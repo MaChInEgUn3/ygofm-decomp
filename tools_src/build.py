@@ -133,6 +133,7 @@ PER_FUNC_FLAGS = {
     "func_800828C0": _O1_G8,
     "func_800828E0": _O1_G8,
     "func_80082900": _O1_G8,
+    "func_8003CDF8": _O1_G8,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
@@ -140,6 +141,21 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 # Per-function assembler flags. Needed when the compiler emits a bare symbol
 # reference and the assembler's -G decides whether to make it gp-relative or
 # expand it into a lui/%lo pair through $at.
+# Functions where the assembler must split an expanded address macro across
+# a branch delay slot -- see fill_delay_slot_with_macro_tail().
+# Functions needing load-delay nops restored for extern small-data symbols
+# -- see insert_small_data_load_delay_nops().
+SMALL_DATA_NOP_FUNCS = {
+    "func_8003CDF8",
+}
+
+DELAY_SLOT_MACRO_FUNCS = {
+    "func_8007A628", "func_8007BEBC", "func_8007BEC8", "func_8007BED4",
+    "func_8007BEE0", "func_8007CD04", "func_800862C0",
+}
+_G0_MACRO_FUNCS = _G0_MACRO_FUNCS + sorted(DELAY_SLOT_MACRO_FUNCS)
+
+PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
 PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_MACRO_FUNCS}
 
 
@@ -224,6 +240,15 @@ def compile_c(name):
         sys.stderr.write(f"maspsx failed on {src.name}:\n{r.stderr[:8000]}\n")
         raise SystemExit(1)
 
+    # Post-passes that emulate aspsx behaviour maspsx does not reproduce.
+    if name in DELAY_SLOT_MACRO_FUNCS or name in SMALL_DATA_NOP_FUNCS:
+        text = masm.read_text().splitlines()
+        if name in DELAY_SLOT_MACRO_FUNCS:
+            text = fill_delay_slot_with_macro_tail(text)
+        if name in SMALL_DATA_NOP_FUNCS:
+            text = insert_small_data_load_delay_nops(text)
+        masm.write_text("\n".join(text) + "\n")
+
     as_flags = list(AS_FLAGS)
     override = PER_FUNC_AS_FLAGS.get(name)
     if override:
@@ -232,6 +257,104 @@ def compile_c(name):
     run([AS, *as_flags, "-o", obj.relative_to(ROOT).as_posix(),
          masm.relative_to(ROOT).as_posix()])
     return obj
+
+
+_BARE_SYM_MEMOP = re.compile(
+    r"^\s*(sw|sh|sb|lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
+_JUMP = re.compile(r"^\s*(j|jr)\s+(\$\w+)\s*$")
+_NOP = re.compile(r"^\s*nop\b")
+
+
+def fill_delay_slot_with_macro_tail(lines):
+    """Emulate aspsx splitting an expanded address macro across a delay slot.
+
+    cc1psx (with -mno-split-addresses) emits a bare-symbol memory op such as
+    `sw $4,D_800F5F80` and leaves the address expansion to the assembler.
+    The original assembler expanded it to `lui $at,%hi` + `sw ...%lo($at)`
+    *and* scheduled the second half into the following branch's delay slot,
+    giving three instructions:
+
+        lui $at,%hi(sym)
+        jr  $ra
+        sw  $a0,%lo(sym)($at)
+
+    GNU as treats the expansion as indivisible and will not move half of it
+    into a delay slot, so it emits four instructions instead and the
+    function fails to match. maspsx passes this case straight through (it
+    only rewrites bare symbols it knows to be small data), so we do the
+    expansion ourselves, here.
+
+    Only applies to the exact `memop / jump / nop` sequence; anything else
+    is left untouched.
+    """
+    out, i = [], 0
+    while i < len(lines):
+        m = _BARE_SYM_MEMOP.match(lines[i])
+        if (m and i + 2 < len(lines)
+                and _JUMP.match(lines[i + 1]) and _NOP.match(lines[i + 2])):
+            op, reg, sym = m.groups()
+            out += [
+                ".set\tnoat",
+                f"lui\t$at,%hi({sym})",
+                lines[i + 1].strip(),
+                f"{op}\t{reg},%lo({sym})($at)",
+                ".set\tat",
+            ]
+            i += 3
+            continue
+        out.append(lines[i])
+        i += 1
+    return out
+
+
+_LOAD_BARE_SYM = re.compile(
+    r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
+_EXTERN = re.compile(r"^\s*\.extern\s+([A-Za-z_]\w*)\s*,\s*(\d+)")
+
+
+def insert_small_data_load_delay_nops(lines, sdata_limit=8):
+    """Restore load-delay nops maspsx omits for extern small-data symbols.
+
+    On the R3000 a loaded value is not available to the next instruction.
+    maspsx normally inserts the required nop, but it skips the case where
+    the following instruction will be expanded through $at -- the lui of
+    that expansion fills the delay naturally. To decide, it needs to know
+    whether the symbol is small data, and it deliberately ignores
+    `.extern sym,size` when building that set. Every global we declare is
+    extern (the definitions come from splat's data dumps), so maspsx
+    assumes $at expansion for all of them.
+
+    With -G8 the assembler instead emits a single gp-relative instruction,
+    no lui, and the nop really is needed -- so the function comes out
+    several instructions short. We recover the size information from the
+    `.extern` directives the compiler emits and insert the nops ourselves.
+    """
+    small = {m.group(1) for m in (_EXTERN.match(l) for l in lines)
+             if m and int(m.group(2)) <= sdata_limit}
+    if not small:
+        return lines
+
+    def is_real_instruction(line):
+        s = line.split("#")[0].strip()
+        return bool(s) and not s.startswith(".") and not s.endswith(":")
+
+    out = []
+    for i, line in enumerate(lines):
+        out.append(line)
+        m = _LOAD_BARE_SYM.match(line.split("#")[0])
+        if not m or m.group(3) not in small:
+            continue
+        reg = m.group(2)
+        nxt = next((lines[j] for j in range(i + 1, len(lines))
+                    if is_real_instruction(lines[j])), None)
+        if nxt is None:
+            continue
+        body = nxt.split("#")[0].strip()
+        if body.startswith("nop"):
+            continue
+        if re.search(rf"{re.escape(reg)}\b", body):
+            out.append("nop # load delay: extern small-data symbol")
+    return out
 
 
 def object_func_size(obj, name):

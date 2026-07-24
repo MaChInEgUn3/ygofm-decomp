@@ -112,6 +112,14 @@ extern u8 D_8009B4A0;
 extern u8 D_8009B4A1;
 extern u8 D_8009B4A2;
 
+extern u16 D_8009B394;
+extern u16 D_8009B396;
+extern u16 D_8009B39A;
+extern u16 D_8009B39E;
+extern u16 D_8009B3A0;
+extern u16 D_8009B3A4;
+extern u16 D_8009B3A6;
+extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;

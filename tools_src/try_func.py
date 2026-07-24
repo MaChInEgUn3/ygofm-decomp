@@ -24,6 +24,8 @@ PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
 CPPPSX = PSYQ_BIN / "CPPPSX.EXE"
 CC1PSX = PSYQ_BIN / "CC1PSX.EXE"
 ASM_DIR = ROOT / "asm" / "nonmatchings" / "31D8"
+MASPSX = ROOT / "tools" / "maspsx" / "maspsx.py"
+VENV_PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
 SCRATCH = ROOT / "build" / "scratch"
 
 CPP_FLAGS = [
@@ -64,11 +66,21 @@ def normalise(line):
     text = " ".join(parts).replace(" , ", ",")
     # `li $r,N` is a pseudo-instruction; for small N the assembler emits
     # exactly `addiu $r,$zero,N`, which is what the disassembly shows.
+    # The disassembly spells split constants as expressions; evaluate them
+    # so `(0x808080 >> 16)` compares against a plain 0x80.
+    text = re.sub(r"\((0x[0-9a-fA-F]+|\d+)\s*>>\s*(\d+)\)",
+                  lambda m: str(int(m.group(1), 0) >> int(m.group(2))), text)
+    text = re.sub(r"\((0x[0-9a-fA-F]+|\d+)\s*&\s*(0x[0-9a-fA-F]+|\d+)\)",
+                  lambda m: str(int(m.group(1), 0) & int(m.group(2), 0)), text)
+
     m = re.match(r"li (\$\w+),(-?(?:0x)?[0-9a-fA-F]+)$", text)
     if m:
         value = int(m.group(2), 0)
         if -0x8000 <= value < 0x8000:
             text = f"addiu {m.group(1)},$zero,{value}"
+        elif value > 0 and (value & 0xFFFF) == 0:
+            # a constant with no low half assembles to a bare lui
+            text = f"lui {m.group(1)},{value >> 16}"
     # `j $ra` and `jr $ra` are the same instruction spelled two ways.
     text = re.sub(r"^j\b", "jr", text) if text.startswith("j $ra") else text
     # cc1psx emits small-data references bare (`lhu $v0,sym`); the assembler
@@ -78,7 +90,28 @@ def normalise(line):
     # the other; normalise every hex literal to decimal so they compare.
     text = re.sub(r"\b0x([0-9a-fA-F]+)\b",
                   lambda m: str(int(m.group(1), 16)), text)
-    return text.lower()
+    text = text.lower()
+
+    # Label definitions occupy no bytes; the two sides can never agree on
+    # their names, and renumber_labels only handles references.
+    if re.match(r"^(?:\$|\.)?l?\w*:$", text) or text.endswith(":"):
+        return None
+
+    # Pseudo-instructions the two sides spell differently but which
+    # assemble identically.
+    text = re.sub(r"^move (\$\w+),(\$\w+)$", r"addu \1,\2,$zero", text)
+    text = re.sub(r"^beqz (\$\w+),", r"beq \1,$zero,", text)
+    text = re.sub(r"^bnez (\$\w+),", r"bne \1,$zero,", text)
+    text = re.sub(r"^negu (\$\w+),(\$\w+)$", r"subu \1,$zero,\2", text)
+    # gcc writes the register form with an immediate operand; the assembler
+    # emits the immediate instruction, which is what the disassembly shows.
+    text = re.sub(r"^(add|sub|and|or|xor|slt|sltu)u? (\$\w+),(\$\w+),(-?\d+)$",
+                  lambda m: f"{m.group(1)}iu "
+                            f"{m.group(2)},{m.group(3)},{m.group(4)}"
+                  if m.group(1) in ("add", "sub", "slt", "sltu")
+                  else f"{m.group(1)}i {m.group(2)},{m.group(3)},{m.group(4)}",
+                  text)
+    return text
 
 
 def target_lines(func):
@@ -87,6 +120,10 @@ def target_lines(func):
         sys.exit(f"no disassembly for {func} at {path}")
     out = []
     for line in path.read_text().splitlines():
+        # Anything past endlabel is inter-object padding, not part of the
+        # function -- see the translation-unit boundary note in DECISIONS.md.
+        if line.strip().startswith("endlabel"):
+            break
         if "/*" in line and "*/" in line:
             body = line.split("*/", 1)[1]
             n = normalise(body)
@@ -112,8 +149,21 @@ def built_lines(func, csrc, extra_flags):
         if r.returncode != 0:
             sys.exit(f"{Path(str(cmd[0])).name} failed:\n{r.stdout}\n{r.stderr}")
 
+    # Run maspsx as the build does. It inserts the load-delay nops the
+    # compiler leaves to the assembler, and those nops are real
+    # instructions -- comparing pre-maspsx output silently ignores them and
+    # will call a function matching when it is several instructions short.
+    masm = SCRATCH / "try.maspsx.s"
+    with open(asm) as fin, open(masm, "w") as fout:
+        r = subprocess.run(
+            [str(VENV_PYTHON), str(MASPSX), "--aspsx-version=2.86",
+             "--macro-inc"],
+            stdin=fin, stdout=fout, stderr=subprocess.PIPE, text=True, cwd=ROOT)
+    if r.returncode != 0:
+        sys.exit(f"maspsx failed:\n{r.stderr[:4000]}")
+
     out, inside = [], False
-    for line in asm.read_text().splitlines():
+    for line in masm.read_text().splitlines():
         if line.startswith(f"{func}:"):
             inside = True
             continue
@@ -126,18 +176,41 @@ def built_lines(func, csrc, extra_flags):
     return out
 
 
+def renumber_labels(lines):
+    """Rewrite branch labels positionally so the two sides can be compared.
+
+    gcc emits `$L3`, the disassembly has `.L80058E34`. The names can never
+    agree, so map each side's labels to L1, L2, ... in order of first
+    appearance; a real control-flow difference still shows up as a
+    mismatch, but the naming no longer does.
+    """
+    mapping, counter, out = {}, 0, []
+    label_re = re.compile(r"(?:\$|\.)l[0-9a-f]+", re.IGNORECASE)
+
+    def sub(m):
+        nonlocal counter
+        key = m.group(0)
+        if key not in mapping:
+            counter += 1
+            mapping[key] = f"L{counter}"
+        return mapping[key]
+
+    for line in lines:
+        out.append(label_re.sub(sub, line))
+    return out
+
+
 def main():
     if len(sys.argv) < 3:
         sys.exit(__doc__)
     func, csrc, flags = sys.argv[1], sys.argv[2], sys.argv[3:] or ["-O2", "-G8"]
 
-    want = target_lines(func)
-    got = built_lines(func, csrc, flags)
+    want = renumber_labels(target_lines(func))
+    got = renumber_labels(built_lines(func, csrc, flags))
 
-    # The target keeps explicit load-delay nops that the compiler leaves to
-    # the assembler to insert, so ignore bare nops when lining things up.
-    w = [l for l in want if l != "nop"]
-    g = [l for l in got if l != "nop"]
+    # maspsx inserts the load-delay nops, so both sides now carry them and
+    # they must be compared -- they occupy real bytes.
+    w, g = want, got
 
     print(f"flags: {' '.join(flags)}")
     print(f"{'TARGET':<44} {'BUILT'}")
