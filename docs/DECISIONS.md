@@ -143,6 +143,37 @@ Three incidental findings from that work, all worth keeping:
 - **`-O1` vs `-O2` changes register allocation here.** At `-O2` gcc uses `$v1` for the second load; the original (and `-O1`) uses `$v0` both times. So the game's `-O` level is still genuinely unknown, and may well vary per translation unit — do not assume `-O2` globally.
 - **The assembler's `-G` must match the compiler's.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, silently making the function 4 bytes longer per reference (this is what first showed up as "16 bytes too long").
 
+### Decompilation conventions (learned from the first 64 functions)
+
+**Declare every global in `include/variables.h`, never locally.** Two files disagreeing about a global's type or qualifiers silently changes codegen and breaks matching somewhere far away. The header carries the shared `u8`/`u16`/`s32` typedefs (`include/types.h`) too.
+
+**Scalar vs. unsized-array is a codegen decision, not a style one.** We build at `-G8`, so a small scalar goes in small data and is reached gp-relative (`lhu $v0, %gp_rel(sym)($gp)`). A symbol the retail code reaches with an explicit `%hi`/`%lo` pair was *not* small data in the original build. Two different causes, and they need different fixes:
+- it was genuinely an aggregate → declare it unsized (`extern u8 D_800EAE90[];`) and index it;
+- it was a scalar in a unit built with `-G0` → keep the scalar declaration and give the *function* a `-G0` override.
+Getting this backwards produces a right-sized function whose registers are subtly wrong.
+
+**`volatile` where the retail code stores and reloads.** Without it the compiler folds consecutive read-modify-writes of the same global into a single load/store pair.
+
+**Flags genuinely vary per translation unit.** `PER_FUNC_FLAGS` in `build.py` already holds `-O1` and `-G0` overrides, and it will keep growing — that is the game being built from ~234 units with different settings, not a defect in the harness. `PER_FUNC_AS_FLAGS` does the same for the assembler, which is possible only because each decompiled function is its own object.
+
+**Useful idioms observed so far:**
+- `return *p = 1;` does *not* reproduce store-and-return; gcc emits the constant twice. `s32 v = 1; *p = v; return v;` does.
+- `sltiu $v0, $v0, 1` after a load is `return x == 0;`.
+- `srl $r, $r, 31` extracts a sign bit: `(u32)x >> 31`.
+- A function ending in `jr $ra` with the real work in the delay slot is just ordinary scheduling, not something to reproduce deliberately.
+
+**Known unmatched pattern — parked, 5 functions.** Simple global stores like `D_800F5F80 = arg0;` where the retail code reads:
+```
+lui $at, %hi(sym)
+jr  $ra
+sw  $a0, %lo(sym)($at)      <- second half of the macro, in the delay slot
+```
+The original assembler (aspsx) split a `sw $a0, sym` macro across the delay slot. GNU `as` expands the macro as an indivisible pair, so we get four instructions instead of three. `-mno-split-addresses` produces the right macro form but not the delay-slot split. Affected: `func_8007A628`, `func_8007BEBC`, `func_8007BEC8`, `func_8007BED4`, `func_8007BEE0` — left as assembly for now. Worth revisiting via maspsx (which exists precisely to emulate aspsx quirks) rather than by contorting the C.
+
+### Progress
+
+64 of 1794 functions decompiled and byte-matching. Of the remainder, roughly 116 are hand-written assembly in the original (GTE/COP2 work) and will likely never become C. Instruction counts, if a better measure of remaining work: ~129,000 still in assembly.
+
 ### Tooling: `tools_src/try_func.py`
 
 Single-function matching loop, so you don't need a full build per attempt:

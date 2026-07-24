@@ -54,18 +54,30 @@ def normalise(line):
     if not line or line.startswith((".", "/*")):
         return None
     line = re.sub(r"/\*.*?\*/", "", line)
+    # Numbered registers appear bare and inside operands like `0($4)`, so
+    # rewrite them wherever they occur rather than only as whole tokens.
+    line = re.sub(r"\$(\d+)\b", lambda m: REG_NAMES.get("$" + m.group(1),
+                                                       "$" + m.group(1)), line)
     parts = line.replace(",", " , ").split()
     if not parts:
         return None
-    out = []
-    for p in parts:
-        out.append(REG_NAMES.get(p, p))
-    text = " ".join(out).replace(" , ", ",")
+    text = " ".join(parts).replace(" , ", ",")
+    # `li $r,N` is a pseudo-instruction; for small N the assembler emits
+    # exactly `addiu $r,$zero,N`, which is what the disassembly shows.
+    m = re.match(r"li (\$\w+),(-?(?:0x)?[0-9a-fA-F]+)$", text)
+    if m:
+        value = int(m.group(2), 0)
+        if -0x8000 <= value < 0x8000:
+            text = f"addiu {m.group(1)},$zero,{value}"
     # `j $ra` and `jr $ra` are the same instruction spelled two ways.
     text = re.sub(r"^j\b", "jr", text) if text.startswith("j $ra") else text
     # cc1psx emits small-data references bare (`lhu $v0,sym`); the assembler
     # turns them into the gp-relative form the disassembly shows. Same thing.
     text = re.sub(r"%gp_rel\(([^)]*)\)\(\$gp\)", r"\1", text)
+    # Immediates and offsets are written 0x1618 in one place and 5656 in
+    # the other; normalise every hex literal to decimal so they compare.
+    text = re.sub(r"\b0x([0-9a-fA-F]+)\b",
+                  lambda m: str(int(m.group(1), 16)), text)
     return text.lower()
 
 

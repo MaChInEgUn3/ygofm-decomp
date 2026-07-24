@@ -2,15 +2,11 @@
 #define COMMON_H
 
 /*
- * Project-wide header pulled in by every generated source file.
+ * Project-wide header pulled in by every source file.
  *
- * Right now this only wires up splat's INCLUDE_ASM/INCLUDE_RODATA machinery,
- * which is what lets a .c file that is still 100% un-decompiled build into
- * byte-identical output: each INCLUDE_ASM line assembles the original
- * function's .s straight into the object.
- *
- * As functions get decompiled, shared typedefs/structs/prototypes belong
- * here (or in headers included from here).
+ * It wires up splat's INCLUDE_ASM/INCLUDE_RODATA machinery (so a file that
+ * is still un-decompiled can build into byte-identical output) and provides
+ * the shared type and global declarations.
  */
 
 /* Use macro.inc (modern GNU as) rather than labels.inc (original PsyQ
@@ -19,5 +15,7 @@
 #define INCLUDE_ASM_USE_MACRO_INC 1
 
 #include "include_asm.h"
+#include "types.h"
+#include "variables.h"
 
 #endif /* COMMON_H */

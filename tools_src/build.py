@@ -91,10 +91,34 @@ AS_FLAGS = [
     "-I.", "-Iinclude",
 ]
 
-# Per-function C files may need a different -O than the project default to
-# match. Add entries here as they are discovered.
+# Per-function compiler flags. The retail game was built from ~234 separate
+# translation units and clearly did not use one flag set throughout, so
+# expect this table to keep growing; it is normal, not a smell.
+#
+# Two recurring cases so far:
+#   -O1        some units were built at -O1; it changes register allocation.
+#   -G0        a unit whose globals are reached with explicit %hi/%lo pairs
+#              rather than gp-relative. Such a function usually needs
+#              PER_FUNC_AS_FLAGS too, so the assembler agrees.
+_O1_G8 = ["-quiet", "-O1", "-G8"]
+_O1_G0 = ["-quiet", "-O1", "-G0"]
+# -mno-split-addresses leaves the address in macro form for the assembler to
+# expand via $at, which is what the retail code shows for these.
+_O1_G0_MACRO = ["-quiet", "-O1", "-G0", "-mno-split-addresses"]
+
 PER_FUNC_FLAGS = {
-    "func_80015010": ["-quiet", "-O1", "-G8"],
+    "func_80015010": _O1_G8,
+    "func_8003B734": _O1_G0,
+    "func_80058F10": _O1_G0,
+    "func_8004544C": _O1_G0,
+    "func_80049594": _O1_G0,
+    "func_800495DC": _O1_G0,
+}
+
+# Per-function assembler flags. Needed when the compiler emits a bare symbol
+# reference and the assembler's -G decides whether to make it gp-relative or
+# expand it into a lui/%lo pair through $at.
+PER_FUNC_AS_FLAGS = {
 }
 
 
@@ -179,9 +203,28 @@ def compile_c(name):
         sys.stderr.write(f"maspsx failed on {src.name}:\n{r.stderr[:8000]}\n")
         raise SystemExit(1)
 
-    run([AS, *AS_FLAGS, "-o", obj.relative_to(ROOT).as_posix(),
+    as_flags = list(AS_FLAGS)
+    override = PER_FUNC_AS_FLAGS.get(name)
+    if override:
+        # later -G wins, so appending is enough to override the default
+        as_flags.append(override)
+    run([AS, *as_flags, "-o", obj.relative_to(ROOT).as_posix(),
          masm.relative_to(ROOT).as_posix()])
     return obj
+
+
+def object_func_size(obj, name):
+    """Size of `name` as compiled, read back from the object's symbol table."""
+    r = run([OBJCOPY.with_name("mipsel-none-elf-objdump.exe"), "-t",
+             obj.relative_to(ROOT).as_posix()])
+    for line in r.stdout.splitlines():
+        parts = line.split()
+        if parts and parts[-1] == name and len(parts) >= 5:
+            try:
+                return int(parts[-2], 16)
+            except ValueError:
+                continue
+    return None
 
 
 def assemble_run(index, names):
@@ -263,20 +306,65 @@ def link_and_verify():
         return 0
 
     original = ROOT / "extracted" / "SLUS_014.11"
-    if original.exists():
-        want, got = original.read_bytes(), TARGET_BIN.read_bytes()
-        print(f"\nMISMATCH: {len(got)} bytes built vs {len(want)} expected")
-        for i in range(min(len(want), len(got))):
-            if want[i] != got[i]:
-                print(f"first differing byte at file offset 0x{i:X} "
-                      f"(vram ~0x{0x80010000 + i - 0x800:08X}): "
-                      f"expected {want[i]:02X}, got {got[i]:02X}")
-                break
-        else:
-            print("common prefix matches; files differ only in length")
-    else:
+    if not original.exists():
         print("\nMISMATCH (original not present for a byte-level diff)")
+        return 1
+
+    want, got = original.read_bytes(), TARGET_BIN.read_bytes()
+    print(f"\nMISMATCH: {len(got)} bytes built vs {len(want)} expected")
+    report_bad_functions(want, got)
     return 1
+
+
+def report_bad_functions(want, got):
+    """Map differing bytes back to the functions they belong to.
+
+    With a whole-binary diff the first bad byte is rarely informative: one
+    wrong function shifts everything after it. Attributing differences to
+    named functions says directly which sources to look at.
+    """
+    funcs = ordered_functions()
+    spans = []           # (start_file_off, end_file_off, name)
+    for name in funcs:
+        addr = func_addr(name)
+        size = target_size(name)
+        start = 0x800 + (addr - 0x80010000)
+        spans.append((start, start + size, name))
+
+    limit = min(len(want), len(got))
+    bad, first_off = [], None
+    for start, end, name in spans:
+        if start >= limit:
+            break
+        chunk_end = min(end, limit)
+        if want[start:chunk_end] != got[start:chunk_end]:
+            bad.append(name)
+            if first_off is None:
+                first_off = start
+
+    decompiled = [n for n in bad if (SRC / f"{n}.c").exists()]
+    if decompiled:
+        print(f"\n{len(decompiled)} decompiled function(s) differ — "
+              f"these are the ones to fix:")
+        for n in decompiled[:25]:
+            print(f"  {n}   (src/{n}.c)")
+        if len(decompiled) > 25:
+            print(f"  ... and {len(decompiled) - 25} more")
+    if bad and not decompiled:
+        print("\nNo decompiled function differs directly; the first bad "
+              f"region is {bad[0]}, which is still assembled from .s — "
+              "this usually means something before it changed size.")
+    if not bad:
+        print("\nAll function bodies match; the difference is outside "
+              "function bodies (padding, data, or alignment).")
+
+
+def target_size(name):
+    """Size of a function as recorded in its disassembly header."""
+    path = ASM_FUNCS / f"{name}.s"
+    first = path.read_text().split("\n", 1)[0]
+    m = re.search(r",\s*(0x[0-9A-Fa-f]+)", first)
+    return int(m.group(1), 16) if m else 0
 
 
 def main():
@@ -298,6 +386,7 @@ def main():
     # function and one per run of consecutive undecompiled ones.
     text_entries = []
     pending, run_index = [], 0
+    size_errors = []
     for name in functions:
         if (SRC / f"{name}.c").exists():
             if pending:
@@ -307,6 +396,12 @@ def main():
                 run_index += 1
                 pending = []
             obj = compile_c(name)
+            # A wrong-sized function shifts everything after it, so the
+            # whole-binary diff would blame dozens of innocent functions.
+            # Catching size errors here keeps the blame local.
+            built, wanted = object_func_size(obj, name), target_size(name)
+            if built is not None and wanted and built != wanted:
+                size_errors.append((name, built, wanted))
             text_entries.append(f"{obj.relative_to(ROOT).as_posix()}(.text);")
             if name in boundaries:
                 # reinstate the original object's 16-byte .text padding
@@ -320,6 +415,15 @@ def main():
     for src in sorted((ROOT / "asm").glob("*.s")) + \
                sorted((ROOT / "asm" / "data").glob("*.s")):
         assemble_plain(src)
+
+    if size_errors:
+        print(f"\n{len(size_errors)} function(s) compiled to the wrong size. "
+              "Fix these first — each one shifts everything after it, so any "
+              "other reported difference is probably just fallout:")
+        for name, built, wanted in size_errors:
+            delta = (built - wanted) // 4
+            print(f"  {name}: {built:#x} vs {wanted:#x} expected "
+                  f"({delta:+d} instructions)   src/{name}.c")
 
     write_linker_script(text_entries)
     print(f"placed {len(text_entries)} entries in .text")

@@ -1,0 +1,89 @@
+#ifndef VARIABLES_H
+#define VARIABLES_H
+
+#include "types.h"
+
+/*
+ * Game globals, declared once here so that two source files can never
+ * disagree about a variable's type or qualifiers -- a disagreement would
+ * silently change codegen and break matching in a hard-to-trace way.
+ *
+ * Names are splat's auto-generated D_<address> form. Rename them (here and
+ * at the use sites) as their purpose becomes clear.
+ *
+ * Two conventions matter for matching:
+ *
+ *  - `volatile` is not decoration. The retail code frequently stores and
+ *    then reloads the same global, which a non-volatile access would let
+ *    the compiler fold away. Mark a variable volatile only once a function
+ *    actually requires it to match.
+ *
+ *  - Scalars vs. arrays is a *codegen* distinction here, not a stylistic
+ *    one. We build with -G8, so a small scalar is placed in small data and
+ *    accessed gp-relative (`lhu $v0, %gp_rel(sym)($gp)`). A symbol the
+ *    retail code reaches with an explicit `%hi`/`%lo` pair was not small
+ *    data in the original build -- almost certainly because it was an
+ *    array or a struct rather than a scalar. Declaring those as
+ *    unsized arrays here reproduces that. If a symbol is declared the
+ *    wrong way round, the function using it will not match.
+ */
+
+/* --- small data: accessed gp-relative ------------------------------------ */
+
+extern volatile u16 D_8009B112;
+
+extern u8 D_8009AFA0;
+extern u8 D_8009AFA4;
+extern u8 D_8009AFA6;
+extern u8 D_8009B063;
+extern u8 D_8009B064;
+extern u8 D_8009B078;
+extern u8 D_8009B07B;
+extern u8 D_8009B07C;
+extern u8 D_8009B141;
+extern u8 D_8009B2EB;
+extern u8 D_8009B318;
+
+extern u16 D_8009AF92;
+extern u16 D_8009AF96;
+extern u16 D_8009B220;
+
+extern s32 D_8009AF64;
+extern s32 D_8009AF68;
+
+extern u8 D_8009B478;
+
+/* --- aggregates reached with an explicit %hi/%lo pair --------------------- */
+/* Declared unsized so they are never treated as small data. */
+
+extern u8 D_800EAE90[];
+extern u8 D_800F5C7F[];
+extern u8 D_800F56A0[];
+extern u8 D_800F56F0[];
+extern u8 D_800FE148[];
+extern u8 D_800FE348[];
+extern u8 D_800938AE[];
+
+extern s32 D_8009B450[];
+
+/* --- scalars belonging to units built with -G0 ---------------------------- */
+/*
+ * These are ordinary scalars, but the functions touching them reach them
+ * with %hi/%lo rather than gp-relative, so those units were compiled with
+ * -G0. The declaration here stays a plain scalar; it is the *function* that
+ * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
+ */
+
+extern u16 D_8009B398;
+extern s32 D_800E9D98;
+extern s32 D_80093788;
+extern s32 D_800F5F80;
+extern s32 D_800F5F84;
+extern s32 D_800F5F88;
+extern s32 D_800F5F8C;
+
+/* Pointers into larger runtime structures. */
+extern u8 *D_8009B458;
+extern u8 *D_8009B45C;
+
+#endif /* VARIABLES_H */
