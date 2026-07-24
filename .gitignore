@@ -43,3 +43,7 @@ Thumbs.db
 
 # Reproducible from `python tools_src/build.py`.
 /build/
+
+# splat regenerates this monolithic INCLUDE_ASM file, but the build uses
+# per-function src/func_*.c instead and ignores it. See docs/DECISIONS.md.
+/src/31D8.c

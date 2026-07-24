@@ -23,7 +23,7 @@ A fresh clone cannot build until you supply the game and the toolchains, because
    ```
    .venv/Scripts/splat.exe split config/SLUS_014.11.yaml
    ```
-   This is required even though `asm/` is committed: the large data dumps (notably `asm/data/carddata.data.s`) are gitignored, and the linker script references them. Splat will not overwrite hand-decompiled `.c` files in `src/`, so it is safe to re-run at any time.
+   This is required even though `asm/` is committed: the large data dumps (notably `asm/data/carddata.data.s`) are gitignored, and the linker script references them. It is safe to re-run at any time — decompiled sources live in per-function `src/func_*.c` files that splat never touches.
 5. **Build and verify:**
    ```
    .venv/Scripts/python.exe tools_src/build.py
@@ -37,6 +37,13 @@ See `docs/DECISIONS.md` for the current state of the project (toolchain, confirm
 
 - `docs/` — RAM/ROM map notes, decisions log, function inventory (source of truth, kept in sync with the code as the project evolves)
 - `tools_src/ghidra_scripts/` — our own Ghidra headless-analysis scripts (Java)
-- `config/` — splat config (once toolchain is confirmed)
-- `asm/` — disassembly output (once splat is set up)
-- `src/` — matched C source, function by function, as it's proven byte-exact
+- `config/` — splat config and the generated linker script
+- `asm/` — disassembly output (per-function `.s` under `asm/nonmatchings/`)
+- `src/` — matched C source, one file per decompiled function (`src/func_XXXXXXXX.c`)
+- `tools_src/` — our own tooling: `build.py` (build + sha1 verify) and `try_func.py` (fast single-function match loop)
+
+## Decompiling a function
+
+Write `src/func_XXXXXXXX.c` and re-run the build. Placement is handled automatically — the harness positions every function via the linker script, so a decompiled function slots into the address the original occupied with no further bookkeeping.
+
+`tools_src/try_func.py` gives a faster inner loop while hunting for the right C, without a full rebuild.

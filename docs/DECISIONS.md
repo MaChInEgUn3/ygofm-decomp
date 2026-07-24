@@ -75,7 +75,19 @@ Set up in `config/SLUS_014.11.yaml`, using `splat64[mips]` (installed in a **pro
 
 That single check validates the entire setup at once: segment boundaries, `gp_value`, `subalign`, the linker script, and the whole toolchain. Any future change that breaks byte-exactness will be caught immediately by re-running it.
 
-Pipeline per C file: `CPPPSX.EXE` (preprocess) → `CC1PSX.EXE` (compile) → `maspsx` (rewrite PsyQ asm quirks to GNU as syntax) → `mipsel-none-elf-as`. Raw `.s` files (header, data segments) go straight to the assembler. Everything links via the splat linker script, then `objcopy -O binary`.
+Pipeline per C file: `CPPPSX.EXE` (preprocess) → `CC1PSX.EXE` (compile) → `maspsx` (rewrite PsyQ asm quirks to GNU as syntax) → `mipsel-none-elf-as`. Raw `.s` files (header, data segments) go straight to the assembler. Everything links via a generated linker script, then `objcopy -O binary`.
+
+**Layout is driven by the linker script, never by compiler emission order.** Walking the address-ordered function list, the build emits:
+- one object per decompiled function, from `src/<func_name>.c`;
+- one object per *run* of consecutive not-yet-decompiled functions, from a generated stub in `build/gen/` that `.include`s each function's `.s`.
+
+It then rewrites splat's linker script (`config/slus_014.11.ld` → `build/gen/slus_014.11.ld`), replacing the single `build/src/31D8.o(.text);` line with that ordered list. This is what makes `-G8` usable — see the gp-relative section below for why it is essential rather than a stylistic choice. **Do not collapse this back into one object per segment.**
+
+Decompiling a function is therefore just: create `src/<func_name>.c`, and re-run the build. Nothing else needs updating; the placement follows automatically.
+
+Two consequences worth knowing:
+- **`src/31D8.c` is a splat artifact we deliberately don't use** (it is the monolithic `INCLUDE_ASM` file). The build ignores it — it only looks for `src/func_*.c`. It is gitignored so it doesn't reappear as noise after a `splat split`. The per-function `.s` files it comes bundled with *are* used, which is why the subsegment stays `c` rather than `asm`.
+- **Per-function compiler flags** live in `PER_FUNC_FLAGS` in `build.py`. `func_80015010` needs `-O1` where the project default is `-O2`; expect this table to grow, since the game's per-file `-O` levels are unknown.
 
 **Why a Python script and not a Makefile:** `make` is not available in this Windows environment (no make, no ninja). The dependency graph is shallow (a handful of asm files + one C file today), so a plain script is sufficient and avoids adding a build-tool dependency.
 
@@ -107,9 +119,9 @@ Two functions are now real C in `src/31D8.c` and the build **still reproduces th
 
 Both matched with the existing `-O2 -G0`. That is *weak* evidence for those flags, though — both are nearly flag-insensitive (straight-line bit manipulation, and a shallow branch chain), with few enough live values that register allocation never has to make an interesting choice. They would very likely match at `-O1` too. **Do not treat `-O2` as confirmed**; the discriminating test is a function with enough live values to force real register-allocation decisions, and that hasn't been run yet.
 
-### BLOCKER: gp-relative globals vs. compiler output ordering
+### gp-relative globals vs. compiler output ordering — SOLVED
 
-This is the most important open problem in the project, and it is **architectural, not a matching puzzle**. It was investigated in depth; the findings below are solid and reproducible.
+This was the project's main blocker. It is now fixed by the per-function layout described under "Build harness" above: `-G8` is enabled globally and `func_80015010` (a gp-relative read-modify-write) is decompiled and matching. The analysis is kept below because it explains *why* the harness is shaped the way it is — do not "simplify" the build back into one object per segment.
 
 Most game functions touch state gp-relatively, e.g. `lhu $v0, %gp_rel(D_8009B112)($gp)`. Reproducing that requires a non-zero `-G` on cc1psx (`-G8`). What was established:
 
@@ -122,19 +134,11 @@ Most game functions touch state gp-relatively, e.g. `lhu $v0, %gp_rel(D_8009B112
 
 Note the corollary: the deferral is harmless for a translation unit that is either **fully** `INCLUDE_ASM` (no C functions to defer) or **fully** decompiled (order among C functions is preserved). It only bites a *partially* decompiled unit — which is every unit, during the entire grind.
 
-**Proposed fix (not implemented, needs a decision):** stop relying on compiler emission order for layout. Assemble each of the 1794 per-function `.s` files into its own object, emit each decompiled C function into its own section too, and have the linker script list everything in address order. That decouples layout from emission order entirely and makes the mixing problem disappear. We already have the per-function `.s` files, so the main work is generating the linker script and accepting a much larger object count (build time). This supersedes and partly absorbs the translation-unit split described below.
+**The fix, now implemented:** stop relying on compiler emission order for layout. `tools_src/build.py` places every function individually via the linker script, in address order — each decompiled function as its own object from `src/<name>.c`, and each *run* of consecutive not-yet-decompiled functions gathered into one generated `.s` in `build/gen/`. Emission order inside any single object no longer matters, because no object spans a decompiled/undecompiled boundary.
 
-The C for the test function is known-good and worth keeping for whenever this is unblocked — at `-O1 -G8` it reproduces `func_80015010` instruction for instruction:
+Grouping the undecompiled functions into runs (rather than one object per function) keeps the object count proportional to how much has been decompiled: 24 decompiled functions currently produce 44 `.text` entries, not 1794. Build time stays reasonable and degrades gracefully.
 
-```c
-extern volatile unsigned short D_8009B112;
-void func_80015010(void) {
-    D_8009B112 &= 0x3FFC;
-    D_8009B112 |= 2;
-}
-```
-
-Two incidental findings from that work, both worth keeping:
+Three incidental findings from that work, all worth keeping:
 - **`volatile` matters.** Without it, gcc merges the read-modify-writes into a single load/store pair; the retail code stores and reloads between the two operations, which only `volatile` reproduces. Expect many game-state globals to need it.
 - **`-O1` vs `-O2` changes register allocation here.** At `-O2` gcc uses `$v1` for the second load; the original (and `-O1`) uses `$v0` both times. So the game's `-O` level is still genuinely unknown, and may well vary per translation unit — do not assume `-O2` globally.
 - **The assembler's `-G` must match the compiler's.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, silently making the function 4 bytes longer per reference (this is what first showed up as "16 bytes too long").
