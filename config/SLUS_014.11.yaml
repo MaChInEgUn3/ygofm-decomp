@@ -1,0 +1,76 @@
+name: SLUS_014.11
+sha1: 84747e64f6da8e764206ec203e489acf8c9dcf7d
+options:
+  basename: slus_014.11
+  target_path: D:\YGOFM\extracted\SLUS_014.11
+  elf_path: build/slus_014.11.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: ../asm
+  src_path: ../src
+  build_path: ../build
+  # create_asm_dependencies: True
+
+  ld_script_path: slus_014.11.ld
+  ld_dependencies: True
+
+  find_file_boundaries: False
+  gp_value: 0x8009AF08
+  # ld_gp_expression: main_SCOMMON_START + 0x7FF0
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  # auto_link_sections: [".data", ".rodata", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  # undefined_funcs_auto_path: undefined_funcs_auto.txt
+  # undefined_syms_auto_path: undefined_syms_auto.txt
+
+  extensions_path: tools/splat_ext
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  # Uncomment this line if you need to use the maspsx reorder workaround hack
+  # https://github.com/mkst/maspsx?tab=readme-ov-file#include_asm-reordering-workaround-hack
+  # include_asm_macro_style: maspsx_hack
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    bss_size: 0x63698   # .sbss (1048) + .bss (406144) runtime-only gap between .sdata and the trailing region below
+    subsegments:
+      - [0x800, rodata]      # .rdata   80010000-800129d7 (10712 bytes)
+      - [0x31D8, c]          # .text    800129d8-800906df (515336 bytes) -- our 1336 game functions live here
+      - [0x80EE0, data]      # .data    800906e0-8009af07 (43048 bytes)
+      - [0x8B708, data]      # .sdata   8009af08-8009b08f (392 bytes), gp-relative small data
+      # .sbss/.bss (8009b090-800fe727) consume no file bytes -- handled by bss_size above.
+
+  - name: carddata
+    type: data
+    start: 0x8B890
+    vram: 0x800fe728       # explicit override: file content resumes here but vram jumps past the bss gap
+    # 923864 bytes, mostly zero padding/reserved space -- NOT code, do not disassemble as .text.
+    # Contains one dense (~85-90% non-zero) ~188KB block around vram 801ab728-801d9728,
+    # very likely the card database (722 cards). Investigate as data, not functions.
+    # DataCrystal's documented fusion-table address (0x8017C2D8) falls in this range
+    # and is all-zero on disc -- it's a runtime-computed cache, not shipped data.
+
+  - [0x1D0800]

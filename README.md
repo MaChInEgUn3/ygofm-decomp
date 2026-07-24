@@ -2,7 +2,9 @@
 
 Matching decompilation of the PS1 game *Yu-Gi-Oh! Forbidden Memories* (NTSC-U, `SLUS_014.11`), in the same style as [OpenDriver2](https://github.com/OpenDriver2/REDRIVER2), [sotn-decomp](https://github.com/xeeynamo/sotn-decomp), and [mgs_reversing](https://github.com/FoxdieTeam/mgs_reversing): the goal is byte-exact C recompilation of the original executable using the original PsyQ SDK toolchain, not a reimplementation.
 
-**No copyrighted material (disc image, extracted executable, game assets) is ever committed to this repo.** You need your own legally-owned copy of the disc to build/verify anything here. See `docs/DECISIONS.md` for why this matters and how it's enforced (`.gitignore`).
+**The disc image, extracted executable, and downloaded toolchain binaries (Ghidra, PsyQ SDK) are never committed** — you need your own legally-owned copy of the disc and your own copy of the PsyQ SDK to build/verify anything here. This matches the posture of every comparable community project (sotn-decomp, mgs_reversing, OpenDriver2, Severed Chains).
+
+The disassembly output itself (`asm/`, `src/`) **is** committed, same as those projects do — publishing disassembly/decompilation-in-progress of a binary you don't redistribute is the whole point of a project like this, and is the long-standing, untouched practice across the PS1 decomp community. See `docs/DECISIONS.md` for the exact line between what's in and what's out.
 
 ## Status
 

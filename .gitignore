@@ -9,8 +9,18 @@ YUGIOH.*
 *.sub
 /extracted/
 
-# Downloaded third-party binaries (Ghidra + plugin) — not ours to redistribute.
+# Downloaded third-party binaries (Ghidra + plugin, PsyQ SDK) — not ours to redistribute.
 /tools/
+
+# Python virtualenv for decomp tooling (splat, asm-differ) — regenerable, not portable across machines.
+/.venv/
+
+# splat build output (re-derivable from extracted/ + config/ any time).
+/build/
+
+# Huge (~26MB), mostly-zero raw data dump of the still-uninvestigated trailing region (see docs/DECISIONS.md).
+# Regenerate with splat once needed; not worth bloating repo history until we know what's actually in there.
+/asm/data/carddata.data.s
 
 # Ghidra project database (binary, machine-specific, regenerable from extracted/ + tools_src/).
 /ghidra_project/*.gpr

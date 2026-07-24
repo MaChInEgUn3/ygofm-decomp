@@ -8,7 +8,11 @@ Single source of truth for project state. Update this whenever a decision change
 
 ## Legal posture
 
-No copyrighted files (disc image, extracted executable, `MRG`/`STR`/`XA` assets) are ever committed. Only code, config, and tooling live in this repo. Anyone building/verifying against it needs their own legally-owned copy of the disc. This is the same posture that has kept OpenDriver2, Severed Chains, and sotn-decomp alive under Konami's historically aggressive C&D pattern. GitHub repo is **private** for now.
+**Never committed:** the disc image (`.ccd`/`.img`/`.sub`), the extracted executable, original game assets (`MRG`/`STR`/`XA`), and downloaded toolchain binaries (Ghidra, the PsyQ 4.6 SDK). Anyone building/verifying against this repo needs their own legally-owned copy of the disc and their own copy of the PsyQ SDK.
+
+**Committed:** disassembly output (`asm/`, `src/`) as it's generated/matched. This is the actual deliverable of a matching decomp project, and every comparable project (sotn-decomp, mgs_reversing, OpenDriver2) commits exactly this — publishing disassembly of a binary you don't redistribute is standard, long-tolerated practice in this community, distinct from redistributing the binary/media assets themselves. One exception for now: `asm/data/carddata.data.s` (~26MB, mostly zero padding — see the "trailing region" note below) is gitignored until we know what's actually in it; not worth the repo bloat yet.
+
+This is the same posture that has kept OpenDriver2, Severed Chains, and sotn-decomp alive under Konami's historically aggressive C&D pattern. GitHub repo is **private** for now.
 
 ## Target executable
 
@@ -43,8 +47,36 @@ Obtained from the PS1 preservation/homebrew community archive `psx.arthus.net/sd
 - **Confirmed to run natively on Windows 11 (no DOSBox needed)**: these are genuine 32-bit Win32 console PE binaries (`machine=0x14c`, `subsystem=3`), not 16-bit DOS executables as one might expect from a late-90s SDK. `CC1PSX.EXE` invoked directly and behaved as expected (reads preprocessed C from stdin, emits MIPS assembly, prints the standard GCC2 pass-timing footer).
 - This means local matching decomp iteration (compile candidate C → compare bytes) no longer strictly depends on decomp.me's hosted compiler — decomp.me is still useful for quick one-off tests and its diff UI, but the local toolchain is what a real splat-based build harness will drive.
 
+## The trailing "carddata" region (vram 0x800fe728–0x801dffff, 923,864 bytes)
+
+Ghidra's naive loader heuristic first labeled this whole span `.text` (a fallback guess, not a real determination — see the `PsxLoader.createCompilerSegments` fallback: "if there's leftover file content past where the heap-struct heuristic thinks bss ends, call it `.text`"). Investigated directly against the raw file bytes rather than trusting that label:
+
+- It is **not** meaningfully code: Ghidra's auto-analysis only found ~29 tiny "functions" scattered across the whole 923KB span, each in near-total isolation (huge gaps between them) — consistent with false-positive disassembly of what's actually data, not with real code density.
+- Most of the region (all but ~46 of 225 checked 4KB chunks) is literally all-zero in the ROM file.
+- **One dense, real data block**: roughly vram `0x801ab728`–`0x801d9728` (~188KB), 85–90% non-zero bytes — the density profile of a packed binary table, not code. Strong candidate for the card database (722 cards).
+- DataCrystal's community-documented fusion-table address (`0x8017C2D8`, within this span) is **all-zero on disc** — confirms it's a runtime-computed cache (built from card data at boot/on first use), not a shipped table. Not a bug on our end; matches expected behavior for a computed lookup.
+- **Splat config fix**: declared this span as its own `type: data` top-level segment (`carddata`, explicit `vram: 0x800fe728` override) rather than folding it into `main`'s fallback `.text` guess, so splat doesn't waste effort trying to disassemble it as MIPS instructions. The real `.sbss`/`.bss` gap (1048 + 406144 = `0x63698` bytes, no file content) between `.sdata` and this region is handled via `bss_size` on the `main` segment.
+- **Open question, not yet answered**: what exactly is in that dense ~188KB block, and what (if anything) lives in the remaining sparser parts of the 923KB span. Worth a dedicated pass once we're further into decompiling `main`'s actual functions (may become obvious once we decompile whatever code reads from this region).
+
+## Local build harness (splat)
+
+Set up in `config/SLUS_014.11.yaml`, using `splat64[mips]` (installed in a **project-local venv**, `.venv/` — see the note below about why that matters) plus the real local PsyQ 4.6 toolchain.
+
+- `splat create_config` auto-generated a starting config from the raw executable and — good cross-check — independently computed `gp_value: 0x8009AF08`, matching what we'd already derived by hand from Ghidra's `DAT_8009b112` gp-relative addressing (`0x8009b112 - 0x20a`).
+- The auto-generated segment boundaries were rough estimates; replaced with the exact boundaries Ghidra already gave us (`.rdata`/`.text`/`.data`/`.sdata`/bss-gap/`carddata`, see above).
+- `splat split config/SLUS_014.11.yaml` (run from repo root) produced:
+  - `asm/nonmatchings/31D8/func_*.s` — **1,794 individual function assembly files** (splat's own function count for the main code segment; in the same ballpark as Ghidra's 1,336 game + 495 library split, difference expected from different heuristics — worth reconciling later but not blocking).
+  - `src/31D8.c` — one stub C file with an `INCLUDE_ASM("asm/nonmatchings/31D8", func_XXXXXXXX);` line per function. This is the file that gets edited function-by-function during actual decomp work (each `INCLUDE_ASM` line gets replaced with real matched C).
+  - `asm/data/*.data.s` / `.rodata.s` — the `.rdata`, `.data`, `.sdata` segments as raw data dumps, plus `carddata.data.s` (huge, gitignored — see Legal posture section).
+  - Splat also flagged a rodata/jumptable file-split suggestion (rodata segment `800` has jump tables suggesting further splits at `0x844`, `0x8C0`, `0xA24`, `0xB48`, `0x100C`, `0x1FD8`, `0x214C`, `0x22D8`) — not applied yet, worth revisiting once we're deep into functions that reference jump tables in that area.
+- **Not done yet**: the actual Makefile wiring `CPPPSX.EXE | CC1PSX.EXE | ASPSX.EXE` to compile a candidate `src/*.c` and verify it byte-matches the corresponding `asm/nonmatchings/*.s`, plus a local diff step (asm-differ, cloned to `tools/asm-differ/`, deps installed in `.venv/`) instead of relying on decomp.me for every function. This is the next concrete task before real function-by-function grinding starts.
+
+## Tooling gotcha: use a project-local venv, not the global Python
+
+`pip install splat64` was first tried **globally** and it downgraded `tqdm` (4.67.3 → 4.67.1), breaking a pinned dependency of `aider-chat` (another tool on this machine) — caught and reverted (`pip install tqdm==4.67.3`) before it caused real damage. Fixed properly with `python -m venv .venv` at the repo root and installing `splat64[mips]` (needs the `[mips]` extra — `spimdisasm`, `rabbitizer`, `n64img`, `crunch64`, `pygfxd` — the bare package doesn't ship these) plus `asm-differ`'s deps there instead. **Always use `.venv/Scripts/python.exe` / `.venv/Scripts/splat.exe` for this project's Python tooling, never bare `pip install` into the system Python.**
+
 ## Repo layout / tooling plan
 
-- `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map) and `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg). Both run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
-- Next: splat config once toolchain confirmed, then per-function matching against `decomp.me` / local asm-differ, with `src/` filling in as functions are proven byte-exact.
-- Ghidra + `ghidra_psx_ldr` binaries themselves are NOT vendored in the repo (`/tools/` gitignored) — anyone picking this up needs to redownload Ghidra 12.1.2 and the matching `ghidra_psx_ldr` release themselves.
+- `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
+- Ghidra + `ghidra_psx_ldr`, the PsyQ SDK, and `asm-differ` are NOT vendored in the repo (`/tools/` gitignored) — anyone picking this up needs to redownload/reclone all three themselves (see the sources cited above for each).
+- Next concrete task: the Makefile/compile-and-diff wiring described above, then start actually matching functions, prioritizing ones DataCrystal's RAM map already gives us names/context for.
