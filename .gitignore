@@ -37,3 +37,6 @@ YUGIOH.*
 # OS/editor cruft
 Thumbs.db
 .DS_Store
+
+# Claude Code session/harness artifacts — not project content.
+/.claude/
