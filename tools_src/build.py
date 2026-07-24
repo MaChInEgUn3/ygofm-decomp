@@ -106,20 +106,31 @@ _O1_G0 = ["-quiet", "-O1", "-G0"]
 # expand via $at, which is what the retail code shows for these.
 _O1_G0_MACRO = ["-quiet", "-O1", "-G0", "-mno-split-addresses"]
 
+_G0_FUNCS = [
+    "func_8003B734", "func_80058F10", "func_8004544C", "func_80049594",
+    "func_800495DC", "func_8007BAC0", "func_8007BF04",
+    "func_8007BF14", "func_8007BF30", "func_8007BF40", "func_8007BF50",
+    "func_8007BF60", "func_8007CD14", "func_8007F5C4", "func_80085320",
+]
+# Stores the assembler expands through $at. These need the macro form from
+# the compiler *and* an assembler that will not treat the symbol as small
+# data, so they carry a PER_FUNC_AS_FLAGS entry too.
+_G0_MACRO_FUNCS = [
+    "func_80082A80", "func_8008D1E0", "func_8008D1F4", "func_8008D208",
+]
+
 PER_FUNC_FLAGS = {
     "func_80015010": _O1_G8,
-    "func_8003B734": _O1_G0,
-    "func_80058F10": _O1_G0,
-    "func_8004544C": _O1_G0,
-    "func_80049594": _O1_G0,
-    "func_800495DC": _O1_G0,
+    "func_80047008": _O1_G8,
+    "func_8004703C": _O1_G8,
 }
+PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
+PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 
 # Per-function assembler flags. Needed when the compiler emits a bare symbol
 # reference and the assembler's -G decides whether to make it gp-relative or
 # expand it into a lui/%lo pair through $at.
-PER_FUNC_AS_FLAGS = {
-}
+PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_MACRO_FUNCS}
 
 
 def run(cmd, **kwargs):

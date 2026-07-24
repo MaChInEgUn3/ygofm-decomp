@@ -170,9 +170,25 @@ sw  $a0, %lo(sym)($at)      <- second half of the macro, in the delay slot
 ```
 The original assembler (aspsx) split a `sw $a0, sym` macro across the delay slot. GNU `as` expands the macro as an indivisible pair, so we get four instructions instead of three. `-mno-split-addresses` produces the right macro form but not the delay-slot split. Affected: `func_8007A628`, `func_8007BEBC`, `func_8007BEC8`, `func_8007BED4`, `func_8007BEE0` — left as assembly for now. Worth revisiting via maspsx (which exists precisely to emulate aspsx quirks) rather than by contorting the C.
 
+Note the *same* pattern with the store **not** in the delay slot does match fine (`func_80082A80`, `func_8008D1E0/F4/208`) — those just need `-G0 -mno-split-addresses` plus `-G0` on the assembler. Only the delay-slot split is the blocker.
+
+Also parked: `func_800495EC` (register allocation refuses to match across every `-O`/`-G` combination and several C formulations) and `func_800136D4` (an empty function that nonetheless allocates and immediately frees a stack frame).
+
+### What counts as a target
+
+`docs/LIBRARY_FUNCS.txt` lists **342 PsyQ library functions that live inside `.text`** but are out of scope — they stay as assembly and link as-is. They are easy to spot and easy to waste time on: a large cluster around `0x80073840`+ are BIOS syscall trampolines of the form
+```
+addiu $t2, $zero, 0xB0
+jr    $t2
+addiu $t1, $zero, <index>
+```
+which cannot be expressed in C at all. Filter these out before picking targets.
+
 ### Progress
 
-64 of 1794 functions decompiled and byte-matching. Of the remainder, roughly 116 are hand-written assembly in the original (GTE/COP2 work) and will likely never become C. Instruction counts, if a better measure of remaining work: ~129,000 still in assembly.
+93 of 1794 functions decompiled and byte-matching.
+
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~93 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/try_func.py`
 

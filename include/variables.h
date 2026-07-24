@@ -82,8 +82,37 @@ extern s32 D_800F5F84;
 extern s32 D_800F5F88;
 extern s32 D_800F5F8C;
 
-/* Pointers into larger runtime structures. */
+extern s32 D_800F5EE8;
+extern s32 D_800938BC;
+extern s32 D_80093880;
+extern s32 D_800FE000;
+extern s32 D_800FE418;
+extern s32 D_800FE41C;
+extern s32 D_800FE420;
+
+extern u8 D_800938AC;
+extern u8 D_800938AD;
+extern u8 D_800938B2;
+extern u8 D_800938B3;
+extern u8 D_80093898;
+extern u8 D_8009466A;
+
+extern s16 D_800FE0CC;
+
+/* Pointers into larger runtime structures. Reached gp-relative from one
+ * unit and via %hi/%lo from another, so the declaration stays a plain
+ * scalar and the per-function -G override decides which form is emitted. */
 extern u8 *D_8009B458;
 extern u8 *D_8009B45C;
+
+/* --- more small data ------------------------------------------------------ */
+
+extern s8 D_8009AF9A;
+extern u8 D_8009B4A0;
+extern u8 D_8009B4A1;
+extern u8 D_8009B4A2;
+
+/* Table of 8-byte entries. */
+extern u8 D_80091570[];
 
 #endif /* VARIABLES_H */
