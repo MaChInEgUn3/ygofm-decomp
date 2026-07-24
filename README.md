@@ -6,6 +6,29 @@ Matching decompilation of the PS1 game *Yu-Gi-Oh! Forbidden Memories* (NTSC-U, `
 
 The disassembly output itself (`asm/`, `src/`) **is** committed, same as those projects do — publishing disassembly/decompilation-in-progress of a binary you don't redistribute is the whole point of a project like this, and is the long-standing, untouched practice across the PS1 decomp community. See `docs/DECISIONS.md` for the exact line between what's in and what's out.
 
+## Building
+
+The build reproduces the retail executable **byte for byte** (sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`). That check is the project's regression test — if it passes, nothing has drifted.
+
+A fresh clone cannot build until you supply the game and the toolchains, because none of them are committed. Full sequence:
+
+1. **Provide the executable.** Dump your own disc, then extract `SLUS_014.11` from it into `extracted/`.
+2. **Fetch the toolchains** into `tools/` — the PsyQ 4.6 SDK, a `mipsel-none-elf` binutils build, and `maspsx`. See `docs/DECISIONS.md` ("Local PsyQ 4.6 toolchain" and "Build harness") for exact sources and expected paths.
+3. **Set up Python tooling** (project-local venv, never the system Python):
+   ```
+   python -m venv .venv
+   .venv/Scripts/python.exe -m pip install "splat64[mips]"
+   ```
+4. **Generate the disassembly**, from the repo root:
+   ```
+   .venv/Scripts/splat.exe split config/SLUS_014.11.yaml
+   ```
+   This is required even though `asm/` is committed: the large data dumps (notably `asm/data/carddata.data.s`) are gitignored, and the linker script references them. Splat will not overwrite hand-decompiled `.c` files in `src/`, so it is safe to re-run at any time.
+5. **Build and verify:**
+   ```
+   .venv/Scripts/python.exe tools_src/build.py
+   ```
+
 ## Status
 
 See `docs/DECISIONS.md` for the current state of the project (toolchain, confirmed facts, open questions) and `docs/FUNCTION_INVENTORY.txt` for the current function-by-function breakdown.

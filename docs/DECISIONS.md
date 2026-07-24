@@ -77,7 +77,11 @@ That single check validates the entire setup at once: segment boundaries, `gp_va
 
 Pipeline per C file: `CPPPSX.EXE` (preprocess) → `CC1PSX.EXE` (compile) → `maspsx` (rewrite PsyQ asm quirks to GNU as syntax) → `mipsel-none-elf-as`. Raw `.s` files (header, data segments) go straight to the assembler. Everything links via the splat linker script, then `objcopy -O binary`.
 
-**Why a Python script and not a Makefile:** `make` is not available in this Windows environment (no make, no ninja). The dependency graph is shallow (a handful of asm files + one C file today), so a plain script is sufficient and avoids adding a build-tool dependency. If the project ever grows enough source files that incremental rebuild matters, revisit.
+**Why a Python script and not a Makefile:** `make` is not available in this Windows environment (no make, no ninja). The dependency graph is shallow (a handful of asm files + one C file today), so a plain script is sufficient and avoids adding a build-tool dependency.
+
+Note it rebuilds **everything** on every run — there is no incremental/mtime checking. That is fine at one C file, but splitting into the ~234 original translation units (see below) is exactly the trigger for revisiting this; whoever does that split should expect the full-rebuild cost to become annoying and may want to add dependency tracking at the same time.
+
+`splat split` is safe to re-run: it skips `.c` files that already exist, so hand-decompiled work in `src/` is never clobbered (verified empirically).
 
 Toolchain components (all gitignored, must be re-fetched by anyone cloning):
 - **MIPS binutils**: prebuilt Windows `mipsel-none-elf` toolchain (GNU Binutils 2.46.1) from `https://static.grumpycoder.net/pixel/mips/g++-mipsel-none-elf-16.1.0.zip`. URL taken from pcsx-redux's own `mips.ps1` installer + its `index.json`, so it stays correct as versions move. Extracted to `tools/mips/`.
@@ -101,7 +105,7 @@ Two functions are now real C in `src/31D8.c` and the build **still reproduces th
 - `func_80042AD8` — steps a value toward a limit by a step size, clamping so it never overshoots; the sign of the limit picks the direction. Matched on the first attempt.
 - `func_80082780` — the game's own out-of-line copy of PsyQ's `GetTPage()` macro (packs a texture-page attribute word from `tp`, `abr`, `x`, `y`). All 15 instructions matched on the first attempt.
 
-Both matched with the existing `-O2 -G0`, which is the first real evidence those flags are right for this game (the all-`INCLUDE_ASM` build never exercised the compiler's codegen at all).
+Both matched with the existing `-O2 -G0`. That is *weak* evidence for those flags, though — both are nearly flag-insensitive (straight-line bit manipulation, and a shallow branch chain), with few enough live values that register allocation never has to make an interesting choice. They would very likely match at `-O1` too. **Do not treat `-O2` as confirmed**; the discriminating test is a function with enough live values to force real register-allocation decisions, and that hasn't been run yet.
 
 **Not yet exercised:** anything touching globals. Most functions access game state gp-relatively (e.g. `lhu $v0, %gp_rel(D_8009B112)($gp)`), which needs a non-zero `-G` and correctly-placed `.sdata`/`.sbss` symbols. `-G0` will emit `%hi`/`%lo` pairs instead and won't match. Expect this to be the first real fight when the grind starts — it is a solved problem in other PS1 decomps, but it isn't solved *here* yet.
 
