@@ -94,6 +94,29 @@ Assembler flags: `-EL -march=r3000 -mtune=r3000 -no-pad-sections -O0 -G0` (`-no-
 
 Compiler flags currently `-quiet -O2 -G0`. `-O2` is the near-universal choice for retail PS1 titles, but this is **not yet proven for this game** — the all-`INCLUDE_ASM` build doesn't exercise the compiler's codegen at all. Expect to revisit per-file (or per-function) once real C starts getting matched.
 
+### First real decompiled functions (the loop is proven end-to-end)
+
+Two functions are now real C in `src/31D8.c` and the build **still reproduces the retail sha1 exactly**. This is the proof that matters: the harness doesn't just reassemble the original bytes, it can take hand-written C through the real compiler and land byte-identical output.
+
+- `func_80042AD8` — steps a value toward a limit by a step size, clamping so it never overshoots; the sign of the limit picks the direction. Matched on the first attempt.
+- `func_80082780` — the game's own out-of-line copy of PsyQ's `GetTPage()` macro (packs a texture-page attribute word from `tp`, `abr`, `x`, `y`). All 15 instructions matched on the first attempt.
+
+Both matched with the existing `-O2 -G0`, which is the first real evidence those flags are right for this game (the all-`INCLUDE_ASM` build never exercised the compiler's codegen at all).
+
+**Not yet exercised:** anything touching globals. Most functions access game state gp-relatively (e.g. `lhu $v0, %gp_rel(D_8009B112)($gp)`), which needs a non-zero `-G` and correctly-placed `.sdata`/`.sbss` symbols. `-G0` will emit `%hi`/`%lo` pairs instead and won't match. Expect this to be the first real fight when the grind starts — it is a solved problem in other PS1 decomps, but it isn't solved *here* yet.
+
+### Original translation-unit boundaries (discovered, not yet applied)
+
+While matching `func_80082780` its build came out 4 bytes short, which turned out to be a structural discovery rather than a codegen bug.
+
+**233 of the ~1792 functions are followed by padding, and in every case that padding runs to the next 16-byte boundary.** That is the signature of an object file's `.text` ending: the original game was built from ~234 separate translation units, and the linker padded each object's `.text` to 16 bytes. Functions in the *middle* of a source file have no padding at all (1559 of them).
+
+`docs/FILE_BOUNDARIES.txt` lists every detected boundary (derived address + the last function of the preceding unit). Note the earliest boundaries cluster in the `0x80073xxx`+ range as runs of consecutive 16-byte functions — those are the PsyQ library stubs, where each library function genuinely is its own object inside a `.LIB`, which independently corroborates the interpretation.
+
+**Current stopgap:** `func_80082780` is the last function of its unit, so `src/31D8.c` emits its padding explicitly via `__asm__(".space 4");` immediately after it. (`.align 4` does *not* work here — it aligns to 16 and over-padded by a full 16 bytes.) This is a deliberate placeholder, marked as such in the source.
+
+**The proper fix**, and the clear next structural task: split `src/31D8.c` into multiple `c` subsegments in the splat config matching the real boundaries, so each object's `.text` gets padded naturally by the linker and the source tree mirrors the original file layout. This is mechanical now that the boundaries are known, but it is a large config change and was deliberately left for a separate pass rather than bundled into the harness work.
+
 ### Splat config gotchas worth remembering
 
 - `base_path` resolves relative to **the yaml file's directory**, not the CWD. With the yaml in `config/`, `base_path: ..` makes everything else (`asm_path: asm`, `src_path: src`, `generated_asm_macros_directory: include`) resolve naturally against the repo root. Getting this wrong the first time scattered generated files into `config/asm/`, `config/src/`, `config/include/`.

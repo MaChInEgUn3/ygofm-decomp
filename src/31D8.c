@@ -1349,7 +1349,22 @@ INCLUDE_ASM("asm/nonmatchings/31D8", func_80042A78);
 
 INCLUDE_ASM("asm/nonmatchings/31D8", func_80042AA4);
 
-INCLUDE_ASM("asm/nonmatchings/31D8", func_80042AD8);
+/* Steps `x` toward `limit` by `step`, clamping so it never overshoots.
+ * The sign of `limit` picks the direction. */
+int func_80042AD8(int x, int limit, int step) {
+    if (limit < 0) {
+        x -= step;
+        if (x < limit) {
+            x = limit;
+        }
+    } else {
+        x += step;
+        if (x > limit) {
+            x = limit;
+        }
+    }
+    return x;
+}
 
 INCLUDE_ASM("asm/nonmatchings/31D8", func_80042B08);
 
@@ -3063,7 +3078,17 @@ INCLUDE_ASM("asm/nonmatchings/31D8", func_80082680);
 
 INCLUDE_ASM("asm/nonmatchings/31D8", func_80082740);
 
-INCLUDE_ASM("asm/nonmatchings/31D8", func_80082780);
+/* The game's own out-of-line copy of PsyQ's GetTPage() macro:
+ * packs a texture page attribute word from (tp, abr, x, y). */
+int func_80082780(int tp, int abr, int x, int y) {
+    return ((tp & 0x3) << 7) | ((abr & 0x3) << 5) | ((y & 0x100) >> 4) |
+           ((x & 0x3ff) >> 6) | ((y & 0x200) << 2);
+}
+/* This function is the last one in its original translation unit, so the
+ * retail binary pads its .text out to a 16-byte boundary here. Until the
+ * file splits are reconstructed (see docs/DECISIONS.md) we reproduce that
+ * padding explicitly. */
+__asm__(".space 4");
 
 INCLUDE_ASM("asm/nonmatchings/31D8", func_800827C0);
 
