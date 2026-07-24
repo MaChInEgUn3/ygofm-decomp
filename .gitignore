@@ -1,0 +1,29 @@
+# Copyrighted game assets — never commit these. Everyone who works on this
+# repo must dump their own legally-owned copy of the disc.
+YUGIOH.*
+*.bin
+*.cue
+*.iso
+*.ccd
+*.img
+*.sub
+/extracted/
+
+# Downloaded third-party binaries (Ghidra + plugin) — not ours to redistribute.
+/tools/
+
+# Ghidra project database (binary, machine-specific, regenerable from extracted/ + tools_src/).
+/ghidra_project/*.gpr
+/ghidra_project/*.rep/
+/ghidra_project/scripts/
+/ghidra_project/*.txt
+/ghidra_project/import_log*.txt
+/ghidra_project/inventory_log.txt
+/ghidra_project/dump_log*.txt
+
+# Browser automation scratch (Playwright MCP).
+/.playwright-mcp/
+
+# OS/editor cruft
+Thumbs.db
+.DS_Store
