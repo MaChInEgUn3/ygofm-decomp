@@ -216,6 +216,26 @@ which cannot be expressed in C at all. Filter these out before picking targets.
 
 The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~139 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
+### Tooling: `tools_src/permute.py` (decomp-permuter)
+
+For the failure mode the manual loop cannot solve: logic and instruction count correct, registers allocated differently. The permuter randomly rewrites the candidate C -- reordering declarations, introducing temporaries, changing types -- recompiles each variant through our real pipeline and scores it against the target object (0 = match).
+
+    python tools_src/permute.py func_80035598          # prepare only
+    python tools_src/permute.py func_80035598 --run     # prepare and search
+
+It needs a candidate at `src/<func>.c` already: it refines a near miss, it cannot decompile from nothing. Output candidates land in `build/permuter/<func>/output-<score>-N/`.
+
+**Getting it running on Windows took four fixes**, all handled automatically by `permute.py` but worth knowing about, since re-cloning decomp-permuter reverts the patched ones:
+
+1. *Executable-bit check* (patch to `src/main.py`). It refuses to start unless `compile.sh` has mode bit `0o100`. Windows cannot set that -- `os.chmod` is a no-op and `os.stat` reports `0o100666` for any writable file -- so the check fails for everyone on this platform. Relaxed to apply only off Windows.
+2. *Executing a shell script* (patch to `src/compiler.py`). It runs `compile.sh` directly, which Windows cannot do. Routed through `bash` on Windows.
+3. *Tool names.* It finds objdump via `shutil.which()` against a fixed list (`mips-linux-gnu-objdump` and friends) and shells out to a bare `cpp`. Ours are prefixed `mipsel-none-elf-*`, so copies are made under the expected names. These copies must go **inside the toolchain's own bin directory**: `cpp` is a driver that locates its `cc1` relative to its own path, so a copy anywhere else dies with `cannot execute 'cc1'`.
+4. *PATH resolution.* Windows resolves a child process's program name against the **parent's** PATH, not the `env` passed to it, so the shim directory has to be added to `os.environ` before launching, not just handed to the subprocess.
+
+`compile.sh` is generated from the same flag tables the build uses, so a variant that matches under the permuter also matches under `build.py`. If those ever drift, permuter results become worthless -- keep them in step.
+
+**First real use was inconclusive**, and that is worth recording rather than glossing: ~1000 iterations on `func_80035598` (a three-way unsigned compare) got the score from its starting value down to 120, never to 0. The candidates it produced are heavily contorted C that still does not match. So the permuter is available and functional, but it is not a guarantee -- some functions will need a different insight, not more search.
+
 ### Tooling: `tools_src/try_func.py`
 
 Single-function matching loop, so you don't need a full build per attempt:
