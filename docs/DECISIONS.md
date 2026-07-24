@@ -158,9 +158,17 @@ Getting this backwards produces a right-sized function whose registers are subtl
 
 **Useful idioms observed so far:**
 - `return *p = 1;` does *not* reproduce store-and-return; gcc emits the constant twice. `s32 v = 1; *p = v; return v;` does.
-- `sltiu $v0, $v0, 1` after a load is `return x == 0;`.
+- `sltiu $v0, $v0, 1` after a load is `return x == 0;`; `sltu $v0, $zero, $v0` is `return x != 0;`.
 - `srl $r, $r, 31` extracts a sign bit: `(u32)x >> 31`.
+- `lw`/`addiu`/`sw` on the same global around a load is a post-increment: `return *ptr++;`.
 - A function ending in `jr $ra` with the real work in the delay slot is just ordinary scheduling, not something to reproduce deliberately.
+
+**Three recurring causes of a wrong-sized function** (all cost an extra instruction, all cheap to fix once recognised):
+- *Reloading a global.* Dereferencing the same global pointer twice makes gcc reload it. The retail code loads once — assign it to a local first (`u8 *p = D_8009B45C;`).
+- *An over-narrow parameter.* A `u8` parameter makes gcc mask with `andi $a0,$a0,0xff` before storing. Where the retail code stores `$a0` straight through, the parameter was word-sized — use `s32`.
+- *Pointer arithmetic written the wrong way round.* `arg0 += arg1 * 4; return arg0[0x56];` matches where `return arg0[arg1 * 4 + 0x56];` picks a different register.
+
+**`-O1` vs `-O2` shows up constantly**, and the tell is usually scheduling or register reuse: at `-O2` gcc hoists constants into separate registers, at `-O1` it computes one, uses it, then computes the next into the same register. When a function is the right size but the registers differ, try `-O1` before rewriting the C.
 
 **Known unmatched pattern — parked, 5 functions.** Simple global stores like `D_800F5F80 = arg0;` where the retail code reads:
 ```
@@ -186,9 +194,9 @@ which cannot be expressed in C at all. Filter these out before picking targets.
 
 ### Progress
 
-93 of 1794 functions decompiled and byte-matching.
+118 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~93 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~118 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/try_func.py`
 

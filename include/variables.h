@@ -112,7 +112,38 @@ extern u8 D_8009B4A0;
 extern u8 D_8009B4A1;
 extern u8 D_8009B4A2;
 
+extern u16 D_8009B3FA;
+extern u8 D_8009B3DE;
+extern u8 D_8009B3C1;
+extern u8 D_8009B2F8;
+extern s32 D_8009B300;
+extern s32 D_8009B30C;
+extern s32 D_8009B350;
+
+/* Cursor advanced by the reader in func_80030050. */
+extern u8 *D_8009B290;
+
 /* Table of 8-byte entries. */
 extern u8 D_80091570[];
+
+/* Tables reached by address, so never small data. */
+extern u8 D_800E9EC8[];
+extern u8 D_800EA0E8[];
+
+/* --- more scalars in -G0 units -------------------------------------------- */
+
+extern u8 D_8009B26C;
+extern u8 D_8009B269;
+extern s32 D_800938A0[];
+extern u16 *D_80092A90;
+extern s32 *D_80094770;
+extern s32 *D_8009A0BC;
+extern u8 *D_800EB184;
+extern s32 D_800FE240;
+extern s32 D_800FE424;
+extern s32 D_800FE428;
+extern s32 D_800FE42C;
+extern s32 D_800FE430;
+extern s32 D_800FE434;
 
 #endif /* VARIABLES_H */
