@@ -143,6 +143,7 @@ extern u8 D_80091570[];
 /* Tables reached by address, so never small data. */
 extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
+extern u8 D_800E9EF0[];
 
 /* --- more scalars in -G0 units -------------------------------------------- */
 

@@ -156,6 +156,8 @@ Getting this backwards produces a right-sized function whose registers are subtl
 
 **Flags genuinely vary per translation unit.** `PER_FUNC_FLAGS` in `build.py` already holds `-O1` and `-G0` overrides, and it will keep growing — that is the game being built from ~234 units with different settings, not a defect in the harness. `PER_FUNC_AS_FLAGS` does the same for the assembler, which is possible only because each decompiled function is its own object.
 
+**Function declarations live in `include/functions.h`**, for the same reason globals live in `variables.h`: a signature mismatch between two files changes codegen silently. A function listed there need not be decompiled -- the declaration only has to agree with how it is used, since the definition can still come from assembly (e.g. `func_80019BA0` takes the address of `func_80019B2C`, which is still asm).
+
 **Useful idioms observed so far:**
 - `return *p = 1;` does *not* reproduce store-and-return; gcc emits the constant twice. `s32 v = 1; *p = v; return v;` does.
 - `sltiu $v0, $v0, 1` after a load is `return x == 0;`; `sltu $v0, $zero, $v0` is `return x != 0;`.
@@ -210,9 +212,9 @@ which cannot be expressed in C at all. Filter these out before picking targets.
 
 ### Progress
 
-137 of 1794 functions decompiled and byte-matching.
+139 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~137 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~139 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/try_func.py`
 
