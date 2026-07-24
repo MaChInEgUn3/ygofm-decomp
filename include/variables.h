@@ -116,6 +116,12 @@ extern u16 D_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
 extern u8 D_8009B2F8;
+extern u8 D_8009B357;
+extern u8 D_8009AFA3;
+extern s32 D_8009B074;
+extern s32 D_8009B304;
+extern s32 D_8009B310;
+extern s32 D_8009B314;
 extern s32 D_8009B300;
 extern s32 D_8009B30C;
 extern s32 D_8009B350;
@@ -132,14 +138,23 @@ extern u8 D_800EA0E8[];
 
 /* --- more scalars in -G0 units -------------------------------------------- */
 
-extern u8 D_8009B26C;
-extern u8 D_8009B269;
+/* Reached via %hi/%lo from a -G0 unit and from a -G8 one, so these must
+ * never be small data: declared unsized rather than as scalars. */
+extern u8 D_8009B26C[];
+extern u8 D_8009B269[];
 extern s32 D_800938A0[];
 extern u16 *D_80092A90;
 extern s32 *D_80094770;
 extern s32 *D_8009A0BC;
 extern u8 *D_800EB184;
 extern s32 D_800FE240;
+extern s32 D_800947B8;
+extern u8 *D_80092B88;
+extern s32 D_800F8394[];
+extern s32 D_800F8398[];
+extern s32 D_800F5D70;
+extern s32 D_800F5D4C;
+extern s32 D_800F5D6C;
 extern s32 D_800FE424;
 extern s32 D_800FE428;
 extern s32 D_800FE42C;

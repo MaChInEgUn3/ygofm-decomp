@@ -114,7 +114,7 @@ _G0_FUNCS = [
     "func_80044FE4", "func_8004503C", "func_800490F0", "func_80049108",
     "func_80049120", "func_800744F4", "func_80080B6C",
     "func_800901D4", "func_80030090", "func_800300AC",
-]
+    "func_80082274",     ]
 # Stores the assembler expands through $at. These need the macro form from
 # the compiler *and* an assembler that will not treat the symbol as small
 # data, so they carry a PER_FUNC_AS_FLAGS entry too.
@@ -122,13 +122,17 @@ _G0_MACRO_FUNCS = [
     "func_80082A80", "func_8008D1E0", "func_8008D1F4", "func_8008D208",
     "func_8008D21C", "func_8008D230", "func_8008D244", "func_8008D258",
     "func_8008D26C", "func_8002F930", "func_8002F94C",
-]
+    ]
 
 PER_FUNC_FLAGS = {
     "func_80015010": _O1_G8,
     "func_80047008": _O1_G8,
     "func_8004703C": _O1_G8,
     "func_80038D14": _O1_G8,
+    "func_800828A0": _O1_G8,
+    "func_800828C0": _O1_G8,
+    "func_800828E0": _O1_G8,
+    "func_80082900": _O1_G8,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
