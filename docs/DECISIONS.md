@@ -107,7 +107,49 @@ Two functions are now real C in `src/31D8.c` and the build **still reproduces th
 
 Both matched with the existing `-O2 -G0`. That is *weak* evidence for those flags, though — both are nearly flag-insensitive (straight-line bit manipulation, and a shallow branch chain), with few enough live values that register allocation never has to make an interesting choice. They would very likely match at `-O1` too. **Do not treat `-O2` as confirmed**; the discriminating test is a function with enough live values to force real register-allocation decisions, and that hasn't been run yet.
 
-**Not yet exercised:** anything touching globals. Most functions access game state gp-relatively (e.g. `lhu $v0, %gp_rel(D_8009B112)($gp)`), which needs a non-zero `-G` and correctly-placed `.sdata`/`.sbss` symbols. `-G0` will emit `%hi`/`%lo` pairs instead and won't match. Expect this to be the first real fight when the grind starts — it is a solved problem in other PS1 decomps, but it isn't solved *here* yet.
+### BLOCKER: gp-relative globals vs. compiler output ordering
+
+This is the most important open problem in the project, and it is **architectural, not a matching puzzle**. It was investigated in depth; the findings below are solid and reproducible.
+
+Most game functions touch state gp-relatively, e.g. `lhu $v0, %gp_rel(D_8009B112)($gp)`. Reproducing that requires a non-zero `-G` on cc1psx (`-G8`). What was established:
+
+1. **`-G0` cannot produce gp-relative addressing at all.** cc1psx emits an explicit `lui %hi(sym)` / `%lo(sym)` pair; there is no bare-symbol "macro" form left for the assembler to turn into a gp-relative access. Dead end, confirmed by inspecting the emitted asm.
+2. **`-G8` produces exactly the right instructions.** With `-G8` and `extern volatile unsigned short D_8009B112;`, cc1psx + maspsx emit the target's 10 instructions verbatim.
+3. **But `-G8` makes cc1psx defer *all* C function output to the end of the file.** With small-data enabled the compiler buffers text output (it must emit `.extern sym, size` declarations before use), so the generated `.s` becomes `[every top-level inline asm block][then every C function, in source order]` instead of source order throughout. Verified by a controlled sweep: the deferral tracks `-G`, **not** `-O` (`-O2 -G0` and `-O1 -G0` interleave correctly; `-O2 -G8` and `-O1 -G8` both defer).
+4. **No compiler flag turns it off.** `-mno-file-switching` / `-mfile-switching` are rejected outright by cc1psx; `-mno-gpopt`, `-mgpopt`, `-mno-split-addresses`, `-mrnames`, `-mno-abicalls` are all accepted but leave the deferral in place.
+
+**Why this breaks us specifically:** it is only a problem because `INCLUDE_ASM` (top-level inline asm) and real decompiled C functions live in the *same* translation unit. The original build never hit this — each original `.c` was pure C, so "all C functions in source order at the end" *was* the correct order. For us, deferring the C functions moves them out of their address slots and scrambles `.text` (measured: 23% of the binary differs, `.text` alone taking ~56,000 divergent runs).
+
+Note the corollary: the deferral is harmless for a translation unit that is either **fully** `INCLUDE_ASM` (no C functions to defer) or **fully** decompiled (order among C functions is preserved). It only bites a *partially* decompiled unit — which is every unit, during the entire grind.
+
+**Proposed fix (not implemented, needs a decision):** stop relying on compiler emission order for layout. Assemble each of the 1794 per-function `.s` files into its own object, emit each decompiled C function into its own section too, and have the linker script list everything in address order. That decouples layout from emission order entirely and makes the mixing problem disappear. We already have the per-function `.s` files, so the main work is generating the linker script and accepting a much larger object count (build time). This supersedes and partly absorbs the translation-unit split described below.
+
+The C for the test function is known-good and worth keeping for whenever this is unblocked — at `-O1 -G8` it reproduces `func_80015010` instruction for instruction:
+
+```c
+extern volatile unsigned short D_8009B112;
+void func_80015010(void) {
+    D_8009B112 &= 0x3FFC;
+    D_8009B112 |= 2;
+}
+```
+
+Two incidental findings from that work, both worth keeping:
+- **`volatile` matters.** Without it, gcc merges the read-modify-writes into a single load/store pair; the retail code stores and reloads between the two operations, which only `volatile` reproduces. Expect many game-state globals to need it.
+- **`-O1` vs `-O2` changes register allocation here.** At `-O2` gcc uses `$v1` for the second load; the original (and `-O1`) uses `$v0` both times. So the game's `-O` level is still genuinely unknown, and may well vary per translation unit — do not assume `-O2` globally.
+- **The assembler's `-G` must match the compiler's.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, silently making the function 4 bytes longer per reference (this is what first showed up as "16 bytes too long").
+
+### Tooling: `tools_src/try_func.py`
+
+Single-function matching loop, so you don't need a full build per attempt:
+
+```
+.venv/Scripts/python.exe tools_src/try_func.py func_80015010 candidate.c -O1 -G8
+```
+
+Compiles the snippet with the real toolchain and diffs the instructions against the target's disassembly. Trailing arguments pass straight through to cc1psx, so optimisation levels can be swept quickly.
+
+**Known limitation:** it compares branch labels literally, so any function with internal branches (gcc emits `$L2`, the disassembly has `.L80042B28`) reports spurious differences. Treat a "differs" result on a branching function as inconclusive and fall back to the full build, which is the real authority. Straight-line functions are reported accurately.
 
 ### Original translation-unit boundaries (discovered, not yet applied)
 
