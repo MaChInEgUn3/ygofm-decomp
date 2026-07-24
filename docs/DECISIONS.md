@@ -69,7 +69,35 @@ Set up in `config/SLUS_014.11.yaml`, using `splat64[mips]` (installed in a **pro
   - `src/31D8.c` — one stub C file with an `INCLUDE_ASM("asm/nonmatchings/31D8", func_XXXXXXXX);` line per function. This is the file that gets edited function-by-function during actual decomp work (each `INCLUDE_ASM` line gets replaced with real matched C).
   - `asm/data/*.data.s` / `.rodata.s` — the `.rdata`, `.data`, `.sdata` segments as raw data dumps, plus `carddata.data.s` (huge, gitignored — see Legal posture section).
   - Splat also flagged a rodata/jumptable file-split suggestion (rodata segment `800` has jump tables suggesting further splits at `0x844`, `0x8C0`, `0xA24`, `0xB48`, `0x100C`, `0x1FD8`, `0x214C`, `0x22D8`) — not applied yet, worth revisiting once we're deep into functions that reference jump tables in that area.
-- **Not done yet**: the actual Makefile wiring `CPPPSX.EXE | CC1PSX.EXE | ASPSX.EXE` to compile a candidate `src/*.c` and verify it byte-matches the corresponding `asm/nonmatchings/*.s`, plus a local diff step (asm-differ, cloned to `tools/asm-differ/`, deps installed in `.venv/`) instead of relying on decomp.me for every function. This is the next concrete task before real function-by-function grinding starts.
+### Build harness: DONE and verified byte-exact
+
+`tools_src/build.py` (run from repo root: `.venv/Scripts/python.exe tools_src/build.py`) rebuilds the whole executable and **reproduces the retail binary exactly** — sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`, matching `extracted/SLUS_014.11` byte for byte.
+
+That single check validates the entire setup at once: segment boundaries, `gp_value`, `subalign`, the linker script, and the whole toolchain. Any future change that breaks byte-exactness will be caught immediately by re-running it.
+
+Pipeline per C file: `CPPPSX.EXE` (preprocess) → `CC1PSX.EXE` (compile) → `maspsx` (rewrite PsyQ asm quirks to GNU as syntax) → `mipsel-none-elf-as`. Raw `.s` files (header, data segments) go straight to the assembler. Everything links via the splat linker script, then `objcopy -O binary`.
+
+**Why a Python script and not a Makefile:** `make` is not available in this Windows environment (no make, no ninja). The dependency graph is shallow (a handful of asm files + one C file today), so a plain script is sufficient and avoids adding a build-tool dependency. If the project ever grows enough source files that incremental rebuild matters, revisit.
+
+Toolchain components (all gitignored, must be re-fetched by anyone cloning):
+- **MIPS binutils**: prebuilt Windows `mipsel-none-elf` toolchain (GNU Binutils 2.46.1) from `https://static.grumpycoder.net/pixel/mips/g++-mipsel-none-elf-16.1.0.zip`. URL taken from pcsx-redux's own `mips.ps1` installer + its `index.json`, so it stays correct as versions move. Extracted to `tools/mips/`.
+  - GNU binutils is **not optional**: splat emits GNU-as syntax (`glabel`, `%gp_rel`, `.section`), which PsyQ's own `ASPSX.EXE` cannot assemble.
+- **maspsx** (`https://github.com/mkst/maspsx`, cloned to `tools/maspsx/`): bridges cc1psx's asm output to GNU as. Not on PyPI — must be cloned, then run as `python tools/maspsx/maspsx.py`. Invoked with `--aspsx-version=2.86` (the ASPSX bundled with PsyQ 4.6) and `--macro-inc`.
+  - Chose maspsx over the more "authentic" `ASPSX.EXE` + `psyq-obj-parser` path (what decomp.me runs internally) because maspsx is pure Python, needs no extra binary, and is what every modern splat-based PS1 decomp uses (sotn-decomp, Silent Hill, MediEvil, Soul Reaver, Croc…).
+
+Two non-obvious things that had to be fixed to reach byte-exactness:
+
+1. **`ld_align_section_vram_end` / `ld_align_segment_vram_end` must both be `False`** (splat defaults both to `True`). They emit `. = ALIGN(., 16)` after each section/segment. The retail binary has no such padding — `.text` starts at `0x800129D8`, which is deliberately *not* 16-byte aligned. With the defaults, `.text` landed 8 bytes late, which surfaced as **every jumptable entry in `.rodata` pointing 8 bytes too high** (e.g. `0x80014698` built as `0x800146A0`) and a binary 16 bytes too long. Worth remembering as the signature of this class of bug: uniform small offset in pointer-valued data = section placement, not bad code.
+2. **Assembler needs `-I.` *and* `-Iinclude`.** The `.include "macro.inc"` chain resolves relative to the include search path, and `macro.inc` itself pulls in `gte_macros.inc`. Without `-Iinclude`, the GTE macros never load and assembly fails with a flood of `unrecognized opcode 'rtps' / 'ncds'` errors — which look like missing CPU support but are really just a missing include path.
+
+Assembler flags: `-EL -march=r3000 -mtune=r3000 -no-pad-sections -O0 -G0` (`-no-pad-sections` and `-O0` are both required for byte-exact section contents/sizes).
+
+Compiler flags currently `-quiet -O2 -G0`. `-O2` is the near-universal choice for retail PS1 titles, but this is **not yet proven for this game** — the all-`INCLUDE_ASM` build doesn't exercise the compiler's codegen at all. Expect to revisit per-file (or per-function) once real C starts getting matched.
+
+### Splat config gotchas worth remembering
+
+- `base_path` resolves relative to **the yaml file's directory**, not the CWD. With the yaml in `config/`, `base_path: ..` makes everything else (`asm_path: asm`, `src_path: src`, `generated_asm_macros_directory: include`) resolve naturally against the repo root. Getting this wrong the first time scattered generated files into `config/asm/`, `config/src/`, `config/include/`.
+- splat generates the asm macro definitions itself (`include/macro.inc`, `gte_macros.inc`, `labels.inc`, `include_asm.h`) — no need to hand-write them. But it does **not** generate `include/common.h`, which every generated `.c` file includes; that one is ours to write. It defines `INCLUDE_ASM_USE_MACRO_INC 1` (we assemble with modern GNU as, so we need the gas-flavored macros from `macro.inc`, not the original-assembler `labels.inc`) and includes `include_asm.h`.
 
 ## Tooling gotcha: use a project-local venv, not the global Python
 

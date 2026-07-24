@@ -40,3 +40,6 @@ Thumbs.db
 
 # Claude Code session/harness artifacts — not project content.
 /.claude/
+
+# Reproducible from `python tools_src/build.py`.
+/build/

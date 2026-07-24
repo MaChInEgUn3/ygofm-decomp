@@ -2,37 +2,45 @@ name: SLUS_014.11
 sha1: 84747e64f6da8e764206ec203e489acf8c9dcf7d
 options:
   basename: slus_014.11
-  target_path: D:\YGOFM\extracted\SLUS_014.11
+  # All paths below are relative to base_path, which is the repo root
+  # (this yaml lives in config/, so ".." walks up one level).
+  base_path: ..
+  target_path: extracted/SLUS_014.11
   elf_path: build/slus_014.11.elf
-  base_path: .
   platform: psx
   compiler: PSYQ
 
-  asm_path: ../asm
-  src_path: ../src
-  build_path: ../build
-  # create_asm_dependencies: True
+  asm_path: asm
+  src_path: src
+  build_path: build
+  generated_asm_macros_directory: include
 
-  ld_script_path: slus_014.11.ld
+  ld_script_path: config/slus_014.11.ld
   ld_dependencies: True
+
+  # The retail binary packs its sections with no inter-section padding:
+  # .text starts at 0x800129D8, which is not 16-byte aligned. splat's default
+  # `. = ALIGN(., 16)` after each section/segment shifted .text forward by 8
+  # bytes, which showed up as every jumptable entry in .rodata pointing 8 bytes
+  # too high. Both must stay False for a byte-exact link.
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
 
   find_file_boundaries: False
   gp_value: 0x8009AF08
-  # ld_gp_expression: main_SCOMMON_START + 0x7FF0
 
   o_as_suffix: True
   use_legacy_include_asm: False
 
   section_order: [".rodata", ".text", ".data", ".bss"]
-  # auto_link_sections: [".data", ".rodata", ".bss"]
 
   symbol_addrs_path:
-    - symbol_addrs.txt
+    - config/symbol_addrs.txt
   reloc_addrs_path:
-    - reloc_addrs.txt
+    - config/reloc_addrs.txt
 
-  # undefined_funcs_auto_path: undefined_funcs_auto.txt
-  # undefined_syms_auto_path: undefined_syms_auto.txt
+  undefined_funcs_auto_path: config/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/undefined_syms_auto.txt
 
   extensions_path: tools/splat_ext
 
@@ -58,7 +66,7 @@ segments:
     bss_size: 0x63698   # .sbss (1048) + .bss (406144) runtime-only gap between .sdata and the trailing region below
     subsegments:
       - [0x800, rodata]      # .rdata   80010000-800129d7 (10712 bytes)
-      - [0x31D8, c]          # .text    800129d8-800906df (515336 bytes) -- our 1336 game functions live here
+      - [0x31D8, c]          # .text    800129d8-800906df (515336 bytes) -- our ~1794 game functions live here
       - [0x80EE0, data]      # .data    800906e0-8009af07 (43048 bytes)
       - [0x8B708, data]      # .sdata   8009af08-8009b08f (392 bytes), gp-relative small data
       # .sbss/.bss (8009b090-800fe727) consume no file bytes -- handled by bss_size above.

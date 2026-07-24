@@ -24,12 +24,10 @@ SECTIONS
         main_RODATA_START = .;
         build/asm/data/800.rodata.o(.rodata);
         build/src/31D8.o(.rodata);
-        . = ALIGN(., 16);
         main_RODATA_END = .;
         main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
         main_TEXT_START = .;
         build/src/31D8.o(.text);
-        . = ALIGN(., 16);
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
         main_DATA_START = .;
@@ -37,19 +35,16 @@ SECTIONS
         build/src/31D8.o(.data);
         build/asm/data/80EE0.data.o(.data);
         build/asm/data/8B708.data.o(.data);
-        . = ALIGN(., 16);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_BSS_START = .;
         build/asm/data/800.rodata.o(.bss);
         build/src/31D8.o(.bss);
-        . = ALIGN(., 16);
         main_BSS_END = .;
         main_BSS_SIZE = ABSOLUTE(main_BSS_END - main_BSS_START);
     }
     __romPos += SIZEOF(.main);
     __romPos = ALIGN(__romPos, 16);
-    . = ALIGN(., 16);
     main_ROM_END = __romPos;
     main_VRAM_END = .;
 
