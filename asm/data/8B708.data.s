@@ -45,7 +45,10 @@ enddlabel D_8009AF20
 nonmatching D_8009AF24
 
 dlabel D_8009AF24
-    /* 8B724 8009AF24 050A0F14 */ .word 0x140F0A05
+    /* 8B724 8009AF24 */ .byte 0x05
+    /* 8B725 8009AF25 */ .byte 0x0A
+    /* 8B726 8009AF26 */ .byte 0x0F
+    /* 8B727 8009AF27 */ .byte 0x14
     /* 8B728 8009AF28 */ .byte 0x1E
 enddlabel D_8009AF24
 
@@ -84,15 +87,27 @@ enddlabel D_8009AF2E
 nonmatching D_8009AF30
 
 dlabel D_8009AF30
-    /* 8B730 8009AF30 02050A14 */ .word 0x140A0502
-    /* 8B734 8009AF34 32000000 */ .word 0x00000032
+    /* 8B730 8009AF30 */ .byte 0x02
+    /* 8B731 8009AF31 */ .byte 0x05
+    /* 8B732 8009AF32 */ .byte 0x0A
+    /* 8B733 8009AF33 */ .byte 0x14
+    /* 8B734 8009AF34 */ .byte 0x32
+    /* 8B735 8009AF35 */ .byte 0x00
+    /* 8B736 8009AF36 */ .byte 0x00
+    /* 8B737 8009AF37 */ .byte 0x00
 enddlabel D_8009AF30
 
 nonmatching D_8009AF38
 
 dlabel D_8009AF38
-    /* 8B738 8009AF38 050A1432 */ .word 0x32140A05
-    /* 8B73C 8009AF3C 64000000 */ .word 0x00000064
+    /* 8B738 8009AF38 */ .byte 0x05
+    /* 8B739 8009AF39 */ .byte 0x0A
+    /* 8B73A 8009AF3A */ .byte 0x14
+    /* 8B73B 8009AF3B */ .byte 0x32
+    /* 8B73C 8009AF3C */ .byte 0x64
+    /* 8B73D 8009AF3D */ .byte 0x00
+    /* 8B73E 8009AF3E */ .byte 0x00
+    /* 8B73F 8009AF3F */ .byte 0x00
 enddlabel D_8009AF38
 
 .align 2
