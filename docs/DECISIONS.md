@@ -345,11 +345,36 @@ unlocks a group rather than three separate puzzles. The obvious guesses
 (`-O1`, `-fno-schedule-insns2`, and the rest of the sweeper's sixteen
 combinations) do not do it.
 
-Not chased further in this batch, on the standing rule that
-register-allocation-only differences get parked rather than ground on. Logged
-here so the next attempt starts from a described pattern instead of rederiving
-it. `tools_src/permute.py` is the right tool to point at these, since the
-structure is already correct and only the allocation needs searching.
+**The permuter was pointed at it and could not reach it either.**
+`func_8007368C` ran 25,274 iterations over 40 minutes: best score **10**, hit
+7,859 times, never 0. Score 10 is the floor for "structurally identical, one
+register wrong" — the search saturated there immediately and stayed. Combined
+with a sixteen-combination flag sweep (run *after* the staleness fix, so this
+one counts) and four hand-written C shapes, the evidence is now:
+
+- not reachable by compiler flags — every allocation-related option in gcc 2.7
+  was tried directly against cc1psx, and only `-fno-omit-frame-pointer` changes
+  the output at all, which is not what retail has
+- not reachable by C-level rewriting — 25k random variants and 4 reasoned ones
+- structurally exact otherwise — same opcodes, order, and offsets
+
+**That combination points somewhere specific, and it is worth stating as a
+hypothesis rather than leaving the class as "hard".** If no C and no flag can
+make *this* cc1psx emit retail's allocation, the likeliest remaining
+explanation is that some translation units were not built by *this* cc1psx.
+Mixed SDK versions across objects were normal for PS1 titles.
+
+There is already independent evidence pointing the same way: the epilogue
+hoisting above is a case of *byte-identical cc1psx output* assembling into two
+different shapes depending on address region. That is two assemblers in one
+binary. If the assembler differed between regions, the compiler plausibly did
+too — and the affected functions would show exactly this symptom, a correct
+structure with an allocation this compiler will not produce.
+
+**This is untested.** Testing it means obtaining another PsyQ version's cc1psx
+(decomp.me exposes several) and checking whether one of them reproduces a
+parked function directly. Cheap to falsify, and if it holds it reclassifies
+this whole park rather than one function.
 
 ### `ByteReader` and the limit of the struct trick
 
