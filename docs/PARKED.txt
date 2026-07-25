@@ -1,0 +1,31 @@
+# Functions attempted and parked, with the class of difference. Read by
+# tools_src/candidates.py so they are not offered again. See docs/DECISIONS.md
+# for what each class means and what has already been tried.
+#
+# --- register allocator (closed: no flag in 2.8.1, permuter saturates) ---
+func_80071424
+func_80071460
+func_80038498
+func_80047B68
+func_8004BAE4
+func_8004CABC
+func_80038334
+func_800466C8
+func_80026C0C
+func_80049CB0
+# --- range-check fold (closed: happens in fold on the &&) ---
+func_80049544
+func_80049640
+# --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
+func_800601D0
+# --- addressing / individual causes, described in DECISIONS.md ---
+func_8003F7D4
+func_8001BD48
+func_80030F40
+func_80037D2C
+func_8002C518
+func_8003594C
+func_8003D2B8
+func_80019CC8
+func_80035A64
+func_8003A198
