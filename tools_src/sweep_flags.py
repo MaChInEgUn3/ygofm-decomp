@@ -75,9 +75,12 @@ def main():
         sys.exit(f"src/{func}.c does not exist -- write a candidate first")
 
     for label, cc, asf in COMBOS:
-        spec = {"cc": cc}
-        if asf:
-            spec["as"] = asf
+        # "as" is always set, to None when the combination wants the default.
+        # Omitting it instead left whatever PER_FUNC_AS_FLAGS already held for
+        # this function in place, so a combination labelled "O2 G8" could
+        # silently be tested against a -G0 assembler -- and report a match that
+        # does not reproduce when the entry is removed.
+        spec = {"cc": cc, "as": asf}
         OVERRIDES.write_text(json.dumps({func: spec}, indent=1))
         ok, why = build_reports(func)
         print(f"  {'MATCH' if ok else 'no   '}  {label}"

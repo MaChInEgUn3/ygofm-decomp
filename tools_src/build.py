@@ -229,7 +229,14 @@ if _DROP:
 # gp-relative instruction, leaving the function an instruction short. So
 # every -G0 function gets a -G0 assembler, not just the macro-form ones.
 PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
+# A -G8 compiler with a -G0 assembler. cc1psx at -G8 emits the bare symbol
+# form `lw $3,D_8009B458` and leaves the expansion to the assembler; a -G0
+# assembler expands it to lui/lw where a -G8 one would collapse it to a single
+# gp-relative load. The comment above says the two -G settings must match, and
+# that is the usual case -- these are the exceptions, where the mismatch is
+# exactly what reproduces retail.
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
+PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means

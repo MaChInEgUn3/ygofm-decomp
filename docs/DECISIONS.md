@@ -348,6 +348,46 @@ nested `mfdpsx*.zip` → a multi-part RAR3 that needs the non-free `unrar`
 live in `tools/psyq45/BIN/`, which `/tools/` in `.gitignore` keeps out of the
 repo along with everything else that is not ours to redistribute.
 
+### Re-deriving the pre-4.5 park: 4 of 5, and a fourth stale-input bug
+
+Five functions parked in earlier sessions were rewritten from their target asm
+and retested under 4.5. Four landed (231 total): a little-endian halfword
+stream read, a `qsort`-style comparator, a stream accumulator, and a flag
+store. None of them needed anything exotic — the comparator only wanted its
+**branch polarity** inverted (`if (a >= b) return 1;` rather than
+`if (a < b) return -1;`), which is a rule already in this document and was
+simply never applied to it.
+
+`func_800855B0` stays parked. It writes two halfwords at +0 and +2, and cc1psx
+folds the first store's offset into the `%lo` and forms the base only for the
+second, coming out one instruction short. The `ByteReader` struct trick, a
+local pointer, and retyping the symbol as a two-field struct all fold the same
+way. This is the same limit already recorded for `func_80070988`: **modelling
+an object as a struct reproduces base-then-offset addressing for one field
+access, not for two.**
+
+**A `-G8` compiler with a `-G0` assembler is a real configuration.** The note
+above says the two `-G` settings must match in both directions, and that is the
+usual case. `func_800495EC` is an exception: at `-G8` cc1psx emits the bare
+symbol form `lw $3,D_8009B458` and leaves expansion to the assembler, and a
+`-G0` assembler expands it to `lui`/`lw` where a `-G8` one collapses it to a
+single gp-relative load. The mismatch is what reproduces retail.
+
+**And the fourth instance of the same failure — this one in `sweep_flags.py`
+itself.** It reported `func_800495EC` matching at plain `-O2 -G8`; removing the
+override broke the build. Cause: the sweeper set `"cc"` for each combination but
+only set `"as"` when the combination named one, so a combination labelled
+"O2 G8" inherited whatever `PER_FUNC_AS_FLAGS` already held — here a leftover
+`-G0`. The verdict was true of what it actually built and false of what it
+claimed to build. Fixed by always writing `"as"`, using the null-means-default
+value that the audit work added.
+
+Four bugs, one shape: **an input that varies without the mechanism knowing it
+varied.** The override file that the staleness check ignored, the flag whose
+effect was never verified, the env var missing from the stamp, and now a tool
+that set one half of a pair. Worth checking any new knob against this list
+before trusting its first result.
+
 ### Auditing the flag tables after the version fix — and walking into the same trap a third time
 
 Every entry in `PER_FUNC_FLAGS`, `PER_FUNC_AS_FLAGS`, and the three post-pass
@@ -716,9 +756,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-227 of 1794 functions decompiled and byte-matching.
+231 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~227 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~231 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

@@ -190,7 +190,15 @@ extern u8 D_800917F0[];
 extern u8 D_800F2C40[];
 extern u8 D_800E9DB0[];
 extern u8 D_800E9EF0[];
-extern u8 D_800FE040[];
+/* Reached as a base plus two halfword offsets, which is what a struct
+ * access compiles to; a bare array lets gcc fold the first store's offset
+ * into the %lo and form the base only for the second. */
+typedef struct {
+    s16 x;
+    s16 y;
+} ScreenPos;
+
+extern ScreenPos D_800FE040;
 /* The retail code forms this object's base address and then reaches the
  * cursor at +8, which is what a struct field access compiles to -- reaching
  * it as D_800F5BE8[8] instead lets gcc fold the +8 into the %lo and comes
