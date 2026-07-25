@@ -241,9 +241,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-148 of 1794 functions decompiled and byte-matching.
+149 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~148 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~149 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -263,7 +263,18 @@ It needs a candidate at `src/<func>.c` already: it refines a near miss, it canno
 
 `compile.sh` is generated from the same flag tables the build uses, so a variant that matches under the permuter also matches under `build.py`. If those ever drift, permuter results become worthless -- keep them in step.
 
-**First real use was inconclusive**, and that is worth recording rather than glossing: ~1000 iterations on `func_80035598` (a three-way unsigned compare) got the score from its starting value down to 120, never to 0. The candidates it produced are heavily contorted C that still does not match. So the permuter is available and functional, but it is not a guarantee -- some functions will need a different insight, not more search.
+**Use it to learn *whether* a match is reachable, not to get the C you commit.** It searches for any program that assembles identically, and what it returns is usually unusable: its winning variant for `func_800156B8` indexed the array with `i & 0xFFFFFFFFFFFFFFFFu` repeated *twelve times*. That is byte-exact and completely meaningless -- committing it would mislead every future reader about what the original code did.
+
+The productive workflow is: let the permuter prove the allocation is reachable, then find a defensible route to it. For `func_800156B8` the essential trick reduced to a 64-bit promotion of the index, and from there to something entirely idiomatic:
+
+```c
+*(p + i + 0xA) = arg0;   /* matches */
+p[i + 0xA] = arg0;       /* does not */
+```
+
+Those are the same thing to C, but gcc canonicalises the addition differently -- it emits `addu counter,base` for the index form and `addu base,counter` for the deref form, and the operand order is visible in the encoding. **Worth trying the deref form on any near-miss whose only defect is a swapped `addu`.** It does not generalise to every register-allocation miss, though: it failed on `func_8003006C` (target reuses the pointer register) and `func_800855B0` (target overwrites the hi register with the base).
+
+Earlier record, for calibration: a first attempt on `func_80035598` ran ~1000 iterations and got the score to 120 without ever reaching 0. The tool is genuinely useful but not a guarantee.
 
 ### Tooling: `tools_src/try_func.py`
 
