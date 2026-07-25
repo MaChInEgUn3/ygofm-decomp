@@ -135,7 +135,16 @@ extern u16 D_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
 extern u8 D_8009B2F8;
+extern u8 D_8009B324;
+extern u8 D_8009B325;
 extern u8 D_8009B357;
+extern u8 D_8009B3C7;
+extern u8 D_8009B3CF;
+extern u8 D_8009B3DD;
+extern u16 D_8009B3CC;
+/* Small-data table of halfwords: the retail code takes its address with
+ * addiu $v1,$gp,%gp_rel(...), so it must stay inside the -G8 threshold. */
+extern u16 D_8009AF74[4];
 extern u8 D_8009AFA3;
 extern s32 D_8009B074;
 extern s32 D_8009B304;
@@ -158,6 +167,8 @@ extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
+extern u8 D_800EB288[];
+extern u8 D_800EF6E0[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];
 extern u8 D_800F2C40[];
@@ -179,7 +190,9 @@ extern ByteReader D_800F5BE8;
 
 /* Reached via %hi/%lo from a -G0 unit and from a -G8 one, so these must
  * never be small data: declared unsized rather than as scalars. */
+extern u8 D_8009B268[];
 extern u8 D_8009B26C[];
+extern u8 D_8009B26D[];
 extern u8 D_8009B269[];
 extern s32 D_800938A0[];
 extern u16 *D_80092A90;

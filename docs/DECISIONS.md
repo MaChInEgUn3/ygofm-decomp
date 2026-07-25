@@ -207,6 +207,8 @@ So the checklist for a function that is structurally right but has the wrong reg
 
 Read the checklist as "these are the knobs that exist", not "these will unlock the parked set".
 
+**Flags tried and found not to help, so nobody repeats them:** `-fno-schedule-insns` (for the case where gcc hoists an unrelated load into a load-delay slot that the retail code leaves as a `nop`) and `-fno-schedule-insns` combined with `-fno-delayed-branch`. Neither moved `func_8001B780`. `-fno-delayed-branch` remains useful, but only alongside a correct signature.
+
 **Sweep one candidate at a time.** A wrong-sized function shifts everything after it, so with several broken candidates in `src/` at once the difference list is mostly cascade and a function can look like it matches when it does not. Two of the thirteen appeared to match while swept together and did not when swept alone. `tools_src/sweep_flags.py` runs one function's combinations; keep only matching candidates in `src/` between runs.
 
 **A specific sub-case: the retail code overwrites the source pointer's register with its last load.** Where the original reads `lbu $a1, 0x0($a1)` -- destroying the pointer because it is dead afterwards -- gcc allocates a fresh register instead. Structure and instruction count are otherwise identical. Seen in `func_8003006C` and `func_8004143C`; `-O1`/`-G0` and the deref form do not shift it. (`func_8006C30C` looked like this class but was in fact plain register alternation, and `-O1` did fix that one, so check whether the pointer is genuinely being overwritten before assuming.)
@@ -273,9 +275,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-173 of 1794 functions decompiled and byte-matching.
+178 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~173 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~178 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
