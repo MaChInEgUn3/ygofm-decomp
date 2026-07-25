@@ -432,6 +432,36 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Declaring an array by its record type closes the reassociation gap
+
+The base-formation gap recorded two sections ago — `base + (scaled index +
+constant)`, where cc1psx reassociates and folds both constants into the
+addressing mode — has a fix after all, and it is the obvious one in hindsight:
+**declare the array as an array of its record type instead of bytes.**
+
+`D_801AB000` holds twelve-byte records and was declared `u8 D_801AB000[]`, so
+every access spelled its own `index * 12` and cc1psx was free to reassociate.
+Declared as `Rec12 D_801AB000[]`, the index scales as part of the array access
+and the base lands in a register exactly where retail has it.
+`func_80073480` matched with no other change, and the first ten instructions of
+`func_800708C4` went from wrong to identical.
+
+This makes it a fifth variant of the recipe rather than a gap:
+
+| what retail does | what works |
+|---|---|
+| base, then one field access | a plain struct |
+| base, then two different offsets | unsized array of the struct, indexed `[0]` |
+| base, then a variable index | index in a local **and** the element address in a pointer local |
+| base, then a constant non-zero offset | base in one local, offset added in a separate statement |
+| **base, then scaled index plus constant** | **declare the array by its record type** |
+
+Worth doing eagerly rather than reactively: any symbol accessed with a repeated
+`index * N` is a record array, and typing it that way removes a whole class of
+addressing mismatch before it happens.
+
+`func_800708C4` remains parked, now on the loop shape rather than the base.
+
 ### Sampling the 35+ band: the misses change character
 
 The 16-26 pool is down to about 38 clean candidates while **555 clean functions
@@ -1984,9 +2014,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-369 of 1794 functions decompiled and byte-matching.
+370 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~369 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~370 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

@@ -173,7 +173,17 @@ extern u8 D_801A7AD8[];
 extern u16 D_800F2B22[];
 extern s32 D_800E9EA8[];
 extern u8 D_8017A1D8[];
-extern u8 D_801AB000[];
+/* Twelve-byte records. Declared as an array of the record type so the index
+ * scales naturally; see the base-formation notes in docs/DECISIONS.md. */
+typedef struct {
+    s16 unk0;
+    u8 unk2[4];
+    u16 unk6;
+    s8 unk8;
+    u8 unk9[3];
+} Rec12;
+
+extern Rec12 D_801AB000[];
 extern u8 D_800907D8[];
 extern u8 D_801D0200[];
 extern s32 D_8009B118;
