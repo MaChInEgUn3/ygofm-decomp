@@ -383,6 +383,34 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### Stack-built structs, and source order deciding codegen order
+
+`func_80044FFC` builds a record in its own frame and passes its address on. The
+frame is `0x48`: the struct at `+0x10`, `$ra` at `+0x40`, so the struct is
+`0x30` bytes — **the frame layout gives the struct's size**, which is often the
+only way to know it.
+
+Getting it byte-exact took three passes, and each failure was informative:
+
+| version | result |
+|---|---|
+| `m.unk2 = arg1` with a `u16` field | one instruction short — no `andi` |
+| add `& 0xFF`, assign `unk8` first | right size, `li` for the constant two slots late |
+| assign `kind` first, then `unk8`, `unk2`, `unk1` | matches |
+
+Two rules out of that. **A `u16` field does not imply a `u16` value**: retail
+masks the argument to `0xFF` before storing it into a halfword, so the mask is
+in the source and has to be written. And **the order of field assignments in the
+source decides the order of the setup instructions**, including where a constant
+is materialised — it is not just the stores that move. When a function is the
+right size but one instruction sits in the wrong slot, reordering the source
+statements is the first thing to try.
+
+Also landed: two record-scan loops (`func_8004002C`, `func_8004006C`) over
+`0x70`-byte records, returning an index or `-1`. Both wanted a pointer walked
+alongside an independent counter rather than one derived from the other, which
+is what the retail code does — `$a0` advances by `0x70` while `$v1` counts.
+
 ### The byte-stream cursor idiom, and `u8` locals costing an instruction
 
 A shape that recurs across the script interpreter: a byte read through a table
@@ -941,9 +969,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-267 of 1794 functions decompiled and byte-matching.
+271 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~267 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~271 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

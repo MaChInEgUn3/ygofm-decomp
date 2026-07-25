@@ -106,6 +106,15 @@ extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
 extern u16 D_8009B33A;
 extern u8 D_8009B363[];
+/* Scanned in 0x70-byte records; only the halfword at +8 is known. */
+typedef struct {
+    u8 unk0[8];
+    u16 flags;
+    u8 unkA[0x66];
+} Slot70;
+
+extern Slot70 D_800F0548[];
+extern Slot70 D_800EFE48[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];

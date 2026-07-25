@@ -10,4 +10,15 @@ typedef signed short s16;
 typedef unsigned int u32;
 typedef signed int s32;
 
+/* Built on the stack and passed by address to func_80045BE8. Only the four
+ * fields the callers touch are named; the size comes from the retail frame. */
+typedef struct {
+    u8 kind;
+    u8 unk1;
+    u16 unk2;
+    u8 unk4[4];
+    s32 unk8;
+    u8 unkC[0x24];
+} Msg30;
+
 #endif /* TYPES_H */
