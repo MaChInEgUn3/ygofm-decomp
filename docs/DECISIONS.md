@@ -207,6 +207,52 @@ So the checklist for a function that is structurally right but has the wrong reg
 
 Read the checklist as "these are the knobs that exist", not "these will unlock the parked set".
 
+### Predicting `-G0` before writing the C, and why it cannot be exact
+
+The original game was built from ~234 translation units, and the `-G` model is
+a property of the *unit*, not the function. So flags ought to be predictable
+from position. Two attempts, both now in `tools_src/predict_flags.py`:
+
+**`docs/FILE_BOUNDARIES.txt` is not what its header claims.** All 233
+boundaries fall in `0x80073840..0x800906E0`. The game's own code, everything
+below `0x80073840`, has **zero** detected boundaries — the 16-byte-padding
+heuristic only fires in the library region, because those objects were linked
+with alignment padding and the game's were not. The file is still valid for
+what it covers, and the predictor is *consistent* there: of the three
+library-region units holding several decompiled functions, all three looked
+like they disagreed on flags, and in every case the odd function out also
+matched under its unit's majority flags. Those were underdetermined, not
+contradictory. Tiny functions often compile identically at `-O1 -G0` and
+`-O2 -G8`, so a match does not pin the flags down.
+
+**For the main body, `%gp_rel` gives a high-recall negative filter.** A
+function using `%gp_rel` was certainly `-G8`. Maximal runs of consecutive
+functions with no `%gp_rel` that still touch globals are candidate `-G0`
+units: 19/19 recall on the known `-G0` main-body functions, but ~51%
+precision. Use it the negative way — **outside such a run, do not waste a
+sweep on `-G0`.** That halves the search space.
+
+**The exact-looking test is contaminated by our own declarations, and this is
+the useful finding.** A symbol reached via `%gp_rel` anywhere must fit inside
+the `-G8` threshold, so a `%hi`/`%lo` access to that same symbol looks like
+proof of `-G0`. It is 97% precise but only 27% recall, and the four false
+positives explain both numbers. `func_80044CFC` stores to `D_8009B450` via
+`%hi`/`%lo` and matches at **`-G8`** — because we declare `D_8009B450` as an
+*unsized array*, and cc1psx cannot place an object of unknown size in small
+data. Other functions reach the same symbol gp-relative.
+
+So there are **two independent knobs for the same symptom**: compile the
+function `-G0`, or declare the symbol unsized. Both produce `%hi`/`%lo`. The
+flag tables in `build.py` are therefore a record of *a* byte-exact
+configuration, not a reconstruction of the original build — those are
+different things, and only the first is required. Worth keeping in mind
+before treating `PER_FUNC_FLAGS` as evidence about the game's real makefile.
+
+**Corpus answer on `-O2`:** across 179 matching functions, 113 are at `-O2`
+and 66 at `-O1`. `-O2` stays the default because it is the plurality and
+because the two are indistinguishable for many small functions, but 66
+overrides is too many to keep calling `-O2` "confirmed". It is not.
+
 ### `-fno-schedule-insns2` — the load-delay counterpart
 
 There are **two** schedulers, and only the second one matters to us.
