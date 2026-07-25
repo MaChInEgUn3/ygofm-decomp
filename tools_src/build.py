@@ -453,7 +453,12 @@ def read_defsyms():
 
 
 def link_and_verify():
-    run([LD, "-T", GEN_LD.relative_to(ROOT).as_posix(),
+    # -EL is not optional on Linux: mips-linux-gnu-ld defaults to big-endian
+    # while the PS1 is little-endian, and it rejects our (correctly
+    # little-endian) objects with "endianness incompatible with that of the
+    # selected emulation". The Windows mipsel-none-elf-ld already defaults
+    # to LE, so passing it there is a harmless no-op.
+    run([LD, "-EL", "-T", GEN_LD.relative_to(ROOT).as_posix(),
          "-Map", (BUILD / "slus_014.11.map").relative_to(ROOT).as_posix(),
          "--no-check-sections", *read_defsyms(),
          "-o", ELF.relative_to(ROOT).as_posix()])
