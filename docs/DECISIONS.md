@@ -168,7 +168,16 @@ the next one meaningful:
 4. **Count the materialisations** of each value. One per write in the source.
 5. **Then** sweep flags.
 
-I spent a long time doing 5 before 2 and 3, which is why this list exists.
+**And know when to stop.** Stop when the only remaining difference is which
+register holds a value — that class is closed (no flag in gcc 2.8.1, permuter
+saturates at 16k iterations, see below), so any further C shapes are wasted.
+Stop also when the target has *more* duplicated tails than you produce
+(cross-jumping) or keeps two comparisons where cc1psx folds a range check.
+Park, record which class, move on.
+
+I spent a long time doing 5 before 2 and 3, which is why this list exists — and
+a while after that grinding shapes against differences no shape could reach,
+which is why the stopping rule is here too.
 
 ### Decompilation conventions (learned from the first 64 functions)
 
@@ -1784,9 +1793,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-348 of 1794 functions decompiled and byte-matching.
+350 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~348 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~350 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
