@@ -202,6 +202,20 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
 PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 
+# Optional experiment file, so sweeping flags for one function never means
+# rewriting this script (editing it by string substitution silently failed
+# more than once, and a flag that never took effect looks exactly like a
+# flag that did not help). Format:
+#   {"func_8001700C": {"cc": ["-quiet", "-O2", "-G0"], "as": "-G0"}}
+_OVERRIDES = ROOT / "config" / "flag_overrides.json"
+if _OVERRIDES.exists():
+    import json
+    for _name, _spec in json.loads(_OVERRIDES.read_text()).items():
+        if "cc" in _spec:
+            PER_FUNC_FLAGS[_name] = _spec["cc"]
+        if "as" in _spec:
+            PER_FUNC_AS_FLAGS[_name] = _spec["as"]
+
 
 def run(cmd, **kwargs):
     kwargs.setdefault("cwd", ROOT)

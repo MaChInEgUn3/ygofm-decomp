@@ -47,3 +47,6 @@ Thumbs.db
 # splat regenerates this monolithic INCLUDE_ASM file, but the build uses
 # per-function src/func_*.c instead and ignores it. See docs/DECISIONS.md.
 /src/31D8.c
+
+# Scratch file for per-function flag experiments (see build.py).
+/config/flag_overrides.json
