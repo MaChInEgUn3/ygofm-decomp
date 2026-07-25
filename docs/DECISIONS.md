@@ -383,6 +383,45 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### `switch` and an `if` chain are distinguishable, even with two cases
+
+`func_800603DC` selects one of three function pointers by comparing against two
+constants. Written as two `if`s it comes out an instruction short; written as a
+`switch` it matches. The shapes differ in where the *returns* live:
+
+    switch (retail):                    if chain (ours):
+    beq  $a0,$v0,.L…E40                 bne  $4,$2,$L2
+    nop                                 nop
+    ori  $v0,$v0,1                      lui  …E40        <- return inlined
+    beq  $a0,$v0,.L…ED0                 j    $31            in the fall-through
+    nop                                 addiu …E40
+    j    .L…E20        <- default       $L2:
+    lui  …E20 (delay)                   ori  $2,$2,1
+    .L…E40: …                           …
+
+**A `switch` puts every case in its own block and branches *to* them, leaving
+the default as the fall-through. An `if` chain inlines the first body into the
+fall-through.** So if the target's comparisons are consecutive with nothing
+between them, the source was a `switch` — even with only two cases, where one
+might assume gcc would degenerate to the same code. It does not.
+
+Also visible here: gcc shares a `lui` between two constants that differ only in
+the low half, comparing against `0x2000000` and then `ori`-ing to get
+`0x2000001`. That is a hint the two case labels are adjacent values, which is
+worth knowing when the constants look arbitrary.
+
+### A reconciliation regex that missed pointer return types
+
+The prototype-vs-definition sweep added earlier silently skipped any function
+returning a pointer. Its pattern required whitespace between the return type and
+the name, and `u8 *func_80089E20(...)` has none — the `*` binds to the name. So
+`func_80089E20` kept a wrong `void func_80089E20(void)` prototype through a
+sweep that reported success. Fixed. **A cleanup pass that cannot fail loudly is
+another unwatched input**; the same shape as the four bugs listed above, and the
+fifth time in this project. The tell was that it reported "reconciled: 0" while a
+conflict existed — a zero from a tool that should have found something is a
+result, not a non-result.
+
 ### Branch polarity is the most common single fix, and it has a tell
 
 Two of four functions in one batch failed on nothing but branch polarity, which
@@ -1009,9 +1048,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-275 of 1794 functions decompiled and byte-matching.
+279 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~275 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~279 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

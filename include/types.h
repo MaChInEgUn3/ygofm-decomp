@@ -21,4 +21,7 @@ typedef struct {
     u8 unkC[0x24];
 } Msg30;
 
+/* The dispatch in func_800603DC selects between handlers of this shape. */
+typedef u8 *(*ByteFn)(u8 **);
+
 #endif /* TYPES_H */
