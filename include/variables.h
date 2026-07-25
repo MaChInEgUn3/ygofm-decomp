@@ -183,7 +183,18 @@ extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
-extern u8 D_800EB288[];
+/* Walked with a 0x1C stride, two bytes cleared per record. Declared as an
+ * array of the record type so the base lands in a register before any
+ * field offset -- see the two-field addressing note in docs/DECISIONS.md. */
+typedef struct {
+    u8 unk0[0x11];
+    u8 unk11;
+    u8 unk12[6];
+    u8 unk18;
+    u8 unk19[3];
+} Rec1C;
+
+extern Rec1C D_800EB288[];
 extern u8 D_800EF6E0[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];

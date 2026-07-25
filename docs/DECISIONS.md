@@ -383,6 +383,41 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### The struct-array pattern generalises, and the park is nearly dry
+
+Four more parked functions fell to the pattern from the previous section plus
+one loop-shape fix, taking the total to 237 and leaving three parked.
+
+`func_80035DF4` walks 0x26C records with a 0x1C stride, clearing bytes at +0x11
+and +0x18. It was one instruction short because cc1psx folded the `+0x18` into
+the `%lo` where retail forms the base and then adds `0x18` separately. Declaring
+the object as `Rec1C D_800EB288[]` — an array of the record struct, with the two
+cleared bytes as named fields — and walking `p++` matched immediately. **Same
+mechanism as the two-halfword store: indexing forces the base into a register
+before any field offset applies.** It is worth reaching for this shape whenever
+a function is exactly one instruction short around a based address.
+
+`func_800428EC` was one instruction long, and the fix was to *stop* helping.
+`D_8009AF74[arg0[0x17]]` inline matches; hoisting the table into a local `u16 *`
+first adds an instruction. The same is true of the index. A local variable is
+not free — it can force an address to materialise that retail folded.
+
+`func_8005B5FC` was two instructions long as a `for` loop and matches as a
+`do`/`while(--i != -1)`. The `-1` sentinel lives in a register across the loop
+in retail, which is what the `do`/`while` form produces and the `for` form does
+not. `while (arg2-- != 0)` does not work either — the counter's *form* matters,
+not just its trip count.
+
+`func_80049200` needed only `-O2 -G0`, found by the sweeper. Worth noting that
+this is the same function whose sixteen-combination sweep came back empty
+earlier in the project: that sweep ran under the staleness bug, against the
+wrong compiler, with the sweeper's own inherited-`as`-flag bug. Three
+independent reasons the old answer was worthless.
+
+**Still parked: `func_8003F7D4`, `func_80071424`, `func_80071460`** — from ~50 at
+the session's start. The last two are the `D_800F5B98` store family and differ
+only in which register holds a temporary; their two siblings match.
+
 ### Two field accesses: index an unsized array of the struct, not the struct
 
 The rule recorded earlier was that modelling an object as a struct reproduces
@@ -787,9 +822,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-233 of 1794 functions decompiled and byte-matching.
+237 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~233 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~237 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
