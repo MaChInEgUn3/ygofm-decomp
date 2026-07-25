@@ -423,6 +423,24 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### `u16` loop counters cost an `andi` per iteration
+
+`func_80019A08` walks a table of groups — key, member count, then that many
+members — and came out two instructions long. Both were `andi $v0,$a2,0xFFFF`:
+once before the loop-continuation test and once before using the count as a
+pointer increment. Declaring the counter `s32` instead of `u16` removed both.
+
+The value is loaded with `lhu`, so it is already zero-extended and the mask is
+redundant — but C says a `u16` wraps at 16 bits, and after `n--` cc1psx has to
+prove it. It cannot, so it masks.
+
+This is the same rule as the `u8` local feeding a wider parameter, the `u8`
+return value, and the `-1` stored into a `u8` array: **hold the raw value in the
+widest natural type and let the store or call narrow it.** Four instances now, in
+four different positions — parameter, return, local, and loop counter — which is
+enough to treat "a narrow type in a computation" as a smell rather than a
+detail.
+
 ### Filtering out the closed-class signatures restores the rate
 
 First batch drawn from the *clean complement* — candidates with neither a
@@ -1720,9 +1738,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-342 of 1794 functions decompiled and byte-matching.
+344 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~342 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~344 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
