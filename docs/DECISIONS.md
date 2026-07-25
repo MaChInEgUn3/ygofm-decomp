@@ -406,6 +406,24 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Cross-jumping: two identical returns the compiler insists on merging
+
+`func_800601D0` has an early `return -1;` before a search loop and another after
+it. Retail keeps both inline — two separate `jr $ra` / `addiu $v0,$zero,-0x1`
+pairs. cc1psx merges them into one shared exit reached by a branch, which is two
+instructions shorter.
+
+The counting rule says two materialisations means two `return` statements, and
+the source *does* have two. **This is the first case where the right source
+shape is not enough**: gcc's `jump_optimize` cross-jumps identical tails
+unconditionally, and 2.8.1 has no flag to disable it — `-fno-crossjumping` does
+not arrive until gcc 3.
+
+So the counting rule needs a caveat: it tells you what the source had, but the
+compiler may collapse what the source wrote. When the target has *more*
+duplicated tails than we produce, source structure is not the lever, and there
+is currently no other one.
+
 ### The allocation-flag space is smaller under 4.5, not larger
 
 Every allocation-flag scan in this document was run against **4.6's** cc1psx,
@@ -1502,9 +1520,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-329 of 1794 functions decompiled and byte-matching.
+331 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~329 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~331 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
