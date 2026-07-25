@@ -432,6 +432,23 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### `slt` versus `sltiu` is a signedness question in the source
+
+`func_80021894` compares a byte counter against `0xFB`. Retail uses `sltiu`;
+declaring the value `s32` gives `slt`. Making it `u32` matched — and the
+comparison is genuinely unsigned in the original, since the value is a byte
+counter that saturates.
+
+Worth adding to the reading list because the two are one character apart in a
+listing and easy to skim past: **`slt`/`slti` mean at least one side is signed
+in the source; `sltu`/`sltiu` mean both are unsigned.** With a masked byte the
+compiler cannot tell which the author meant, so it follows the declared type.
+
+The same function also needed its index in a local: `base + arg0 + 0x4F` folds
+the `0x4F` into each access offset, while `s32 idx = arg0 + 0x4F; base + idx`
+computes the sum first, which is what retail does. Third variant of the
+base-formation recipe to come up, after the two-local split and the array index.
+
 ### A struct copied to a local, not passed by value
 
 `func_80059A50` copies seven words from a pointer argument into its own frame
@@ -1841,9 +1858,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-356 of 1794 functions decompiled and byte-matching.
+358 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~356 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~358 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
