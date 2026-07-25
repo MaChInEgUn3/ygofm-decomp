@@ -179,6 +179,8 @@ PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
     "func_8001755C": _O2_G0_NOSCHED2_MACRO,
     "func_800495A4": _O2_G0,
+    "func_80049CB0": _O2_G0,
+    "func_80049EC8": _O2_G0,
     "func_80049F10": _O2_G0,
     "func_80049200": _O2_G0,
     "func_80070988": _O1_G8,
@@ -248,6 +250,8 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8001755C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80044DA0"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80049CB0"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80049EC8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049600"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"

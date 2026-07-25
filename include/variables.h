@@ -210,6 +210,8 @@ extern s16 D_800FE0CC;
  * unit and via %hi/%lo from another, so the declaration stays a plain
  * scalar and the per-function -G override decides which form is emitted. */
 extern u8 *D_8009B458;
+/* Alias for D_8009B458; see config/symbol_aliases.txt. */
+extern u8 *Base2_8009B458;
 extern u8 *D_8009B45C;
 /* Alias for D_8009B45C; see config/symbol_aliases.txt. */
 extern u8 *Base2_8009B45C;

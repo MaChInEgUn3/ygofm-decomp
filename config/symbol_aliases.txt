@@ -8,3 +8,6 @@ KeyTable_801D9174 = 0x801D9174;
 
 # func_80044DA0 loads the D_8009B45C pointer twice in one basic block.
 Base2_8009B45C = 0x8009B45C;
+
+# func_80049CB0 loads the D_8009B458 pointer twice in one basic block.
+Base2_8009B458 = 0x8009B458;

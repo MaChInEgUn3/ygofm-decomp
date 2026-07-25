@@ -406,6 +406,32 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### The `$v0`/`$v1` swap class, sixth member and a sharper description
+
+`func_80049CB0` loads the `D_8009B458` pointer twice in one basic block, and the
+alias produces both loads correctly. What remains is one register choice, and it
+is worth stating precisely because the class keeps growing:
+
+    retail:                            ours:
+    lui $v1,%hi(sym)                   lui $2,%hi(sym)
+    lw  $v1,%lo(sym)($v1)   <- reuses  lw  $3,%lo(sym)($2)   <- does not
+    …
+    lui $v0,%hi(sym)                   lui $2,%hi(sym)
+    lw  $v0,%lo(sym)($v0)   <- reuses  lw  $2,%lo(sym)($2)   <- reuses
+
+**The second load reuses its address register in both; only the first differs.**
+In ours the `lui` register is needed later for a constant, so the pointer goes
+elsewhere; retail keeps the pointer in the `lui` register and puts the constant
+in `$v0`. Three C shapes and the alias on either side of the pair all fail.
+
+That makes the pattern across the class: **cc1psx and retail disagree about
+which of `$v0`/`$v1` holds a value that stays live across a branch.** The one
+member solved so far (`func_8003CE74`) was solved by making the live value the
+*return* value, which forces it into `$v0`. Where the function has no return
+value to give — as here, `void` with two stores — there is no lever yet. Six
+members now, and worth a focused attempt rather than one-off guessing when the
+mining slows.
+
 ### Two idioms worth recognising on sight
 
 **`andi` / `xori` / `sltiu $v0,$v0,1` is `(x & M) == M`.** cc1psx has no
@@ -1308,9 +1334,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-306 of 1794 functions decompiled and byte-matching.
+309 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~306 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~309 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
