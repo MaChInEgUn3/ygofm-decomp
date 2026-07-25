@@ -383,6 +383,46 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### Branch polarity is the most common single fix, and it has a tell
+
+Two of four functions in one batch failed on nothing but branch polarity, which
+makes it the most frequent single cause in this project so far. It also has a
+reliable tell, worth stating as a procedure rather than a rule of thumb:
+
+**Look at which path falls through in the target.** cc1psx emits the
+*fall-through* path for the branch that is written as not-taken. So if retail
+falls through into the body of an `if`, the source tested the positive
+condition; if it branches away into the body, the source tested the negation.
+
+- `func_80049600`: retail does `beqz $v0,.L…` on `(v < 0x15)`, i.e. it branches
+  away when the test *fails* and falls through into the work. So the source is
+  `if (v < 0x15) { … }` with the `0xFF` return as the outer else — not two
+  sequential early returns, which invert it.
+- `func_8005F588`: retail does `bnez $a0` to the store-zero path, so the source
+  tests `arg0 == 0` first and stores `-1` in that branch. Writing the `!= 0`
+  case first swaps both arms.
+
+### `-O2 -G0` versus `-O1 -G0` has a visible signature
+
+Both appear in the tables and picking wrong costs an instruction. The tell is
+where the prologue sits relative to a global load:
+
+    -O2 -G0:                       -O1 -G0:
+    lui   $v0,%hi(sym)             addiu $sp,$sp,-0x18
+    lw    $v0,%lo(sym)($v0)        sw    $ra,0x10($sp)
+    addiu $sp,$sp,-0x18   <- fills lui   $v0,%hi(sym)
+    sw    $ra,0x10($sp)      the   lw    $v0,%lo(sym)($v0)
+    lh    $v1,0x7E2($v0)     delay nop             <- maspsx must insert one
+
+If the target loads a global *before* the prologue, `-O2` scheduled the prologue
+down into the load-delay slot and there is no `nop`; `-O1` leaves the prologue
+first and needs the `nop`. `func_80049F10` was one instruction long as `-O1 -G0`
+purely because of that `nop`, and matched at `-O2 -G0` unchanged.
+
+One more from this batch: `func_80049F10` also needed its `0x7E2` read hoisted
+*above* the two stores, matching retail. A read whose result is only used later
+still has a position, and the source order fixes it.
+
 ### Stack-built structs, and source order deciding codegen order
 
 `func_80044FFC` builds a record in its own frame and passes its address on. The
@@ -969,9 +1009,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-271 of 1794 functions decompiled and byte-matching.
+275 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~271 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~275 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
