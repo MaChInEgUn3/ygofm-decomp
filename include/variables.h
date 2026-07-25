@@ -54,6 +54,7 @@ extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
 extern u16 D_8009B220;
+extern u16 D_8009B27C;
 
 extern s32 D_8009AF64;
 extern s32 D_8009AF68;
@@ -139,6 +140,7 @@ extern s32 D_8009B310;
 extern s32 D_8009B314;
 extern s32 D_8009B300;
 extern s32 D_8009B30C;
+extern s32 D_8009B330;
 extern s32 D_8009B350;
 
 /* Cursor advanced by the reader in func_80030050. */
@@ -151,6 +153,8 @@ extern u8 D_80091570[];
 extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
+extern u8 D_800EAF08[];
+extern u8 D_801D0000[];
 extern u8 D_800E9EF0[];
 extern u8 D_800FE040[];
 /* The retail code forms this object's base address and then reaches the

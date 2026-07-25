@@ -190,6 +190,8 @@ return 1;
 
 **A `u8` read that gets sign-extended by `sll`/`sra` is a cast, not an `s8` load.** Where the retail code does `lbu` then `sll 24` / `sra 24`, assigning to an `s8` local lets gcc collapse the whole thing into a single `lb` and the function comes out two instructions short. Cast at the point of use instead: `D_8009AF76 - (s8)arg0[0x16]`.
 
+**A recurring unsolved class: the retail code overwrites the source pointer's register with its last load.** Where the original reads `lbu $a1, 0x0($a1)` -- destroying the pointer because it is dead afterwards -- gcc allocates a fresh register instead. Structure and instruction count are otherwise identical. Seen in `func_8003006C` and `func_8004143C`; `-O1`/`-G0` and the deref form do not shift it. (`func_8006C30C` looked like this class but was in fact plain register alternation, and `-O1` did fix that one, so check whether the pointer is genuinely being overwritten before assuming.)
+
 **Three recurring causes of a wrong-sized function** (all cost an extra instruction, all cheap to fix once recognised):
 - *Reloading a global.* Dereferencing the same global pointer twice makes gcc reload it. The retail code loads once — assign it to a local first (`u8 *p = D_8009B45C;`).
 - *An over-narrow parameter.* A `u8` parameter makes gcc mask with `andi $a0,$a0,0xff` before storing. Where the retail code stores `$a0` straight through, the parameter was word-sized — use `s32`.
@@ -252,9 +254,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-157 of 1794 functions decompiled and byte-matching.
+168 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~157 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~168 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
