@@ -406,6 +406,24 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Declaring versus assigning a local are different instructions
+
+`func_8002E00C` differed only in *when* the constant `-1` was materialised —
+retail puts it between the two callee-saved register saves, we put it after
+both. The fix was moving the counter's initialiser out of its declaration:
+
+    s32 i = 0;              ->      s32 i;
+    *(s16 *)(a + 0x3C) = -1;        *(s16 *)(a + 0x3C) = -1;
+                                    i = 0;
+
+**A declaration with an initialiser and a bare declaration followed by an
+assignment are not the same to cc1psx.** The initialiser is evaluated in
+declaration order, so it competes with the function's first statements for the
+prologue slots; a separate assignment happens where it is written. This is a
+fourth thing local declarations control, alongside callee-saved register
+choice, constant placement, and address folding — and it is the one that is
+purely stylistic in normal C, which is why it is easy to miss.
+
 ### Cross-jumping: two identical returns the compiler insists on merging
 
 `func_800601D0` has an early `return -1;` before a search loop and another after
@@ -1520,9 +1538,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-331 of 1794 functions decompiled and byte-matching.
+334 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~331 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~334 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
