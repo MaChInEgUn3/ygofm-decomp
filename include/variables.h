@@ -201,6 +201,7 @@ extern ObjFn D_80090EAC[];
 extern u8 D_801D1880[];
 extern u8 *D_8009B3E0;
 extern u16 D_8009B322;
+extern u8 D_80090E58[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];

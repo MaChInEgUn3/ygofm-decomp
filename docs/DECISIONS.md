@@ -432,6 +432,32 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Sampling the 35+ band: the misses change character
+
+The 16-26 pool is down to about 38 clean candidates while **555 clean functions
+sit at 35+**, untouched. Two samples from 35-45, both straight-line
+initialisers, both parked:
+
+- `func_80035AF0` fills a 100-byte record: registers swapped between the base
+  pointer and the constants, plus the argument mask placed differently.
+- `func_80059134` fills eighteen fields: retail hoists the two reused constants
+  (`0x1388`, `0x80`) into registers early and interleaves them with the first
+  stores, while cc1psx materialises each constant immediately before its own
+  store. Naming them in locals does not move them.
+
+**The character of the misses is different from the small band.** There, a miss
+was usually one rule away — polarity, declaration order, a cast. Here both
+misses are the compiler distributing a dozen constants and a base pointer across
+registers over thirty-plus instructions, and one disagreement anywhere in that
+spread kills the function. Longer really is harder, but not for the reason
+assumed earlier: not because large functions are more likely to hit a *closed*
+class, but because they offer more independent chances for the allocator to
+choose differently.
+
+Two samples is not a rate. Recorded so the next attempt at this band starts from
+"expect allocator spread, look for the least-branchy and least-constant-heavy
+candidates first" rather than from scratch.
+
 ### `sll 16` versus `andi 0xffff` is another signedness tell
 
 `func_800379F8` decrements a halfword counter and tests it against zero. Retail
