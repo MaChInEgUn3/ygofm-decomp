@@ -279,6 +279,48 @@ The general lesson, which has now cost time twice in this project: **a split
 observed on a handful of samples is a hypothesis. Scan the whole binary before
 letting it justify not building something.**
 
+### Every flag sweep before this commit was void. Read this before trusting one.
+
+`config/flag_overrides.json` feeds `PER_FUNC_FLAGS`, but it was **not** an
+input to the staleness check. `compile_c()` rebuilt an object when `src/*.c`,
+`build.py`, or a header changed — never when only the override file changed.
+
+So `sweep_flags.py`, whose entire method is "rewrite the override file, run the
+build, look at the result", **reused the stale object on every combination
+after the first.** Its first combination is `-O2 -G8`, the default, which is
+what the existing object was already built with. Every later combination
+reported that same default result. The tool printed sixteen lines and tested
+one thing.
+
+That invalidates every "no combination matched" in this document that came
+from a sweep, including the thirteen parked candidates and the batches after
+them. Those results say nothing. They need re-running.
+
+It also produced a wrong conclusion I had already written down. `func_80071424`
+and its three siblings were one instruction short; `-fno-schedule-insns2`
+fixes them, and the sweep said no. Checking cc1psx output directly showed the
+flag *did* change the output and *did* produce the right shape — the build
+simply never recompiled. Two of the four then matched immediately.
+
+**Why an mtime dependency is not the fix.** Adding `_OVERRIDES` to the
+dependency list looks right and is wrong: `is_stale()` deliberately treats a
+missing dependency as stale, so with no override file present — the normal
+state — every function would rebuild on every run, turning a 1-second
+incremental build back into a 3-6 minute one.
+
+**What is the fix.** The resolved flags are themselves an input, so they are
+now recorded in `<obj>.flags` beside each object, and the object is stale when
+that stamp is absent or differs. This is exact in both directions: adding,
+changing, and *removing* an override all trigger a rebuild of exactly the
+affected functions.
+
+The general lesson is narrower and sharper than "verify your tools". It is:
+**when a tool's input is not a file the build system watches, the build system
+will lie to you and the tool will look like it is working.** Both earlier rules
+in this document — the false negative on `-fno-schedule-insns`, and the
+spurious override that a green build seemed to justify — were the same failure
+wearing different clothes. The stamp closes the whole family.
+
 ### A sub-pattern inside the register-allocation class: `$a0` as scratch
 
 Three functions parked in one batch (`func_80042874`, `func_800495A4`,
@@ -530,9 +572,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-216 of 1794 functions decompiled and byte-matching.
+219 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~216 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~219 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

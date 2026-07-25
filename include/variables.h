@@ -75,8 +75,16 @@ extern u8 D_800938AE[];
 extern s32 D_8009B400;
 extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
-extern u8 D_800F5B98[][4];
+extern s32 D_800F5B98[];
 extern u8 D_800EAE8F[];
+extern u8 D_8009B260;
+extern u8 D_8009B0D1[];
+extern u8 D_801D3200[];
+extern u8 D_80010384[];
+extern u8 D_8009B3ED;
+extern u8 D_8009B3C0;
+extern u8 D_8009B364[];
+extern u16 D_800F5C80[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -89,7 +97,7 @@ extern s32 D_8009B450[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
-extern s8 D_8009B361;
+extern s8 D_8009B361[];
 /* Holds a callback; reached through $at, so its unit was built -G0. */
 extern void (*D_8009B128)(void);
 extern u16 D_8009B398;

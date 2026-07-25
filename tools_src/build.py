@@ -166,6 +166,8 @@ PER_FUNC_FLAGS = {
     "func_800828E0": _O1_G8,
     "func_80082900": _O1_G8,
     "func_8001B780": _O2_G8_NOSCHED2,
+    "func_80071510": _O2_G8_NOSCHED2,
+    "func_8007164C": _O2_G8_NOSCHED2,
     "func_8003CDF8": _O1_G8,
     "func_8003CE48": _O1_G8,
     "func_80082920": _O1_G8,
@@ -320,10 +322,24 @@ def compile_c(name):
     masm = out_dir / f"{name}.maspsx.s"
     obj = out_dir / f"{name}.o"
 
-    if not is_stale(obj, [src, SELF, *headers()]):
-        return obj
-
+    # The flags themselves are an input, so record them beside the object and
+    # rebuild when they change. mtime alone is not enough: PER_FUNC_FLAGS can
+    # come from config/flag_overrides.json, and rewriting that file leaves
+    # every mtime in the dependency list untouched. Before this stamp existed,
+    # a sweep that only rewrote the override file silently reused the stale
+    # object and reported the *previous* flags' result -- so every sweep
+    # reported the default flags no matter what was in the file. Making the
+    # override file an mtime dependency does not work either: is_stale treats
+    # a missing dependency as stale, so with no override file present every
+    # function would rebuild on every run.
     flags = PER_FUNC_FLAGS.get(name, CC1_FLAGS)
+    stamp = obj.with_suffix(".flags")
+    want = " ".join(flags) + " || " + (PER_FUNC_AS_FLAGS.get(name) or "")
+    fresh = (not is_stale(obj, [src, SELF, *headers()])
+             and stamp.exists() and stamp.read_text() == want)
+    if fresh:
+        return obj
+    stamp.write_text(want)
     run([*PSYQ_RUNNER, CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
          pre.relative_to(ROOT).as_posix()])
     run([*PSYQ_RUNNER, CC1PSX, *flags, pre.relative_to(ROOT).as_posix(),
