@@ -24,13 +24,23 @@ OVERRIDES = ROOT / "config" / "flag_overrides.json"
 BUILD = [str(ROOT / ".venv" / "bin" / "python"), "tools_src/build.py"]
 
 # Ordered cheapest/most-likely first. The -fno-delayed-branch entries are
-# for functions whose target leaves a branch delay slot empty; see the
-# "unfilled delay slot" section of docs/DECISIONS.md.
+# for functions whose target leaves a *branch* delay slot empty, and the
+# -fno-schedule-insns2 entries for a *load* delay slot the retail code leaves
+# as a nop; see the "unfilled delay slot" section of docs/DECISIONS.md.
+# Note -fno-schedule-insns (without the 2) is accepted but changes nothing --
+# it was verified to produce byte-identical cc1psx output, so do not add it.
 COMBOS = [
     ("O2 G8",                 ["-quiet", "-O2", "-G8"], None),
     ("O1 G8",                 ["-quiet", "-O1", "-G8"], None),
+    ("O2 G8 nosched2",        ["-quiet", "-O2", "-G8", "-fno-schedule-insns2"], None),
+    ("O1 G8 nosched2",        ["-quiet", "-O1", "-G8", "-fno-schedule-insns2"], None),
     ("O2 G0",                 ["-quiet", "-O2", "-G0"], "-G0"),
     ("O1 G0",                 ["-quiet", "-O1", "-G0"], "-G0"),
+    ("O2 G0 nosched2",        ["-quiet", "-O2", "-G0", "-fno-schedule-insns2"], "-G0"),
+    ("O2 G8 nosched2 nodelay", ["-quiet", "-O2", "-G8", "-fno-schedule-insns2",
+                                "-fno-delayed-branch"], None),
+    ("O2 G0 nosched2 macro",  ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
+                               "-mno-split-addresses"], "-G0"),
     ("O2 G8 nodelay",         ["-quiet", "-O2", "-G8", "-fno-delayed-branch"], None),
     ("O1 G8 nodelay",         ["-quiet", "-O1", "-G8", "-fno-delayed-branch"], None),
     ("O2 G0 nodelay",         ["-quiet", "-O2", "-G0", "-fno-delayed-branch"], "-G0"),

@@ -207,7 +207,36 @@ So the checklist for a function that is structurally right but has the wrong reg
 
 Read the checklist as "these are the knobs that exist", not "these will unlock the parked set".
 
-**Flags tried and found not to help, so nobody repeats them:** `-fno-schedule-insns` (for the case where gcc hoists an unrelated load into a load-delay slot that the retail code leaves as a `nop`) and `-fno-schedule-insns` combined with `-fno-delayed-branch`. Neither moved `func_8001B780`. `-fno-delayed-branch` remains useful, but only alongside a correct signature.
+### `-fno-schedule-insns2` — the load-delay counterpart
+
+There are **two** schedulers, and only the second one matters to us.
+
+`func_8001B780` was parked because cc1psx hoisted an unrelated `lw` into the
+load-delay slot of a `lb`, where the retail code leaves the slot empty. I first
+recorded `-fno-schedule-insns` as tried-and-useless. **That entry was wrong, and
+the way it was wrong is worth remembering:** the flag is *accepted* by cc1psx
+(passing `-fnoschedule-insns` errors, so option parsing does work) but produces
+**byte-identical output**. It changes nothing, so a non-matching build says
+nothing about it. Verified by hashing cc1psx output with and without it.
+
+`-fno-schedule-insns2` — the *post-reload* scheduler — is the one that governs
+load-delay slot filling in gcc 2.7.x MIPS. With it, `func_8001B780` compiles to
+the target instruction-for-instruction *and* register-for-register:
+
+    lb   $3,14($4)      <- slot left empty, aspsx fills the nop
+    sll  $2,$3,4
+    ...
+
+**A negative result only counts if the flag actually changed the output.** Before
+recording "flag X does not help", hash cc1psx's output with and without X. This
+is the same class of mistake as the silent string-substitution failures in
+`build.py`, and it is worse, because a false "already tried" entry closes off a
+real avenue permanently.
+
+`-fno-delayed-branch` remains useful for *branch* delay slots, but only
+alongside a correct signature. The two flags are independent; the sweeper now
+tries `-fno-schedule-insns2` on its own, with `-G0`, with `-fno-delayed-branch`,
+and with `-mno-split-addresses`.
 
 **Sweep one candidate at a time.** A wrong-sized function shifts everything after it, so with several broken candidates in `src/` at once the difference list is mostly cascade and a function can look like it matches when it does not. Two of the thirteen appeared to match while swept together and did not when swept alone. `tools_src/sweep_flags.py` runs one function's combinations; keep only matching candidates in `src/` between runs.
 
@@ -275,9 +304,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-178 of 1794 functions decompiled and byte-matching.
+179 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~178 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~179 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

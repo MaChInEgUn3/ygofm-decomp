@@ -126,6 +126,10 @@ _O1_G0 = ["-quiet", "-O1", "-G0"]
 # slots, leaving that to aspsx.
 _O2_G0_NODELAY = ["-quiet", "-O2", "-G0", "-fno-delayed-branch"]
 _O1_G0_NODELAY = ["-quiet", "-O1", "-G0", "-fno-delayed-branch"]
+_O2_G8_NOSCHED2 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns2"]
+_O1_G8_NOSCHED2 = ["-quiet", "-O1", "-G8", "-fno-schedule-insns2"]
+_O2_G0_NOSCHED2 = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2"]
+
 _O2_G0_NODELAY_MACRO = ["-quiet", "-O2", "-G0", "-fno-delayed-branch",
                         "-mno-split-addresses"]
 # -mno-split-addresses leaves the address in macro form for the assembler to
@@ -161,6 +165,7 @@ PER_FUNC_FLAGS = {
     "func_800828C0": _O1_G8,
     "func_800828E0": _O1_G8,
     "func_80082900": _O1_G8,
+    "func_8001B780": _O2_G8_NOSCHED2,
     "func_8003CDF8": _O1_G8,
     "func_8003CE48": _O1_G8,
     "func_80082920": _O1_G8,
