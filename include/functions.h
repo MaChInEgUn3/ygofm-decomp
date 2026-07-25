@@ -159,6 +159,10 @@ void func_8016824C(u8 *arg0);  /* PROVISIONAL */
 void func_800356A0(u8 *arg0, u8 *arg1, s32 arg2);  /* PROVISIONAL */
 void func_8003D03C(u8 *arg0);  /* PROVISIONAL */
 void func_80044DC0(s32 arg0);  /* PROVISIONAL */
+void func_800540B4(s32 arg0);  /* PROVISIONAL */
+s32 func_80073704(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
+s32 func_80073734(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
+void func_80073724(s32 arg0);  /* PROVISIONAL */
 void func_80019B2C(void);
 void func_8004544C(void);
 

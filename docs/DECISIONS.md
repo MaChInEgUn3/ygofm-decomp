@@ -432,6 +432,28 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### An `if`/`else` join can cost a callee-saved register
+
+`func_8005988C` opens a handle, uses it twice, and returns either `-1` or the
+middle call's result. Written with an `if`/`else` assigning to one variable — the
+shape the join rule usually calls for — it came out two instructions long,
+because gcc kept the result in a *second* callee-saved register (`$s1`) across
+the last call. Written with an early `return -1;` it matched, with the result
+living in `$v0` until the very last moment and moving into `$s0` in the final
+call's delay slot.
+
+So the earlier rule — *an explicit `j` to a join means the source assigned to a
+variable* — has a limit worth recording: **it holds when the two arms produce
+values, and misleads when one arm is an early exit.** Retail here does have a `j`
+to a join, but only because the non-error path has to funnel its result out; the
+error path is a plain early return. Read the join as evidence of a shared exit,
+not automatically of a shared variable.
+
+The tell for which one: count the callee-saved registers the target saves. Two
+values live across calls means two `$s` registers in the prologue. This function
+saves only `$s0`, so only one value survives a call, so there is no second
+variable.
+
 ### One function needing three different mechanisms
 
 `func_8002D62C` took four passes and each failure named a mechanism already in
@@ -1793,9 +1815,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-352 of 1794 functions decompiled and byte-matching.
+354 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~352 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~354 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
