@@ -383,6 +383,39 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### A third knob for the `-G` symptom: per-file declarations
+
+`func_8001BD48` reaches `D_8009B398` through `%hi`/`%lo` **and** `D_8009B164`
+gp-relatively, in the same function. That rules out both existing knobs: `-G0`
+cannot emit gp-relative addressing at all, and declaring `D_8009B398` unsized
+globally would break the functions that reach it gp-relatively. The *declaration*
+has to differ per file — which is exactly what the original build had, with a
+header per translation unit.
+
+`include/variables.h` now supports that:
+
+    #ifdef D_8009B398_IS_AGGREGATE
+    extern u16 D_8009B398[];
+    #else
+    extern u16 D_8009B398;
+    #endif
+
+and a file opts in with `#define D_8009B398_IS_AGGREGATE` before
+`#include "common.h"`. Verified to produce the right addressing.
+
+**The function itself is still parked, for an unrelated reason**, and the
+distinction matters: the guard fixed what it was for. What remains is control
+flow. Retail leaves the first branch's delay slot empty and materialises the
+constant `1` twice, once for the store and once for the return. Nested `if`s
+come out one instruction short, sequential early returns one long, and the
+sweeper finds nothing — including `-fno-delayed-branch`, which is the obvious
+candidate for an empty delay slot and does not help here.
+
+The mechanism is kept despite its first intended user being parked, because the
+situation it solves is structural: any function mixing gp-relative and
+`%hi`/`%lo` access to *small* symbols will need it, and there is no other way to
+express that in a single central header.
+
 ### A wrong *return* type hides exactly like a wrong arity
 
 Three prototypes generated from a loose heuristic — "the asm mentions `$v0`,
@@ -877,9 +910,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-262 of 1794 functions decompiled and byte-matching.
+265 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~262 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~265 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

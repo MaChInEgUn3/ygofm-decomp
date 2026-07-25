@@ -91,6 +91,17 @@ extern u8 D_800F5C83[];
 /* Read twice in a row by func_80015038, once per condition, so the
  * hardware register it shadows is not cached across the test. */
 extern volatile s32 D_8009B0F4;
+/* A table of (threshold, value) halfword pairs, five per row: the retail
+ * code indexes rows by arg0 * 20 and then walks pairs four bytes at a time. */
+typedef struct {
+    s16 threshold;
+    s16 value;
+} Threshold;
+
+extern Threshold D_801798A8[][5];
+extern u8 D_801AB00C[];
+extern u8 D_8009B1D5;
+extern u8 D_8009B164;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -106,7 +117,19 @@ extern s32 D_8009B450[];
 extern s8 D_8009B361[];
 /* Holds a callback; reached through $at, so its unit was built -G0. */
 extern void (*D_8009B128)(void);
+/* Reached gp-relative in most files but through %hi/%lo in func_8001BD48,
+ * which also needs gp-relative access to another symbol -- so -G0 is not an
+ * option for it and the *declaration* has to differ per file, exactly as it
+ * would have in the original build's per-unit headers. Define the guard before
+ * including common.h to get the aggregate form in one file only.
+ *
+ * This is the third knob for the same symptom, alongside -G0 and declaring a
+ * symbol unsized globally; see the -G0-prediction section of DECISIONS.md. */
+#ifdef D_8009B398_IS_AGGREGATE
+extern u16 D_8009B398[];
+#else
 extern u16 D_8009B398;
+#endif
 extern s32 D_800E9D98;
 extern s32 D_80093788;
 extern s32 D_800F5F80;
