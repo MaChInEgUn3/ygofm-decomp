@@ -196,9 +196,11 @@ extern u8 D_800E9EF0[];
 typedef struct {
     s16 x;
     s16 y;
+    s16 unk4;
+    s16 unk6;
 } ScreenPos;
 
-extern ScreenPos D_800FE040;
+extern ScreenPos D_800FE040[];
 /* The retail code forms this object's base address and then reaches the
  * cursor at +8, which is what a struct field access compiles to -- reaching
  * it as D_800F5BE8[8] instead lets gcc fold the +8 into the %lo and comes
@@ -209,7 +211,7 @@ typedef struct {
     u8 *cursor; /* +8 */
 } ByteReader;
 
-extern ByteReader D_800F5BE8;
+extern ByteReader D_800F5BE8[];
 
 /* --- more scalars in -G0 units -------------------------------------------- */
 

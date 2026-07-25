@@ -358,13 +358,8 @@ store. None of them needed anything exotic — the comparator only wanted its
 `if (a < b) return -1;`), which is a rule already in this document and was
 simply never applied to it.
 
-`func_800855B0` stays parked. It writes two halfwords at +0 and +2, and cc1psx
-folds the first store's offset into the `%lo` and forms the base only for the
-second, coming out one instruction short. The `ByteReader` struct trick, a
-local pointer, and retyping the symbol as a two-field struct all fold the same
-way. This is the same limit already recorded for `func_80070988`: **modelling
-an object as a struct reproduces base-then-offset addressing for one field
-access, not for two.**
+`func_800855B0` and `func_80070988` both landed too — see the next section, they
+turned out to share a fix.
 
 **A `-G8` compiler with a `-G0` assembler is a real configuration.** The note
 above says the two `-G` settings must match in both directions, and that is the
@@ -387,6 +382,42 @@ varied.** The override file that the staleness check ignored, the flag whose
 effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
+
+### Two field accesses: index an unsized array of the struct, not the struct
+
+The rule recorded earlier was that modelling an object as a struct reproduces
+retail's base-then-offset addressing. That holds for **one** field access. With
+two, cc1psx folds the first offset into the `%lo` and forms the base only for
+the second, coming out an instruction short:
+
+    ours:                          retail:
+    lui   $2,%hi(D_800FE040)       lui   $v0,%hi(D_800FE040)
+    sh    $4,%lo(D_800FE040)($2)   addiu $v0,$v0,%lo(D_800FE040)
+    addiu $2,$2,%lo(D_800FE040)    sh    $a0,0x0($v0)
+    sh    $5,2($2)                 sh    $a1,0x2($v0)
+
+**The fix is to declare the object as an unsized array of the struct and index
+element 0**, `extern ScreenPos D_800FE040[];` with `D_800FE040[0].x = ...`.
+Indexing forces the base into a register before any field offset is applied.
+Both stuck functions then came down to flags, and both were found by
+`sweep_flags.py`.
+
+What *doesn't* work, recorded because each looks plausible: a plain struct
+(folds), a local `ScreenPos *` (folds), retyping the symbol as a struct
+(folds), and `volatile` — which does materialise the base but adds an
+instruction. And a local pointer declared *before* a call keeps the base in
+`$s0` across it, adding a register save retail does not have; the call has to
+come first.
+
+**A claim from two commits ago needs correcting.** I deleted the
+`-fno-schedule-insns2` flag lists after the 4.5 switch, saying every function
+that needed them under 4.6 matches without them. That was true of the corpus at
+that moment and false in general: `func_800855B0` needs
+`-O2 -G0 -fno-schedule-insns2 -mno-split-addresses`. Restored. The accurate
+version: the flag was *usually* compensating for 4.6, most entries went away,
+and it is still occasionally what retail wants. "No current function needs it"
+is not "nothing needs it" — the same shape of error as reading a passing build
+as proof of an assumption.
 
 ### Auditing the flag tables after the version fix — and walking into the same trap a third time
 
@@ -756,9 +787,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-231 of 1794 functions decompiled and byte-matching.
+233 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~231 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~233 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

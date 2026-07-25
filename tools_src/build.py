@@ -136,11 +136,13 @@ AS_FLAGS = [
 #              rather than gp-relative. Such a function usually needs
 #              PER_FUNC_AS_FLAGS too, so the assembler agrees.
 _O1_G8 = ["-quiet", "-O1", "-G8"]
-# -fno-schedule-insns2 flag lists once lived here. Every function that
-# needed them under PsyQ 4.6 matches without them under 4.5, so they are
-# gone: that flag was compensating for 4.6 running the post-reload
-# scheduler before register allocation. sweep_flags.py still tries it,
-# since a search space costs nothing to keep wide.
+# I deleted the -fno-schedule-insns2 lists after the 4.5 switch, on the
+# grounds that nothing needed them any more. That was true of the corpus at
+# that moment and not true in general -- func_800855B0 needs one. Restored,
+# with the correct claim: the flag was *usually* compensating for 4.6, and
+# most entries went away, but it is still occasionally what retail wants.
+_O2_G0_NOSCHED2_MACRO = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
+                         "-mno-split-addresses"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
 # Hypothesis under test: some units were built without gcc filling delay
@@ -174,6 +176,8 @@ _G0_MACRO_FUNCS = [
 
 PER_FUNC_FLAGS = {
     "func_800495A4": _O2_G0,
+    "func_80070988": _O1_G8,
+    "func_800855B0": _O2_G0_NOSCHED2_MACRO,
     "func_8003CDF8": _O1_G8,
     "func_8003CE48": _O1_G8,
     "func_800498F8": _O2_G0_NODELAY_MACRO,
@@ -237,6 +241,7 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # exactly what reproduces retail.
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"
+PER_FUNC_AS_FLAGS["func_800855B0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
