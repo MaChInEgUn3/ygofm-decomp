@@ -406,6 +406,37 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### `if`/`else` with a join versus an early return
+
+`func_8003D2B8` came out two instructions short as an early return and the right
+size as an explicit `if`/`else` assigning to one variable. The two shapes are
+distinguishable in the target:
+
+    if/else with a join (retail):     early return (ours):
+    beqz  $v0,.L…EC                   beq   $2,$0,$L3
+    nop                               addu  $2,$0,$zero   <- return value in
+    …work…                                                   the delay slot
+    j     .L…F0        <- join        …work…
+    sltiu $v0,$v0,0x1                 $L3:
+    .L…EC:
+    addu  $v0,$zero,$zero
+
+**An explicit `j` to a join label, plus a separate block for the other arm,
+means the source assigned to a variable and returned it once.** An early return
+lets cc1supply the return value from the branch delay slot and needs no join, which
+is the two-instruction saving. Same family as the shared-exit rule from
+`func_8004BAA0`, in the opposite direction: there one instruction served two
+paths and the source had one `return`; here two paths each get their own block
+and the source has one *variable*.
+
+**Parked one register-swap away.** With the `if`/`else` shape the instruction
+count, structure and control flow all match; the two loads land in `$v1`/`$v0`
+where retail has `$v0`/`$v1`. Swapping the `xor` operands, naming both values in
+temporaries in target order, and sixteen flag combinations all fail. Fifth member
+of the `$v0`/`$v1`-swap class, and the return-value trick that solved
+`func_8003CE74` does not apply — this function already returns the value in
+question.
+
 ### The alias needs a `-G0` assembler to be worth anything
 
 `func_80044DA0` loads the `D_8009B45C` pointer twice in one basic block. Two
@@ -1259,9 +1290,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-299 of 1794 functions decompiled and byte-matching.
+302 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~299 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~302 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

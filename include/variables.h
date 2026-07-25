@@ -153,6 +153,7 @@ extern u8 D_8009B14C;
 extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
+extern s32 D_8009B3B8;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
