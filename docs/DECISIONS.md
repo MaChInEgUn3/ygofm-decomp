@@ -423,6 +423,31 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### The range-check fold is a class, not a one-off
+
+`func_80049640` fails exactly as `func_80049544` did: the source tests
+`v > 0 && v < 4`, and cc1psx folds it into the unsigned range check
+`(v - 1) < 3` where retail keeps two branches (`blez`, then `slti`).
+
+    retail:                 ours:
+    blez  $v0,.L…           addu  $2,$2,-1
+    slti  $v0,$v0,0x4       sltu  $2,$2,3
+    beqz  $v0,.L…           beq   $2,$0,.L…
+
+Nested `if`s, a local for the base, and reordering all still fold — the
+transformation happens in `fold` on the `&&` itself, before anything the source
+can influence. Two members now, and both are otherwise complete: same count,
+same registers, same structure.
+
+**This is a third closed avenue**, alongside the register allocator and
+cross-jumping. All three are cc1psx doing something the source cannot ask it not
+to do, and none has a flag in 2.8.1. Worth keeping them named separately rather
+than as one "hard" bucket, because they fail differently and a future lever
+would likely only touch one.
+
+`func_800466C8` also parked, on the allocator: `p` and `q` land in `$a0`/`$v1`
+where retail has `$v1`/`$a0`, and swapping the declarations does not move it.
+
 ### Two more for the working order, both from step 2
 
 `func_80044544` computes `v / 8192` in a loop and subtracts the total from 15.
@@ -1629,9 +1654,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-337 of 1794 functions decompiled and byte-matching.
+338 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~337 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~338 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
