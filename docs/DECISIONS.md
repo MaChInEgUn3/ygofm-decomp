@@ -279,6 +279,50 @@ The general lesson, which has now cost time twice in this project: **a split
 observed on a handful of samples is a hypothesis. Scan the whole binary before
 letting it justify not building something.**
 
+### The coupled-ordering park: one flag, two orderings, opposite directions
+
+A recurring shape now has four members (`func_80024954`, `func_80038388`,
+`func_800383B0`, and the `func_80024060` family that *did* match). All are
+`$s0`-saving wrappers: save `$s0`, call, then store something through `$s0`.
+
+The mismatch is one swap in the epilogue. Retail:
+
+    sb   $zero,0x60($s0)      <- jal delay slot
+    sb   $v0,0x61($s0)
+    lw   $ra,0x14($sp)
+
+Ours at `-O2 -G8` schedules the `lw $ra` up one slot, before the last store.
+`-fno-schedule-insns2` fixes exactly that — **and flips the prologue**, emitting
+`sw $ra` before `sw $s0` where retail has `sw $s0` first. `-O1` behaves like
+`-fno-schedule-insns2` (byte-identical cc1psx output, checked). So:
+
+| | prologue order | epilogue order |
+|---|---|---|
+| `-O2 -G8` (default) | correct | wrong |
+| `-fno-schedule-insns2`, `-O1` | wrong | correct |
+
+Retail wants both. No combination in the sweeper produces it, and `volatile`
+on the store does not stop the reorder either. **This is a distinct class from
+plain register allocation** — the register assignment is already right, and the
+instruction *set* is right; only two positions are swapped, and the one flag
+that governs them moves both at once. Worth recording separately, because a
+future fix here unlocks several functions at once rather than one.
+
+### Casting at the point of use, third confirmation
+
+`func_8003FF58` negates a value then passes it on. All three forms were tried
+and only one matches, which is a clean illustration of a rule that keeps
+recurring:
+
+| form | result |
+|---|---|
+| `s32` parameter, plain call | 2 instructions short — no truncation emitted |
+| `s16` parameter | 2 instructions long — extends on entry *and* after the negate |
+| `s32` parameter, `(s16)` cast at the call | matches |
+
+**The conversion belongs where the value is used, not on the declaration.**
+Same rule as the earlier `(s8)` and the `-1`-into-`u8` cases.
+
 ### Signatures without evidence, and how they will bite
 
 Argument forwarding costs no instructions, so a pure thunk's asm is silent
@@ -441,9 +485,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-196 of 1794 functions decompiled and byte-matching.
+211 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~196 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~211 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

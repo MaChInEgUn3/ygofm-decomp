@@ -191,7 +191,7 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 # Functions in the library region whose target has the aspsx-hoisted
 # epilogue; see hoist_epilogue_out_of_delay_slot().
 HOIST_EPILOGUE_FUNCS = {
-    "func_8007E350", "func_8007E370", "func_800857C0",
+    "func_8007E258", "func_8007E350", "func_8007E370", "func_800857C0",
     "func_8008B7E0", "func_8008D48C",
 }
 

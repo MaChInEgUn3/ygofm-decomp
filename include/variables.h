@@ -72,6 +72,9 @@ extern u8 D_800FE148[];
 extern u8 D_800FE348[];
 extern u8 D_800938AE[];
 
+extern s32 D_8009B400;
+extern s32 D_8009B440;
+extern s32 D_8009B444;
 extern s32 D_8009B450[];
 
 /* --- scalars belonging to units built with -G0 ---------------------------- */
