@@ -46,7 +46,16 @@ ROOT = Path(__file__).resolve().parent.parent
 WINDOWS = os.name == "nt"
 
 # --- toolchain locations (all gitignored, see docs/DECISIONS.md) -------------
-PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
+# PsyQ 4.5 is the game's compiler, not 4.6. Both reproduce almost every
+# function, but 4.6 cannot emit retail's combination of scheduled ordering
+# with -O1-style register reuse, and 4.5 can. Measured: with the same 220
+# sources, 4.5 is byte-identical and 4.6 leaves func_800495A4 wrong, with
+# no function matching under 4.6 that fails under 4.5. Set YGOFM_PSYQ=46 to
+# compare. See the toolchain-version section of docs/DECISIONS.md.
+if os.environ.get("YGOFM_PSYQ") == "46":
+    PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
+else:
+    PSYQ_BIN = ROOT / "tools" / "psyq45" / "BIN"
 CPPPSX = PSYQ_BIN / "CPPPSX.EXE"
 CC1PSX = PSYQ_BIN / "CC1PSX.EXE"
 # Prefix used to invoke the PsyQ executables. Empty on Windows.
@@ -334,7 +343,8 @@ def compile_c(name):
     # function would rebuild on every run.
     flags = PER_FUNC_FLAGS.get(name, CC1_FLAGS)
     stamp = obj.with_suffix(".flags")
-    want = " ".join(flags) + " || " + (PER_FUNC_AS_FLAGS.get(name) or "")
+    want = (" ".join(flags) + " || " + (PER_FUNC_AS_FLAGS.get(name) or "")
+            + " || " + str(PSYQ_BIN))
     fresh = (not is_stale(obj, [src, SELF, *headers()])
              and stamp.exists() and stamp.read_text() == want)
     if fresh:
@@ -676,10 +686,15 @@ def report_bad_functions(want, got):
     if decompiled:
         print(f"\n{len(decompiled)} decompiled function(s) differ — "
               f"these are the ones to fix:")
-        for n in decompiled[:25]:
+        # Truncated by default so a cascade does not bury the summary.
+        # YGOFM_ALL_DIFFS=1 prints the whole list -- needed whenever the
+        # list itself is the data, e.g. comparing two toolchain versions.
+        limit = None if os.environ.get("YGOFM_ALL_DIFFS") else 25
+        for n in decompiled[:limit]:
             print(f"  {n}   (src/{n}.c)")
-        if len(decompiled) > 25:
-            print(f"  ... and {len(decompiled) - 25} more")
+        if limit and len(decompiled) > limit:
+            print(f"  ... and {len(decompiled) - limit} more "
+                  f"(set YGOFM_ALL_DIFFS=1 to list all)")
     if bad and not decompiled:
         print("\nNo decompiled function differs directly; the first bad "
               f"region is {bad[0]}, which is still assembled from .s — "

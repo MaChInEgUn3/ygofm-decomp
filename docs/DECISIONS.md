@@ -279,64 +279,74 @@ The general lesson, which has now cost time twice in this project: **a split
 observed on a handful of samples is a hypothesis. Scan the whole binary before
 letting it justify not building something.**
 
-### The park classes are one class, and it questions the toolchain version
+### The compiler is PsyQ 4.5, not 4.6. This was wrong from the first commit.
 
-Chasing `func_800495A4` collapsed three separately-recorded park classes into
-one, and the conclusion is uncomfortable enough to state carefully.
+**Result first.** With the same 220 sources, PsyQ 4.5's `cc1psx` builds a
+byte-identical binary and 4.6 does not. No function matches under 4.6 that
+fails under 4.5. Switching versions then unlocked **eight** parked functions
+immediately, and they were the entire collapsed park class. `build.py` now
+defaults to 4.5; `YGOFM_PSYQ=46` still selects 4.6 for comparison.
 
-**Step 1 — the mixed-translation-unit idea is dead.** The previous entry
-hypothesised that some TUs were built by a different toolchain. Free to
-falsify, and it fails: every parked function is *sandwiched between matching
-ones*. `func_800495A4` sits 0x10 after `func_80049594` and 0x38 before
-`func_800495DC`, both matching. Interleaved functions cannot be in different
-translation units.
+**How it was found.** `func_800495A4` was the discriminator. Its flags are
+pinned by two matching neighbours 0x10 and 0x38 away (`func_80049594`,
+`func_800495DC`, both `-O1 -G0`), and at those flags 4.6 gets the *registers*
+right but not the ordering, while at `-O2` it gets the ordering right and the
+registers wrong. Then the measurement that closed it:
+`-O1 -G0 -fschedule-insns2` emits output **byte-identical** to `-O2 -G0` under
+4.6 — enabling the post-reload scheduler changes register numbers too, so
+ordering and allocation are one switch and 4.6 *cannot* produce retail's
+combination. 4.5 produces it directly at `-O2 -G0`:
 
-**Step 2 — the neighbours name the flags.** Both are in `_G0_FUNCS`, so
-`-O1 -G0`, and both reach `D_8009B458` exactly as we do. Compiling
-`func_800495A4` the same way makes the **registers match** — `$v0` reused
-throughout, as retail has. What breaks is the ordering: retail schedules the
-prologue down into the `lw`'s load-delay slot, and `-O1` does not.
+    retail:                        4.5 -O2 -G0:          4.6 -O2 -G0:
+    lui   $v0,%hi(D_8009B458)      lui  $2,%hi           lui  $2,%hi
+    lw    $v0,%lo($v0)             lw   $2,%lo($2)       lw   $3,%lo($2)   <- $3
+    addiu $sp,$sp,-0x18            subu $sp,$sp,24       subu $sp,$sp,24
+    sw    $ra,0x10($sp)            sw   $31,16($sp)      sw   $31,16($sp)
+    lbu   $v0,0x814($v0)           lbu  $2,2068($2)      lbu  $4,2068($3)  <- $4
 
-    retail:              -O1 -G0:              -O2 -G0:
-    lui   $v0,%hi        subu  $sp,$sp,24      lui  $2,%hi
-    lw    $v0,%lo($v0)   sw    $31,16($sp)     lw   $3,%lo($2)   <- $3, not $2
-    addiu $sp,$sp,-0x18  lui   $2,%hi          subu $sp,$sp,24
-    sw    $ra,0x10($sp)  lw    $2,%lo($2)      sw   $31,16($sp)
-    lbu   $v0,0x814($v0) nop                   lbu  $4,2068($3)  <- $4, not $2
-                         lbu   $2,2068($2)
+**What it unlocked.** `func_800495A4`, `func_80024954`, `func_80038388`,
+`func_800383B0`, `func_8007368C`, `func_800598E4`, `func_80042874`,
+`func_8003FCD8`. Three separately-named park classes — the coupled-ordering
+wrappers, the `$a0`-as-scratch group, and assorted "register allocation"
+misses — were **all one thing: the wrong compiler.** Every hour spent hunting
+C shapes and flags for those was spent on an artefact.
 
-So `-O1` gives retail's **allocation** with the wrong order, `-O2` gives
-retail's **order** with the wrong allocation. This is the same coupling already
-recorded for the `$s0`-saving wrappers and for the `$a0`-as-scratch group:
-**they were never three classes.**
+**What it cost.** 4.5 narrows a `u8` return value with an extra
+`andi $v0,$v0,0xFF` where 4.6 does not, which broke `func_8007058C` and
+`func_8003B7E0`. Both are fixed by returning `s32` — the value comes from an
+`lbu` and is already zero-extended, so the raw type is the honest one. This is
+the point-of-use casting rule applied to *return* types: declare the raw
+value, narrow at the use site.
 
-**Step 3 — the two are one switch, and it cannot be split.**
-`-O1 -G0 -fschedule-insns2` produces cc1psx output **byte-identical** to
-`-O2 -G0` (hashed, `a71113ab` both). Enabling the post-reload scheduler at
-`-O1` changes the *register numbers* as well as the order. Whatever the flag is
-named, in this cc1psx it does not run after allocation — so ordering and
-allocation move together and **this compiler cannot emit retail's combination
-of the two.** That is now measured, not guessed.
+**Why "confirmed twice" was not confirmation.** The original note claimed the
+toolchain was double-confirmed by `ghidra_psx_ldr`'s detection and by decomp.me
+exposing `psyq4.6/cc1psx` for this title. Neither is evidence of the kind
+needed: the first is a heuristic over library signatures, which 4.5 and 4.6
+largely share, and the second is someone else's configuration, not a
+measurement. **And a byte-identical build was not evidence either** — 219
+functions matched under the wrong compiler, because most are small enough that
+the two versions emit identical code. A whole-binary match only tests the
+functions that can discriminate, and until `func_800495A4` there were none in
+the corpus.
 
-**What that leaves.** Not the C: the permuter's 25k variants and every hand
-form failed. Not the flags: the combination is unreachable by construction, not
-merely unfound. Not mixed TUs: falsified above. The remaining candidate is that
-**PsyQ 4.6.0 is the wrong cc1psx for this game** — a version whose scheduler
-genuinely runs after allocation would produce retail's shape.
+The general form is worth keeping: **a passing global check does not validate
+every assumption feeding it.** It validates them only where they were exercised.
+The way to test a foundational assumption is to find the *one case that
+discriminates* and run it, not to count successes elsewhere.
 
-**Against that, honestly:** the toolchain was double-confirmed, by
-`ghidra_psx_ldr`'s detection and by decomp.me exposing `psyq4.6/cc1psx` for
-this title. But the first is a heuristic and the second may be someone else's
-guess. **And 219 matching functions are weaker evidence than they look** —
-most are small enough that `-O1` and `-O2` produce identical code, so they do
-not discriminate between compiler versions at all.
+**Still failing under 4.5** — and these are now honest unknowns rather than
+suspected version artefacts. Wrong size: `func_80035DF4`, `func_800428EC`,
+`func_80049200`, `func_8005B5FC`. Differing: `func_8003F7D4`, `func_80070988`,
+`func_80071424`, `func_80071460`. Everything recorded about them before this
+commit was measured under the wrong compiler and should be re-derived, not
+trusted.
 
-`func_800495A4` is the ideal discriminator: down to exactly this one
-difference, with its flags pinned by matching neighbours. **Next step is to try
-other PsyQ cc1psx versions against it.** If one matches, the version is wrong
-and a large part of the park is a version artefact. If none does, the version
-survives a real test for the first time and the class needs another
-explanation.
+**Provenance.** PsyQ 4.5 came from the same preservation archive as 4.6
+(`psx.arthus.net`), as `PSYQ.SDevTC.Developers.Toolkit.For.PSX.v4.5-MFD.zip` →
+nested `mfdpsx*.zip` → a multi-part RAR3 that needs the non-free `unrar`
+(`7z` and `unrar-free` both extract it as zero-byte files, silently). Binaries
+live in `tools/psyq45/BIN/`, which `/tools/` in `.gitignore` keeps out of the
+repo along with everything else that is not ours to redistribute.
 
 ### Every flag sweep before this commit was void. Read this before trusting one.
 
@@ -656,9 +666,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-219 of 1794 functions decompiled and byte-matching.
+227 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~219 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~227 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
