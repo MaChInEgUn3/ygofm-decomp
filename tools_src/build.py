@@ -95,7 +95,13 @@ EXPECTED_SHA1 = "84747e64f6da8e764206ec203e489acf8c9dcf7d"
 SPLAT_CODE_OBJ = "build/src/31D8.o"
 
 # ASPSX version bundled with PsyQ 4.6; maspsx emulates its quirks.
-ASPSX_VERSION = "2.86"
+ASPSX_VERSION = "2.79"  # PsyQ 4.5 ships aspsx 2.79 (4.6 shipped 2.86).
+# Set from the SDK we now know the game used, not from a measurement: the
+# corpus does not currently discriminate -- 2.79 and 2.86 both produce a
+# byte-identical build, because the only behaviour maspsx varies between them
+# is gp_allow_la, which no decompiled function exercises yet. Provenance is
+# the tiebreaker, and the distinction is recorded so nobody reads the passing
+# build as evidence for the number.
 
 # -G8 enables small-data/gp-relative access, which the retail code uses for
 # most globals. The assembler's -G must match, or it cannot assume a bare
@@ -131,6 +137,7 @@ AS_FLAGS = [
 #              PER_FUNC_AS_FLAGS too, so the assembler agrees.
 _O1_G8 = ["-quiet", "-O1", "-G8"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
+_O2_G0 = ["-quiet", "-O2", "-G0"]
 # Hypothesis under test: some units were built without gcc filling delay
 # slots, leaving that to aspsx.
 _O2_G0_NODELAY = ["-quiet", "-O2", "-G0", "-fno-delayed-branch"]
@@ -175,6 +182,7 @@ PER_FUNC_FLAGS = {
     "func_800828E0": _O1_G8,
     "func_80082900": _O1_G8,
     "func_8001B780": _O2_G8_NOSCHED2,
+    "func_800495A4": _O2_G0,
     "func_80071510": _O2_G8_NOSCHED2,
     "func_8007164C": _O2_G8_NOSCHED2,
     "func_8003CDF8": _O1_G8,
@@ -226,6 +234,7 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
 # every -G0 function gets a -G0 assembler, not just the macro-form ones.
 PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
+PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
@@ -240,6 +249,14 @@ if _OVERRIDES.exists():
             PER_FUNC_FLAGS[_name] = _spec["cc"]
         if "as" in _spec:
             PER_FUNC_AS_FLAGS[_name] = _spec["as"]
+        # A null value means "use the default", which is what makes it
+        # possible to audit an existing entry by dropping it. Without
+        # this the override file could only add or change, never remove,
+        # so every table entry stayed an untested inherited assumption.
+        if _spec.get("cc", False) is None:
+            PER_FUNC_FLAGS.pop(_name, None)
+        if _spec.get("as", False) is None:
+            PER_FUNC_AS_FLAGS.pop(_name, None)
 
 
 def run(cmd, **kwargs):
