@@ -134,14 +134,16 @@ _G0_FUNCS = [
     "func_80044FE4", "func_8004503C", "func_800490F0", "func_80049108",
     "func_80049120", "func_800744F4", "func_80080B6C",
     "func_800901D4", "func_80030090", "func_800300AC",
-    "func_80082274", "func_8005949C",     ]
+    "func_80082274", "func_8005949C",
+    "func_80059284", 
+]
 # Stores the assembler expands through $at. These need the macro form from
 # the compiler *and* an assembler that will not treat the symbol as small
 # data, so they carry a PER_FUNC_AS_FLAGS entry too.
 _G0_MACRO_FUNCS = [
     "func_80082A80", "func_8008D1E0", "func_8008D1F4", "func_8008D208",
     "func_8008D21C", "func_8008D230", "func_8008D244", "func_8008D258",
-    "func_8008D26C", "func_8002F930", "func_8002F94C",
+    "func_8008D26C", "func_8002F930", "func_8002F94C", 
     ]
 
 PER_FUNC_FLAGS = {
@@ -184,7 +186,13 @@ DELAY_SLOT_MACRO_FUNCS = {
 _G0_MACRO_FUNCS = _G0_MACRO_FUNCS + sorted(DELAY_SLOT_MACRO_FUNCS)
 
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
-PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_MACRO_FUNCS}
+# The assembler's -G must match the compiler's, in both directions. When
+# cc1psx is at -G0 it sometimes emits a bare symbol reference (`lw $3,sym`)
+# and leaves the expansion to the assembler; an assembler still at -G8 then
+# decides the symbol is small data and collapses the lui/%lo pair into one
+# gp-relative instruction, leaving the function an instruction short. So
+# every -G0 function gets a -G0 assembler, not just the macro-form ones.
+PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 
 
 def run(cmd, **kwargs):

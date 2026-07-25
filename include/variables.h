@@ -82,6 +82,9 @@ extern s32 D_8009B450[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
+extern s8 D_8009B361;
+/* Holds a callback; reached through $at, so its unit was built -G0. */
+extern void (*D_8009B128)(void);
 extern u16 D_8009B398;
 extern s32 D_800E9D98;
 extern s32 D_80093788;
@@ -140,6 +143,7 @@ extern s32 D_8009B310;
 extern s32 D_8009B314;
 extern s32 D_8009B300;
 extern s32 D_8009B30C;
+extern s32 D_8009B0B8;
 extern s32 D_8009B330;
 extern s32 D_8009B350;
 
@@ -155,6 +159,9 @@ extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
 extern u8 D_801D0000[];
+extern u8 D_800917F0[];
+extern u8 D_800F2C40[];
+extern u8 D_800E9DB0[];
 extern u8 D_800E9EF0[];
 extern u8 D_800FE040[];
 /* The retail code forms this object's base address and then reaches the

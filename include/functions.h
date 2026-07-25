@@ -15,5 +15,6 @@
  */
 
 void func_80019B2C(void);
+void func_8004544C(void);
 
 #endif /* FUNCTIONS_H */

@@ -151,7 +151,7 @@ Grouping the undecompiled functions into runs (rather than one object per functi
 Three incidental findings from that work, all worth keeping:
 - **`volatile` matters.** Without it, gcc merges the read-modify-writes into a single load/store pair; the retail code stores and reloads between the two operations, which only `volatile` reproduces. Expect many game-state globals to need it.
 - **`-O1` vs `-O2` changes register allocation here.** At `-O2` gcc uses `$v1` for the second load; the original (and `-O1`) uses `$v0` both times. So the game's `-O` level is still genuinely unknown, and may well vary per translation unit — do not assume `-O2` globally.
-- **The assembler's `-G` must match the compiler's.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, silently making the function 4 bytes longer per reference (this is what first showed up as "16 bytes too long").
+- **The assembler's `-G` must match the compiler's, in both directions.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, making the function 4 bytes *longer* per reference (this is what first showed up as "16 bytes too long"). The reverse also bites: at `-G0` cc1psx sometimes emits the bare form `lw $3,sym` and leaves expansion to the assembler, and an assembler still at `-G8` decides the symbol *is* small data and collapses the pair into one gp-relative instruction, leaving the function an instruction *short*. `PER_FUNC_AS_FLAGS` is therefore derived from the `-G0` function lists rather than maintained separately -- do not let them drift apart. Note the shortfall only appears when gcc chose the bare form; where it emitted an explicit `%hi`/`%lo` pair the assembler passes it through and the mismatch is invisible, which is why this took a while to spot.
 
 ### Decompilation conventions (learned from the first 64 functions)
 
@@ -254,9 +254,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-168 of 1794 functions decompiled and byte-matching.
+172 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~168 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~172 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
