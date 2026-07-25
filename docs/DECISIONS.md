@@ -153,6 +153,23 @@ Three incidental findings from that work, all worth keeping:
 - **`-O1` vs `-O2` changes register allocation here.** At `-O2` gcc uses `$v1` for the second load; the original (and `-O1`) uses `$v0` both times. So the game's `-O` level is still genuinely unknown, and may well vary per translation unit — do not assume `-O2` globally.
 - **The assembler's `-G` must match the compiler's, in both directions.** With cc1psx at `-G8` but `as` at `-G0`, the assembler cannot assume a bare symbol is small data and expands each reference into a `lui`+`%lo` pair, making the function 4 bytes *longer* per reference (this is what first showed up as "16 bytes too long"). The reverse also bites: at `-G0` cc1psx sometimes emits the bare form `lw $3,sym` and leaves expansion to the assembler, and an assembler still at `-G8` decides the symbol *is* small data and collapses the pair into one gp-relative instruction, leaving the function an instruction *short*. `PER_FUNC_AS_FLAGS` is therefore derived from the `-G0` function lists rather than maintained separately -- do not let them drift apart. Note the shortfall only appears when gcc chose the bare form; where it emitted an explicit `%hi`/`%lo` pair the assembler passes it through and the mismatch is invisible, which is why this took a while to spot.
 
+### The order to work in, when a function does not match
+
+Learned the hard way, and worth following in this order because each step makes
+the next one meaningful:
+
+1. **Is the instruction count right?** If not, nothing else is diagnostic. A
+   sweep over a wrong-length function tells you only that the length is wrong.
+2. **Does the source's read order match the target's?** Three functions in one
+   session came down to this alone — `func_80049F10`, `func_80037CE0`,
+   `func_800373C8`. Declaration order *is* read order. Thirty seconds to check.
+3. **Is the branch polarity right?** Look at which path retail falls through
+   into; cc1psx emits the fall-through for the branch written as not-taken.
+4. **Count the materialisations** of each value. One per write in the source.
+5. **Then** sweep flags.
+
+I spent a long time doing 5 before 2 and 3, which is why this list exists.
+
 ### Decompilation conventions (learned from the first 64 functions)
 
 **Declare every global in `include/variables.h`, never locally.** Two files disagreeing about a global's type or qualifiers silently changes codegen and breaks matching somewhere far away. The header carries the shared `u8`/`u16`/`s32` typedefs (`include/types.h`) too.
@@ -405,6 +422,37 @@ in this project: which callee-saved register a value gets (here), where a
 constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
+
+### The register-allocation class: a negative that finally counts
+
+`func_8004BAE4` ran **16,206 permuter iterations** under PsyQ 4.5, with the
+compile flags verified as `-O2 -G0` and `target.o` confirmed to hold the same 20
+instructions as retail. Best score **10**, hit 7,570 times, never 0. The earlier
+25,000-iteration run on `func_8007368C` was against 4.6 and told us nothing;
+this one is measured against the right compiler and a validated target, so it is
+the first negative for this class that means anything.
+
+Together with the flag scan, the class now has three independent closures:
+
+- **Not flag-reachable.** gcc 2.8.1 accepts 23 `-f` options and the ones that
+  steer allocation — `-fno-regmove`, `-fno-optimize-register-move`, `-fno-gcse`
+  — do not exist in it.
+- **Not C-shape reachable.** 16k permuter variants plus roughly six reasoned
+  hand-written forms, all saturating at "structurally identical, one register
+  wrong".
+- **Not source-reachable where cross-jumping is involved** (`func_800601D0`):
+  `jump_optimize` merges identical tails unconditionally and `-fno-crossjumping`
+  arrives in gcc 3.
+
+That is eighteen parked functions whose remaining difference is one register or
+one fused block, with no lever currently known. Recording it as a closed avenue
+rather than a to-do, so the next session does not re-run the same searches.
+
+**Also parked: `func_80035A64`**, after five shapes including the
+positioned-pointer-with-negative-offsets idiom that solved `func_800373C8`.
+cc1psx keeps a second base register alive (`$3 = $2 - 12`) to hold the four
+store offsets, where retail uses one pointer and offsets `0`…`0xC`. Addressing
+optimisation, not source shape.
 
 ### Read order in the source is read order in the object
 
