@@ -73,7 +73,7 @@ s32 func_8002C604(void);
 void func_8003F758(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3);
 void func_8003F8D4(void);  /* PROVISIONAL */
 void func_80049010(void);  /* PROVISIONAL */
-s32 func_80015780(void);  /* PROVISIONAL */
+void func_80015780(void);
 void func_800157DC(void);
 void func_8001581C(s32 arg0);
 void func_800158B8(void);
@@ -132,7 +132,7 @@ void func_80076D90(s32 arg0);  /* PROVISIONAL */
 s32 func_8007E710(s32 arg0);  /* PROVISIONAL */
 void func_800243F4(s32 arg0, u8 *arg1, u8 *arg2);  /* PROVISIONAL */
 s32 func_8002892C(void);  /* PROVISIONAL */
-void func_800373C8(u8 *arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
+void func_800373C8(u8 *arg0, s32 arg1, s32 arg2);
 void func_80036C14(u8 *arg0, s32 arg1);  /* PROVISIONAL */
 void func_800393B0(u8 *arg0);  /* PROVISIONAL */
 s32 func_8006041C(s32 arg0);  /* PROVISIONAL */
@@ -164,6 +164,7 @@ s32 func_80073704(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 s32 func_80073734(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 void func_80073724(s32 arg0);  /* PROVISIONAL */
 void func_80058A7C(s32 arg0, s32 arg1, Words7 *arg2);  /* PROVISIONAL */
+s32 func_8007AFA4(void);  /* PROVISIONAL */
 void func_80019B2C(void);
 void func_8004544C(void);
 
