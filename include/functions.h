@@ -134,6 +134,7 @@ void func_800243F4(s32 arg0, u8 *arg1, u8 *arg2);  /* PROVISIONAL */
 s32 func_8002892C(void);  /* PROVISIONAL */
 void func_800373C8(u8 *arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 void func_80036C14(u8 *arg0, s32 arg1);  /* PROVISIONAL */
+void func_800393B0(u8 *arg0);  /* PROVISIONAL */
 void func_80019B2C(void);
 void func_8004544C(void);
 

@@ -406,6 +406,28 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### The shared-exit rule runs both ways
+
+`func_80047B68` returns `1` from both paths and was one instruction short with a
+single `return 1;` after the join. Retail materialises the `1` **twice** — once
+in the branch delay slot for the early path and once after the call, which
+clobbers `$v0`. Two separate `return 1;` statements produce exactly that.
+
+This is the mirror of `func_8004BAA0`, where retail had *one* `subu` serving two
+paths and the fix was to merge two returns into one. The rule is symmetric and
+reads directly off the target: **count the materialisations of the returned
+value. One means one `return`, two means two.** It applies even when both returns
+are the same constant, which is where intuition says "surely the compiler shares
+it" — after a call it cannot, because the callee owns `$v0`.
+
+**Parked one register assignment away.** With two returns the count is right and
+the difference is `addu $a1,$a0,$zero`: retail keeps `arg0` in `$a0` and the
+masked copy in `$a1`, while ours puts the masked value in `$a0` and copies
+`arg0` out. Three mask forms and sixteen flag combinations. Same `$a0`-as-scratch
+symptom as `func_80038498` from the previous batch, which makes two in a row and
+suggests it is common in functions that keep both a value and a masked version
+of it live.
+
 ### Hoisting reads in the source, then letting `-O1` do the rest
 
 `func_80037CE0` needed both halves of a fix that has come up separately before.
@@ -1391,9 +1413,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-319 of 1794 functions decompiled and byte-matching.
+322 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~319 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~322 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
