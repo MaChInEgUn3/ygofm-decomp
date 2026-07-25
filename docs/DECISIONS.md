@@ -383,13 +383,21 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
-### The `jal` class after the version fix: two batches, 14 of 14
+### The `jal` class after the version fix: three batches, 21 of 21
 
 With the right compiler, the flag tables 40% smaller, and a sweeper that no
-longer lies, hit rate went from ~60-85% to **100% across two batches** —
+longer lies, hit rate went from ~60-85% to **100% across three batches** —
 `func_800159D8` and five siblings (two-call thunks), `func_80038690`,
-`func_80042A78`, `func_80047278`, `func_80059C9C`, `func_8005C530`, and the
-`func_80015C0C` family. None needed a flag override. That is the clearest
+`func_80042A78`, `func_80047278`, `func_80059C9C`, `func_8005C530`, the `func_80015C0C` family, three multi-call thunks, and
+`func_800493F8`. Only the last needed a flag override.
+
+**One of them is a reminder that C form and flags are not independent.**
+`func_800493F8` came back empty from a full sixteen-combination sweep, then
+matched at `-O2 -G0` once the C was fixed. The C had materialised a constant
+before the call, pinning it in `$s0` across the call and adding a register
+save; no flag can undo that. **Sweep after the shape is right, not instead of
+getting it right** — a sweep over a wrong shape only tells you the shape is
+wrong, and it looks exactly like "unreachable". That is the clearest
 measure of what the wrong compiler was costing: not just the parked functions,
 but a third of every batch.
 
@@ -847,9 +855,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-251 of 1794 functions decompiled and byte-matching.
+258 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~251 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~258 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
