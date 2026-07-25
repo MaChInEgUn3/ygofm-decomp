@@ -88,6 +88,9 @@ extern u16 D_800F5C80[];
 extern u8 D_8009AF94;
 extern u8 D_800F5C82[];
 extern u8 D_800F5C83[];
+/* Read twice in a row by func_80015038, once per condition, so the
+ * hardware register it shadows is not cached across the test. */
+extern volatile s32 D_8009B0F4;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];

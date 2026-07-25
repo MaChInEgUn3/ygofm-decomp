@@ -383,6 +383,28 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### A wrong *return* type hides exactly like a wrong arity
+
+Three prototypes generated from a loose heuristic — "the asm mentions `$v0`,
+so it returns something" — declared `s32` where the real definition is `void`.
+cc1psx caught it the moment those functions were decompiled, because the
+defining file includes the header.
+
+**But the thunks that call them had already matched byte-for-byte with the
+wrong prototype.** Returning a value costs no instructions when the caller
+ignores it, for the same reason forwarding arguments costs none: `$v0` is
+already where it needs to be. So a wrong return type is invisible until
+something depends on it, exactly like a wrong arity.
+
+Two consequences. The `/* PROVISIONAL */` marking should cover return types and
+not just parameters — a prototype is a guess in both halves. And "the asm
+mentions `$v0`" is not evidence of a return value; `$v0` is the general scratch
+register. Evidence is `$v0` live at *every* exit, or a caller that uses it.
+
+Prototypes are now reconciled against real definitions whenever one is written,
+which is worth doing as a sweep rather than waiting for cc1psx to object one
+file at a time.
+
 ### The `jal` class after the version fix: three batches, 21 of 21
 
 With the right compiler, the flag tables 40% smaller, and a sweeper that no
@@ -855,9 +877,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-258 of 1794 functions decompiled and byte-matching.
+262 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~258 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~262 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
