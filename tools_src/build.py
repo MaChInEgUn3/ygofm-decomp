@@ -247,6 +247,7 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # exactly what reproduces retail.
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8001755C"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80044DA0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049600"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"

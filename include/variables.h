@@ -92,7 +92,11 @@ extern u8 D_800F5C82[];
 extern u8 D_800F5C83[];
 /* Read twice in a row by func_80015038, once per condition, so the
  * hardware register it shadows is not cached across the test. */
+#ifdef D_8009B0F4_IS_AGGREGATE
+extern volatile s32 D_8009B0F4[];
+#else
 extern volatile s32 D_8009B0F4;
+#endif
 /* A table of (threshold, value) halfword pairs, five per row: the retail
  * code indexes rows by arg0 * 20 and then walks pairs four bytes at a time. */
 typedef struct {
@@ -206,6 +210,8 @@ extern s16 D_800FE0CC;
  * scalar and the per-function -G override decides which form is emitted. */
 extern u8 *D_8009B458;
 extern u8 *D_8009B45C;
+/* Alias for D_8009B45C; see config/symbol_aliases.txt. */
+extern u8 *Base2_8009B45C;
 
 /* --- more small data ------------------------------------------------------ */
 

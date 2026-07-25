@@ -406,6 +406,37 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### The alias needs a `-G0` assembler to be worth anything
+
+`func_80044DA0` loads the `D_8009B45C` pointer twice in one basic block. Two
+symbols produced the two loads correctly — and the function was still *two*
+instructions short, because at `-G8` cc1psx emits the bare-symbol form
+`lw $2,D_8009B45C` and a `-G8` assembler collapses each one into a single
+gp-relative load instead of `lui`+`lw`. The alias created the second reference
+and the assembler then threw away half of each.
+
+`PER_FUNC_AS_FLAGS[...] = "-G0"` fixes it. **So the alias and the `-G0`
+assembler are a pair**: the alias makes the second address exist, the `-G0`
+assembler makes each one cost the two instructions retail spends. Worth knowing
+before concluding an alias "didn't work".
+
+**Size of the unblocked class, revised down again.** Of the 82 same-basic-block
+duplicates, only **two** are under 27 instructions, and both are now handled.
+The rest are large functions where the duplicate is one detail among many, so
+the alias is a prerequisite for them rather than the whole fix. That is still
+worth having — it removes a blocker that no amount of C rewriting could clear —
+but "unlocks 82 functions" would overstate it, and this is the third time in
+two hours that the honest number has been smaller than the first one.
+
+**Parked: `func_8003594C`**, one instruction short and instructive about the
+alias's limits. Retail reads `D_8009B0F4` in split form (`lui $v0,%hi` +
+`lw %lo($v0)`) and writes it through the assembler's `$at` macro form
+(`lui $at,%hi` + `sw %lo($at)`) — mixed addressing modes for one symbol in one
+function. An alias gives two split-form materialisations, not one split and one
+macro, so the instruction count comes out right but the registers do not.
+Reproducing that needs the store emitted as a bare symbol while the load stays
+split, and `-mno-split-addresses` is per-function, not per-reference.
+
 ### Two `lui`/`addiu` pairs for one symbol means two symbols — and we can now say so
 
 `func_80036BCC` walks two pointers over the same base, one by 2 and one by
@@ -1228,9 +1259,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-298 of 1794 functions decompiled and byte-matching.
+299 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~298 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~299 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

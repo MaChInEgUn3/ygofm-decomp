@@ -5,3 +5,6 @@
 # func_80036BCC walks a 2-byte key table and a 0x1E-byte record table that
 # start at the same address, and materialises the base twice.
 KeyTable_801D9174 = 0x801D9174;
+
+# func_80044DA0 loads the D_8009B45C pointer twice in one basic block.
+Base2_8009B45C = 0x8009B45C;
