@@ -406,6 +406,40 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### The allocation-flag space is smaller under 4.5, not larger
+
+Every allocation-flag scan in this document was run against **4.6's** cc1psx,
+before the version was corrected. `sweep_flags.py` carries about eighteen
+hand-picked combinations and none of those allocation options is among them, so
+the space had never actually been explored under the compiler the game used.
+Re-run under 4.5 against two parked functions:
+
+| flag | 4.5 |
+|---|---|
+| `-fno-regmove` | **rejected** |
+| `-fno-optimize-register-move` | **rejected** |
+| `-fno-gcse` | **rejected** |
+| `-fno-move-all-movables`, `-fno-reduce-all-givs`, `-fssa`, `-fno-strict-aliasing`, `-fno-if-conversion` | **rejected** |
+| `-fcaller-saves`, `-fno-caller-saves`, `-fno-expensive-optimizations`, `-fno-peephole`, `-fno-cse-follow-jumps`, `-fno-thread-jumps`, `-fno-force-mem`, `-fforce-addr`, `-fno-strength-reduce`, `-fno-function-cse`, `-fno-defer-pop`, `-fno-rerun-cse-after-loop`, `-fno-cse-skip-blocks`, `-fno-unroll-loops`, `-fno-inline-functions` | no effect |
+| `-fno-delayed-branch`, `-fno-schedule-insns2` | change output (both already swept) |
+
+**gcc 2.8.1 accepts 23 `-f` options; 2.95.2 accepts 29.** The options that could
+plausibly steer register allocation simply do not exist in the compiler this
+game was built with. That is a firm negative rather than an untried avenue:
+**the register-allocation park classes are not flag-reachable, by construction.**
+
+What remains is C-shape search, and the permuter has never run under 4.5 — its
+25,000 iterations on `func_8007368C` were spent against the wrong compiler and
+tell us nothing.
+
+**Also retested and still not fixed:** `func_8003594C`, against the
+`-O2 -G8 -mno-split-addresses` behaviour discovered *after* it was parked. That
+flag makes cc1psx materialise the address once (`la $5,D_8009B0F4`) and use it
+twice, which is the opposite of the two materialisations retail has. Worth having
+tried — parked functions had not been re-tested against mechanisms found after
+them since the compiler switch, and that is a gap worth closing routinely rather
+than once.
+
 ### A batch that mostly did not land, and what it says about the band
 
 One of four. This is the worst yield since the toolchain fix, and the three
@@ -1221,9 +1255,11 @@ register wrong" — the search saturated there immediately and stayed. Combined
 with a sixteen-combination flag sweep (run *after* the staleness fix, so this
 one counts) and four hand-written C shapes, the evidence is now:
 
-- not reachable by compiler flags — every allocation-related option in gcc 2.7
-  was tried directly against cc1psx, and only `-fno-omit-frame-pointer` changes
-  the output at all, which is not what retail has
+- not reachable by compiler flags — **but note this line was measured against
+  4.6's cc1psx, before the version was corrected.** It is left as written
+  because the conclusion happened to survive re-measurement under 4.5; see
+  "The allocation-flag space is smaller under 4.5, not larger" below for the
+  scan that actually counts
 - not reachable by C-level rewriting — 25k random variants and 4 reasoned ones
 - structurally exact otherwise — same opcodes, order, and offsets
 
