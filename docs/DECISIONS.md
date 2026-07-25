@@ -1332,16 +1332,17 @@ itself the useful information that this symbol cannot be `-G8` at all.
 
 **Absence of a complaint is not evidence of success when the thing that would
 have complained never ran.** That is the sixth instance in this project of one
-failure shape, and the second inside `sweep_flags.py` alone. The running list:
+failure shape (a seventh, `try_func.py`, is at the end of the table), and the second inside `sweep_flags.py` alone. The running list:
 
 | where | what varied unnoticed |
 |---|---|
 | `config/flag_overrides.json` | not in the staleness check |
-| `-fno-schedule-insns` | effect on output never verified |
+| `-fno-schedule-insns` | effect "verified" against the wrong SDK |
 | `YGOFM_DROP_POSTPASS` | not in the flag stamp |
 | `sweep_flags.py` (as-flags) | set `cc` but inherited `as` |
 | prototype reconcile regex | silently skipped pointer returns |
 | `sweep_flags.py` (build status) | treated a failed build as clean |
+| `try_func.py` | kept its own stale copy of every toolchain path |
 
 Every one of them was a tool reporting confidently on something it had not
 actually measured. When a tool says "no", the next question is whether it could
@@ -1923,11 +1924,22 @@ There are **two** schedulers, and only the second one matters to us.
 
 `func_8001B780` was parked because cc1psx hoisted an unrelated `lw` into the
 load-delay slot of a `lb`, where the retail code leaves the slot empty. I first
-recorded `-fno-schedule-insns` as tried-and-useless. **That entry was wrong, and
-the way it was wrong is worth remembering:** the flag is *accepted* by cc1psx
-(passing `-fnoschedule-insns` errors, so option parsing does work) but produces
-**byte-identical output**. It changes nothing, so a non-matching build says
-nothing about it. Verified by hashing cc1psx output with and without it.
+recorded `-fno-schedule-insns` as tried-and-useless, then corrected that to
+"accepted but byte-identical, so a non-matching build says nothing about it."
+
+**Both of those were wrong.** `-fno-schedule-insns` changes cc1psx 4.5's output
+for 15 of 60 sampled `src/func_*.c` files — a quarter of them. The
+byte-identical measurement was taken with `try_func.py`, which at the time
+still pointed at psyq46 and `--aspsx-version=2.86`; it was hashing the output
+of *the wrong compiler*. `func_80013B04` is the counter-example that finally
+surfaced it: 25 differing instructions out of 25 with the flag on.
+
+The lesson survives the correction, only sharper. The rule was "a negative
+result only counts if the flag actually changed the output" — and the check
+that was supposed to enforce it was itself run against the wrong toolchain.
+Verify the flag changed the output *and* verify the thing doing the verifying
+is the build's own toolchain. `try_func.py` now imports every constant from
+`build.py` for that reason.
 
 `-fno-schedule-insns2` — the *post-reload* scheduler — is the one that governs
 load-delay slot filling in gcc 2.7.x MIPS. With it, `func_8001B780` compiles to

@@ -27,11 +27,20 @@ BUILD = [str(ROOT / ".venv" / "bin" / "python"), "tools_src/build.py"]
 # for functions whose target leaves a *branch* delay slot empty, and the
 # -fno-schedule-insns2 entries for a *load* delay slot the retail code leaves
 # as a nop; see the "unfilled delay slot" section of docs/DECISIONS.md.
-# Note -fno-schedule-insns (without the 2) is accepted but changes nothing --
+# -fno-schedule-insns (without the 2) was long excluded here on the belief that
+# it changed nothing. It changes cc1psx 4.5's output for a quarter of the
+# functions in src/; the measurement that said otherwise ran the wrong SDK. It
+# is in the set below now, and every function parked before this was swept
+# against an incomplete flag space.
+# (superseded note) --
 # it was verified to produce byte-identical cc1psx output, so do not add it.
 COMBOS = [
     ("O2 G8",                 ["-quiet", "-O2", "-G8"], None),
     ("O1 G8",                 ["-quiet", "-O1", "-G8"], None),
+    ("O2 G8 nosched1",        ["-quiet", "-O2", "-G8", "-fno-schedule-insns"], None),
+    ("O2 G8 nosched1+2",      ["-quiet", "-O2", "-G8", "-fno-schedule-insns",
+                               "-fno-schedule-insns2"], None),
+    ("O2 G0 nosched1",        ["-quiet", "-O2", "-G0", "-fno-schedule-insns"], "-G0"),
     ("O2 G8 nosched2",        ["-quiet", "-O2", "-G8", "-fno-schedule-insns2"], None),
     ("O1 G8 nosched2",        ["-quiet", "-O1", "-G8", "-fno-schedule-insns2"], None),
     ("O2 G8 macro",           ["-quiet", "-O2", "-G8",
