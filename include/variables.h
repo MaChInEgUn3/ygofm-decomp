@@ -159,7 +159,8 @@ extern u8 D_80177FE8[];
 extern u8 D_8009B254[];
 extern s8 D_8009B345;
 extern u8 D_8009B34C;
-extern s32 D_8009B340;
+/* A handler pointer, cleared by func_80037CE0 and called by func_80038E1C. */
+extern ObjFn D_8009B340;
 extern u8 D_801D5708[];
 extern u8 D_800F2B20[];
 extern u8 D_8009B142;
