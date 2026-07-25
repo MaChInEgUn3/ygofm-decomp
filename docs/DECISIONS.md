@@ -89,6 +89,16 @@ Two consequences worth knowing:
 - **`src/31D8.c` is a splat artifact we deliberately don't use** (it is the monolithic `INCLUDE_ASM` file). The build ignores it — it only looks for `src/func_*.c`. It is gitignored so it doesn't reappear as noise after a `splat split`. The per-function `.s` files it comes bundled with *are* used, which is why the subsegment stays `c` rather than `asm`.
 - **Per-function compiler flags** live in `PER_FUNC_FLAGS` in `build.py`. `func_80015010` needs `-O1` where the project default is `-O2`; expect this table to grow, since the game's per-file `-O` levels are unknown.
 
+### Platform support (Windows and Linux)
+
+`build.py` detects the platform and adapts; there is no fork.
+
+- **PsyQ SDK** is 32-bit Windows executables. Native on Windows; prefixed with `wine` elsewhere (`PSYQ_RUNNER`). **Verified byte-identical**: `cc1psx` output under Wine 10.0 matches native Windows exactly, checked across three functions including one built at `-O1`. Wine is not an approximation here.
+- **MIPS binutils** come from the distro on Linux (`mips-linux-gnu-*`, `apt install binutils-mips-linux-gnu`) and from the prebuilt toolchain under `tools/mips/` on Windows (`mipsel-none-elf-*`).
+- **venv path** differs (`.venv/bin/python` vs `.venv/Scripts/python.exe`).
+
+Linux is the better long-term host: every tool in this ecosystem (splat, decomp-permuter, maspsx, and every reference decomp project) is Linux-first, and the Windows workarounds documented elsewhere in this file — four of them for decomp-permuter alone — are the cost of being the odd platform out. Measured trade-offs, if useful: Wine adds per-invocation overhead to ~278 PsyQ calls per full build; WSL with the repo on `/mnt/d` is *not* a good middle ground, since reading the 1794 asm files took 6.2s there versus 0.87s on native Windows.
+
 **Why a Python script and not a Makefile:** `make` is not available in this Windows environment (no make, no ninja). The dependency graph is shallow (a handful of asm files + one C file today), so a plain script is sufficient and avoids adding a build-tool dependency.
 
 Note it rebuilds **everything** on every run — there is no incremental/mtime checking. That is fine at one C file, but splitting into the ~234 original translation units (see below) is exactly the trigger for revisiting this; whoever does that split should expect the full-rebuild cost to become annoying and may want to add dependency tracking at the same time.

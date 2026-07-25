@@ -28,6 +28,7 @@ Run from the repo root:  python tools_src/build.py
 
 import argparse
 import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -36,18 +37,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# --- platform ----------------------------------------------------------------
+# The PsyQ SDK is a set of 32-bit Windows executables, so it runs natively on
+# Windows and under Wine elsewhere. Everything else differs only in naming:
+# Linux gets MIPS binutils from the distro (mips-linux-gnu-*), while on
+# Windows we ship a prebuilt mipsel-none-elf toolchain under tools/.
+WINDOWS = os.name == "nt"
+
 # --- toolchain locations (all gitignored, see docs/DECISIONS.md) -------------
 PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
 CPPPSX = PSYQ_BIN / "CPPPSX.EXE"
 CC1PSX = PSYQ_BIN / "CC1PSX.EXE"
+# Prefix used to invoke the PsyQ executables. Empty on Windows.
+PSYQ_RUNNER = [] if WINDOWS else ["wine"]
 
-MIPS_BIN = ROOT / "tools" / "mips" / "bin"
-AS = MIPS_BIN / "mipsel-none-elf-as.exe"
-LD = MIPS_BIN / "mipsel-none-elf-ld.exe"
-OBJCOPY = MIPS_BIN / "mipsel-none-elf-objcopy.exe"
+if WINDOWS:
+    MIPS_BIN = ROOT / "tools" / "mips" / "bin"
+    AS = MIPS_BIN / "mipsel-none-elf-as.exe"
+    LD = MIPS_BIN / "mipsel-none-elf-ld.exe"
+    OBJCOPY = MIPS_BIN / "mipsel-none-elf-objcopy.exe"
+    OBJDUMP = MIPS_BIN / "mipsel-none-elf-objdump.exe"
+    VENV_PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
+else:
+    MIPS_BIN = Path("/usr/bin")
+    AS = MIPS_BIN / "mips-linux-gnu-as"
+    LD = MIPS_BIN / "mips-linux-gnu-ld"
+    OBJCOPY = MIPS_BIN / "mips-linux-gnu-objcopy"
+    OBJDUMP = MIPS_BIN / "mips-linux-gnu-objdump"
+    VENV_PYTHON = ROOT / ".venv" / "bin" / "python"
 
 MASPSX = ROOT / "tools" / "maspsx" / "maspsx.py"
-VENV_PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
 
 # --- project layout ----------------------------------------------------------
 SRC = ROOT / "src"
@@ -226,9 +245,9 @@ def compile_c(name):
     obj = out_dir / f"{name}.o"
 
     flags = PER_FUNC_FLAGS.get(name, CC1_FLAGS)
-    run([CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
+    run([*PSYQ_RUNNER, CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
          pre.relative_to(ROOT).as_posix()])
-    run([CC1PSX, *flags, pre.relative_to(ROOT).as_posix(),
+    run([*PSYQ_RUNNER, CC1PSX, *flags, pre.relative_to(ROOT).as_posix(),
          "-o", asm.relative_to(ROOT).as_posix()])
 
     with open(asm) as fin, open(masm, "w") as fout:
@@ -359,7 +378,7 @@ def insert_small_data_load_delay_nops(lines, sdata_limit=8):
 
 def object_func_size(obj, name):
     """Size of `name` as compiled, read back from the object's symbol table."""
-    r = run([OBJCOPY.with_name("mipsel-none-elf-objdump.exe"), "-t",
+    r = run([OBJDUMP, "-t",
              obj.relative_to(ROOT).as_posix()])
     for line in r.stdout.splitlines():
         parts = line.split()
