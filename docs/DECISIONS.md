@@ -423,6 +423,32 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Naming intermediate results fixes scheduling, and a cascade nearly hid it
+
+`func_80022F98` computes two coordinate differences and stores them, then reads
+a byte and writes three more fields. cc1psx interleaved the second subtraction
+with the function-pointer store; retail keeps the two subtract-and-store pairs
+together, then the byte read, then the rest. Naming each intermediate — the two
+differences and the byte — in its own local fixed it exactly.
+
+That is the same lever as hoisting reads, from the other end: **naming a value
+pins where it is computed.** An unnamed subexpression is free to float, and
+cc1psx floats it.
+
+**A process note worth more than the function.** The fix was applied in the same
+build as another candidate that turned out to be the wrong size, so the report
+said "differs" for both and I nearly parked a function that was already correct.
+Lining the two listings up side by side showed all 22 instructions matching.
+The rule already in this document — *remove the wrong-sized function first, then
+read the list* — applies to a function being **fixed** as much as to one being
+written, and I did not apply it here until the diff forced me to.
+
+**Parked: `func_80070870`.** A linear search returning 1 on a hit. Retail places
+the `return 1` inline after the compare, falling through into it; cc1psx moves
+that block past the loop and branches to it. Instruction counts and registers
+match. Three loop forms tried. Block placement, like cross-jumping, is not
+something the source can direct.
+
 ### `u16` loop counters cost an `andi` per iteration
 
 `func_80019A08` walks a table of groups — key, member count, then that many
@@ -1738,9 +1764,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-344 of 1794 functions decompiled and byte-matching.
+345 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~344 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~345 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
