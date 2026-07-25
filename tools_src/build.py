@@ -169,6 +169,7 @@ _G0_FUNCS = [
 # the compiler *and* an assembler that will not treat the symbol as small
 # data, so they carry a PER_FUNC_AS_FLAGS entry too.
 _G0_MACRO_FUNCS = [
+    "func_80038898",
     "func_80082A80", "func_8008D1E0", "func_8008D1F4", "func_8008D208",
     "func_8008D21C", "func_8008D230", "func_8008D244", "func_8008D258",
     "func_8008D26C", "func_8002F930", "func_8002F94C", "func_8002FA28", 

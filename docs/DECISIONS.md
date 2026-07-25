@@ -383,6 +383,37 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### The byte-stream cursor idiom, and `u8` locals costing an instruction
+
+A shape that recurs across the script interpreter: a byte read through a table
+of cursors indexed by a signed byte at +0x58 of the object.
+
+    u8 **pp = (u8 **)(arg0 + *(s8 *)(arg0 + 0x58) * 4);
+    u8 *p = *pp;
+
+    *pp = p + 1;
+    /* ...use *p... */
+
+`func_8003B7E0` established it and `func_80038094` and `func_80038898` reuse it
+unchanged. Worth recognising on sight — the `lb 0x58` / `sll 2` / `addu` /
+`lw 0(...)` / `lbu 0(...)` / `addiu +1` / `sw` sequence is this and nothing else.
+
+**A `u8` local costs an instruction when it feeds a wider parameter.** In
+`func_80038094` the byte comes from `lbu`, already zero-extended, but holding it
+in a `u8` and passing it to an `s32` parameter makes cc1psx emit a redundant
+`andi $a1,$a1,0xFF`. Declaring the local `s32` matches. This is the same
+narrowing behaviour that forced `func_8007058C` and `func_8003B7E0` to return
+`s32`, now showing up for a local rather than a return value: **hold the raw
+value in the widest natural type and let the store or call narrow it.**
+
+**Parked from this batch:** `func_80030F40` and `func_80037D2C`, both on
+instruction *order* with the right count. Retail hoists all four argument
+registers above two global stores in the first, and interleaves a gp-relative
+load into a load-delay slot in the second. Sixteen flag combinations and two C
+reorderings each; no match. These are scheduling differences of a kind not yet
+understood — distinct from the old coupled-ordering class, which the 4.5 switch
+resolved.
+
 ### A third knob for the `-G` symptom: per-file declarations
 
 `func_8001BD48` reaches `D_8009B398` through `%hi`/`%lo` **and** `D_8009B164`
@@ -910,9 +941,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-265 of 1794 functions decompiled and byte-matching.
+267 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~265 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~267 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
