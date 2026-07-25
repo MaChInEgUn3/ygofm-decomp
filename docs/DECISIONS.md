@@ -383,6 +383,42 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### Forcing base formation, complete recipe
+
+This has now come up six times and each instance needed a slightly different
+shape, so here is the whole ladder in one place. The symptom is always the same:
+**one instruction short, around an address built from a symbol plus an offset.**
+cc1psx folds the offset into the `%lo` where retail forms the base in a register
+first.
+
+| what retail does | what works |
+|---|---|
+| base, then one field access | a plain struct is enough |
+| base, then *two* different offsets | declare the object as an unsized array of the struct and index `[0]` |
+| base, then a *variable* index | index in a `u8`/`s32` local **and** the element address in a pointer local |
+| base, then a *constant non-zero* offset | assign the base to one local, then add the offset in a **separate statement** |
+
+The last one is `func_8002E370`, and it is the least obvious: `Rec4C *p =
+&D_800EB010[2]` folds, and so does `p = D_800EB010; p += 2`. What works is
+
+    Rec4C *base = D_800EB010;
+    Rec4C *p;
+
+    p = base + 2;
+
+Two locals and a separate assignment. Splitting the declaration from the
+arithmetic is what stops the fold — the base becomes a value in its own right
+rather than part of an address expression.
+
+**A note on measuring this.** `func_8002E370` was one instruction short and
+three functions *before* it in address order showed up in the differing list.
+That looked like real breakage from the header changes in the same batch and was
+not: `build.py` regenerates the linker script from per-function object sizes, so a
+wrong size shifts run boundaries and can move objects placed *earlier* in the
+script than the culprit. **The "everything after it" wording in the size warning
+is too weak** — with linker-driven layout, one wrong size can perturb anything.
+Remove the wrong-sized function first, then read the list.
+
 ### The sweeper counted failed builds as matches — sixth of the same shape
 
 `sweep_flags.py` reported `func_8001755C` matching at
@@ -1088,9 +1124,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-283 of 1794 functions decompiled and byte-matching.
+287 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~283 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~287 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

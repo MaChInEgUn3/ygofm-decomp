@@ -118,6 +118,28 @@ typedef struct {
 extern Slot70 D_800F0548[];
 extern Slot70 D_800EFE48[];
 extern u8 *D_80010000;
+/* Walked backwards in 0x4C-byte records from index 2; only the signed byte
+ * at +0x30 is known. Declared as an array so the base lands in a register
+ * before the element offset -- 0x98 is exactly two records. */
+typedef struct {
+    u8 unk0[0x30];
+    s8 unk30;
+    u8 unk31[0x1B];
+} Rec4C;
+
+extern Rec4C D_800EB010[];
+extern u8 D_8009B2EA;
+extern s32 D_8009B2EC;
+extern u8 D_8009B2B4;
+extern u8 D_8009B2B5;
+extern u8 D_8009B2B6;
+extern u8 D_8009B2E9;
+extern u8 D_8009B2DC;
+extern u8 D_8009B2B8;
+extern u8 D_8009B2C0;
+extern u8 D_8009B2C1;
+extern u8 D_8009B2C2;
+extern u8 D_8009B2E0;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -274,7 +296,14 @@ extern ByteReader D_800F5BE8[];
 /* Reached via %hi/%lo from a -G0 unit and from a -G8 one, so these must
  * never be small data: declared unsized rather than as scalars. */
 extern u8 D_8009B268[];
+/* Aggregate by default, because most users reach it through %hi/%lo. Files
+ * that need the gp-relative form define D_8009B26C_IS_SCALAR first -- see the
+ * per-file declaration note on D_8009B398. */
+#ifdef D_8009B26C_IS_SCALAR
+extern u8 D_8009B26C;
+#else
 extern u8 D_8009B26C[];
+#endif
 extern u8 D_8009B26D[];
 extern u8 D_8009B269[];
 extern s32 D_800938A0[];
