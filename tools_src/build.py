@@ -27,6 +27,7 @@ Run from the repo root:  python tools_src/build.py
 """
 
 import argparse
+import concurrent.futures as cf
 import hashlib
 import os
 import re
@@ -234,6 +235,29 @@ def boundary_functions():
     return out
 
 
+def headers():
+    """Every header a source file could pull in via common.h."""
+    return sorted((ROOT / "include").glob("*.h"))
+
+
+# This script holds the per-function flag tables, so a change to it can change
+# any object's contents -- it counts as a dependency of everything.
+SELF = Path(__file__).resolve()
+
+
+def is_stale(target: Path, deps) -> bool:
+    """True if `target` needs rebuilding from `deps` (mtime comparison).
+
+    Deliberately conservative: a missing dependency counts as stale rather
+    than being ignored, so a mistake here costs a rebuild, never a wrong
+    binary. The sha1 check at the end is the backstop either way.
+    """
+    if not target.exists():
+        return True
+    t = target.stat().st_mtime
+    return any(not d.exists() or d.stat().st_mtime > t for d in deps)
+
+
 def compile_c(name):
     """cpppsx -> cc1psx -> maspsx -> as for one decompiled function."""
     src = SRC / f"{name}.c"
@@ -243,6 +267,9 @@ def compile_c(name):
     asm = out_dir / f"{name}.s"
     masm = out_dir / f"{name}.maspsx.s"
     obj = out_dir / f"{name}.o"
+
+    if not is_stale(obj, [src, SELF, *headers()]):
+        return obj
 
     flags = PER_FUNC_FLAGS.get(name, CC1_FLAGS)
     run([*PSYQ_RUNNER, CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
@@ -398,8 +425,19 @@ def assemble_run(index, names):
              ".set noat", ".set noreorder", ""]
     for n in names:
         lines.append(f'.include "asm/nonmatchings/31D8/{n}.s"')
-    stub.write_text("\n".join(lines) + "\n")
+    text = "\n".join(lines) + "\n"
+    # Only touch the stub when its contents actually change: rewriting it
+    # unconditionally would bump its mtime and defeat the staleness check
+    # below. The contents encode which functions are in this run, so a
+    # change in the decompiled set is caught here.
+    if not stub.exists() or stub.read_text() != text:
+        stub.write_text(text)
+
     obj = GEN / f"run_{index:04d}.o"
+    deps = [stub, SELF, *headers(),
+            *(ASM_FUNCS / f"{n}.s" for n in names)]
+    if not is_stale(obj, deps):
+        return obj
     run([AS, *AS_FLAGS, "-o", obj.relative_to(ROOT).as_posix(),
          stub.relative_to(ROOT).as_posix()])
     return obj
@@ -408,6 +446,8 @@ def assemble_run(index, names):
 def assemble_plain(src: Path) -> Path:
     obj = BUILD / src.relative_to(ROOT).with_suffix(".o")
     obj.parent.mkdir(parents=True, exist_ok=True)
+    if not is_stale(obj, [src, SELF, *headers()]):
+        return obj
     run([AS, *AS_FLAGS, "-o", obj.relative_to(ROOT).as_posix(),
          src.relative_to(ROOT).as_posix()])
     return obj
@@ -538,6 +578,9 @@ def target_size(name):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--clean", action="store_true", help="remove build/ first")
+    ap.add_argument("-j", "--jobs", type=int, default=12,
+                    help="concurrent compile/assemble jobs "
+                         "(latency-bound, so oversubscribing cores helps)")
     args = ap.parse_args()
 
     check_toolchain()
@@ -550,39 +593,62 @@ def main():
     boundaries = boundary_functions()
     print(f"{len(functions)} functions, {len(decompiled)} decompiled")
 
-    # Walk the address-ordered list, emitting one object per decompiled
-    # function and one per run of consecutive undecompiled ones.
-    text_entries = []
+    # Plan first, build second. Walking the address-ordered list decides
+    # which objects exist and in what order they are placed; the actual
+    # compiling is then order-independent and can run concurrently.
+    plan = []          # (kind, payload) in .text placement order
     pending, run_index = [], 0
-    size_errors = []
     for name in functions:
         if (SRC / f"{name}.c").exists():
             if pending:
-                obj = assemble_run(run_index, pending)
-                text_entries.append(
-                    f"{obj.relative_to(ROOT).as_posix()}(.text);")
+                plan.append(("run", (run_index, pending)))
                 run_index += 1
                 pending = []
-            obj = compile_c(name)
-            # A wrong-sized function shifts everything after it, so the
-            # whole-binary diff would blame dozens of innocent functions.
-            # Catching size errors here keeps the blame local.
-            built, wanted = object_func_size(obj, name), target_size(name)
-            if built is not None and wanted and built != wanted:
-                size_errors.append((name, built, wanted))
-            text_entries.append(f"{obj.relative_to(ROOT).as_posix()}(.text);")
+            plan.append(("c", name))
             if name in boundaries:
                 # reinstate the original object's 16-byte .text padding
-                text_entries.append(". = ALIGN(., 16);")
+                plan.append(("align", None))
         else:
             pending.append(name)
     if pending:
-        obj = assemble_run(run_index, pending)
-        text_entries.append(f"{obj.relative_to(ROOT).as_posix()}(.text);")
+        plan.append(("run", (run_index, pending)))
 
-    for src in sorted((ROOT / "asm").glob("*.s")) + \
-               sorted((ROOT / "asm" / "data").glob("*.s")):
-        assemble_plain(src)
+    plain = sorted((ROOT / "asm").glob("*.s")) + \
+        sorted((ROOT / "asm" / "data").glob("*.s"))
+
+    # Almost all of the wall time here is waiting on subprocesses -- a full
+    # build spends minutes of real time on seconds of CPU, and under Wine
+    # each PsyQ invocation pays process-startup latency. So oversubscribe
+    # the cores rather than matching them.
+    jobs = {}
+    with cf.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+        for kind, payload in plan:
+            if kind == "c":
+                jobs[("c", payload)] = pool.submit(compile_c, payload)
+            elif kind == "run":
+                index, names = payload
+                jobs[("run", index)] = pool.submit(assemble_run, index, names)
+        for src in plain:
+            jobs[("plain", src)] = pool.submit(assemble_plain, src)
+        # Surface the first failure rather than a wall of tracebacks.
+        for fut in cf.as_completed(jobs.values()):
+            fut.result()
+
+    text_entries, size_errors = [], []
+    for kind, payload in plan:
+        if kind == "align":
+            text_entries.append(". = ALIGN(., 16);")
+            continue
+        key = ("c", payload) if kind == "c" else ("run", payload[0])
+        obj = jobs[key].result()
+        text_entries.append(f"{obj.relative_to(ROOT).as_posix()}(.text);")
+        if kind == "c":
+            # A wrong-sized function shifts everything after it, so the
+            # whole-binary diff would blame dozens of innocent functions.
+            # Catching size errors here keeps the blame local.
+            built, wanted = object_func_size(obj, payload), target_size(payload)
+            if built is not None and wanted and built != wanted:
+                size_errors.append((payload, built, wanted))
 
     if size_errors:
         print(f"\n{len(size_errors)} function(s) compiled to the wrong size. "
