@@ -196,6 +196,7 @@ extern s32 D_8009B424[];
 extern u8 D_8009B0C0[];
 extern u8 D_8009B39C[];
 extern u8 D_8009B3A2[];
+extern u8 *D_8009B328;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];

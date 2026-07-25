@@ -432,6 +432,26 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### A loop with two entry points is not reachable from structured C
+
+`func_800358A0` walks backwards zeroing bytes above a threshold. Retail's loop
+has **two labels**: one at a decrement and one at the test, and the two paths
+through the body enter at different points — the "byte is small" path jumps to
+the test with its own decrement in the delay slot, while the "byte is large"
+path jumps to the decrement and shares it with the loop entry.
+
+Four C shapes — `if`/`else`, swapped arms, `continue`, and a walked pointer —
+all come out two instructions long, because each produces a single loop entry
+and duplicates what retail shares. The literal transcription needs two `goto`s
+into different points of the same loop, which is what the original almost
+certainly had but which this project does not write.
+
+Recording it as its own reason rather than filing it under the closed classes:
+those three are cc1psx transformations, and this is a *source construct* we are
+choosing not to use. If the parked pile grows several more of these, `goto` may
+be worth reconsidering — sotn-decomp and similar projects do use it. For one
+function it is not worth the precedent.
+
 ### `slt` versus `sltiu` is a signedness question in the source
 
 `func_80021894` compares a byte counter against `0xFB`. Retail uses `sltiu`;
@@ -1858,9 +1878,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-362 of 1794 functions decompiled and byte-matching.
+363 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~362 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~363 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
