@@ -32,3 +32,4 @@ func_8003A198
 func_80070870
 func_80038AB0
 func_8003B9BC
+func_80059A50

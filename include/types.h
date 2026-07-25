@@ -26,4 +26,10 @@ typedef u8 *(*ByteFn)(u8 **);
 
 typedef void (*VoidFn)(void);
 
+/* Seven words passed by value: the o32 ABI copies anything over 16 bytes
+ * into the caller's outgoing area and passes its address. */
+typedef struct {
+    s32 w[7];
+} Words7;
+
 #endif /* TYPES_H */

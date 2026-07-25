@@ -432,6 +432,32 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### A struct copied to a local, not passed by value
+
+`func_80059A50` copies seven words from a pointer argument into its own frame
+and passes the copy's address on. The obvious reading — passing a struct *by
+value* and letting the o32 ABI lower it — is wrong: gcc then splits the struct
+across `$a2`/`$a3` and the stack, reading from offset 8 onward. Retail copies
+all seven words to the frame and passes `$sp+0x10`, which is what an explicit
+local copy produces:
+
+    Words7 local = *arg2;
+
+    func_80058A7C(arg0, arg1, &local);
+
+The frame size is the tell. By-value lowering gave `0x30`; the explicit copy
+gives `0x38`, matching retail, because the local occupies its own space rather
+than reusing the outgoing-argument area.
+
+**Parked anyway, on the allocator.** With the copy right, all 22 instructions
+line up and the registers are uniformly shifted by one — ours uses
+`$v0`/`$v1`/`$a3`/`$t0` where retail uses `$v1`/`$a3`/`$t0`/`$t1`.
+
+A reading error worth recording: I first read the two listings as identical
+because I matched `$2` against `$v1`. `$2` is `$v0`. When comparing a numbered
+listing against a named one, translate one side properly or the eye will pair
+them up in order and see agreement that is not there.
+
 ### An `if`/`else` join can cost a callee-saved register
 
 `func_8005988C` opens a handle, uses it twice, and returns either `-1` or the
@@ -1815,9 +1841,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-354 of 1794 functions decompiled and byte-matching.
+356 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~354 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~356 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
