@@ -432,6 +432,31 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Two zeros: cc1psx chains what retail materialises twice
+
+`func_8003CEB8` is a CRC-16/CCITT loop that matched instruction for instruction
+except for its second initialiser. Retail emits two independent zeros:
+
+    addu $v1,$zero,$zero      crc = 0
+    blez $a1,.L…
+    addu $a3,$zero,$zero      i = 0   (delay slot)
+
+cc1psx emits one and copies it: `move v1,zero` then `move a3,v1`. Swapping the
+declarations swaps which is the source and which the copy, and never produces
+two independent zeros. Four shapes tried, including a `for` loop and assigning
+`i` inside the guard.
+
+Same family as the register-allocation class — cc1psx deciding a value is
+already available and reusing it — but visible as a *chained copy* rather than a
+different register, which is a distinct enough symptom to name.
+
+**A reading warning, for the second time in one session.** I read this function
+as matching line for line and it did not: at line 3 ours was `addu $7,$3,$zero`
+against retail's `addu $a3,$zero,$zero`, and the difference is `$3` versus
+`$zero`. When comparing a numbered listing against a named one, `objdump` output
+with symbolic names on both sides is the reliable move — I only saw it after
+disassembling the object rather than reading the assembly text.
+
 ### A loop with two entry points is not reachable from structured C
 
 `func_800358A0` walks backwards zeroing bytes above a threshold. Retail's loop
@@ -1878,9 +1903,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-363 of 1794 functions decompiled and byte-matching.
+364 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~363 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~364 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

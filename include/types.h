@@ -32,4 +32,7 @@ typedef struct {
     s32 w[7];
 } Words7;
 
+/* Script opcode handler: dispatched from a table by a byte from the stream. */
+typedef void (*ObjFn)(u8 *);
+
 #endif /* TYPES_H */

@@ -37,3 +37,4 @@ func_80015780
 func_8001EF1C
 func_8001EF78
 func_800358A0
+func_8003CEB8
