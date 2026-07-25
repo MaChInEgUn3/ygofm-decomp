@@ -406,6 +406,34 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### A batch that mostly did not land, and what it says about the band
+
+One of four. This is the worst yield since the toolchain fix, and the three
+misses are all *one* difference each — which is worth recording as a picture of
+where the 16-22 band actually is now.
+
+**`func_80019CC8`** leaves a `bgez` delay slot empty where we fill it with the
+next `lui`. Sixteen flag combinations including `-fno-delayed-branch`, plus the
+nested-to-sequential rewrite, no match. The unfilled-delay-slot symptom that
+`-fno-delayed-branch` was found for does not always answer to it.
+
+**`func_80049544`** tests `v > 0 && v < 4` and cc1psx folds it into the unsigned
+range check `(v - 1) < 3`, while retail keeps two branches (`blez` then `slti`).
+Nested `if`s and a local for the base both still fold. Instruction counts are
+equal, so this is a *transformation* difference rather than a shape one — the
+source clearly had two comparisons and there is no obvious way to stop cc1psx
+combining them.
+
+**`func_8004BAE4`** is one register: retail reuses the `lui` register for the
+loaded pointer, ours uses a separate one. Already at `-O2 -G0`, which is the
+setting that produces that reuse elsewhere.
+
+The three together suggest the remaining functions in this band are not blocked
+on shapes I have not learned, but on a small number of allocator and
+transformation behaviours I cannot yet steer. That is a different problem from
+the first 150 functions, and it argues for spending the next focused effort on
+those behaviours rather than on more candidates.
+
 ### Counting materialisations generalises beyond `return`
 
 Three functions have now been fixed by the same act of counting, and it is worth
@@ -1438,9 +1466,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-326 of 1794 functions decompiled and byte-matching.
+327 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~326 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~327 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
