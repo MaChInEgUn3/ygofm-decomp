@@ -220,6 +220,21 @@ addiu $t1, $zero, <index>
 ```
 which cannot be expressed in C at all. Filter these out before picking targets.
 
+### Build performance
+
+Wall time is dominated by process-startup latency, not computation -- a full rebuild spends seconds of CPU across minutes of real time, and under Wine every PsyQ invocation pays that cost (~278 per full build). `build.py` therefore does two things:
+
+- **Concurrency.** Planning (which objects exist, and their `.text` order) is separated from building, so compiles are order-independent and run in a thread pool. The default `-j` deliberately oversubscribes the cores, since the work is latency-bound. On the 2-core Linux VM a full rebuild went from **9m27s to 21s**.
+- **Incrementality.** An object is skipped when it is newer than its inputs. For a C file those are its source, every header in `include/`, and `build.py` itself -- the per-function flag tables live there, so editing it can change any object's contents. Run stubs are rewritten only when their contents change, because rewriting unconditionally would bump the mtime and defeat the check. A rebuild with nothing changed takes **0.95s**.
+
+`is_stale()` treats a missing dependency as stale rather than ignoring it, so a mistake costs a rebuild and never a wrong binary. The sha1 check remains the backstop.
+
+### splat must stay idempotent
+
+`splat split` regenerates `asm/` *and* rewrites `config/undefined_syms_auto.txt` (which it opens with `"w"` -- it is output, not accumulated state). Both artifacts must be committed **from the same run**, or re-running splat produces churn that looks like a platform or version difference and is neither.
+
+This was broken once: the config changed several times during setup without `asm/` being regenerated alongside it, so a clean-tree `splat split` reproducibly dirtied five files. The symptom was cosmetic -- the old asm spelled `0x8009B48F` as `D_8009B48E + 0x1`, offsetting from a symbol that existed when it was generated, where a fresh run emits `D_8009B48F` directly. The build produces the same sha1 either way. Fixed by regenerating and committing both together; verify with: clean tree, `splat split`, `git status` shows nothing.
+
 ### Progress
 
 139 of 1794 functions decompiled and byte-matching.
