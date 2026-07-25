@@ -174,6 +174,7 @@ extern u16 D_800F2B22[];
 extern s32 D_800E9EA8[];
 extern u8 D_8017A1D8[];
 extern u8 D_801AB000[];
+extern u8 D_800907D8[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -347,7 +348,13 @@ extern u8 D_8009B26C;
 extern u8 D_8009B26C[];
 #endif
 extern u8 D_8009B26D[];
+/* Aggregate by default; func_8002D62C reaches it gp-relatively. See the
+ * per-file declaration note on D_8009B398. */
+#ifdef D_8009B269_IS_SCALAR
+extern u8 D_8009B269;
+#else
 extern u8 D_8009B269[];
+#endif
 extern s32 D_800938A0[];
 extern u16 *D_80092A90;
 extern s32 *D_80094770;
