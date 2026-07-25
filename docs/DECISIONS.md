@@ -383,6 +383,31 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### The `jal` class after the version fix: two batches, 14 of 14
+
+With the right compiler, the flag tables 40% smaller, and a sweeper that no
+longer lies, hit rate went from ~60-85% to **100% across two batches** —
+`func_800159D8` and five siblings (two-call thunks), `func_80038690`,
+`func_80042A78`, `func_80047278`, `func_80059C9C`, `func_8005C530`, and the
+`func_80015C0C` family. None needed a flag override. That is the clearest
+measure of what the wrong compiler was costing: not just the parked functions,
+but a third of every batch.
+
+Two practical notes from writing them:
+
+**A thunk's parameters come from its callee's prototype, not from its own asm.**
+Six two-call thunks looked argument-free; two of them call functions that read
+`$a0`, and cc1psx refuses to compile the call rather than silently forwarding
+nothing. Deriving the thunk's signature from `include/functions.h` — after
+filling in the callee from *its* asm — is the reliable order of operations.
+
+**`D_800E9EC8[6] |= 2` matches without any struct trick**, even though it is a
+read-modify-write of one byte and the retail code forms the base with
+`lui`/`addiu` before both accesses. So the struct-array pattern is for the case
+where two *different* offsets are touched; a single offset read and written
+folds correctly on its own. Four existing functions already use this symbol as a
+plain `u8` array, and leaving that alone was right.
+
 ### The struct-array pattern generalises, and the park is nearly dry
 
 Four more parked functions fell to the pattern from the previous section plus
@@ -822,9 +847,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-237 of 1794 functions decompiled and byte-matching.
+251 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~237 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~251 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
