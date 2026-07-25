@@ -2,6 +2,15 @@
 # tools_src/candidates.py so they are not offered again. See docs/DECISIONS.md
 # for what each class means and what has already been tried.
 #
+# When parking a function, put its best candidate C in parked/<func>.c. The
+# first 37 entries below were parked without doing that, and the near-miss
+# source is gone -- which means the flag sweep and the permuter can never be
+# re-run on them without decompiling from scratch. That mattered the moment
+# -fno-schedule-insns turned out to have been wrongly excluded from the sweep
+# set: the functions most likely to be unblocked by it are exactly the ones
+# whose candidates were thrown away. Only func_80040390 and func_800594C0
+# survived, because they happened to still be in scratch.
+#
 # --- register allocator (closed: no flag in 2.8.1, permuter saturates) ---
 func_80071424
 func_80071460
