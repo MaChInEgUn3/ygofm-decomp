@@ -406,6 +406,31 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Counting materialisations generalises beyond `return`
+
+Three functions have now been fixed by the same act of counting, and it is worth
+stating as one rule rather than three special cases:
+
+**Count how many times the target materialises a value. That is how many times
+the source writes it.**
+
+| function | target | source |
+|---|---|---|
+| `func_8004BAA0` | one `subu` reached by two paths | one `return` |
+| `func_80047B68` | two `addiu $v0,$zero,1` | two `return 1;` |
+| `func_8005A878` | one `addiu $v1,$zero,1` at a join, copied to `$v0` at the end | one variable, one assignment, one `return` |
+
+`func_8005A878` is the version that shows it is not about `return` at all. Retail
+zeroes `$v1` in the first branch's delay slot, sets it to `1` at a shared label,
+and copies it to `$v0` on the way out — which is `s32 r = 0; if (…) r = 1;
+return r;`. Written as three early returns it produced three separate `li $v0,1`
+and did not match, even though the instruction *count* happened to be identical.
+
+The corollary is the useful part: **an accumulator variable and a set of early
+returns are distinguishable in the object code**, so the target tells you which
+one the original used. Look for a value written at a join label and copied to
+`$v0` at a single exit — that is an accumulator.
+
 ### The shared-exit rule runs both ways
 
 `func_80047B68` returns `1` from both paths and was one instruction short with a
@@ -1413,9 +1438,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-322 of 1794 functions decompiled and byte-matching.
+326 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~322 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~326 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
