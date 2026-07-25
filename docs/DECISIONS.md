@@ -423,6 +423,35 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Filtering out the closed-class signatures restores the rate
+
+First batch drawn from the *clean complement* — candidates with neither a
+same-basic-block duplicate `%hi` nor an adjacent `blez`/`slti` — landed **3 of
+3** after several batches at 1-2. The filter costs nothing to apply and should be
+part of candidate selection from now on:
+
+    exclude: duplicate %hi within one basic block   (needs an alias, and often
+                                                     an allocator disagreement
+                                                     on top)
+    exclude: blez/bgtz followed within 2 by slti    (the range-check fold)
+
+Three shapes worth recording from this batch:
+
+**A stack buffer passed to a callee** shows up as a frame much larger than the
+locals need, with `addiu $a0,$sp,0x20` and nothing initialising that area. The
+frame layout gives the size: outgoing args below, buffer, then `$ra`.
+
+**A nested `switch` inside an `if`** — `func_8005C768` tests the high half of a
+word, then switches on the low half. Both levels read exactly as the earlier
+`switch`-versus-`if`-chain rule predicts: consecutive comparisons branching *to*
+their cases, with the default as the fall-through.
+
+**Two `lui`s for one symbol in different delay slots is normal**, not the
+duplicate-`%hi` signature. `func_8005A0DC` fills two branch delay slots with the
+same `lui $v1,%hi(D_800F2B22)`, which cc1psx does on its own. The signature that
+needs an alias is two materialisations in *one* basic block; the detector already
+distinguishes them, and this batch confirms the distinction is real.
+
 ### How much is actually left, measured rather than guessed
 
 Yield dropped to 1-2 per batch and my first reading was "the 16-23 band is
@@ -1691,9 +1720,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-339 of 1794 functions decompiled and byte-matching.
+342 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~339 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~342 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
