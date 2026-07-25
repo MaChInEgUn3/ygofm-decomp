@@ -240,6 +240,7 @@ extern ObjFn D_80090EAC[];
 extern u8 D_801D1880[];
 extern u8 *D_8009B3E0;
 extern u16 D_8009B322;
+extern s8 D_800909D4[][6];
 extern u8 D_80090E58[];
 extern s8 D_8009B408;
 extern u8 D_800F2878[];
@@ -305,6 +306,8 @@ extern s16 D_800FE0CC;
 extern u8 *D_8009B458;
 /* Alias for D_8009B458; see config/symbol_aliases.txt. */
 extern u8 *Base2_8009B458;
+extern u8 Base2_8009B364[];
+extern u8 Base2_801D0000[];
 extern u8 *D_8009B45C;
 /* Alias for D_8009B45C; see config/symbol_aliases.txt. */
 extern u8 *Base2_8009B45C;

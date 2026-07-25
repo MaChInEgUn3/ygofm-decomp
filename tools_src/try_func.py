@@ -51,6 +51,31 @@ REG_NAMES = {
 }
 
 
+# config/symbol_aliases.txt gives a second name to an address splat named once,
+# so that gcc materialises the base twice where retail does. The two names
+# assemble to the same address and the same bytes -- but they are spelled
+# differently, so comparing text reports a difference the build does not have.
+# Map every alias back to whichever symbol shares its address.
+def _alias_map():
+    by_addr, out = {}, {}
+    for path, pat in ((ROOT / "config" / "symbol_aliases.txt",
+                       re.compile(r"^\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;")),):
+        if not path.exists():
+            continue
+        for line in path.read_text().splitlines():
+            m = pat.match(line)
+            if m:
+                by_addr.setdefault(int(m.group(2), 16), []).append(m.group(1))
+    for addr, names in by_addr.items():
+        canon = f"D_{addr:08X}".lower()
+        for n in names:
+            out[n.lower()] = canon
+    return out
+
+
+ALIASES = _alias_map()
+
+
 def normalise(line):
     """Reduce an asm line to `mnemonic operands` for comparison."""
     line = line.split("#")[0].strip()
@@ -92,6 +117,8 @@ def normalise(line):
     text = re.sub(r"\b0x([0-9a-fA-F]+)\b",
                   lambda m: str(int(m.group(1), 16)), text)
     text = text.lower()
+    for alias, canon in ALIASES.items():
+        text = text.replace(alias, canon)
 
     # Label definitions occupy no bytes; the two sides can never agree on
     # their names, and renumber_labels only handles references.
@@ -116,11 +143,19 @@ def normalise(line):
                   text)
     # gcc writes the register form with an immediate operand; the assembler
     # emits the immediate instruction, which is what the disassembly shows.
+    # Each register-form mnemonic has exactly one immediate form, and they are
+    # not derivable by a shared rule: add/sub take -iu, and/or/xor take -i,
+    # slt takes -i (signed) while sltu takes -iu (unsigned). Folding slt in
+    # with add/sub -- as this did until it was caught on func_8002497C --
+    # rewrites every signed `slt $r,$r,20` into `sltiu` and reports a
+    # signedness difference against the target that does not exist. Two
+    # functions were mis-analysed for it before the micro-test showed the
+    # tool inventing the diff.
+    _IMM = {"add": "addiu", "sub": "subiu", "and": "andi", "or": "ori",
+            "xor": "xori", "slt": "slti", "sltu": "sltiu"}
     text = re.sub(r"^(add|sub|and|or|xor|slt|sltu)u? (\$\w+),(\$\w+),(-?\d+)$",
-                  lambda m: f"{m.group(1)}iu "
-                            f"{m.group(2)},{m.group(3)},{m.group(4)}"
-                  if m.group(1) in ("add", "sub", "slt", "sltu")
-                  else f"{m.group(1)}i {m.group(2)},{m.group(3)},{m.group(4)}",
+                  lambda m: f"{_IMM[m.group(1)]} "
+                            f"{m.group(2)},{m.group(3)},{m.group(4)}",
                   text)
     return text
 

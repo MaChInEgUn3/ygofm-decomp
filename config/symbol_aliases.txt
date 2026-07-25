@@ -11,3 +11,10 @@ Base2_8009B45C = 0x8009B45C;
 
 # func_80049CB0 loads the D_8009B458 pointer twice in one basic block.
 Base2_8009B458 = 0x8009B458;
+
+# func_8002497C reads this counter once to test it and once to index with, in
+# two different basic blocks, and materialises the address for each.
+Base2_8009B364 = 0x8009B364;
+
+# func_8002CCE4 forms this bitmap's base once in each arm of its if/else.
+Base2_801D0000 = 0x801D0000;

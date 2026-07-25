@@ -1,0 +1,22 @@
+	.text
+	.ent	func_8002497C
+func_8002497C:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, extra= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+	lui	$2,%hi(D_8009B364) # high
+	lbu	$2,%lo(D_8009B364)($2)
+	#nop
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L3
+	slt	$2,$4,20
+	.set	macro
+	.set	reorder
+
+	bne	$2,$0,$L4
+$L3:
+	move	$2,$0
+$L4:
+	j	$31
+	.end	func_8002497C
