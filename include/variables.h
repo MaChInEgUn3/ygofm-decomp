@@ -198,6 +198,8 @@ extern u8 D_8009B39C[];
 extern u8 D_8009B3A2[];
 extern u8 *D_8009B328;
 extern ObjFn D_80090EAC[];
+extern u8 D_801D1880[];
+extern u8 *D_8009B3E0;
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];

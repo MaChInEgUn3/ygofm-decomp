@@ -173,6 +173,7 @@ void func_80039E9C(void);  /* PROVISIONAL */
 void func_80030198(void);  /* PROVISIONAL */
 void func_80031084(void);  /* PROVISIONAL */
 void func_800357E8(s32 arg0);  /* PROVISIONAL */
+void func_8003CF14(u8 *arg0);  /* PROVISIONAL */
 void func_80019B2C(void);
 void func_8004544C(void);
 
