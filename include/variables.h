@@ -168,6 +168,7 @@ extern u8 D_8009B144;
 extern s8 D_8009B360[];
 extern u8 D_800F5918[];
 extern u8 D_801A8000[];
+extern u8 D_800EB0F8[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -287,9 +288,13 @@ extern u8 D_800EAF08[];
  * field offset -- see the two-field addressing note in docs/DECISIONS.md. */
 typedef struct {
     u8 unk0[0x11];
-    u8 unk11;
-    u8 unk12[6];
-    u8 unk18;
+    u8 unk11;    /* +0x11 */
+    u8 unk12;
+    u8 unk13;    /* +0x13 */
+    u8 unk14;
+    u8 unk15;    /* +0x15 */
+    u8 unk16[2];
+    u8 unk18;    /* +0x18 */
     u8 unk19[3];
 } Rec1C;
 
