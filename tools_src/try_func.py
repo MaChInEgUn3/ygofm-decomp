@@ -104,6 +104,12 @@ def normalise(line):
     text = re.sub(r"^beqz (\$\w+),", r"beq \1,$zero,", text)
     text = re.sub(r"^bnez (\$\w+),", r"bne \1,$zero,", text)
     text = re.sub(r"^negu (\$\w+),(\$\w+)$", r"subu \1,$zero,\2", text)
+    # gcc writes `subiu $sp,$sp,24`; there is no such instruction, and the
+    # assembler emits `addiu $sp,$sp,-24`, which is what the disassembly shows.
+    # Without this the two sides differ on every stack frame ever built.
+    text = re.sub(r"^subiu (\$\w+),(\$\w+),(-?\d+)$",
+                  lambda m: f"addiu {m.group(1)},{m.group(2)},{-int(m.group(3))}",
+                  text)
     # gcc writes the register form with an immediate operand; the assembler
     # emits the immediate instruction, which is what the disassembly shows.
     text = re.sub(r"^(add|sub|and|or|xor|slt|sltu)u? (\$\w+),(\$\w+),(-?\d+)$",
