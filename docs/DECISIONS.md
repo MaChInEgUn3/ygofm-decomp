@@ -406,12 +406,27 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
-**Parked: `func_8003CE74`**, a two-word PRNG mix. Structure, instruction count
-and the `$s`/`$a` registers are all correct; `$v0` and `$v1` are swapped
-relative to retail. Four declaration orders and sixteen flag combinations, no
-match. Same shape as `func_80071424`'s pair — a `$v0`/`$v1` swap that no
-reordering reaches — which is now the largest remaining park class at three
-members.
+### A `$v0`/`$v1` swap can mean the function returns a value
+
+`func_8003CE74` was parked with structure, instruction count and every `$s`/`$a`
+register correct, and `$v0`/`$v1` swapped. Four declaration orders and sixteen
+flag combinations found nothing.
+
+**It returns its result.** `$v0` is the return register, so declaring the
+function `u32` and returning the mixed value puts that value in `$v0` and
+everything else falls into place — no other change. Matched immediately.
+
+This is the mirror of the wrong-return-type problem recorded earlier. There, a
+prototype claiming `s32` for a `void` function was invisible because the callers
+ignored the value. Here the same invisibility runs the other way: **a function
+whose callers all ignore its return value looks like `void` in every call site,
+and the only evidence it returns something is `$v0` holding a live value at
+exit.** So when the registers are right except for a `$v0`/`$v1` swap, check
+whether one of them holds a result at the return.
+
+Tried on the other two members of that park class and it does not fit them, so
+this is a specific tool rather than a general one — `func_80037D2C` and
+`func_80071424` both come out longer when given a return value.
 
 ### Forcing base formation, complete recipe
 
@@ -1154,9 +1169,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-290 of 1794 functions decompiled and byte-matching.
+291 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~290 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~291 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
