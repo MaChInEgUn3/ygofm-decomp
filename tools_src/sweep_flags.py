@@ -55,11 +55,24 @@ COMBOS = [
 
 
 def build_reports(func):
-    """Run the build; return True if `func` is not among the differences."""
+    """Run the build; return True only if it completed and `func` matched.
+
+    The "completed" half is not pedantry. This function used to fall through
+    to "is `func` named in the output?" whenever the byte-identical line was
+    absent -- including when the build *failed*. A link error names the file
+    as `src/func_X.c:(.text+0x24): relocation truncated`, which matches none
+    of the patterns below, so a crashed build read as a clean one and the
+    sweeper reported a combination that does not even link as a MATCH.
+
+    Absence of a complaint is not evidence of success when the thing that
+    would have complained never ran.
+    """
     r = subprocess.run(BUILD, cwd=ROOT, capture_output=True, text=True)
     out = r.stdout + r.stderr
     if "OK: build is byte-identical" in out:
         return True, "whole build matches"
+    if r.returncode != 0 or "sha1  :" not in out:
+        return False, "build failed"
     # Named either as a size error or in the differing list.
     bad = any(func in line for line in out.splitlines()
               if line.strip().startswith(func) or f" {func}:" in line

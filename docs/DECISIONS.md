@@ -383,6 +383,46 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### The sweeper counted failed builds as matches — sixth of the same shape
+
+`sweep_flags.py` reported `func_8001755C` matching at
+`-O2 -G8 -fno-schedule-insns2 -fno-delayed-branch`. That configuration does not
+**link**: at `-G8` the compiler makes `D_80010000` gp-relative, which overflows
+the small-data section, and the linker says
+
+    small-data section too large; lower small-data size limit
+    src/func_8001755C.c:(.text+0x24): relocation truncated to fit: R_MIPS_GPREL16
+
+The sweeper's logic was: if the byte-identical line is absent, check whether the
+function is named in the output; if not, call it clean. A link error names the
+*file* as `src/func_8001755C.c:(.text+0x24): …`, which matches none of the
+patterns it looks for. **So a crashed build read as a clean one.** Every `-G8`
+combination in the sweep was failing to link, and the first of them was reported
+as the answer.
+
+Fixed by requiring the build to have completed — non-zero exit or a missing
+`sha1  :` line is now `build failed`, never a match. Re-swept honestly, the real
+answer is `-O2 -G0 -fno-schedule-insns2 -mno-split-addresses` with a `-G0`
+assembler, and the log now shows eight `build failed` lines above it, which is
+itself the useful information that this symbol cannot be `-G8` at all.
+
+**Absence of a complaint is not evidence of success when the thing that would
+have complained never ran.** That is the sixth instance in this project of one
+failure shape, and the second inside `sweep_flags.py` alone. The running list:
+
+| where | what varied unnoticed |
+|---|---|
+| `config/flag_overrides.json` | not in the staleness check |
+| `-fno-schedule-insns` | effect on output never verified |
+| `YGOFM_DROP_POSTPASS` | not in the flag stamp |
+| `sweep_flags.py` (as-flags) | set `cc` but inherited `as` |
+| prototype reconcile regex | silently skipped pointer returns |
+| `sweep_flags.py` (build status) | treated a failed build as clean |
+
+Every one of them was a tool reporting confidently on something it had not
+actually measured. When a tool says "no", the next question is whether it could
+have said "yes" — and when it says "yes", whether the run it judged completed.
+
 ### `switch` and an `if` chain are distinguishable, even with two cases
 
 `func_800603DC` selects one of three function pointers by comparing against two
@@ -1048,9 +1088,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-279 of 1794 functions decompiled and byte-matching.
+283 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~279 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~283 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
