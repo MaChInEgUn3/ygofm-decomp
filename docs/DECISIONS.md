@@ -383,6 +383,36 @@ effect was never verified, the env var missing from the stamp, and now a tool
 that set one half of a pair. Worth checking any new knob against this list
 before trusting its first result.
 
+### Local declaration order picks the callee-saved registers
+
+`func_80039F90` differed only in its prologue: retail saves `$s1` before `$s0`
+and initialises the counter before the pointer, while ours did the reverse.
+
+    retail:                        ours:
+    sw    $s1,0x14($sp)            sw    $16,16($sp)   <- $s0 first
+    addiu $s1,$zero,0x2            addu  $16,$4,8
+    sw    $s0,0x10($sp)            sw    $17,20($sp)
+    addiu $s0,$a0,0x8              li    $17,2
+
+**cc1psx assigns `$s0`, `$s1`, … in order of first use, so swapping the two
+local declarations swaps the registers and the save order with them.** Writing
+the counter first matched with no other change. This is cheap to try and easy to
+read off the target: whichever value ends up in `$s0` was used first in the
+source.
+
+That makes three distinct things local *declaration* order controls, all found
+in this project: which callee-saved register a value gets (here), where a
+constant is materialised (`func_80044FFC`), and whether an address is folded or
+built in a register (`func_8002E370`). Declaration order is not cosmetic in this
+codebase.
+
+**Parked: `func_8003CE74`**, a two-word PRNG mix. Structure, instruction count
+and the `$s`/`$a` registers are all correct; `$v0` and `$v1` are swapped
+relative to retail. Four declaration orders and sixteen flag combinations, no
+match. Same shape as `func_80071424`'s pair — a `$v0`/`$v1` swap that no
+reordering reaches — which is now the largest remaining park class at three
+members.
+
 ### Forcing base formation, complete recipe
 
 This has now come up six times and each instance needed a slightly different
@@ -1124,9 +1154,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-287 of 1794 functions decompiled and byte-matching.
+290 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~287 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~290 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

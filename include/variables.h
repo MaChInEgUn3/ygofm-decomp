@@ -56,7 +56,9 @@ extern u16 D_8009AF96;
 extern u16 D_8009B220;
 extern u16 D_8009B27C;
 
-extern s32 D_8009AF64;
+/* Two words of PRNG state, mixed together by func_8003CE74. Eight bytes, so
+ * still small data at -G8 even though func_8003CE74 takes its address. */
+extern u32 D_8009AF64[2];
 extern s32 D_8009AF68;
 
 extern u8 D_8009B478;
