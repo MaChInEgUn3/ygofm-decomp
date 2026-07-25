@@ -19,23 +19,24 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
-CPPPSX = PSYQ_BIN / "CPPPSX.EXE"
-CC1PSX = PSYQ_BIN / "CC1PSX.EXE"
-ASM_DIR = ROOT / "asm" / "nonmatchings" / "31D8"
-MASPSX = ROOT / "tools" / "maspsx" / "maspsx.py"
-VENV_PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
-SCRATCH = ROOT / "build" / "scratch"
+# Every toolchain constant comes from build.py rather than being restated
+# here. This file used to keep its own copies, and they went stale without
+# anyone noticing: it still pointed at psyq46 after the SDK was corrected to
+# 4.5, still passed --aspsx-version=2.86, still ran the Windows venv python,
+# and never applied the post-passes. So it would have compiled a candidate
+# with the *wrong compiler* and printed a confident side-by-side diff about
+# it. Importing is what keeps the two honest -- there is nothing left to
+# drift.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build as B  # noqa: E402
 
-CPP_FLAGS = [
-    "-undef", "-D__GNUC__=2", "-lang-c",
-    "-Dmips", "-D__mips__", "-D__mips",
-    "-Dpsx", "-D__psx__", "-D__psx",
-    "-D_PSYQ", "-D__EXTENSIONS__", "-D_MIPSEL",
-    "-D__CHAR_UNSIGNED__", "-D_LANGUAGE_C", "-DLANGUAGE_C",
-    "-Iinclude",
-]
+ROOT = B.ROOT
+PSYQ_BIN, CPPPSX, CC1PSX = B.PSYQ_BIN, B.CPPPSX, B.CC1PSX
+PSYQ_RUNNER = B.PSYQ_RUNNER
+ASM_DIR = B.ASM_FUNCS
+MASPSX, VENV_PYTHON = B.MASPSX, B.VENV_PYTHON
+CPP_FLAGS = B.CPP_FLAGS
+SCRATCH = ROOT / "build" / "scratch"
 
 # cc1psx writes numbered registers; the target disassembly uses ABI names.
 REG_NAMES = {
@@ -139,9 +140,9 @@ def built_lines(func, csrc, extra_flags):
     pre, asm = SCRATCH / "try.i", SCRATCH / "try.s"
 
     for cmd in (
-        [CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
+        [*PSYQ_RUNNER, CPPPSX, *CPP_FLAGS, src.relative_to(ROOT).as_posix(),
          pre.relative_to(ROOT).as_posix()],
-        [CC1PSX, "-quiet", *extra_flags, pre.relative_to(ROOT).as_posix(),
+        [*PSYQ_RUNNER, CC1PSX, *extra_flags, pre.relative_to(ROOT).as_posix(),
          "-o", asm.relative_to(ROOT).as_posix()],
     ):
         r = subprocess.run([str(c) for c in cmd], cwd=ROOT,
@@ -156,14 +157,24 @@ def built_lines(func, csrc, extra_flags):
     masm = SCRATCH / "try.maspsx.s"
     with open(asm) as fin, open(masm, "w") as fout:
         r = subprocess.run(
-            [str(VENV_PYTHON), str(MASPSX), "--aspsx-version=2.86",
-             "--macro-inc"],
+            [str(VENV_PYTHON), str(MASPSX),
+             f"--aspsx-version={B.ASPSX_VERSION}", "--macro-inc"],
             stdin=fin, stdout=fout, stderr=subprocess.PIPE, text=True, cwd=ROOT)
     if r.returncode != 0:
         sys.exit(f"maspsx failed:\n{r.stderr[:4000]}")
 
+    # The build applies these after maspsx; a diff taken without them is a
+    # diff against a file the build would never produce.
+    text = masm.read_text().splitlines()
+    if func in B.DELAY_SLOT_MACRO_FUNCS:
+        text = B.fill_delay_slot_with_macro_tail(text)
+    if func in B.SMALL_DATA_NOP_FUNCS:
+        text = B.insert_small_data_load_delay_nops(text)
+    if func in B.HOIST_EPILOGUE_FUNCS:
+        text = B.hoist_epilogue_out_of_delay_slot(text)
+
     out, inside = [], False
-    for line in masm.read_text().splitlines():
+    for line in text:
         if line.startswith(f"{func}:"):
             inside = True
             continue
@@ -203,7 +214,10 @@ def renumber_labels(lines):
 def main():
     if len(sys.argv) < 3:
         sys.exit(__doc__)
-    func, csrc, flags = sys.argv[1], sys.argv[2], sys.argv[3:] or ["-O2", "-G8"]
+    func, csrc = sys.argv[1], sys.argv[2]
+    # Default to the flags the build would use for this very function,
+    # including any per-function override, not to a guess at the defaults.
+    flags = sys.argv[3:] or list(B.PER_FUNC_FLAGS.get(func, B.CC1_FLAGS))
 
     want = renumber_labels(target_lines(func))
     got = renumber_labels(built_lines(func, csrc, flags))
