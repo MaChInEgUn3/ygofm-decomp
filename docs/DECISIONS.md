@@ -279,6 +279,51 @@ The general lesson, which has now cost time twice in this project: **a split
 observed on a handful of samples is a hypothesis. Scan the whole binary before
 letting it justify not building something.**
 
+### A sub-pattern inside the register-allocation class: `$a0` as scratch
+
+Three functions parked in one batch (`func_80042874`, `func_800495A4`,
+`func_8007368C`) turned out to share something specific, and it is worth
+writing down because the register-allocation class has been treated as
+structureless until now.
+
+In all three the instruction sequence is identical to retail — same opcodes,
+same order, same offsets — and only the register *assignment* differs. And it
+differs the same way each time: **we use `$a0`/`$t0` as a scratch temporary
+where retail uses `$v0`/`$v1`.**
+
+    retail:  lbu  $v0, 0x814($v0)      ours:  lbu  $4, 2068($3)
+    retail:  lbu  $v1, 0x0($v0)        ours:  lbu  $4, 0($2)
+    retail:  lw   $v0,0x38($sp) / $v1,0x30 / $t0,0x34
+    ours:    lw   $3,48($sp)   / $8,52     / $2,56
+
+cc1psx knows the argument registers are dead after the call and reuses them;
+retail's build preferred the return registers. Whatever causes that, it is
+*systematic*, not random — so this is a candidate for a single fix that
+unlocks a group rather than three separate puzzles. The obvious guesses
+(`-O1`, `-fno-schedule-insns2`, and the rest of the sweeper's sixteen
+combinations) do not do it.
+
+Not chased further in this batch, on the standing rule that
+register-allocation-only differences get parked rather than ground on. Logged
+here so the next attempt starts from a described pattern instead of rederiving
+it. `tools_src/permute.py` is the right tool to point at these, since the
+structure is already correct and only the allocation needs searching.
+
+### `ByteReader` and the limit of the struct trick
+
+`func_80070988` reads the field at +4 and writes the field at +8 of
+`D_800F5BE8`. The existing note in `include/variables.h` says modelling that
+object as a struct is what makes the retail base-then-offset addressing come
+out, and that is true when there is *one* field access. With *two*, cc1psx
+uses a single `lui` and folds both `%lo` offsets, dropping the `addiu` that
+forms the base — two instructions short.
+
+Three C forms were tried: the direct expression, a local `ByteReader *` before
+the call, and the same local after the call. The middle one keeps the base in
+`$s0` across the call, which adds a register save retail does not have; the
+other two both fold. Parked. The struct field at +4 was added to the typedef
+anyway, since it is now known to exist.
+
 ### The coupled-ordering park: one flag, two orderings, opposite directions
 
 A recurring shape now has four members (`func_80024954`, `func_80038388`,
@@ -485,9 +530,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-211 of 1794 functions decompiled and byte-matching.
+216 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~211 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~216 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

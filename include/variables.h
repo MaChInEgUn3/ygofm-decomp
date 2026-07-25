@@ -73,6 +73,10 @@ extern u8 D_800FE348[];
 extern u8 D_800938AE[];
 
 extern s32 D_8009B400;
+extern u8 D_8009B3EF;
+extern u8 D_8009B3EB;
+extern u8 D_800F5B98[][4];
+extern u8 D_800EAE8F[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
@@ -184,8 +188,9 @@ extern u8 D_800FE040[];
  * it as D_800F5BE8[8] instead lets gcc fold the +8 into the %lo and comes
  * out one instruction short. */
 typedef struct {
-    u8 unk0[8];
-    u8 *cursor;
+    u8 unk0[4];
+    u8 *base;   /* +4 */
+    u8 *cursor; /* +8 */
 } ByteReader;
 
 extern ByteReader D_800F5BE8;
