@@ -107,6 +107,10 @@ def normalise(line):
     # gcc writes `subiu $sp,$sp,24`; there is no such instruction, and the
     # assembler emits `addiu $sp,$sp,-24`, which is what the disassembly shows.
     # Without this the two sides differ on every stack frame ever built.
+    # Variable shifts: gcc writes `sra $2,$2,$3`, the assembler emits `srav`.
+    # Same for sllv/srlv. Without this every variable shift reads as a diff.
+    text = re.sub(r"^(sra|sll|srl) (\$\w+),(\$\w+),(\$\w+)$",
+                  r"\1v \2,\3,\4", text)
     text = re.sub(r"^subiu (\$\w+),(\$\w+),(-?\d+)$",
                   lambda m: f"addiu {m.group(1)},{m.group(2)},{-int(m.group(3))}",
                   text)
