@@ -423,6 +423,26 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### One function needing three different mechanisms
+
+`func_8002D62C` took four passes and each failure named a mechanism already in
+the toolbox but not applied. Worth writing out, because the three interact and
+none alone was enough:
+
+1. **Wrong declaration form.** `D_8009B269` was an unsized array, so
+   `D_8009B26C = D_8009B269;` stored its *address*. Indexing `[0]` fixed the
+   value but not the addressing.
+2. **Wrong addressing.** Retail reaches it `%gp_rel`, which needs the scalar
+   declaration — the per-file guard, now on its third symbol.
+3. **Missing load-delay `nop`.** With both symbols gp-relative, maspsx omitted
+   the `nop` between the `lbu` and the `sb`, because it discards
+   `.extern sym,size` and cannot tell the symbol is small data.
+   `SMALL_DATA_NOP_FUNCS` exists for exactly that.
+
+The lesson is about *order of diagnosis* rather than any one mechanism: a wrong
+declaration masks an addressing problem, which masks a post-pass problem. Each
+fix revealed the next, and none of the three was visible from the first diff.
+
 ### Naming intermediate results fixes scheduling, and a cascade nearly hid it
 
 `func_80022F98` computes two coordinate differences and stores them, then reads
@@ -1764,9 +1784,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-345 of 1794 functions decompiled and byte-matching.
+347 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~345 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~347 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
