@@ -122,6 +122,12 @@ AS_FLAGS = [
 #              PER_FUNC_AS_FLAGS too, so the assembler agrees.
 _O1_G8 = ["-quiet", "-O1", "-G8"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
+# Hypothesis under test: some units were built without gcc filling delay
+# slots, leaving that to aspsx.
+_O2_G0_NODELAY = ["-quiet", "-O2", "-G0", "-fno-delayed-branch"]
+_O1_G0_NODELAY = ["-quiet", "-O1", "-G0", "-fno-delayed-branch"]
+_O2_G0_NODELAY_MACRO = ["-quiet", "-O2", "-G0", "-fno-delayed-branch",
+                        "-mno-split-addresses"]
 # -mno-split-addresses leaves the address in macro form for the assembler to
 # expand via $at, which is what the retail code shows for these.
 _O1_G0_MACRO = ["-quiet", "-O1", "-G0", "-mno-split-addresses"]
@@ -163,6 +169,7 @@ PER_FUNC_FLAGS = {
     "func_800829A0": _O1_G8,
     "func_800829C0": _O1_G8,
     "func_8006C30C": _O1_G8,
+    "func_800498F8": _O2_G0_NODELAY_MACRO,
     "func_800156B8": _O1_G8,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
@@ -193,6 +200,7 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
 # gp-relative instruction, leaving the function an instruction short. So
 # every -G0 function gets a -G0 assembler, not just the macro-form ones.
 PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
+PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 
 
 def run(cmd, **kwargs):

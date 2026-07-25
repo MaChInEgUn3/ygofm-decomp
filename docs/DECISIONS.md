@@ -190,15 +190,18 @@ return 1;
 
 **A `u8` read that gets sign-extended by `sll`/`sra` is a cast, not an `s8` load.** Where the retail code does `lbu` then `sll 24` / `sra 24`, assigning to an `s8` local lets gcc collapse the whole thing into a single `lb` and the function comes out two instructions short. Cast at the point of use instead: `D_8009AF76 - (s8)arg0[0x16]`.
 
-**The register-allocation class is the dominant blocker, and attacking it directly did not work.** Most functions parked recently have correct structure, correct instruction count, and differ only in which registers gcc chose. What has been tried and does *not* shift them:
+### An unfilled delay slot means `-fno-delayed-branch`
 
-- every optimisation level (`-O0`, `-O1`, `-O2`, `-O3`) crossed with `-G8`/`-G0`;
-- the deref-vs-index form, which does fix operand-order differences but not register choice;
-- decomp-permuter, which on `func_800498F8` reached score 10 in ~7 minutes without converging, and whose best candidate was a meaningless `D_8009B458 += 0;`.
+**This cracked what had looked like an unbeatable register-allocation class.** Read the tell first: if the retail code leaves a branch's delay slot as a `nop`, gcc did *not* schedule that code -- gcc fills delay slots itself, so an empty one means the original unit was compiled with delay-slot filling off and the assembler left the slot alone.
 
-One suggestive detail worth following up: the retail code for `func_800498F8` leaves the `beq` delay slot as a `nop`, where gcc fills delay slots itself. An unfilled slot points at the *assembler* having done the scheduling, which would mean these units were compiled with `.set reorder` and aspsx placed the delay slots. If so, no combination of cc1psx flags will reproduce them and the fix belongs in the maspsx layer -- this is unverified but is the most promising lead, and worth more than further flag sweeps.
+`-fno-delayed-branch` reproduces it. And it does far more than add a nop: with the slot unfilled, gcc's whole register assignment changes, which is why sweeping `-O` levels never helped. Everything that had failed on `func_800498F8` -- all four `-O` levels crossed with both `-G` values, the deref form, and ~7 minutes of decomp-permuter that only reached score 10 with a meaningless `D_8009B458 += 0;` -- came down to a missing flag.
 
-Practical guidance meanwhile: park these quickly rather than grinding. Structural patterns (the ones documented above) are where the yield is; a batch of new functions runs at 40-90% while this class runs near zero.
+Two other things were needed for that function, both generalisable:
+
+- **A value still live in `$v0` at exit means the function returns it.** The retail code loaded the halfword into `$v0` and never used it again, which only makes sense as a return value. Declaring the function `void` forced gcc to pick a different register; giving it the return type put the value where the original had it.
+- **`-mno-split-addresses` plus a `-G0` assembler** to reproduce `lui $v1` / `lw $v1,%lo(sym)($v1)`, where the address computation reuses the destination register. gcc's own expansion uses a separate temp; the assembler's reuses the destination, so the address has to be left in macro form for `as` to expand.
+
+So the checklist for a function that is structurally right but has the wrong registers: look for an empty delay slot, look for a value sitting in `$v0` at exit, and check whether the address computation reuses its destination register. Those three cover the cases parked before this was understood, and they are worth trying *before* reaching for the permuter.
 
 **A specific sub-case: the retail code overwrites the source pointer's register with its last load.** Where the original reads `lbu $a1, 0x0($a1)` -- destroying the pointer because it is dead afterwards -- gcc allocates a fresh register instead. Structure and instruction count are otherwise identical. Seen in `func_8003006C` and `func_8004143C`; `-O1`/`-G0` and the deref form do not shift it. (`func_8006C30C` looked like this class but was in fact plain register alternation, and `-O1` did fix that one, so check whether the pointer is genuinely being overwritten before assuming.)
 
@@ -264,9 +267,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-172 of 1794 functions decompiled and byte-matching.
+173 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~172 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~173 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
