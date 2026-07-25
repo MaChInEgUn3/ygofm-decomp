@@ -186,6 +186,7 @@ PER_FUNC_FLAGS = {
     "func_80030E30": _O2_G8_MACRO,
     "func_80037CE0": _O1_G8,
     "func_80030E7C": _O2_G8_MACRO,
+    "func_80044D48": _O2_G0,
     "func_800495A4": _O2_G0,
     "func_80049CB0": _O2_G0,
     "func_80049EC8": _O2_G0,
@@ -261,6 +262,7 @@ PER_FUNC_AS_FLAGS["func_8001755C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80044DA0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CB0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049EC8"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80044D48"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049600"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"

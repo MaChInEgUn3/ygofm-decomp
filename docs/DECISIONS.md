@@ -160,8 +160,8 @@ the next one meaningful:
 
 1. **Is the instruction count right?** If not, nothing else is diagnostic. A
    sweep over a wrong-length function tells you only that the length is wrong.
-2. **Does the source's read order match the target's?** Three functions in one
-   session came down to this alone — `func_80049F10`, `func_80037CE0`,
+2. **Does the source's read order match the target's?** More functions have
+   come down to this alone than to anything else — `func_80049F10`, `func_80037CE0`,
    `func_800373C8`. Declaration order *is* read order. Thirty seconds to check.
 3. **Is the branch polarity right?** Look at which path retail falls through
    into; cc1psx emits the fall-through for the branch written as not-taken.
@@ -1793,9 +1793,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-350 of 1794 functions decompiled and byte-matching.
+352 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~350 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~352 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
