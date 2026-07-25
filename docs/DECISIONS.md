@@ -406,6 +406,36 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Two `lui`/`addiu` pairs for one symbol means two symbols in the source
+
+`func_80036BCC` walks two pointers, one by 2 and one by `0x1E`, and retail
+materialises the *same* address twice:
+
+    lui   $v0,%hi(D_801D9174)
+    addiu $a2,$v0,%lo(D_801D9174)
+    lui   $v0,%hi(D_801D9174)      <- again
+    addiu $a1,$v0,%lo(D_801D9174)
+
+cc1psx will not emit that from one symbol — it CSEs the address, which is why
+`u8 *rec = D_801D9174; u8 *key = D_801D9174;` comes out an instruction short.
+**Two independent materialisations of one address mean the source referenced two
+different objects that happen to start at the same place.** splat names only one
+symbol there (`config/undefined_syms_auto.txt` has a single entry at
+`0x801D9174`), so reproducing this needs a second symbol declared at the same
+address, which the current single-symbol-per-address setup cannot express.
+
+Parked, and the reason is worth separating from the usual ones: this is not a
+flag, a shape, or an ordering problem. It is a limitation of how the project
+declares data, and fixing it means adding an alias symbol to the linker script
+rather than rewriting C.
+
+**Also parked: `func_8002C518`.** Polarity is now correct — swapping the `if`/`else`
+arms fixed the branch and both `-1`/`1` materialisations. What remains is a single
+delay-slot filler: retail puts `addiu $v0,$zero,0x1` in the `bgez` delay slot
+where we emit `nop`, same instruction count. Retail computed a `1` in `$v0` that
+nothing visibly consumes; three return-value shapes were tried and none
+reproduces it.
+
 ### One shared exit in the target means one `return` in the source
 
 `func_8004BAA0` is a `memcmp`: compare `arg2` bytes, return the difference at
@@ -1193,9 +1223,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-295 of 1794 functions decompiled and byte-matching.
+297 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~295 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~297 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
