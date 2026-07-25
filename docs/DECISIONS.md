@@ -279,6 +279,65 @@ The general lesson, which has now cost time twice in this project: **a split
 observed on a handful of samples is a hypothesis. Scan the whole binary before
 letting it justify not building something.**
 
+### The park classes are one class, and it questions the toolchain version
+
+Chasing `func_800495A4` collapsed three separately-recorded park classes into
+one, and the conclusion is uncomfortable enough to state carefully.
+
+**Step 1 — the mixed-translation-unit idea is dead.** The previous entry
+hypothesised that some TUs were built by a different toolchain. Free to
+falsify, and it fails: every parked function is *sandwiched between matching
+ones*. `func_800495A4` sits 0x10 after `func_80049594` and 0x38 before
+`func_800495DC`, both matching. Interleaved functions cannot be in different
+translation units.
+
+**Step 2 — the neighbours name the flags.** Both are in `_G0_FUNCS`, so
+`-O1 -G0`, and both reach `D_8009B458` exactly as we do. Compiling
+`func_800495A4` the same way makes the **registers match** — `$v0` reused
+throughout, as retail has. What breaks is the ordering: retail schedules the
+prologue down into the `lw`'s load-delay slot, and `-O1` does not.
+
+    retail:              -O1 -G0:              -O2 -G0:
+    lui   $v0,%hi        subu  $sp,$sp,24      lui  $2,%hi
+    lw    $v0,%lo($v0)   sw    $31,16($sp)     lw   $3,%lo($2)   <- $3, not $2
+    addiu $sp,$sp,-0x18  lui   $2,%hi          subu $sp,$sp,24
+    sw    $ra,0x10($sp)  lw    $2,%lo($2)      sw   $31,16($sp)
+    lbu   $v0,0x814($v0) nop                   lbu  $4,2068($3)  <- $4, not $2
+                         lbu   $2,2068($2)
+
+So `-O1` gives retail's **allocation** with the wrong order, `-O2` gives
+retail's **order** with the wrong allocation. This is the same coupling already
+recorded for the `$s0`-saving wrappers and for the `$a0`-as-scratch group:
+**they were never three classes.**
+
+**Step 3 — the two are one switch, and it cannot be split.**
+`-O1 -G0 -fschedule-insns2` produces cc1psx output **byte-identical** to
+`-O2 -G0` (hashed, `a71113ab` both). Enabling the post-reload scheduler at
+`-O1` changes the *register numbers* as well as the order. Whatever the flag is
+named, in this cc1psx it does not run after allocation — so ordering and
+allocation move together and **this compiler cannot emit retail's combination
+of the two.** That is now measured, not guessed.
+
+**What that leaves.** Not the C: the permuter's 25k variants and every hand
+form failed. Not the flags: the combination is unreachable by construction, not
+merely unfound. Not mixed TUs: falsified above. The remaining candidate is that
+**PsyQ 4.6.0 is the wrong cc1psx for this game** — a version whose scheduler
+genuinely runs after allocation would produce retail's shape.
+
+**Against that, honestly:** the toolchain was double-confirmed, by
+`ghidra_psx_ldr`'s detection and by decomp.me exposing `psyq4.6/cc1psx` for
+this title. But the first is a heuristic and the second may be someone else's
+guess. **And 219 matching functions are weaker evidence than they look** —
+most are small enough that `-O1` and `-O2` produce identical code, so they do
+not discriminate between compiler versions at all.
+
+`func_800495A4` is the ideal discriminator: down to exactly this one
+difference, with its flags pinned by matching neighbours. **Next step is to try
+other PsyQ cc1psx versions against it.** If one matches, the version is wrong
+and a large part of the park is a version artefact. If none does, the version
+survives a real test for the first time and the class needs another
+explanation.
+
 ### Every flag sweep before this commit was void. Read this before trusting one.
 
 `config/flag_overrides.json` feeds `PER_FUNC_FLAGS`, but it was **not** an
