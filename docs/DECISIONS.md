@@ -406,6 +406,30 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### One shared exit in the target means one `return` in the source
+
+`func_8004BAA0` is a `memcmp`: compare `arg2` bytes, return the difference at
+the first mismatch. Two natural C shapes came out two instructions long; the
+matching one has a **single** `return`.
+
+    while (--arg2 != 0 && *arg0 == *arg1) {
+        arg0++;
+        arg1++;
+    }
+
+    return *arg0 - *arg1;
+
+The tell is in the target: both the mismatch branch and the loop-exhausted path
+land on the *same* `subu $v0,$v1,$v0`. **Two paths reaching one instruction means
+one `return` statement, not two returns that happen to compute the same thing.**
+Writing `if (*arg0 != *arg1) return *arg0 - *arg1;` inside the loop and a second
+`return` after it duplicates the subtraction and the loads, which is the two
+extra instructions.
+
+Corollary worth stating: folding the comparison into the loop condition with
+`&&` is what merges the two exits. A `break` would not — it leaves the loop
+condition and the mismatch test as separate branches.
+
 ### A `$v0`/`$v1` swap can mean the function returns a value
 
 `func_8003CE74` was parked with structure, instruction count and every `$s`/`$a`
@@ -1169,9 +1193,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-291 of 1794 functions decompiled and byte-matching.
+295 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~291 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~295 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
