@@ -207,6 +207,74 @@ So the checklist for a function that is structurally right but has the wrong reg
 
 Read the checklist as "these are the knobs that exist", not "these will unlock the parked set".
 
+### The `jal` class is open, and it is the richest vein left
+
+Every batch up to 179 functions avoided `jal` entirely. That was a mistake:
+calls are most of the ~1160 remaining targets, and the shapes that involve
+them turn out to be *easier* than the tiny leaf functions, because a call
+pins down register usage that a 9-instruction leaf leaves free.
+
+Start with **thunks** — one call, no other work. Filter to callees inside the
+game's own code (a call into a PsyQ library function needs that function's
+real prototype, which we do not have). 64 single-call candidates remain in
+the main body alone.
+
+Two things make them cheap:
+
+**Argument forwarding costs no instructions.** `void f(int a) { g(a); }`
+compiles to exactly the same code as `void f(void) { g(); }`, because `$a0` is
+already in place. So the thunk's own arity cannot be read off its asm; infer
+it from the *callee's* asm (which `$aN` it reads before writing) and forward
+everything. The bytes match either way, so getting arity wrong costs
+correctness, not the match — worth being careful about anyway.
+
+**`include/functions.h` is the safety net, and it earned its place.** Two
+callees in the first thunk batch were already decompiled with a different
+return type, and cc1psx refused to compile rather than silently emitting
+different code. That is exactly why cross-file declarations are centralised.
+
+### Signedness at the point of store, again
+
+`func_80039FD4` sets a byte to -1 through a `u8 *`. Written as
+`arg0[0x30] = -1;` cc1psx narrows the constant and emits `li $v0,255`; the
+retail code has `addiu $v0,$zero,-0x1`. The fix is to store through the
+signed type at the point of use, `*(s8 *)(arg0 + 0x30) = -1;`, keeping the
+parameter `u8 *` so it still agrees with the callee. Same lesson as the
+earlier `(s8)` cast rule: **the cast goes where the value is used, not on the
+declaration.**
+
+### A third aspsx behaviour maspsx does not reproduce — and why it can be ignored
+
+cc1psx ends a small frame with the stack restore in the `jr` delay slot:
+
+    lw    $31,16($sp)
+    .set  noreorder
+    j     $31
+    addu  $sp,$sp,24
+
+`lw $31` followed by a `jr $31` is a load-delay hazard. maspsx inserts a `nop`
+after the `lw` and leaves `addu $sp` in the branch delay slot. Real aspsx
+instead **hoists `addu $sp` into the load-delay slot** and leaves the branch
+delay slot empty. Both shapes exist in the retail binary from *byte-identical
+cc1psx output* — verified by hashing, so it is not a compiler-flag difference.
+
+The split is by address: the hoisted form appears only at `0x8007E350` and
+above, inside the library region, and the maspsx form throughout the game's
+own code. So this is very likely a different assembler or assembler setting
+used for Sony's library objects, and it needs no post-pass — those functions
+are out of scope. Recorded so the next person does not mistake it for a
+compiler flag. Five such thunks (`func_8007E350`, `func_8007E370`,
+`func_800857C0`, `func_8008B7E0`, `func_8008D48C`) are dropped for this
+reason, not parked.
+
+**A warning attached to this:** the six *game-region* thunks were first
+committed with a `-fno-schedule-insns2` override, and they matched. The
+override was spurious — cc1psx emits identical output with and without the
+flag for that shape, verified by hash. They match at plain `-O2 -G8`. Do not
+add a flag override just because the build went green with it; confirm the
+flag actually changed the output first. This is the same rule as the false
+negative above, in the opposite direction.
+
 ### Predicting `-G0` before writing the C, and why it cannot be exact
 
 The original game was built from ~234 translation units, and the `-G` model is
@@ -350,9 +418,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-179 of 1794 functions decompiled and byte-matching.
+191 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~179 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~191 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
