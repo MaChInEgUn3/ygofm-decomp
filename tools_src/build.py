@@ -145,6 +145,11 @@ _O2_G0_NOSCHED2_MACRO = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
                          "-mno-split-addresses"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
+# Macro-form addressing does *not* imply -G0. At -G8 with -mno-split-addresses
+# cc1psx emits the bare symbol for every global and the assembler picks the
+# form per symbol: gp-relative for small data, lui $at + %lo for aggregates.
+# That is the only way to get both in one function.
+_O2_G8_MACRO = ["-quiet", "-O2", "-G8", "-mno-split-addresses"]
 # Hypothesis under test: some units were built without gcc filling delay
 # slots, leaving that to aspsx.
 _O2_G0_NODELAY = ["-quiet", "-O2", "-G0", "-fno-delayed-branch"]
@@ -178,6 +183,8 @@ _G0_MACRO_FUNCS = [
 PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
     "func_8001755C": _O2_G0_NOSCHED2_MACRO,
+    "func_80030E30": _O2_G8_MACRO,
+    "func_80030E7C": _O2_G8_MACRO,
     "func_800495A4": _O2_G0,
     "func_80049CB0": _O2_G0,
     "func_80049EC8": _O2_G0,

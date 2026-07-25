@@ -406,6 +406,30 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Macro-form addressing does not imply `-G0`
+
+`func_80030E30` and its sibling reach one symbol gp-relatively and another
+through the assembler's `$at` macro form, in the same function:
+
+    sb  $v0,%gp_rel(D_8009B2EB)($gp)     <- small data, gp-relative
+    lui $at,%hi(D_8009B254)              <- aggregate, assembler-expanded
+    sb  $v0,%lo(D_8009B254)($at)
+
+Every earlier macro-form function in this project was `-G0`, so `-G0` and macro
+form had become linked in my head. They are not. **`-O2 -G8
+-mno-split-addresses` makes cc1psx emit the bare symbol for *every* global and
+lets the assembler choose the form per symbol** — gp-relative for small data,
+`lui $at` + `%lo` for aggregates. That is the only way to get both in one
+function, and it is exactly what these two needed.
+
+This also means the earlier per-file declaration guards are not always the
+answer to mixed addressing. The guard changes what one *symbol* looks like; this
+flag changes what *all* of them look like while leaving the assembler to
+discriminate by size. Try the flag first — it needs no header surgery.
+
+Both combinations are now in `sweep_flags.py`, which had only ever paired macro
+form with `-G0` and so could never have found this.
+
 ### The `$v0`/`$v1` swap class, sixth member and a sharper description
 
 `func_80049CB0` loads the `D_8009B458` pointer twice in one basic block, and the
@@ -1334,9 +1358,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-313 of 1794 functions decompiled and byte-matching.
+316 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~313 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~316 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

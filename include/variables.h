@@ -156,6 +156,7 @@ extern u8 KeyTable_801D9174[];
 extern s32 D_8009B3B8;
 extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
+extern u8 D_8009B254[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
 extern s32 D_8009B450[];
