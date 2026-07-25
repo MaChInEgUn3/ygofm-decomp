@@ -144,6 +144,17 @@ extern u8 D_80091570[];
 extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
 extern u8 D_800E9EF0[];
+extern u8 D_800FE040[];
+/* The retail code forms this object's base address and then reaches the
+ * cursor at +8, which is what a struct field access compiles to -- reaching
+ * it as D_800F5BE8[8] instead lets gcc fold the +8 into the %lo and comes
+ * out one instruction short. */
+typedef struct {
+    u8 unk0[8];
+    u8 *cursor;
+} ByteReader;
+
+extern ByteReader D_800F5BE8;
 
 /* --- more scalars in -G0 units -------------------------------------------- */
 

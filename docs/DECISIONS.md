@@ -175,6 +175,10 @@ Getting this backwards produces a right-sized function whose registers are subtl
 - `lw`/`addiu`/`sw` on the same global around a load is a post-increment: `return *ptr++;`.
 - A function ending in `jr $ra` with the real work in the delay slot is just ordinary scheduling, not something to reproduce deliberately.
 
+**With a ~2s incremental build, `build.py` is now the fast loop.** `try_func.py` existed to avoid a 9-minute rebuild and carries known blind spots (it cannot see assembler-level macro expansion). Prefer editing a candidate and re-running the build: it is the authoritative check, reports which functions differ, and costs about as much as the comparator did.
+
+**A base address formed once, then reached by offsets, means a struct.** When the retail code does `lui` + `addiu` and *then* stores at `0(reg)` and `2(reg)`, indexing an unsized array in C will not reproduce it -- gcc folds the offset into the second `%lo` and the function comes out an instruction short. Modelling the object as a struct and using field access fixes it (`func_8007058C`). Two cautions learned the hard way: a struct of 8 bytes or fewer becomes small data at `-G8` and the link then fails with `relocation truncated to fit: R_MIPS_GPREL16` because the address is far from `$gp`; and taking the base into a local pointer instead is *not* equivalent — gcc CSEs it back.
+
 **Three recurring causes of a wrong-sized function** (all cost an extra instruction, all cheap to fix once recognised):
 - *Reloading a global.* Dereferencing the same global pointer twice makes gcc reload it. The retail code loads once — assign it to a local first (`u8 *p = D_8009B45C;`).
 - *An over-narrow parameter.* A `u8` parameter makes gcc mask with `andi $a0,$a0,0xff` before storing. Where the retail code stores `$a0` straight through, the parameter was word-sized — use `s32`.
@@ -237,9 +241,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-139 of 1794 functions decompiled and byte-matching.
+148 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~139 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~148 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

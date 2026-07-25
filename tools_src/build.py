@@ -154,6 +154,12 @@ PER_FUNC_FLAGS = {
     "func_800828E0": _O1_G8,
     "func_80082900": _O1_G8,
     "func_8003CDF8": _O1_G8,
+    "func_80082920": _O1_G8,
+    "func_80082940": _O1_G8,
+    "func_80082960": _O1_G8,
+    "func_80082980": _O1_G8,
+    "func_800829A0": _O1_G8,
+    "func_800829C0": _O1_G8,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
