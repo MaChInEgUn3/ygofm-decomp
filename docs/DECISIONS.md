@@ -406,6 +406,24 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Two idioms worth recognising on sight
+
+**`andi` / `xori` / `sltiu $v0,$v0,1` is `(x & M) == M`.** cc1psx has no
+compare-equal instruction, so it xors against the expected value and tests for
+zero with `sltiu …,1`. `func_80042960` ends this way and matched first try once
+read that way; the sequence is unambiguous.
+
+**A `jalr` through a loaded register is a function pointer in a struct field.**
+`lw $v0,0x24($s0)` / `beqz` / `jalr $v0` is a null-checked callback, which is
+`VoidFn fn = *(VoidFn *)(arg0 + 0x24); if (fn != 0) { fn(); }`. Note the guard is
+in the source — cc1psx does not insert null checks.
+
+A batch of four landed with no iteration at all, which is the first time that
+has happened in the 16-26 band. The rules accumulated over the last several
+batches — polarity from the fall-through, declaration order, cast at the point of
+use, base formation — are now covering most of what these functions need on the
+first write.
+
 ### `if`/`else` with a join versus an early return
 
 `func_8003D2B8` came out two instructions short as an early return and the right
@@ -1290,9 +1308,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-302 of 1794 functions decompiled and byte-matching.
+306 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~302 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~306 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

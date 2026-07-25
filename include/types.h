@@ -24,4 +24,6 @@ typedef struct {
 /* The dispatch in func_800603DC selects between handlers of this shape. */
 typedef u8 *(*ByteFn)(u8 **);
 
+typedef void (*VoidFn)(void);
+
 #endif /* TYPES_H */
