@@ -50,3 +50,8 @@ Thumbs.db
 
 # Scratch file for per-function flag experiments (see build.py).
 /config/flag_overrides.json
+
+# Local assistant entry point; the content it points at is docs/WORKFLOW.md,
+# which is versioned. Keeping this out of the repo so the project's docs stand
+# on their own.
+/CLAUDE.md

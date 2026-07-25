@@ -1,8 +1,9 @@
 # Yu-Gi-Oh! Forbidden Memories — matching decompilation
 
 Byte-exact recompilation of `SLUS_014.11`. **Not** a reimplementation: every
-function must assemble to the retail bytes. `docs/DECISIONS.md` is the real
-reference and is long; this file is the operational minimum.
+function must assemble to the retail bytes. `DECISIONS.md` in this directory is the
+full reference and is long; this file is the operational minimum — read it
+first, then reach for DECISIONS.md when you need the reasoning behind a rule.
 
 ## Verify everything with the build
 
