@@ -432,6 +432,30 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### A base-formation case the recipe does not cover
+
+`func_8004A8E4` indexes `base[arg0 * 40 + 0x180 + 3]`. Retail adds the constant
+to the *scaled index* first, then the base, then uses `3` as the access offset:
+
+    sll   $v0,$a0,2 / addu / sll $v0,$v0,3     v0 = arg0 * 40
+    addiu $v0,$v0,0x180
+    addu  $a1,$a2,$v0
+    lbu   $v1,0x3($a1)
+
+cc1psx reassociates: it adds the base first and folds `0x180 + 3` into the
+access offset, `lbu $v1,387($v1)`, two instructions shorter. Naming the offset
+in a local, splitting the pointer assignment from its declaration, and both
+together all fail — the reassociation happens regardless of how the source
+groups the additions.
+
+So the recipe's four variants cover *base plus a constant* and *base plus a
+variable index*, but not **base plus (scaled index plus constant)**, where the
+constant can migrate past the base into the addressing mode. Recorded as a gap
+rather than a fifth variant, since nothing found so far closes it.
+
+`func_8004CA60` is parked for the same reason, with `base[off + 0x53C]` inside a
+loop.
+
 ### Two zeros: cc1psx chains what retail materialises twice
 
 `func_8003CEB8` is a CRC-16/CCITT loop that matched instruction for instruction
