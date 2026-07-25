@@ -348,6 +348,56 @@ nested `mfdpsx*.zip` → a multi-part RAR3 that needs the non-free `unrar`
 live in `tools/psyq45/BIN/`, which `/tools/` in `.gitignore` keeps out of the
 repo along with everything else that is not ours to redistribute.
 
+### Auditing the flag tables after the version fix — and walking into the same trap a third time
+
+Every entry in `PER_FUNC_FLAGS`, `PER_FUNC_AS_FLAGS`, and the three post-pass
+sets was derived under PsyQ 4.6, so each was an untested inherited assumption.
+`tools_src/audit_flags.py` drops them one at a time and rebuilds. To make that
+possible `config/flag_overrides.json` now accepts a `null` value meaning "use
+the default" — before, it could only add or change an entry, never remove one,
+so no entry could be falsified.
+
+**Result: 29 of 71 flag overrides were unnecessary, and 22 could be deleted
+outright.** The tables went from 71 entries to 42 compiler + 40 assembler.
+Notably *every* `-fno-schedule-insns2` entry vanished — that flag existed
+purely to work around 4.6 running the post-reload scheduler before register
+allocation, and nothing needs it under 4.5. The flag lists for it are gone;
+`sweep_flags.py` still tries it, since a search space costs nothing to keep
+wide.
+
+**Decoupling that the audit exposed.** Membership of `DELAY_SLOT_MACRO_FUNCS`
+used to imply `-O1 -G0 -mno-split-addresses` *and* a `-G0` assembler *and* the
+post-pass. All seven members match with **default** flags under 4.5 while still
+needing the post-pass, so the set now means only what its name says. The
+coupling was compensating for the wrong compiler.
+
+**Then the same bug for the third time, and it is worth being blunt about.**
+The post-pass audit needed a way to drop a post-pass, which the override file
+cannot express, so it got an env var: `YGOFM_DROP_POSTPASS`. It reported **8 of
+15 post-pass entries unnecessary**. All eight were false. The flag stamp
+recorded compiler flags, assembler flags, and the SDK path — but not post-pass
+membership. So the env var changed no stamp and no mtime, the stale object was
+reused, and the audit read a correctly-built object as proof that the transform
+producing it was unnecessary.
+
+I had already written the rule for this — *"when a tool's input is not a file
+the build system watches, the build system will lie to you and the tool will
+look like it is working"* — and then introduced a **new** unwatched input and
+believed the output. The first instance was `config/flag_overrides.json`, the
+second was reading a green build as evidence a spurious flag did something,
+this was the third.
+
+The fix is structural rather than another patch: the stamp now names **every**
+input that shapes an object — compiler flags, assembler flags, SDK path, and
+post-pass membership. With it, the honest answer is **0 of 15 post-pass entries
+are unnecessary.** All three post-passes are real, including the epilogue
+hoisting, so the "two assemblers in one binary" reading survives.
+
+The generalisable part: an audit tool is only as trustworthy as the build's
+dependency tracking, and *adding a knob to a tool adds an input to the build*.
+Any new way to vary a build has to be registered with the staleness check in
+the same commit, or the tool will confidently report that nothing matters.
+
 ### Every flag sweep before this commit was void. Read this before trusting one.
 
 `config/flag_overrides.json` feeds `PER_FUNC_FLAGS`, but it was **not** an

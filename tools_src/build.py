@@ -136,15 +136,17 @@ AS_FLAGS = [
 #              rather than gp-relative. Such a function usually needs
 #              PER_FUNC_AS_FLAGS too, so the assembler agrees.
 _O1_G8 = ["-quiet", "-O1", "-G8"]
+# -fno-schedule-insns2 flag lists once lived here. Every function that
+# needed them under PsyQ 4.6 matches without them under 4.5, so they are
+# gone: that flag was compensating for 4.6 running the post-reload
+# scheduler before register allocation. sweep_flags.py still tries it,
+# since a search space costs nothing to keep wide.
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
 # Hypothesis under test: some units were built without gcc filling delay
 # slots, leaving that to aspsx.
 _O2_G0_NODELAY = ["-quiet", "-O2", "-G0", "-fno-delayed-branch"]
 _O1_G0_NODELAY = ["-quiet", "-O1", "-G0", "-fno-delayed-branch"]
-_O2_G8_NOSCHED2 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns2"]
-_O1_G8_NOSCHED2 = ["-quiet", "-O1", "-G8", "-fno-schedule-insns2"]
-_O2_G0_NOSCHED2 = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2"]
 
 _O2_G0_NODELAY_MACRO = ["-quiet", "-O2", "-G0", "-fno-delayed-branch",
                         "-mno-split-addresses"]
@@ -160,9 +162,7 @@ _G0_FUNCS = [
     "func_80044FE4", "func_8004503C", "func_800490F0", "func_80049108",
     "func_80049120", "func_800744F4", "func_80080B6C",
     "func_800901D4", "func_80030090", "func_800300AC",
-    "func_80082274", "func_8005949C", "func_80058E3C",
-    "func_80059284", 
-]
+    "func_80082274", ]
 # Stores the assembler expands through $at. These need the macro form from
 # the compiler *and* an assembler that will not treat the symbol as small
 # data, so they carry a PER_FUNC_AS_FLAGS entry too.
@@ -173,29 +173,10 @@ _G0_MACRO_FUNCS = [
     ]
 
 PER_FUNC_FLAGS = {
-    "func_80015010": _O1_G8,
-    "func_80047008": _O1_G8,
-    "func_8004703C": _O1_G8,
-    "func_80038D14": _O1_G8,
-    "func_800828A0": _O1_G8,
-    "func_800828C0": _O1_G8,
-    "func_800828E0": _O1_G8,
-    "func_80082900": _O1_G8,
-    "func_8001B780": _O2_G8_NOSCHED2,
     "func_800495A4": _O2_G0,
-    "func_80071510": _O2_G8_NOSCHED2,
-    "func_8007164C": _O2_G8_NOSCHED2,
     "func_8003CDF8": _O1_G8,
     "func_8003CE48": _O1_G8,
-    "func_80082920": _O1_G8,
-    "func_80082940": _O1_G8,
-    "func_80082960": _O1_G8,
-    "func_80082980": _O1_G8,
-    "func_800829A0": _O1_G8,
-    "func_800829C0": _O1_G8,
-    "func_8006C30C": _O1_G8,
     "func_800498F8": _O2_G0_NODELAY_MACRO,
-    "func_800156B8": _O1_G8,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
@@ -223,9 +204,24 @@ DELAY_SLOT_MACRO_FUNCS = {
     "func_8007A628", "func_8007BEBC", "func_8007BEC8", "func_8007BED4",
     "func_8007BEE0", "func_8007CD04", "func_800862C0",
 }
-_G0_MACRO_FUNCS = _G0_MACRO_FUNCS + sorted(DELAY_SLOT_MACRO_FUNCS)
+# Audit hook. YGOFM_DROP_POSTPASS=func_A,func_B removes those names from the
+# post-pass sets before anything derives from them, so a post-pass entry can be
+# tested the way a flag override can. Needed because these sets also feed
+# PER_FUNC_FLAGS below: a function in DELAY_SLOT_MACRO_FUNCS takes its compiler
+# flags from that membership, so "are the flags needed" and "is the post-pass
+# needed" are different questions and only the first is reachable through
+# config/flag_overrides.json.
+_DROP = {n for n in os.environ.get("YGOFM_DROP_POSTPASS", "").split(",") if n}
+if _DROP:
+    DELAY_SLOT_MACRO_FUNCS -= _DROP
+    SMALL_DATA_NOP_FUNCS -= _DROP
+    HOIST_EPILOGUE_FUNCS -= _DROP
 
-PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in DELAY_SLOT_MACRO_FUNCS})
+# DELAY_SLOT_MACRO_FUNCS used to imply -O1 -G0 -mno-split-addresses flags and a
+# -G0 assembler as well as the post-pass. The flag audit showed all seven match
+# with default flags under PsyQ 4.5 while still needing the post-pass, so the
+# set now means only what its name says: this function needs the delay-slot
+# macro rewrite. The old coupling was compensating for the wrong compiler.
 # The assembler's -G must match the compiler's, in both directions. When
 # cc1psx is at -G0 it sometimes emits a bare symbol reference (`lw $3,sym`)
 # and leaves the expansion to the assembler; an assembler still at -G8 then
@@ -360,8 +356,20 @@ def compile_c(name):
     # function would rebuild on every run.
     flags = PER_FUNC_FLAGS.get(name, CC1_FLAGS)
     stamp = obj.with_suffix(".flags")
+    # The stamp must name every input that shapes this object, not just the
+    # compiler flags. Post-pass membership rewrites the assembly, so it belongs
+    # here too -- leaving it out meant YGOFM_DROP_POSTPASS changed no mtime and
+    # no stamp, the stale object was reused, and the post-pass audit read that
+    # cached object as proof the post-pass was unnecessary. Eight false
+    # "UNNEEDED" verdicts. This is the third time in this project that an input
+    # the build did not watch produced confident nonsense; see the sweep-void
+    # section of docs/DECISIONS.md for the first two.
+    passes = ",".join(sorted(
+        p for p, s in (("delay", DELAY_SLOT_MACRO_FUNCS),
+                       ("sdnop", SMALL_DATA_NOP_FUNCS),
+                       ("hoist", HOIST_EPILOGUE_FUNCS)) if name in s))
     want = (" ".join(flags) + " || " + (PER_FUNC_AS_FLAGS.get(name) or "")
-            + " || " + str(PSYQ_BIN))
+            + " || " + str(PSYQ_BIN) + " || " + passes)
     fresh = (not is_stale(obj, [src, SELF, *headers()])
              and stamp.exists() and stamp.read_text() == want)
     if fresh:
