@@ -188,6 +188,13 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 # a branch delay slot -- see fill_delay_slot_with_macro_tail().
 # Functions needing load-delay nops restored for extern small-data symbols
 # -- see insert_small_data_load_delay_nops().
+# Functions in the library region whose target has the aspsx-hoisted
+# epilogue; see hoist_epilogue_out_of_delay_slot().
+HOIST_EPILOGUE_FUNCS = {
+    "func_8007E350", "func_8007E370", "func_800857C0",
+    "func_8008B7E0", "func_8008D48C",
+}
+
 SMALL_DATA_NOP_FUNCS = {
     "func_8003CDF8",
     "func_8003CE48",
@@ -332,12 +339,15 @@ def compile_c(name):
         raise SystemExit(1)
 
     # Post-passes that emulate aspsx behaviour maspsx does not reproduce.
-    if name in DELAY_SLOT_MACRO_FUNCS or name in SMALL_DATA_NOP_FUNCS:
+    if (name in DELAY_SLOT_MACRO_FUNCS or name in SMALL_DATA_NOP_FUNCS
+            or name in HOIST_EPILOGUE_FUNCS):
         text = masm.read_text().splitlines()
         if name in DELAY_SLOT_MACRO_FUNCS:
             text = fill_delay_slot_with_macro_tail(text)
         if name in SMALL_DATA_NOP_FUNCS:
             text = insert_small_data_load_delay_nops(text)
+        if name in HOIST_EPILOGUE_FUNCS:
+            text = hoist_epilogue_out_of_delay_slot(text)
         masm.write_text("\n".join(text) + "\n")
 
     as_flags = list(AS_FLAGS)
@@ -445,6 +455,57 @@ def insert_small_data_load_delay_nops(lines, sdata_limit=8):
             continue
         if re.search(rf"{re.escape(reg)}\b", body):
             out.append("nop # load delay: extern small-data symbol")
+    return out
+
+
+def hoist_epilogue_out_of_delay_slot(lines):
+    """Emulate aspsx hoisting a delay-slot instruction into a load-delay slot.
+
+    cc1psx ends a small frame with the stack restore in the jr delay slot:
+
+        lw    $31,16($sp)
+        .set  noreorder
+        j     $31
+        addu  $sp,$sp,24
+
+    `lw $31` immediately before a `jr $31` is a load-delay hazard. maspsx
+    resolves it by inserting a nop after the load and leaving the restore in
+    the delay slot. Real aspsx instead moves the restore up into the load
+    delay and leaves the branch delay slot empty -- same cycle count, but two
+    instructions swapped, which is a mismatch.
+
+    Both shapes are in the retail binary, produced from byte-identical cc1psx
+    output, so this is an assembler difference and not a compiler flag. The
+    split is by address and very sharp: across 313 sampled functions the
+    hoisted form appears only at 0x800742E8 and above and the maspsx form only
+    at 0x80072F54 and below. So this pass is opt-in per function rather than
+    global -- see HOIST_EPILOGUE_FUNCS.
+    """
+    def body(line):
+        return line.split("#")[0].strip()
+
+    def is_real(line):
+        s = body(line)
+        return bool(s) and not s.startswith(".") and not s.endswith(":")
+
+    out = list(lines)
+    for i, line in enumerate(out):
+        m = re.match(r"(lw|lh|lhu|lb|lbu)\s+(\$\w+)\s*,", body(line))
+        if not m:
+            continue
+        reg = m.group(2)
+        idx = [j for j in range(i + 1, len(out)) if is_real(out[j])][:3]
+        if len(idx) < 3:
+            continue
+        nop_i, jump_i, slot_i = idx
+        if not body(out[nop_i]).startswith("nop"):
+            continue
+        if not re.match(rf"(j|jr)\s+{re.escape(reg)}\s*$", body(out[jump_i])):
+            continue
+        slot = body(out[slot_i])
+        if re.search(rf"{re.escape(reg)}\b", slot) or slot.startswith("nop"):
+            continue
+        out[nop_i], out[slot_i] = out[slot_i], out[nop_i]
     return out
 
 

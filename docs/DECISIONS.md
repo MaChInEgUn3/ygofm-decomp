@@ -243,7 +243,7 @@ parameter `u8 *` so it still agrees with the callee. Same lesson as the
 earlier `(s8)` cast rule: **the cast goes where the value is used, not on the
 declaration.**
 
-### A third aspsx behaviour maspsx does not reproduce — and why it can be ignored
+### A third aspsx behaviour maspsx does not reproduce — now emulated
 
 cc1psx ends a small frame with the stack restore in the `jr` delay slot:
 
@@ -255,25 +255,48 @@ cc1psx ends a small frame with the stack restore in the `jr` delay slot:
 `lw $31` followed by a `jr $31` is a load-delay hazard. maspsx inserts a `nop`
 after the `lw` and leaves `addu $sp` in the branch delay slot. Real aspsx
 instead **hoists `addu $sp` into the load-delay slot** and leaves the branch
-delay slot empty. Both shapes exist in the retail binary from *byte-identical
-cc1psx output* — verified by hashing, so it is not a compiler-flag difference.
+delay slot empty. Same cycle count, two instructions swapped, mismatch.
 
-The split is by address: the hoisted form appears only at `0x8007E350` and
-above, inside the library region, and the maspsx form throughout the game's
-own code. So this is very likely a different assembler or assembler setting
-used for Sony's library objects, and it needs no post-pass — those functions
-are out of scope. Recorded so the next person does not mistake it for a
-compiler flag. Five such thunks (`func_8007E350`, `func_8007E370`,
-`func_800857C0`, `func_8008B7E0`, `func_8008D48C`) are dropped for this
-reason, not parked.
+Both shapes exist in the retail binary from *byte-identical cc1psx output* —
+verified by hashing, so it is an assembler difference, not a compiler flag.
 
-**A warning attached to this:** the six *game-region* thunks were first
-committed with a `-fno-schedule-insns2` override, and they matched. The
-override was spurious — cc1psx emits identical output with and without the
-flag for that shape, verified by hash. They match at plain `-O2 -G8`. Do not
-add a flag override just because the build went green with it; confirm the
-flag actually changed the output first. This is the same rule as the false
-negative above, in the opposite direction.
+**I first wrote this off as out of scope on five samples, and that was wrong.**
+The claim was "the hoisted form is only in the library region, so it needs no
+post-pass". Scanning all 1794 functions instead of five: the hoisted form
+appears in **106** functions spanning `0x800742E8..0x800901EC`, the maspsx form
+in **207** spanning `0x80012D4C..0x80072F54`. Zero overlap, and the seam sits
+exactly where `docs/FILE_BOUNDARIES.txt` begins — two independent signals
+agreeing on the same boundary, which is worth more than either alone.
+
+But "only in the library region" does not imply "out of scope": **53 of those
+106 are not in `docs/LIBRARY_FUNCS.txt`**, out of 250 non-library functions
+above the seam. So the post-pass is worth writing, and
+`hoist_epilogue_out_of_delay_slot()` in `build.py` now does it, opt-in per
+function via `HOIST_EPILOGUE_FUNCS` because the two shapes must not be mixed.
+It immediately recovered the five thunks that had been dropped.
+
+The general lesson, which has now cost time twice in this project: **a split
+observed on a handful of samples is a hypothesis. Scan the whole binary before
+letting it justify not building something.**
+
+### Signatures without evidence, and how they will bite
+
+Argument forwarding costs no instructions, so a pure thunk's asm is silent
+about its callee's arity. Nine prototypes added while opening the `jal` class
+are therefore guesses; they are marked `/* PROVISIONAL */` in
+`include/functions.h` with the reasoning inline.
+
+Evidence for a signature comes from two places, and only these: the callee
+reads `$aN` before writing it, or some *call site* sets `$aN` up. The second
+matters — `func_80038024` never reads `$a1`, but `func_80038070` loads it, so
+the two-argument declaration is supported by the caller even though the callee
+ignores it. An arity scanner that only looks at the callee will under-report;
+do not trust it alone.
+
+This costs nothing today, because forwarding is free and the bytes match. It
+bites at the first function that calls one of these *with* real argument setup:
+that function will be blamed for a mismatch that is really a stale prototype.
+Widen the prototype then, do not fight the caller.
 
 ### Predicting `-G0` before writing the C, and why it cannot be exact
 
@@ -418,9 +441,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-191 of 1794 functions decompiled and byte-matching.
+196 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~191 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~196 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
