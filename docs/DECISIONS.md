@@ -423,6 +423,43 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### How much is actually left, measured rather than guessed
+
+Yield dropped to 1-2 per batch and my first reading was "the 16-23 band is
+worked out, move up". That reading was wrong twice over. Moving to 24-34 did not
+help, and it could not have: **one difference kills a function regardless of its
+length**, so a longer function has *more* chances to contain a closed-class
+disagreement, not fewer.
+
+The discriminating measurement is how many remaining functions carry a
+closed-class signature. Two of the three are detectable in the target:
+
+| | count |
+|---|---|
+| non-library main-body functions not yet decompiled (≥9 instructions) | **905** |
+| …with a same-basic-block duplicate `%hi` | 62 |
+| …with an adjacent `blez`/`slti` range check | 7 |
+| …with **neither** | **837** — 141 at 16-23, 141 at 24-34, 555 at 35+ |
+
+So the two detectable closed classes account for about **7.5%** of what remains,
+not most of it.
+
+**The honest caveat: the third class is not detectable.** Register-allocation
+disagreements are about what cc1psx *would* emit, not about anything visible in
+the target, so 837 is an upper bound. From the last six batches, roughly a third
+of attempts hit the allocator, which puts the reachable remainder nearer 550-600.
+
+The useful correction is to the *story*, not the number: **the rate is not
+declining, it is stable at roughly half to two-thirds per batch**, and the
+misses are a fixed-rate tax rather than a sign of exhaustion. Band choice barely
+matters. Keep mining wherever the candidates read most clearly.
+
+**A wording correction while here:** earlier commits say things like "123
+candidates remain in this band". That is candidates *matching the current
+filter* — which excludes calls into PsyQ library functions, GTE routines, and
+`mult`/`div` shapes — not functions remaining. The real remaining count for the
+main body is the 905 above.
+
 ### The range-check fold is a class, not a one-off
 
 `func_80049640` fails exactly as `func_80049544` did: the source tests
