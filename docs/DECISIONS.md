@@ -423,6 +423,29 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### Two more for the working order, both from step 2
+
+`func_80044544` computes `v / 8192` in a loop and subtracts the total from 15.
+It differed only in which of `$a2`/`$a3` held the counter and which the total —
+fixed by swapping the two local declarations, exactly the step-2 check. Worth
+noting the signed-division idiom it contains, since it reads as noise otherwise:
+
+    bgez  $v1,.L…       if (v >= 0) use v
+    addiu $v0,$v1,0x1FFF  else use v + 8191
+    sra   $v0,$v0,13    then >> 13
+
+That whole sequence is `v / 8192` for a signed `v` — the bias corrects the
+rounding direction. Seeing it as division rather than as three separate
+operations is what makes the C obvious.
+
+**Parked: `func_8003A198` and `func_80038334`.** The first is a three-level
+offset-table walk where retail returns through a join with `0` materialised at a
+label; the accumulator form loses one instruction and the early-return form
+loses two, so neither of the two shapes the counting rule distinguishes fits.
+The second differs only in whether `$v0` or `$v1` carries the index through a
+`lb`/`sll`/`addu` triple, twice — the allocator class again, and the class is
+closed.
+
 ### The register-allocation class: a negative that finally counts
 
 `func_8004BAE4` ran **16,206 permuter iterations** under PsyQ 4.5, with the
@@ -1606,9 +1629,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-336 of 1794 functions decompiled and byte-matching.
+338 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~336 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~338 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
