@@ -432,6 +432,18 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
+### `sll 16` versus `andi 0xffff` is another signedness tell
+
+`func_800379F8` decrements a halfword counter and tests it against zero. Retail
+emits `sll $v0,$v0,16` then `bnez`; casting the value to `u16` gives
+`andi $v0,$v0,0xffff` instead. Casting to `s16` matched.
+
+Both test the low sixteen bits, so the choice carries no semantics at this point
+— it carries the *declared type*. **`sll`-then-branch is a signed short; `andi`
+is unsigned.** Same family as `slt` versus `sltiu`, and the two together mean
+signedness is readable off the instruction selection in both comparisons and
+zero-tests.
+
 ### Statement order inside a loop body decides delay-slot filling
 
 `func_8005A468` took three passes, each a statement-order question and each
@@ -1946,9 +1958,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-368 of 1794 functions decompiled and byte-matching.
+369 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~368 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~369 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
