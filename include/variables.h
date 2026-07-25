@@ -40,10 +40,17 @@ extern u8 D_8009B064;
 extern u8 D_8009B078;
 extern u8 D_8009B07B;
 extern u8 D_8009B07C;
+extern u8 D_8009B079;
+extern s8 D_8009B07A;
 extern u8 D_8009B141;
+extern u8 D_8009B145;
+extern u8 D_8009B248;
+extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
 extern u8 D_8009B318;
 
+extern u16 D_8009AF76;
+extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
 extern u16 D_8009B220;
@@ -143,6 +150,7 @@ extern u8 D_80091570[];
 /* Tables reached by address, so never small data. */
 extern u8 D_800E9EC8[];
 extern u8 D_800EA0E8[];
+extern u8 D_800F39F0[];
 extern u8 D_800E9EF0[];
 extern u8 D_800FE040[];
 /* The retail code forms this object's base address and then reaches the
