@@ -430,6 +430,17 @@ discriminate by size. Try the flag first — it needs no header surgery.
 Both combinations are now in `sweep_flags.py`, which had only ever paired macro
 form with `-G0` and so could never have found this.
 
+**This is not another instance of the six bugs listed under the sweep-void
+section, and the difference matters.** Those were tools reporting on things they
+had not measured — a stale object, a flag whose effect was never checked, a
+crashed build read as clean. The sweeper here was not broken: it searched the
+space I defined for it, and the space was too narrow because I had encoded an
+observed correlation ("macro form goes with `-G0`") as if it were a rule.
+A tool that lies about what it measured and a tool that measures a space you
+drew too small need different remedies — verify the measurement in the first
+case, widen the space in the second — so lumping them together would lose what
+makes the first six actionable.
+
 ### The `$v0`/`$v1` swap class, sixth member and a sharper description
 
 `func_80049CB0` loads the `D_8009B458` pointer twice in one basic block, and the
