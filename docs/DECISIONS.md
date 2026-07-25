@@ -406,35 +406,40 @@ constant is materialised (`func_80044FFC`), and whether an address is folded or
 built in a register (`func_8002E370`). Declaration order is not cosmetic in this
 codebase.
 
-### Two `lui`/`addiu` pairs for one symbol means two symbols in the source
+### Two `lui`/`addiu` pairs for one symbol means two symbols — and we can now say so
 
-`func_80036BCC` walks two pointers, one by 2 and one by `0x1E`, and retail
-materialises the *same* address twice:
+`func_80036BCC` walks two pointers over the same base, one by 2 and one by
+`0x1E`, and retail materialises the *same* address twice:
 
     lui   $v0,%hi(D_801D9174)
     addiu $a2,$v0,%lo(D_801D9174)
-    lui   $v0,%hi(D_801D9174)      <- again
+    lui   $v0,%hi(D_801D9174)      <- again, same basic block
     addiu $a1,$v0,%lo(D_801D9174)
 
-cc1psx will not emit that from one symbol — it CSEs the address, which is why
+cc1psx will not emit that from one symbol — it CSEs the address — so
 `u8 *rec = D_801D9174; u8 *key = D_801D9174;` comes out an instruction short.
-**Two independent materialisations of one address mean the source referenced two
-different objects that happen to start at the same place.** splat names only one
-symbol there (`config/undefined_syms_auto.txt` has a single entry at
-`0x801D9174`), so reproducing this needs a second symbol declared at the same
-address, which the current single-symbol-per-address setup cannot express.
+**Two independent materialisations of one address in one basic block mean the
+original source saw two distinct objects at the same place.**
 
-Parked, and the reason is worth separating from the usual ones: this is not a
-flag, a shape, or an ordering problem. It is a limitation of how the project
-declares data, and fixing it means adding an alias symbol to the linker script
-rather than rewriting C.
+`config/symbol_aliases.txt` now exists for exactly this, in the same
+`NAME = 0xADDR;` format as splat's own files and read by the same code path.
+splat only ever emits one symbol per address and regenerates its auto files, so
+the aliases need a file of their own. `func_80036BCC` matches with `key` pointing
+at an alias.
 
-**Also parked: `func_8002C518`.** Polarity is now correct — swapping the `if`/`else`
-arms fixed the branch and both `-1`/`1` materialisations. What remains is a single
-delay-slot filler: retail puts `addiu $v0,$zero,0x1` in the `bgez` delay slot
-where we emit `nop`, same instruction count. Retail computed a `1` in `$v0` that
-nothing visibly consumes; three return-value shapes were tried and none
-reproduces it.
+**How much this is worth, measured rather than assumed.** A first scan found 343
+functions that materialise some symbol's `%hi` more than once, which would have
+been a wildly overstated claim: cc1psx reproduces that naturally when the uses
+sit in *different basic blocks*, since CSE does not cross them. Restricting to
+duplicates with no branch or label between them gives **82** functions, none of
+which currently match. The same symbols recur heavily — `D_8009B0F4`,
+`D_8009B45C`, `D_8009B458` — which suggests a handful of aliases will cover most
+of them.
+
+Worth noting the shape of the near-miss: the difference between 343 and 82 is
+the difference between "the pattern appears" and "the pattern needs this fix".
+Counting the first and reporting it as the second is the same error as reading a
+green build as evidence for an assumption, and it was one refinement away.
 
 ### One shared exit in the target means one `return` in the source
 
@@ -1223,9 +1228,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-297 of 1794 functions decompiled and byte-matching.
+298 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~297 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~298 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 

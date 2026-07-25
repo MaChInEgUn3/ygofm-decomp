@@ -657,9 +657,19 @@ def write_linker_script(text_entries):
 
 
 def read_defsyms():
-    """splat emits symbols it couldn't place as `name = 0xADDR;` lines."""
+    """splat emits symbols it couldn't place as `name = 0xADDR;` lines.
+
+    config/symbol_aliases.txt is ours, in the same format, and exists because
+    the retail code sometimes materialises one address twice in a single basic
+    block -- which cc1psx will not do from one symbol, since it CSEs the
+    address. Two independent materialisations mean the original source saw two
+    distinct objects at the same place, so we need a second name for it. splat
+    only ever emits one symbol per address, and its auto files are regenerated,
+    so the aliases live in a file of their own.
+    """
     defsyms = []
-    for name in ("undefined_syms_auto.txt", "undefined_funcs_auto.txt"):
+    for name in ("undefined_syms_auto.txt", "undefined_funcs_auto.txt",
+                 "symbol_aliases.txt"):
         path = ROOT / "config" / name
         if not path.exists():
             continue

@@ -1,0 +1,7 @@
+# Extra names for addresses that splat gave a single symbol. See read_defsyms()
+# in tools_src/build.py for why these are needed. Format matches splat's own
+# undefined_syms files: NAME = 0xADDRESS;
+#
+# func_80036BCC walks a 2-byte key table and a 0x1E-byte record table that
+# start at the same address, and materialises the base twice.
+KeyTable_801D9174 = 0x801D9174;
