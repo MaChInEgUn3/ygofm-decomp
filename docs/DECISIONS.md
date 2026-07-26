@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-383 of 1794 functions decompiled and byte-matching.
+384 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~383 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~384 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2116,6 +2116,24 @@ do not. Its candidate is in `parked/` and is now at 22 differing instructions
 with the correct loop body and guard, from initialising the loop index *from*
 the write count (`s32 i = n;`), which is what retail's `addu $a0,$a1,$zero`
 literally does.
+
+### A narrow return type is free in the callee and expensive at every caller
+
+`func_8005F174` and `func_8005F18C` each return one `u8` global, and both were
+written `u8 f(void)`. That is byte-identical to `s32 f(void)` in the callee --
+the value comes from an `lbu` either way, and nothing masks it.
+
+At the *caller* it is not free. gcc does not trust a callee to have extended
+its return value, so every use of a `u8`-returning function emits
+`andi $r,$r,255` first. func_80059FAC calls both and retail masks neither, so
+retail's translation unit declared them int-width. Widening both definitions to
+`s32` left the callees byte-identical and let the caller match.
+
+The rule: **when a caller does not mask a narrow return, the return type is
+int-width, and the callee is where to fix it.** The reverse is also worth
+remembering -- a `u8` return that costs nothing today will cost an instruction
+in the first caller written against it, and the callee will still be matching,
+so the mistake will look like a caller problem.
 
 ### Two more members of the base-formation recipe
 
