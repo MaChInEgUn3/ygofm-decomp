@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-519 of 1794 functions decompiled and byte-matching.
+525 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~519 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~525 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2584,6 +2584,60 @@ also matches, which is the same layout by another route.
 
 **Check the loop statement before reading anything into the branch direction.**
 Two of these three had already been through a polarity edit that did nothing.
+
+### The base-materialisation switch, stated as a rule
+
+Five functions this session turned on *when* a global's address is formed
+relative to the index arithmetic that will be added to it, and the switch is a
+one-line source edit either way:
+
+| target shows | write |
+| --- | --- |
+| `lui`/`addiu` for the symbol **before** the index arithmetic | name the base in its own statement: `u8 *base = D_800F2C40; u8 *p = base + i * K;` |
+| the index arithmetic **first**, symbol formed after | fold it into one expression: `u8 *p = D_800F2C40 + i * K;` |
+| the constant offset in the memory operand (`lbu $v1,3602($v0)`) | one named pointer, offset at the access: `p[0xE12]` |
+| the constant folded into the index (`addiu $v0,$v0,3602`) | offset inside the subscript: `D_800F2C40[i * K + 0xE12]` |
+
+`func_80059590` and `func_80059AA8` are the same helper over the same 3616-byte
+record and they want *opposite* rows of the first pair; `func_80058E68` and
+`func_80058E94` are another such pair. So this is not a per-file or per-unit
+property to be predicted — read it off each function.
+
+Two related notes, both learned the expensive way:
+
+- **Remove every intermediate the source does not need before diagnosing a
+  register problem.** `func_80033CC4` was parked as a three-register rotation
+  with a flat sweep; deleting one `u8 *t = D_80090DD8;` matched it exactly.
+  `func_8004545C` and `func_80058E94` were the same story. Three in one session.
+- **And add one when the target materialises early.** The same edit in the other
+  direction is what matched `func_80059AA8`. The intermediate is a positioning
+  tool, not a style choice.
+
+### `if (x == 0) return 0;` and `if (x != 0) return y;` are different layouts
+
+`func_80033500` returns a field or zero. Written with the non-zero test first —
+
+```c
+    if (p[0xD] != 0) return *(s16 *)(p + 4);
+    return 0;
+```
+
+— cc1psx cross-jumps the two exits into one `jr $ra` and puts the zero in the
+branch's delay slot: 13 instructions against retail's 15. Written the other way
+round,
+
+```c
+    if (p[0xD] == 0) return 0;
+    return *(s16 *)(p + 4);
+```
+
+it keeps both exits and leaves the delay slot empty, which is retail. An
+`if`/`else` with the same two returns does not help (3 differences).
+
+This is the same lesson as the loop-form note above: when the target has more
+exit blocks than you produce, the fix is which test is written first, not the
+polarity of a single branch and not a flag. Both orders express the same
+function; only one of them survives cross-jumping.
 
 ## Repo layout / tooling plan
 

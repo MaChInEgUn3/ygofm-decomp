@@ -116,7 +116,9 @@ void func_800404CC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 void func_80014E1C(s32 arg0, u8 *arg1, s32 arg2, s32 arg3,
                    void *arg4, s32 arg5, s32 arg6);  /* PROVISIONAL */
 void func_8005B64C(void);  /* PROVISIONAL */
-void func_8002C4DC(void);  /* PROVISIONAL */
+/* Was PROVISIONAL void(void): it searches D_801D0200 for a halfword and
+ * returns the index or -1. */
+s32 func_8002C4DC(s32 arg0);
 void func_80032184(void);  /* PROVISIONAL */
 void func_800137E4(void);  /* PROVISIONAL */
 void func_80044F58(s32 arg0);  /* PROVISIONAL */
@@ -153,6 +155,9 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+s32 func_80059AA8(s32 arg0, s32 arg1);
+void func_8002EE20(void);
+s32 func_80033500(u8 *arg0);
 void func_8003798C(u8 *arg0);
 void func_80037D6C(u8 *arg0);
 void func_80038110(u8 *arg0);
