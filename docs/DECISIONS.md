@@ -2071,7 +2071,53 @@ Single-function matching loop, so you don't need a full build per attempt:
 
 Compiles the snippet with the real toolchain and diffs the instructions against the target's disassembly. Trailing arguments pass straight through to cc1psx, so optimisation levels can be swept quickly.
 
-**Known limitation:** it compares branch labels literally, so any function with internal branches (gcc emits `$L2`, the disassembly has `.L80042B28`) reports spurious differences. Treat a "differs" result on a branching function as inconclusive and fall back to the full build, which is the real authority. Straight-line functions are reported accurately.
+Branch labels are renumbered positionally on both sides, so branching functions
+compare correctly. The full build is still the authority; try_func only tells
+you where to look next.
+
+**This file has been the single largest source of wrong conclusions in the
+project, and every one had the same shape: it reported on something it had not
+measured.** Four separate bugs, all found on the same day:
+
+| bug | what it claimed |
+|---|---|
+| kept its own copy of every toolchain path (psyq46, aspsx 2.86, Windows venv, no post-passes) | that `-fno-schedule-insns` was inert — measured on the wrong compiler |
+| no `subiu` → `addiu -n` rule | a phantom diff on the frame setup of *every* function with a stack frame |
+| `slt $r,$r,20` normalised to `sltiu` | a signed/unsigned mismatch that did not exist |
+| symbol aliases compared as text | every deliberate alias use reported as a difference |
+
+The toolchain constants now come from `build.py` by import, so that class of
+drift cannot recur. The normalisation table is the remaining risk: each
+register-form mnemonic has exactly one immediate form and they are *not*
+derivable by a shared rule (`add`→`addiu`, `and`→`andi`, `slt`→`slti`,
+`sltu`→`sltiu`). Before believing a one- or two-instruction difference in a
+mnemonic's *spelling*, write the three-line function that isolates it and check
+the tool is not inventing it.
+
+### Two more members of the base-formation recipe
+
+Both found on func_8002497C and func_8002CCE4, both now generalisable.
+
+**Declare a strided table by its row type.** `D_800909D4` is 20 rows of 6
+bytes indexed by a 1-based counter. Written flat as
+`D_800909D4[counter + arg0 * 6 - 1]`, gcc reassociates and puts the `-1` on
+the counter; retail puts it on the row product. Declared `s8 D_800909D4[][6]`
+and written `D_800909D4[arg0][counter - 1]`, the whole index chain matches
+*including its register allocation* — from seven differing instructions to
+one register. This is the same lever as the record-typed struct array, applied
+to a plain 2-D table.
+
+**Declare locals inside the arm that uses them.** With `u8 *p` and `s32 m`
+declared at the top of func_8002CCE4, gcc hoists the second base's `lui` above
+the branch and the schedule of both arms shifts: 18 differing instructions.
+Block-scoped inside each arm: 3. Nothing else changed. When two arms do the
+same shape of work on different symbols, scope the locals to the arm.
+
+A third, smaller: **read an aliased base into a local before the guard.**
+`u8 *n = Base2_8009B364;` ahead of the early-return test was the last step
+from six differing instructions to a match on func_8002497C. The permuter
+found it; it is not something to guess at, but it is worth trying by hand
+before reaching for the permuter.
 
 ### Original translation-unit boundaries (discovered, not yet applied)
 
