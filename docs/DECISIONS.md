@@ -2129,11 +2129,29 @@ its return value, so every use of a `u8`-returning function emits
 retail's translation unit declared them int-width. Widening both definitions to
 `s32` left the callees byte-identical and let the caller match.
 
-The rule: **when a caller does not mask a narrow return, the return type is
-int-width, and the callee is where to fix it.** The reverse is also worth
-remembering -- a `u8` return that costs nothing today will cost an instruction
-in the first caller written against it, and the callee will still be matching,
-so the mistake will look like a caller problem.
+Two tells, one for each direction:
+
+  - **A caller one instruction long, with an `andi $r,$r,255` right after a
+    `jal` that retail does not have** -> the callee's return type is too
+    narrow. Widen the callee.
+  - **A caller one instruction short, with retail carrying an
+    `andi $r,$r,255` after a `jal` that we do not emit** -> the callee's
+    return type should be narrow. This is the one to expect from here on,
+    because wide is now the default in `src/`.
+
+Either way the callee itself is byte-identical and stays green, so the
+symptom always appears at the caller and always looks like the caller's fault.
+
+**How far this is actually evidenced.** Only `func_8005F174` and
+`func_8005F18C` are proven: widening them *changed func_80059FAC's bytes* from
+not-matching to matching. The other 22 were widened in a sweep justified by
+"the build stays green", and that is not evidence -- the build is equally green
+with them narrow. Every one of them has a decompiled caller, but no caller's
+bytes differ between the two spellings, which is exactly what "undetermined"
+looks like. They are widened because wide is the better default to be wrong
+in (a redundant mask is easier to spot than a missing one), not because the
+build says so. `func_800451E0` is the one that is proven *narrow*: as `s32` it
+comes out an instruction short, so its `s16` is doing real work.
 
 ### Two more members of the base-formation recipe
 
