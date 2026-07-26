@@ -63,12 +63,28 @@ extern s16 D_8009B33C;
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
 extern u16 D_8009B220;
+#ifdef D_8009B2A8_IS_AGGREGATE
+extern u16 D_8009B2A8[];
+#else
 extern u16 D_8009B2A8;
+#endif
+#ifdef D_8009B2AA_IS_AGGREGATE
+extern u16 D_8009B2AA[];
+#else
 extern u16 D_8009B2AA;
+#endif
+#ifdef D_8009B29C_IS_AGGREGATE
+extern u16 D_8009B29C[];
+#else
 extern u16 D_8009B29C;
+#endif
 extern u16 D_8009B270;
 extern u16 D_8009B278;
+#ifdef D_8009B27C_IS_AGGREGATE
+extern u16 D_8009B27C[];
+#else
 extern u16 D_8009B27C;
+#endif
 
 /* Two words of PRNG state, mixed together by func_8003CE74. Eight bytes, so
  * still small data at -G8 even though func_8003CE74 takes its address. */
