@@ -498,6 +498,9 @@ typedef struct {
 extern Rec1C D_800EB288[];
 extern u8 D_800EF6B0[];
 extern u8 D_800EF6E0[];
+extern u8 D_801B0000[];
+extern u8 D_801C0000[];
+extern u8 D_801D5800[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];
 extern u8 D_800F2C40[];
