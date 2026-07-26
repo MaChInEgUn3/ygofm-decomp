@@ -120,6 +120,13 @@ def normalise(line):
     # cc1psx emits small-data references bare (`lhu $v0,sym`); the assembler
     # turns them into the gp-relative form the disassembly shows. Same thing.
     text = re.sub(r"%gp_rel\(([^)]*)\)\(\$gp\)", r"\1", text)
+    # Taking the *address* of a small-data symbol: gcc emits the `la` pseudo
+    # and the disassembly shows the `addiu $r,$gp,%gp_rel(sym)` the assembler
+    # expanded it to. Same instruction. (For a symbol outside small data `la`
+    # expands to two instructions instead, so this equivalence is only safe
+    # because the disassembly side is already the gp-relative form -- if the
+    # target used lui/%hi there would be nothing here to match against.)
+    text = re.sub(r"^addiu (\$\w+),\$gp,%gp_rel\(([^)]*)\)$", r"la \1,\2", text)
     # Immediates and offsets are written 0x1618 in one place and 5656 in
     # the other; normalise every hex literal to decimal so they compare.
     text = re.sub(r"\b0x([0-9a-fA-F]+)\b",

@@ -333,6 +333,10 @@ extern u8 D_8009B4A0;
 extern u8 D_8009B4A1;
 extern u8 D_8009B4A2;
 
+extern s32 D_8009B390;
+extern s32 D_8009B3A8;
+extern s32 D_8009B3B0;
+extern s32 D_8009B3B4;
 extern u16 D_8009B394;
 extern u16 D_8009B396;
 extern u16 D_8009B39A;
@@ -396,6 +400,7 @@ typedef struct {
 } Rec1C;
 
 extern Rec1C D_800EB288[];
+extern u8 D_800EF6B0[];
 extern u8 D_800EF6E0[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];
