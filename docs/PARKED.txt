@@ -58,6 +58,11 @@
 # works sometimes rather than the answer. Two variables each covering part of
 # the body is the thing to try first here.
 # ---
+# func_80070710 is ten instructions, sequence identical, every register name
+# different: retail reuses $a0 as the %hi temp of the scalar load it lands in,
+# and puts the table address in $v0 where we put $v1. Six source forms and both
+# -G settings all sit at 8.
+func_80070710
 func_8003201C
 func_80071424
 func_80071460

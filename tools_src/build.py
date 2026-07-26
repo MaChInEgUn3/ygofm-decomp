@@ -187,6 +187,7 @@ PER_FUNC_FLAGS = {
     "func_8002CD8C": _O2_G8_MACRO,
     "func_8002D0E0": _O2_G8_MACRO,
     "func_80030C10": _O2_G8_MACRO,
+    "func_8004B70C": _O2_G8_MACRO,
     "func_80029108": _O2_G8_MACRO,
     "func_80030E30": _O2_G8_MACRO,
     "func_80037CE0": _O1_G8,
@@ -281,6 +282,7 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8001755C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80044DA0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CB0"] = "-G0"
