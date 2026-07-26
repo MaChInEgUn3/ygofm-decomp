@@ -272,6 +272,7 @@ extern u8 D_8009B144;
 extern s8 D_8009B360[];
 extern u8 D_800F5918[];
 extern u8 D_801A8000[];
+extern s32 D_801D5608[];
 /* 0x64-byte records. Declared by record type so a scaled index cannot be
  * reassociated past the base; see the base-formation recipe in DECISIONS.md. */
 typedef struct {
