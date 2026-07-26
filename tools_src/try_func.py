@@ -115,6 +115,16 @@ def normalise(line):
             # shows as `lui $a0,0xFFFF`. Restricting this to positive values
             # made every 0xFFFF0000 mask read as a differing instruction.
             text = f"lui {m.group(1)},{(value >> 16) & 0xFFFF}"
+        elif value < 0 or value > 0xFFFF:
+            # Both halves needed: the assembler emits lui+ori, two real
+            # instructions. Returned as two lines -- the callers splice them
+            # in -- because comparing one line against two silently shifts
+            # every following instruction and reports the whole tail as
+            # differing. func_80059520's reciprocal-multiply constant is the
+            # case that found this.
+            hi, lo = (value >> 16) & 0xFFFF, value & 0xFFFF
+            r = m.group(1)
+            text = f"lui {r},{hi}\nori {r},{r},{lo}"
     # `j $ra` and `jr $ra` are the same instruction spelled two ways.
     text = re.sub(r"^j\b", "jr", text) if text.startswith("j $ra") else text
     # An indirect call: gcc writes `jal $ra,$v0`, the disassembly shows the
@@ -198,11 +208,27 @@ def target_lines(func):
             body = line.split("*/", 1)[1]
             n = normalise(body)
             if n:
-                out.append(n)
+                out.extend(n.split("\n"))
     return out
 
 
+_OBJ_REG = re.compile(r"\b(zero|at|v[01]|a[0-3]|t[0-9]|s[0-7]|t[89]|k[01]|gp|sp|fp|ra)\b")
+_OBJ_INSN = re.compile(r"^\s*[0-9a-f]+:\s+(\S+)\s*(.*)$")
+_OBJ_RELOC = re.compile(r"^\s+[0-9a-f]+:\s+(R_MIPS_\S+)\s+(\S+)")
+
+
 def built_lines(func, csrc, extra_flags):
+    """Compile the candidate and read back what the *assembler* produced.
+
+    Reading cc1psx's text instead was the source of most of this file's
+    history of wrong answers. cc1psx emits pseudo-instructions -- `la`,
+    `li`, `subiu`, bare-symbol memory ops, `jal $ra,$reg` -- and the
+    assembler decides how many real instructions each becomes, sometimes one
+    and sometimes two, depending on whether the symbol landed in small data.
+    No amount of rewriting rules in this file can know that; the assembler
+    does. So we assemble and disassemble, and the only thing left to
+    reconstruct is the relocated operands, which objdump prints alongside.
+    """
     SCRATCH.mkdir(parents=True, exist_ok=True)
     src = SCRATCH / "try.c"
     src.write_text(Path(csrc).read_text())
@@ -219,10 +245,6 @@ def built_lines(func, csrc, extra_flags):
         if r.returncode != 0:
             sys.exit(f"{Path(str(cmd[0])).name} failed:\n{r.stdout}\n{r.stderr}")
 
-    # Run maspsx as the build does. It inserts the load-delay nops the
-    # compiler leaves to the assembler, and those nops are real
-    # instructions -- comparing pre-maspsx output silently ignores them and
-    # will call a function matching when it is several instructions short.
     masm = SCRATCH / "try.maspsx.s"
     with open(asm) as fin, open(masm, "w") as fout:
         r = subprocess.run(
@@ -232,8 +254,6 @@ def built_lines(func, csrc, extra_flags):
     if r.returncode != 0:
         sys.exit(f"maspsx failed:\n{r.stderr[:4000]}")
 
-    # The build applies these after maspsx; a diff taken without them is a
-    # diff against a file the build would never produce.
     text = masm.read_text().splitlines()
     if func in B.DELAY_SLOT_MACRO_FUNCS:
         text = B.fill_delay_slot_with_macro_tail(text)
@@ -241,19 +261,94 @@ def built_lines(func, csrc, extra_flags):
         text = B.insert_small_data_load_delay_nops(text)
     if func in B.HOIST_EPILOGUE_FUNCS:
         text = B.hoist_epilogue_out_of_delay_slot(text)
+    masm.write_text("\n".join(text) + "\n")
 
+    obj = SCRATCH / "try.o"
+    as_flags = list(B.AS_FLAGS)
+    override = B.PER_FUNC_AS_FLAGS.get(func)
+    if override:
+        as_flags.append(override)
+    r = subprocess.run([str(B.AS), *as_flags, "-o",
+                        obj.relative_to(ROOT).as_posix(),
+                        masm.relative_to(ROOT).as_posix()],
+                       cwd=ROOT, capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"as failed:\n{r.stderr[:4000]}")
+
+    r = subprocess.run([str(B.OBJDUMP), "-dr", "--no-show-raw-insn",
+                        obj.relative_to(ROOT).as_posix()],
+                       cwd=ROOT, capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"objdump failed:\n{r.stderr[:4000]}")
+    return _from_objdump(r.stdout, func)
+
+
+def _from_objdump(dump, func):
+    """Turn `objdump -dr` output into the spelling the target listings use."""
     out, inside = [], False
-    for line in text:
-        if line.startswith(f"{func}:"):
+    for line in dump.splitlines():
+        if line.rstrip().endswith(f"<{func}>:"):
             inside = True
             continue
-        if inside:
-            if ".end" in line:
-                break
-            n = normalise(line)
-            if n:
-                out.append(n)
-    return out
+        if not inside:
+            continue
+        m = _OBJ_RELOC.match(line)
+        if m and out:
+            kind, sym = m.group(1), m.group(2)
+            prev = out[-1]
+            if kind == "R_MIPS_HI16":
+                prev = re.sub(r"0x[0-9a-f]+$", f"%hi({sym})", prev)
+            elif kind == "R_MIPS_LO16":
+                # either `addiu $r,$r,0` or a displacement `0($r)`
+                if re.search(r",\s*-?\d+\(", prev):
+                    prev = re.sub(r"(,)\s*-?\d+(\()", rf"\1%lo({sym})\2", prev)
+                else:
+                    prev = re.sub(r"-?\d+$", f"%lo({sym})", prev)
+            elif kind == "R_MIPS_GPREL16":
+                if re.search(r"-?\d+\(\$gp\)", prev):
+                    prev = re.sub(r"-?\d+(\(\$gp\))",
+                                  rf"%gp_rel({sym})\1", prev)
+                else:
+                    # `addiu $r,$gp,0` -- taking the address rather than
+                    # loading through it.
+                    prev = re.sub(r"(\$gp,)-?\d+$", rf"\1%gp_rel({sym})", prev)
+            elif kind == "R_MIPS_26":
+                # A jump inside the same section relocates against `.text`
+                # itself; that is not a callee name, and substituting it
+                # turns a local jump into a call to a section.
+                if sym.startswith("."):
+                    continue
+                prev = re.sub(r"\s+\S+$", f" {sym}", prev)
+            out[-1] = prev
+            continue
+        m = _OBJ_INSN.match(line)
+        if not m:
+            if line.strip() == "" or line.startswith("Disassembly"):
+                continue
+            continue
+        mnem, ops = m.group(1), m.group(2).strip()
+        # objdump prints a branch/jump target as `addr <sym+off>`; drop the
+        # symbolic part, renumber_labels only needs a consistent token.
+        ops = re.sub(r"\s*<[^>]*>", "", ops)
+        ops = _OBJ_REG.sub(lambda mm: "$" + mm.group(1), ops)
+        # objdump gives a branch target as a bare hex offset; the target
+        # listings give a label. Spell it as one so renumber_labels can map
+        # both sides positionally.
+        if mnem.startswith("b") or mnem in ("j", "jal"):
+            last = ops.rsplit(",", 1)[-1].strip()
+            # Whole-token hex only. Testing "does not end in a letter" is
+            # wrong -- `5c` is a perfectly good offset and ends in one.
+            if re.fullmatch(r"[0-9a-f]+", last):
+                ops = ops[:len(ops) - len(last)] + ".L" + last
+        out.append(f"{mnem} {ops}".strip())
+    # normalise *after* the relocations are spliced in: it lowercases and
+    # rewrites immediates, which would stop the reloc patterns from matching.
+    final = []
+    for raw in out:
+        n = normalise(raw)
+        if n:
+            final.extend(n.split("\n"))
+    return final
 
 
 def renumber_labels(lines):
