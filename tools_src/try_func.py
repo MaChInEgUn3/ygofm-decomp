@@ -104,9 +104,12 @@ def normalise(line):
         value = int(m.group(2), 0)
         if -0x8000 <= value < 0x8000:
             text = f"addiu {m.group(1)},$zero,{value}"
-        elif value > 0 and (value & 0xFFFF) == 0:
-            # a constant with no low half assembles to a bare lui
-            text = f"lui {m.group(1)},{value >> 16}"
+        elif (value & 0xFFFF) == 0:
+            # A constant with no low half assembles to a bare lui. Negative
+            # ones count: `li $a0,-65536` is 0xFFFF0000, which the disassembly
+            # shows as `lui $a0,0xFFFF`. Restricting this to positive values
+            # made every 0xFFFF0000 mask read as a differing instruction.
+            text = f"lui {m.group(1)},{(value >> 16) & 0xFFFF}"
     # `j $ra` and `jr $ra` are the same instruction spelled two ways.
     text = re.sub(r"^j\b", "jr", text) if text.startswith("j $ra") else text
     # cc1psx emits small-data references bare (`lhu $v0,sym`); the assembler
@@ -131,17 +134,6 @@ def normalise(line):
     text = re.sub(r"^beqz (\$\w+),", r"beq \1,$zero,", text)
     text = re.sub(r"^bnez (\$\w+),", r"bne \1,$zero,", text)
     text = re.sub(r"^negu (\$\w+),(\$\w+)$", r"subu \1,$zero,\2", text)
-    # gcc writes `subiu $sp,$sp,24`; there is no such instruction, and the
-    # assembler emits `addiu $sp,$sp,-24`, which is what the disassembly shows.
-    # Without this the two sides differ on every stack frame ever built.
-    # Variable shifts: gcc writes `sra $2,$2,$3`, the assembler emits `srav`.
-    # Same for sllv/srlv. Without this every variable shift reads as a diff.
-    text = re.sub(r"^(sra|sll|srl) (\$\w+),(\$\w+),(\$\w+)$",
-                  r"\1v \2,\3,\4", text)
-    text = re.sub(r"^subiu (\$\w+),(\$\w+),(-?\d+)$",
-                  lambda m: f"addiu {m.group(1)},{m.group(2)},{-int(m.group(3))}",
-                  text)
-    # gcc writes the register form with an immediate operand; the assembler
     # emits the immediate instruction, which is what the disassembly shows.
     # Each register-form mnemonic has exactly one immediate form, and they are
     # not derivable by a shared rule: add/sub take -iu, and/or/xor take -i,
@@ -156,6 +148,15 @@ def normalise(line):
     text = re.sub(r"^(add|sub|and|or|xor|slt|sltu)u? (\$\w+),(\$\w+),(-?\d+)$",
                   lambda m: f"{_IMM[m.group(1)]} "
                             f"{m.group(2)},{m.group(3)},{m.group(4)}",
+                  text)
+    # There is no subiu instruction: the assembler emits `addiu $r,$r,-n`,
+    # which is what the disassembly shows. This must run *after* the table
+    # above, because gcc's own spelling is `subu $sp,$sp,24` and it is that
+    # table which turns it into subiu. Placed before it -- as it was when
+    # first written -- it never fires, and every stack frame in the project
+    # reads as a differing instruction.
+    text = re.sub(r"^subiu (\$\w+),(\$\w+),(-?\d+)$",
+                  lambda m: f"addiu {m.group(1)},{m.group(2)},{-int(m.group(3))}",
                   text)
     return text
 
