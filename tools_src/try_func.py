@@ -340,14 +340,28 @@ def _from_objdump(dump, func):
         if m and out:
             kind, sym = m.group(1), m.group(2)
             prev = out[-1]
+            # A non-zero immediate on a %hi/%lo pair is an *addend* -- gcc
+            # folded a constant offset into the relocation. Retail spelling it
+            # as a separate `addiu` is then a real difference of one
+            # instruction, and dropping the addend here hides it: that is what
+            # this rule did until func_80039E9C, where try_func called a
+            # two-instruction difference a match in the making.
             if kind == "R_MIPS_HI16":
-                prev = re.sub(r"0x[0-9a-f]+$", f"%hi({sym})", prev)
+                m2 = re.search(r"0x([0-9a-f]+)$", prev)
+                add = int(m2.group(1), 16) if m2 else 0
+                tag = f"%hi({sym})" if not add else f"%hi({sym}+{add})"
+                prev = re.sub(r"0x[0-9a-f]+$", tag, prev)
             elif kind == "R_MIPS_LO16":
-                # either `addiu $r,$r,0` or a displacement `0($r)`
                 if re.search(r",\s*-?\d+\(", prev):
-                    prev = re.sub(r"(,)\s*-?\d+(\()", rf"\1%lo({sym})\2", prev)
+                    m2 = re.search(r",\s*(-?\d+)\(", prev)
+                    add = int(m2.group(1)) if m2 else 0
+                    tag = f"%lo({sym})" if not add else f"%lo({sym}+{add})"
+                    prev = re.sub(r"(,)\s*-?\d+(\()", rf"\1{tag}\2", prev)
                 else:
-                    prev = re.sub(r"-?\d+$", f"%lo({sym})", prev)
+                    m2 = re.search(r"(-?\d+)$", prev)
+                    add = int(m2.group(1)) if m2 else 0
+                    tag = f"%lo({sym})" if not add else f"%lo({sym}+{add})"
+                    prev = re.sub(r"-?\d+$", tag, prev)
             elif kind == "R_MIPS_GPREL16":
                 if re.search(r"-?\d+\(\$gp\)", prev):
                     prev = re.sub(r"-?\d+(\(\$gp\))",

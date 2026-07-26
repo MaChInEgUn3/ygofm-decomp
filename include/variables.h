@@ -152,9 +152,14 @@ extern u8 *D_80010000;
  * at +0x30 is known. Declared as an array so the base lands in a register
  * before the element offset -- 0x98 is exactly two records. */
 typedef struct {
-    u8 unk0[0x30];
+    s32 w[12];      /* 0x00 */
     s8 unk30;
-    u8 unk31[0x1B];
+    u8 unk31;
+    u8 unk32;
+    u8 unk33[7];
+    u8 unk3A;
+    u8 unk3B;
+    u8 unk3C[0x10];
 } Rec4C;
 
 extern Rec4C D_800EB010[];
@@ -229,6 +234,7 @@ typedef struct {
 } Rec64;
 
 extern Rec64 D_800EB0F8[];
+extern s8 D_8015C410[];
 extern u8 D_801A7AD8[];
 extern u16 D_800F2B22[];
 extern u8 D_800E9EA7[];

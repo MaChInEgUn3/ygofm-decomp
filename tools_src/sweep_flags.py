@@ -37,6 +37,8 @@ BUILD = [str(ROOT / ".venv" / "bin" / "python"), "tools_src/build.py"]
 COMBOS = [
     ("O2 G8",                 ["-quiet", "-O2", "-G8"], None),
     ("O1 G8",                 ["-quiet", "-O1", "-G8"], None),
+    ("O2 G8 nostrength",     ["-quiet", "-O2", "-G8", "-fno-strength-reduce"], None),
+    ("O2 G0 nostrength",     ["-quiet", "-O2", "-G0", "-fno-strength-reduce"], "-G0"),
     ("O2 G8 nosched1",        ["-quiet", "-O2", "-G8", "-fno-schedule-insns"], None),
     ("O2 G8 nosched1+2",      ["-quiet", "-O2", "-G8", "-fno-schedule-insns",
                                "-fno-schedule-insns2"], None),
