@@ -348,6 +348,7 @@ extern u8 D_8009B2F8;
 extern u8 D_8009B324;
 extern u8 D_8009B325;
 extern u8 D_8009B344;
+extern u8 D_8009B34E;
 extern u8 D_8009B355;
 extern u8 D_8009B357;
 extern u8 D_8009B3C7;
