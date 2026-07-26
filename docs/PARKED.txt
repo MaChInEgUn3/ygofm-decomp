@@ -85,6 +85,18 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_8004C0AC: 6 out, and all six are where the loop counter is incremented.
+# Retail increments once in the preheader and once in the bottom branch's delay
+# slot, testing the pre-increment value; cc1psx puts the increment in the first
+# branch's delay slot and leaves the bottom one a nop. do/while with `i++ < n`,
+# a rotated for, and an explicit while(1) with two breaks give 6, 23 and 15.
+func_8004C0AC
+# func_8004C560 is 11 out but only one instruction short: retail copies p[0]
+# into a third register and adds there, keeping p[0] live until after the sum so
+# it can store it to p[4]; cc1psx stores p[4] first and then adds in place.
+# Five orderings of the two stores and the sum, with and without a variable for
+# the call result, all land on 11 or 14.
+func_8004C560
 # func_80038798 is ONE instruction: retail has `andi $v0,$a0,0x8000` where the
 # masked value lives in $a0; cc1psx folds `(x & 0xFFFF) & 0x8000` back to
 # `x & 0x8000` and reads $v0. Both registers are live (the masked value is the
