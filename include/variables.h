@@ -266,6 +266,7 @@ extern VoidFn D_80090A5C[];
 extern u8 D_80090AD4[];
 extern u8 D_80090E58[];
 extern s8 D_8009B408;
+extern u8 D_800F2848[];
 extern u8 D_800F2878[];
 extern u8 D_800EFE38[];
 extern u16 D_8009B410;
