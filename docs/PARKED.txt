@@ -57,3 +57,4 @@ func_800594C0
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
 func_800732A0
 func_8002CCE4
+func_80048C0C
