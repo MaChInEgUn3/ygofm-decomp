@@ -85,6 +85,17 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80045BE8 appends a 48-byte record with a struct assignment -- that is
+# where the four-word block-move loop comes from, and Rec48 in variables.h
+# exists for it. Addressing and control flow match; what is left is that retail
+# puts the D_8009B45C base in $a1 and keeps arg0 in $a0 until the block move
+# needs $a1, while cc1psx copies arg0 to $a1 in the prologue and gives the base
+# $a0. Every access through either then differs -- 45, almost all cascade.
+# Needs the -G0 assembler entry restored when picked up again.
+func_80045BE8
+# func_800129D8 is crt0: it writes $sp, $gp and $fp and ends in `break 0,1`.
+# Filtered by candidates.py now, listed here so nobody re-derives that.
+func_800129D8
 # func_8002C604: addressing solved (scalar D_80010000 + -G0 assembler gives the
 # lui/lw register reuse retail has). What is left is 22 differences from one
 # register: retail keeps the object returned by func_8002C5CC in $a0 and we put

@@ -200,6 +200,12 @@ extern Slot70 D_800EFE48[];
 #ifdef D_80010000_IS_AGGREGATE
 extern u8 *D_80010000[];
 #else
+/* 48-byte record: func_80045BE8 appends one with a struct assignment,
+ * which is where the four-word block-move loop comes from. */
+typedef struct {
+    s32 w[12];
+} Rec48;
+
 extern u8 *D_80010000;
 #endif
 extern u8 D_800E9D90[];

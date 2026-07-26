@@ -35,7 +35,11 @@ ASM = os.path.join(ROOT, "asm", "nonmatchings", "31D8")
 LIBRARY_REGION = 0x80073840
 
 BRANCH = re.compile(r"\b(b(eq|ne|gez|gtz|lez|ltz|eqz|nez)?|j|jal|jr)\b")
-HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|\bmult\b|\bdiv\b|jr\s+\$v|jr\s+\$a")
+# `break` and writes to $sp/$gp/$fp are the C runtime stubs (crt0, the
+# constructor walker): assembly by construction, and two of them were
+# offered as candidates before this was added.
+HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|\bmult\b|\bdiv\b|jr\s+\$v|jr\s+\$a"
+                          r"|\bbreak\b|\bor\s+\$sp\b|\$fp,\s*\$sp|\$gp,\s*%hi")
 
 
 def parked():
