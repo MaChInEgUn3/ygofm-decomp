@@ -511,7 +511,11 @@ extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
+#ifdef D_8009B2F8_IS_AGGREGATE
+extern u8 D_8009B2F8[];
+#else
 extern u8 D_8009B2F8;
+#endif
 extern u8 D_8009B324;
 extern u8 D_8009B325;
 extern u8 D_8009B344;

@@ -159,6 +159,9 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+void func_800323F8(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3);
+s32 func_80033BE8(void);
+void func_8002D370(void);
 s32 func_80045BE8(u8 *arg0);  /* returns 1, or 0 when the table is full */
 s32 func_80032B38(u8 *arg0);
 void func_800338E4(u8 *arg0);
