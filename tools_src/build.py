@@ -201,6 +201,7 @@ PER_FUNC_FLAGS = {
     "func_8003CDF8": _O1_G8,
     "func_8003CE48": _O1_G8,
     "func_800498F8": _O2_G0_NODELAY_MACRO,
+    "func_80030EC8": _O2_G8_MACRO,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})

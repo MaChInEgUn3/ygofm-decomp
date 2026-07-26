@@ -92,7 +92,14 @@ extern u8 D_8009B260;
 extern u8 D_8009B0D1[];
 extern u8 D_801D3200[];
 extern u8 D_80010384[];
+/* Scalar by default -- func_8003FCD8 reaches it gp-relatively. func_80030EC8
+ * needs %hi/%lo and defines D_8009B3ED_IS_AGGREGATE. */
+#ifdef D_8009B3ED_IS_AGGREGATE
+extern u8 D_8009B3ED[];
+#else
 extern u8 D_8009B3ED;
+#endif
+extern u8 D_8009B3EA[];
 extern u8 D_8009B3C0;
 extern u8 D_8009B364[];
 extern u16 D_800F5C80[];
