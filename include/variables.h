@@ -429,6 +429,8 @@ extern u8 D_80091570[];
 
 /* Tables reached by address, so never small data. */
 extern u8 D_800E9EC8[];
+extern u8 D_800E9ECE[];
+extern u8 D_800E9ECF[];
 typedef struct {
     u8 unk0[0x14];
     s16 unk14;

@@ -27,6 +27,7 @@ func_80049544
 func_80049640
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
 func_800601D0
+func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
 func_8003F7D4
 func_8001BD48
