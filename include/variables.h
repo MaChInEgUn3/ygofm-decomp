@@ -144,7 +144,9 @@ extern s8 D_8009B34D;
 extern u8 D_8009B363[];
 /* Scanned in 0x70-byte records; only the halfword at +8 is known. */
 typedef struct {
-    u8 unk0[8];
+    s16 unk0;
+    s16 unk2;
+    u8 unk4[4];
     u16 flags;     /* +0x08 */
     u8 unkA[0x1E];
     s32 unk28;     /* +0x28 */
