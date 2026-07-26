@@ -2453,6 +2453,55 @@ the only embedded source path in the whole binary: grepping every `.asciz` in
 `asm/data/` for a `.c` suffix returns exactly one string, referenced by exactly
 these two functions. No other unit can be named this way.
 
+### `x & (1 << i)` in a loop, and the return cc1psx threads and retail does not
+
+Two findings from `func_80077090`, which scans a 24-bit mask for its lowest set
+bit and then reads a table entry. It went 34 → 7, and the 7 are one wall.
+
+**Naming the mask stops the bit-test rewrite.** Written `if (arg0 & (1 << i))`,
+cc1psx's combiner rewrites it to `((arg0 >> i) & 1) != 0` and emits
+`srav`/`andi`. Retail keeps `1` in a register and shifts *left*:
+`addiu $a2,$zero,1` before the loop, `sllv $v0,$a2,$v1` in the branch delay slot,
+`and $v0,$a0,$v0`. Giving the mask a name is enough to prevent the rewrite:
+
+```c
+        s32 m = 1 << i;
+
+        if (arg0 & m) { ... }
+```
+
+That is 26 of the 34 differences, and it is the same lever as the older
+"naming intermediate results fixes scheduling" note, doing something stronger —
+it blocks a combiner transform, not just a schedule.
+
+**What is left is jump-to-return threading, and it is a compiler difference.**
+Retail returns `-1` with `j <exit>` and a `nop` in the delay slot, jumping to a
+single `jr $ra` at the end of the function. cc1psx emits `j $31` — checked in the
+raw `.s` before maspsx runs, so it is cc1psx and not the assembler wrapper. The
+same difference is the whole of what parks `func_80075CB0` and `func_80075D30`
+one instruction short, where it also lets cross-jumping merge two return blocks
+retail keeps separate.
+
+Measured, since three functions in a row is exactly when a pattern starts looking
+like a rule: **46 of the 1794 functions contain a `j` to a bare `jr $ra`**, and
+they are not spread evenly — the densest 0x1000 buckets are `0x8008E000` (6/18),
+`0x80075000` (5/21) and `0x80077000` (3/14), all high addresses. Three matched
+functions do contain the shape, but in all three the jump comes out of a `switch`
+default or an `if`/`else` tail rather than from a threaded `return`, so they are
+not counter-examples. Nothing in the flag space reaches it: none of
+`-fno-cse-follow-jumps`, `-fno-expensive-optimizations`,
+`-fno-rerun-cse-after-loop`, `-fno-peephole`, `-fno-inline`, `-fno-caller-saves`,
+`-fno-function-cse`, `-fno-thread-jumps` or `-fno-delayed-branch` changes it, and
+PsyQ 4.6 is worse on `func_80077090` (36) while being slightly better on
+`func_80075CB0` (25 against 27) — suggestive of a version difference, not
+evidence of one.
+
+The honest state: three functions parked within 1–2 real instructions on a
+behaviour we cannot currently select. If a fourth turns up in the same address
+range, the hypothesis worth testing is that this region is SDK library code built
+with an older gcc than the game's own units — `0x80075000`–`0x80079000` holds 61
+functions and not one of them has matched yet.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.

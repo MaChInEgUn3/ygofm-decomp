@@ -550,6 +550,7 @@ extern u8 D_800118AC[];
 extern u32 *D_80092BF0[];
 /* Shift applied to the address before the block-list walk. */
 extern u32 D_80092BB0[];
+extern u32 D_80092B14[];
 extern u8 D_800118E4[];
 extern u8 D_800118CC[];
 extern u8 D_8009B084[];
@@ -588,7 +589,9 @@ extern u8 *D_800EB184;
 #endif
 extern s32 D_800FE240;
 extern s32 D_800947B8;
-extern u8 *D_80092B88;
+/* Reached through %hi/%lo, so unsized rather than a scalar. Nothing had
+ * used it before func_80077090; if a gp-relative user turns up, guard it. */
+extern u8 *D_80092B88[];
 extern s32 D_800F8394[];
 extern s32 D_800F8398[];
 extern s32 D_800F5D70;

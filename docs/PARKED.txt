@@ -78,8 +78,16 @@ func_80049CB0
 # func_80075D30 is the same walk with the address pre-shifted by D_80092BB0,
 # 33 against 35, one instruction from the same merge plus two lui swapped at
 # the top. Same class, no point solving twice.
+# func_80077090 is the third of these and the clearest: 7 differences, of which
+# 4 are label renumbering caused by the 5th. Retail's `return -1` is
+# `j <exit>; nop`; cc1psx emits `j $31` -- verified in the raw cc1psx output,
+# so it is the compiler and not maspsx. The 6th and 7th are one `lui` scheduled
+# a slot early. None of -fno-cse-follow-jumps, -fno-expensive-optimizations,
+# -fno-rerun-cse-after-loop, -fno-peephole, -fno-inline, -fno-caller-saves,
+# -fno-function-cse or -fno-thread-jumps moves it, and PsyQ 4.6 is worse (36).
 func_80075CB0
 func_80075D30
+func_80077090
 func_800601D0
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
