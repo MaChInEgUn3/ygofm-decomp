@@ -122,7 +122,13 @@ typedef struct {
 
 extern Threshold D_801798A8[][5];
 extern u8 D_801AB00C[];
+/* Scalar by default -- three functions reach it gp-relatively. func_8007154C
+ * needs %hi/%lo and defines D_8009B1D5_IS_AGGREGATE. */
+#ifdef D_8009B1D5_IS_AGGREGATE
+extern u8 D_8009B1D5[];
+#else
 extern u8 D_8009B1D5;
+#endif
 extern u8 D_8009B164;
 extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
@@ -410,7 +416,9 @@ extern u8 D_800E9EC8[];
 typedef struct {
     u8 unk0[0x14];
     s16 unk14;
-    u8 unk16[0xA];
+    u8 unk16[3];
+    s8 unk19;
+    u8 unk1A[6];
 } Rec20;
 
 extern Rec20 D_800E9FF0[];
