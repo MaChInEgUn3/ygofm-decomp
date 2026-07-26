@@ -26,7 +26,7 @@ Write `src/func_XXXXXXXX.c` and rebuild; placement is automatic. Get candidates
 from `tools_src/candidates.py`, which filters out signatures that cannot match.
 
 **When it does not match, work in this order.** Each step makes the next
-meaningful, and skipping to 5 wastes hours:
+meaningful, and skipping to the last one wastes hours:
 
 1. **Instruction count right?** Nothing else is diagnostic until it is. If a
    function is the wrong size, remove it before reading the rest of the report —
@@ -41,11 +41,15 @@ meaningful, and skipping to 5 wastes hours:
    **loops**: a backward unconditional `j` in the target means the loop was *not*
    rotated, so write it as `while (1)` with the exit inside, never as
    `while (cond)`. 105 functions in the binary have that `j`.
-4. **Count materialisations** of each value: one per write in the source. One
+4. **Which operand receives the result?** `addu $a1,$a1,$v1` and
+   `addu $v0,$v0,$a1` compute the same sum into different registers. Swapping the
+   operands of a `+` changes nothing; rewriting it as `a += b;` and then using
+   `a` makes that operand the destination. This unparked four functions.
+5. **Count materialisations** of each value: one per write in the source. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
    an accumulator variable.
-5. **Then** `tools_src/sweep_flags.py`.
+6. **Then** `tools_src/sweep_flags.py`.
 
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Record the

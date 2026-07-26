@@ -42,10 +42,6 @@
 #   func_8004C84C     19  O2 G8 nosched1+2
 #   func_800594C0     16  O1 G0
 #   func_8005F7B0      5  O2 G8
-#   func_800709C0      5  O2 G0
-#   func_80070A40     11  O2 G0
-#   func_80070AC0      5  O2 G0
-#   func_80070B3C      5  O2 G0
 #   func_800732A0     13  O1 G8 macro
 #
 # --- register allocator: retail copies a value out of a register and we do
@@ -107,7 +103,6 @@ func_80048C0C
 func_800472A8
 func_800382A8
 func_8004733C
-func_800709C0
 func_80040510
 func_8005F7B0
 func_8004C84C
@@ -122,6 +117,3 @@ func_80031EE4
 func_800496C4
 func_8005A3D0
 func_8003B744
-func_80070B3C
-func_80070AC0
-func_80070A40

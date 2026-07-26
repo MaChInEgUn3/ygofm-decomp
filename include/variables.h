@@ -533,9 +533,21 @@ typedef struct {
     u8 unk0[4];
     u8 *base;   /* +4 */
     u8 *cursor; /* +8 */
+    u8 unkC[8];
+    /* Return-address stack for nested routines: func_80070DA8 pops
+     * cursor = stack[--depth] and prints "ERROR:Can't Return From Routine"
+     * when depth is already zero. */
+    u8 depth;   /* +0x14 */
+    u8 unk15[3];
+    u8 *stack[8];  /* +0x18 */
 } ByteReader;
 
 extern ByteReader D_800F5BE8[];
+/* printf format and assert strings from src/hirata/H_mctrl1.c. */
+extern u8 D_800118AC[];
+extern u8 D_800118E4[];
+extern u8 D_800118CC[];
+extern u8 D_8009B084[];
 
 /* --- more scalars in -G0 units -------------------------------------------- */
 

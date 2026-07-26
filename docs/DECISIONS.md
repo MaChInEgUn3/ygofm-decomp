@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-483 of 1794 functions decompiled and byte-matching.
+489 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~483 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~489 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2403,6 +2403,55 @@ them is nearly always what a backward `j` means.
 So: a rotated loop in your output against an unrotated one in the target is not a
 scheduling difference to chase with flags. It is the loop written the other way
 round in the source.
+
+### `x = a + b` picks a destination register, and `+=` is how you choose it
+
+Five functions in `src/hirata/H_mctrl1.c` end the same way: read a byte offset,
+add it to a base pointer, store the result as a cursor. Written the obvious way
+
+```c
+    u8 *p = D_800F5BE8[0].base;
+    D_800F5BE8[0].cursor = c + p;          /* or p + c -- identical output */
+```
+
+every one of them was **five instructions out**, and the five were always the
+same: the address of the object in `$v1` instead of `$v0`, the loaded base in
+`$v0` instead of `$v1`, and `addu $v0,$v0,$a1` where retail has
+`addu $a1,$a1,$v1`. Both compute the same sum. The difference is *which operand's
+register receives it*: retail accumulates into the register holding the offset,
+cc1psx accumulates into the register holding the freshly loaded base. Swapping
+the operands in the source does nothing, because for a commutative `+` gcc has
+already canonicalised the tree by the time it picks a destination.
+
+What does work is writing the accumulation as an assignment to the offset:
+
+```c
+    c += (s32)D_800F5BE8[0].base;
+    D_800F5BE8[0].cursor = (u8 *)c;
+```
+
+Now `c` is the destination of the `+` at tree level and the register allocation
+follows. `func_80070D00` went from 5 to MATCH, and the same edit matched
+`func_800709C0`, `func_80070AC0` and `func_80070B3C` unchanged — all three had
+been **parked**, two of them under "scheduling / rematerialisation", which they
+were not. `func_80070A40` needed one more thing: it compares two array elements,
+and retail forms the *left* operand's address first, so `D_800F5B98[b] <
+D_800F5B98[a]` has to be written `D_800F5B98[a] > D_800F5B98[b]`. Then it matched
+too.
+
+So the generalisation, which is worth reaching for before parking anything on
+register naming: **when two registers are swapped around an arithmetic
+instruction, look at which operand the result lands in, and rewrite the statement
+so that operand is the assignment target.** A pure expression `t = a + b` leaves
+the choice to gcc; `a += b; t = a;` takes it away.
+
+The provenance is worth recording too. `func_80070DA8` and `func_80070D00` both
+call the printf at `func_8008E870` with `"%s:%d\n"`, the string
+`"src/hirata/H_mctrl1.c"` and a line number — 403 and 379 — so these are
+`assert`-style bailouts and they name their translation unit outright. That is
+the only embedded source path in the whole binary: grepping every `.asciz` in
+`asm/data/` for a `.c` suffix returns exactly one string, referenced by exactly
+these two functions. No other unit can be named this way.
 
 ## Repo layout / tooling plan
 
