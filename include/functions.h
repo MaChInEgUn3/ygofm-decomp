@@ -231,3 +231,4 @@ s32 func_8002C7E8(s32 arg0, s32 arg1);
 void func_8002FD10(s32 arg0);
 void func_8002FA54(void);
 void func_80015B00(void);
+void func_8003C7A0(void);
