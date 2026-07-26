@@ -67,6 +67,19 @@ func_80049CB0
 # nested ifs rather than &&. Neither had a candidate saved; both were
 # decompiled again from the listing in a few minutes.
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
+# func_80075CB0 is the same thing at the *return*: retail keeps two
+# `addiu $v0,$zero,1`, one in each branch's delay slot, jumping to a single
+# `jr $ra`. cc1psx threads jump-to-return first, which turns them into two
+# identical `addiu; jr` blocks and then merges them, so we come out one
+# instruction short (31 vs 32) with everything else identical. Structure,
+# constant hoisting, addressing and the double read of D_80092BF0 are all
+# already right; -fno-thread-jumps does not change it and neither does any
+# combination in the sweeper.
+# func_80075D30 is the same walk with the address pre-shifted by D_80092BB0,
+# 33 against 35, one instruction from the same merge plus two lui swapped at
+# the top. Same class, no point solving twice.
+func_80075CB0
+func_80075D30
 func_800601D0
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
