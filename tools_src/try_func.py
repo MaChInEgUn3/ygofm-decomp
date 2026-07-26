@@ -117,6 +117,9 @@ def normalise(line):
             text = f"lui {m.group(1)},{(value >> 16) & 0xFFFF}"
     # `j $ra` and `jr $ra` are the same instruction spelled two ways.
     text = re.sub(r"^j\b", "jr", text) if text.startswith("j $ra") else text
+    # An indirect call: gcc writes `jal $ra,$v0`, the disassembly shows the
+    # `jalr $v0` the assembler emits with $ra implicit. Same instruction.
+    text = re.sub(r"^jalr? \$ra,(\$\w+)$", r"jalr \1", text)
     # cc1psx emits small-data references bare (`lhu $v0,sym`); the assembler
     # turns them into the gp-relative form the disassembly shows. Same thing.
     text = re.sub(r"%gp_rel\(([^)]*)\)\(\$gp\)", r"\1", text)
