@@ -58,3 +58,4 @@ func_800594C0
 func_800732A0
 func_8002CCE4
 func_80048C0C
+func_80049394

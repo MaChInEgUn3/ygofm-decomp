@@ -104,6 +104,11 @@ def normalise(line):
         value = int(m.group(2), 0)
         if -0x8000 <= value < 0x8000:
             text = f"addiu {m.group(1)},$zero,{value}"
+        elif 0x8000 <= value <= 0xFFFF:
+            # Too large for a signed addiu, no high half: the assembler emits
+            # `ori $r,$zero,N`. 0xFFFF masks are common enough that leaving
+            # this out shows a phantom diff on every one of them.
+            text = f"ori {m.group(1)},$zero,{value}"
         elif (value & 0xFFFF) == 0:
             # A constant with no low half assembles to a bare lui. Negative
             # ones count: `li $a0,-65536` is 0xFFFF0000, which the disassembly
