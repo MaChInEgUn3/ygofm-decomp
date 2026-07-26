@@ -345,7 +345,19 @@ extern u8 D_800E9E18[];
 extern u8 D_800E9E60[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
+/* Aggregate by default (four functions reach it through %hi/%lo);
+ * func_800440B4 reaches it gp-relatively. */
+#ifdef D_8009B450_IS_SCALAR
+extern s32 D_8009B450;
+#else
 extern s32 D_8009B450[];
+#endif
+extern u8 D_8009B437;
+extern u8 D_8009B43C;
+extern u8 D_8009B43D;
+extern s8 D_8009B43E;
+extern u8 D_8009B44F;
+extern u8 D_800F39B0[];
 
 /* --- scalars belonging to units built with -G0 ---------------------------- */
 /*
