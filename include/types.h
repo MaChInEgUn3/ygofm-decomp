@@ -52,4 +52,13 @@ typedef struct {
     s32 unk28;
 } Cmd2C;
 
+/* Four bytes passed and returned in one register. The byte-wise reassembly
+   gcc emits around a call is the tell that a struct went by value. */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+} Word4;
+
 #endif /* TYPES_H */
