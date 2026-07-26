@@ -182,6 +182,8 @@ extern u8 D_8009B2B6;
 extern u16 D_8009B2DE;
 extern u8 *D_8009B2E4;
 extern u8 D_8009B2E9;
+extern u8 D_8009B2E8;
+extern u16 D_8009B2C8;
 extern u8 D_8009B2DC;
 extern u8 D_8009B2B8;
 extern u8 D_8009B2C0;
@@ -267,6 +269,8 @@ typedef struct {
 
 extern Rec12 D_801AB000[];
 extern u8 D_800907D8[];
+/* The debug format string "             MAP = %02X\n". */
+extern u8 D_80090D0C[];
 extern u8 D_801D0200[];
 extern u8 D_801D0250[];
 extern u8 D_8009B114;
