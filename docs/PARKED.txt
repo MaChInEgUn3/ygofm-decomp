@@ -85,6 +85,15 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_800338E4: the four accesses to D_8009B146 are right (scalar + -G0
+# assembler, no alias) and so is the first half. What is left is a schedule:
+# retail reads D_8009B146, then +0x5AA8, then the counter at +0x5AAC; cc1psx
+# reloads the counter first, immediately after the store to it in the branch
+# above. Naming the three reads in retail's order does not move it, inlining
+# them is worse (24), and the sweep's best is O1 G8 at 18. Also note the two
+# reads of D_8009B146 differ in signedness -- lh for the subtraction, lhu for
+# the sum -- which the `(u16)` cast reproduces.
+func_800338E4
 # func_80026BA4 is 3 out, in the last arm of a three-way if. Both arms are one
 # instruction; retail puts `addiu $v1,$a0,-601` in the branch delay slot and
 # `addiu $v1,$zero,100` in the fall-through, cc1psx the other way round. Writing
