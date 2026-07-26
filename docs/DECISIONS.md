@@ -2551,6 +2551,53 @@ different operand orders, and you choose by which one retail shows. Naming the
 intermediate half-way (`v = (c<<24)|(c<<16)|(c<<8); c = v | c;`) does *not* work,
 because the destination is still `c`.
 
+### Where a constant offset lands, and the $at asymmetry
+
+Three levers from the 10-20 instruction band, all about placement of a constant
+rather than control flow.
+
+**%lo folding follows the shape of the address expression.** For a load at
+`sym + i*K + C`, retail keeps `%lo(sym)` bare and puts `C` in the memory
+operand's offset field. `*(u16 *)&D_800F2C40[i * K + 0xE06]` instead folds
+`0xE06` into the `%lo` and then adds it again to form the index -- same address,
+one instruction's worth of different split. Naming the base as its own statement
+fixes it:
+
+```c
+    u8 *p = D_800F2C40;             /* forces the symbol to be materialised bare */
+
+    return *(u16 *)(p + arg0 * 3616 + 0xE06) >> 4;
+```
+
+The same choice appears in clear loops. `p = (u16 *)((u8 *)D_800F5BE8 + 0x3E);`
+then `p[i]` folds the 0x3E into the base; `p = (u16 *)D_800F5BE8;` then
+`p[i + 0x1F]` gives retail's split, with the base register holding `sym + 2*i`
+and 62 in the store. When the target's base register does *not* include the
+struct/array offset, move that offset into the index expression.
+
+**A bare-symbol load reuses its destination as the `%hi` temp; a store takes
+`$at`.** `func_8004545C` has both in ten instructions:
+
+```
+    lui  $v1, %hi(D_8009B45C)
+    lw   $v1, %lo(D_8009B45C)($v1)     # load: destination doubles as the temp
+    ...
+    lui  $at, %hi(D_8009B128)
+    sw   $v0, %lo(D_8009B128)($at)     # store: no spare register, so $at
+```
+
+That is one mechanism, not two: the assembler expanding bare symbols. Getting it
+needs the compiler to emit bare symbols for both -- a **scalar** declaration at
+`-G8` -- with a `-G0` assembler so neither is treated as small data. I reached
+for `-mno-split-addresses` and an unsized-array declaration first and neither was
+needed; `lui $at` next to an explicit `%hi`/`%lo` pair in the same function is
+not evidence of two addressing modes.
+
+**`&&` folds two bit tests, not just range checks.** `func_8001700C`'s
+`(f & 0x8000) && !(f & 0x4000)` compiled to `andi 0xC000; xori 0xC000; sltiu` --
+one test for the pair. Nested `if`s keep both, exactly as for the range-check
+fold. Read the fold as being about the `&&`, whatever the operands are.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
