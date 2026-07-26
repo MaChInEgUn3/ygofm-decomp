@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-537 of 1794 functions decompiled and byte-matching.
+541 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~537 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~541 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2638,6 +2638,40 @@ This is the same lesson as the loop-form note above: when the target has more
 exit blocks than you produce, the fix is which test is written first, not the
 polarity of a single branch and not a flag. Both orders express the same
 function; only one of them survives cross-jumping.
+
+### Array subscripts get reassociated; explicit byte arithmetic does not
+
+`func_8003B6AC` reads `t[arg0]` and `t[arg0 + 1]` from a halfword table.
+Written that way, cc1psx computes `arg0 * 2` once and gets the second address as
+`arg0 * 2 + 2` — and in doing so clobbers `$a0`, which changes the register
+assignment for the rest of the function. Retail keeps `arg0` and computes both
+products from it:
+
+```
+    sll   $v0, $a0, 1
+    addu  $v0, $v0, $v1
+    addiu $a0, $a0, 0x1
+    sll   $a0, $a0, 1
+    addu  $a0, $a0, $v1
+```
+
+Writing the scaling out by hand on a byte pointer is what stops the
+reassociation:
+
+```c
+    u8 *t = D_80090E58;
+    u8 *lo = t + arg0 * 2;
+    u8 *hi = t + (arg0 + 1) * 2;
+```
+
+That was 5 of the 17 differences. The rest were the two levers already recorded
+— naming the second base (`D_800EB288`) so it is materialised before the index
+multiply, and moving `i++` to the end of the loop body so the reload of the limit
+can fill its own load-delay slot instead of taking a `nop`.
+
+**Two adjacent subscripts of the same array are a reassociation risk.** When the
+target recomputes the scaling instead of adding the stride, write the scaling
+explicitly.
 
 ## Repo layout / tooling plan
 

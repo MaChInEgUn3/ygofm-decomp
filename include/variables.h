@@ -162,7 +162,9 @@ typedef struct {
     s16 unk2;
     u8 unk4[4];
     u16 flags;     /* +0x08 */
-    u8 unkA[0x1E];
+    u8 unkA[0x1A];
+    ObjFn unk24;   /* +0x24 -- called with the record as its argument by
+                    * func_80040CAC, which walks the list through unk2. */
     s32 unk28;     /* +0x28 */
     u8 unk2C[0x44];
 } Slot70;
