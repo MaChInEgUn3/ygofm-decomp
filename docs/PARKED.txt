@@ -66,7 +66,6 @@ func_80049CB0
 # two predate that finding and have no candidate saved (they are among the 37
 # thrown away before parked/ existed), so they need decompiling again -- but
 # the cause is no longer a wall.
-func_80049544
 func_80049640
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
 func_800601D0
