@@ -141,7 +141,9 @@ void func_80060170(s32 arg0, s32 arg1);
 void func_80015D0C(void);
 void func_8004B854(void);  /* PROVISIONAL */
 s32 func_8002EE5C(void);  /* PROVISIONAL */
-void func_80035AB8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);  /* PROVISIONAL */
+/* arg0 is a record index, not a pointer: it is scaled by 100 and added to
+ * D_800EB0F8. The PROVISIONAL u8 * was a guess. */
+void func_80035AB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_8004B910(void);  /* PROVISIONAL */
 void func_8003B9BC(void);  /* PROVISIONAL */
 void func_80168FB4(void);  /* PROVISIONAL */
@@ -151,6 +153,11 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+void func_8003798C(u8 *arg0);
+void func_80037D6C(u8 *arg0);
+void func_80038110(u8 *arg0);
+s32 func_80041464(u8 *arg0, u8 *arg1);
+s32 func_80042B08(s32 arg0, s32 arg1);
 /* None of these four reads $a0 before writing one. */
 void func_8001306C(void);
 void func_80012DB4(void);

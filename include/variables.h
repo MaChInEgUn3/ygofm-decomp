@@ -292,7 +292,12 @@ extern s32 D_8009B11C;
 extern s32 D_8009B120;
 extern s32 D_8009B0F0;
 extern s32 D_8009B138;
+/* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
+#ifdef D_8009B134_IS_AGGREGATE
+extern s32 D_8009B134[];
+#else
 extern s32 D_8009B134;
+#endif
 extern s32 D_8009B10C;
 extern s32 D_8009B12C;
 extern u16 D_8009B124;
