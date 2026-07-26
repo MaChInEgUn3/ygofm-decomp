@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-550 of 1794 functions decompiled and byte-matching.
+551 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~550 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~551 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2801,6 +2801,31 @@ gcc to common — the accesses are bare symbol ops from the start, and a `-G0`
 assembler expands each. Prefer that; reach for an alias only when the function
 also needs a genuinely gp-relative symbol, which forces the assembler back to
 `-G8` and the aggregate declarations with it.
+
+### Repeated reads with nothing in between mean `volatile`, not an alias
+
+`func_80023FBC` reads `D_8009B3A4` **five times** in a row, testing a different
+bit each time, and retail reloads it every time. That is not the address being
+materialised five times — it is the *value* not being commoned, and no
+declaration form or alias reaches it: a scalar declaration gives five bare-symbol
+loads that gcc still CSEs into one, and an alias per read would be five names for
+what is obviously one variable.
+
+The only thing that makes gcc reload is `volatile`, and that is almost certainly
+what the original said — a hardware or interrupt-updated flag word. One
+`#ifdef D_8009B3A4_IS_VOLATILE` guard and it matches.
+
+**So distinguish the two failure modes before reaching for `symbol_aliases.txt`:**
+
+- repeated `lui`/`%hi` for one symbol, each feeding a *different* access →
+  address CSE. Scalar declaration, or one alias per extra access.
+- the same *value* loaded repeatedly with nothing in between that could change
+  it → value CSE. `volatile`.
+
+`func_8003D0F4` earlier today is the reverse warning: `volatile` there *blocked*
+the bare-symbol form and had to be dropped from the aggregate declaration. The
+two uses of the keyword pull in opposite directions, so decide which one the
+target is showing before using it.
 
 ## Repo layout / tooling plan
 

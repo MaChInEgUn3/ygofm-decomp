@@ -487,7 +487,13 @@ extern u16 D_8009B396;
 extern u16 D_8009B39A;
 extern u16 D_8009B39E;
 extern u16 D_8009B3A0;
+/* func_80023FBC reads it five times in a row and retail reloads each time,
+ * which only a volatile does. */
+#ifdef D_8009B3A4_IS_VOLATILE
+extern volatile u16 D_8009B3A4;
+#else
 extern u16 D_8009B3A4;
+#endif
 extern u16 D_8009B3A6;
 extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
