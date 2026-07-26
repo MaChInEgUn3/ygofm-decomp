@@ -38,7 +38,11 @@ typedef void (*TickFn)(u8 *, s32);
 
 typedef struct {
     u8 unk0;
-    u8 pad1[0xF];
+    u8 unk1;
+    s16 unk2;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
     s32 unk10;
     s32 unk14;
     s32 unk18;
