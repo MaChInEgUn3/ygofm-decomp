@@ -151,6 +151,13 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+/* None of these four reads $a0 before writing one. */
+void func_8001306C(void);
+void func_80012DB4(void);
+void func_80012E5C(void);
+void func_8003CCD8(void);
+u8 *func_8002C5CC(void);
+s32 func_80033998(void);
 void func_800143DC(void);
 s32 func_80030294(void);
 void func_80030250(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,

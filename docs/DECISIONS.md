@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-508 of 1794 functions decompiled and byte-matching.
+514 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~508 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~514 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2543,6 +2543,47 @@ not evidence of two addressing modes.
 `(f & 0x8000) && !(f & 0x4000)` compiled to `andi 0xC000; xori 0xC000; sltiu` --
 one test for the pair. Nested `if`s keep both, exactly as for the range-check
 fold. Read the fold as being about the `&&`, whatever the operands are.
+
+### `do`/`while` and a rotated `for` are not the same block layout
+
+Three search loops in the 14-15 instruction band -- `func_8002C5CC`,
+`func_8002EE5C`, `func_80033998` -- all had the same 6-7 differences, and all of
+them were block *placement*, not polarity in the usual sense. Retail puts the
+early-return inline, between the test and the loop-back:
+
+```
+    lhu  $v0, 0x0($a0)
+    bne  $v0, $zero, .L8002EE80    # branch when the loop continues
+     addiu $v1, $v1, 0x1
+    jr   $ra                       # the `return 0`, inline
+     addu $v0, $zero, $zero
+  .L8002EE80:
+    slti $v0, $v1, 0x28
+    bne  $v0, $zero, .L8002EE68
+```
+
+Written as a `do { if (...) return X; ...; } while (cond);` cc1psx branches the
+other way and puts the return block *after* the loop-back, which costs the
+branch and the block order -- 7 differences with everything else identical.
+Written as a plain
+
+```c
+    for (i = 0; i < 0x28; i++) {
+        if (*p == 0) return 0;
+        p++;
+    }
+```
+
+it matches exactly, even though gcc rotates the `for` into the same
+test-at-the-bottom loop the `do`/`while` produced. So the two forms are *not*
+interchangeable: gcc lays out a rotated `for` with the interior return inline and
+an explicit `do`/`while` with it out of line. Hoisting the increment above the
+test, which is what the delay slot suggests, changes nothing -- the shape of the
+loop statement is the whole of it. An `if`/`else` with the return in the `else`
+also matches, which is the same layout by another route.
+
+**Check the loop statement before reading anything into the branch direction.**
+Two of these three had already been through a polarity edit that did nothing.
 
 ## Repo layout / tooling plan
 

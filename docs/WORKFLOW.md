@@ -36,11 +36,15 @@ meaningful, and skipping to the last one wastes hours:
    order controls which callee-saved register a value gets, where a constant is
    materialised, whether an address is folded, and whether an initialiser
    competes with the prologue.
-3. **Branch polarity.** cc1psx emits the fall-through for the branch written as
-   not-taken — look at which path retail falls into. In the same pass, check the
-   **loops**: a backward unconditional `j` in the target means the loop was *not*
-   rotated, so write it as `while (1)` with the exit inside, never as
-   `while (cond)`. 85 in-scope functions still have that `j`.
+3. **Branch polarity and loop form.** cc1psx emits the fall-through for the
+   branch written as not-taken — look at which path retail falls into. But check
+   the **loop statement first**, because it decides block layout on its own:
+   - a backward unconditional `j` means the loop was *not* rotated — write
+     `while (1)` with the exit inside, never `while (cond)`. 85 in-scope
+     functions have that `j`;
+   - a rotated `for` puts an interior `return` **inline**, between the test and
+     the loop-back; an explicit `do`/`while` puts it after the loop-back. Same
+     loop, different layout, and no polarity edit reaches across the difference.
 4. **Which operand receives the result?** `addu $a1,$a1,$v1` and
    `addu $v0,$v0,$a1` compute the same sum into different registers. Swapping the
    operands of a `+` changes nothing. `a += b;` makes `a` the destination *and*
