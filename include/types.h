@@ -36,4 +36,16 @@ typedef struct {
 typedef void (*ObjFn)(u8 *);
 typedef void (*TickFn)(u8 *, s32);
 
+typedef struct {
+    u8 unk0;
+    u8 pad1[0xF];
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} Cmd2C;
+
 #endif /* TYPES_H */
