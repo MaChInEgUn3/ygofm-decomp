@@ -423,8 +423,6 @@ extern u8 *D_8009B458[];
 #else
 extern u8 *D_8009B458;
 #endif
-/* Alias for D_8009B458; see config/symbol_aliases.txt. */
-extern u8 *Base2_8009B458;
 extern u8 Base2_8009B364[];
 /* Reached %hi/%lo from func_80048C0C's unit and gp-relatively elsewhere; see
  * the per-file declaration knob in docs/DECISIONS.md. */

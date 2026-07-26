@@ -6,9 +6,6 @@
 # start at the same address, and materialises the base twice.
 KeyTable_801D9174 = 0x801D9174;
 
-# func_80049CB0 loads the D_8009B458 pointer twice in one basic block.
-Base2_8009B458 = 0x8009B458;
-
 # func_8002497C reads this counter once to test it and once to index with, in
 # two different basic blocks, and materialises the address for each.
 Base2_8009B364 = 0x8009B364;
@@ -18,11 +15,18 @@ Base2_8009B364 = 0x8009B364;
 # _gp is 0x8009AF08. Named so the C can refer to it.
 D_8009B24A = 0x8009B24A;
 
-# Two of the five entries this file used to have were dead weight, measured
+# THREE of the five entries this file used to have were dead weight, measured
 # rather than assumed: func_80044DA0 matches with both stores naming
-# D_8009B45C, and func_8002CCE4 sits at the same 3 differences either way.
+# D_8009B45C, func_8002CCE4 sits at the same 3 differences either way, and
+# func_80049C40 -- which looked like the textbook case, two pointer values
+# into one object in one basic block -- matches with both naming D_8009B458.
 # An alias is needed when the source needs two distinct *pointer values* into
 # one object -- func_8002497C holds one in a variable while reading through the
 # other, func_80036BCC walks two -- because gcc commons the address expression.
 # It is NOT needed when the repeated %hi comes from separate bare-symbol memory
-# ops, which the assembler expands one at a time; see func_8002A660.
+# ops, which the assembler expands one at a time; see func_8002A660 -- and it
+# is not needed when a *store through one of the pointers* sits between the
+# two reads, because D_8009B458 is itself a pointer in memory that the store
+# might alias, so gcc has to reload it anyway. That is func_80049C40. What is
+# left for the two surviving aliases is two reads of one address with nothing
+# in between that could have changed it.

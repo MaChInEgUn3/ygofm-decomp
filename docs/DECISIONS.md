@@ -2710,12 +2710,23 @@ condition is about *pointer values*:
 | `KeyTable_801D9174` (`func_80036BCC`) | **yes** — 16 differences without. Walks two pointers over one base. |
 | `Base2_8009B45C` (`func_80044DA0`) | no — MATCHes without it. Two plain stores. |
 | `Base2_801D0000` (`func_8002CCE4`) | no — 3 differences either way. |
-| `Base2_8009B458` (`func_80049CB0`) | untested; that function is parked with no saved candidate. |
+| `Base2_8009B458` (`func_80049B4C`/`func_80049C40`) | no — `func_80049C40` MATCHes without it, and it looked like the textbook case. |
 
-So: **an alias is for when the source needs two distinct pointer *values* into one
-object**, because gcc commons the address expression. It does nothing when the
-repeated `%hi` comes from separate bare-symbol memory ops, which the assembler
-expands one at a time. The two dead entries are deleted.
+So **three of the five were dead weight**, and the surviving condition is
+narrower than "two pointer values". `func_80049C40` has exactly two pointer
+values into `D_8009B458` inside one basic block and still needs no alias, because
+a *store through the first pointer* sits between the two reads — and
+`D_8009B458` is itself a pointer living in memory, so that store might alias it
+and gcc has to reload regardless.
+
+What is left for `Base2_8009B364` and `KeyTable_801D9174` is: **two reads of one
+address with nothing in between that could have changed it.** Everything else the
+compiler reloads on its own. The three dead entries are deleted.
+
+That is the second wrong version of this rule in one hour — "same basic block"
+first, then "two pointer values" — and both were written from a single function
+before the others were tested. The table above is the deliverable; the sentence is
+just its summary.
 
 `func_80049F50` is the second confirmation of the mechanism: three `lui`/`lw` of
 `D_8009B458` in three basic blocks, all from the scalar declaration plus a `-G0`
