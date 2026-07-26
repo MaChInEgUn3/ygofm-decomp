@@ -230,6 +230,7 @@ SMALL_DATA_NOP_FUNCS = {
     "func_8002D62C",
     "func_8003CDF8",
     "func_8003CE48",
+    "func_80025028",
 }
 
 # Functions where an address computation, not a memory op, is split across a
@@ -575,6 +576,7 @@ def split_address_across_call(lines):
     return out
 
 
+_ANY_LOAD = re.compile(r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,")
 _LOAD_BARE_SYM = re.compile(
     r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
 _EXTERN = re.compile(r"^\s*\.extern\s+([A-Za-z_]\w*)\s*,\s*(\d+)")
@@ -609,10 +611,29 @@ def insert_small_data_load_delay_nops(lines, sdata_limit=8):
     out = []
     for i, line in enumerate(lines):
         out.append(line)
-        m = _LOAD_BARE_SYM.match(line.split("#")[0])
-        if not m or m.group(3) not in small:
-            continue
-        reg = m.group(2)
+        body_here = line.split("#")[0]
+        m = _LOAD_BARE_SYM.match(body_here)
+        if m and m.group(3) in small:
+            reg = m.group(2)
+        else:
+            # The same omission happens the other way round: an ordinary load
+            # followed by a bare-symbol memory op on a *small* symbol. maspsx
+            # decides by the following instruction -- it expects that to expand
+            # through $at and fill the slot -- so which of the two touches the
+            # small symbol does not matter to it, and the first version of this
+            # pass only handled the load side. func_80025028 is the case where
+            # the store is the small one.
+            m2 = _ANY_LOAD.match(body_here)
+            if not m2:
+                continue
+            reg = m2.group(2)
+            nxt0 = next((lines[j] for j in range(i + 1, len(lines))
+                         if is_real_instruction(lines[j])), None)
+            if nxt0 is None:
+                continue
+            m3 = _BARE_SYM_MEMOP.match(nxt0.split("#")[0])
+            if not m3 or m3.group(3) not in small:
+                continue
         nxt = next((lines[j] for j in range(i + 1, len(lines))
                     if is_real_instruction(lines[j])), None)
         if nxt is None:

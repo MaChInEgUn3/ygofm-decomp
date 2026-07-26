@@ -55,3 +55,6 @@ Thumbs.db
 # which is versioned. Keeping this out of the repo so the project's docs stand
 # on their own.
 /CLAUDE.md
+
+__pycache__/
+*.pyc

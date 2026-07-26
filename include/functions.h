@@ -252,4 +252,4 @@ void func_80032C48(u8 *arg0);
 void func_80058938(s32 arg0, s32 arg1, Word4 arg2, Word4 arg3, s32 arg4, s32 arg5);
 void func_800428EC(u8 *arg0, s32 arg1);
 s32 func_8004002C(void);
-void func_80015DB8(void);
+void func_80015DB8(u8 *arg0);
