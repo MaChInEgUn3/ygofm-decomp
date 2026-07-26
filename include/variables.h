@@ -452,6 +452,7 @@ extern s32 D_8009B350;
 extern u8 *D_8009B290;
 
 /* Table of 8-byte entries. */
+extern u8 D_80091550[];
 extern u8 D_80091570[];
 
 /* Tables reached by address, so never small data. */
