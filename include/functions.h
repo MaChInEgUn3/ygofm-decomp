@@ -233,3 +233,5 @@ void func_8002FA54(void);
 void func_80015B00(void);
 void func_8003C7A0(void);
 void func_80036DBC(u8 *arg0);
+s32 func_8005C4F0(u8 *arg0, u8 *arg1);
+s32 func_8005B8A0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);

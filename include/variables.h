@@ -87,6 +87,7 @@ extern u8 D_800938AE[];
 extern s32 D_8009B400;
 extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
+extern u8 D_800F5750[];
 extern s32 D_800F5B98[];
 extern u8 D_800EAE88[];
 extern u8 D_800EAE8E[];
