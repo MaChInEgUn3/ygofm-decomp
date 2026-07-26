@@ -37,7 +37,10 @@ meaningful, and skipping to 5 wastes hours:
    materialised, whether an address is folded, and whether an initialiser
    competes with the prologue.
 3. **Branch polarity.** cc1psx emits the fall-through for the branch written as
-   not-taken — look at which path retail falls into.
+   not-taken — look at which path retail falls into. In the same pass, check the
+   **loops**: a backward unconditional `j` in the target means the loop was *not*
+   rotated, so write it as `while (1)` with the exit inside, never as
+   `while (cond)`. 105 functions in the binary have that `j`.
 4. **Count materialisations** of each value: one per write in the source. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is

@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-482 of 1794 functions decompiled and byte-matching.
+483 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~482 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~483 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2359,6 +2359,50 @@ solving two functions in a row: **`lui $at` in the target does not predict the
 macro flag.** Across the 482 matched functions, 31 have `lui $at, %hi` in retail
 and 21 of those build with the default flags; of the 17 built with a macro flag
 set, 7 have no `lui $at` at all. It is not a tell in either direction — sweep.
+
+### A backward `j` means `while (1)` with an interior exit, and 100 functions have one
+
+`func_80031F7C` searches a 0x10-byte record array for one whose halfword at `+4`
+equals the argument. Written as `while (*(s16 *)(p + 4) != arg1) p += 0x10;` it
+came out 29 instructions wrong, because cc1psx **rotates** the loop: it copies the
+test above the body, ends the body with the conditional branch, and there is no
+unconditional jump anywhere. Retail does not rotate:
+
+```
+.L80031FB4:
+    lh    $v0, 0x4($v1)
+    beq   $v0, $s2, .L80031FCC
+    addu  $v0, $s1, $s2          # delay slot: loop-invariant, hoisted into it
+    j     .L80031FB4
+    addiu $v1, $v1, 0x10         # delay slot
+```
+
+Test at the top, exit branch out of the middle, unconditional `j` back. The source
+shape that produces it is an infinite loop with the exit written inside:
+
+```c
+    while (1) {
+        if (*(s16 *)(p + 4) == arg1) break;
+        p += 0x10;
+    }
+```
+
+With that and one operand-order fix — `(arg0 + arg1)[0x5D97]` rather than
+`arg0[arg1 + 0x5D97]`, which decides whether the `addu` reads `$s1,$s2` or
+`$s2,$s1` — it matches exactly.
+
+**The tell is a backward unconditional `j`**, and it is worth stating as a rule
+because it is not rare: scanning all 1794 functions for a `j` to a label defined
+earlier in the same function finds **105**, of which only 5 are decompiled. Of
+those 5, four are `while (1)` with an interior `return` or `break`
+(`func_80021558`, `func_80019A08`, `func_80031F7C`, `func_80036BCC`) and the
+fifth, `func_8003FE80`, is `while (func_8004703C() & 8)` — a condition gcc will
+not duplicate because it contains a call. Both forms defeat rotation, and one of
+them is nearly always what a backward `j` means.
+
+So: a rotated loop in your output against an unrotated one in the target is not a
+scheduling difference to chase with flags. It is the loop written the other way
+round in the source.
 
 ## Repo layout / tooling plan
 
