@@ -155,6 +155,12 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+void func_80035CA8(s32 arg0);
+void func_80035DB8(s32 arg0);
+void func_800378D8(u8 *arg0);
+void func_80037914(u8 *arg0);
+void func_80037950(u8 *arg0);
+void func_800380D4(u8 *arg0);
 s32 func_80059AA8(s32 arg0, s32 arg1);
 void func_8002EE20(void);
 s32 func_80033500(u8 *arg0);
