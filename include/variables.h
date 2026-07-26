@@ -244,6 +244,8 @@ typedef struct {
 } Rec64;
 
 extern Rec64 D_800EB0F8[];
+extern u8 D_8015C424[];
+extern s16 D_800908A0[];
 extern s8 D_8015C410[];
 extern u8 D_801A7AD8[];
 extern u16 D_800F2B22[];
