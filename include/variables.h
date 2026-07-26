@@ -224,6 +224,7 @@ typedef struct {
 extern Rec12 D_801AB000[];
 extern u8 D_800907D8[];
 extern u8 D_801D0200[];
+extern u8 D_8009B114;
 extern s32 D_8009B118;
 extern u8 D_8009B110;
 extern volatile u16 D_8009B100;
@@ -232,6 +233,7 @@ extern u8 D_8009B108;
 extern s32 D_8009B11C;
 extern s32 D_8009B120;
 extern s32 D_8009B0F0;
+extern s32 D_8009B138;
 extern s32 D_8009B134;
 extern s32 D_8009B10C;
 extern s32 D_8009B12C;
