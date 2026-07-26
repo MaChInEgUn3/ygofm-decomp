@@ -208,6 +208,7 @@ typedef struct {
 extern Rec64 D_800EB0F8[];
 extern u8 D_801A7AD8[];
 extern u16 D_800F2B22[];
+extern u8 D_800E9EA7[];
 extern s32 D_800E9EA8[];
 extern u8 D_8017A1D8[];
 /* Twelve-byte records. Declared as an array of the record type so the index
@@ -225,7 +226,10 @@ extern u8 D_800907D8[];
 extern u8 D_801D0200[];
 extern s32 D_8009B118;
 extern u8 D_8009B110;
+extern volatile u16 D_8009B100;
+extern s32 D_8009B104;
 extern u8 D_8009B108;
+extern s32 D_8009B11C;
 extern s32 D_8009B120;
 extern s32 D_8009B0F0;
 extern s32 D_8009B134;
