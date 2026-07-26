@@ -1,3 +1,5 @@
+/* Needs -mno-split-addresses; parked for hours on the hoisted %hi before that
+   flag was tried on it. */
 #include "common.h"
 
 void func_8001798C(void) {

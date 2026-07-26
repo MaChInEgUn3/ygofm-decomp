@@ -1,3 +1,4 @@
+/* Needs -mno-split-addresses. */
 #define D_8009B45C_IS_AGGREGATE
 #include "common.h"
 
