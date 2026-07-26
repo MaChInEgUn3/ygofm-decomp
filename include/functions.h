@@ -71,7 +71,10 @@ void func_8003F454(void);  /* PROVISIONAL */
 u8 *func_80040468(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_8004B9E0(void);  /* PROVISIONAL */
 s32 func_800705AC(void);  /* PROVISIONAL */
-s32 func_8002C604(void);
+/* Takes an index it stores at +0x18 and returns the object, or 0.
+ * func_8002C68C forwards its own argument, which costs no instructions --
+ * which is why the void form matched. */
+u8 *func_8002C604(s32 arg0);
 void func_8003F758(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3);
 s32 func_8003F8D4(void);
 void func_80049010(void);  /* PROVISIONAL */

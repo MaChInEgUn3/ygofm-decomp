@@ -197,7 +197,12 @@ typedef struct {
 
 extern Slot70 D_800F0548[];
 extern Slot70 D_800EFE48[];
+#ifdef D_80010000_IS_AGGREGATE
+extern u8 *D_80010000[];
+#else
 extern u8 *D_80010000;
+#endif
+extern u8 D_800E9D90[];
 /* Walked backwards in 0x4C-byte records from index 2; only the signed byte
  * at +0x30 is known. Declared as an array so the base lands in a register
  * before the element offset -- 0x98 is exactly two records. */

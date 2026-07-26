@@ -85,6 +85,12 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_8002C604: addressing solved (scalar D_80010000 + -G0 assembler gives the
+# lui/lw register reuse retail has). What is left is 22 differences from one
+# register: retail keeps the object returned by func_8002C5CC in $a0 and we put
+# it in $a1, so every store through it differs. Needs the -G0 assembler entry
+# restored when picked up again.
+func_8002C604
 # func_800338E4: the four accesses to D_8009B146 are right (scalar + -G0
 # assembler, no alias) and so is the first half. What is left is a schedule:
 # retail reads D_8009B146, then +0x5AA8, then the counter at +0x5AAC; cc1psx
