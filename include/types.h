@@ -34,5 +34,6 @@ typedef struct {
 
 /* Script opcode handler: dispatched from a table by a byte from the stream. */
 typedef void (*ObjFn)(u8 *);
+typedef void (*TickFn)(u8 *, s32);
 
 #endif /* TYPES_H */
