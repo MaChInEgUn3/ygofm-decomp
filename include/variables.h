@@ -144,7 +144,13 @@ extern u8 D_8009B368[];
 extern u16 D_8009B33A;
 extern u8 D_8009B336;
 extern s8 D_8009B34D;
+/* Aggregate by default; files that need the bare form so the *assembler*
+ * expands it through $at define D_8009B363_IS_SCALAR first. */
+#ifdef D_8009B363_IS_SCALAR
+extern u8 D_8009B363;
+#else
 extern u8 D_8009B363[];
+#endif
 /* Scanned in 0x70-byte records; only the halfword at +8 is known. */
 typedef struct {
     s16 unk0;
@@ -457,6 +463,14 @@ extern s32 D_8009B350;
 
 /* Cursor advanced by the reader in func_80030050. */
 extern u8 *D_8009B290;
+extern s8 D_8009B2F1;
+extern u8 D_8009B2B2;
+#ifdef D_8009B365_IS_SCALAR
+extern u8 D_8009B365;
+#else
+extern u8 D_8009B365[];
+#endif
+extern u8 D_80090D68[];
 
 /* Table of 8-byte entries. */
 extern u8 D_80091550[];

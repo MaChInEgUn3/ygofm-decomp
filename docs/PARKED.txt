@@ -62,7 +62,6 @@
 # different: retail reuses $a0 as the %hi temp of the scalar load it lands in,
 # and puts the table address in $v0 where we put $v1. Six source forms and both
 # -G settings all sit at 8.
-func_80070710
 func_8003201C
 func_80071424
 func_80071460
@@ -103,6 +102,18 @@ func_80077090
 func_800601D0
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
+# func_80070710: ten instructions, sequence identical, every register name
+# different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
+# and puts the table address in $v0. Six source forms, both -G settings, all 8.
+func_80070710
+# func_80030FA0 needs three addressing forms at once: %gp_rel for two scalars,
+# lui $at + %lo for two aggregates, and an explicit la for the table it indexes.
+# -mno-split-addresses gives the first two (it is what matched its sibling
+# func_8002EB48) but then folds the indexed load into `lbu %lo(sym)($at)` where
+# retail forms the address in a register first. Seven differences without the
+# flag (the two stores bare instead of $at), nine with it; eight source forms
+# tried, including integer-cast pointers to block the fold.
+func_80030FA0
 func_8003F7D4
 func_8001BD48
 func_80030F40
