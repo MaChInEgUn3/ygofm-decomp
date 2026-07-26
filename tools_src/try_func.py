@@ -83,6 +83,39 @@ def _alias_map():
 ALIASES = _alias_map()
 
 
+def _gp_map():
+    """Target listings show `834($gp)` where splat found no symbol.
+
+    Our side emits `%gp_rel(D_8009B24A)($gp)` for the same address, because we
+    named it. Same instruction, different spelling, and comparing the text
+    calls it a difference -- so resolve the bare offsets to names using _gp
+    from the linker script and the symbol tables the build already reads.
+    """
+    gp, out = None, {}
+    ld = ROOT / "config" / "slus_014.11.ld"
+    if ld.exists():
+        m = re.search(r"_gp\s*=\s*(0x[0-9A-Fa-f]+)", ld.read_text())
+        if m:
+            gp = int(m.group(1), 16)
+    if gp is None:
+        return {}
+    for name in ("undefined_syms_auto.txt", "symbol_aliases.txt",
+                 "symbol_addrs.txt"):
+        path = ROOT / "config" / name
+        if not path.exists():
+            continue
+        for line in path.read_text().splitlines():
+            m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
+            if m:
+                off = int(m.group(2), 16) - gp
+                if -0x8000 <= off < 0x8000:
+                    out.setdefault(off, m.group(1).lower())
+    return out
+
+
+GP_SYMS = _gp_map()
+
+
 def normalise(line):
     """Reduce an asm line to `mnemonic operands` for comparison."""
     line = line.split("#")[0].strip()
@@ -151,6 +184,10 @@ def normalise(line):
     # the other; normalise every hex literal to decimal so they compare.
     text = re.sub(r"\b0x([0-9a-fA-F]+)\b",
                   lambda m: str(int(m.group(1), 16)), text)
+    # After the hex-to-decimal rewrite above: a bare `834($gp)` is an address
+    # splat had no name for, and our side spells the same address as a symbol.
+    text = re.sub(r"(-?\d+)\(\$gp\)",
+                  lambda m: GP_SYMS.get(int(m.group(1)), m.group(0)), text)
     text = text.lower()
     for alias, canon in ALIASES.items():
         text = text.replace(alias, canon)

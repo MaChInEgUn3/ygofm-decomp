@@ -18,3 +18,7 @@ Base2_8009B364 = 0x8009B364;
 
 # func_8002CCE4 forms this bitmap's base once in each arm of its if/else.
 Base2_801D0000 = 0x801D0000;
+
+# splat found no symbol here; func_8002892C reaches it as 0x342($gp) and
+# _gp is 0x8009AF08. Named so the C can refer to it.
+D_8009B24A = 0x8009B24A;

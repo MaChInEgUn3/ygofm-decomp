@@ -46,6 +46,7 @@ extern u8 D_8009B141;
 extern u8 D_8009B145;
 extern s8 D_8009B238;
 extern u8 D_8009B248;
+extern u8 D_8009B24A;
 extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
 extern u8 D_8009B318;
@@ -179,7 +180,13 @@ extern u8 KeyTable_801D9174[];
 extern s32 D_8009B3B8;
 extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
+/* Aggregate by default; func_8002892C reaches it gp-relatively and defines
+ * D_8009B254_IS_SCALAR. */
+#ifdef D_8009B254_IS_SCALAR
+extern u8 D_8009B254;
+#else
 extern u8 D_8009B254[];
+#endif
 extern s8 D_8009B345;
 extern u8 D_8009B34C;
 /* A handler pointer, cleared by func_80037CE0 and called by func_80038E1C. */
@@ -278,6 +285,7 @@ extern u16 D_8009B322;
 extern s8 D_800909D4[][6];
 extern VoidFn D_80090A5C[];
 extern u8 D_80090AD4[];
+extern VoidFn D_80090B3C[];
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
 extern s8 D_8009B408;
