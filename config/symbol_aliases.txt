@@ -10,6 +10,10 @@ KeyTable_801D9174 = 0x801D9174;
 # two different basic blocks, and materialises the address for each.
 Base2_8009B364 = 0x8009B364;
 
+# func_8003D0F4 reads this flag and writes it back in the same function with
+# nothing between that could have changed it, so gcc commons the address.
+Base2_8009B408 = 0x8009B408;
+
 
 # splat found no symbol here; func_8002892C reaches it as 0x342($gp) and
 # _gp is 0x8009AF08. Named so the C can refer to it.

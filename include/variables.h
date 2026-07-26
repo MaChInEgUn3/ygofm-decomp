@@ -213,6 +213,7 @@ extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
 extern s32 D_8009B3B8;
+extern u8 D_801B125A[];
 extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
 /* Aggregate by default; func_8002892C reaches it gp-relatively and defines
@@ -324,7 +325,13 @@ extern volatile s32 D_8009B09C[];
 extern volatile s32 D_8009B09C;
 #endif
 extern u8 D_8009B0C3;
+/* Non-volatile in the aggregate form: func_8003D0F4 stores it once and
+ * volatile blocks the bare-symbol form the assembler expands through $at. */
+#ifdef D_8009B0C4_IS_AGGREGATE
+extern s32 D_8009B0C4[];
+#else
 extern volatile s32 D_8009B0C4;
+#endif
 extern volatile s32 D_8009B0C8;
 extern u8 D_8009B0A3[];
 extern u8 D_8009B0C0[];
@@ -341,7 +348,12 @@ extern u8 D_80090AD4[];
 extern VoidFn D_80090B3C[];
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
+#ifdef D_8009B408_IS_AGGREGATE
+extern s8 D_8009B408[];
+extern s8 Base2_8009B408[];
+#else
 extern s8 D_8009B408;
+#endif
 extern u8 D_800F2848[];
 extern u8 D_800F2878[];
 extern u8 D_800EFE38[];

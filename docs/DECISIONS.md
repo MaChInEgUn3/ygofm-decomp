@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-544 of 1794 functions decompiled and byte-matching.
+545 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~544 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~545 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2739,6 +2739,32 @@ The last two differences after that were ordinary: the read of the halfword the
 first `if` uses had to be written after the store to `D_8009B146` — one statement
 later than felt natural — so it lands in the delay slot of the comparison instead
 of ahead of it, and that also settles which of the two values gets `$a1`.
+
+### `volatile` blocks the bare-symbol form, and a third dup-%hi mechanism
+
+`func_8003D0F4` needed all three addressing forms at once and taught two things
+the earlier dup-%hi functions did not.
+
+**`volatile` forces cc1psx to form the address as a value.** `D_8009B0C4` is
+declared `volatile s32` and retail stores it through `lui $at` + `%lo` — the
+assembler expanding a bare symbol. Under `-mno-split-addresses` with a volatile
+unsized-array declaration, cc1psx emits `lui`/`addiu` into an ordinary register
+and stores at `0($v0)` instead. Dropping the volatile in the aggregate arm of the
+declaration guard is what gets the bare form. Worth knowing before spending time
+on the flag: **a volatile access is never a candidate for the macro form.**
+
+**Two accesses to one symbol in one function will be commoned even across a
+branch.** `D_8009B408` is read before an `if` and written inside it, and cc1psx
+formed the address once into `$a1` and used it for both, where retail expands
+each separately. That is the alias case — the surviving condition from the table
+above, "two reads of one address with nothing in between that could have changed
+it", holds here even though a conditional branch separates them. `Base2_8009B408`
+is the third live entry in `config/symbol_aliases.txt`.
+
+The last two differences were the ordinary lever: naming the two struct fields
+being copied out (`a` and `b`) so both loads are emitted before either store,
+instead of letting the second load fill a delay slot the `D_8009B408` read had
+already taken.
 
 ## Repo layout / tooling plan
 
