@@ -50,11 +50,13 @@ name in `docs/PARKED.txt` with its class **and keep the candidate in
 `parked/<func>.c`**.
 
 Before parking on "one register differs", check whether a **call** separates the
-definitions of the two values. gcc prioritises pseudos by frequency over live
-range, so the longer-lived one lands in the later register: moving one definition
-across the call flips the pair, and it flips nothing else in the output, which is
-why this hides so well. That is verified on `func_80022FF0`. The class is closed
-only for values with equal live ranges.
+definitions of the two values, and if it does, try moving one definition across
+it. That took `func_80022FF0` from seven differences to a match, and it changes
+nothing else in the output, which is why it hides so well. **Observed once.**
+Probed afterwards on every parked candidate with a call in it and it moved none
+of them, so treat it as one more thing to try, not as a rule — and note that most
+"one register differs" parks are `$v0`/`$v1` inside a single basic block, where
+there is no call to move anything across.
 
 The third class this list used to name — the target keeping two comparisons
 where cc1psx folds a range check — **is not closed**. The fold happens on the

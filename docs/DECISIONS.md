@@ -2316,12 +2316,19 @@ computed**:
     b = a + 4;                                 /* b is not */
 ```
 
-With `b = a + 4` before the call, both pointers are live across it and both have
-the same live range; with it after, `a`'s range is strictly longer. gcc 2.8.1's
-global allocator sorts pseudos by priority, which divides usage frequency by live
-range, so the *longer*-lived pointer sorts later and receives the later hard
-register. Moving one statement past one call flips `$s0`/`$s1` and the function
-matches exactly.
+With `b = a + 4` before the call, both pointers are live across it; with it after,
+only `a` is. Moving that one statement past that one call flips `$s0`/`$s1` and
+the function matches exactly.
+
+**The mechanism below is a reconstruction and it does not predict the corpus.**
+The natural story is that gcc 2.8.1's global allocator sorts pseudos by a
+priority that divides usage frequency by live-range length, so the longer-lived
+pointer sorts later and takes the later hard register. `func_8004733C` contradicts
+it: there `arg1` is copied to a callee-saved register in the prologue and used
+last, `arg0` is copied eleven instructions later, and it is `arg1` — the earlier
+and longer-lived one — that retail puts in `$s0`. So take the lever as an
+empirical move, not as a predictive rule, and do not reason forward from the
+priority formula.
 
 The instruction that computes `b` still ends up in the `jal`'s delay slot in both
 forms — reorg pulls it back across the call — so **the emitted order is identical
@@ -2329,12 +2336,29 @@ either way and the diff shows nothing at that line**. That is why this looked
 like an allocation difference: the statement that decides the allocation does not
 move in the output.
 
-This is the first lever anyone has found into the class recorded above as closed.
-It does not reopen the whole class — that negative was 16k permuter iterations on
-a function with no call in it, and with no call there is no live range to
-lengthen. It does mean the class as stated was too broad: **"only a register
-differs" is closed only when the differing values have equal live ranges.** When
-a call sits between the definitions, try moving a definition across it.
+This is the first lever anyone has found into the class recorded above as closed,
+and so far it is the only function it has moved. Probing it afterwards on every
+parked candidate that contains a call — `func_800709C0`, `func_80070AC0`,
+`func_80070B3C`, `func_8005F7B0`, `func_8004733C`, `func_80031EE4`,
+`func_8005A618` — moved none of them, and three variants on `func_8004733C`, the
+one whose difference really is a callee-saved pair swap, went 10 → 12, 17, 10.
+
+Two things that fall out of that probe and are worth more than the lever itself:
+
+- **Most "one register differs" parks are `$v0`/`$v1` inside one basic block.**
+  `func_8002CCE4` (3 out) and `func_800709C0` (5 out) are both a caller-saved
+  pair swapped between an address and a value loaded through it, with no call
+  anywhere near. Nothing can be moved across nothing.
+- The triage I used to find candidates counted each file's own definition line as
+  a call, so the first six functions I tested had **zero** calls in them. Grep for
+  call sites with the *defining* line excluded, or the sample is off by one
+  everywhere.
+
+And one non-tell, measured rather than assumed while `-mno-split-addresses` was
+solving two functions in a row: **`lui $at` in the target does not predict the
+macro flag.** Across the 482 matched functions, 31 have `lui $at, %hi` in retail
+and 21 of those build with the default flags; of the 17 built with a macro flag
+set, 7 have no `lui $at` at all. It is not a tell in either direction — sweep.
 
 ## Repo layout / tooling plan
 
