@@ -85,7 +85,7 @@ void func_80015870(void);
 void func_80042A00(u8 *arg0);
 void func_80042A28(u8 *arg0);
 void func_800472A8(s32 arg0);
-void func_80047AD0(s32 arg0);
+s32 func_80047AD0(s32 arg0);  /* every path returns 1 */
 void func_800530C4(void);  /* PROVISIONAL */
 void func_800533D8(void);  /* PROVISIONAL */
 void func_8005BB7C(s32 arg0);
@@ -155,6 +155,11 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(void);  /* PROVISIONAL */
 void func_80022F98(u8 *arg0, u8 *arg1);
+void func_80047A68(void);
+void func_80047788(s32 arg0);
+void func_8003767C(u8 *arg0);
+void func_8004C77C(void);
+void func_80049BAC(s32 arg0);
 void func_8003771C(u8 *arg0);
 void func_8003BC40(u8 *arg0, u8 *arg1, s32 arg2);
 /* Returns a value: func_80049308 stores it. The parked candidate had void. */

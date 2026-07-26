@@ -65,11 +65,13 @@ extern u8 D_8009B1B8;
 extern u16 D_8009B220;
 #ifdef D_8009B2A8_IS_AGGREGATE
 extern u16 D_8009B2A8[];
+extern u16 Base2_8009B2A8[];
 #else
 extern u16 D_8009B2A8;
 #endif
 #ifdef D_8009B2AA_IS_AGGREGATE
 extern u16 D_8009B2AA[];
+extern u16 Base2_8009B2AA[];
 #else
 extern u16 D_8009B2AA;
 #endif
@@ -78,7 +80,11 @@ extern u16 D_8009B29C[];
 #else
 extern u16 D_8009B29C;
 #endif
+#ifdef D_8009B270_IS_AGGREGATE
+extern u16 D_8009B270[];
+#else
 extern u16 D_8009B270;
+#endif
 extern u16 D_8009B278;
 #ifdef D_8009B27C_IS_AGGREGATE
 extern u16 D_8009B27C[];

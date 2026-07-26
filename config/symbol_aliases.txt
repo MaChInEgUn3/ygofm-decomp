@@ -14,6 +14,11 @@ Base2_8009B364 = 0x8009B364;
 # nothing between that could have changed it, so gcc commons the address.
 Base2_8009B408 = 0x8009B408;
 
+# func_8003767C stores each of these twice; without a second name cc1psx
+# commons the address into a callee-saved register and grows the frame.
+Base2_8009B2AA = 0x8009B2AA;
+Base2_8009B2A8 = 0x8009B2A8;
+
 
 # splat found no symbol here; func_8002892C reaches it as 0x342($gp) and
 # _gp is 0x8009AF08. Named so the C can refer to it.

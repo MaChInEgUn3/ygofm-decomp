@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-546 of 1794 functions decompiled and byte-matching.
+549 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~546 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~549 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2765,6 +2765,39 @@ The last two differences were the ordinary lever: naming the two struct fields
 being copied out (`a` and `b`) so both loads are emitted before either store,
 instead of letting the second load fill a delay slot the `D_8009B408` read had
 already taken.
+
+### The alias rule, third and final version: count the accesses
+
+Three more dup-%hi functions settle what `config/symbol_aliases.txt` is for, and
+it is simpler than either sentence I wrote earlier today.
+
+**Under `-mno-split-addresses`, one access to an aggregate is a bare-symbol
+memory op the assembler expands; two or more accesses to the same aggregate get
+their address commoned into a register** — a callee-saved one if a call is in the
+way, which also grows the frame. That is the whole rule. It does not matter
+whether the accesses are loads or stores, in one basic block or across a branch:
+
+- `func_8002EB48`, `func_8003D0F4` — one access per aggregate, no alias.
+- `func_8003D0F4`'s `D_8009B408` — read then write across a branch. Commoned.
+  One alias fixes it.
+- `func_8003767C` — two stores each to `D_8009B2AA` and `D_8009B2A8`, one before
+  a call and one after. Commoned into `$s1` and `$s2`, frame grown by 8, 41
+  differences. One alias each: MATCH.
+
+So **give the symbol one extra name per extra access.** `func_8003771C` is the
+counter-example that proves the arithmetic rather than the rule: it touches
+`D_8009B2AA` *four* times and two extra names still leave two accesses sharing a
+name, which is why it went 26 → 36 rather than to a match. It needs three extra
+names, or a shape that reads the value once.
+
+And the scalar route is the alternative when no `%gp_rel` symbol is in the way:
+`func_8002A660`, `func_80049F50`, `func_80049C40`, `func_80049308` and
+`func_80049BAC` all have a symbol accessed two to four times and need no alias at
+all, because a **scalar** declaration never produces an address expression for
+gcc to common — the accesses are bare symbol ops from the start, and a `-G0`
+assembler expands each. Prefer that; reach for an alias only when the function
+also needs a genuinely gp-relative symbol, which forces the assembler back to
+`-G8` and the aggregate declarations with it.
 
 ## Repo layout / tooling plan
 
