@@ -45,10 +45,18 @@ meaningful, and skipping to 5 wastes hours:
 5. **Then** `tools_src/sweep_flags.py`.
 
 **Stop and park** when the only remaining difference is which register holds a
-value, when the target has more duplicated tails than you produce, or when it
-keeps two comparisons where cc1psx folds a range check. Those three classes are
-closed — verified, not assumed — and no C shape reaches them. Record the name in
-`docs/PARKED.txt` with its class.
+value, or when the target has more duplicated tails than you produce. Those two
+are closed — verified, not assumed. Record the name in `docs/PARKED.txt` with
+its class **and keep the candidate in `parked/<func>.c`**.
+
+The third class this list used to name — the target keeping two comparisons
+where cc1psx folds a range check — **is not closed**. The fold happens on the
+`&&`; write it as nested `if`s and both comparisons survive.
+
+Before parking anything, run `tools_src/sweep_try.py <func>`. It is the flag
+sweep through try_func rather than a full build per combination, so it costs
+seconds instead of half an hour, and two functions were parked for hours today
+on a combination that had been in the table for weeks.
 
 ## Types and declarations
 
