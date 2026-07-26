@@ -55,6 +55,9 @@ extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
 extern u16 D_8009B220;
+extern u16 D_8009B2A8;
+extern u16 D_8009B2AA;
+extern u16 D_8009B29C;
 extern u16 D_8009B27C;
 
 /* Two words of PRNG state, mixed together by func_8003CE74. Eight bytes, so

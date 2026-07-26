@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-392 of 1794 functions decompiled and byte-matching.
+393 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~392 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~393 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2166,11 +2166,21 @@ and written `D_800909D4[arg0][counter - 1]`, the whole index chain matches
 one register. This is the same lever as the record-typed struct array, applied
 to a plain 2-D table.
 
-**Declare locals inside the arm that uses them.** With `u8 *p` and `s32 m`
+**Declare locals inside the block that uses them.** (Originally written as
+"inside the arm"; it is not about branches at all.) With `u8 *p` and `s32 m`
 declared at the top of func_8002CCE4, gcc hoists the second base's `lui` above
 the branch and the schedule of both arms shifts: 18 differing instructions.
 Block-scoped inside each arm: 3. Nothing else changed. When two arms do the
 same shape of work on different symbols, scope the locals to the arm.
+
+Six functions now, and the last one had no branches: func_8002E9A0 reads
+three little-endian halfwords from a byte cursor. With one `u8 *p` reused
+across the three reads, gcc keeps one base register and addresses everything
+off it; with `p` declared fresh inside a `{ }` around each read -- which is
+what three copies of the same idiom look like -- it keeps the old cursor and
+the new one live together and addresses the odd bytes off the newer, exactly
+as retail does. Nineteen differing instructions to a match, with no other
+change.
 
 A third, smaller: **read an aliased base into a local before the guard.**
 `u8 *n = Base2_8009B364;` ahead of the early-return test was the last step
