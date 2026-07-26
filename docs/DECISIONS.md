@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-489 of 1794 functions decompiled and byte-matching.
+490 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~489 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~490 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2501,6 +2501,55 @@ behaviour we cannot currently select. If a fourth turns up in the same address
 range, the hypothesis worth testing is that this region is SDK library code built
 with an older gcc than the game's own units — `0x80075000`–`0x80079000` holds 61
 functions and not one of them has matched yet.
+
+### Four levers from one word-wise memset (`func_80035748`)
+
+A four-arm `switch` over `len & 3` after a backwards word-fill loop. 34 → 1 → MATCH,
+and each step is a separate reusable lever.
+
+**An expression recomputed in several arms was not a variable.** Retail emits
+`srl $v0,$a2,2` *three times* — once for the loop bound and once in each switch
+arm. Holding it in `s32 n = len >> 2;` keeps it in a callee-saved register and
+costs the recomputations. gcc 2.8 has no global CSE, only per-block, so an
+expression written inline in three basic blocks is emitted three times. Read the
+repetition as evidence about the source rather than as something to optimise away:
+write `dst + (len >> 2) * 4` in each arm.
+
+**`case 1: case 2:` with one body folds into a range check; two bodies do not.**
+Sharing the body gave `sltiu $v0,$v1,3`, one test for the pair. Retail tests
+`== 1` and `== 2` separately, because in its case tree the two labels are
+distinct — which is what you get by writing each `case` with its own copy of the
+body and letting cross-jumping merge the tails afterwards. It merges all of it
+except the one instruction that ended up in case 1's delay slot, which is exactly
+the `.L800357B8` → `.L800357BC` fallthrough retail has. Same family as the
+range-check-fold note: the fold happens on the *source* sharing, not on the values.
+
+**`case 0: break;` is load-bearing.** Without it gcc must range-check the
+switch value against the default; with all four of 0..3 present it knows the
+value is in range and emits four bare equality tests in the order 1, 0, 2, 3.
+An explicit empty case for the do-nothing value is not redundant.
+
+**Sometimes the assignment target must *not* be an operand.** This is the mirror
+of the `+=` lever recorded above. Written
+
+```c
+    c = (c << 24) | (c << 16) | (c << 8) | c;
+```
+
+cc1psx emits `or $a1,$a1,$v0` — when the destination is also an operand, expand
+reorders so the destination comes first. Retail has `or $a1,$v0,$a1`, the tree
+order. Assigning the result to a **fresh variable** and using that variable
+everywhere afterwards gives it, and the allocator still puts it in `$a1` because
+`c` is dead:
+
+```c
+    v = (c << 24) | (c << 16) | (c << 8) | c;
+```
+
+So the rule is not "prefer `op=`" — it is that `x = f(x)` and `y = f(x)` pick
+different operand orders, and you choose by which one retail shows. Naming the
+intermediate half-way (`v = (c<<24)|(c<<16)|(c<<8); c = v | c;`) does *not* work,
+because the destination is still `c`.
 
 ## Repo layout / tooling plan
 

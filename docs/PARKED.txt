@@ -44,6 +44,12 @@
 #   func_8005F7B0      5  O2 G8
 #   func_800732A0     13  O1 G8 macro
 #
+# func_8003201C is a clean instance: 40 instructions against 40, the whole
+# sequence identical, and two symmetric pairs swapped -- (card, its copy) in
+# the outer loop and (count, index) in the trailing one. Four declaration
+# orders, a hoisted slot pointer and && vs nested ifs all leave it at 17; the
+# sweep's best is O1 G0 at 13, which fixes the register names and loses the
+# strength-reduced pointer instead, so it is not closer.
 # --- register allocator: retail copies a value out of a register and we do
 # not. func_80037110 escaped this by declaring a *second* pointer at the top
 # and using it for only part of the function -- not `p = arg0` used
@@ -52,6 +58,7 @@
 # works sometimes rather than the answer. Two variables each covering part of
 # the body is the thing to try first here.
 # ---
+func_8003201C
 func_80071424
 func_80071460
 func_80038498

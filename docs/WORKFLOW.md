@@ -43,8 +43,13 @@ meaningful, and skipping to the last one wastes hours:
    `while (cond)`. 105 functions in the binary have that `j`.
 4. **Which operand receives the result?** `addu $a1,$a1,$v1` and
    `addu $v0,$v0,$a1` compute the same sum into different registers. Swapping the
-   operands of a `+` changes nothing; rewriting it as `a += b;` and then using
-   `a` makes that operand the destination. This unparked four functions.
+   operands of a `+` changes nothing. `a += b;` makes `a` the destination *and*
+   the first operand; `t = a + b;` into a fresh variable keeps the tree order.
+   Pick by which one retail shows — this unparked four functions in one direction
+   and matched `func_80035748` in the other.
+   Related, same pass: an expression the target recomputes in several blocks was
+   **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
+   in each block.
 5. **Count materialisations** of each value: one per write in the source. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
