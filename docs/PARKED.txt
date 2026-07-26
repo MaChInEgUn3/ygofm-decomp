@@ -85,16 +85,6 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
-# func_8003771C needs %gp_rel for D_8009B357 and lui $at for four others, so
-# it is the macro form -- but D_8009B2AA is touched four times (store, signed
-# read, unsigned read, store) and cc1psx commons `&D_8009B2AA[0]` into a
-# callee-saved register, costing an extra save and 26 differences. Giving the
-# reads two extra alias names makes it 36, not better: the aliases get their
-# own address expressions too. Scalar declarations would stop the subscript
-# from being an address expression at all, but then D_8009B357 cannot be
-# gp-relative. That is the open question -- how to get a bare-symbol access
-# for an aggregate touched more than twice.
-func_8003771C
 # func_80026BA4 is 3 out, in the last arm of a three-way if. Both arms are one
 # instruction; retail puts `addiu $v1,$a0,-601` in the branch delay slot and
 # `addiu $v1,$zero,100` in the fall-through, cc1psx the other way round. Writing

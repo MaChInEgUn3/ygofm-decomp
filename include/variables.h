@@ -72,6 +72,8 @@ extern u16 D_8009B2A8;
 #ifdef D_8009B2AA_IS_AGGREGATE
 extern u16 D_8009B2AA[];
 extern u16 Base2_8009B2AA[];
+extern u16 Base3_8009B2AA[];
+extern u16 Base4_8009B2AA[];
 #else
 extern u16 D_8009B2AA;
 #endif

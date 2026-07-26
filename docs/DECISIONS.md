@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-549 of 1794 functions decompiled and byte-matching.
+550 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~549 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~550 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2784,11 +2784,14 @@ whether the accesses are loads or stores, in one basic block or across a branch:
   a call and one after. Commoned into `$s1` and `$s2`, frame grown by 8, 41
   differences. One alias each: MATCH.
 
-So **give the symbol one extra name per extra access.** `func_8003771C` is the
-counter-example that proves the arithmetic rather than the rule: it touches
-`D_8009B2AA` *four* times and two extra names still leave two accesses sharing a
-name, which is why it went 26 → 36 rather than to a match. It needs three extra
-names, or a shape that reads the value once.
+So **give the symbol one extra name per extra access.** `func_8003771C` proves
+the arithmetic: it touches `D_8009B2AA` *four* times, two extra names left two
+accesses sharing one and it went 26 → 36; **three** extra names took it to 19,
+and it matched once the last two differences were fixed. Those were ordinary
+scheduling — the signed read has to come first so the unsigned one fills its
+load-delay slot, which means naming the *raw* second read and leaving the
+subtraction inside the `if` so reorg can sink it into the branch delay slot.
+Writing `w - 0x1000` outside the `if` keeps both loads but reorders them.
 
 And the scalar route is the alternative when no `%gp_rel` symbol is in the way:
 `func_8002A660`, `func_80049F50`, `func_80049C40`, `func_80049308` and
