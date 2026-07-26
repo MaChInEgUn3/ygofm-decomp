@@ -8,8 +8,13 @@ first, then reach for DECISIONS.md when you need the reasoning behind a rule.
 ## Verify everything with the build
 
 ```
-.venv/bin/python tools_src/build.py     # must end "OK: build is byte-identical"
+.venv/bin/python tools_src/build.py && echo GREEN
 ```
+It exits non-zero on any failure, so **check the exit status, not the last
+lines of output**. Piping it through `tail -2` reads as green when the build
+died early, because the last thing printed is then the function count. Two
+commits in this project went in red that way, one of them the commit that
+noticed the first.
 sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`. Always the project `.venv`,
 never a bare `pip install` — installing globally once broke another tool's pins.
 
