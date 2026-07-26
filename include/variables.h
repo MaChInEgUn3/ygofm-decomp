@@ -75,6 +75,8 @@ extern u8 D_8009B478;
 /* Declared unsized so they are never treated as small data. */
 
 extern u8 D_800EAE90[];
+extern u8 D_8009B27A[];
+extern u8 D_800EAE98[];
 extern u8 D_800F5C7F[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];

@@ -203,6 +203,7 @@ PER_FUNC_FLAGS = {
     "func_800498F8": _O2_G0_NODELAY_MACRO,
     "func_80030EC8": _O2_G8_MACRO,
     "func_8004763C": _O2_G8_MACRO,
+    "func_8002CE64": _O2_G8_MACRO,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
@@ -227,6 +228,11 @@ SMALL_DATA_NOP_FUNCS = {
     "func_8003CE48",
 }
 
+# Functions where an address computation, not a memory op, is split across a
+# call's delay slot. See split_address_across_call.
+LA_CALL_FUNCS = {
+    "func_8002CE64",
+}
 DELAY_SLOT_MACRO_FUNCS = {
     "func_8007A628", "func_8007BEBC", "func_8007BEC8", "func_8007BED4",
     "func_8007BEE0", "func_8007CD04", "func_800862C0",
@@ -243,6 +249,11 @@ if _DROP:
     DELAY_SLOT_MACRO_FUNCS -= _DROP
     SMALL_DATA_NOP_FUNCS -= _DROP
     HOIST_EPILOGUE_FUNCS -= _DROP
+    # Every post-pass set must be listed here. LA_CALL_FUNCS was added and
+    # this line was not, so dropping its only member changed nothing and the
+    # audit reported the post-pass unnecessary -- the same false-UNNEEDED the
+    # stamp bug produced eight of. A new set means a new line here.
+    LA_CALL_FUNCS -= _DROP
 
 # DELAY_SLOT_MACRO_FUNCS used to imply -O1 -G0 -mno-split-addresses flags and a
 # -G0 assembler as well as the post-pass. The flag audit showed all seven match
@@ -412,6 +423,7 @@ def compile_c(name):
     passes = ",".join(sorted(
         p for p, s in (("delay", DELAY_SLOT_MACRO_FUNCS),
                        ("sdnop", SMALL_DATA_NOP_FUNCS),
+                       ("lacall", LA_CALL_FUNCS),
                        ("hoist", HOIST_EPILOGUE_FUNCS)) if name in s))
     want = (" ".join(flags) + " || " + (PER_FUNC_AS_FLAGS.get(name) or "")
             + " || " + str(PSYQ_BIN) + " || " + passes)
@@ -436,12 +448,14 @@ def compile_c(name):
 
     # Post-passes that emulate aspsx behaviour maspsx does not reproduce.
     if (name in DELAY_SLOT_MACRO_FUNCS or name in SMALL_DATA_NOP_FUNCS
-            or name in HOIST_EPILOGUE_FUNCS):
+            or name in HOIST_EPILOGUE_FUNCS or name in LA_CALL_FUNCS):
         text = masm.read_text().splitlines()
         if name in DELAY_SLOT_MACRO_FUNCS:
             text = fill_delay_slot_with_macro_tail(text)
         if name in SMALL_DATA_NOP_FUNCS:
             text = insert_small_data_load_delay_nops(text)
+        if name in LA_CALL_FUNCS:
+            text = split_address_across_call(text)
         if name in HOIST_EPILOGUE_FUNCS:
             text = hoist_epilogue_out_of_delay_slot(text)
         masm.write_text("\n".join(text) + "\n")
@@ -496,6 +510,46 @@ def fill_delay_slot_with_macro_tail(lines):
                 lines[i + 1].strip(),
                 f"{op}\t{reg},%lo({sym})($at)",
                 ".set\tat",
+            ]
+            i += 3
+            continue
+        out.append(lines[i])
+        i += 1
+    return out
+
+
+_LA_SYM = re.compile(r"^\s*la\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
+_CALL = re.compile(r"^\s*(jal|j|jr)\b")
+
+
+def split_address_across_call(lines):
+    """The `la` counterpart of fill_delay_slot_with_macro_tail.
+
+    With -mno-split-addresses cc1psx emits `la $4,D_800EAE98` and leaves the
+    expansion alone. aspsx expanded it to lui/addiu *and* put the addiu in the
+    following call's delay slot:
+
+        lui   $a0,%hi(sym)
+        jal   func
+        addiu $a0,$a0,%lo(sym)
+
+    GNU as keeps the pair together and the call gets a nop, one instruction
+    too many. The existing macro post-pass does not cover this because it
+    matches a memory op, not an address computation, and it writes through
+    $at, which is wrong here -- the address stays in the argument register.
+
+    Only the exact `la / call / nop` sequence is touched.
+    """
+    out, i = [], 0
+    while i < len(lines):
+        m = _LA_SYM.match(lines[i])
+        if (m and i + 2 < len(lines)
+                and _CALL.match(lines[i + 1]) and _NOP.match(lines[i + 2])):
+            reg, sym = m.groups()
+            out += [
+                f"lui\t{reg},%hi({sym})",
+                lines[i + 1].strip(),
+                f"addiu\t{reg},{reg},%lo({sym})",
             ]
             i += 3
             continue

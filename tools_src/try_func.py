@@ -303,6 +303,8 @@ def built_lines(func, csrc, extra_flags):
         text = B.fill_delay_slot_with_macro_tail(text)
     if func in B.SMALL_DATA_NOP_FUNCS:
         text = B.insert_small_data_load_delay_nops(text)
+    if func in B.LA_CALL_FUNCS:
+        text = B.split_address_across_call(text)
     if func in B.HOIST_EPILOGUE_FUNCS:
         text = B.hoist_epilogue_out_of_delay_slot(text)
     masm.write_text("\n".join(text) + "\n")
