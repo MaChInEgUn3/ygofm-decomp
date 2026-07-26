@@ -85,6 +85,15 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80038800 is underdetermined between -O levels rather than wrong. At -O2
+# the prologue matches (the $s1 copy scheduled between two saves) and the
+# registers do not; at -O1 the registers match and the prologue is unscheduled
+# -- 27 and 10. Retail has both, which neither level gives. The one real
+# difference at -O1 is that retail loads the byte into $a0 and copies it to
+# $s0, where cc1psx loads straight into $s0; four source forms for that copy
+# (two variables, a named mask, an assignment split from the declaration, the
+# store moved) all leave it. Best is -O1 -G8 at 10.
+func_80038800
 # func_80032370 is two loops over one 16-entry halfword table -- a sweep that
 # clears entries whose referenced byte is zero, then a compaction. Both loops
 # are instruction-for-instruction right, including the two reads per entry
