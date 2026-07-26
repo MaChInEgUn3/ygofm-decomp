@@ -181,7 +181,7 @@ void func_8003BF00(void);  /* PROVISIONAL */
 void func_80045F3C(void);  /* PROVISIONAL */
 void func_80046A08(void);  /* PROVISIONAL */
 void func_8005ABA0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);  /* PROVISIONAL */
-void func_80019B2C(void);
+void func_80019B2C(u8 *arg0);
 void func_8004544C(void);
 
 #endif /* FUNCTIONS_H */
