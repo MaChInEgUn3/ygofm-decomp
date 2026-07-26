@@ -293,6 +293,7 @@ extern volatile s32 D_8009B09C;
 extern u8 D_8009B0C3;
 extern volatile s32 D_8009B0C4;
 extern volatile s32 D_8009B0C8;
+extern u8 D_8009B0A3[];
 extern u8 D_8009B0C0[];
 extern u8 D_8009B39C[];
 extern u8 D_8009B3A2[];

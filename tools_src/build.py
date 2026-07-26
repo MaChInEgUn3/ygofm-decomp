@@ -206,6 +206,7 @@ PER_FUNC_FLAGS = {
     "func_8002CE64": _O2_G8_MACRO,
     "func_8001798C": _O2_G8_MACRO,
     "func_80049394": _O2_G8_MACRO,
+    "func_8002D2D8": _O2_G8_MACRO,
     "func_80017708": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
