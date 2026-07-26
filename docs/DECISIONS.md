@@ -2094,6 +2094,29 @@ derivable by a shared rule (`add`→`addiu`, `and`→`andi`, `slt`→`slti`,
 mnemonic's *spelling*, write the three-line function that isolates it and check
 the tool is not inventing it.
 
+### "The permuter saturates" is a claim about a search that finished
+
+Two park notes written today say the permuter saturated. Neither search
+finished. `func_800732A0`'s run was SIGTERMed by its own `timeout 1200`
+(exit 143) and `func_800594C0`'s I killed with `pkill` because it was
+competing for cores. Both notes read as though the search had exhausted the
+space, and one of them is in a commit message.
+
+This is the same failure this project keeps auditing out of its tools --
+reporting on something that was not measured -- except here the tool was
+honest and the *conclusion* was not. A killed search tells you the best score
+so far and nothing about what a completed one would find. Write "killed at
+Ns, best score N" or run it to completion; do not write "saturates".
+
+The re-measurement that prompted this: after the `slt`→`sltiu` normalisation
+bug was fixed, `func_800732A0`'s diff no longer shows the signedness
+difference it was partly parked on. The real gap is smaller and different --
+one instruction, a redundant copy of the base pointer that retail makes and we
+do not. Its candidate is in `parked/` and is now at 22 differing instructions
+with the correct loop body and guard, from initialising the loop index *from*
+the write count (`s32 i = n;`), which is what retail's `addu $a0,$a1,$zero`
+literally does.
+
 ### Two more members of the base-formation recipe
 
 Both found on func_8002497C and func_8002CCE4, both now generalisable.
