@@ -132,22 +132,31 @@ def main():
         if any(c in lib or not c.startswith("func_")
                for c in re.findall(r"jal\s+(\S+)", joined)):
             continue
-        if has_duplicate_hi(both):
+        # Neither of the old drop rules is a "cannot match" any more.
+        #
+        # The range-check fold was retracted: it happens on the `&&`, and
+        # writing the condition as nested `if`s keeps both comparisons. Three
+        # functions came out of the park that way, so the filter is gone.
+        #
+        # Duplicate %hi for one symbol means retail materialised the address
+        # twice, which config/symbol_aliases.txt plus a -G0 assembler can
+        # reproduce. It is harder, not impossible, so these are listed last
+        # and tagged rather than hidden -- 41 candidates were invisible while
+        # the small bands looked depleted.
+        dup = has_duplicate_hi(both)
+        if dup:
             dropped["dup_hi"] += 1
-            continue
-        if has_range_check(body):
-            dropped["range"] += 1
-            continue
-        rows.append((len(body), name, both))
+        rows.append((dup, len(body), name, both))
 
     rows.sort()
-    print(f"{len(rows)} clean candidates in {lo}-{hi} instructions "
-          f"(dropped {dropped['dup_hi']} duplicate-%hi, "
-          f"{dropped['range']} range-check)")
+    print(f"{len(rows) - dropped['dup_hi']} clean candidates in "
+          f"{lo}-{hi} instructions, plus {dropped['dup_hi']} needing a symbol "
+          f"alias (listed last, tagged dup-%hi)")
     if "--count" in sys.argv:
         return 0
-    for count, name, both in rows[:show]:
-        print(f"\n--- {name} ({count})")
+    for dup, count, name, both in rows[:show]:
+        tag = "  [dup-%hi: needs a symbol alias + -G0 assembler]" if dup else ""
+        print(f"\n--- {name} ({count}){tag}")
         for _, text in both:
             print("   ", text)
     return 0

@@ -343,3 +343,8 @@ func_80090140
 func_800901EC
 func_800902A0
 func_800905F0
+# Added by address+behaviour rather than by signature match: func_80075CB0
+# walks the PsyQ heap block list ({header, size} pairs, bit 31 free, bit 30
+# end-of-list) and sits above LIBRARY_REGION next to func_80075D30, which is
+# already listed. Three of us wasted an afternoon on it and its neighbours.
+func_80075CB0

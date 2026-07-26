@@ -40,7 +40,7 @@ meaningful, and skipping to the last one wastes hours:
    not-taken — look at which path retail falls into. In the same pass, check the
    **loops**: a backward unconditional `j` in the target means the loop was *not*
    rotated, so write it as `while (1)` with the exit inside, never as
-   `while (cond)`. 105 functions in the binary have that `j`.
+   `while (cond)`. 85 in-scope functions still have that `j`.
 4. **Which operand receives the result?** `addu $a1,$a1,$v1` and
    `addu $v0,$v0,$a1` compute the same sum into different registers. Swapping the
    operands of a `+` changes nothing. `a += b;` makes `a` the destination *and*
@@ -112,7 +112,11 @@ the run it judged completed.
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern
-justify a decision.
+justify a decision — and then **filter the scan by scope**: anything at or above
+`0x80073840`, or listed in `docs/LIBRARY_FUNCS.txt`, is PsyQ library code that
+stays as assembly. `candidates.py` applies that filter; a hand-rolled grep over
+`asm/` does not, and three functions were parked as matching failures before
+anyone checked.
 
 Run `tools_src/sync_count.py` before committing a batch — the count has been
 typed wrong twice.

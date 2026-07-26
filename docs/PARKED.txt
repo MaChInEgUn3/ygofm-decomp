@@ -78,27 +78,6 @@ func_80049CB0
 # nested ifs rather than &&. Neither had a candidate saved; both were
 # decompiled again from the listing in a few minutes.
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
-# func_80075CB0 is the same thing at the *return*: retail keeps two
-# `addiu $v0,$zero,1`, one in each branch's delay slot, jumping to a single
-# `jr $ra`. cc1psx threads jump-to-return first, which turns them into two
-# identical `addiu; jr` blocks and then merges them, so we come out one
-# instruction short (31 vs 32) with everything else identical. Structure,
-# constant hoisting, addressing and the double read of D_80092BF0 are all
-# already right; -fno-thread-jumps does not change it and neither does any
-# combination in the sweeper.
-# func_80075D30 is the same walk with the address pre-shifted by D_80092BB0,
-# 33 against 35, one instruction from the same merge plus two lui swapped at
-# the top. Same class, no point solving twice.
-# func_80077090 is the third of these and the clearest: 7 differences, of which
-# 4 are label renumbering caused by the 5th. Retail's `return -1` is
-# `j <exit>; nop`; cc1psx emits `j $31` -- verified in the raw cc1psx output,
-# so it is the compiler and not maspsx. The 6th and 7th are one `lui` scheduled
-# a slot early. None of -fno-cse-follow-jumps, -fno-expensive-optimizations,
-# -fno-rerun-cse-after-loop, -fno-peephole, -fno-inline, -fno-caller-saves,
-# -fno-function-cse or -fno-thread-jumps moves it, and PsyQ 4.6 is worse (36).
-func_80075CB0
-func_80075D30
-func_80077090
 func_800601D0
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
@@ -106,11 +85,6 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
-# func_80033CC4: thirteen instructions, the sequence identical instruction for
-# instruction, three registers rotated (base, j*16 and i*2 each hold each
-# other's). The grouping and load order are already retail's --
-# `(base + i*2)[j*16 + 1]`, j read first -- and the whole sweep sits at 9.
-func_80033CC4
 # func_80030FA0 needs three addressing forms at once: %gp_rel for two scalars,
 # lui $at + %lo for two aggregates, and an explicit la for the table it indexes.
 # -mno-split-addresses gives the first two (it is what matched its sibling

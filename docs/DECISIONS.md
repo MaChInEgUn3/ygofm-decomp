@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-507 of 1794 functions decompiled and byte-matching.
+508 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~507 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~508 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2393,7 +2393,7 @@ With that and one operand-order fix — `(arg0 + arg1)[0x5D97]` rather than
 
 **The tell is a backward unconditional `j`**, and it is worth stating as a rule
 because it is not rare: scanning all 1794 functions for a `j` to a label defined
-earlier in the same function finds **105**, of which only 5 are decompiled. Of
+earlier in the same function finds **105**, of which only 5 are decompiled and 85 are in scope (the rest are above `LIBRARY_REGION` or listed in `docs/LIBRARY_FUNCS.txt`). Of
 those 5, four are `while (1)` with an interior `return` or `break`
 (`func_80021558`, `func_80019A08`, `func_80031F7C`, `func_80036BCC`) and the
 fifth, `func_8003FE80`, is `while (func_8004703C() & 8)` — a condition gcc will
@@ -2453,16 +2453,14 @@ the only embedded source path in the whole binary: grepping every `.asciz` in
 `asm/data/` for a `.c` suffix returns exactly one string, referenced by exactly
 these two functions. No other unit can be named this way.
 
-### `x & (1 << i)` in a loop, and the return cc1psx threads and retail does not
+### `x & (1 << i)` in a loop, and an afternoon spent inside the library region
 
-Two findings from `func_80077090`, which scans a 24-bit mask for its lowest set
-bit and then reads a table entry. It went 34 → 7, and the 7 are one wall.
-
-**Naming the mask stops the bit-test rewrite.** Written `if (arg0 & (1 << i))`,
-cc1psx's combiner rewrites it to `((arg0 >> i) & 1) != 0` and emits
-`srav`/`andi`. Retail keeps `1` in a register and shifts *left*:
-`addiu $a2,$zero,1` before the loop, `sllv $v0,$a2,$v1` in the branch delay slot,
-`and $v0,$a0,$v0`. Giving the mask a name is enough to prevent the rewrite:
+**Naming the mask stops the bit-test rewrite.** In `func_80077090`, written
+`if (arg0 & (1 << i))`, cc1psx's combiner rewrites the test to
+`((arg0 >> i) & 1) != 0` and emits `srav`/`andi`. Retail keeps `1` in a register
+and shifts *left*: `addiu $a2,$zero,1` before the loop, `sllv $v0,$a2,$v1` in the
+branch delay slot, `and $v0,$a0,$v0`. Giving the mask a name is enough to prevent
+the rewrite:
 
 ```c
         s32 m = 1 << i;
@@ -2470,86 +2468,34 @@ cc1psx's combiner rewrites it to `((arg0 >> i) & 1) != 0` and emits
         if (arg0 & m) { ... }
 ```
 
-That is 26 of the 34 differences, and it is the same lever as the older
-"naming intermediate results fixes scheduling" note, doing something stronger —
-it blocks a combiner transform, not just a schedule.
+That took the function from 34 differences to 7, and it is a stronger form of the
+older "naming intermediate results fixes scheduling" note — it blocks a combiner
+transform, not a schedule.
 
-**What is left is jump-to-return threading, and it is a compiler difference.**
-Retail returns `-1` with `j <exit>` and a `nop` in the delay slot, jumping to a
-single `jr $ra` at the end of the function. cc1psx emits `j $31` — checked in the
-raw `.s` before maspsx runs, so it is cc1psx and not the assembler wrapper. The
-same difference is the whole of what parks `func_80075CB0` and `func_80075D30`
-one instruction short, where it also lets cross-jumping merge two return blocks
-retail keeps separate.
+**The remaining 7 were not reachable, and the reason is that the function is not
+ours.** Retail returns `-1` with `j <exit>` into a single trailing `jr $ra`;
+cc1psx emits `j $31`, checked in the raw `.s` before maspsx runs. Nothing in the
+flag space moves it — `-fno-cse-follow-jumps`,
+`-fno-expensive-optimizations`, `-fno-rerun-cse-after-loop`, `-fno-peephole`,
+`-fno-inline`, `-fno-caller-saves`, `-fno-function-cse`, `-fno-thread-jumps`,
+`-fno-delayed-branch`, and PsyQ 4.6 — and the same difference is the whole of what
+stopped `func_80075CB0` and `func_80075D30`, both one instruction short.
 
-Measured, since three functions in a row is exactly when a pattern starts looking
-like a rule: **46 of the 1794 functions contain a `j` to a bare `jr $ra`**, and
-they are not spread evenly — the densest 0x1000 buckets are `0x8008E000` (6/18),
-`0x80075000` (5/21) and `0x80077000` (3/14), all high addresses. Three matched
-functions do contain the shape, but in all three the jump comes out of a `switch`
-default or an `if`/`else` tail rather than from a threaded `return`, so they are
-not counter-examples. Nothing in the flag space reaches it: none of
-`-fno-cse-follow-jumps`, `-fno-expensive-optimizations`,
-`-fno-rerun-cse-after-loop`, `-fno-peephole`, `-fno-inline`, `-fno-caller-saves`,
-`-fno-function-cse`, `-fno-thread-jumps` or `-fno-delayed-branch` changes it, and
-PsyQ 4.6 is worse on `func_80077090` (36) while being slightly better on
-`func_80075CB0` (25 against 27) — suggestive of a version difference, not
-evidence of one.
+**`func_80075D30` and `func_80077090` are listed in `docs/LIBRARY_FUNCS.txt`,
+which says in its header "Do not write C for these."** All three sit above
+`LIBRARY_REGION = 0x80073840`, the boundary `candidates.py` already filters on;
+`func_80075CB0` walks the PsyQ heap block list, `{header, size}` pairs with bit 31
+free and bit 30 end-of-list. I found them by scanning the whole binary for a
+pattern and never re-applied the project's own scope filter to the result, so the
+"jump-to-return threading is a wall" finding is really "Sony's compiler was not
+this compiler". All three are out of the park, and `func_80075CB0` is now in
+`LIBRARY_FUNCS.txt` with its evidence.
 
-The honest state: three functions parked within 1–2 real instructions on a
-behaviour we cannot currently select. If a fourth turns up in the same address
-range, the hypothesis worth testing is that this region is SDK library code built
-with an older gcc than the game's own units — `0x80075000`–`0x80079000` holds 61
-functions and not one of them has matched yet.
-
-### Four levers from one word-wise memset (`func_80035748`)
-
-A four-arm `switch` over `len & 3` after a backwards word-fill loop. 34 → 1 → MATCH,
-and each step is a separate reusable lever.
-
-**An expression recomputed in several arms was not a variable.** Retail emits
-`srl $v0,$a2,2` *three times* — once for the loop bound and once in each switch
-arm. Holding it in `s32 n = len >> 2;` keeps it in a callee-saved register and
-costs the recomputations. gcc 2.8 has no global CSE, only per-block, so an
-expression written inline in three basic blocks is emitted three times. Read the
-repetition as evidence about the source rather than as something to optimise away:
-write `dst + (len >> 2) * 4` in each arm.
-
-**`case 1: case 2:` with one body folds into a range check; two bodies do not.**
-Sharing the body gave `sltiu $v0,$v1,3`, one test for the pair. Retail tests
-`== 1` and `== 2` separately, because in its case tree the two labels are
-distinct — which is what you get by writing each `case` with its own copy of the
-body and letting cross-jumping merge the tails afterwards. It merges all of it
-except the one instruction that ended up in case 1's delay slot, which is exactly
-the `.L800357B8` → `.L800357BC` fallthrough retail has. Same family as the
-range-check-fold note: the fold happens on the *source* sharing, not on the values.
-
-**`case 0: break;` is load-bearing.** Without it gcc must range-check the
-switch value against the default; with all four of 0..3 present it knows the
-value is in range and emits four bare equality tests in the order 1, 0, 2, 3.
-An explicit empty case for the do-nothing value is not redundant.
-
-**Sometimes the assignment target must *not* be an operand.** This is the mirror
-of the `+=` lever recorded above. Written
-
-```c
-    c = (c << 24) | (c << 16) | (c << 8) | c;
-```
-
-cc1psx emits `or $a1,$a1,$v0` — when the destination is also an operand, expand
-reorders so the destination comes first. Retail has `or $a1,$v0,$a1`, the tree
-order. Assigning the result to a **fresh variable** and using that variable
-everywhere afterwards gives it, and the allocator still puts it in `$a1` because
-`c` is dead:
-
-```c
-    v = (c << 24) | (c << 16) | (c << 8) | c;
-```
-
-So the rule is not "prefer `op=`" — it is that `x = f(x)` and `y = f(x)` pick
-different operand orders, and you choose by which one retail shows. Naming the
-intermediate half-way (`v = (c<<24)|(c<<16)|(c<<8); c = v | c;`) does *not* work,
-because the destination is still `c`.
+The transferable lesson is about the ad-hoc scan, not the threading: **any list of
+targets derived by grepping `asm/` has to be filtered by `LIBRARY_REGION` and
+`LIBRARY_FUNCS.txt` before it is a list of candidates.** The backward-`j` vein
+recorded above is 105 functions binary-wide but **85** in scope; that is the number
+to plan from.
 
 ### Where a constant offset lands, and the $at asymmetry
 
