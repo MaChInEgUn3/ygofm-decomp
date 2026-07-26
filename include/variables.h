@@ -320,6 +320,8 @@ extern u8 *Base2_8009B45C;
 
 /* --- more small data ------------------------------------------------------ */
 
+extern u8 D_8009AF98;
+extern s8 D_8009AF99;
 extern s8 D_8009AF9A;
 extern u8 D_8009B4A0;
 extern u8 D_8009B4A1;
