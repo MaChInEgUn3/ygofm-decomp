@@ -14,7 +14,9 @@ Any trailing arguments are passed straight through to CC1PSX, so you can
 sweep optimisation levels etc. without editing anything.
 """
 
+import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -36,7 +38,12 @@ PSYQ_RUNNER = B.PSYQ_RUNNER
 ASM_DIR = B.ASM_FUNCS
 MASPSX, VENV_PYTHON = B.MASPSX, B.VENV_PYTHON
 CPP_FLAGS = B.CPP_FLAGS
-SCRATCH = ROOT / "build" / "scratch"
+# Per-process scratch. These paths were shared, so two try_func runs at once
+# -- which is exactly what check_try_func.py plus a manual run looks like --
+# clobbered each other's intermediate assembly and produced a diff belonging
+# to neither candidate. It reported 32 differing instructions for a function
+# that has 5, and two spurious failures in the full regression pass.
+SCRATCH = ROOT / "build" / "scratch" / f"try{os.getpid()}"
 
 # cc1psx writes numbered registers; the target disassembly uses ABI names.
 REG_NAMES = {
@@ -408,4 +415,7 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    finally:
+        shutil.rmtree(SCRATCH, ignore_errors=True)
