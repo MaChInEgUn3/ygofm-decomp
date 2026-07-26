@@ -1,19 +1,18 @@
-/* Retail keeps the record pointer in $v0 -- a caller-saved register -- across
- * the call to func_8005F1A4, and reads 2($v0) after it returns. No C produces
- * that: gcc must assume a call clobbers $v0, so it allocates $s1 and the frame
- * grows by 8. Either retail relies on that callee not touching $v0, or this
- * compiler had a way of knowing it. Worth a separate look at whether any other
- * function does the same -- if several do, it is a compiler behaviour and not
- * a one-off.
+/* 18 differing instructions. Retail computes base+offset twice with opposite
+ * operand orders --  for the first read and
+ *  for the second -- so the two array accesses want
+ * different source spellings in the same function, and I could not find the
+ * pair. Six combinations of the named-array and byte-offset levers tried.
  */
 #include "common.h"
 
 s32 func_8005A618(s32 arg0) {
     s32 o = arg0 * 3616;
-    u8 *p = D_800F3938 + o + D_800F3938[o + 0x106];
+    u8 *r = D_800F3938 + o;
+    u8 *p;
     s32 t;
 
-    func_8005F1A4(p[0xA] & 0x1F);
+    p = func_8005F1A4(r[r[0x106] + 0xA] & 0x1F);
 
     if (arg0 > 0) {
         t = *(s16 *)(p + 2) + 0x1400;
