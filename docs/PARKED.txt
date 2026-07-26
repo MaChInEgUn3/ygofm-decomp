@@ -85,6 +85,19 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80026BA4 is 3 out, in the last arm of a three-way if. Both arms are one
+# instruction; retail puts `addiu $v1,$a0,-601` in the branch delay slot and
+# `addiu $v1,$zero,100` in the fall-through, cc1psx the other way round. Writing
+# the condition either way (== 0x2D1 or != 0x2D1), nesting it instead of
+# else-if, and hoisting the -601 out all give 3 or worse, and the sweep is flat:
+# reorg picks which single-instruction block to steal and the source does not
+# reach that choice. The three range checks and everything else already match.
+func_80026BA4
+# func_80012AE8 is not a C-shape problem: it is a constructor-list walker whose
+# count is `lui $s1,(0x0>>16); addiu $s1,$s1,0x0` -- a link-time constant that
+# resolves to zero, i.e. symbol arithmetic over an empty array. Reproducing it
+# needs linker-defined symbols we do not have, not a different loop.
+func_80012AE8
 # func_8004C0AC: 6 out, and all six are where the loop counter is incremented.
 # Retail increments once in the preheader and once in the bottom branch's delay
 # slot, testing the pre-increment value; cc1psx puts the increment in the first
