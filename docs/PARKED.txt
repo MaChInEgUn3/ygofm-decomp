@@ -17,6 +17,15 @@
 # that were on this list -- func_8001798C and func_80049394 -- matched outright
 # under -mno-split-addresses and are in src/ now.
 #
+# THESE ARE SEARCH RESULTS, NOT MEASUREMENTS. sweep_try.py runs through
+# try_func, which is validated against src/ and parked/ under the flags those
+# functions actually use -- not against arbitrary combinations. Its assembler
+# flags go through a per-combination flag_overrides.json write, which is
+# exactly the kind of path that has produced confident wrong numbers in this
+# project before. Confirm with a full build before any of these becomes a
+# PER_FUNC_FLAGS entry. func_8001798C and func_80049394 were confirmed that
+# way; nothing else in this table has been.
+#
 #   func_80016DDC     11  O1 G0
 #   func_8002CCE4      3  O2 G0
 #   func_8002F440     14  O1 G8
