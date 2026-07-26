@@ -2216,12 +2216,13 @@ are cheap enough to apply speculatively.
 A green build makes every file in `src/` a known-good case, and every file in
 `parked/` a known-bad one. `tools_src/check_try_func.py` runs both:
 
-    415/415 of src report MATCH
-    12/12 of parked still report a difference
+    450/450 of src report MATCH
+    18/18 of parked report a difference
 
-(The 415 pass ran the script before the parked phase was added, so the
-negative half was a separate run of the same comparisons -- two runs, not one,
-but the same twelve candidates and the same tool.)
+-- one run, current code, both phases. Two earlier full passes were run
+against older builds of the tool and are superseded; the addend fix and the
+bare-gp-offset resolution both landed after them, and the addend fix in
+particular could only have been validated by a pass that came after it.
 
 That is the first time any claim about this tool has been checked rather than
 assumed, and it immediately paid: ten normalisation gaps across three rounds,
