@@ -222,3 +222,4 @@ void func_800857C0(s32 arg0);
 void func_8001352C(void);
 s32 func_8003FCD8(void);
 void func_8005B85C(void);
+void func_8005922C(u8 *arg0, s32 arg1);
