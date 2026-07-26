@@ -1,10 +1,10 @@
 #include "common.h"
 
 void func_80040390(void) {
-    s32 i = 0;
-    s32 v = -1;
     u16 *b = (u16 *)D_800F2878;
     u16 *a = (u16 *)D_800EFE38;
+    s32 i = 0;
+    s32 v = -1;
     Slot70 *p;
     s32 j;
 
