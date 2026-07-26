@@ -430,6 +430,14 @@ typedef struct {
 } Rec20;
 
 extern Rec20 D_800E9FF0[];
+typedef struct {
+    u8 *unk0;
+    u8 unk4[5];
+    u8 unk9;
+    u8 unkA[2];
+} Rec0C;
+
+extern Rec0C D_800EA030[];
 extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
