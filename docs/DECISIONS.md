@@ -2153,6 +2153,64 @@ in (a redundant mask is easier to spot than a missing one), not because the
 build says so. `func_800451E0` is the one that is proven *narrow*: as `s32` it
 comes out an instruction short, so its `s16` is doing real work.
 
+### The source-shape levers, consolidated
+
+These came out of roughly seventy functions matched on 2026-07-25/26. They now
+solve more than the flag sweep does. Try them in this order; the first four
+are cheap enough to apply speculatively.
+
+**Where a local is declared decides register allocation and scheduling.**
+- *Inside the block that uses it* -- eight functions. Works in if/else arms, in
+  straight-line code (three copies of a stream-read idiom), and in a loop body,
+  where it stops gcc hoisting an address formation to the top of the function
+  while still hoisting it out of the loop.
+- *Named before the first call* keeps a base in a callee-saved register across
+  that call; named after, gcc forms it later.
+- *Order of first assignment*, not of declaration, is what the allocator
+  follows. Splitting declaration from assignment does not separate the two.
+
+**Reusing a variable versus introducing one.**
+- Retail keeps one register across a transformation -> the source reused the
+  variable (`v &= 0xFFFF; v |= v << 16;`, not a new local).
+- Retail's loop counter shares a register with a value that is dead by then ->
+  the source reused *that* variable as the counter.
+- Retail makes a copy we do not -> introduce something that forces one: a
+  narrower intermediate (`s32 raw = *p; s16 c = raw;`), or a post-increment in
+  an argument (`f(p, (*n)++)`), which needs both the old and new value live.
+
+**Addresses.**
+- *Byte offset into a local* (`o = i * 4;` then `p + o`) takes the multiply out
+  of the address and fixes `addu` operand order -- in straight-line code.
+- *In a loop, leave the index arithmetic in* and let strength reduction build
+  the induction variable; hand-advancing a pointer makes gcc fold the constant
+  offset into it.
+- *Name the array before indexing it* (`b = Arr; &b[i * 64]`) to get the base
+  formed before the index.
+- *Record type for a strided table* keeps a field offset as a displacement
+  where a cast folds it into the symbol -- and does it without moving the
+  address computation, which a pointer local cannot.
+- *A second base pointer* in the source when the target forms one with no use
+  of its own.
+
+**Declarations.**
+- Per-file `#ifdef X_IS_AGGREGATE` for a symbol reached gp-relatively in one
+  unit and through %hi/%lo in another. Five symbols now.
+- `volatile` when retail reads back a value it just stored, keeps two
+  read-modify-writes in order, or pins a store against a volatile read.
+- A narrow return type is free in the callee and an `andi` in every caller.
+
+**Reading the target.**
+- Read to `endlabel`. A store in the return's delay slot is the easiest
+  instruction to miss.
+- `$at` means the assembler expanded a bare symbol: `-mno-split-addresses`.
+  `$at` on *some* symbols and a compiler-split address on others in the same
+  function means a -G8 compiler with a -G0 assembler instead.
+- `lui $r,%hi(sym)` followed by a load into `$r` itself is the same tell.
+- A register reused across a branch belongs to whichever predecessor reaches
+  the use, not to the nearest assignment in the listing.
+- Retail reloading a pointer before every access means the source read it
+  again. The local you would rather write is not what was compiled.
+
 ### try_func is validated in both directions now, and how
 
 A green build makes every file in `src/` a known-good case, and every file in
