@@ -54,11 +54,17 @@ meaningful, and skipping to the last one wastes hours:
    Related, same pass: an expression the target recomputes in several blocks was
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block.
-5. **Count materialisations** of each value: one per write in the source. One
+5. **Which test is written first**, when the target has more exit blocks than
+   you produce. `if (x == 0) return 0;` then the body, versus the body under
+   `if (x != 0)` with `return 0` after it, are *different layouts*: the first
+   keeps both exits, the second gets cross-jumped into one with the value in a
+   delay slot. Rule of thumb: whichever condition the target **branches out on**
+   is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
+6. **Count materialisations** of each value: one per write in the source. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
    an accumulator variable.
-6. **Then** `tools_src/sweep_flags.py`.
+7. **Then** `tools_src/sweep_flags.py`.
 
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Record the
