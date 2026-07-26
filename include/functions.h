@@ -187,3 +187,4 @@ void func_8004544C(void);
 #endif /* FUNCTIONS_H */
 s32 func_80042B98(u8 *arg0);
 void func_8004036C(s32 arg0);
+void func_80059700(s32 arg0, s32 arg1);

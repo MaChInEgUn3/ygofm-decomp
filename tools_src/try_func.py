@@ -148,9 +148,17 @@ def normalise(line):
     # signedness difference against the target that does not exist. Two
     # functions were mis-analysed for it before the micro-test showed the
     # tool inventing the diff.
-    _IMM = {"add": "addiu", "sub": "subiu", "and": "andi", "or": "ori",
-            "xor": "xori", "slt": "slti", "sltu": "sltiu"}
-    text = re.sub(r"^(add|sub|and|or|xor|slt|sltu)u? (\$\w+),(\$\w+),(-?\d+)$",
+    # Longest alternative first. Written as (...|slt|sltu)u? the regex
+    # matches `sltu` as `slt` plus the optional u -- Python's alternation is
+    # first-match, not longest-match -- so every unsigned compare was rewritten
+    # to the signed immediate form. That is the *second* time this one line
+    # invented a signedness difference: the first was mapping slt to sltiu.
+    # Each mnemonic is now spelled out and mapped directly.
+    _IMM = {"sltu": "sltiu", "slt": "slti", "addu": "addiu", "add": "addiu",
+            "subu": "subiu", "sub": "subiu", "and": "andi", "or": "ori",
+            "xor": "xori"}
+    text = re.sub(r"^(sltu|slt|addu|add|subu|sub|and|or|xor) "
+                  r"(\$\w+),(\$\w+),(-?\d+)$",
                   lambda m: f"{_IMM[m.group(1)]} "
                             f"{m.group(2)},{m.group(3)},{m.group(4)}",
                   text)
