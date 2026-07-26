@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_80049230(s16 arg0, s32 arg1) {
+void func_80049230(s16 arg0, s16 arg1) {
     Cmd2C c;
 
     if (arg0 < 0) {

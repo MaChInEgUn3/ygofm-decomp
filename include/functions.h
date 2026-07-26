@@ -51,7 +51,7 @@ void func_80023FBC(u8 *arg0);  /* PROVISIONAL */
 void func_80024914(u8 *arg0);
 s32 func_80036D3C(u8 *arg0);
 void func_80044598(s32 arg0, s32 arg1, s32 arg2);
-s32 func_80045208(s32 arg0, s32 arg1);
+s32 func_80045208(s32 arg0, s16 arg1);
 void func_800473F0(s32 arg0, s32 arg1);
 void func_80048658(s32 arg0, s32 arg1, s32 arg2);
 void func_80059908(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -59,7 +59,7 @@ void func_80012D4C(void);  /* PROVISIONAL */
 void func_8004733C(s32 arg0, s32 arg1);
 void func_800490F0(s16 arg0, u8 arg1);
 void func_80049108(s16 arg0, u8 arg1);
-void func_80049230(s16 arg0, s32 arg1);
+void func_80049230(s16 arg0, s16 arg1);
 void func_8007DE4C(void);
 void func_8007E860(void (*arg0)(void));
 void func_8003A920(u8 *arg0, s16 arg1, s16 arg2);
@@ -236,3 +236,4 @@ void func_80036DBC(u8 *arg0);
 s32 func_8005C4F0(u8 *arg0, u8 *arg1);
 s32 func_8005B8A0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_8004503C(s16 arg0, u8 arg1, s32 arg2);
+void func_800473CC(s32 arg0);
