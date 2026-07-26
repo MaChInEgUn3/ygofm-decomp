@@ -2153,6 +2153,29 @@ in (a redundant mask is easier to spot than a missing one), not because the
 build says so. `func_800451E0` is the one that is proven *narrow*: as `s32` it
 comes out an instruction short, so its `s16` is doing real work.
 
+### try_func is validated in both directions now, and how
+
+A green build makes every file in `src/` a known-good case, and every file in
+`parked/` a known-bad one. `tools_src/check_try_func.py` runs both:
+
+    415/415 of src report MATCH
+    12/12 of parked still report a difference
+
+(The 415 pass ran the script before the parked phase was added, so the
+negative half was a separate run of the same comparisons -- two runs, not one,
+but the same twelve candidates and the same tool.)
+
+That is the first time any claim about this tool has been checked rather than
+assumed, and it immediately paid: ten normalisation gaps across three rounds,
+plus a regression I introduced *while* fixing one of them (reordering two
+branches of the `li` rewrite silently broke every 0xFFFF0000 mask), plus a
+scratch-file collision that made two concurrent runs report a diff belonging
+to neither candidate.
+
+**Run it after touching try_func.py. Every time.** The stride argument samples
+`src/`; stride 1 takes about twenty minutes and the parked half is always
+checked in full.
+
 ### Two more members of the base-formation recipe
 
 Both found on func_8002497C and func_8002CCE4, both now generalisable.
