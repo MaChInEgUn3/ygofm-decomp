@@ -176,6 +176,8 @@ extern s32 D_8009B2EC;
 extern u8 D_8009B2B4;
 extern u8 D_8009B2B5;
 extern u8 D_8009B2B6;
+extern u16 D_8009B2DE;
+extern u8 *D_8009B2E4;
 extern u8 D_8009B2E9;
 extern u8 D_8009B2DC;
 extern u8 D_8009B2B8;
@@ -540,7 +542,13 @@ extern s32 D_800938A0[];
 extern u16 *D_80092A90;
 extern s32 *D_80094770;
 extern s32 *D_8009A0BC;
+/* Scalar by default; func_80031354 reaches it %hi/%lo and defines
+ * D_800EB184_IS_AGGREGATE. */
+#ifdef D_800EB184_IS_AGGREGATE
+extern u8 *D_800EB184[];
+#else
 extern u8 *D_800EB184;
+#endif
 extern s32 D_800FE240;
 extern s32 D_800947B8;
 extern u8 *D_80092B88;

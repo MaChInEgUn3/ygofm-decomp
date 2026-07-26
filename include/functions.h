@@ -238,3 +238,6 @@ s32 func_8005B8A0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_8004503C(s16 arg0, u8 arg1, s32 arg2);
 void func_800473CC(s32 arg0);
 u8 *func_8005F1A4(s32 arg0);
+void func_8003134C(void);
+s32 func_800358FC(s32 arg0);
+void func_8003B378(u8 *arg0, s32 arg1);
