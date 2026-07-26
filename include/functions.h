@@ -32,7 +32,7 @@
 void func_8002CD8C(void);
 s32 func_8002E3B4(void);
 void func_80033C90(void);  /* PROVISIONAL */
-void func_80035AF0(s32 arg0, s32 arg1, s32 arg2);
+u8 *func_80035AF0(s32 arg0, s32 arg1, s32 arg2);
 void func_80040390(void);  /* PROVISIONAL */
 void func_8004A518(void);  /* PROVISIONAL */
 void func_8007BE00(void);  /* PROVISIONAL */
