@@ -85,6 +85,14 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80038798 is ONE instruction: retail has `andi $v0,$a0,0x8000` where the
+# masked value lives in $a0; cc1psx folds `(x & 0xFFFF) & 0x8000` back to
+# `x & 0x8000` and reads $v0. Both registers are live (the masked value is the
+# argument to the next call), so it is a combiner fold and not allocation. Six
+# source forms tried -- u16 local, u16 return type on the callee, a named
+# intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
+# and the whole flag sweep is 1.
+func_80038798
 # func_8003798C: fourteen instructions, same sequence, but cc1psx hoists the
 # second %hi above the first load where retail keeps each lui/lw pair adjacent,
 # and the three registers rotate with it. D_8009B0F4 is volatile, which does not
