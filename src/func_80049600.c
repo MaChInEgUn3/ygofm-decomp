@@ -1,6 +1,6 @@
 #include "common.h"
 
-u8 func_80049600(s32 arg0) {
+s32 func_80049600(s32 arg0) {
     u8 v = arg0;
 
     if (v >= 0x15) {
