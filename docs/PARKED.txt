@@ -11,6 +11,34 @@
 # whose candidates were thrown away. Only func_80040390 and func_800594C0
 # survived, because they happened to still be in scratch.
 #
+# Best flag combination per candidate, from tools_src/sweep_try.py over the
+# whole set (2026-07-26). The count is differing instructions under that
+# combination; the source shape is whatever is in parked/<func>.c. Two entries
+# that were on this list -- func_8001798C and func_80049394 -- matched outright
+# under -mno-split-addresses and are in src/ now.
+#
+#   func_80016DDC     11  O1 G0
+#   func_8002CCE4      3  O2 G0
+#   func_8002F440     14  O1 G8
+#   func_80036F80     21  O2 G8 nosched1
+#   func_800382A8     33  O2 G0 nosched2
+#   func_80039E9C      6  O1 G0
+#   func_80040390      6  O1 G8
+#   func_80040510     29  O1 G0
+#   func_80045484      8  O2 G0 nosched2 macro
+#   func_800472A8     10  O1 G8
+#   func_8004733C     10  O2 G8
+#   func_80048C0C      3  O1 G0
+#   func_8004A854     13  O2 G0 nosched2 macro
+#   func_8004C84C     19  O2 G8 nosched1+2
+#   func_800594C0     16  O1 G0
+#   func_8005F7B0      5  O2 G8
+#   func_800709C0      5  O2 G0
+#   func_80070A40     11  O2 G0
+#   func_80070AC0      5  O2 G0
+#   func_80070B3C      5  O2 G0
+#   func_800732A0     13  O1 G8 macro
+#
 # --- register allocator (closed: no flag in 2.8.1, permuter saturates) ---
 func_80071424
 func_80071460
@@ -71,6 +99,7 @@ func_80036F80
 func_80045484
 func_8004A854
 func_80016DDC
+func_8005A618
 func_80070B3C
 func_80070AC0
 func_80070A40

@@ -464,6 +464,7 @@ typedef struct {
 
 extern Rec0C D_800EA030[];
 extern u8 D_800EA0E8[];
+extern u8 D_800F3938[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
 /* Walked with a 0x1C stride, two bytes cleared per record. Declared as an
