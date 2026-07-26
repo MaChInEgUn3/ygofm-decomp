@@ -283,6 +283,15 @@ PER_FUNC_AS_FLAGS["func_80044D48"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80029164"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049230"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049A64"] = "-G0"
+# These three are parked, not in src/, so these entries are inert for the
+# build. They are here anyway because check_try_func.py's negative phase runs
+# try_func over parked/ and try_func reads these tables: without them the three
+# differ under default flags for the *addressing form*, not for the residual
+# difference they were parked on, and a future try_func bug that hid the real
+# difference would still pass the check.
+PER_FUNC_AS_FLAGS["func_8004C84C"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80045484"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8004A854"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049600"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495EC"] = "-G0"

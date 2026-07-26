@@ -1,3 +1,15 @@
+/* Natural form: 11 differing instructions.
+ *
+ * Replacing the guard with `a = d == 0; if (a) return;` reaches 1 -- using the
+ * variable for the early test makes it live before the abs and fixes the whole
+ * register assignment of the band selection. That is not plausible source and
+ * it is not this candidate; it is recorded here so the next attempt knows the
+ * register assignment is reachable and the remaining instruction is
+ * `subu $a1,$zero,$a1`, retail negating the copy where gcc negates the
+ * original. Do not start from the artificial guard: it is one instruction out
+ * and structurally wrong, which is a worse place to start than eleven out and
+ * right.
+ */
 #include "common.h"
 
 void func_80016DDC(u8 *arg0) {
@@ -5,8 +17,7 @@ void func_80016DDC(u8 *arg0) {
     s32 a;
     s32 step;
 
-    a = d == 0;
-    if (a) {
+    if (d == 0) {
         return;
     }
 
