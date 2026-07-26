@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-541 of 1794 functions decompiled and byte-matching.
+542 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~541 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~542 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2672,6 +2672,37 @@ can fill its own load-delay slot instead of taking a `nop`.
 **Two adjacent subscripts of the same array are a reassociation risk.** When the
 target recomputes the scaling instead of adding the stride, write the scaling
 explicitly.
+
+### The duplicate-%hi class is mostly not a symbol-alias problem
+
+`tools_src/candidates.py` dropped every function that materialises one symbol's
+`%hi` twice, on the grounds that it "cannot match" without
+`config/symbol_aliases.txt`. That cost 41 candidates and it was wrong for the
+first one tried.
+
+`func_8002A660` reads `D_8009B148`, writes `D_8009B146`, then writes
+`D_8009B148` twice — four `%hi` materialisations of two symbols, three of them
+for the same one. There is no second symbol involved. All four are the
+**assembler** expanding a bare-symbol memory op, and getting them is the
+declaration lever again:
+
+- **scalar** declarations for both globals, so cc1psx emits `lh $v1,sym` and
+  `sh $zero,sym` rather than forming an address;
+- `PER_FUNC_AS_FLAGS[...] = "-G0"` so the assembler does not make them
+  gp-relative and expands each one separately.
+
+With unsized-array declarations instead, cc1psx forms the address once into a
+register and uses `0($a1)` for all three accesses — one materialisation, 21
+differences. With `-mno-split-addresses` on top of that it is the same, because
+the address is still a value gcc can common up. **A repeated `%hi` for one symbol
+usually means each access was a separate bare-symbol op, not that the source had
+two names for the address.** Reach for an alias only when the two
+materialisations are in the *same basic block* and gcc would have to common them.
+
+The last two differences after that were ordinary: the read of the halfword the
+first `if` uses had to be written after the store to `D_8009B146` — one statement
+later than felt natural — so it lands in the delay slot of the comparison instead
+of ahead of it, and that also settles which of the two values gets `$a1`.
 
 ## Repo layout / tooling plan
 

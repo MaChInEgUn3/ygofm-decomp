@@ -55,6 +55,8 @@ extern u16 D_8009AF76;
 extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
+extern s16 D_8009B146;
+extern s16 D_8009B148;
 extern s16 D_8009B1A8;
 extern s16 D_8009B1D2;
 extern s16 D_8009B33C;
