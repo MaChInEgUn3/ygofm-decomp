@@ -48,7 +48,14 @@
 #   func_80070B3C      5  O2 G0
 #   func_800732A0     13  O1 G8 macro
 #
-# --- register allocator (closed: no flag in 2.8.1, permuter saturates) ---
+# --- register allocator: retail copies a value out of a register and we do
+# not. func_80037110 escaped this by declaring a *second* pointer at the top
+# and using it for only part of the function -- not `p = arg0` used
+# everywhere, which does nothing. Tried on func_800382A8, func_800472A8 and
+# func_80040510 afterwards and it moved none of them, so it is a shape that
+# works sometimes rather than the answer. Two variables each covering part of
+# the body is the thing to try first here.
+# ---
 func_80071424
 func_80071460
 func_80038498
