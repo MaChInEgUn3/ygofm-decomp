@@ -447,6 +447,7 @@ typedef struct {
     u8 unk1A[6];
 } Rec20;
 
+extern u8 D_800E9F10[];
 extern Rec20 D_800E9FF0[];
 typedef struct {
     u8 *unk0;
