@@ -137,6 +137,8 @@ extern u8 D_8009B164;
 extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
 extern u16 D_8009B33A;
+extern u8 D_8009B336;
+extern s8 D_8009B34D;
 extern u8 D_8009B363[];
 /* Scanned in 0x70-byte records; only the halfword at +8 is known. */
 typedef struct {
