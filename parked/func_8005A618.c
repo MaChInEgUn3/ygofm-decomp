@@ -1,6 +1,6 @@
 /* 18 differing instructions. Retail computes base+offset twice with opposite
- * operand orders --  for the first read and
- *  for the second -- so the two array accesses want
+ * operand orders -- "addu $a0,$v1,$v0" for the first read and
+ * "addu $v0,$v0,$v1" for the second -- so the two array accesses want
  * different source spellings in the same function, and I could not find the
  * pair. Six combinations of the named-array and byte-offset levers tried.
  */
