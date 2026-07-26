@@ -289,7 +289,13 @@ extern u16 D_8009B372[];
 extern u8 D_8009B369[];
 extern s32 D_8009B424[];
 extern u8 D_8009AF0C;
+/* Scalar by default; func_80037110 reaches it %hi/%lo and defines
+ * D_8009B09C_IS_AGGREGATE. */
+#ifdef D_8009B09C_IS_AGGREGATE
+extern volatile s32 D_8009B09C[];
+#else
 extern volatile s32 D_8009B09C;
+#endif
 extern u8 D_8009B0C3;
 extern volatile s32 D_8009B0C4;
 extern volatile s32 D_8009B0C8;
