@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-479 of 1794 functions decompiled and byte-matching.
+480 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~479 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~480 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2290,6 +2290,51 @@ While matching `func_80082780` its build came out 4 bytes short, which turned ou
 ## Tooling gotcha: use a project-local venv, not the global Python
 
 `pip install splat64` was first tried **globally** and it downgraded `tqdm` (4.67.3 → 4.67.1), breaking a pinned dependency of `aider-chat` (another tool on this machine) — caught and reverted (`pip install tqdm==4.67.3`) before it caused real damage. Fixed properly with `python -m venv .venv` at the repo root and installing `splat64[mips]` (needs the `[mips]` extra — `spimdisasm`, `rabbitizer`, `n64img`, `crunch64`, `pygfxd` — the bare package doesn't ship these) plus `asm-differ`'s deps there instead. **Always use `.venv/Scripts/python.exe` / `.venv/Scripts/splat.exe` for this project's Python tooling, never bare `pip install` into the system Python.**
+
+### Live-range length picks the callee-saved register — the first lever into the allocation class
+
+`func_80022FF0` walks five 12-byte records, calling `func_80022F98` on the
+pointer at `+0` and the pointer at `+4` of each. Retail uses two induction
+variables, `$s1` for the base and `$s0` for base+4, plus `$s2` for the counter.
+
+Writing it with one base and offsets `0`/`4` gives 39 differences: cc1psx keeps a
+single iv. Writing two explicit pointers gives **10**, then reordering the two
+increments and the counter init gives **7** — at which point the two functions
+are instruction-for-instruction identical and the only difference is that my base
+pointer is in `$s0` and retail's is in `$s1`. Textbook register-allocation class,
+and the flag sweep agrees: all thirteen viable combinations sit at 7.
+
+It is not the allocation class. The fix is **where the derived pointer is
+computed**:
+
+```c
+    a = *(u8 **)(arg0 + 8);
+    if (a == 0) return;
+    i = 0;
+    func_80022F98(arg0, *(u8 **)(arg0 + 4));   /* a is live across this call */
+    *(u8 **)(arg0 + 4) = 0;
+    b = a + 4;                                 /* b is not */
+```
+
+With `b = a + 4` before the call, both pointers are live across it and both have
+the same live range; with it after, `a`'s range is strictly longer. gcc 2.8.1's
+global allocator sorts pseudos by priority, which divides usage frequency by live
+range, so the *longer*-lived pointer sorts later and receives the later hard
+register. Moving one statement past one call flips `$s0`/`$s1` and the function
+matches exactly.
+
+The instruction that computes `b` still ends up in the `jal`'s delay slot in both
+forms — reorg pulls it back across the call — so **the emitted order is identical
+either way and the diff shows nothing at that line**. That is why this looked
+like an allocation difference: the statement that decides the allocation does not
+move in the output.
+
+This is the first lever anyone has found into the class recorded above as closed.
+It does not reopen the whole class — that negative was 16k permuter iterations on
+a function with no call in it, and with no call there is no live range to
+lengthen. It does mean the class as stated was too broad: **"only a register
+differs" is closed only when the differing values have equal live ranges.** When
+a call sits between the definitions, try moving a definition across it.
 
 ## Repo layout / tooling plan
 

@@ -45,9 +45,16 @@ meaningful, and skipping to 5 wastes hours:
 5. **Then** `tools_src/sweep_flags.py`.
 
 **Stop and park** when the only remaining difference is which register holds a
-value, or when the target has more duplicated tails than you produce. Those two
-are closed — verified, not assumed. Record the name in `docs/PARKED.txt` with
-its class **and keep the candidate in `parked/<func>.c`**.
+value, or when the target has more duplicated tails than you produce. Record the
+name in `docs/PARKED.txt` with its class **and keep the candidate in
+`parked/<func>.c`**.
+
+Before parking on "one register differs", check whether a **call** separates the
+definitions of the two values. gcc prioritises pseudos by frequency over live
+range, so the longer-lived one lands in the later register: moving one definition
+across the call flips the pair, and it flips nothing else in the output, which is
+why this hides so well. That is verified on `func_80022FF0`. The class is closed
+only for values with equal live ranges.
 
 The third class this list used to name — the target keeping two comparisons
 where cc1psx folds a range check — **is not closed**. The fold happens on the
