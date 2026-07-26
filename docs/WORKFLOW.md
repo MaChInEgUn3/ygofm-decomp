@@ -86,9 +86,18 @@ on a combination that had been in the table for weeks.
 - **Hold values in the widest natural type; cast at the point of use.** A narrow
   type inside a computation costs an `andi` or a sign-extend — this has bitten
   parameters, return values, locals and loop counters.
-- Scalar vs unsized array is a codegen choice. Three knobs when one function
-  needs different addressing from another: `-G0`, an unsized-array declaration,
-  or a per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h`.
+- Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
+  Three addressing forms can appear in one function; pick each by declaration:
+  - **scalar** — cc1psx knows the size, treats it as small data and emits
+    `%gp_rel($gp)` itself. The assembler's `-G` never enters into it.
+  - **unsized array** — not small, so cc1psx emits an explicit `%hi`/`%lo` pair
+    into an ordinary register.
+  - **unsized array + `-mno-split-addresses`** — cc1psx emits the bare symbol and
+    the *assembler* expands it: through the destination register for a load,
+    through `$at` for a store, which has no spare register. `lui $at` in the
+    target means this one.
+  A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
+  disagree about the same symbol.
 - `config/symbol_aliases.txt` gives an address a second name, for when retail
   materialises it twice inside one basic block. Needs a `-G0` assembler to be
   worth anything.
