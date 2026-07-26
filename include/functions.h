@@ -196,3 +196,4 @@ void func_800171A8(void);
 void func_8003CDF8(void);
 void func_80024200(void);
 void func_8003CE48(void);
+void func_8003D0F4(u8 *arg0);
