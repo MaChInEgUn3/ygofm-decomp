@@ -13,7 +13,7 @@ void func_8002CCE4(s32 arg0) {
     }
     {
         s32 m = 0x80 >> (arg0 & 7);
-        u8 *p = &Base2_801D0000[i];
+        u8 *p = &D_801D0000[i];
 
         p[0x618] |= m;
     }

@@ -426,7 +426,6 @@ extern u8 *D_8009B458;
 /* Alias for D_8009B458; see config/symbol_aliases.txt. */
 extern u8 *Base2_8009B458;
 extern u8 Base2_8009B364[];
-extern u8 Base2_801D0000[];
 /* Reached %hi/%lo from func_80048C0C's unit and gp-relatively elsewhere; see
  * the per-file declaration knob in docs/DECISIONS.md. */
 #ifdef D_8009B45C_IS_AGGREGATE
@@ -434,8 +433,6 @@ extern u8 *D_8009B45C[];
 #else
 extern u8 *D_8009B45C;
 #endif
-/* Alias for D_8009B45C; see config/symbol_aliases.txt. */
-extern u8 *Base2_8009B45C;
 
 /* --- more small data ------------------------------------------------------ */
 

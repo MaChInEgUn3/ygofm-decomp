@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-542 of 1794 functions decompiled and byte-matching.
+543 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~542 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~543 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2696,8 +2696,33 @@ register and uses `0($a1)` for all three accesses — one materialisation, 21
 differences. With `-mno-split-addresses` on top of that it is the same, because
 the address is still a value gcc can common up. **A repeated `%hi` for one symbol
 usually means each access was a separate bare-symbol op, not that the source had
-two names for the address.** Reach for an alias only when the two
-materialisations are in the *same basic block* and gcc would have to common them.
+two names for the address.**
+
+**And the alias rule, measured across all five existing entries rather than
+reasoned about.** I first wrote "reach for an alias when the two materialisations
+are in the same basic block", which `func_80044DA0` disproves immediately — two
+stores, one block, and it matches with both naming `D_8009B45C`. The real
+condition is about *pointer values*:
+
+| alias | still needed? |
+| --- | --- |
+| `Base2_8009B364` (`func_8002497C`) | **yes** — 13 differences without. Holds one address in a `u8 *` while reading through the other. |
+| `KeyTable_801D9174` (`func_80036BCC`) | **yes** — 16 differences without. Walks two pointers over one base. |
+| `Base2_8009B45C` (`func_80044DA0`) | no — MATCHes without it. Two plain stores. |
+| `Base2_801D0000` (`func_8002CCE4`) | no — 3 differences either way. |
+| `Base2_8009B458` (`func_80049CB0`) | untested; that function is parked with no saved candidate. |
+
+So: **an alias is for when the source needs two distinct pointer *values* into one
+object**, because gcc commons the address expression. It does nothing when the
+repeated `%hi` comes from separate bare-symbol memory ops, which the assembler
+expands one at a time. The two dead entries are deleted.
+
+`func_80049F50` is the second confirmation of the mechanism: three `lui`/`lw` of
+`D_8009B458` in three basic blocks, all from the scalar declaration plus a `-G0`
+assembler, no alias. Its one remaining difference was a type question — retail
+stores the *sign-extended* return of `func_8004CABC`, so the local has to be
+`s32 v = (s16)func_8004CABC();` and not `s16 v = func_8004CABC();`, which keeps
+the raw value and extends only for the comparison.
 
 The last two differences after that were ordinary: the read of the halfword the
 first `if` uses had to be written after the store to `D_8009B146` — one statement
