@@ -59,14 +59,10 @@ func_80038334
 func_800466C8
 func_80026C0C
 func_80049CB0
-# --- range-check fold (NOT closed: write the condition as nested ifs) ---
-# func_8005FB30 was in this class and matched: gcc folds `a <= v && v < b` to
-# an unsigned `(v - a) <u (b - a)` in fold, on the && expression. Written as
-# two nested ifs the fold never happens and both comparisons survive. These
-# two predate that finding and have no candidate saved (they are among the 37
-# thrown away before parked/ existed), so they need decompiling again -- but
-# the cause is no longer a wall.
-func_80049640
+# --- range-check fold: class emptied, see WORKFLOW.md. Both members
+# (func_80049544, func_80049640) matched once the condition was written as
+# nested ifs rather than &&. Neither had a candidate saved; both were
+# decompiled again from the listing in a few minutes.
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
 func_800601D0
 func_8002F440

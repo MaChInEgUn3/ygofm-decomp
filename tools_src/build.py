@@ -286,6 +286,7 @@ PER_FUNC_AS_FLAGS["func_80029164"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049230"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049A64"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049544"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80049640"] = "-G0"
 # These three are parked, not in src/, so these entries are inert for the
 # build. They are here anyway because check_try_func.py's negative phase runs
 # try_func over parked/ and try_func reads these tables: without them the three
