@@ -381,6 +381,13 @@ extern u8 D_80091570[];
 
 /* Tables reached by address, so never small data. */
 extern u8 D_800E9EC8[];
+typedef struct {
+    u8 unk0[0x14];
+    s16 unk14;
+    u8 unk16[0xA];
+} Rec20;
+
+extern Rec20 D_800E9FF0[];
 extern u8 D_800EA0E8[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
