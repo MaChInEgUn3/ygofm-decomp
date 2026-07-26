@@ -278,6 +278,7 @@ extern u16 D_8009B322;
 extern s8 D_800909D4[][6];
 extern VoidFn D_80090A5C[];
 extern u8 D_80090AD4[];
+extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
 extern s8 D_8009B408;
 extern u8 D_800F2848[];
@@ -342,7 +343,13 @@ extern s16 D_800FE0CC;
 /* Pointers into larger runtime structures. Reached gp-relative from one
  * unit and via %hi/%lo from another, so the declaration stays a plain
  * scalar and the per-function -G override decides which form is emitted. */
+/* Scalar by default; func_8004C84C reaches it %hi/%lo and defines
+ * D_8009B458_IS_AGGREGATE. */
+#ifdef D_8009B458_IS_AGGREGATE
+extern u8 *D_8009B458[];
+#else
 extern u8 *D_8009B458;
+#endif
 /* Alias for D_8009B458; see config/symbol_aliases.txt. */
 extern u8 *Base2_8009B458;
 extern u8 Base2_8009B364[];
