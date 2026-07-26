@@ -18,6 +18,8 @@ without a check like this -- reordering two branches of the `li` rewrite
 silently broke every 0xFFFF0000 mask.
 
 It checks both directions, and the second one is the one that matters more.
+A parked candidate must report a *difference count*, not merely "not MATCH":
+one that stops compiling would otherwise sail through the negative check.
 src/ is the positive set: every file there is byte-identical to retail, so
 try_func must say MATCH. parked/ is the negative set: every file there is a
 recorded near miss, so try_func must *not* say MATCH. Only the positive
@@ -63,12 +65,19 @@ def main():
     for i, f in enumerate(parked, 1):
         verdict = verdict_for(f.stem, f)
         if verdict == "MATCH":
-            false_pos.append(f.stem)
+            false_pos.append((f.stem, "reported MATCH for a parked near miss"))
+        # A candidate that no longer *compiles* also fails to report MATCH, so
+        # the plain "did not match" test passes it. That is the hole this file
+        # exists to close, and it opened for real: widening a callee's return
+        # type in functions.h left parked/func_800496C4.c with a conflicting
+        # declaration, and the negative check called it a pass.
+        elif not verdict.endswith("differing instruction(s)"):
+            false_pos.append((f.stem, f"did not compile or diff: {verdict}"))
         print(f"\r[parked] {i}/{len(parked)}  {len(false_pos)} bad ",
               end="", flush=True)
     print()
-    for name in false_pos:
-        print(f"  {name}: reported MATCH for a parked near miss")
+    for name, why in false_pos:
+        print(f"  {name}: {why}")
 
     print(f"\n{len(srcs) - len(bad)}/{len(srcs)} of src report MATCH; "
           f"{len(parked) - len(false_pos)}/{len(parked)} of parked report a "

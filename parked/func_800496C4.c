@@ -11,10 +11,15 @@
  * also materialises the zero it stores at +0x4A4 into $t0 rather than using
  * $zero, which is the same story: a variable that exists in the source and not
  * in mine.
+ *
+ * Return value: this was written as void, and func_80049308 stores the
+ * result -- retail zeroes $v0 on the path modelled here and there are exits
+ * above it that do not, so the reconstruction is missing at least one. The
+ * difference count below predates knowing that.
  */
 #include "common.h"
 
-void func_800496C4(u8 *arg0, s16 arg1, s32 arg2) {
+s32 func_800496C4(u8 *arg0, s16 arg1, s32 arg2) {
     u8 *b = D_8009B458;
     u8 *q;
     s32 v;
@@ -37,4 +42,6 @@ void func_800496C4(u8 *arg0, s16 arg1, s32 arg2) {
     q[0x18] = arg0[0x18];
     *(s32 *)(q + 0x14) = arg2;
     q[0x1B] = arg0[0x19];
+
+    return 0;
 }
