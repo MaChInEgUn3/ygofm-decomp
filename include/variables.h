@@ -480,6 +480,7 @@ extern u8 D_8009B4A2;
 extern u8 D_8009B37C;
 extern s32 D_8009B390;
 extern s32 D_8009B3A8;
+extern u8 D_800EF668[];
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
 extern u16 D_8009B394;

@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-551 of 1794 functions decompiled and byte-matching.
+552 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~551 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~552 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2826,6 +2826,38 @@ what the original said — a hardware or interrupt-updated flag word. One
 the bare-symbol form and had to be dropped from the aggregate declaration. The
 two uses of the keyword pull in opposite directions, so decide which one the
 target is showing before using it.
+
+### A shared `%hi` with two `%lo`s is the *absence* of an alias
+
+`func_8003CC38` reads one record at `+0` and again at `+0x22`, and retail has:
+
+```
+    lui   $v0, %hi(D_800EF668)
+    addiu $a0, $v0, %lo(D_800EF668)      # first pointer
+    ...
+    lui   $v0, %hi(D_800EF668)           # in a branch delay slot
+    addiu $v1, $v0, %lo(D_800EF668)      # second pointer
+```
+
+Two `%hi`s, so `candidates.py` called it a duplicate-`%hi` function — but the
+first branch out of block one jumps **past** the second `lui`, because `$v0`
+still holds the high part from the top. That only works if both pointers name
+the *same* symbol. Giving the second one an alias makes them two symbols gcc
+cannot prove equal, so it can no longer skip the `lui`, and the branch lands one
+instruction earlier: three differences that are entirely branch offsets, with the
+instruction stream identical. Plain `-O2 -G8` with two locals off one symbol
+matches.
+
+So the tell is finer than "two `%hi`s":
+
+- two `%hi`s where a branch can **skip** one → one symbol, no alias, plain
+  `-G8` and two pointer variables;
+- two `%hi`s where **both are always executed** → gcc would common them; alias.
+
+And the diagnostic habit that caught it: try_func reported the three differences
+as label names, which looks like a normalisation artefact. It was not — the build
+disagreed too. **Label-name differences are real differences**; they mean the
+branch targets sit at different offsets.
 
 ## Repo layout / tooling plan
 
