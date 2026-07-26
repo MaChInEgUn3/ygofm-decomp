@@ -84,8 +84,20 @@ def build_reports(func):
     out = r.stdout + r.stderr
     if "OK: build is byte-identical" in out:
         return True, "whole build matches"
+    # "build failed" used to cover three different things, and only one of
+    # them is a flag result. A toolchain error means the combination never
+    # compiled, so it says nothing about whether those flags would help --
+    # reported as "no" alongside genuine misses, a broken entry in the table
+    # is indistinguishable from a flag that did not work. Sweeping the two
+    # surviving parked candidates printed "(build failed)" for all 21
+    # combinations including the plain baseline, which read as 21 flag
+    # results and was in fact one wrong-size function repeated 21 times.
+    if "Command failed:" in out or "error:" in out:
+        return False, "TOOLCHAIN ERROR -- combination never compiled"
+    if "compiled to the wrong size" in out and func in out:
+        return False, "wrong size"
     if r.returncode != 0 or "sha1  :" not in out:
-        return False, "build failed"
+        return False, "build did not produce a binary"
     # Named either as a size error or in the differing list.
     bad = any(func in line for line in out.splitlines()
               if line.strip().startswith(func) or f" {func}:" in line
