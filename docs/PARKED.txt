@@ -85,6 +85,21 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80059700 picks one of three mode bytes from the sign of arg1, then
+# dispatches on it. The three-way sign test matches once written as
+# `if (arg1 <= 0) { if (arg1 < 0) ... else ... } else ...` -- gcc turns the
+# inner `< 0` into the `bgez` retail has. The recomputed base (gcc 2.8 has no
+# global CSE) is right too. What is left, 21, is that retail computes the
+# doubled value into $a2 and copies it to $a1 in the first test's delay slot,
+# where we compute it straight into $a1; `a = v;` before the switch and
+# `a = -a` in the arm does not produce the copy.
+func_80059700
+# func_800597C8 is 25 out on the scheduling of three independent operations at
+# the top -- the shift of arg2, its store to +0xE06 and the `(u16)` for the
+# fourth call argument. Retail reads the loop bound before the shift and puts
+# the mask in the guard's delay slot; we shift first. Duplicating the three
+# into both arms of the guard to force it is much worse (49).
+func_800597C8
 # func_80015078 is func_80013B68's seven-argument sibling and matches except at
 # the exit: retail materialises the return value (`addu $v0,$s0,$zero`) BEFORE
 # reading D_8009B0F4 for the final `|= 0x20`, and reads it into $v1; cc1psx uses
