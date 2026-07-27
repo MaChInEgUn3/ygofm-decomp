@@ -85,6 +85,16 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80058A7C packs a GPU word from seven halfwords. Structure and the two
+# offset adjustments are right -- the -0x280 has to be s32 arithmetic in a
+# local, or gcc folds it to `+ 0xFD80` in a register because the u16 store makes
+# the whole expression u16, and naming `arg0 << 8` and the +0x12 test value gets
+# their reads into retail's order. 54 -> 52.
+# Open: retail emits `sll 16; sra 20` for the (x & 0x100) >> 4 term -- a fused
+# sign-extend-and-shift -- where we get two sll/sra pairs. An s16 local, an s16
+# lvalue read and a direct (s16) cast all give the same 52, and the rest of the
+# 52 is offsets shifting from it.
+func_80058A7C
 # func_80030D5C is TWO instructions: retail materialises the 0x2000000 mask
 # after loading D_8009B0F4, cc1psx puts it in the preceding branch's delay slot
 # and takes a nop after the load. Needs _O2_G8_MACRO restored when picked up.
