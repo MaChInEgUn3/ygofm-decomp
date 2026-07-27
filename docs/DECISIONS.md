@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-648 of 1794 functions decompiled and byte-matching.
+652 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~648 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~652 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3112,6 +3112,116 @@ good as the tight end. func_800134E0 pairs with func_800599FC at 0.700 and
 shares nothing with it but a `jal`, and it matched. What the ratio finds down
 there is small functions of a shape already solved, which is the same thing by
 a different route.
+
+## A narrow local can be the whole difference, and it is not the mode this time
+
+`docs/WORKFLOW.md` says to hold values in the widest natural type and cast at
+the point of use, because a narrow type costs an `andi` or a sign-extend and
+because it changes the *mode* a comparison happens in. func_80027060 is the
+case that needs the rule stated more carefully, because there the narrow local
+is what matched and the wide one did not — and no instruction changed.
+
+The function reads a signed byte out of a structure and takes it modulo 5:
+
+```c
+s8 v = sp10[0][0x18];      /* matches */
+s32 v = (s8)sp10[0][0x18]; /* 18 differences */
+```
+
+Both spellings emit exactly the same instructions in exactly the same order —
+`lbu`, `sll 24`, `sra 24`, then the reciprocal multiply. The count is identical
+and nothing is reordered. What differs is that with the `s32` spelling *every*
+register in the block is rotated by one: retail's `$a1`/`$a2`/`$a3` become our
+`$a2`/`$a3` and the D_800EAE88 base slides from `$a3` to `$a1`. The rotation
+starts at the top of the block, where retail has `addu $v0,$zero,$zero` — the
+function's `return 0` — as the *first* instruction, and we emit it seventh,
+after `$v0` has been used as the scratch for `lw 0x10($sp)`.
+
+So the lever is register birth order, not mode. The `(s8)` cast creates a
+conversion pseudo that is born before the load's own pseudo; the `s8` local
+does the conversion at the point of use and lets the load's pseudo be born
+first, which frees `$v0` for the constant zero and un-rotates everything after
+it. The general form: **when the only remaining difference is that every
+register in a block is shifted by one, the fix is a pseudo that should not
+exist, and a redundant cast is the commonest source of one.** This does not
+retract the width rule — it is about a cast that changes no instruction, where
+the width rule is about casts that change one.
+
+## A store in a `j`'s delay slot can be a real second store
+
+func_800402A0 ends an `if` branch with `j` into a join block, and the delay
+slot holds `sh $v0,0($s0)` — a store the join block performs again three
+instructions later, to the same address, with the same value. The obvious
+reading is that gcc filled the slot by copying the join's first instruction and
+should have branched past it, and that reading is wrong: gcc only does that
+with the branch adjusted to target+4, and this branch targets the join's first
+instruction.
+
+It is simply a second store, and the source has it twice:
+
+```c
+if (v < 0) {
+    *(u16 *)(D_800F2878 + arg1 * 2) = arg0->unkA[0];
+    arg0->unk2 = -1;
+    arg0->unk0 = -1;     /* here */
+} else {
+    D_800EFE48[v].unk0 = arg0->unkA[0];
+    arg0->unk2 = *(u16 *)(D_800EFE38 + arg1 * 2);
+}
+arg0->unk0 = -1;         /* and again */
+```
+
+Writing it the tidy way — the store once in each arm, nothing after — costs 18
+differences and an instruction. Writing it redundantly matches. The tell is the
+`-1` materialisation: retail computes `addiu $v0,$zero,-1` at the *end* of the
+else arm, immediately before the join, which only makes sense if the join is
+what consumes it. When a join block reads a constant that each predecessor
+materialises for itself, the statement lives after the `if`, whatever the arms
+also do.
+
+## Giving a table its own local moves its address to the top of the function
+
+func_80019A60 sorts its two arguments and then indexes a table. Retail
+materialises the table address in the first two instructions, *before* the
+comparison that drives the swap; writing the table reference where it is used —
+`D_8017C2D8[arg0]`, after the swap — puts the `la` after the swap instead, and
+that is 7 differences with everything else already right.
+
+```c
+u8 *base = (u8 *)D_8017C2D8;   /* first local, first statement */
+...
+off = *(u16 *)(base + arg0 * 2);
+p = base + off;
+```
+
+matches. This is declaration order (working-order step 2) with a specific
+shape worth naming: **a table read through a local declared before anything
+else has its address materialised before anything else.** The failed attempt
+that looks similar is giving the *base* of a subtraction its own local
+(func_8005A8C4, parked) — there the extra local stayed live and cost a register
+everywhere. The difference is that func_80019A60's local replaces every
+reference to the symbol, so nothing extra is live.
+
+Same function, second lever: the order of the two updates at the bottom of the
+loop. gcc emits the derived induction variable's update relative to the
+counter's in source order, so `p += 5; n -= 2;` and `n -= 2; p += 5;` differ by
+two instructions being swapped, and only one of them is retail's.
+
+## `NULL` is not declared, and a filtered grep of try_func reads a crash as a match
+
+`common.h` does not pull in a definition of `NULL`; write `(u8 *)0`. That is a
+one-line fact, but the way it cost time is the part worth recording. The
+candidate was checked with
+
+    try_func.py func_80014EEC cand.c | grep -E '<<|differing|MATCH'
+
+which printed nothing — and nothing is what a clean match with no trailing
+summary looks like at a glance. The compile had failed on `NULL undeclared`;
+the grep dropped the error text because it matched none of the three patterns.
+This is the same failure the "a tool's answer only counts if it measured what
+you think" habit is about, arriving through a filter rather than through a
+stale object. **Read try_func's last lines, not a grep of them** — the word
+MATCH is printed on success and nothing stands in for it on failure.
 
 ## Repo layout / tooling plan
 

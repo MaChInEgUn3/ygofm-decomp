@@ -53,7 +53,12 @@ meaningful, and skipping to the last one wastes hours:
 2. **Read/declaration order.** The most common single fix here. Declaration
    order controls which callee-saved register a value gets, where a constant is
    materialised, whether an address is folded, and whether an initialiser
-   competes with the prologue.
+   competes with the prologue. Specific shape: **a table read through a local
+   declared before anything else has its address materialised before anything
+   else** — that is what put func_80019A60's `la` ahead of the argument swap.
+   It only works if the local replaces *every* reference to the symbol;
+   a local that merely names one operand stays live and costs a register
+   everywhere (func_8005A8C4, parked).
 3. **Branch polarity and loop form.** cc1psx emits the fall-through for the
    branch written as not-taken — look at which path retail falls into. But check
    the **loop statement first**, because it decides block layout on its own:
@@ -81,7 +86,12 @@ meaningful, and skipping to the last one wastes hours:
 6. **Count materialisations** of each value: one per write in the source. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
-   an accumulator variable.
+   an accumulator variable. Same counting applies to *stores*: a store in a
+   `j`'s delay slot that the join block repeats is a genuine second store, not
+   a delay-slot copy of the join (gcc only copies a target instruction with the
+   branch moved to target+4). The confirming tell is a constant the join
+   consumes but each predecessor materialises for itself — func_800402A0.
+   Writing that store once per arm instead costs 18 differences.
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
    the other way**: gcc reverses a counted loop whose counter is dead after it,
@@ -130,6 +140,14 @@ on a combination that had been in the table for weeks.
   function. `u16 func(s32 arg0)` holds the value unmasked and puts the `andi` at
   the return, which is why retail copies the argument to `$v0` before clobbering
   `$a0` with the test — func_80047C50.
+- And a narrow **local** can be the whole function without changing one
+  instruction. `s8 v = p[0x18];` matched func_80027060 where
+  `s32 v = (s8)p[0x18];` gave 18 differences — same instructions, same order,
+  every register in the block rotated by one, because the redundant cast is a
+  pseudo born before the load's own. **When the only difference left is that a
+  whole block's registers are shifted by one, look for a pseudo that should not
+  exist**; a cast that changes no instruction is the commonest source.
+- `common.h` does not define `NULL`. Write `(u8 *)0`.
 - Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
   Three addressing forms can appear in one function; pick each by declaration:
   - **scalar** — cc1psx knows the size, treats it as small data and emits
@@ -160,7 +178,10 @@ on a combination that had been in the table for weeks.
 project were tools reporting confidently on something they had not measured — a
 stale object, an unverified flag, a crashed build read as clean. When a tool
 says "no", ask whether it could have said "yes"; when it says "yes", ask whether
-the run it judged completed.
+the run it judged completed. The cheapest way to fall into this is a **filter**:
+`try_func.py ... | grep -E '<<|differing|MATCH'` prints nothing both for a clean
+match and for a compile error, because the error text matches none of the three
+patterns. Read try_func's last lines, not a grep of them.
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern

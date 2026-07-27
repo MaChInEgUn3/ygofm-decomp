@@ -39,6 +39,7 @@ extern u8 D_8009AFA4[];
 #else
 extern u8 D_8009AFA4;
 #endif
+extern u8 D_8009AFA2;
 extern u8 D_8009AFA6;
 extern u8 D_8009B063;
 extern u8 D_8009B064;
@@ -752,10 +753,12 @@ extern Rec1C D_800EB288[];
 extern u8 D_800EF6B0[];
 extern u8 D_800EF6E0[];
 extern u8 D_801B0000[];
+extern u16 D_8017C2D8[];
 extern u8 D_801C0000[];
 extern u8 D_801D5800[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];
+extern u8 D_800A5768[];
 extern u8 D_800F2C40[];
 extern u8 D_800E9DB0[];
 extern u8 D_800E9EF0[];
@@ -845,7 +848,13 @@ extern u8 *D_800EB184[];
 #else
 extern u8 *D_800EB184;
 #endif
+#ifdef D_800FE240_IS_AGGREGATE
+/* Reached through an explicit %hi/%lo pair in func_8005A8C4, where the scalar
+ * form would go gp-relative and collapse to one instruction. */
+extern s32 D_800FE240[];
+#else
 extern s32 D_800FE240;
+#endif
 extern s32 D_800947B8;
 /* Reached through %hi/%lo, so unsized rather than a scalar. Nothing had
  * used it before func_80077090; if a gp-relative user turns up, guard it. */

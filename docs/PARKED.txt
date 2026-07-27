@@ -655,3 +655,38 @@ func_80031EE4
 func_800496C4
 func_8005A3D0
 func_8003B744
+
+func_8005A8C4 -- 3 differences, register allocation.
+  Matches everything but the two-instruction materialisation of D_800FE240.
+  Retail: lui $a0,%hi(D_800FE240) / lw $a0,%lo(D_800FE240)($a0) -- the %hi temp
+  and the loaded value share $a0, and %hi(D_800A5768) is scheduled ahead of
+  both. We emit lui $v1,%hi / lw $a0,%lo($v1) with a separate temp, which puts
+  the two luis in the other order; the swap is a consequence of the register,
+  not a second fault.
+  Needs D_800FE240 as an unsized array (D_800FE240_IS_AGGREGATE): the scalar
+  declaration goes gp-relative and collapses the pair to one instruction --
+  that alone was 44 differences down to 3.
+  -mno-split-addresses gets the register right and the schedule wrong (4): the
+  bare form is one pseudo-instruction at schedule time, so nothing can be
+  hoisted between its halves, and retail hoists %hi(D_800A5768) between them.
+  Ten source shapes tried at 3 (single expression, split statements, statement
+  reorder, pointer-typed array, &D_800A5768[0], separate base variable). The
+  only one that reproduced retail's *order* introduced a live local and cost a
+  register everywhere (24). Full flag sweep: best is plain -O2 -G8.
+
+func_80014E1C -- 13 differences, one instruction short, register allocation.
+  Same body as func_80014EEC (which MATCHES, src/func_80014EEC.c) wrapped in
+  `D_8009B0F4 |= 0x40;` before and `D_8009B0F4 = *(s32 *)(p + 0x2C) | 0x10;`
+  after, where p is the pointer func_80014EEC would have returned -- NULL on
+  the early-out, D_800E9E60 otherwise. Written with a goto to the tail, which
+  is what puts the two values into one variable.
+  Retail keeps p in $v0 and copies it in with `addu $v0,$s0,$zero` after the
+  call; we coalesce p with the D_800E9E60 pseudo, so p lands in $s0 and that
+  copy disappears -- hence one instruction short. The knock-on is the delay
+  slot: retail's `addu $v0,$zero,$zero` (p = NULL) rides the `beq` because $v0
+  is dead on the taken path, while our $s0 still holds arg3 there, so we emit a
+  nop and put the assignment in the `j`'s slot instead.
+  Tried: tail duplicated in both paths instead of a goto (31, gcc folds the
+  null deref to $zero and cross-jumping never fires), calling func_80014EEC for
+  the pointer (32), p assigned before the branch (41, p goes callee-saved and
+  costs an extra $s4). Full flag sweep: best is plain -O2 -G8.
