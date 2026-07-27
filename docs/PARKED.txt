@@ -229,6 +229,30 @@
 # the opposite of what they do for func_80047EC4, so the alias rule does not
 # reach this shape: there the commoning was loop-invariant motion, here it is
 # plain address CSE inside one block.
+# ---
+# func_80049AF4 is seven differences and all seven are $s0 against $s1: retail
+# puts arg0 in $s0 and the constant 1 -- hoisted because it is stored twice --
+# in $s1, and gcc does the reverse. Naming the 1 as a local makes it 11.
+# ---
+# func_8004B854 is three, and they are which instruction fills the call's delay
+# slot. Retail emits the three constant arguments, then `lui $a3,%hi(cb)`, then
+# the call with `addiu $a3,$a3,%lo(cb)` in the slot -- the split_address_across
+# _call shape. gcc emits the callback address first and fills the slot with the
+# 0x1000 argument instead, so the post-pass cannot fire: it only rewrites
+# `la / call / nop`, and there is no nop to rewrite. Hoisting the 0x1000 into a
+# local does not stop gcc sinking it to the call site. Do NOT add this one to
+# LA_CALL_FUNCS -- it was tried, the entry is dead, and it was removed again.
+# ---
+# func_80049434 is twenty stores into D_8009B458[0] and nothing else. Written
+# with the symbol inline in every statement it reloads the pointer per store,
+# which is right for most of them but not all: retail reuses one load across
+# *groups* -- 0x510 with 0x814, then 0x512/0x514/0x516 with it too, while
+# 0x815 gets its own. So some runs of stores were one pointer variable in the
+# source and some were not, and the grouping has to be recovered store by
+# store. 62 differences, all of them that. Worth finishing; just not quick.
+func_80049434
+func_80049AF4
+func_8004B854
 func_8003D03C
 func_80044F58
 func_8003D46C

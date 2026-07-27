@@ -237,6 +237,8 @@ void func_80047A68(void);
 void func_80047788(s32 arg0);
 void func_8003767C(u8 *arg0);
 void func_8004C77C(void);
+/* Callback func_8004B854 hands to func_80073860. */
+void func_8004B734(void);
 void func_80049BAC(s32 arg0);
 void func_8003771C(u8 *arg0);
 void func_8003BC40(u8 *arg0, u8 *arg1, s32 arg2);
