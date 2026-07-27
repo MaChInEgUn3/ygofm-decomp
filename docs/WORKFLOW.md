@@ -28,7 +28,20 @@ gitignored and must be re-fetched per machine.
 ## Adding a function
 
 Write `src/func_XXXXXXXX.c` and rebuild; placement is automatic. Get candidates
-from `tools_src/candidates.py`, which filters out signatures that cannot match.
+from `tools_src/candidates.py`, and from `tools_src/siblings.py`, which pairs
+each unmatched candidate with the decompiled function it most resembles. Run
+siblings at 0.70, not 0.90 — the loose end of that list is as good as the tight
+end, and skip the `[PARKED]` rows, which are sorted last for a measured reason.
+
+`candidates.py` no longer hides anything as "cannot match": three drop rules
+have been retracted in turn, each after being measured, and each was hiding
+functions that matched. It tags instead. Two tags matter:
+- **`dup-%hi`** — retail materialised one address twice. Try
+  `-mno-split-addresses` **first**; all 96 instances in the binary are the bare
+  form and an alias makes them worse. A quarter of them also want a hoisted
+  split address in the same unit and cannot have both.
+- **`lib-call`** — calls a PsyQ library function. An implicit declaration is
+  enough; do not write a prototype unless a float or struct is involved.
 
 **When it does not match, work in this order.** Each step makes the next
 meaningful, and skipping to the last one wastes hours:
@@ -69,7 +82,12 @@ meaningful, and skipping to the last one wastes hours:
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
    an accumulator variable.
-7. **Then** `tools_src/sweep_flags.py`.
+7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
+   confirm. Do not leave this to last when the target shows a **loop counting
+   the other way**: gcc reverses a counted loop whose counter is dead after it,
+   and `-O1` is sometimes the only thing that stops it (func_80047A68, 23
+   differences to 6). If retail's loop comparison is *unsigned*, try a `u32`
+   counter before reaching for a flag (func_800494F4).
 
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Record the
@@ -104,7 +122,14 @@ on a combination that had been in the table for weeks.
   finds the callers that also need updating.
 - **Hold values in the widest natural type; cast at the point of use.** A narrow
   type inside a computation costs an `andi` or a sign-extend — this has bitten
-  parameters, return values, locals and loop counters.
+  parameters, return values, locals and loop counters. It also changes
+  *comparisons*: a `u8` local compares in QImode and a `u16` local in HImode,
+  and both are **unsigned**, so `u8 v = p[i]; if (v >= 0xB)` gives `sltiu` where
+  the same byte in an `s32` gives retail's `slti`.
+- The reverse also happens: a narrow **return type** is sometimes the whole
+  function. `u16 func(s32 arg0)` holds the value unmasked and puts the `andi` at
+  the return, which is why retail copies the argument to `$v0` before clobbering
+  `$a0` with the test — func_80047C50.
 - Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
   Three addressing forms can appear in one function; pick each by declaration:
   - **scalar** — cc1psx knows the size, treats it as small data and emits
@@ -116,7 +141,15 @@ on a combination that had been in the table for weeks.
     through `$at` for a store, which has no spare register. `lui $at` in the
     target means this one.
   A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
-  disagree about the same symbol.
+  disagree about the same symbol. The tell for the third form is `lui $r,%hi(s)`
+  with the memory op through the **same** `$r`; but read it in one direction
+  only — a *separate* temp is always cc1psx's own pair, while one register can
+  be either (func_80022618 splits its own pair across a delay slot using one
+  register).
+- **`volatile` when the function's point is re-reading.** gcc commons a repeated
+  read with the one in the entry guard and then propagates the value, which
+  deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs
+  a second *name* for the same reason where volatile would be wrong.
 - `config/symbol_aliases.txt` gives an address a second name, for when retail
   materialises it twice inside one basic block. Needs a `-G0` assembler to be
   worth anything.

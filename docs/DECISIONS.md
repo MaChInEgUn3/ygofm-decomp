@@ -2937,6 +2937,136 @@ The same two functions also needed the index-first address form
 (`(Slot70 *)(i * 112 + (s32)base)` rather than `&base[i]`), which is the
 operand-order lever again.
 
+## Three drop rules retracted, in one session, all by measurement
+
+`candidates.py` used to hide functions it judged unmatchable. Every one of those
+judgements was wrong, and each had been reasoned from a couple of samples rather
+than counted. The pattern is worth naming: **a filter that says "cannot match"
+is a claim about the whole binary, so it needs a scan of the whole binary.**
+
+**The range-check fold.** Retracted earlier: the fold happens on the `&&` (or
+`||`), and nested `if`s keep both comparisons. Still real as codegen --
+`v == 0 || v == -1` becomes `sltiu v+1,2` on the nose, which is what
+func_8005C4F0 does -- but never a reason to skip.
+
+**Duplicate %hi is not an alias problem.** All 96 dup-%hi candidates in the
+binary use the *bare* form: `lui $r,%hi(s)` with the memory op through the same
+`$r`, which is the assembler expanding a bare symbol. Zero of the 96 use
+cc1psx's own `%hi`/`%lo` pair with a separate temp. So they want
+`-mno-split-addresses`; an alias actively hurts, because with two names gcc
+hoists both `%hi` values into callee-saved registers and grows the frame.
+`Base2_8009B458` went back into `symbol_aliases.txt` on the alias theory and
+came straight back out.
+
+25 of the 96 also contain a `%hi` whose `%lo` is completed in another block --
+a loop-invariant *split* address, which the same flag turns off. One file flag
+cannot serve both shapes; `func_8004BBBC` is parked as the example, with
+D_8009B458 exactly right and D_8009AF80 exactly wrong under the flag, and vice
+versa without it.
+
+**"Calls a PsyQ library function" was never a reason to skip one.** The stated
+reason was that such functions "need prototypes we do not have". They do not:
+gcc 2.8 accepts an implicit declaration and passes integer and pointer
+arguments correctly. `func_8008E870`, `func_8007D3F0`, `func_80073880`,
+`func_8008AD50`, `func_8008FB8C`, `func_80077240`, `func_8007E7F0` and
+`func_80077C70` were all called with no prototype and matched. What a missing
+prototype would actually cost is a float or struct argument, and that shows up
+as a wrong instruction count on the first attempt. Dropping the rule took the
+16-26 band from 0 candidates to 12 and 27-40 from 1 to 25, and 9 of the first
+12 matched.
+
+## Narrow locals compare in their own mode, and that mode is unsigned
+
+`u8 v = p[i]; if (v >= 0xB)` emits `sltiu`, not `slti`. The integer promotion
+in the C standard says the comparison is signed `int`, but cc1psx compares in
+QImode and a QImode compare of an `unsigned char` is unsigned. Holding the same
+byte in an `s32` gives retail's signed `slti`. Same for `u16` and HImode:
+func_80047A68 compares two `u16` fields and gets `sltu`.
+
+This is the "hold values in the widest natural type" rule with a *direction*:
+the narrow type does not merely cost an `andi`, it changes the comparison.
+func_80073220 turned on it.
+
+## Loop reversal, and the two things that stop it
+
+gcc reverses a counted loop into a countdown when the counter is dead after the
+loop and the trip count is known -- `addiu $v0,$v0,-1` with `bgez`, where retail
+counts up and compares. Two levers, and they are not interchangeable:
+
+- **`u32` instead of `s32`** for the counter. func_800494F4 counts to 0x212 and
+  retail compares `sltiu`; with `s32 i` gcc reverses it, with `u32 i` it does
+  not. This works when retail's own comparison is unsigned.
+- **`-O1`**. func_80047A68 counts to 4 with a signed `slti`, so `u32` is not
+  available, and no source shape stops the reversal at -O2: `u32 i`, a `for`,
+  and `i = mask` as the initialiser all leave it reversed. At `-O1 -G0` the loop
+  is exact. 23 differences to 6.
+
+If retail counts up and you are counting down, check the signedness of retail's
+comparison first -- it tells you which of the two levers is even applicable.
+
+## Two call sites are cheaper than a pointer variable
+
+When the same function is called in both arms of an `if` with different
+arguments, write it as two calls. gcc's cross-jumping merges them into the
+single `jal` retail shows, leaving the argument setup in each arm -- and the
+argument is materialised straight into `$a0`, which for an address means
+`lui $a0,%hi(s)` / `addiu $a0,$a0,%lo(s)` through one register.
+
+Hoisting the choice into a variable (`p = A; else p = B; f(p);`) produces the
+same instruction *count* and a different register: the address goes through a
+separate temp, `lui $v0,%hi(s)` / `addiu $a0,$v0,%lo(s)`. func_80022618 is four
+differences apart on exactly that, and func_800498BC needs the same shape to
+get retail's branchy 0/1 -- `f(x != 0)` gives `sltu` instead.
+
+Corollary for the `lui`/load tell: **cc1psx's own pair does not always use a
+separate temp.** The reliable direction is the other one -- a separate temp is
+always cc1psx's pair, but one register can be either.
+
+## A prologue save in a call's delay slot means nothing else was available
+
+func_80043E68 fills the delay slot of its first `jal` with `sw $s0,16($sp)`.
+That only happens when the scheduler has nothing else to put there, so an
+initialisation written *before* the call (`s32 i = 8;` as an initialiser) fills
+the slot instead and the save moves up. Writing `i = 8;` after the call is the
+whole difference.
+
+## maspsx expands `li` differently from aspsx when the low half is negative
+
+Retail materialises 0x7FFFFFFF as `lui $v1,0x8000` + `addiu $v1,$v1,-1`
+(encodings 3C038000, 2463FFFF). cc1psx emits `li $v1,0x7fffffff` and maspsx's
+`expand_load_immediate` turns that into `lui 0x7FFF` + `ori 0xFFFF`. Same value,
+different bytes, and no source shape reaches across it -- aspsx evidently splits
+a `li` the `%hi`/`%lo` way whenever the low half has bit 15 set.
+
+Why it has stayed invisible: splat renders such a pair as `%hi(D_x)`/`%lo(D_x)`
+and defines the symbol, so when the constant happens to look like an address,
+writing `&D_x` reproduces the bytes by accident. 0x7FFFFFFF does not look like
+one, and splat's own entry for it (`D_7FFFFF = 0x7FFFFF`) does not match the
+encodings either. func_8005C5D4 is the only in-scope function that exercises it,
+which is why this is documented rather than fixed: one observation is not enough
+to justify a post-pass that would touch every function. If a second one appears,
+patch `expand_load_immediate` to use the `lui`/`addiu` form when
+`operand & 0x8000`.
+
+## siblings.py ranked its own list upside down
+
+`tools_src/siblings.py` pairs each unmatched candidate with the decompiled
+function it most resembles. It originally sorted parked candidates *first*, on
+the theory that a park predating its sibling's decompilation is the best lead.
+Measured over one session: eleven non-parked leads gave eleven matches, most
+first try, while the two `[PARKED]` leads at the top of the ratio list (0.933
+and 1.000) took more attempts than anything else that day and stayed parked.
+
+The mechanism is clear once stated. A park in the register-allocation class
+asserts that the *shape* is already right; a matching sibling proves the same
+thing, so it carries no new information. Parked entries now sort last.
+
+The other half of the same measurement: the loose end of the ratio list is as
+good as the tight end. func_800134E0 pairs with func_800599FC at 0.700 and
+shares nothing with it but a `jal`, and it matched. What the ratio finds down
+there is small functions of a shape already solved, which is the same thing by
+a different route.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
