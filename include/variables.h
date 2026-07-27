@@ -576,6 +576,18 @@ extern u16 D_8009AF74[4];
  * load in a register; the reads are what the function is. */
 /* Handed to func_8004BAA0 by address; %hi/%lo, so unsized. */
 extern u8 D_8009AF80[];
+/* The three debug strings and the two flag bytes func_80022618 prints. */
+extern u8 D_80010074[];
+extern u8 D_80010090[];
+extern u8 D_800100A8[];
+/* Table func_8004A764 indexes by word. */
+extern s32 D_80011434[];
+extern u8 D_8009AF2A;
+extern u8 D_8009AF2C;
+extern u8 D_8009AF2D;
+/* func_8005C5D4 spins on this until it is set, then clears it: volatile, or
+ * gcc commons the read with the guard and propagates the flag as zero. */
+extern volatile u8 D_8009B062;
 extern u8 D_8009AFA3;
 extern u8 Base2_8009AFA3;
 extern s32 D_8009B074;

@@ -72,3 +72,7 @@ D_8009AF80 = 0x8009AF80;
 # func_80049C40 did not need it -- that function has a store between the two
 # reads, which forces the reload anyway. This one does not.
 Base2_8009B458 = 0x8009B458;
+
+# splat has D_8009AF2A and D_8009AF2D but not the byte between them, which
+# func_80022618 passes as the second argument of a printf.
+D_8009AF2C = 0x8009AF2C;

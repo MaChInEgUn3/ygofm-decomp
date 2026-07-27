@@ -117,7 +117,41 @@
 # What is left is the usual tie: retail keeps v in $v1 and the -1 in $v0, we
 # get v in $a0 and the -1 in $v1. Whichever pseudo is allocated first takes
 # $v1, and nothing source-side chooses. Sweep best 4, same as O2 G8.
+# ---
+# func_8004A764 fills five fields of D_8009B458[0] from D_80011434[arg0]. Every
+# instruction from the prologue on matches; the nine differences are one block's
+# order, because gcc hoists `lui %hi(D_8009B458)` to the top of the function and
+# schedules the matching `lw` away from it, where retail keeps the pair adjacent.
+# -mno-split-addresses does keep it adjacent but then turns the *table* access
+# into an indexed bare-symbol load (`lui $at; addu $at; lw %lo($at)`) instead of
+# retail's la + addu + lw, which is worse. Four source orders for the two reads
+# (pointer first, value first, address-only in a variable) give 9, 12 and 14.
+# ---
+# func_8005C5D4 spins on D_8009B062 for 0x7FFFFFFF iterations, then calls
+# func_8008FBE0(1) if it timed out. D_8009B062 has to be volatile or gcc commons
+# the loop's read with the entry guard and propagates the flag as zero, which
+# deletes the test; that is in variables.h now and it is the useful part.
+# Two things remain, and the first is a *tool* difference rather than a source
+# one, so read this before trying again:
+#   - the 0x7FFFFFFF is materialised by retail as `lui $v1,0x8000` +
+#     `addiu $v1,$v1,-1` (splat named the pair D_7FFFFF and wrote 0x7FFFFF for
+#     it in undefined_syms_auto.txt, which does not match the bytes -- the
+#     encodings are 3C038000 and 2463FFFF). cc1psx emits `li $v1,0x7fffffff`
+#     and maspsx's expand_load_immediate turns that into `lui 0x7FFF` +
+#     `ori 0xFFFF`. Same value, different bytes. aspsx evidently splits it the
+#     %hi/%lo way whenever the low half has bit 15 set. This is the only
+#     in-scope function that exercises it, which is why it has never shown up:
+#     when such a constant *looks* like an address splat names it and writing
+#     `&D_x` reproduces the bytes by accident.
+#   - retail's loop is not rotated -- `bgtz` at the head with the timeout call
+#     as the fall-through -- and gcc rotates it and drops the first test because
+#     the initial value is a known constant. while(1) with the exit inside,
+#     a rotated while, a goto loop and an explicit block order with the body
+#     behind a forward goto all produce the same 19: gcc's jump pass inverts the
+#     branch and lays the call block last whatever the source says.
 func_8005C4F0
+func_8004A764
+func_8005C5D4
 func_80026D18
 func_8004BBBC
 func_80073220
