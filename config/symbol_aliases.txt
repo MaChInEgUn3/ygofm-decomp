@@ -79,3 +79,8 @@ D_8009AF2C = 0x8009AF2C;
 
 # splat has no symbol for the "bu%02X:%s" format string func_800443EC passes.
 D_80010538 = 0x80010538;
+
+# func_80012DB4 tests this flag and then clears it. Both accesses are the bare
+# form, but gcc still commons the array base into a register when the same name
+# appears twice, so the store needs its own name.
+Base2_8009AFA4 = 0x8009AFA4;

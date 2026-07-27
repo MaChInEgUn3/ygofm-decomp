@@ -193,6 +193,7 @@ PER_FUNC_FLAGS = {
     "func_800494F4": _O2_G8_MACRO,
     "func_80047F38": _O2_G8_MACRO,
     "func_80047BB4": _O2_G8_MACRO,
+    "func_80012DB4": _O2_G8_MACRO,
     "func_80033C90": _O2_G8_MACRO,
     "func_80033CA8": _O2_G8_MACRO,
     "func_8002EB48": _O2_G8_MACRO,
@@ -254,6 +255,7 @@ SMALL_DATA_NOP_FUNCS = {
     "func_8002D6C8",
     "func_8002D370",
     "func_8002D730",
+    "func_80012DB4",
 }
 
 # Functions where an address computation, not a memory op, is split across a

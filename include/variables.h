@@ -33,7 +33,12 @@
 extern volatile u16 D_8009B112;
 
 extern u8 D_8009AFA0;
+extern u8 Base2_8009AFA4[];
+#ifdef D_8009AFA4_IS_AGGREGATE
+extern u8 D_8009AFA4[];
+#else
 extern u8 D_8009AFA4;
+#endif
 extern u8 D_8009AFA6;
 extern u8 D_8009B063;
 extern u8 D_8009B064;
@@ -397,7 +402,19 @@ extern volatile s32 D_8009B0C4;
 #endif
 extern volatile s32 D_8009B0C8;
 extern u8 D_8009B0A3[];
+/* func_80012DB4 reaches this gp-relatively AND re-reads it every iteration of
+ * its wait loop, next to the volatile D_8009B0C8 -- without volatile gcc hoists
+ * this load out of the loop and the loop head moves. */
+#ifdef D_8009B0C0_IS_VOLATILE
+extern volatile u8 D_8009B0C0;
+#elif defined(D_8009B0C0_IS_SCALAR)
+extern u8 D_8009B0C0;
+#else
 extern u8 D_8009B0C0[];
+#endif
+extern u8 D_8009B0C1;
+extern u16 D_8009B098;
+extern s32 D_8009B0CC;
 /* func_8003CBE8 reaches these two gp-relatively. */
 #ifdef D_8009B39C_IS_SCALAR
 extern u8 D_8009B39C;
@@ -611,7 +628,13 @@ extern u8 D_8009AF2D;
 /* func_8005C5D4 spins on this until it is set, then clears it: volatile, or
  * gcc commons the read with the guard and propagates the flag as zero. */
 extern volatile u8 D_8009B062;
+/* func_80012DB4 stores to both of these through $at -- the bare-symbol form --
+ * where func_80058E1C reads D_8009AFA3 gp-relatively. */
+#ifdef D_8009AFA3_IS_AGGREGATE
+extern u8 D_8009AFA3[];
+#else
 extern u8 D_8009AFA3;
+#endif
 extern u8 Base2_8009AFA3;
 extern s32 D_8009B074;
 extern s32 D_8009B304;
@@ -667,7 +690,11 @@ extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
 extern u8 D_80090D28[];
 extern u8 D_80090D44[];
+#ifdef D_8009B0D8_IS_SCALAR
+extern s32 D_8009B0D8;
+#else
 extern s32 D_8009B0D8[];
+#endif
 /* Walked with a 0x1C stride, two bytes cleared per record. Declared as an
  * array of the record type so the base lands in a register before any
  * field offset -- see the two-field addressing note in docs/DECISIONS.md. */
