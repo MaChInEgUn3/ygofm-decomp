@@ -149,7 +149,21 @@
 #     a rotated while, a goto loop and an explicit block order with the body
 #     behind a forward goto all produce the same 19: gcc's jump pass inverts the
 #     branch and lays the call block last whatever the source says.
+# ---
+# func_80047A68 ORs a bit per slot whose count has reached the limit and hands
+# the mask to func_80076ED0. **It needs O1 G0** -- at O2 gcc reverses the loop
+# into a countdown from 3 and the whole tail moves, which is 23 differences;
+# under O1 G0 the loop, the mask and the call are all exact and only the
+# prologue block is left, at 6. `u32 i`, a `for`, and `i = mask` as the
+# initialiser do not stop the reversal at O2, so do not spend time there again.
+# What is left at O1 G0: retail loads the D_8009B45C pointer into $v0 and
+# *copies* it to $v1, which also fills the load delay before `lhu 4($v1)`; we
+# load straight into $v1 and take a nop, and `sw $ra` lands first instead of
+# after the copy. A second pointer variable does not produce the copy -- gcc
+# coalesces the two -- and declaring the bit mask before the accumulator makes
+# it 7.
 func_8005C4F0
+func_80047A68
 func_8004A764
 func_8005C5D4
 func_80026D18
