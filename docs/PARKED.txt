@@ -85,6 +85,15 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_800320BC finds the first free 0x10-byte slot and fills five fields from
+# a D_801D4244 entry. `k--` as its own statement gets retail's explicit
+# `addiu $v1,$a1,-1` instead of the -1 folding into the %lo. What does not come
+# out: retail walks the record with ONE cursor at +0x2D58 (offsets 5, -4, -2, 0,
+# 2) and cc1psx creates a second at +0x2D56 as well, whichever base the source
+# names -- writing the offsets from the record start at +0x2D54 is 49, from
+# +0x2D58 also 49, and the original single-expression form 45. Naming the table
+# base does not move it either.
+func_800320BC
 # func_800734DC picks a table byte one of two ways and writes it to a slot.
 # Down from 12 to 10 by naming the table base *inside each arm* (a variable
 # outside gets hoisted and CSE'd across both, which is not what retail does)
