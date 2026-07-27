@@ -267,6 +267,18 @@
 # scale. What is left is register allocation around the call result -- retail
 # keeps it in $v0 and the pointer in $v1; splitting the reused local into two
 # variables makes it 37, so the reuse is not the cause.
+# --- the mult/div population, opened 2026-07-27 when that drop rule was
+# retracted. Both of these are ordinary C; neither needs an idiom.
+# func_8004A27C is 11: the two multiplies, the two zero stores and the call all
+# match, and what is left is the %hi temp register plus where the 0xF store
+# lands relative to the table read. Hoisting the table read into a local took it
+# 16 -> 11; the macro flags make it 25, so this one wants the split pair.
+# func_8004A3BC is 25 and needs reading again rather than nudging: the three-way
+# `b < 0x40` / `b == 0x40` / `b > 0x40` split with the shared `return 0` is
+# right in shape but the negation (`negu` on one path, plain mult on the other)
+# and the s16 return conversion are not falling where retail has them.
+func_8004A27C
+func_8004A3BC
 func_80044E90
 func_80045054
 func_80049434
