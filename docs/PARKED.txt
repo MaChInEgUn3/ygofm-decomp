@@ -203,6 +203,24 @@
 # A sized array declaration does not restore the split pair under the macro
 # flags, so the size hint is not a fourth addressing form. Everything else,
 # including the six-argument call and the if/else-if tail, is exact.
+# **volatile is a real per-symbol escape from the bare form, and it half works
+# here.** With -mno-split-addresses plus `volatile u8 D_800EF6EA[]` the store
+# comes out exactly right AND the load goes back to a cc1psx pair -- but to
+# `lui $v0,%hi(s)` + `addiu $v0,$v0,%lo(s)` + `lbu $a0,0($v0)`, the address
+# completed in a register, because volatile also blocks folding %lo into the
+# memory operand. Retail folds it. So the knob is worth reaching for when the
+# target itself shows the *unfolded* form, and not otherwise; here it is 32
+# against 26 and 28.
+# ---
+# func_80044F58 fills a four-byte packet and then writes three fields through
+# D_8009B45C. Under the macro flags everything matches except the tail: retail
+# emits the second pointer load *between* the 0x49 store and the 0x510 store,
+# so the 0x510 store fills its load delay and the two pointers live in $v0 and
+# $v1; gcc keeps one register, stores both fields, then reloads into $v0. A
+# second name for the second read and a named second pointer both leave it at
+# 9 and 10. The if/else polarity below it is settled -- retail branches out on
+# `!= 0`, so the `== 0` arm is written first.
+func_80044F58
 func_8003D46C
 func_80047FAC
 func_80021810

@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-636 of 1794 functions decompiled and byte-matching.
+638 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~636 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~638 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2962,7 +2962,27 @@ came straight back out.
 a loop-invariant *split* address, which the same flag turns off. One file flag
 cannot serve both shapes; `func_8004BBBC` is parked as the example, with
 D_8009B458 exactly right and D_8009AF80 exactly wrong under the flag, and vice
-versa without it.
+versa without it. `func_8003D46C` is the same barrier with the roles reversed:
+a bare *store* through `$at` next to a cc1psx split *load*.
+
+**Correction, measured afterwards: an alias is sometimes needed, but only
+alongside the flag and only inside a loop.** The claim above -- that an alias
+makes dup-%hi candidates worse -- is true without `-mno-split-addresses`, where
+two names give gcc two invariants to hoist. *With* the flag and inside a loop it
+is the opposite: two references to one name make gcc form the address as a loop
+invariant and hoist it into a callee-saved register even though each reference
+would otherwise assemble to a single `lw symbol`. func_80047EC4 reads
+D_8009B45C twice in its loop and went from 29 differences to MATCH on
+`Base2_8009B45C` plus the flag. So the rule is: macro flags first; if the
+address then appears hoisted out of a loop, add a name per extra reference.
+
+**volatile is a real per-symbol escape from the bare form, with a catch.**
+`-mno-split-addresses` is per file, but `volatile` on one symbol brings back
+cc1psx's own `%hi`/`%lo` pair for that symbol alone. It also blocks folding the
+`%lo` into the memory operand, so what comes back is
+`lui $r,%hi(s)` + `addiu $r,$r,%lo(s)` + `lbu $d,0($r)`, the address completed
+in a register. That is only useful when the target itself shows the unfolded
+form. func_8003D46C wants the folded one, which is why it stays parked.
 
 **"Calls a PsyQ library function" was never a reason to skip one.** The stated
 reason was that such functions "need prototypes we do not have". They do not:

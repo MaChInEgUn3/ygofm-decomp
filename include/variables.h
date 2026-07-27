@@ -58,7 +58,14 @@ extern u8 D_8009B318;
 
 extern u16 D_8009AF76;
 /* Reached %hi/%lo by func_8003D46C. */
+/* func_8003D46C needs this one to keep cc1psx's own %hi/%lo pair while the
+ * same unit stores to D_8009B34D as a bare symbol; volatile is the only thing
+ * that blocks the bare form per-symbol. */
+#ifdef D_800EF6EA_IS_VOLATILE
+extern volatile u8 D_800EF6EA[];
+#else
 extern u8 D_800EF6EA[];
+#endif
 extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
@@ -544,6 +551,7 @@ extern u8 *D_8009B458;
 extern u8 Base2_8009B364[];
 /* Reached %hi/%lo from func_80048C0C's unit and gp-relatively elsewhere; see
  * the per-file declaration knob in docs/DECISIONS.md. */
+extern u8 *Base2_8009B45C[];
 #ifdef D_8009B45C_IS_AGGREGATE
 extern u8 *D_8009B45C[];
 #else

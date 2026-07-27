@@ -84,3 +84,9 @@ D_80010538 = 0x80010538;
 # form, but gcc still commons the array base into a register when the same name
 # appears twice, so the store needs its own name.
 Base2_8009AFA4 = 0x8009AFA4;
+
+# func_80047EC4 reads D_8009B45C twice inside a loop. Both are bare-symbol
+# loads, but two references to one name make gcc form the address as a loop
+# invariant and hoist it into a callee-saved register; two names leave each
+# `lw symbol` alone, which is what retail has.
+Base2_8009B45C = 0x8009B45C;
