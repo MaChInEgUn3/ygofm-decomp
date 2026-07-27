@@ -265,6 +265,7 @@ extern ObjFn D_8009B340;
 extern s32 D_801D4244[];
 extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];
+extern u8 D_800EB15C[];
 extern u8 D_800F2B20[];
 extern u8 D_8009B142;
 extern u8 D_8009B143;

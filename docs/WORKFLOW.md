@@ -98,6 +98,10 @@ on a combination that had been in the table for weeks.
 
 - Every global once in `include/variables.h`, every cross-file function in
   `include/functions.h`. Two files disagreeing breaks matching far away.
+- **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
+  a callee was already decompiled with a different signature, and the added
+  prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
+  finds the callers that also need updating.
 - **Hold values in the widest natural type; cast at the point of use.** A narrow
   type inside a computation costs an `andi` or a sign-extend — this has bitten
   parameters, return values, locals and loop counters.
