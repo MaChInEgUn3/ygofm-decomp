@@ -619,6 +619,7 @@ extern s32 D_8009B310;
 extern s32 D_8009B314;
 extern s32 D_8009B300;
 extern s32 D_8009B30C;
+extern s32 D_8009B308;
 extern s32 D_8009B0B8;
 extern s32 D_8009B330;
 extern s32 D_8009B350;
