@@ -85,6 +85,14 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80019564 is ONE instruction: retail copies the object pointer out of
+# $s0 into $v0 (`addu $v0,$s0,$zero`) and does the final read-modify-write of
+# +4 through the copy; cc1psx uses $s0 directly, and the ten differences are
+# all offsets shifting by one. Three forms for the copy -- a second pointer in
+# its own scope, a retyped s32 * with q[1], and the plain form -- all collapse
+# it, and the sweep is flat at 10. Everything else, including the ten-argument
+# call, matches.
+func_80019564
 # func_80038800 is underdetermined between -O levels rather than wrong. At -O2
 # the prologue matches (the $s1 copy scheduled between two saves) and the
 # registers do not; at -O1 the registers match and the prologue is unscheduled
