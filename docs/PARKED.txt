@@ -182,6 +182,17 @@
 # copy. Naming the offset, integer-cast address arithmetic with the chain as the
 # first operand, and accumulating in place all leave it at 11; declaring the
 # locals before assigning them costs 26 more. The sweep agrees at 11.
+# ---
+# func_80047FAC is ONE instruction and the closest miss in the park. Retail
+# zeroes its counter and its accumulator independently -- `addu $s1,$zero,$zero`
+# then `addu $s0,$zero,$zero` -- and gcc commons the constant and copies the
+# second from the first. Six initialisation shapes (both declaration orders,
+# initialiser vs assignment, a `for` header, the pointer hoisted out of the
+# loop) all leave exactly that one `addu`, and the sweep's best is the same 1.
+# Everything else is exact, including the two levers it needed: the macro flags
+# for retail's one-register D_8009B45C load inside the loop, and `p += i * 2;`
+# so the base is the addu's destination rather than the scaled index.
+func_80047FAC
 func_80021810
 func_8004A6F8
 func_8005C4F0
