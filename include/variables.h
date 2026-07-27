@@ -398,8 +398,17 @@ extern volatile s32 D_8009B0C4;
 extern volatile s32 D_8009B0C8;
 extern u8 D_8009B0A3[];
 extern u8 D_8009B0C0[];
+/* func_8003CBE8 reaches these two gp-relatively. */
+#ifdef D_8009B39C_IS_SCALAR
+extern u8 D_8009B39C;
+#else
 extern u8 D_8009B39C[];
+#endif
+#ifdef D_8009B3A2_IS_SCALAR
+extern u8 D_8009B3A2;
+#else
 extern u8 D_8009B3A2[];
+#endif
 extern u8 *D_8009B328;
 extern ObjFn D_80090EAC[];
 extern u8 D_801D1880[];

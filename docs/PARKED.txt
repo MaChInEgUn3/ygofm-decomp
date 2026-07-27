@@ -107,6 +107,17 @@
 # An alias for the second read makes it worse (gcc hoists both), and so does
 # volatile: the %hi is loop-invariant whether or not the load is. Best is 17
 # at O2 G0 nosched2 macro; the shape is right in every other respect.
+# ---
+# func_8005C4F0 is sixteen instructions and every block is right: `if (v != 0)
+# { if (v != -1) return 0; } return -1;`, where retail's `-1` in the first
+# branch's delay slot is the *comparison* operand scheduled early, not a return
+# value -- writing it as two `return -1`s costs six more differences. The -1
+# also has to stay one pseudo shared by the compare and the return; `v == 0 ||
+# v == -1` folds the pair into `sltiu v+1,2`.
+# What is left is the usual tie: retail keeps v in $v1 and the -1 in $v0, we
+# get v in $a0 and the -1 in $v1. Whichever pseudo is allocated first takes
+# $v1, and nothing source-side chooses. Sweep best 4, same as O2 G8.
+func_8005C4F0
 func_80026D18
 func_8004BBBC
 func_80073220
