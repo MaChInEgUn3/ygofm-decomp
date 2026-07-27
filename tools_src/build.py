@@ -192,6 +192,8 @@ PER_FUNC_FLAGS = {
     "func_8003D0F4": _O2_G8_MACRO,
     "func_8003767C": _O2_G8_MACRO,
     "func_8002D370": _O2_G8_MACRO,
+    "func_8002622C": _O2_G8_MACRO,
+    "func_8003798C": _O2_G8_MACRO,
     "func_8003771C": _O2_G8_MACRO,
     "func_80029108": _O2_G8_MACRO,
     "func_80030E30": _O2_G8_MACRO,

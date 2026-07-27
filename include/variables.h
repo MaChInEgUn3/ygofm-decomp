@@ -58,6 +58,7 @@ extern u16 D_8009AF96;
 extern s16 D_8009B146;
 extern s16 D_8009B148;
 extern s16 D_8009B1A8;
+extern s16 D_8009B1A0;
 extern s16 D_8009B1D2;
 extern s16 D_8009B33C;
 extern u16 D_8009B22A;
@@ -145,8 +146,11 @@ extern u8 D_800F5C82[];
 extern u8 D_800F5C83[];
 /* Read twice in a row by func_80015038, once per condition, so the
  * hardware register it shadows is not cached across the test. */
+/* Non-volatile in the aggregate arm: both users read it once, and volatile
+ * blocks the bare-symbol form whose assembler expansion reuses the
+ * destination register -- which is what retail shows. */
 #ifdef D_8009B0F4_IS_AGGREGATE
-extern volatile s32 D_8009B0F4[];
+extern s32 D_8009B0F4[];
 #else
 extern volatile s32 D_8009B0F4;
 #endif

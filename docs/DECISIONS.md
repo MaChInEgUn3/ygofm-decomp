@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-560 of 1794 functions decompiled and byte-matching.
+562 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~560 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~562 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2858,6 +2858,38 @@ And the diagnostic habit that caught it: try_func reported the three differences
 as label names, which looks like a normalisation artefact. It was not — the build
 disagreed too. **Label-name differences are real differences**; they mean the
 branch targets sit at different offsets.
+
+### `lui`/`lw` into the same register is a bare symbol, even for a volatile
+
+Two functions, `func_8002622C` and `func_8003798C`, compute
+`(D_8009B0F4 & 0x2000030) | D_8009B134` and both sat at exactly nine
+differences: the mask constant in `$a0` where retail has `$v0`, the second
+`%hi` hoisted above the first `lw`, and three registers rotated with it. I
+parked one of them saying the sweep was flat, which it was.
+
+The tell was in the pair that *did* match:
+
+```
+    lui  $v1, %hi(D_8009B0F4)
+    lw   $v1, %lo(D_8009B0F4)($v1)     # destination is also the %hi temp
+```
+
+cc1psx emitting its own `%hi`/`%lo` pair uses a **separate** temp register, so
+the two instructions can be scheduled apart. Retail reuses the destination,
+which only the *assembler* does when expanding a bare-symbol load — and that
+makes the pair inseparable, which is the whole of the nine differences.
+
+Getting it needed the aggregate declarations plus `-mno-split-addresses`, and
+one more thing: **`D_8009B0F4` is declared `volatile`, and a volatile access is
+never emitted in bare form.** Making the aggregate arm of its guard
+non-volatile (the scalar arm, used everywhere else, keeps it) matched both
+functions, one of them straight out of the park.
+
+So `lui $r,%hi(sym)` immediately followed by a load *into `$r`* is a
+positive identification: that is the assembler, so the compiler emitted a bare
+symbol, so the declaration is an aggregate under `-mno-split-addresses` and
+nothing in the access is volatile. A separate temp means the compiler emitted
+the pair itself.
 
 ## Repo layout / tooling plan
 

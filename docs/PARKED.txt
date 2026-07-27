@@ -170,12 +170,6 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-# func_8003798C: fourteen instructions, same sequence, but cc1psx hoists the
-# second %hi above the first load where retail keeps each lui/lw pair adjacent,
-# and the three registers rotate with it. D_8009B0F4 is volatile, which does not
-# pin the lui; dropping the volatile through a cast changes nothing, nor does
-# naming the second read, and the whole sweep sits at 9.
-func_8003798C
 # func_80030FA0 needs three addressing forms at once: %gp_rel for two scalars,
 # lui $at + %lo for two aggregates, and an explicit la for the table it indexes.
 # -mno-split-addresses gives the first two (it is what matched its sibling
