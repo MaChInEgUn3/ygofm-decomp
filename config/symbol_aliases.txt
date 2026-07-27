@@ -90,3 +90,7 @@ Base2_8009AFA4 = 0x8009AFA4;
 # invariant and hoist it into a callee-saved register; two names leave each
 # `lw symbol` alone, which is what retail has.
 Base2_8009B45C = 0x8009B45C;
+
+# func_8003D03C reads D_8009B408 signed, clears it, then reads it unsigned --
+# three accesses in one function, so two extra names.
+Base3_8009B408 = 0x8009B408;

@@ -220,6 +220,16 @@
 # second name for the second read and a named second pointer both leave it at
 # 9 and 10. The if/else polarity below it is settled -- retail branches out on
 # `!= 0`, so the `== 0` arm is written first.
+# ---
+# func_8003D03C is a dup-%hi candidate that the macro flags do not finish.
+# D_8009B408 is touched three times -- read signed, cleared, read unsigned --
+# and gcc forms the address once into a register and reaches all three through
+# it, unfolded (`lui`+`addiu`+`lb 0($v1)`) where retail has three separate
+# folded bare accesses. Two extra names make it *worse* (38 to 40), which is
+# the opposite of what they do for func_80047EC4, so the alias rule does not
+# reach this shape: there the commoning was loop-invariant motion, here it is
+# plain address CSE inside one block.
+func_8003D03C
 func_80044F58
 func_8003D46C
 func_80047FAC

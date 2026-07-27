@@ -287,6 +287,8 @@ extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
 extern s32 D_8009B3B8;
+/* Source block func_8003D03C copies from. */
+extern u8 D_801D4000[];
 extern u8 D_8009B3EE;
 extern u8 *D_8009B3D8;
 extern u8 D_801B125A[];
@@ -308,9 +310,21 @@ extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];
 extern u8 D_800EB15C[];
 extern u8 D_800F2B20[];
+#ifdef D_8009B142_IS_AGGREGATE
+extern u8 D_8009B142[];
+#else
 extern u8 D_8009B142;
+#endif
+#ifdef D_8009B143_IS_AGGREGATE
+extern u8 D_8009B143[];
+#else
 extern u8 D_8009B143;
+#endif
+#ifdef D_8009B144_IS_AGGREGATE
+extern u8 D_8009B144[];
+#else
 extern u8 D_8009B144;
+#endif
 extern s8 D_8009B360[];
 extern u8 D_800F5918[];
 extern u8 D_801A8000[];
@@ -455,6 +469,7 @@ extern u8 D_80090E58[];
 #ifdef D_8009B408_IS_AGGREGATE
 extern s8 D_8009B408[];
 extern s8 Base2_8009B408[];
+extern s8 Base3_8009B408[];
 #else
 extern s8 D_8009B408;
 #endif
