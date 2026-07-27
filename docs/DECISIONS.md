@@ -2891,6 +2891,13 @@ symbol, so the declaration is an aggregate under `-mno-split-addresses` and
 nothing in the access is volatile. A separate temp means the compiler emitted
 the pair itself.
 
+Probed afterwards on every parked candidate whose target shows the pattern —
+`func_8002C604`, `func_800338E4`, `func_80045484`, `func_80045BE8`,
+`func_80048C0C`, `func_800496C4`, `func_8004A854`, `func_8004C84C`,
+`func_80070710` — and the macro form moved none of them (`func_80048C0C` got
+worse, 3 → 22). Their remaining differences really are register assignment, so
+the tell identifies the *addressing* and nothing more.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
