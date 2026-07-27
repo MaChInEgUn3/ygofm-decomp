@@ -173,6 +173,7 @@
 # after the copy. A second pointer variable does not produce the copy -- gcc
 # coalesces the two -- and declaring the bit mask before the accumulator makes
 # it 7.
+func_8004A6F8
 func_8005C4F0
 func_80047A68
 func_8004A764
