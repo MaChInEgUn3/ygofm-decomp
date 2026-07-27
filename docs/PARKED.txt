@@ -127,6 +127,17 @@
 # retail's la + addu + lw, which is worse. Four source orders for the two reads
 # (pointer first, value first, address-only in a variable) give 9, 12 and 14.
 # ---
+# func_8004A6F8 is func_8004A764 with three fields copied from arg1 instead of
+# constants, and it sits on the same barrier at 8. It is here for the one thing
+# that moved: splitting the table read into an address and a value --
+# `s32 *t = &D_80011434[arg0]; u8 *p = D_8009B458[0]; s32 v = *t;` -- took it
+# from 26 to 8, because the address computation then lands before the pointer
+# load the way retail has it. The same split makes func_8004A764 *worse* (9 to
+# 14), so the two are not one problem despite looking like one; each keeps its
+# own candidate. What is left in both is that retail reaches D_8009B458 with one
+# register (`lui $v1` then `lw ...($v1)`) and gcc uses a separate temp it can
+# then schedule apart.
+# ---
 # func_8005C5D4 spins on D_8009B062 for 0x7FFFFFFF iterations, then calls
 # func_8008FBE0(1) if it timed out. D_8009B062 has to be volatile or gcc commons
 # the loop's read with the entry guard and propagates the flag as zero, which

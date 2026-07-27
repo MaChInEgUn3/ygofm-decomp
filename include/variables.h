@@ -582,6 +582,10 @@ extern u8 D_80010090[];
 extern u8 D_800100A8[];
 /* Table func_8004A764 indexes by word. */
 extern s32 D_80011434[];
+/* func_80044278 and func_80044380 write these two gp-relatively before
+ * handing off; halfword and word. */
+extern u16 D_8009B44C;
+extern s32 D_8009B430;
 extern u8 D_8009AF2A;
 extern u8 D_8009AF2C;
 extern u8 D_8009AF2D;
