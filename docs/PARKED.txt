@@ -85,6 +85,14 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80014EEC dispatches through D_8009B10C if set, otherwise checks the
+# D_8009B0F4/D_8009B134 flag pair and forwards seven arguments to
+# func_80013998. The flag-check block matches. The rest does not: retail saves
+# s0-s3 and copies a0-a3 into them across the dispatch, cc1psx keeps them in
+# $t0-$t2 with a 40-byte frame against retail's 56, and places the indirect
+# call inline where retail branches to it. 40 differences; flipping the
+# polarity so the call is the out-of-line arm makes it 46.
+func_80014EEC
 # func_80040BF8 walks the same object list as func_80040CAC and additionally
 # calls func_800408D0 for entries whose flags have both of 0xC0 set. Retail tests
 # that with `andi 0xC0; xori 0xC0; bnez` -- both immediates. cc1psx hoists 0xC0
