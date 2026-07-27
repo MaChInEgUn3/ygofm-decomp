@@ -93,6 +93,21 @@ def read(name):
     return both, body
 
 
+# A second stack-allocating prologue partway through a listing means splat
+# missed a function boundary and glued two functions under one label -- the
+# target cannot be written as one C function, and attempting it wastes the
+# time it takes to notice. Exactly two listings in the binary are like this,
+# both in scope and both undecompiled: func_80030FD0 (second prologue at
+# 0x80031004) and func_8002DD74. The real fix is to give splat those two
+# symbols and re-split; until then they are tagged, not hidden, so the count
+# stays honest.
+_PROLOGUE = re.compile(r"addiu\s+\$sp,\s*\$sp,\s*-0x")
+
+
+def merged_listing(body):
+    return sum(1 for ins in body if _PROLOGUE.search(ins)) > 1
+
+
 def has_duplicate_hi(both):
     """Same symbol's %hi materialised twice without a join label between.
 
@@ -177,7 +192,7 @@ def main():
         dup = has_duplicate_hi(both)
         if dup:
             dropped["dup_hi"] += 1
-        rows.append((dup, len(body), name, both, libcall))
+        rows.append((dup, len(body), name, both, libcall, merged_listing(body)))
 
     rows.sort()
     print(f"{len(rows) - dropped['dup_hi']} clean candidates in "
@@ -185,10 +200,12 @@ def main():
           f"one address twice (listed last, tagged dup-%hi)")
     if "--count" in sys.argv:
         return 0
-    for dup, count, name, both, libcall in rows[:show]:
+    for dup, count, name, both, libcall, merged in rows[:show]:
         tag = "  [dup-%hi: try -mno-split-addresses]" if dup else ""
         if libcall:
             tag += "  [lib-call: implicit declaration is enough]"
+        if merged:
+            tag += "  [MERGED: two functions under one label, see candidates.py]"
         print(f"\n--- {name} ({count}){tag}")
         for _, text in both:
             print("   ", text)
