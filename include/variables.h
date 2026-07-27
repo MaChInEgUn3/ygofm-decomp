@@ -331,6 +331,7 @@ typedef struct {
 } Rec12;
 
 extern Rec12 D_801AB000[];
+extern s16 D_800EFE3E[];
 extern u8 D_800907D8[];
 /* The debug format string "             MAP = %02X\n". */
 extern u8 D_80090D0C[];
