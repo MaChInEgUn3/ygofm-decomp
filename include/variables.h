@@ -655,6 +655,9 @@ extern u8 D_80010538[];
 extern u16 D_8009B434;
 /* 1460 bytes per entry, walked as halfwords by func_80021810. */
 extern u8 D_8017878C[];
+/* Two signed byte counters func_8002A6B8 turns into a score. */
+extern u8 D_8009B258;
+extern u8 D_8009B259;
 extern u8 D_8009AF2A;
 extern u8 D_8009AF2C;
 extern u8 D_8009AF2D;

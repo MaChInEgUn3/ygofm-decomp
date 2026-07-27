@@ -297,6 +297,16 @@
 # which alone was 34 differences and one extra callee-saved register; and naming
 # the u16 read of D_8009B314 gets the `lhu` into retail's place. Moving the
 # second read between the stores by hand makes it 12, and the sweep agrees at 3.
+# func_8002A6B8 turns two signed byte counters into a score: `(a/10)*200 +
+# (a%10)*10`, plus 100 if the second is >= 10, plus its own remainder, clamped
+# at 0x2D3. The instruction *sequence* is right and it is 41 differences, all
+# from one thing worth writing down: retail sign-extends the **quotient** back
+# to s8 (`sll 24; sra 24`) before the *200 chain, and with `s8 q = a / 10;` gcc
+# omits that extension -- it can see the value fits -- and reorders the
+# remainder chain ahead of it. So the quotient in retail's source went through
+# something gcc could not see the range of. Needs re-reading with that in mind,
+# not nudging.
+func_8002A6B8
 func_80033CF8
 func_80047864
 func_8004A27C
