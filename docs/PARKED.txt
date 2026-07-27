@@ -277,6 +277,18 @@
 # `b < 0x40` / `b == 0x40` / `b > 0x40` split with the shared `return 0` is
 # right in shape but the negation (`negu` on one path, plain mult on the other)
 # and the s16 return conversion are not falling where retail has them.
+# func_80047864 is TWO instructions and both are the same one: retail reads
+# D_8009B45C with `lui $a0,%hi` + `lw $a0,%lo($a0)` -- one register, the bare
+# form -- and we use a separate temp. The macro flags fix exactly that and cost
+# five elsewhere (the 0x100000 constant moves from $v1 to $v0 and the `3` store
+# reorders behind it), and declaring the constant first does not move it. So
+# this one is the split-versus-bare barrier again, at its smallest yet: two
+# instructions, one symbol, no second symbol to conflict with -- which makes it
+# the best specimen in the park for anyone attacking that class.
+# What did get it to 2, and is worth reusing: naming the two derived pointers
+# (`q = p + arg0 * 2; r = p + arg0;`) so the base is the addu's first operand.
+# Written inline the index comes first and it is 8.
+func_80047864
 func_8004A27C
 func_8004A3BC
 func_80044E90
