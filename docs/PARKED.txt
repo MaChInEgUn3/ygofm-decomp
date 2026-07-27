@@ -85,6 +85,14 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_8001D5B4 compares two signed bytes against globals and sets a mode. The
+# hard part of its shape is visible and not yet expressed: retail funnels the
+# early `D_8009B160 = -1` and the `= 2` case into ONE store block at
+# .L8001D658, and routes three other paths through a shared `return 1` at
+# .L8001D5E8. Two structurings (early returns, and the exit test first with an
+# if/else) both give 35, and the sweep is flat -- so this is a layout question
+# about which stores share a block, not polarity.
+func_8001D5B4
 # func_80014EEC dispatches through D_8009B10C if set, otherwise checks the
 # D_8009B0F4/D_8009B134 flag pair and forwards seven arguments to
 # func_80013998. The flag-check block matches. The rest does not: retail saves
