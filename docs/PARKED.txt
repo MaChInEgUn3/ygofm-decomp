@@ -85,6 +85,13 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80045114 checks the same slot field at n, n-1 and n-2 before appending.
+# The addressing needs a -G0 assembler entry (restore it when picked up) and
+# then the whole instruction stream is right -- 51 differences down to 38, all
+# of which are one rotation: retail holds the D_8009B45C base in $a1 and the
+# 0x11 it compares against in $a2, we get $v1 and $a1. Base-first explicit
+# address arithmetic does not move it.
+func_80045114
 # func_800320BC finds the first free 0x10-byte slot and fills five fields from
 # a D_801D4244 entry. `k--` as its own statement gets retail's explicit
 # `addiu $v1,$a1,-1` instead of the -1 folding into the %lo. What does not come
