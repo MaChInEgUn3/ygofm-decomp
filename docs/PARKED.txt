@@ -85,6 +85,15 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_800734DC picks a table byte one of two ways and writes it to a slot.
+# Down from 12 to 10 by naming the table base *inside each arm* (a variable
+# outside gets hoisted and CSE'd across both, which is not what retail does)
+# and by making the `+ 1` in the second arm's index its own statement so it
+# stays an `addiu` instead of folding into the load's offset. What is left is
+# that retail computes the destination address in the load-delay slot after the
+# `lb`; duplicating that statement into both arms to force it is much worse
+# (32).
+func_800734DC
 # func_80059700 picks one of three mode bytes from the sign of arg1, then
 # dispatches on it. The three-way sign test matches once written as
 # `if (arg1 <= 0) { if (arg1 < 0) ... else ... } else ...` -- gcc turns the
