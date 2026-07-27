@@ -85,6 +85,12 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80023090 builds two record pointers from a shared table and compares
+# them. Read order and grouping are retail's after splitting the index into
+# `x = a * 5 + arg0[0xF]` and naming `i * 28` -- 33 differences down to 18 -- and
+# what is left is a four-register rotation of the two table bases and the second
+# index ($t1/$a3/$t0 against $a3/$t0/$a2). Declaration order does not move it.
+func_80023090
 # func_800208D4: the first half matches. In the second, cc1psx hoists the
 # `D_8009B23A = 2` store and the %hi of D_800E9FF0 above the read-xor-store of
 # D_8009B1D5, where retail keeps them in source order; the 24 differences are
