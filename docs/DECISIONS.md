@@ -2995,10 +2995,20 @@ multiply, the `mfhi`, the `sra 2` and the sign correction are all gcc expanding
 
 All 66 in-scope functions the rule hid pair their `mult` with an `mflo` or
 `mfhi`. What is genuinely hand-written is the GTE intrinsics -- `wc2`, `rtps`,
-`mfc2`, `mtc2` -- and those are still filtered. **That is four retracted drop
-rules out of four ever written.** The pattern is now unambiguous enough to
-state as a rule of its own: this project has never once been right when it
-decided in advance that something could not be matched.
+`mfc2`, `mtc2` -- and those are still filtered. **That is four retracted drop rules out of four ever written** -- and the
+pattern has a precise boundary, which matters more than the count.
+
+All four were **target-side signature heuristics**: "this instruction, or this
+pair of instructions, means the function cannot be matched", reasoned from a
+handful of samples. Every one was wrong, and a heuristic of that shape should
+now be treated as wrong until a scan of the whole binary says otherwise.
+
+The **closed classes are a different kind of claim** and they still hold. They
+are compiler-capability facts established by enumeration, not signatures:
+gcc 2.8.1 has 23 `-f` options and none of them touches register allocation
+(and the permuter saturated at 16k iterations against a validated target), and
+`-fno-crossjumping` does not exist before gcc 3. Do not re-open those on the
+strength of the four retractions -- the retractions say nothing about them.
 
 **"Calls a PsyQ library function" was never a reason to skip one.** The stated
 reason was that such functions "need prototypes we do not have". They do not:
