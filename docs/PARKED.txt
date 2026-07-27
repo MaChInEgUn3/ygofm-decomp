@@ -85,6 +85,19 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80015078 is func_80013B68's seven-argument sibling and matches except at
+# the exit: retail materialises the return value (`addu $v0,$s0,$zero`) BEFORE
+# reading D_8009B0F4 for the final `|= 0x20`, and reads it into $v1; cc1psx uses
+# $v0 for the flag and copies the return value after. Nine differences, all the
+# epilogue. A separate `ret` local before the flag update does not move it.
+func_80015078
+# func_80025B28 is 34 out from ONE register: retail keeps the +0x6C flag byte in
+# $a0 (free, since arg0 was copied to $a1) and cc1psx uses $a2, which cascades
+# through every use and shifts the argument setup of the two calls. The head is
+# otherwise instruction-for-instruction right, including reading +0x22 before
+# +0x6C and the `andi 0xFF` that a s32 local plus a `(u8)` cast at the
+# comparison produces. `f |= 0x80` as its own statement makes it 43.
+func_80025B28
 # func_80073758 reads in 0x8000-byte chunks until short or done. The whole
 # instruction stream matches, including the hoisted `sltu $s6,$s0` in the
 # loop-back delay slot and `total += got` in the branch delay slot. Five
