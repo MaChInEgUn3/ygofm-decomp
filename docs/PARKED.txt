@@ -288,6 +288,16 @@
 # What did get it to 2, and is worth reusing: naming the two derived pointers
 # (`q = p + arg0 * 2; r = p + arg0;`) so the base is the addu's first operand.
 # Written inline the index comes first and it is 8.
+# func_80033CF8 pushes a polar primitive onto the list at D_8009B310 and bumps
+# the counter at D_8009B314. Three differences and they are the position of the
+# *second* read of D_8009B314 -- retail schedules the `lw` up between two of the
+# stores, we leave it at the end. Two levers got it from 40 to 3 and both are
+# reusable: reading D_8009B310 inline in the first store (not into a variable
+# beforehand) keeps the pointer load *after* the call instead of alive across it,
+# which alone was 34 differences and one extra callee-saved register; and naming
+# the u16 read of D_8009B314 gets the `lhu` into retail's place. Moving the
+# second read between the stores by hand makes it 12, and the sweep agrees at 3.
+func_80033CF8
 func_80047864
 func_8004A27C
 func_8004A3BC
