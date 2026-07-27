@@ -85,6 +85,15 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80013B68 has two requirements that pull against each other. Retail
+# assigns the four parameters to $s1-$s4 in declaration order, which cc1psx only
+# does when they are *used* in that order (14 differences otherwise); and retail
+# stores the three bytes at +0x38/+0x39/+0x46 before the three words at
+# +0x24/+0x34/+0x2C, which needs the bytes written first. Doing both at once
+# does not work: the use order fixes the registers and breaks the store order,
+# 7 either way. Copying the arguments into locals in order is worse (16), and
+# the sweep is flat.
+func_80013B68
 # func_8001D5B4 compares two signed bytes against globals and sets a mode. The
 # hard part of its shape is visible and not yet expressed: retail funnels the
 # early `D_8009B160 = -1` and the `= 2` case into ONE store block at
