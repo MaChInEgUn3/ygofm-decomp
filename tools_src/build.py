@@ -247,6 +247,7 @@ SMALL_DATA_NOP_FUNCS = {
     "func_80025028",
     "func_8002D6C8",
     "func_8002D370",
+    "func_8002D730",
 }
 
 # Functions where an address computation, not a memory op, is split across a

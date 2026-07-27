@@ -120,6 +120,8 @@ extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
 extern u8 D_800F5750[];
 extern s32 D_800F5B98[];
+/* Four handles func_800440F0 hands to func_80043D48 in one go. */
+extern s32 D_800F2AE0[];
 extern u8 D_800EAE88[];
 /* The byte at D_800EAE88[0xA] under its own name: func_80070F1C writes it
  * through both, and splat had already given the address a symbol. */
@@ -684,7 +686,11 @@ extern u8 D_8009B084[];
 
 /* Reached via %hi/%lo from a -G0 unit and from a -G8 one, so these must
  * never be small data: declared unsized rather than as scalars. */
+#ifdef D_8009B268_IS_SCALAR
+extern u8 D_8009B268;
+#else
 extern u8 D_8009B268[];
+#endif
 /* Aggregate by default, because most users reach it through %hi/%lo. Files
  * that need the gp-relative form define D_8009B26C_IS_SCALAR first -- see the
  * per-file declaration note on D_8009B398. */
@@ -693,7 +699,13 @@ extern u8 D_8009B26C;
 #else
 extern u8 D_8009B26C[];
 #endif
+#ifdef D_8009B26D_IS_SCALAR
+extern u8 D_8009B26D;
+#else
 extern u8 D_8009B26D[];
+#endif
+/* Passed to func_8008FB8C by func_8002D730. */
+extern u8 D_800E9DC0[];
 /* Aggregate by default; func_8002D62C reaches it gp-relatively. See the
  * per-file declaration note on D_8009B398. */
 #ifdef D_8009B269_IS_SCALAR
