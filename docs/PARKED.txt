@@ -85,6 +85,12 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80073758 reads in 0x8000-byte chunks until short or done. The whole
+# instruction stream matches, including the hoisted `sltu $s6,$s0` in the
+# loop-back delay slot and `total += got` in the branch delay slot. Five
+# callee-saved registers are rotated: retail has handle/buffer/total/0x8000/-1
+# in $s4/$s3/$s2/$s6/$s5, we get $s6/$s2/$s3/$s5/$s4. Sweep flat at 23.
+func_80073758
 # func_80013B68 has two requirements that pull against each other. Retail
 # assigns the four parameters to $s1-$s4 in declaration order, which cc1psx only
 # does when they are *used* in that order (14 differences otherwise); and retail
