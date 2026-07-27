@@ -121,6 +121,9 @@ extern u8 D_8009B3EB;
 extern u8 D_800F5750[];
 extern s32 D_800F5B98[];
 extern u8 D_800EAE88[];
+/* The byte at D_800EAE88[0xA] under its own name: func_80070F1C writes it
+ * through both, and splat had already given the address a symbol. */
+extern u8 D_800EAE92[];
 extern u8 D_800EAE8E[];
 extern u8 D_800EAE8F[];
 extern u8 D_8009B260;
@@ -670,6 +673,9 @@ extern u32 *D_80092BF0[];
 /* Shift applied to the address before the block-list walk. */
 extern u32 D_80092BB0[];
 extern u32 D_80092B14[];
+/* "check_point\n" and the "---- %d ----" banner from the same debug pair. */
+extern u8 D_80011908[];
+extern u8 D_80011918[];
 extern u8 D_800118E4[];
 extern u8 D_800118CC[];
 extern u8 D_8009B084[];
