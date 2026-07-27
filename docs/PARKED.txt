@@ -320,6 +320,15 @@
 #     is a guess at the source's shape -- 0x8015C424 + 0x48000 + 0x39FC is
 #     0x801A7E20, which is D_801A7AD8 + 0x348, so the real source may name a
 #     different symbol entirely and that is the thread to pull.
+# func_80070650 runs the dispatch table at D_800916E0 until the entry it just
+# called is one of three handlers. The shape is right in outline and it is 42
+# differences, with one thing measured: retail hoists *two* of the three handler
+# addresses into callee-saved registers and materialises the third inside the
+# loop, using four callee-saved registers where we use five. Everything after
+# the prologue shifts by that one register. The three comparisons are written as
+# a value read once into a local (retail reloads the table entry after the call
+# and compares it three times, so that part is right).
+func_80070650
 func_80018CF8
 func_8002A6B8
 func_80033CF8

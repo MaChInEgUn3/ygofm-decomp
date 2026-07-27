@@ -160,6 +160,10 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(u8 *arg0);
 void func_80022F98(u8 *arg0, u8 *arg1);
+/* Handlers func_80070650 compares its dispatch entry against. */
+void func_80070FF8(void);
+void func_80071000(void);
+void func_80070F1C(void);
 void func_80046294(void);
 void func_80077FF0(s32 arg0);
 void func_8008B3E0(void);

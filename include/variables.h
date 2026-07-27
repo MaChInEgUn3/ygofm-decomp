@@ -260,6 +260,8 @@ typedef struct {
 
 extern Rec4C D_800EB010[];
 extern ObjFn D_80090F68[];
+/* Dispatch table func_80070650 runs, indexed by the byte reader. */
+extern ObjFn D_800916E0[];
 /* Dispatch table func_80033BE8 indexes with the low six bits of a state word. */
 extern ObjFn D_80090DF8[];
 extern u8 D_8009B2EA;
