@@ -85,6 +85,20 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_800208D4: the first half matches. In the second, cc1psx hoists the
+# `D_8009B23A = 2` store and the %hi of D_800E9FF0 above the read-xor-store of
+# D_8009B1D5, where retail keeps them in source order; the 24 differences are
+# all that reordering. The source order already matches retail, naming the
+# pointer before the flag store does not move it, and the sweep is flat at 24.
+func_800208D4
+# func_8002CBF4 reads D_801D4244[arg0-1] three times, in three blocks, and
+# retail materialises the base and recomputes arg0-1 for each -- gcc 2.8 has no
+# global CSE, so writing the expression inline three times is right and that
+# part matches. What is left is a $v0/$v1 swap in the first arm: retail puts the
+# base in $v1 and the loaded value back into $v1, we use $v0 for both. Splitting
+# the shift into its own statement is worse (29), and the sweep's best is
+# O1 G0 at 21.
+func_8002CBF4
 # func_80039140 copies and offsets nine halfwords from one object to another.
 # The instruction stream is identical, including the three reloads of +0x30 and
 # +0x32 that the intervening stores force. One register: retail keeps the source

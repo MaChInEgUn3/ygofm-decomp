@@ -174,6 +174,9 @@ extern u8 *D_8009B1F8;
 extern u8 D_8009B1D5;
 #endif
 extern u8 D_8009B164;
+extern u16 D_8009B23A;
+extern u16 D_8009B162;
+extern u8 *D_8009B22C;
 extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
 extern u16 D_8009B33A;
