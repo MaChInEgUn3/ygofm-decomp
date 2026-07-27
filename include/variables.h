@@ -236,6 +236,7 @@ typedef struct {
 } Rec4C;
 
 extern Rec4C D_800EB010[];
+extern ObjFn D_80090F68[];
 extern u8 D_8009B2EA;
 extern s32 D_8009B2EC;
 extern u8 D_8009B2B4;
