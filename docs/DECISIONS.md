@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-641 of 1794 functions decompiled and byte-matching.
+643 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~641 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~643 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2983,6 +2983,22 @@ cc1psx's own `%hi`/`%lo` pair for that symbol alone. It also blocks folding the
 `lui $r,%hi(s)` + `addiu $r,$r,%lo(s)` + `lbu $d,0($r)`, the address completed
 in a register. That is only useful when the target itself shows the unfolded
 form. func_8003D46C wants the folded one, which is why it stays parked.
+
+**`mult` and `div` were never a reason to skip one either.** The rule called
+them "hand-written or needing idioms not yet worked out". Neither is true: `a *
+b` in C compiles to `mult`/`mflo`, and division or modulo by a constant compiles
+to a `mult` by a magic number followed by `mfhi` and a shift. func_8002C484 is
+21 instructions of that idiom and its source is
+`return (arg0 / 10) * 178 + (arg0 % 10) * 16 + 14;` -- the `0x66666667`
+multiply, the `mfhi`, the `sra 2` and the sign correction are all gcc expanding
+`/ 10`. func_8005FBC4 is three plain multiplications. Both matched first try.
+
+All 66 in-scope functions the rule hid pair their `mult` with an `mflo` or
+`mfhi`. What is genuinely hand-written is the GTE intrinsics -- `wc2`, `rtps`,
+`mfc2`, `mtc2` -- and those are still filtered. **That is four retracted drop
+rules out of four ever written.** The pattern is now unambiguous enough to
+state as a rule of its own: this project has never once been right when it
+decided in advance that something could not be matched.
 
 **"Calls a PsyQ library function" was never a reason to skip one.** The stated
 reason was that such functions "need prototypes we do not have". They do not:

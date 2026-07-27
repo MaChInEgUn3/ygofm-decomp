@@ -19,6 +19,13 @@ each had been hiding a population that matched:
 
   * the range-check fold, which happens on the `&&` and survives as nested ifs;
   * duplicate %hi, which is not an alias problem at all -- see below;
+  * **`mult` and `div`**, dropped as "hand-written or needing idioms not yet
+    worked out". They are neither. `a * b` in C compiles to `mult`/`mflo`, and
+    `/` or `%` by a constant compiles to a `mult` by a magic number followed by
+    `mfhi` and a shift -- func_8002C484 is `(x / 10) * 178 + (x % 10) * 16 + 14`
+    and nothing else. Every one of the 66 in-scope functions this rule hid pairs
+    its `mult` with an `mflo` or `mfhi`; the genuinely hand-written ones are the
+    GTE intrinsics (`wc2`, `rtps`, `mfc2`, `mtc2`), which are still filtered.
   * **calls into PsyQ library functions**, dropped on the grounds that they
     "need prototypes we do not have". They do not. gcc 2.8 takes an implicit
     declaration, and integer and pointer arguments pass correctly without one;
@@ -56,7 +63,10 @@ BRANCH = re.compile(r"\b(b(eq|ne|gez|gtz|lez|ltz|eqz|nez)?|j|jal|jr)\b")
 # `break` and writes to $sp/$gp/$fp are the C runtime stubs (crt0, the
 # constructor walker): assembly by construction, and two of them were
 # offered as candidates before this was added.
-HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|\bmult\b|\bdiv\b|jr\s+\$v|jr\s+\$a"
+# GTE intrinsics and the C runtime stubs are hand-written by construction.
+# `mult` and `div` are NOT -- see the docstring. They were in this list for
+# months and 66 in-scope functions were invisible because of it.
+HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|jr\s+\$v|jr\s+\$a"
                           r"|\bbreak\b|jr\s+\$t|\bor\s+\$sp\b|\$fp,\s*\$sp|\$gp,\s*%hi")
 
 
