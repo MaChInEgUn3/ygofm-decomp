@@ -151,6 +151,8 @@ extern u8 D_800F5C83[];
  * destination register -- which is what retail shows. */
 #ifdef D_8009B0F4_IS_AGGREGATE
 extern s32 D_8009B0F4[];
+extern s32 Base2_8009B0F4[];
+extern s32 Base3_8009B0F4[];
 #else
 extern volatile s32 D_8009B0F4;
 #endif
@@ -347,6 +349,7 @@ extern s32 D_8009B138;
 /* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
 #ifdef D_8009B134_IS_AGGREGATE
 extern s32 D_8009B134[];
+extern s32 Base2_8009B134[];
 #else
 extern s32 D_8009B134;
 #endif
@@ -592,6 +595,7 @@ extern u8 D_800F3938[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
 extern u8 D_80090D28[];
+extern s32 D_8009B0D8[];
 /* Walked with a 0x1C stride, two bytes cleared per record. Declared as an
  * array of the record type so the base lands in a register before any
  * field offset -- see the two-field addressing note in docs/DECISIONS.md. */

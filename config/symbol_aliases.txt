@@ -14,6 +14,13 @@ Base2_8009B364 = 0x8009B364;
 # nothing between that could have changed it, so gcc commons the address.
 Base2_8009B408 = 0x8009B408;
 
+# func_800137E4 reads D_8009B0F4 three times and D_8009B134 twice across a
+# wait loop; without extra names cc1psx hoists the addresses into callee-saved
+# registers and grows the frame.
+Base2_8009B0F4 = 0x8009B0F4;
+Base3_8009B0F4 = 0x8009B0F4;
+Base2_8009B134 = 0x8009B134;
+
 # func_8003767C stores each of these twice; without a second name cc1psx
 # commons the address into a callee-saved register and grows the frame.
 Base2_8009B2AA = 0x8009B2AA;

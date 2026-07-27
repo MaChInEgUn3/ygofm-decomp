@@ -85,6 +85,13 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_800137E4: 45 differences down to 16 once the three reads of D_8009B0F4
+# and two of D_8009B134 got a name each -- without them cc1psx hoists both
+# addresses into callee-saved registers and grows the frame. What is left is a
+# three-register rotation in the first block (constant/B0F4/B134 in
+# $v0/$v1/$a0 against $v1/$a0/$v0). Its sibling func_8003798C has the identical
+# first block and matches, so the rotation comes from the loop that follows.
+func_800137E4
 # func_80023090 builds two record pointers from a shared table and compares
 # them. Read order and grouping are retail's after splitting the index into
 # `x = a * 5 + arg0[0xF]` and naming `i * 28` -- 33 differences down to 18 -- and

@@ -159,6 +159,10 @@ u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 void func_80022EEC(u8 *arg0);
 void func_80022F98(u8 *arg0, u8 *arg1);
+s32 func_80039AAC(u8 *arg0);
+void func_80039AD4(u8 *arg0);
+void func_80015038(void);  /* used by parked/func_800137E4.c */
+void func_80039BE0(u8 *arg0);
 void func_800377C8(u8 *arg0);
 void func_80022D94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_8002497C(s32 arg0);
