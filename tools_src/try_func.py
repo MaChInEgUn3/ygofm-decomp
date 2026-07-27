@@ -390,16 +390,23 @@ def _from_objdump(dump, func):
         # objdump prints a branch/jump target as `addr <sym+off>`; drop the
         # symbolic part, renumber_labels only needs a consistent token.
         ops = re.sub(r"\s*<[^>]*>", "", ops)
-        ops = _OBJ_REG.sub(lambda mm: "$" + mm.group(1), ops)
         # objdump gives a branch target as a bare hex offset; the target
         # listings give a label. Spell it as one so renumber_labels can map
         # both sides positionally.
+        #
+        # This has to happen BEFORE register normalisation, not after: the
+        # offsets a0, a1, a2 and a3 are valid hex *and* register names, so
+        # `bltz s1,a0` became `bltz $s1,$a0` and then no longer looked like a
+        # branch target. func_80040814 branches to +0xa0 and reported four
+        # false differences because of it -- all label names, which is what the
+        # symptom looks like.
         if mnem.startswith("b") or mnem in ("j", "jal"):
             last = ops.rsplit(",", 1)[-1].strip()
             # Whole-token hex only. Testing "does not end in a letter" is
             # wrong -- `5c` is a perfectly good offset and ends in one.
             if re.fullmatch(r"[0-9a-f]+", last):
                 ops = ops[:len(ops) - len(last)] + ".L" + last
+        ops = _OBJ_REG.sub(lambda mm: "$" + mm.group(1), ops)
         out.append(f"{mnem} {ops}".strip())
     # normalise *after* the relocations are spliced in: it lowercases and
     # rewrites immediates, which would stop the reloc patterns from matching.

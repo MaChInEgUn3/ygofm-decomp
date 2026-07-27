@@ -2856,8 +2856,15 @@ So the tell is finer than "two `%hi`s":
 
 And the diagnostic habit that caught it: try_func reported the three differences
 as label names, which looks like a normalisation artefact. It was not — the build
-disagreed too. **Label-name differences are real differences**; they mean the
-branch targets sit at different offsets.
+disagreed too.
+
+**But label-name differences can also be a try_func bug, so let the build
+arbitrate.** `func_80040814` reported four of them and was byte-identical. The
+cause: objdump prints a branch target as a bare hex offset, and the offsets
+`a0`–`a3` are valid hex *and* register names, so register normalisation rewrote
+`bltz s1,a0` into `bltz $s1,$a0` before the branch-target pass could label it.
+Fixed by labelling branch targets first; the two passes were in the wrong order
+from the start and only a branch to +0xa0 exposes it.
 
 ### `lui`/`lw` into the same register is a bare symbol, even for a volatile
 
