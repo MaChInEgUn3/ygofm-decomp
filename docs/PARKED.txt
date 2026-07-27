@@ -306,6 +306,21 @@
 # remainder chain ahead of it. So the quotient in retail's source went through
 # something gcc could not see the range of. Needs re-reading with that in mind,
 # not nudging.
+# func_80018CF8 copies five signed bytes into a local s16[5], then walks the
+# slots looking for the record whose field equals k for k = 0x11..0x15, marking
+# each hit with -1. The block structure is fully recovered (the goto form in the
+# candidate matches retail's blocks one for one) and it is 37 differences, of
+# which two things are diagnosed and the rest is the register cascade behind
+# them:
+#   - `t = (u8 *)D_8015C424;` has to be assigned *after* the first loop, not at
+#     its declaration, or the address materialises before the loop: 46 -> 38.
+#   - retail keeps 0x48000 in its own register and 0x39FC as the load offset;
+#     written as `+ 0x48000 + 0x39FC` gcc folds them into one constant and uses
+#     offset 0. Holding 0x48000 in an `s32` variable keeps them apart (37) but
+#     is a guess at the source's shape -- 0x8015C424 + 0x48000 + 0x39FC is
+#     0x801A7E20, which is D_801A7AD8 + 0x348, so the real source may name a
+#     different symbol entirely and that is the thread to pull.
+func_80018CF8
 func_8002A6B8
 func_80033CF8
 func_80047864
