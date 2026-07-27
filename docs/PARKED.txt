@@ -85,6 +85,12 @@ func_8002F440
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
 func_80070710
+# func_80039140 copies and offsets nine halfwords from one object to another.
+# The instruction stream is identical, including the three reloads of +0x30 and
+# +0x32 that the intervening stores force. One register: retail keeps the source
+# pointer in $a1 and we put it in $v1 ($a0 holds the destination in both, having
+# overwritten arg0). Three declaration orders and the whole sweep sit at 13.
+func_80039140
 # func_80019564 is ONE instruction: retail copies the object pointer out of
 # $s0 into $v0 (`addu $v0,$s0,$zero`) and does the final read-modify-write of
 # +4 through the copy; cc1psx uses $s0 directly, and the ten differences are
