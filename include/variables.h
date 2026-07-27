@@ -240,6 +240,7 @@ extern u8 D_8009B2B5;
 extern u8 D_8009B2B6;
 extern u16 D_8009B2DE;
 extern u8 *D_8009B2E4;
+extern u8 D_8009B2F0;
 extern u8 D_8009B2E9;
 extern u8 D_8009B2E8;
 extern u16 D_8009B2C8;
