@@ -50,3 +50,12 @@ D_8009B24A = 0x8009B24A;
 # might alias, so gcc has to reload it anyway. That is func_80049C40. What is
 # left for the two surviving aliases is two reads of one address with nothing
 # in between that could have changed it.
+
+# func_80058E1C reads this limit twice, once to compare and once to return,
+# with only the branch in between; without a second name gcc keeps the first
+# load in a register and the second read disappears.
+Base2_8009AFA3 = 0x8009AFA3;
+
+# func_8003E46C stores the cleared value and then the or'd value to the same
+# halfword; with one name gcc drops the first store.
+Base2_8009B3FA = 0x8009B3FA;

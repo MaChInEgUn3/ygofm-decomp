@@ -537,6 +537,7 @@ extern u16 D_8009B3A4;
 extern u16 D_8009B3A6;
 extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
+extern u16 Base2_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
 #ifdef D_8009B2F8_IS_AGGREGATE
@@ -557,7 +558,10 @@ extern u16 D_8009B3CC;
 /* Small-data table of halfwords: the retail code takes its address with
  * addiu $v1,$gp,%gp_rel(...), so it must stay inside the -G8 threshold. */
 extern u16 D_8009AF74[4];
+/* func_80058E1C reads it twice across a branch and gcc would keep the first
+ * load in a register; the reads are what the function is. */
 extern u8 D_8009AFA3;
+extern u8 Base2_8009AFA3;
 extern s32 D_8009B074;
 extern s32 D_8009B304;
 extern s32 D_8009B310;

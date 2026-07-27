@@ -39,7 +39,7 @@ BRANCH = re.compile(r"\b(b(eq|ne|gez|gtz|lez|ltz|eqz|nez)?|j|jal|jr)\b")
 # constructor walker): assembly by construction, and two of them were
 # offered as candidates before this was added.
 HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|\bmult\b|\bdiv\b|jr\s+\$v|jr\s+\$a"
-                          r"|\bbreak\b|\bor\s+\$sp\b|\$fp,\s*\$sp|\$gp,\s*%hi")
+                          r"|\bbreak\b|jr\s+\$t|\bor\s+\$sp\b|\$fp,\s*\$sp|\$gp,\s*%hi")
 
 
 def parked():
