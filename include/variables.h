@@ -437,7 +437,11 @@ extern s32 D_8009B440;
 extern s32 D_8009B444;
 /* Aggregate by default (four functions reach it through %hi/%lo);
  * func_800440B4 reaches it gp-relatively. */
-#ifdef D_8009B450_IS_SCALAR
+/* func_80044038 spins on it and then tests it again, so that unit wants the
+ * volatile form as well as the scalar one. */
+#ifdef D_8009B450_IS_VOLATILE
+extern volatile s32 D_8009B450;
+#elif defined(D_8009B450_IS_SCALAR)
 extern s32 D_8009B450;
 #else
 extern s32 D_8009B450[];
@@ -586,6 +590,21 @@ extern s32 D_80011434[];
  * handing off; halfword and word. */
 extern u16 D_8009B44C;
 extern s32 D_8009B430;
+/* func_8003F758's four gp-relative fields and the buffer it clears. */
+extern u8 D_800EFE18[];
+extern u8 D_8009B3F9;
+extern u16 D_8009B3C2;
+extern u16 D_8009B3C4;
+extern u8 D_8009B3DC;
+extern s32 D_8009B3D0;
+/* Handle blocks next to D_800F2AE0. */
+extern s32 D_800F2AF0[];
+extern s32 D_800F2B00[];
+/* "bu%02X:%s" */
+extern u8 D_80010538[];
+extern u16 D_8009B434;
+/* 1460 bytes per entry, walked as halfwords by func_80021810. */
+extern u8 D_8017878C[];
 extern u8 D_8009AF2A;
 extern u8 D_8009AF2C;
 extern u8 D_8009AF2D;

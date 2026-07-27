@@ -173,6 +173,16 @@
 # after the copy. A second pointer variable does not produce the copy -- gcc
 # coalesces the two -- and declaring the bit mask before the accumulator makes
 # it 7.
+# ---
+# func_80021810 walks 0x2D2 halfwords of a 1460-byte record and returns the
+# index where the running sum passes a random limit. Everything from the call
+# on is exact; the eleven differences are the multiply chain. Retail computes
+# `arg0 * 1460` step by step *into* $s0 -- the callee-saved register the pointer
+# lives in, saved before the first shift -- and we compute it in $v0/$v1 and
+# copy. Naming the offset, integer-cast address arithmetic with the chain as the
+# first operand, and accumulating in place all leave it at 11; declaring the
+# locals before assigning them costs 26 more. The sweep agrees at 11.
+func_80021810
 func_8004A6F8
 func_8005C4F0
 func_80047A68
