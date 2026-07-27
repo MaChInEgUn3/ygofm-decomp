@@ -62,6 +62,22 @@
 # different: retail reuses $a0 as the %hi temp of the scalar load it lands in,
 # and puts the table address in $v0 where we put $v1. Six source forms and both
 # -G settings all sit at 8.
+# ---
+# func_80071424 and func_80071460 are `D_800F5B98[func_8007058C()] = <sym>[0];`
+# and they are the sharpest instance of the class, because their siblings
+# func_8007164C and func_80071688 -- the same store, a different source symbol
+# -- match as that exact one-liner. Retail's two functions disagree about the
+# registers for otherwise identical code: the siblings put the table in $a0 and
+# the loaded value in $v1, these two swap them.
+# Sixteen source forms brought them 6 -> 2, and the two remaining differences
+# are **coupled**, which is what makes it a park rather than a puzzle:
+#   - value read into a named variable (`s32 v = SYM[0]; t[i] = v;`) gets both
+#     registers right, and gcc then emits `la; lb; sll`, one slot late;
+#   - value read inline in the store gets the order and the addu destination
+#     right, and swaps the two registers.
+# No form gives both, and the sweep's best is O2 G0 at 2 for the first shape,
+# 6 for the second, so no flag reaches across it either. The parked candidate
+# is the first shape.
 func_8003201C
 func_80071424
 func_80071460
