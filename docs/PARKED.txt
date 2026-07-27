@@ -78,6 +78,38 @@
 # No form gives both, and the sweep's best is O2 G0 at 2 for the first shape,
 # 6 for the second, so no flag reaches across it either. The parked candidate
 # is the first shape.
+# ---
+# func_80026D18 is func_80026C6C with `arg2 < 0 ||` in front of the comparison.
+# It reaches 4 differences and they are the loop counter and the accumulator
+# holding each other's register: retail gives count $a3 and i $t0, gcc gives
+# count $t0 and i $a3 whatever the declaration order, and the matched sibling
+# agrees with gcc. Nine shapes and the flag sweep all sit at 4.
+# ---
+# func_80073220 clears D_800EAE88[0..5] backwards and then copies the entries
+# of D_800F5BE8 that are >= 0xB into it. Every block is right, including the
+# dead `if (i != 0)` guard retail emits on a variable it has just zeroed, which
+# `while (i <= b[0xA3])` reproduces by itself. Two things do not come out:
+# retail materialises the D_800F5BE8 address into $v1 and *copies* it to $a2 --
+# 32 instructions against our 31 -- and it holds count in $a1 where we get $a2.
+# Nine declaration orders, two-pointer forms for the copy, and the sweep (best
+# O1 G0 at 17, which fills a load delay by luck and loses the scheduling of
+# i++) all leave the same rotation. `s32 v` rather than `u8 v` for the loaded
+# byte is needed for retail's signed `slti`: a u8 local compares in QImode,
+# which is unsigned, and that one is worth keeping.
+# ---
+# func_8004BBBC is the one dup-%hi candidate that a file flag cannot satisfy,
+# and it is worth keeping as the example. Under -mno-split-addresses both
+# D_8009B458 reads come out exactly right -- retail's bare form, one %hi each,
+# no hoisting -- but D_8009AF80 is handed to func_8004BAA0 by address and
+# retail hoists *its* %hi into $s1, completing the %lo inside the loop, which
+# is the split form the same flag turns off. Without the flag, gcc hoists
+# %hi(D_8009B458) into a callee-saved register instead and the frame grows.
+# An alias for the second read makes it worse (gcc hoists both), and so does
+# volatile: the %hi is loop-invariant whether or not the load is. Best is 17
+# at O2 G0 nosched2 macro; the shape is right in every other respect.
+func_80026D18
+func_8004BBBC
+func_80073220
 func_8003201C
 func_80071424
 func_80071460

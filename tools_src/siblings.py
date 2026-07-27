@@ -37,10 +37,16 @@ def main():
     lib = {l.strip() for l in open(os.path.join(ROOT, "docs", "LIBRARY_FUNCS.txt"))
            if l.startswith("func_")}
     done = {os.path.basename(p)[:-2] for p in glob.glob(os.path.join(ROOT, "src", "func_*.c"))}
-    # Parked functions are *included*, and flagged: a park that predates its
-    # sibling's decompilation is the best lead in the list. func_80071460 was
-    # parked in the register class and has a ratio of 1.000 against a function
-    # matched later.
+    # Parked functions are included, flagged, and sorted LAST -- the opposite
+    # of what this file said when it was written. The claim was that a park
+    # predating its sibling's decompilation is the best lead in the list, and
+    # one session measured it: eleven non-parked leads gave eleven matches,
+    # most on the first try, while the two [PARKED] ones at the very top of
+    # the ratio list (0.933 and 1.000) took more attempts than anything else
+    # that day and stayed parked. It makes sense in hindsight. A park in the
+    # register-allocation class asserts the *shape* is already right, and a
+    # matching sibling proves the same thing, so the sibling carries no new
+    # information. Ranking them first inverts the list against its own yield.
     parked = {l.split("#")[0].strip()
               for l in open(os.path.join(ROOT, "docs", "PARKED.txt"))
               if l.startswith("func_")}
@@ -68,7 +74,9 @@ def main():
         if best and ratio >= min_ratio:
             rows.append((ratio, len(seq), name, best, name in parked))
 
-    rows.sort(reverse=True)
+    # is_parked last in the key, negated, so unparked leads outrank a parked
+    # one at the same ratio.
+    rows.sort(key=lambda r: (not r[4], r[0], r[1]), reverse=True)
     print(f"{len(rows)} unmatched candidates with a sibling at ratio >= {min_ratio}")
     for ratio, n, name, sib, is_parked in rows[:max_rows]:
         tag = "  [PARKED]" if is_parked else ""

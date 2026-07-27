@@ -59,3 +59,16 @@ Base2_8009AFA3 = 0x8009AFA3;
 # func_8003E46C stores the cleared value and then the or'd value to the same
 # halfword; with one name gcc drops the first store.
 Base2_8009B3FA = 0x8009B3FA;
+
+# splat found no symbol here either; func_8004BBBC hoists %hi(0x8009AF80) into
+# $s1 and hands the address to func_8004BAA0. It sits between D_8009AF7A and
+# D_8009AF8E, so nothing else claims it.
+D_8009AF80 = 0x8009AF80;
+
+# Back for a second time, and this time measured: func_8004BBBC reads
+# D_8009B458 twice inside a loop and retail re-materialises %hi for each,
+# while gcc hoists one %hi into a callee-saved register and grows the frame by
+# a register. The 2026-07-26 note below deleted this name because
+# func_80049C40 did not need it -- that function has a store between the two
+# reads, which forces the reload anyway. This one does not.
+Base2_8009B458 = 0x8009B458;

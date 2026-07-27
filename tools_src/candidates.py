@@ -6,23 +6,41 @@ List undecompiled functions worth attempting, cheapest first.
     python tools_src/candidates.py 24 34 -n 5 # band and count
     python tools_src/candidates.py --count    # just the totals
 
-Excludes, in order of how much time each used to waste:
+Excludes only what is genuinely out of scope or genuinely unwritable:
 
   * PsyQ library functions (docs/LIBRARY_FUNCS.txt) and the library region
-    above 0x80073840, both out of scope.
-  * GTE and mult/div shapes, which are hand-written or need idioms not yet
-    worked out.
-  * Calls into PsyQ library functions, which need prototypes we do not have.
+    above 0x80073840.
+  * GTE and mult/div shapes, and the C runtime stubs, which are hand-written.
   * Functions already decompiled or parked.
-  * **The two detectable closed-class signatures.** A same-basic-block
-    duplicate %hi needs a symbol alias and usually an allocator disagreement
-    on top; an adjacent blez/slti is the range-check fold. Neither is
-    reachable from C, so attempting them is wasted effort -- filtering them
-    out took a batch from 1-2 hits to 3 of 3. See docs/DECISIONS.md.
 
-The register-allocation class has no target-side signature, so roughly a
-third of what this prints will still miss. That is a fixed tax, not a sign
-the list is exhausted.
+Everything else is listed and *tagged*. Three drop rules have now been
+retracted in turn, each after it was measured rather than reasoned about, and
+each had been hiding a population that matched:
+
+  * the range-check fold, which happens on the `&&` and survives as nested ifs;
+  * duplicate %hi, which is not an alias problem at all -- see below;
+  * **calls into PsyQ library functions**, dropped on the grounds that they
+    "need prototypes we do not have". They do not. gcc 2.8 takes an implicit
+    declaration, and integer and pointer arguments pass correctly without one;
+    a dozen functions calling into the library matched in one session with no
+    prototype written. What a missing prototype would actually cost is a float
+    or struct argument, which is rare and shows up as a wrong instruction
+    count immediately. These are tagged lib-call, not hidden.
+
+The dup-%hi tag means what it says and nothing more: retail materialised one
+symbol's address twice. All 96 such candidates in the binary use the *bare*
+form -- `lui $r,%hi(s)` with the memory op through the same `$r`, which is the
+assembler expanding a bare symbol -- so what they want is
+`-mno-split-addresses`, not a symbol alias. An alias makes them worse, because
+gcc then hoists both %hi values into callee-saved registers. 25 of the 96 also
+contain a %hi whose %lo is completed in another block, which is a hoisted
+split address that `-mno-split-addresses` cannot produce; a function with both
+shapes cannot be satisfied by one file flag. func_8004BBBC is that case and is
+parked for it.
+
+The register-allocation class has no target-side signature, so a good fraction
+of what this prints will still miss. That is a fixed tax, not a sign the list
+is exhausted.
 """
 
 import glob
@@ -133,9 +151,8 @@ def main():
         joined = " ".join(body)
         if HAND_WRITTEN.search(joined):
             continue
-        if any(c in lib or not c.startswith("func_")
-               for c in re.findall(r"jal\s+(\S+)", joined)):
-            continue
+        libcall = any(c in lib or not c.startswith("func_")
+                      for c in re.findall(r"jal\s+(\S+)", joined))
         # Neither of the old drop rules is a "cannot match" any more.
         #
         # The range-check fold was retracted: it happens on the `&&`, and
@@ -143,23 +160,25 @@ def main():
         # functions came out of the park that way, so the filter is gone.
         #
         # Duplicate %hi for one symbol means retail materialised the address
-        # twice, which config/symbol_aliases.txt plus a -G0 assembler can
-        # reproduce. It is harder, not impossible, so these are listed last
-        # and tagged rather than hidden -- 41 candidates were invisible while
-        # the small bands looked depleted.
+        # twice. Every instance in the binary is the bare-symbol form, so the
+        # answer is -mno-split-addresses and not an alias; see the module
+        # docstring. Still sorted last, because a quarter of them also want a
+        # hoisted split address in the same unit and cannot have both.
         dup = has_duplicate_hi(both)
         if dup:
             dropped["dup_hi"] += 1
-        rows.append((dup, len(body), name, both))
+        rows.append((dup, len(body), name, both, libcall))
 
     rows.sort()
     print(f"{len(rows) - dropped['dup_hi']} clean candidates in "
-          f"{lo}-{hi} instructions, plus {dropped['dup_hi']} needing a symbol "
-          f"alias (listed last, tagged dup-%hi)")
+          f"{lo}-{hi} instructions, plus {dropped['dup_hi']} that materialise "
+          f"one address twice (listed last, tagged dup-%hi)")
     if "--count" in sys.argv:
         return 0
-    for dup, count, name, both in rows[:show]:
-        tag = "  [dup-%hi: needs a symbol alias + -G0 assembler]" if dup else ""
+    for dup, count, name, both, libcall in rows[:show]:
+        tag = "  [dup-%hi: try -mno-split-addresses]" if dup else ""
+        if libcall:
+            tag += "  [lib-call: implicit declaration is enough]"
         print(f"\n--- {name} ({count}){tag}")
         for _, text in both:
             print("   ", text)

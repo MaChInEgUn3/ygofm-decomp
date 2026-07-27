@@ -494,7 +494,12 @@ extern s16 D_800FE0CC;
 /* Scalar by default; func_8004C84C reaches it %hi/%lo and defines
  * D_8009B458_IS_AGGREGATE. */
 #ifdef D_8009B458_IS_AGGREGATE
+#ifdef D_8009B458_IS_VOLATILE
+extern u8 *volatile D_8009B458[];
+#else
 extern u8 *D_8009B458[];
+#endif
+extern u8 *Base2_8009B458[];
 #else
 extern u8 *D_8009B458;
 #endif
@@ -560,6 +565,8 @@ extern u16 D_8009B3CC;
 extern u16 D_8009AF74[4];
 /* func_80058E1C reads it twice across a branch and gcc would keep the first
  * load in a register; the reads are what the function is. */
+/* Handed to func_8004BAA0 by address; %hi/%lo, so unsized. */
+extern u8 D_8009AF80[];
 extern u8 D_8009AFA3;
 extern u8 Base2_8009AFA3;
 extern s32 D_8009B074;
