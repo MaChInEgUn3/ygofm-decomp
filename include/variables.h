@@ -57,6 +57,8 @@ extern u8 D_8009B2EB;
 extern u8 D_8009B318;
 
 extern u16 D_8009AF76;
+/* Reached %hi/%lo by func_8003D46C. */
+extern u8 D_800EF6EA[];
 extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
@@ -196,7 +198,11 @@ extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
 extern u16 D_8009B33A;
 extern u8 D_8009B336;
+#ifdef D_8009B34D_IS_AGGREGATE
+extern s8 D_8009B34D[];
+#else
 extern s8 D_8009B34D;
+#endif
 /* Aggregate by default; files that need the bare form so the *assembler*
  * expands it through $at define D_8009B363_IS_SCALAR first. */
 #ifdef D_8009B363_IS_SCALAR
@@ -247,6 +253,8 @@ typedef struct {
 
 extern Rec4C D_800EB010[];
 extern ObjFn D_80090F68[];
+/* Dispatch table func_80033BE8 indexes with the low six bits of a state word. */
+extern ObjFn D_80090DF8[];
 extern u8 D_8009B2EA;
 extern s32 D_8009B2EC;
 extern u8 D_8009B2B4;

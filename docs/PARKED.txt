@@ -192,6 +192,18 @@
 # Everything else is exact, including the two levers it needed: the macro flags
 # for retail's one-register D_8009B45C load inside the loop, and `p += i * 2;`
 # so the base is the addu's destination rather than the scaled index.
+# ---
+# func_8003D46C is the second instance of func_8004BBBC's barrier, with the
+# roles reversed, which is what makes it worth keeping. In one function retail
+# has an assembler-expanded bare *store* -- `lui $at,%hi(D_8009B34D)` with
+# `sb ...%lo($at)`, and only the assembler ever uses $at -- next to a cc1psx
+# split *load* of D_800EF6EA into two different registers, which the assembler
+# cannot produce for a bare symbol. -mno-split-addresses gives the store and
+# loses the load (28); the default gives the load and loses the store (26).
+# A sized array declaration does not restore the split pair under the macro
+# flags, so the size hint is not a fourth addressing form. Everything else,
+# including the six-argument call and the if/else-if tail, is exact.
+func_8003D46C
 func_80047FAC
 func_80021810
 func_8004A6F8
