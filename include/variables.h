@@ -588,6 +588,7 @@ extern u8 D_800EA0E8[];
 extern u8 D_800F3938[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
+extern u8 D_80090D28[];
 /* Walked with a 0x1C stride, two bytes cleared per record. Declared as an
  * array of the record type so the base lands in a register before any
  * field offset -- see the two-field addressing note in docs/DECISIONS.md. */
