@@ -262,6 +262,8 @@ extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
 extern s32 D_8009B3B8;
+extern u8 D_8009B3EE;
+extern u8 *D_8009B3D8;
 extern u8 D_801B125A[];
 extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
