@@ -250,6 +250,25 @@
 # 0x815 gets its own. So some runs of stores were one pointer variable in the
 # source and some were not, and the grouping has to be recovered store by
 # store. 62 differences, all of them that. Worth finishing; just not quick.
+# ---
+# func_80044E90 is TWO instructions and the shape is fully recovered. Retail
+# copies arg0 into $a1 in the first branch's delay slot and uses the copy for
+# both `-0x80 - arg0` subtractions while testing the original -- the
+# "second variable covering part of the function" shape, and without it there
+# is no copy at all and the whole tail shifts (49 differences). With it we get
+# the copy and the mirror assignment: retail subtracts $a1 and tests $a0, we
+# subtract $a0 and test $a1. Three placements of the two names give the same 2,
+# and the sweep agrees.
+# ---
+# func_80045054 sums the squares of 0x100 halfwords into a field of
+# D_8009B45C[0]. It reaches the symbol four times and retail materialises it
+# four times, so it needs Base2/Base3/Base4 on top of the macro flags: that is
+# 49 differences down to 29, and it is the corrected alias rule working at
+# scale. What is left is register allocation around the call result -- retail
+# keeps it in $v0 and the pointer in $v1; splitting the reused local into two
+# variables makes it 37, so the reuse is not the cause.
+func_80044E90
+func_80045054
 func_80049434
 func_80049AF4
 func_8004B854

@@ -567,6 +567,8 @@ extern u8 Base2_8009B364[];
 /* Reached %hi/%lo from func_80048C0C's unit and gp-relatively elsewhere; see
  * the per-file declaration knob in docs/DECISIONS.md. */
 extern u8 *Base2_8009B45C[];
+extern u8 *Base3_8009B45C[];
+extern u8 *Base4_8009B45C[];
 #ifdef D_8009B45C_IS_AGGREGATE
 extern u8 *D_8009B45C[];
 #else

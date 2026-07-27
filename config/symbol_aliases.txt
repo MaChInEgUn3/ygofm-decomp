@@ -94,3 +94,9 @@ Base2_8009B45C = 0x8009B45C;
 # func_8003D03C reads D_8009B408 signed, clears it, then reads it unsigned --
 # three accesses in one function, so two extra names.
 Base3_8009B408 = 0x8009B408;
+
+# func_80045054 reaches D_8009B45C four times and retail materialises it four
+# times; with one name gcc hoists the address into a callee-saved register and
+# grows the frame. One name per reference beyond the first.
+Base3_8009B45C = 0x8009B45C;
+Base4_8009B45C = 0x8009B45C;
