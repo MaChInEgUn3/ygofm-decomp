@@ -101,13 +101,6 @@ func_8001D5B4
 # call inline where retail branches to it. 40 differences; flipping the
 # polarity so the call is the out-of-line arm makes it 46.
 func_80014EEC
-# func_80040BF8 walks the same object list as func_80040CAC and additionally
-# calls func_800408D0 for entries whose flags have both of 0xC0 set. Retail tests
-# that with `andi 0xC0; xori 0xC0; bnez` -- both immediates. cc1psx hoists 0xC0
-# into a callee-saved register as a loop invariant and compares against it,
-# which costs the register, an extra save and 43 differences. `!=` with a
-# continue, and a (u16) cast, both leave it at 43.
-func_80040BF8
 # func_800137E4: 45 differences down to 16 once the three reads of D_8009B0F4
 # and two of D_8009B134 got a name each -- without them cc1psx hoists both
 # addresses into callee-saved registers and grows the frame. What is left is a

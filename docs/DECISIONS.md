@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-575 of 1794 functions decompiled and byte-matching.
+576 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~575 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~576 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -2904,6 +2904,38 @@ Probed afterwards on every parked candidate whose target shows the pattern —
 `func_80070710` — and the macro form moved none of them (`func_80048C0C` got
 worse, 3 → 22). Their remaining differences really are register assignment, so
 the tell identifies the *addressing* and nothing more.
+
+### `(x & C) == C` gets a register; `((x & C) ^ C) == 0` gets two immediates
+
+`func_80040BF8` and `func_80040814` are the same list walk and both test a
+two-bit flag the same way. Retail:
+
+```
+    andi $v0, $v0, 0xC0
+    xori $v0, $v0, 0xC0
+    bnez $v0, <skip>
+```
+
+Two immediates and no register. Written as `(p->flags & 0xC0) == 0xC0`, cc1psx
+materialises `0xC0` in a register and compares against it — and inside a loop it
+hoists that register out, which costs a callee-saved register, a save, and a
+bigger frame. `func_80040BF8` was **43 differences** for exactly that, and I
+parked it.
+
+Writing the comparison the way the target computes it fixes both:
+
+```c
+    if (((p->flags & 0xC0) ^ 0xC0) == 0) { ... }
+```
+
+**A comparison against a non-zero constant and a comparison against zero are
+different instruction selections.** When the target shows `xori` before the
+branch, the source compared to zero after an explicit xor. The equivalent
+`== C` form is not a spelling difference.
+
+The same two functions also needed the index-first address form
+(`(Slot70 *)(i * 112 + (s32)base)` rather than `&base[i]`), which is the
+operand-order lever again.
 
 ## Repo layout / tooling plan
 
