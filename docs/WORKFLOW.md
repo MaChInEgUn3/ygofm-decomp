@@ -33,7 +33,7 @@ each unmatched candidate with the decompiled function it most resembles. Run
 siblings at 0.70, not 0.90 — the loose end of that list is as good as the tight
 end, and skip the `[PARKED]` rows, which are sorted last for a measured reason.
 
-`candidates.py` no longer hides anything as "cannot match": three drop rules
+`candidates.py` no longer hides anything as "cannot match": four drop rules
 have been retracted in turn, each after being measured, and each was hiding
 functions that matched. It tags instead. Two tags matter:
 - **`dup-%hi`** — retail materialised one address twice. Try
