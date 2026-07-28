@@ -58,7 +58,14 @@ meaningful, and skipping to the last one wastes hours:
    else** — that is what put func_80019A60's `la` ahead of the argument swap.
    It only works if the local replaces *every* reference to the symbol;
    a local that merely names one operand stays live and costs a register
-   everywhere (func_8005A8C4, parked).
+   everywhere (func_8005A8C4, parked). The same local is also what stops
+   cc1psx folding the *first* reference's constant offset into the base —
+   without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
+   is 60 too small.
+   The mirror of the two-names rule (func_8004318C, two multiplies of one
+   value need two names): **two unrelated values must not share one name.**
+   Reusing a `y` for both halfword results in func_800300C8 swapped a
+   `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
 3. **Branch polarity and loop form.** cc1psx emits the fall-through for the
    branch written as not-taken — look at which path retail falls into. But check
    the **loop statement first**, because it decides block layout on its own:

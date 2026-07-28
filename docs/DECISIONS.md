@@ -3223,6 +3223,45 @@ you think" habit is about, arriving through a filter rather than through a
 stale object. **Read try_func's last lines, not a grep of them** — the word
 MATCH is printed on success and nothing stands in for it on failure.
 
+## One name per value, in both directions
+
+func_8004318C needed a *second* name for one value: two multiplies of the same
+quantity are two pseudos in retail, and writing the quantity once produced one.
+func_800300C8 is the mirror image and cost more to find, because the symptom
+looks like plain register allocation.
+
+The function computes four halfword pairs. Two of them are unrelated values,
+and writing both through one local:
+
+```c
+y = x + h;                       /* stored at +0x40 and +0x30 */
+...
+y = *(u16 *)(b + 0x40) + m * 16; /* stored at +0x32 and +0x2A */
+```
+
+gives 11 differences, all of them a `$v0`/`$v1` pair swapped inside the second
+division-by-two. Declaring `z` for the second value and changing nothing else
+is 7 — and the seven that remain are one more pair swap in the same block, the
+class we stop on.
+
+So the rule has two halves and they are not symmetric restatements: **the
+number of names in the source must equal the number of pseudos in the target,
+and both directions of the mismatch are common.** One name for two values costs
+register pairs; one name reused for a value the target recomputes costs
+instructions. Counting materialisations (working-order step 6) answers the
+second; the first only shows up as allocation noise, which is why it reads as
+a park and is not one.
+
+Second lever from the same function, worth stating separately because it looks
+like a symbol-declaration problem and is not. cc1psx builds the `%hi`/`%lo`
+pair from the *first* reference to a symbol, constant offset included:
+`*(s16 *)(D_800EB15C + 0x3C)` as the first use gives
+`addiu $a3,$v0,%lo(D_800EB15C+60)`, and every subsequent offset in the function
+is then 60 too small against retail's. Assigning the symbol to a local first —
+`u8 *b = D_800EB15C;` — materialises the bare base and leaves the offsets in
+the memory operands. Same one-line fix as func_80019A60's hoisted table
+address, a different reason to reach for it.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.

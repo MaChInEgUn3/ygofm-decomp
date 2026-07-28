@@ -260,6 +260,9 @@ typedef struct {
 } Rec4C;
 
 extern Rec4C D_800EB010[];
+/* Opcode handlers for the 0xF0..0xFF escapes, indexed by op ^ 0xFF; they
+ * return -1 to stop the interpreter loop, so they are not ObjFn. */
+extern s32 (*D_80090FEC[])(u8 *);
 extern ObjFn D_80090F68[];
 /* Dispatch table func_80070650 runs, indexed by the byte reader. */
 extern ObjFn D_800916E0[];

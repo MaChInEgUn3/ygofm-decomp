@@ -690,3 +690,40 @@ func_80014E1C -- 13 differences, one instruction short, register allocation.
   null deref to $zero and cross-jumping never fires), calling func_80014EEC for
   the pointer (32), p assigned before the branch (41, p goes callee-saved and
   costs an extra $s4). Full flag sweep: best is plain -O2 -G8.
+
+func_80041C8C -- 8 differences, register allocation, one pointer.
+  Bytecode interpreter loop: read the opcode at *(u8**)(arg0+0x50) +
+  *(u16*)(arg0+0x58), and while it is >= 0xF0 dispatch through
+  D_80090FEC[op ^ 0xFF] (which returns -1 to stop). Structure, block layout,
+  loop rotation, the duplicated read in the preheader and at the bottom, and
+  the whole tail all match. The only fault is that the opcode pointer lives in
+  $a0 for us and $a1 in retail; the eight lines are its three uses in each of
+  the two reads plus the two tail loads.
+  Getting there: the tail must be written `*(s32*)(arg0+0x4C) =
+  *(s32*)(arg0+0x54) + ((p[1] << 8) | p[0]);` with the `*(u16*)(arg0+0x58) += 3`
+  *after* it -- putting the increment first is 14 and splitting the sum into a
+  `val` local is 14 as well.
+  Tried at 8: declaration order (p before/after op, with and without a spare
+  local), `op = p[0]; p++;` split from `op = *p++`, reading the program counter
+  into a local before the two byte loads. Flag sweep: 8 at both -O2 -G8 and
+  -O2 -G0, nothing lower.
+
+func_800300C8 -- 7 differences, register allocation inside one basic block.
+  Writes four halfword pairs into the record at D_8009B2E4 from the geometry
+  at D_800EB15C. Everything matches except the second of the two
+  `(s16)x / 2` expansions: retail loads into $v1 and lands the halved value in
+  $v0, we load into $v0 and land it in $v1, then need the following `addu` to
+  move it. $v0/$v1 inside one block with no call in it -- the class WORKFLOW
+  says to stop on.
+  What got it from 48 to 7, in order, each measured:
+  - `u8 *b = D_800EB15C;` as the first local. Without it cc1psx folds the
+    first reference's +0x3C into the base register (`%lo(D_800EB15C+60)`) and
+    every subsequent offset is 60 too small.
+  - `x -= 0x10; x += half;` as two statements. Written as
+    `x = x - 0x10 + half` gcc reassociates and applies the -0x10 to the half.
+  - a `h` local for the halved value in the *if* arm (18 -> 11);
+  - separate `y` and `z` locals for the two halfword values instead of reusing
+    one (11 -> 7). Reusing a local for two unrelated values swaps the pair.
+  Tried at 7: a second `h2` for the other division, every declaration order of
+  `h`, hoisting `n % 10` above the stores (7) and above the `if` (51),
+  `y = half; y = x + y;` (8). Flag sweep: best is plain -O2 -G8.
