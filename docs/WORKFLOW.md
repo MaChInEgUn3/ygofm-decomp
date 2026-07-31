@@ -62,6 +62,10 @@ meaningful, and skipping to the last one wastes hours:
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
+   Before inventing a name for a copy, **check whether the copy is the return
+   value**: retail's `addu $v0,$s0,$zero` before a tail that works through
+   `$v0` is `return p;` on a function whose prototype only says `void`
+   (func_80019564, func_8002ABB4).
    The tell for a missing name: **a copy from a caller-saved register into a
    callee-saved one, right where the value is defined** — retail's
    `lbu $a0,0($v0)` … `addu $s0,$a0,$zero` means `s32 c = *p; … op = c;`, not
@@ -114,7 +118,12 @@ meaningful, and skipping to the last one wastes hours:
    keeps both exits, the second gets cross-jumped into one with the value in a
    delay slot. Rule of thumb: whichever condition the target **branches out on**
    is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
-6. **Count materialisations** of each value: one per write in the source. One
+6. **Count materialisations** of each value: one per write in the source.
+   A value computed in a **branch's delay slot that the fall-through then
+   overwrites** is an unconditional assignment followed by a conditional one,
+   not two arms of an `if` — `v = a; if (c) v = b;`, never
+   `if (c) v = b; else v = a;` (func_80026BA4). Register form of the
+   duplicated-store rule below. One
    `subu` reached by two paths means one `return`; two identical constants mean
    two `return`s; a value written at a join and copied to `$v0` at one exit is
    an accumulator variable. Same counting applies to *stores*: a store in a

@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-662 of 1794 functions decompiled and byte-matching.
+664 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~662 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~664 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3577,6 +3577,55 @@ Reading PARKED.txt for the phrase, not the count, is how func_8004C0AC came
 back: its diagnosis said "all six are where the loop counter is incremented",
 and by then "an increment in an unexpected place is a loop-form question" had
 been written down twice that week.
+
+## Three off the park list in one pass, and the shape that did two of them
+
+The re-read of PARKED.txt described above paid three times the same afternoon.
+Two of the three came from one new source shape.
+
+**func_80026BA4** — a three-way select where the last two arms are one
+instruction each. Retail:
+
+```
+bne  $a0, $v0, .join
+ addiu $v1, $a0, -0x259     # delay slot: the taken arm's value
+addiu $v1, $zero, 0x64      # fall-through overwrites it
+```
+
+Written as `else if (arg0 != 0x2D1) v = arg0 - 0x259; else v = 0x64;` — either
+polarity, nested or chained — gcc puts the *other* value in the delay slot and
+the pair never lines up. The shape that matches assigns unconditionally and
+then overrides:
+
+```c
+v = arg0 - 0x259;
+if (arg0 == 0x2D1) {
+    v = 0x64;
+}
+```
+
+This is func_800402A0's duplicated store in register form. The tell is the
+same: **a value computed in a branch's delay slot that the fall-through then
+overwrites is an unconditional assignment followed by a conditional one, not
+two arms of an `if`.** A delay slot executes on both paths, so anything gcc
+puts there it has already decided is harmless when overwritten — which is a
+statement about the source, not about the scheduler.
+
+**func_80019564** — one instruction: retail copies the object pointer out of
+`$s0` into `$v0` and does the last read-modify-write through the copy. The park
+had tried three spellings of a second pointer variable, all of which collapsed
+back. The copy is not a second variable at all: it is `return p;` on a function
+whose prototype said `void`. gcc materialises the return value early enough to
+use it as the base for the tail. func_8002ABB4, matched the same week, shows
+the same thing and was read correctly there only because its `$v0` base was
+obviously the return register.
+
+So the copy-means-a-second-name rule has a second reading worth carrying:
+**check whether the copy is the return value before inventing a variable for
+it**, and check the prototype rather than trusting it — `void` is what a
+provisional signature says when nobody has read the callers.
+
+**func_8004C0AC** is written up above; it is the loop-increment one.
 
 ## Repo layout / tooling plan
 

@@ -11,10 +11,11 @@ void func_80026BA4(s32 arg0, s32 arg1) {
 
     if (arg0 < 0x28B) {
         v = arg0 - 0x12D;
-    } else if (arg0 != 0x2D1) {
-        v = arg0 - 0x259;
     } else {
-        v = 0x64;
+        v = arg0 - 0x259;
+        if (arg0 == 0x2D1) {
+            v = 0x64;
+        }
     }
 
     D_8009B1A8 = v;

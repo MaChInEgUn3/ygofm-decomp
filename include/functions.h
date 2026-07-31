@@ -219,7 +219,7 @@ void func_80029164(s32 arg0, s32 arg1);
 void func_8002622C(void);
 void func_80040510(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_80019564(u8 *arg0);
+u8 *func_80019564(u8 *arg0);
 void func_80070BB8(void);
 u8 *func_80035BE4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_8003C4E0(s32 arg0);
