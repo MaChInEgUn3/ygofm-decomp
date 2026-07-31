@@ -289,6 +289,9 @@ extern u8 D_800117C8[];
 extern u8 D_8009B14A;
 extern u8 D_8009B14B;
 extern u8 D_8009B14C;
+/* Word-entry lookup table walked by func_8003BC40: the low halfword is the
+ * key and a zero word terminates it. */
+extern u32 D_801D9000[];
 extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];

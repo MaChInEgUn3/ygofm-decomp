@@ -143,6 +143,12 @@ _O1_G8 = ["-quiet", "-O1", "-G8"]
 # most entries went away, but it is still occasionally what retail wants.
 _O2_G0_NOSCHED2_MACRO = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
                          "-mno-split-addresses"]
+# First user is func_80014A5C. gcc's sched1 hoists a load of one global above
+# a store to another to fill the load-delay slot; retail leaves the nop, so
+# that pass did not run on this unit. Neither `volatile` spelling stops the
+# hoist -- gcc 2.8 moves a non-volatile *and* a volatile load across a
+# volatile store -- so this is a flag, not a source shape.
+_O2_G8_NOSCHED1 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
 # Macro-form addressing does *not* imply -G0. At -G8 with -mno-split-addresses
@@ -182,6 +188,7 @@ _G0_MACRO_FUNCS = [
 
 PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
+    "func_80014A5C": _O2_G8_NOSCHED1,
     "func_8001755C": _O2_G0_NOSCHED2_MACRO,
     "func_80024DC8": _O2_G8_MACRO,
     "func_8002CD8C": _O2_G8_MACRO,

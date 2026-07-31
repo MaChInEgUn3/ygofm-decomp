@@ -727,3 +727,25 @@ func_800300C8 -- 7 differences, register allocation inside one basic block.
   Tried at 7: a second `h2` for the other division, every declaration order of
   `h`, hoisting `n % 10` above the stores (7) and above the `if` (51),
   `y = half; y = x + y;` (8). Flag sweep: best is plain -O2 -G8.
+
+func_800476B4 -- 44 positional differences, really three: a %hi hoisted out of
+  a loop, one missing copy, and two induction registers swapped behind them.
+  Walks the u16 array at arg0+8 for *(s32 *)arg0 entries; for each entry that
+  is not 0xFFFF it writes the display-list cursor into the index table at
+  D_8009B45C[0]+0x43C, appends the 8-byte record at arg0+0x1A0+i*8 to the list
+  at +0x444 (an 8-byte struct assignment with alignment 1, which is where the
+  lwl/lwr/swl/swr block move comes from), adds arg1>>4 to the copied record's
+  +6 field, and bumps the count at +0x440.
+  The whole loop body matches from `lw $v1,1084($a1)` down. What does not:
+  retail materialises `lui $a1,%hi(D_8009B45C)` *inside* the loop and loads
+  through the same register, while gcc hoists our %hi into $t3 in the
+  preheader. That extra live register is what pushes the counter from $a3 to
+  $a2 and the 0xFFFF constant from $t3 to $t4. Retail also has one
+  `addu $a0,$a1,$zero` we do not produce, and switches to $a0 for the last
+  three accesses.
+  Tried: `-mno-split-addresses` hoists the whole `la` instead (worse); a
+  second name through Base2_8009B45C hoists *two* addresses; a volatile load
+  (`*(u8 *volatile *)D_8009B45C`) does not stop the %hi hoist either; the
+  local is already declared inside the `if`, which DECISIONS records as
+  stopping the hoist to the top of the *function* but not out of the loop.
+  Full flag sweep: nothing changes the hoist.

@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-652 of 1794 functions decompiled and byte-matching.
+655 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~652 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~655 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3261,6 +3261,112 @@ is then 60 too small against retail's. Assigning the symbol to a local first —
 `u8 *b = D_800EB15C;` — materialises the bare base and leaves the offsets in
 the memory operands. Same one-line fix as func_80019A60's hoisted table
 address, a different reason to reach for it.
+
+## A clamp written as `if`/`else if` is not the clamp retail compiled
+
+func_800595C8 clamps three arguments to [-0x1000, 0x3000] and stores each. The
+obvious spelling
+
+```c
+if (arg1 < -0x1000) arg1 = -0x1000;
+else if (arg1 > 0x3000) arg1 = 0x3000;
+```
+
+assigns straight into the parameter's register: `addiu $a1,$zero,-4096`. Retail
+computes into `$v1` in every arm and then does `addu $a1,$v1,$zero` — a
+temporary and a copy back, three times over. That is what a **conditional
+expression** produces, because its value has to land somewhere before the
+assignment consumes it:
+
+```c
+arg1 = (arg1 < -0x1000) ? -0x1000 : ((arg1 > 0x3000) ? 0x3000 : arg1);
+```
+
+42 differences to a match, with nothing else changed. Worth trying whenever a
+target assigns a value into a scratch register and immediately copies it to the
+variable's own register in every arm of a branch — that copy is the tell, and
+it is free information because an `if` chain never emits it.
+
+## The unrotated `while`, and the tail-merge that hides behind it
+
+func_8003BC40 searches a word table for a halfword key. Its inner loop enters
+with a *forward* `j` to a test at the bottom:
+
+```
+  lw   $v0, 0($v1)        # preheader loads the first entry
+  j    .test
+  ...body...
+.advance:
+  addiu $v1,$v1,4
+  lw   $v0, 0($v1)        # and the advance block loads the next
+  addiu $a3,$a3,1
+.test:
+  bnez $v0, .body
+```
+
+No spelling of `while` or `do`/`while` produces that. Every one of them gets
+gcc's copied loop header — a duplicate of the test as an entry guard, then a
+bottom test. The shape above is the *uncopied* header, and the only way to
+write it is to say so:
+
+```c
+goto test;
+body:
+    ...
+    e++;
+    v = *e;
+    idx++;
+test:
+    if (v != 0) goto body;
+```
+
+The second half of this is the part that cost the time. Write the advance block
+as `e++; idx++; v = *e;` — load last, the natural order — and gcc tail-merges
+the two `v = *e` insns into the test block, because they are then identical
+final instructions of both predecessors. The test block ends up doing its own
+load and the preheader's disappears. Moving one unrelated statement after the
+load (`e++; v = *e; idx++;`) makes the two blocks end differently and the merge
+cannot fire. 42 differences to 28, and the statement moved changes nothing else.
+
+Two more from the same function, both about placement rather than content:
+
+- **An out-of-line arm the target places before the loop body is a `goto`.**
+  The `idx >= 0xF0` case sits physically between the preheader and the loop
+  body in retail. Written as the `else` of an `if` inside the body — either
+  polarity, either arm inline — gcc always emits it *after* the body, and the
+  12 remaining differences were nothing but that. A label before the body and
+  a `goto` to it is exact. Branch polarity decides which arm falls through; it
+  does not decide which side of the loop head a block lands on.
+- **One index variable for two sequential loops.** The trim loop and the encode
+  loop both use `$t0` in retail. Two separate locals gave two registers and 28
+  differences; one local reused gave 14. This is not in tension with
+  func_800300C8's "two unrelated values must not share one name" — there the
+  two values were live in the same stretch of code, here the loops are
+  disjoint. The count that matters is *simultaneously live* values, not
+  distinct roles.
+
+## `-fno-schedule-insns` enters the table, and volatile does not substitute for it
+
+func_80014A5C is the project's first `-fno-schedule-insns` user. It sets one
+global then reads another:
+
+```c
+D_8009B124 = 1;
+if (D_8009B0E8 != 0) return;
+```
+
+gcc's first scheduling pass hoists `lw D_8009B0E8` above `sh D_8009B124` so the
+store fills the load's delay slot. Retail leaves the `nop` there and fills the
+following branch's slot instead, so that pass did not run on the unit.
+
+The thing worth recording is that **`volatile` is not an alternative here.**
+Marking the loaded object volatile still hoists it; marking the stored object
+volatile still hoists the load above it. gcc 2.8's scheduler treats volatile as
+an ordering constraint among volatile references only, so a plain load moves
+freely across a volatile store and a volatile load moves freely across a plain
+one. Both were tried and produced the identical 46 differences, which is also a
+reminder to read the output rather than the count — two different edits giving
+the same number is what "the edit did nothing" looks like.
 
 ## Repo layout / tooling plan
 

@@ -72,6 +72,16 @@ meaningful, and skipping to the last one wastes hours:
    - a backward unconditional `j` means the loop was *not* rotated — write
      `while (1)` with the exit inside, never `while (cond)`. 85 in-scope
      functions have that `j`;
+   - a *forward* `j` into the loop's bottom test is the **unrotated** `while`:
+     gcc did not copy the header, and no `while`/`do` spelling reproduces it.
+     Write `goto test;` at the top with the test at the bottom (func_8003BC40).
+     Once you do, gcc tail-merges the two copies of the test's own load into
+     the test block; put a statement *after* that load in the advance block
+     (`e++; v = *e; idx++;`, not `e++; idx++; v = *e;`) and the merge cannot
+     fire. That was 42 differences to 28;
+   - an out-of-line arm the target places **before** the loop body is a label
+     the source reached with a `goto`, not an `else` — no polarity edit moves
+     a block across the loop head;
    - a rotated `for` puts an interior `return` **inline**, between the test and
      the loop-back; an explicit `do`/`while` puts it after the loop-back. Same
      loop, different layout, and no polarity edit reaches across the difference.
@@ -104,7 +114,11 @@ meaningful, and skipping to the last one wastes hours:
    the other way**: gcc reverses a counted loop whose counter is dead after it,
    and `-O1` is sometimes the only thing that stops it (func_80047A68, 23
    differences to 6). If retail's loop comparison is *unsigned*, try a `u32`
-   counter before reaching for a flag (func_800494F4).
+   counter before reaching for a flag (func_800494F4). Also flags, not source:
+   a **load hoisted above a store to a different global** to fill its own
+   load-delay slot is `-fno-schedule-insns` (func_80014A5C, the first user).
+   `volatile` does not stop that hoist on either object — gcc 2.8 moves a load
+   across a volatile store and moves a volatile load too.
 
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Record the
