@@ -504,10 +504,16 @@ def compile_c(name):
     run([*PSYQ_RUNNER, CC1PSX, *flags, pre.relative_to(ROOT).as_posix(),
          "-o", asm.relative_to(ROOT).as_posix()])
 
+    # --expand-div: aspsx expands `div`/`rem` into the checked sequence
+    # (`bne`+`break 7` for the divisor, the -1/0x80000000 pair and `break 6`
+    # for the overflow), and retail has those checks. Without it maspsx emits
+    # the bare `div`, which is what kept every function containing a real
+    # division out of reach -- candidates.py was filtering them as
+    # hand-written on the `break`. See DECISIONS.md.
     with open(asm) as fin, open(masm, "w") as fout:
         r = subprocess.run(
             [str(VENV_PYTHON), str(MASPSX),
-             f"--aspsx-version={ASPSX_VERSION}", "--macro-inc"],
+             f"--aspsx-version={ASPSX_VERSION}", "--macro-inc", "--expand-div"],
             stdin=fin, stdout=fout, stderr=subprocess.PIPE, text=True, cwd=ROOT)
     if r.returncode != 0:
         sys.stderr.write(f"maspsx failed on {src.name}:\n{r.stderr[:8000]}\n")

@@ -60,14 +60,27 @@ ASM = os.path.join(ROOT, "asm", "nonmatchings", "31D8")
 LIBRARY_REGION = 0x80073840
 
 BRANCH = re.compile(r"\b(b(eq|ne|gez|gtz|lez|ltz|eqz|nez)?|j|jal|jr)\b")
-# `break` and writes to $sp/$gp/$fp are the C runtime stubs (crt0, the
-# constructor walker): assembly by construction, and two of them were
-# offered as candidates before this was added.
-# GTE intrinsics and the C runtime stubs are hand-written by construction.
-# `mult` and `div` are NOT -- see the docstring. They were in this list for
-# months and 66 in-scope functions were invisible because of it.
+# GTE intrinsics and the C runtime stubs (crt0, the constructor walker) are
+# hand-written by construction. Everything else that was ever in this list has
+# come back out:
+#   * `mult`/`div` -- `a * b` and `/`-by-a-constant are ordinary codegen. 66
+#     in-scope functions were invisible for months.
+#   * `break` -- this was the FIFTH retraction and the only one that was a
+#     *toolchain* gap rather than a misread of the target. `break 7` and
+#     `break 6` are the divisor and overflow checks aspsx wraps around a real
+#     `div`; maspsx only emits them with --expand-div, which build.py did not
+#     pass. func_800358FC (`return f() % arg0;`) matched the moment it did.
+#     41 in-scope functions were hidden by it. What stays filtered is the
+#     *two-operand* form, `break 0,260` and friends: those are the BIOS
+#     syscall stubs just under the library boundary, hand-written by
+#     construction. `break 7` and `break 6` are the division checks.
+# `jr $v`/`jr $a`/`jr $t` stays for now, but as a *measured* obstacle and not
+# a claim about C: those 37 are `switch` jump tables, and the C is trivial --
+# what is unsolved is that splat already emits the table as data at its own
+# address, so a compiler-generated one would be a duplicate. See DECISIONS.md.
 HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|jr\s+\$v|jr\s+\$a"
-                          r"|\bbreak\b|jr\s+\$t|\bor\s+\$sp\b|\$fp,\s*\$sp|\$gp,\s*%hi")
+                          r"|break\s+\d+\s*,|jr\s+\$t|\bor\s+\$sp\b"
+                          r"|\$fp,\s*\$sp|\$gp,\s*%hi")
 
 
 def parked():

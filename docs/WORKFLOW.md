@@ -33,9 +33,18 @@ each unmatched candidate with the decompiled function it most resembles. Run
 siblings at 0.70, not 0.90 — the loose end of that list is as good as the tight
 end, and skip the `[PARKED]` rows, which are sorted last for a measured reason.
 
-`candidates.py` no longer hides anything as "cannot match": four drop rules
+`candidates.py` no longer hides anything as "cannot match": five drop rules
 have been retracted in turn, each after being measured, and each was hiding
-functions that matched. It tags instead. Two tags matter:
+functions that matched. The fifth, `break`, was the first that was a
+**toolchain** gap and not a misread target: `break 7`/`break 6` are the checks
+aspsx wraps around a real `div`, and maspsx only emits them with
+`--expand-div`, which build.py now passes globally. A real division in C is
+ordinary. What is still filtered on `break` is the two-operand form
+(`break 0,260`), which is the BIOS syscall stubs.
+`jr $v`/`jr $a`/`jr $t` also stays, and it is a `switch` jump table — the C is
+trivial and the unsolved part is that splat already emits the table as data, so
+a compiled one would be a duplicate. 37 functions wait on that.
+It tags instead. Two tags matter:
 - **`dup-%hi`** — retail materialised one address twice. Try
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare
   form and an alias makes them worse. A quarter of them also want a hoisted

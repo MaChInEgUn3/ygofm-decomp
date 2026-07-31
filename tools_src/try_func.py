@@ -293,7 +293,8 @@ def built_lines(func, csrc, extra_flags):
     with open(asm) as fin, open(masm, "w") as fout:
         r = subprocess.run(
             [str(VENV_PYTHON), str(MASPSX),
-             f"--aspsx-version={B.ASPSX_VERSION}", "--macro-inc"],
+             f"--aspsx-version={B.ASPSX_VERSION}", "--macro-inc",
+             "--expand-div"],
             stdin=fin, stdout=fout, stderr=subprocess.PIPE, text=True, cwd=ROOT)
     if r.returncode != 0:
         sys.exit(f"maspsx failed:\n{r.stderr[:4000]}")

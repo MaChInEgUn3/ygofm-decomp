@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-664 of 1794 functions decompiled and byte-matching.
+667 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~664 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~667 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3626,6 +3626,73 @@ it**, and check the prototype rather than trusting it — `void` is what a
 provisional signature says when nobody has read the callers.
 
 **func_8004C0AC** is written up above; it is the loop-increment one.
+
+## The fifth drop rule, and the first one that was a toolchain gap
+
+`break` was in candidates.py's HAND_WRITTEN filter from early on, with the
+stated reason that `break` and writes to `$sp`/`$gp`/`$fp` are the C runtime
+stubs. That is true of the two-operand form — `break 0,260` and friends are the
+BIOS syscall stubs sitting just under the library boundary — and false of
+everything else. `break 7` and `break 6` are the divisor-is-zero and
+`-1 / 0x80000000` overflow checks that aspsx wraps around a real `div`:
+
+```
+div   $zero, $v0, $s0
+bne   $s0, $zero, .L1
+ nop
+break 7
+.L1:
+addiu $at, $zero, -1
+bne   $s0, $at, .L2
+ lui  $at, 0x8000
+bne   $v0, $at, .L2
+ nop
+break 6
+.L2:
+mfhi  $v0
+```
+
+`func_800358FC` is that sequence and nothing else. Its source is
+`return func_8008E590() % arg0;`.
+
+**What made this different from the four retractions before it: the C was never
+the problem.** Writing the modulo gets you `div` and `mfhi` and none of the
+checks, because maspsx only emits them when passed `--expand-div` and build.py
+did not pass it. maspsx even labels the region it is *not* filling in —
+`# EXPAND_ZERO_DIV START` around a bare `div`/`mfhi` pair — which is as close
+to a signed confession as a tool gets, and it went unread for months because
+nothing ever looked at the intermediate for one of these functions. The filter
+and the missing flag covered for each other: the filter meant no division
+function was ever offered, so the flag was never exercised, so nothing ever
+failed in a way that pointed at it.
+
+`--expand-div` is now on globally in build.py, and the whole 667-function build
+is still byte-identical, so retail expanded them everywhere. 41 in-scope
+functions were hidden. Three matched the same hour: func_800358FC,
+func_8004149C, func_80070E20.
+
+The generalisation worth carrying is not about division. It is that **a drop
+rule and a toolchain gap can hide each other indefinitely**, and the tell is a
+filter whose population has never been *sampled*. Every previous retraction
+came from measuring the population the rule excluded; this one came from the
+same habit applied one level further — not "how many does it hide" but "what
+happens if I write one".
+
+## `jr $v0` is a `switch`, and the obstacle is the table, not the C
+
+The same scan turned up 37 in-scope functions filtered on `jr $v`/`jr $a`/
+`jr $t`. They are `switch` jump tables — splat has already named the tables
+`jtbl_...`, and func_80070738 is a seven-case switch over `arg0` with a
+`sltiu $v0,$a0,0x7` range check in front of it, which is exactly gcc's output.
+The C for these is trivial.
+
+The obstacle is real but is *not* a claim about C: splat emits the jump table
+as data at its own address, and a compiler-generated table would be a second
+copy competing for that space. Solving it means teaching build.py to suppress
+splat's copy for the functions we compile, the way it already regenerates the
+linker script from object sizes. **The rule stays in the filter with that
+reason written down instead of the old one** — a measured obstacle, revisitable,
+not "hand-written by construction".
 
 ## Repo layout / tooling plan
 
