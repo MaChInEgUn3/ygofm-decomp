@@ -139,6 +139,15 @@ value, or when the target has more duplicated tails than you produce. Record the
 name in `docs/PARKED.txt` with its class **and keep the candidate in
 `parked/<func>.c`**.
 
+**And re-read the park list whenever a new source-shape lever is measured.** A
+park records that a shape was not found, not that none exists. Entries whose
+diagnosis names the *placement* of an instruction — a counter incremented
+somewhere unexpected, a copy from nowhere, a block on the wrong side of a loop
+head — are candidates for a free match; entries that say `$v0` versus `$v1` in
+one basic block are not. func_8004C0AC sat at 6 differences for weeks and
+matched first try once "an increment in an unexpected place is a loop-form
+question" had been written down.
+
 Before parking on "one register differs", check whether a **call** separates the
 definitions of the two values, and if it does, try moving one definition across
 it. That took `func_80022FF0` from seven differences to a match, and it changes

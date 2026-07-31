@@ -581,11 +581,17 @@ func_80012AE8
 # branch's delay slot and leaves the bottom one a nop. do/while with `i++ < n`,
 # a rotated for, and an explicit while(1) with two breaks give 6, 23 and 15.
 func_8004C0AC
-# func_8004C560 is 11 out but only one instruction short: retail copies p[0]
-# into a third register and adds there, keeping p[0] live until after the sum so
-# it can store it to p[4]; cc1psx stores p[4] first and then adds in place.
-# Five orderings of the two stores and the sum, with and without a variable for
-# the call result, all land on 11 or 14.
+# func_8004C560: retail copies p[0] into a third register and adds there,
+# keeping p[0] live until after the sum so it can store it to p[4]. Re-tried
+# 2026-07-31 with the "an extra copy is an extra name" lever from
+# func_800386B8: `s32 u = t; u += n;` does produce the copy and makes the
+# instruction count right, which the old candidate (11, one short) never was.
+# What is left at 14 is placement: retail stores the func_8004BC2C result to
+# p[2] straight from $v0 and copies it to $a1 afterwards, because $v0 is needed
+# for the `return 0`; gcc copies to $a0 first and stores from the copy. Five
+# orderings of the two stores and the sum, with and without a variable for the
+# call result and for n, all land on 14. The parked candidate is now the
+# right-sized one -- working-order step 1 says count first.
 func_8004C560
 # func_80038798 is ONE instruction: retail has `andi $v0,$a0,0x8000` where the
 # masked value lives in $a0; cc1psx folds `(x & 0xFFFF) & 0x8000` back to

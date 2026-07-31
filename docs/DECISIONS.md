@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-661 of 1794 functions decompiled and byte-matching.
+662 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~661 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~662 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3539,6 +3539,44 @@ handle *addressing* disagreements between files; this is a *signedness*
 disagreement inside one function, and a per-file guard cannot express it. Reach
 for the lvalue cast, and say in a comment which load it is buying — otherwise
 it reads as noise and someone simplifies it away.
+
+## Re-run the park list when a lever lands
+
+func_8004C0AC was parked at 6 differences, all of them the loop counter's
+increment: retail increments once in the preheader and once in the bottom
+branch's delay slot and tests the pre-increment value, and three loop spellings
+(`do`/`while` with `i++ < n`, a rotated `for`, `while (1)` with two breaks)
+gave 6, 23 and 15.
+
+The answer is the increment at the *top* of a `do`/`while` body:
+
+```c
+u32 i = 0;
+u32 n = func_8004BB34(arg0);
+do {
+    i++;
+    if ((func_8004BAE4(arg0) & 0xFF) == 0xF7) break;
+} while (i < n);
+```
+
+gcc moves that increment to the end of the previous iteration — one copy peeled
+into the preheader, one in the back-edge's delay slot — which is exactly the
+shape the park describes and none of the three spellings tried could produce.
+Match, first attempt, on a function that had been parked for weeks.
+
+The process point is the one worth keeping. **A park records that a *shape* was
+not found, not that no shape exists**, and the closed classes (register
+allocation, cross-jumping) are the only ones where that distinction collapses.
+Every time a new source-shape lever is measured, the park list becomes stale in
+a specific way: entries whose diagnosis names *placement of instructions* —
+a counter incremented somewhere unexpected, a copy that appears from nowhere, a
+block on the wrong side of a loop head — are candidates for a free match.
+Entries that say "$v0 versus $v1 in one basic block" are not.
+
+Reading PARKED.txt for the phrase, not the count, is how func_8004C0AC came
+back: its diagnosis said "all six are where the loop counter is incremented",
+and by then "an increment in an unexpected place is a loop-form question" had
+been written down twice that week.
 
 ## Repo layout / tooling plan
 
