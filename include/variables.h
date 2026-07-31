@@ -51,6 +51,7 @@ extern s8 D_8009B07A;
 extern u8 D_8009B141;
 extern u8 D_8009B145;
 extern s8 D_8009B238;
+extern u16 D_8009B244;
 extern u8 D_8009B248;
 extern u8 D_8009B24A;
 extern u8 D_8009B3C6;
@@ -130,7 +131,15 @@ extern u8 D_800FE148[];
 extern u8 D_800FE348[];
 extern u8 D_800938AE[];
 
+/* func_800386B8 reaches both of these through %hi/%lo and stores through $at,
+ * so they are aggregates there and small data everywhere else. */
+#ifdef D_8009B400_IS_AGGREGATE
+extern s32 D_8009B400[];
+extern s32 D_8009B404[];
+#else
 extern s32 D_8009B400;
+extern s32 D_8009B404;
+#endif
 extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
 extern u8 D_800F5750[];

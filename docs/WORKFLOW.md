@@ -62,6 +62,11 @@ meaningful, and skipping to the last one wastes hours:
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
+   The tell for a missing name: **a copy from a caller-saved register into a
+   callee-saved one, right where the value is defined** — retail's
+   `lbu $a0,0($v0)` … `addu $s0,$a0,$zero` means `s32 c = *p; … op = c;`, not
+   `s32 op = *p;` (func_800386B8). An extra copy in the target is almost
+   always an extra name in the source; allocation does not invent one.
    The mirror of the two-names rule (func_8004318C, two multiplies of one
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
@@ -91,6 +96,10 @@ meaningful, and skipping to the last one wastes hours:
    the first operand; `t = a + b;` into a fresh variable keeps the tree order.
    Pick by which one retail shows — this unparked four functions in one direction
    and matched `func_80035748` in the other.
+   The inverse too: where the target reads something **once** and you read it
+   twice, look for a store between your two reads that gcc must assume aliases
+   — `if (q[7]) x = q[7] << 4;` reloads across a store through another
+   parameter, and one local was the whole of func_80059000.
    Related, same pass: an expression the target recomputes in several blocks was
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and

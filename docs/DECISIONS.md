@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-656 of 1794 functions decompiled and byte-matching.
+659 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~656 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~659 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3451,6 +3451,70 @@ because both were worth several instructions each:
   `else` puts it before the tail and adds a `j` to arm2, which no longer falls
   through. A `goto` out of the `else` to a label placed after the tail is what
   reproduces it.
+
+## A copy into a callee-saved register at the point of definition is a second name
+
+func_800386B8 reads a byte out of a bytecode stream and tests it against five
+masks, with calls in between, so the value has to live in a callee-saved
+register. Retail loads it and then copies it:
+
+```
+lbu  $a0, 0($v0)
+addiu $v0, $v0, 1
+sw   $v0, 0($v1)
+addu $s0, $a0, $zero      # <- the copy
+andi $v0, $s0, 63
+```
+
+Loading straight into the long-lived variable — `s32 op = *p;` — gives no copy
+and is one instruction short. Two names give it:
+
+```c
+s32 c = *p;
+*pp = p + 1;
+op = c;
+```
+
+The rule this belongs to is already in WORKFLOW.md step 2 (func_8004318C: two
+uses of one value can need two names). What is new is the *tell*: a copy from a
+caller-saved register into a callee-saved one, right where the value is
+defined, is not register allocation being clumsy — it is a second name in the
+source. gcc allocates the short-lived one to the load's natural register and
+the long-lived one across the calls. This is the same shape as the temporary a
+conditional expression forces (func_800595C8), from the other end: **an extra
+copy in the target is almost always an extra name in the source, and it is
+free information because neither register allocation nor scheduling invents
+one.**
+
+One trap on the way: `u8 c = *p;` gets the copy in the right place but spells
+it `andi $s0,$a0,255` — the widening to `s32 op` is a real conversion for a
+QImode pseudo even though the `lbu` already zero-extended. `s32 c` is the one
+that matches.
+
+## A byte read twice around a store through another pointer is read twice
+
+func_80059000 overrides three halfwords conditionally:
+
+```c
+if (q[7] != 0) *(u16 *)(arg1 + 0) = q[7] << 4;
+```
+
+gcc emits two `lbu`s of `q[7]`, because between them is a store through `arg1`
+and it cannot prove `arg1` does not alias `q` — both are pointers reaching the
+function from outside. Retail has one load with the shift in the branch's delay
+slot, so the source held the byte:
+
+```c
+t = q[7];
+if (t != 0) *(u16 *)(arg1 + 0) = t << 4;
+```
+
+That was the whole function: 43 differences to a match. The general form is the
+inverse of "an expression the target recomputes was not a variable" — when the
+target reads something **once** and you read it twice, look for a store between
+your two reads that gcc has to assume aliases. One local fixes it, and unlike
+most local-introducing edits it costs no register, because the value dies at
+the branch.
 
 ## Repo layout / tooling plan
 
