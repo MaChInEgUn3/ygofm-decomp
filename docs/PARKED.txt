@@ -422,10 +422,19 @@ func_800734DC
 # dispatches on it. The three-way sign test matches once written as
 # `if (arg1 <= 0) { if (arg1 < 0) ... else ... } else ...` -- gcc turns the
 # inner `< 0` into the `bgez` retail has. The recomputed base (gcc 2.8 has no
-# global CSE) is right too. What is left, 21, is that retail computes the
-# doubled value into $a2 and copies it to $a1 in the first test's delay slot,
-# where we compute it straight into $a1; `a = v;` before the switch and
-# `a = -a` in the arm does not produce the copy.
+# global CSE) is right too.
+# 21 -> 3 on 2026-07-31. The doubled value and the argument have to be two
+# registers ($a2 and $a1), and gcc coalesces them whenever the *pre-switch
+# default* is `a = v` -- every arrangement of that (with and without a
+# redundant `a = v` in the 0x3E arm, with `a = -v` instead of `a = -a`, with
+# the assignment moved into each arm) sits at 21. Making the default `a = 0`
+# and assigning `v` in the arms keeps them apart and is 3.
+# The three that remain are all "the default should be v, not 0": retail has
+# `addu $a1,$a2,$zero` in the first test's delay slot where we have
+# `addu $a1,$zero,$zero`, `addu $a1,$zero,$zero` in the 0x23 arm's slot where
+# we have a nop, and `subu $a1,$zero,$a1` where we negate $a2 directly. So the
+# source wants the default to be v *and* the two registers distinct, and those
+# two pull against each other through copy propagation.
 func_80059700
 # func_800597C8 is 25 out on the scheduling of three independent operations at
 # the top -- the shift of arg2, its store to +0xE06 and the `(u16)` for the

@@ -20,19 +20,20 @@ void func_80059700(s32 arg0, s32 arg1) {
 
     q = D_800F2C40 + arg0 * 3616;
     v = q[0xE0D] * 2;
-    a = v;
+    a = 0;
     m = q[0xE16];
 
     switch (m) {
     case 0x23:
-        a = 0;
         break;
 
     case 0x3C:
+        a = v;
         a = -a;
         break;
 
     case 0x3E:
+        a = v;
         break;
 
     default:
