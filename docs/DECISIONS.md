@@ -3416,6 +3416,42 @@ load and emits `addu $v0,$s0,$v0` — index plus base. `(D_8009B1E8 + arg0)[0x34
 emits `addu $v0,$v0,$s0` — base plus index. Same address, same instruction
 count, different destination operand order, and it was the last difference.
 
+## gcc computes `symbol & 0xFFFF0000` with the `lui` it already has
+
+func_800383DC builds a far pointer as `((u32)tbl & 0xFFFF0000) + tbl[index]`,
+where `tbl` is one of two symbols chosen by a preceding `if`. In the arm that
+selects `D_801C0000` gcc never materialises 0xFFFF0000 at all: it reuses the
+`lui $v0,%hi(D_801C0000)` from the address formation as the masked value, and
+the join's `and` becomes `tbl & %hi(tbl)`. It does *not* do this in the arm
+that selects `D_801D5800`, which gets a real `lui $v0,65535`.
+
+The asymmetry is the giveaway: `%hi(sym) << 16` equals `sym & 0xFFFF0000` only
+when the symbol's low half has bit 15 clear, and 0x801C0000's low half is zero
+while 0x801D5800's is not. Retail emits the constant in *both* arms and does
+the `and` at the join, so the compiler that built it did not take the shortcut.
+Nothing tried from the source side blocks it — `tbl` as `u32` instead of
+`u8 *`, a separate `base` local at the join, both assignment orders inside the
+arms, both declaration orders. Parked one instruction short.
+
+Worth carrying: a function that is exactly one instruction short with no other
+fault is not automatically a park in the register class. Count what is
+*missing*, not what differs — here the missing instruction is a constant that
+gcc proved it did not need, and that reads as noise in a positional diff.
+
+The two levers that did work on it are ordinary and worth restating together,
+because both were worth several instructions each:
+
+- **`s32 v = D_8009B32E;`, not `u16 v`.** A `u16` local makes every subsequent
+  comparison `sltu`; retail's are `slt`. This is the same rule as the QImode
+  note in WORKFLOW.md, and it cost 6 differences here before anyone looked at
+  the interesting part.
+- **The odd arm out goes after the shared tail.** Two of three branches share
+  a tail and the third has its own; retail's layout is
+  [arm1][arm2][shared tail][arm3][store]. Writing the third arm as a plain
+  `else` puts it before the tail and adds a `j` to arm2, which no longer falls
+  through. A `goto` out of the `else` to a label placed after the tail is what
+  reproduces it.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.

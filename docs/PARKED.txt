@@ -767,3 +767,45 @@ func_8001EE44 -- 22 positional differences, two registers and the scheduling
   conditional-expression form (which is what fixed func_800595C8's identical
   looking symptom), `a = a & 0xF` versus `a &= 0xF`, u32 locals, and both
   declaration orders -- all 22. Full flag sweep: nothing below 22.
+
+func_800383DC -- 42 positional differences, one instruction short, and the
+  missing instruction is an optimisation retail did not take.
+  Builds a far pointer as `(base & 0xFFFF0000) + table[index]` and appends it
+  to the u32 array at arg0, indexed by the byte counter at arg0+0x58. Three
+  ranges of D_8009B32E pick the table: > 0xCFFF uses D_801C0000 at v - 0xD000,
+  > 0x7FFF uses D_801D5800 at v - 0x8000 (these two share the tail), and the
+  rest uses D_801C0000 at v (minus 0x100 above 0x500) with D_801B0000 as the
+  masked base.
+  Block layout, the shared tail, the branch that falls into it, and the whole
+  low branch all match. The one fault: in the D_801C0000 arm gcc computes
+  `(u32)D_801C0000 & 0xFFFF0000` as the `lui %hi(D_801C0000)` it already has,
+  and so never materialises 0xFFFF0000 there. Retail emits `lui $a0,65535` in
+  *both* arms and does the `and` at the join. The fold only fires on the symbol
+  whose low half is zero -- D_801D5800 gets the real constant in both builds --
+  which is what makes it look like a register difference until you count.
+  Getting to 42: `s32 v`, not `u16` (a u16 makes every comparison `sltu`;
+  retail's are `slt`) -- 49 to 43; and the low arm reached by a `goto` placed
+  *after* the shared tail, which is where retail puts it -- 43 to 42.
+  Tried at 42: tbl as u32 rather than u8*, a separate `base` local for the
+  masked value, both assignment orders inside the arms, both declaration
+  orders, and -mno-split-addresses (45, and it loses the `addu` as well).
+  Flag sweep: -O2 -G0 reports 23 but only because it also drops the gp-relative
+  load of D_8009B32E, which is two more faults, not fewer.
+
+func_8002A3CC -- 26 differences, register allocation driving the schedule.
+  Advances a 16.16 fixed-point position held as two halfword pairs in
+  D_800EA1E8 (+0x8/+0xC is x, +0xA/+0xE is y, deltas at +0x18/+0x1C), counts
+  down the byte at +0x16, and on reaching zero snaps back to +0x12/+0x14,
+  clears the active flag at +0x17 and calls func_8003FEE0(0x35) and
+  func_8002A2F4. Returns the flag byte, which the early-out path gets from the
+  entry load by CSE -- that part matches.
+  The fault is one register and everything the scheduler does behind it. Retail
+  builds each 32-bit value into $a2 (`or $a2,$v0,$v1`), which keeps it live
+  while the second pair's three loads are hoisted above the first pair's
+  stores; we build it into $v0 in place, gcc sees $v0 die at the `or`, and the
+  stores stay put. Same instructions, interleaved differently, and the two
+  pairs' registers rotate with it.
+  Tried: both stores after both computations (26), stores in the other order
+  within each pair (27), named locals for the two halves (46), `x = hi|lo;
+  x += delta;` split (43). Flag sweep: nothing below 26; -mno-split-addresses
+  is 34.

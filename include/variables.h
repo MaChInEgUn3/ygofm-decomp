@@ -411,6 +411,7 @@ extern s32 Base2_8009B134[];
 #else
 extern s32 D_8009B134;
 #endif
+extern u16 D_8009B32E;
 extern u8 *D_8009B1E8;
 extern s32 D_8009B10C;
 extern s32 D_8009B12C;
@@ -489,6 +490,7 @@ extern u8 D_800EFE38[];
 extern u16 D_8009B410;
 extern u16 D_8009B412;
 extern u8 D_800E9E18[];
+extern u8 D_800EA1E8[];
 extern u8 D_800E9E60[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;
