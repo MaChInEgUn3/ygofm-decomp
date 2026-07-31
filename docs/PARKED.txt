@@ -845,3 +845,23 @@ func_80024824 -- 46 differences; the structure is right and the addressing of
   Also needed and already applied: a `base` local for D_8015C424, or cc1psx
   folds the first reference's offset into %lo (the func_800300C8 lever).
   Flag sweep on the literal form: nothing below 53.
+
+func_8002ABB4 -- 22 positional differences, all scheduling; the instruction
+  count is right.
+  Clones an object: allocates through func_800400AC(func_8004002C(), 6),
+  copies +0x48/+0x18/+0x30/+0x20/+0x44 across, doubles the two halfwords at
+  +0x18/+0x1A into +0x3C/+0x3E, zeroes +0xC, calls func_80042918 and
+  func_800428EC with `(s8)(arg0[0x16] + arg1)`, then sets +0x10, hangs
+  func_8002A9C0 on +0x4C and rewrites the flags at +4. The tail's `$v0` base
+  is the `return p;` -- gcc uses the return register for the last five stores.
+  Two one-instruction scheduling shifts in opposite directions, so the totals
+  agree and the whole diff is alignment:
+  - retail hoists `lw $v1,0x48($s1)` above `addu $s0,$v0,$zero` and fills the
+    load-delay slot with the copy; we do the copy first and fill the slot with
+    the 0x100 constant, which then leaves a `nop` after the 0x18 load;
+  - retail leaves a `nop` after `lw $v0,0x20($s1)` and puts `sw $zero,0xC($s0)`
+    in the slot before the call; we put the 0xC store in the load's slot.
+  Tried: the 0x60 store moved after the 0x18 pair (29) and before the 0x48
+  pair (50), the 0xC store moved after the 0x44 copy (50). Flag sweep: 22 is
+  the floor, and -fno-schedule-insns does not help -- retail's schedule is not
+  simply the unscheduled one.
