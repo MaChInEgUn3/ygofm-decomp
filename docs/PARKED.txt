@@ -822,3 +822,26 @@ func_8003F2B0 -- 8 differences, one register.
   func_80042B98 result so it takes $v0 first, an `s16` working copy (42 -- the
   sign-extensions come back), the working copy scoped to its own block. Flag
   sweep: nothing below 8.
+
+func_80024824 -- 46 differences; the structure is right and the addressing of
+  two big constant offsets is not.
+  Fills 0x50 six-byte records at D_801A7E20 from two tables that live
+  0x1BBC4 and 0x1BB70 bytes past D_8015C424, searches D_80178130 for each
+  halfword, and memcpy's the 0x580-byte block the search index selects into
+  D_8018C2D8. The record layout, the unrotated search loop (a backward `j`, so
+  `while (1)` with the exit inside), and the memcpy all match.
+  What does not: retail hoists **0x18000** into $s5 and reaches both tables as
+  `IV + $s5` with 0x3BC4 / 0x3B70 as the load immediates, sharing the register
+  between the two. gcc gives us the whole 0x1BBC4 and 0x1BB70 with lui+ori
+  inside the loop, and folding the offsets any other way moves the fault rather
+  than removing it:
+  - `base + i*2 + 0x18000 + 0x3BC4` (the literal reading) folds both constants
+    into 0x1BBC4 and materialises it whole -- 55;
+  - a `vram = D_8015C424 + 0x18000` local gets the immediates right (15300 and
+    15216, as retail) but folds 0x18000 into the induction variable, where
+    retail keeps the IV over `base` and adds $s5 in the loop -- 46, the best;
+  - `q = base + i*2; q += 0x18000;` as separate statements -- 48;
+  - writing 0x18000 before the index -- 55.
+  Also needed and already applied: a `base` local for D_8015C424, or cc1psx
+  folds the first reference's offset into %lo (the func_800300C8 lever).
+  Flag sweep on the literal form: nothing below 53.

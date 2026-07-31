@@ -191,6 +191,7 @@ PER_FUNC_FLAGS = {
     "func_80014A5C": _O2_G8_NOSCHED1,
     "func_800386B8": _O2_G8_MACRO,
     "func_800375A4": _O2_G8_MACRO,
+    "func_8002DF2C": _O2_G8_MACRO,
     "func_8001755C": _O2_G0_NOSCHED2_MACRO,
     "func_80024DC8": _O2_G8_MACRO,
     "func_8002CD8C": _O2_G8_MACRO,

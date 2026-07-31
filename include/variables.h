@@ -376,6 +376,9 @@ typedef struct {
 } Rec64;
 
 extern Rec64 D_800EB0F8[];
+extern u8 D_80178130[];
+extern u8 D_8018C2D8[];
+extern u8 D_801A7E20[];
 extern u8 D_8015C424[];
 extern s16 D_800908A0[];
 extern s8 D_8015C410[];
@@ -499,6 +502,10 @@ extern u8 D_800EFE38[];
 extern u16 D_8009B410;
 extern u16 D_8009B412;
 extern u8 D_800E9E18[];
+/* The second function inside the func_8002DD74 listing; splat has not split
+ * it yet, so it is only reachable by address. func_8002DF2C passes it as a
+ * callback. */
+extern u8 D_8002DDFC[];
 extern u8 D_800EA1E8[];
 extern u8 D_800E9E60[];
 extern s32 D_8009B440;
