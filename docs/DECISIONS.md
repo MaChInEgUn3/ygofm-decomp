@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-655 of 1794 functions decompiled and byte-matching.
+656 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~655 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~656 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3367,6 +3367,54 @@ freely across a volatile store and a volatile load moves freely across a plain
 one. Both were tried and produced the identical 46 differences, which is also a
 reminder to read the output rather than the count — two different edits giving
 the same number is what "the edit did nothing" looks like.
+
+## The order of two increments in a `for` clause decides a delay slot
+
+func_80021480 walks a pointer table with a counter and a pointer, both advanced
+in the `for` clause. Written the way anyone writes it:
+
+```c
+for (i = 0; i < 10; i++, p++)     /* 39 differences */
+for (i = 0; i < 10; p++, i++)     /* 1 */
+```
+
+That is the whole edit. With `i++` first, gcc emits `addiu $a0,$a0,1` at the
+top of the body, ahead of the `lhu` that starts it, and the load's delay slot
+then needs a `nop`. With `p++` first, the counter increment lands after the
+load and fills the slot, which is retail. Nothing else in the function moves.
+
+The pointer increment is the one that ends up in the loop-back branch's delay
+slot in both versions, so the clause is not simply emitted in order — but the
+*relative* order of the two decides which of them is available to the scheduler
+at the top of the body. Cheap to try, and invisible from the diff, which just
+reports a stray `nop` and everything after it shifted.
+
+## Widening a callee's parameter is sometimes the caller's whole fix
+
+func_80021480 passes its own `s32` argument straight to func_80040410, whose
+prototype said `void func_80040410(u8 *arg0, u8 arg1)`. That `u8` forces an
+`andi $a1,$s0,255` at every call site, and retail has none.
+
+The parameter was never really a byte: the callee's only use of it is
+`arg0[0x69] = arg1`, a byte store, which truncates on its own. Widening the
+prototype to `s32` left func_80040410 itself byte-identical and left
+func_80029108 — the other decompiled caller, which passes an `s32` too —
+byte-identical as well, while removing the `andi` that was blocking the new
+caller.
+
+This is the width rule ("hold values in the widest natural type; cast at the
+point of use") applied one level up: **the narrowness usually belongs to the
+memory access, not to the parameter that feeds it.** A `u8` parameter is only
+right when the target actually shows the mask at the call site. Before widening
+one, run try_func over every decompiled caller and the callee itself — the
+prototype is shared, so this is the same hazard as adding one, and the same
+`grep -rn <callee> src/` finds the files.
+
+Also from this function, and covered by the reassociation section above but
+worth the concrete pair: `D_8009B1E8[arg0 + 0x34]` folds the constant into the
+load and emits `addu $v0,$s0,$v0` — index plus base. `(D_8009B1E8 + arg0)[0x34]`
+emits `addu $v0,$v0,$s0` — base plus index. Same address, same instruction
+count, different destination operand order, and it was the last difference.
 
 ## Repo layout / tooling plan
 

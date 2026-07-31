@@ -749,3 +749,21 @@ func_800476B4 -- 44 positional differences, really three: a %hi hoisted out of
   local is already declared inside the `if`, which DECISIONS records as
   stopping the hoist to the top of the *function* but not out of the loop.
   Full flag sweep: nothing changes the hoist.
+
+func_8001EE44 -- 22 positional differences, two registers and the scheduling
+  that follows from them.
+  Extracts a 4-bit field from D_801D4244[record->unkC - 1] twice, once per
+  argument, choosing shift 18 or 22 on the 0x200 flag at record+0x16, and
+  passes both to func_8002CB80. Everything matches but this: retail leaves the
+  shift result in $v0 and writes the argument register at the mask
+  (`sra $v0,$v0,18` ... `andi $a0,$v0,15`), while gcc coalesces the shift
+  straight into $a0 and then masks in place. The knock-on is one instruction of
+  scheduling: with the mask in place, gcc can sink it into the following
+  `beq`'s delay slot, and retail puts %hi(D_801D4244) there instead.
+  The mask must be its own statement after the if/else -- inside the call
+  arguments gcc sinks it past the second block entirely (24). Beyond that,
+  every attempt to split the unmasked value into its own local costs a
+  register: gcc then copies arg1 into $a2 and the count goes to 52. Tried the
+  conditional-expression form (which is what fixed func_800595C8's identical
+  looking symptom), `a = a & 0xF` versus `a &= 0xF`, u32 locals, and both
+  declaration orders -- all 22. Full flag sweep: nothing below 22.

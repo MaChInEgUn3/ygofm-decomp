@@ -93,7 +93,12 @@ meaningful, and skipping to the last one wastes hours:
    and matched `func_80035748` in the other.
    Related, same pass: an expression the target recomputes in several blocks was
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
-   in each block.
+   in each block. Also here: `tbl[i + K]` emits `addu index,base` and
+   `(tbl + i)[K]` emits `addu base,index` — same address, opposite operands.
+   And the order of two increments in one `for` clause decides which is
+   available to fill a load-delay slot at the top of the body:
+   `for (i = 0; i < 10; p++, i++)` matched func_80021480 where `i++, p++`
+   left a stray `nop` and 39 differences.
 5. **Which test is written first**, when the target has more exit blocks than
    you produce. `if (x == 0) return 0;` then the body, versus the body under
    `if (x != 0)` with `return 0` after it, are *different layouts*: the first
@@ -147,6 +152,12 @@ on a combination that had been in the table for weeks.
 
 - Every global once in `include/variables.h`, every cross-file function in
   `include/functions.h`. Two files disagreeing breaks matching far away.
+- **A `u8` parameter is only right when the target masks at the call site.**
+  The narrowness usually belongs to the store inside the callee, which
+  truncates anyway. Widening `func_80040410`'s second parameter to `s32` left
+  the callee and its other caller byte-identical and removed the `andi` that
+  was blocking func_80021480. Re-run try_func over every decompiled caller
+  when you change one — same hazard as adding a prototype.
 - **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
