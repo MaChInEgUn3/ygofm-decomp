@@ -809,3 +809,16 @@ func_8002A3CC -- 26 differences, register allocation driving the schedule.
   within each pair (27), named locals for the two halves (46), `x = hi|lo;
   x += delta;` split (43). Flag sweep: nothing below 26; -mno-split-addresses
   is 34.
+
+func_8003F2B0 -- 8 differences, one register.
+  Nudges the s16 at arg0+0x60 toward zero by 0x40, clearing the byte at
+  arg0+0x6C and snapping to zero when it crosses, then calls func_80043230 and
+  (for a non-negative arg3) func_80039934 with D_800EB0F8[arg3]. Everything
+  matches except that the working copy of the s16 lives in $a3 in retail and
+  $v0 for us; the eight lines are its eight uses.
+  $a3 is arg3's incoming register, free after the entry copies it to $s1, and
+  nothing else in the function wants a caller-saved register at that point --
+  so gcc had every reason to pick $v0 and did. Tried: naming the
+  func_80042B98 result so it takes $v0 first, an `s16` working copy (42 -- the
+  sign-extensions come back), the working copy scoped to its own block. Flag
+  sweep: nothing below 8.

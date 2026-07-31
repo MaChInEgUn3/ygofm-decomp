@@ -188,6 +188,12 @@ on a combination that had been in the table for weeks.
   pseudo born before the load's own. **When the only difference left is that a
   whole block's registers are shifted by one, look for a pseudo that should not
   exist**; a cast that changes no instruction is the commonest source.
+- **A symbol read `lb` in one place and `lbu` in another** needs an lvalue
+  cast, not a value cast: `*(s8 *)&D_8009B32C == 0` gives `lb` where
+  `(s8)D_8009B32C == 0` still gives `lbu` (gcc has no reason to sign-extend
+  before a compare against zero). The `_IS_AGGREGATE` guards cover addressing
+  disagreements between files; this is signedness inside one function and no
+  guard expresses it (func_800375A4).
 - `common.h` does not define `NULL`. Write `(u8 *)0`.
 - Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
   Three addressing forms can appear in one function; pick each by declaration:

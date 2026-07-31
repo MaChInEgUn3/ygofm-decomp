@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-659 of 1794 functions decompiled and byte-matching.
+660 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~659 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~660 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3515,6 +3515,30 @@ target reads something **once** and you read it twice, look for a store between
 your two reads that gcc has to assume aliases. One local fixes it, and unlike
 most local-introducing edits it costs no register, because the value dies at
 the branch.
+
+## One symbol read `lb` in one place and `lbu` in another
+
+func_800375A4 decrements a counter and then tests it:
+
+```
+lbu $v0, %gp_rel(D_8009B32C)($gp)   # the decrement reads it unsigned
+...
+lb  $v0, %gp_rel(D_8009B32C)($gp)   # the test reads it signed
+```
+
+One declaration cannot produce both. `extern u8` gives `lbu` twice; `extern s8`
+gives `lb` twice, and a `(s8)` cast on the u8 does not change the load — for a
+comparison against zero gcc has no reason to sign-extend, so it keeps `lbu`.
+
+What works is casting the *lvalue*, not the value: `*(s8 *)&D_8009B32C == 0`
+emits `lb`. That was the last difference in the function.
+
+This belongs next to the `_IS_AGGREGATE` / `_IS_SCALAR` guards in
+variables.h as a third way two uses of one symbol can disagree. The guards
+handle *addressing* disagreements between files; this is a *signedness*
+disagreement inside one function, and a per-file guard cannot express it. Reach
+for the lvalue cast, and say in a comment which load it is buying — otherwise
+it reads as noise and someone simplifies it away.
 
 ## Repo layout / tooling plan
 
