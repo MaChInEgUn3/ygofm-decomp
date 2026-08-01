@@ -265,7 +265,10 @@ says "no", ask whether it could have said "yes"; when it says "yes", ask whether
 the run it judged completed. The cheapest way to fall into this is a **filter**:
 `try_func.py ... | grep -E '<<|differing|MATCH'` prints nothing both for a clean
 match and for a compile error, because the error text matches none of the three
-patterns. Read try_func's last lines, not a grep of them.
+patterns. Read try_func's last lines, not a grep of them. And when the difference is a
+small number of **`nop`s**, suspect the reader: `objdump` collapses a run of
+identical words into `...`, which cost func_800357E8 two nops that were in the
+object all along (fixed with `-z`, but the class of bug recurs).
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern

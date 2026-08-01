@@ -329,7 +329,11 @@ def built_lines(func, csrc, extra_flags):
     if r.returncode != 0:
         sys.exit(f"as failed:\n{r.stderr[:4000]}")
 
-    r = subprocess.run([str(B.OBJDUMP), "-dr", "--no-show-raw-insn",
+    # -z: without it objdump abbreviates a run of identical words as `...`,
+    # which silently eats the `nop`s aspsx inserts for the mflo/mult hazard.
+    # func_800357E8 was two nops "short" and matched the moment this was
+    # added -- the diff had been reporting a difference that did not exist.
+    r = subprocess.run([str(B.OBJDUMP), "-dr", "-z", "--no-show-raw-insn",
                         obj.relative_to(ROOT).as_posix()],
                        cwd=ROOT, capture_output=True, text=True)
     if r.returncode != 0:

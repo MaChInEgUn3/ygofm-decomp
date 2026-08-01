@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-670 of 1794 functions decompiled and byte-matching.
+672 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~670 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~672 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3743,6 +3743,37 @@ right to start, not the functions themselves.
 
 try_func normalises `%hi(jtbl_X)` to `%hi(.rodata)` so the fast loop is usable
 on them; only the full link can actually prove the address, and the sha1 does.
+
+## objdump abbreviates repeated words, and try_func was eating nops
+
+func_800357E8 converts a number to decimal digits. Written out it came to two
+instructions short, both `nop`, in the one place the MIPS `mflo`/`mult` hazard
+requires them:
+
+```
+mflo $v1
+nop
+nop
+mult $t0,$t1
+```
+
+maspsx emits those nops — the scratch `.maspsx.s` has them, plainly. `as`
+assembles them. They are in the object. What lost them was the *reader*:
+`objdump -d` collapses a run of identical words into a line reading `...`, and
+try_func's parser skipped the line and moved on two instructions poorer.
+
+`objdump -z` disables the abbreviation. With it the function matches.
+
+This is the seventh time in this project a tool has reported confidently on
+something it had not measured, and the shape is the same every time: **a layer
+between the artefact and the answer, doing something reasonable for a human
+reader.** The nops were never missing; the diff was. Worth adding to the habit
+in WORKFLOW.md: when a difference is a small number of `nop`s, suspect the
+reader before the compiler — and read the intermediate, which took two minutes
+and would have taken two more anywhere in the previous hour.
+
+Every parked candidate was re-run afterwards, since a park at "two
+instructions" could have been this and nothing else.
 
 ## Repo layout / tooling plan
 
