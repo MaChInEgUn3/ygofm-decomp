@@ -3773,7 +3773,11 @@ reader before the compiler — and read the intermediate, which took two minutes
 and would have taken two more anywhere in the previous hour.
 
 Every parked candidate was re-run afterwards, since a park at "two
-instructions" could have been this and nothing else.
+instructions" could have been this and nothing else. **None of the 90 changed**
+— a clean negative, and worth the twenty minutes it took: without it the
+suspicion would have sat over the whole park list indefinitely. The closest
+parks are still func_80038798 at 1 and func_80047864, func_80071424,
+func_80071460 at 2.
 
 ## Repo layout / tooling plan
 
