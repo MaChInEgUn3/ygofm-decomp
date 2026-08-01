@@ -41,9 +41,12 @@ aspsx wraps around a real `div`, and maspsx only emits them with
 `--expand-div`, which build.py now passes globally. A real division in C is
 ordinary. What is still filtered on `break` is the two-operand form
 (`break 0,260`), which is the BIOS syscall stubs.
-`jr $v`/`jr $a`/`jr $t` also stays, and it is a `switch` jump table — the C is
-trivial and the unsolved part is that splat already emits the table as data, so
-a compiled one would be a duplicate. 37 functions wait on that.
+The sixth, `jr $v`/`jr $a`/`jr $t`, went the same day: those are `switch` jump
+tables. Write the `switch`; build.py splits splat's rodata at the table and
+puts the compiled object's `.rodata` in the hole. try_func normalises the
+symbol so the fast loop still works, but **only the full build can prove the
+table landed** — a jump-table function that try_func calls MATCH still has to
+be built. 37 functions and 62 KB, the largest class the project has opened.
 It tags instead. Two tags matter:
 - **`dup-%hi`** — retail materialised one address twice. Try
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare

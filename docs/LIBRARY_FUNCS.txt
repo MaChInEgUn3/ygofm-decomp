@@ -2,6 +2,15 @@
 # ghidra_psx_ldr signature matching. Out of scope: they stay as
 # assembly and are linked as-is. Do not write C for these.
 func_80012A78
+# BIOS entry stubs sitting just under the 0x80073840 boundary: `jr $t2` to the
+# A0/B0/C0 vector, or a two-operand `break`. Assembly by construction, and
+# candidates.py started offering them once the `break` and `jr $t` drop rules
+# were retracted.
+func_80073704
+func_80073724
+func_80073734
+func_80073818
+func_80073830
 func_80073840
 func_80073850
 func_80073860

@@ -180,6 +180,13 @@ def normalise(line):
     # because the disassembly side is already the gp-relative form -- if the
     # target used lui/%hi there would be nothing here to match against.)
     text = re.sub(r"^addiu (\$\w+),\$gp,%gp_rel\(([^)]*)\)$", r"la \1,\2", text)
+    # A `switch` table: cc1psx puts it at offset 0 of the object's own
+    # .rodata and reaches it as %hi(.rodata)/%lo(.rodata), where the target
+    # names splat's symbol for the same bytes. build.py places our section in
+    # the hole splat's table left, so these are the same address -- but only
+    # the full link can show that, and without this normalisation every
+    # jump-table function reports a permanent 2.
+    text = re.sub(r"%(hi|lo)\(jtbl_[0-9A-Fa-f]+\)", r"%\1(.rodata)", text)
     # Immediates and offsets are written 0x1618 in one place and 5656 in
     # the other; normalise every hex literal to decimal so they compare.
     text = re.sub(r"\b0x([0-9a-fA-F]+)\b",

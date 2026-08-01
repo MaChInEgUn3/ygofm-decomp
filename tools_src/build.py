@@ -27,6 +27,7 @@ Run from the repo root:  python tools_src/build.py
 """
 
 import argparse
+import bisect
 import concurrent.futures as cf
 import hashlib
 import os
@@ -766,6 +767,16 @@ def object_func_size(obj, name):
     return None
 
 
+def object_section_size(obj, section):
+    """Byte size of one section in an object, or 0 if it has none."""
+    r = run([OBJDUMP, "-h", obj.relative_to(ROOT).as_posix()])
+    for line in r.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[1] == section:
+            return int(parts[2], 16)
+    return 0
+
+
 def assemble_run(index, names):
     """Assemble a run of consecutive not-yet-decompiled functions."""
     GEN.mkdir(parents=True, exist_ok=True)
@@ -792,6 +803,16 @@ def assemble_run(index, names):
     return obj
 
 
+def assemble_gen(src: Path) -> Path:
+    """Assemble a stub we generated in build/gen (rodata runs)."""
+    obj = src.with_suffix(".o")
+    if not is_stale(obj, [src, SELF]):
+        return obj
+    run([AS, *AS_FLAGS, "-o", obj.relative_to(ROOT).as_posix(),
+         src.relative_to(ROOT).as_posix()])
+    return obj
+
+
 def assemble_plain(src: Path) -> Path:
     obj = BUILD / src.relative_to(ROOT).with_suffix(".o")
     obj.parent.mkdir(parents=True, exist_ok=True)
@@ -802,7 +823,152 @@ def assemble_plain(src: Path) -> Path:
     return obj
 
 
-def write_linker_script(text_entries):
+# --------------------------------------------------------------------------
+# Jump tables.
+#
+# A `switch` dense enough for cc1psx to build a table puts that table in the
+# object's .rodata and reaches it as %hi(.rodata)/%lo(.rodata) -- offset zero
+# of the section. splat has already disassembled the same bytes into
+# asm/data/800.rodata.s as `jtbl_<addr>`, so compiling such a function means
+# the table exists twice and neither copy is where the other belongs.
+#
+# The fix is the same one .text already uses: split splat's rodata at the
+# tables owned by functions we compile, and place the compiled object's
+# .rodata in the hole. Ownership is derived from the table's own entries --
+# `.word .L800XXXXX` targets land inside exactly one function -- rather than
+# from the disassembly of the owner, which stops being read once it is
+# decompiled.
+RODATA_SRC = ROOT / "asm" / "data" / "800.rodata.s"
+RODATA_OBJ_LINE = "build/asm/data/800.rodata.o(.rodata);"
+RODATA_OBJ_STEM = "build/asm/data/800.rodata.o("
+
+
+def rodata_blocks():
+    """(name, first_line, last_line) for each dlabel block, in file order."""
+    lines = RODATA_SRC.read_text().splitlines()
+    out, start = [], None
+    for i, line in enumerate(lines):
+        if line.startswith("nonmatching ") and start is None:
+            start = i
+        m = re.match(r"^dlabel (\S+)", line)
+        if m and start is None:
+            start = i
+        m = re.match(r"^enddlabel (\S+)", line)
+        if m:
+            out.append((m.group(1), start, i))
+            start = None
+    return lines, out
+
+
+def jtbl_owners(lines, blocks):
+    """jtbl name -> the function whose body its entries point into."""
+    spans = []
+    for name in ordered_functions():
+        a = func_addr(name)
+        spans.append((a, a + (target_size(name) or 0), name))
+    spans.sort()
+    starts = [s[0] for s in spans]
+
+    def owner(addr):
+        i = bisect.bisect_right(starts, addr) - 1
+        if i >= 0 and spans[i][0] <= addr < spans[i][1]:
+            return spans[i][2]
+        return None
+
+    out = {}
+    for name, s, e in blocks:
+        if not name.startswith("jtbl_"):
+            continue
+        body = "\n".join(lines[s:e + 1])
+        owners = {owner(int(t, 16))
+                  for t in re.findall(r"\.word \.L([0-9A-Fa-f]{8})", body)}
+        owners.discard(None)
+        if len(owners) == 1:
+            out[name] = owners.pop()
+    return out
+
+
+def plan_rodata(decompiled):
+    """Linker entries for .rodata, with compiled objects in the holes.
+
+    Returns None when no decompiled function owns a table, so the ordinary
+    single-object line is kept and nothing about the build changes.
+
+    Everything outside an owned table is copied through verbatim, including
+    the lines between blocks and the tail after the last one -- the first
+    version of this carved out only the dlabel..enddlabel spans and lost the
+    16 bytes the file ends with.
+    """
+    lines, blocks = rodata_blocks()
+    owners = jtbl_owners(lines, blocks)
+    mine = set(decompiled)
+    if not any(f in mine for f in owners.values()):
+        return None
+
+    # Contiguous spans of lines belonging to one compiled owner.
+    holes = []          # (first_line, last_line, func)
+    i = 0
+    while i < len(blocks):
+        f = owners.get(blocks[i][0])
+        if f in mine:
+            j = i
+            while j + 1 < len(blocks) and owners.get(blocks[j + 1][0]) == f:
+                j += 1
+            holes.append((blocks[i][1], blocks[j][2], f))
+            i = j + 1
+        else:
+            i += 1
+
+    preamble = ['.include "macro.inc"', "", '.section .rodata, "a"', ""]
+    entries, runs, index, pos = [], [], 0, 0
+
+    def emit(chunk):
+        nonlocal index
+        if not any(l.strip() for l in chunk):
+            return
+        # `.align 3` is a no-op in splat's file -- it lists every padding byte
+        # explicitly, so the whole segment is contiguous -- but only because
+        # that segment starts 8-aligned. A chunk that starts 4 mod 8 would
+        # have the same directive emit four real bytes. Drop the wide aligns;
+        # the byte-for-byte listing is what carries the layout.
+        chunk = [l for l in chunk if not re.match(r"\s*\.align\s+[3-9]\s*$", l)]
+        text = "\n".join(preamble + chunk) + "\n"
+        stub = GEN / f"rodata_{index:04d}.s"
+        stub.parent.mkdir(parents=True, exist_ok=True)
+        if not stub.exists() or stub.read_text() != text:
+            stub.write_text(text)
+        runs.append(stub)
+        entries.append(
+            f"{stub.with_suffix('.o').relative_to(ROOT).as_posix()}(.rodata);")
+        index += 1
+
+    def next_addr(i):
+        """Address of the first data line at or after line i."""
+        for l in lines[i:]:
+            m = re.search(r"/\*\s*\w+\s+([0-9A-Fa-f]{8})(?:\s+\w+)?\s*\*/", l)
+            if m:
+                return int(m.group(1), 16)
+        return None
+
+    for first, last, f in holes:
+        emit(lines[pos:first])
+        # Reinstate the hole's original extent. cc1psx aligns each table to 8
+        # (`.align 3`) *relative to its own section*, so two tables that shared
+        # a translation unit have padding between them that separate objects
+        # cannot reproduce: jtbl_8001194C is seven live words and one word of
+        # padding belonging to the table after it. How much to add is only
+        # known once the object exists, so leave a marker and let main() fill
+        # it in -- an absolute `. = 0x...` here instead moves _gp and the whole
+        # small-data window with it.
+        start, end = next_addr(first), next_addr(last + 1)
+        span = (end - start) if (start and end) else 0
+        entries.append((f, span))
+        pos = last + 1
+    emit(lines[pos:])
+    return entries, runs
+
+
+def write_linker_script(text_entries, rodata_entries=None):
     """Rewrite splat's linker script to place our per-function objects.
 
     splat emits a single `build/src/31D8.o(<section>);` line per section,
@@ -814,12 +980,18 @@ def write_linker_script(text_entries):
     out = []
     for line in SPLAT_LD.read_text().splitlines():
         stripped = line.strip()
+        if rodata_entries is not None and stripped.startswith(RODATA_OBJ_STEM):
+            if stripped != RODATA_OBJ_LINE:
+                continue  # the undivided object is not built when we split
+            indent = line[: len(line) - len(line.lstrip())]
+            out.extend(indent + e for e in rodata_entries)
+            continue
         m = re.match(rf"{re.escape(SPLAT_CODE_OBJ)}\((\.\w+)\);", stripped)
         if not m:
             out.append(line)
             continue
         if m.group(1) != ".text":
-            continue  # our objects have no rodata/data/bss to contribute
+            continue  # our objects have no data/bss to contribute
         indent = line[: len(line) - len(line.lstrip())]
         out.extend(indent + e for e in text_entries)
     GEN_LD.write_text("\n".join(out) + "\n")
@@ -980,6 +1152,14 @@ def main():
     plain = sorted((ROOT / "asm").glob("*.s")) + \
         sorted((ROOT / "asm" / "data").glob("*.s"))
 
+    # .rodata: only split when a decompiled function owns a jump table.
+    # When we do split, the undivided object must not be assembled at all --
+    # it would define every jtbl symbol a second time.
+    rodata = plan_rodata(decompiled)
+    rodata_entries, rodata_runs = rodata if rodata else (None, [])
+    if rodata_entries is not None:
+        plain = [p for p in plain if p != RODATA_SRC]
+
     # Almost all of the wall time here is waiting on subprocesses -- a full
     # build spends minutes of real time on seconds of CPU, and under Wine
     # each PsyQ invocation pays process-startup latency. So oversubscribe
@@ -994,6 +1174,8 @@ def main():
                 jobs[("run", index)] = pool.submit(assemble_run, index, names)
         for src in plain:
             jobs[("plain", src)] = pool.submit(assemble_plain, src)
+        for stub in rodata_runs:
+            jobs[("rodata", stub)] = pool.submit(assemble_gen, stub)
         # Surface the first failure rather than a wall of tracebacks.
         for fut in cf.as_completed(jobs.values()):
             fut.result()
@@ -1023,7 +1205,25 @@ def main():
             print(f"  {name}: {built:#x} vs {wanted:#x} expected "
                   f"({delta:+d} instructions)   src/{name}.c")
 
-    write_linker_script(text_entries)
+    if rodata_entries is not None:
+        resolved = []
+        for e in rodata_entries:
+            if isinstance(e, str):
+                resolved.append(e)
+                continue
+            name, span = e
+            obj = jobs[("c", name)].result()
+            resolved.append(f"{obj.relative_to(ROOT).as_posix()}(.rodata);")
+            pad = span - object_section_size(obj, ".rodata")
+            if pad > 0:
+                resolved.append(f". = . + {pad};")
+            elif pad < 0:
+                raise SystemExit(
+                    f"{name}: compiled .rodata is {-pad} bytes larger than the "
+                    f"{span}-byte hole splat left for its jump table")
+        rodata_entries = resolved
+
+    write_linker_script(text_entries, rodata_entries)
     print(f"placed {len(text_entries)} entries in .text")
     return link_and_verify()
 

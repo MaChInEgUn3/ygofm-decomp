@@ -74,12 +74,17 @@ BRANCH = re.compile(r"\b(b(eq|ne|gez|gtz|lez|ltz|eqz|nez)?|j|jal|jr)\b")
 #     *two-operand* form, `break 0,260` and friends: those are the BIOS
 #     syscall stubs just under the library boundary, hand-written by
 #     construction. `break 7` and `break 6` are the division checks.
-# `jr $v`/`jr $a`/`jr $t` stays for now, but as a *measured* obstacle and not
-# a claim about C: those 37 are `switch` jump tables, and the C is trivial --
-# what is unsolved is that splat already emits the table as data at its own
-# address, so a compiler-generated one would be a duplicate. See DECISIONS.md.
-HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2|jr\s+\$v|jr\s+\$a"
-                          r"|break\s+\d+\s*,|jr\s+\$t|\bor\s+\$sp\b"
+#   * `jr $v`/`jr $a`/`jr $t` -- the SIXTH, retracted the same day as the
+#     fifth. These are `switch` jump tables and the C is ordinary; what
+#     blocked them was that splat emits the table as data at its own address
+#     while cc1psx emits its own into the object's .rodata. build.py now
+#     splits splat's rodata at the tables owned by compiled functions and
+#     places the compiled section in the hole. 37 in-scope functions, 62 KB --
+#     more code than everything matched before it. See DECISIONS.md.
+# What is left is genuinely hand-written: the GTE intrinsics, and the C
+# runtime and BIOS syscall stubs (`break 0,260`, writes to $sp/$gp/$fp).
+HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2"
+                          r"|break\s+\d+\s*,|\bor\s+\$sp\b"
                           r"|\$fp,\s*\$sp|\$gp,\s*%hi")
 
 

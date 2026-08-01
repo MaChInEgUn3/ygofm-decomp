@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-667 of 1794 functions decompiled and byte-matching.
+669 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~667 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~669 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3693,6 +3693,56 @@ splat's copy for the functions we compile, the way it already regenerates the
 linker script from object sizes. **The rule stays in the filter with that
 reason written down instead of the old one** — a measured obstacle, revisitable,
 not "hand-written by construction".
+
+## The sixth drop rule: splitting splat's .rodata so a `switch` can have its table
+
+`jr $v0` was filtered as hand-written from the start. It is a `switch` jump
+table, and the C is ordinary — func_80070738 is a seven-case switch and
+matches to two instructions the moment it is written as one. The two are the
+table reference: cc1psx puts its table at offset 0 of the object's own
+`.rodata` and reaches it as `%hi(.rodata)`/`%lo(.rodata)`, where the target
+names `jtbl_8001194C`, splat's symbol for the same bytes at the same address.
+
+So the whole class was blocked on layout, not on source. build.py dropped
+every non-`.text` section our objects produced — a comment even said "our
+objects have no rodata/data/bss to contribute", which was true only because
+nothing that produced any had ever been compiled.
+
+**What it took, in the order the build told me:**
+
+1. *Split splat's rodata at the owned tables.* Ownership comes from the
+   table's own entries — `.word .L800XXXXX` targets land inside exactly one
+   function — not from the owner's disassembly, which stops being read once it
+   is decompiled. All 58 tables have a unique owner and all 47 owners' tables
+   are contiguous blocks, so a hole is always one span.
+2. *Copy everything outside a hole through verbatim.* The first version carved
+   out only the `dlabel`..`enddlabel` spans and lost the 16 bytes the file ends
+   with.
+3. *Do not assemble the undivided object at all.* It defines every `jtbl`
+   symbol a second time.
+4. *Reinstate the hole's original extent.* cc1psx aligns each table to 8
+   relative to its own section, so two tables that shared a translation unit
+   have padding between them that separate objects cannot reproduce:
+   jtbl_8001194C is seven live words and one word of padding that belongs to
+   the table after it. The padding is `. = . + N` with N measured from the
+   compiled object after it exists — an absolute `. = 0x8001196C` instead moves
+   `_gp` and every gp-relative relocation in the binary overflows.
+5. *Strip `.align 3` from the generated chunks.* This is the one that took the
+   longest to see. Those directives are no-ops in splat's file, because splat
+   lists every padding byte explicitly — but only while the segment starts
+   8-aligned. A chunk starting at 0x8001196C is 4 mod 8, and the same directive
+   then emits four real bytes, which pushed `.text` four bytes down and made
+   every pointer in rodata wrong by four. The symptom was 639 "differing"
+   functions and one byte in four differing from the very start of rodata;
+   the cause was one directive that had never had to mean anything.
+
+The class is 37 in-scope functions and **62 420 bytes — more code than
+everything matched in the project before it**. Two are done (func_80070738,
+func_800707C4); the rest average 421 instructions, so the unlock buys the
+right to start, not the functions themselves.
+
+try_func normalises `%hi(jtbl_X)` to `%hi(.rodata)` so the fast loop is usable
+on them; only the full link can actually prove the address, and the sha1 does.
 
 ## Repo layout / tooling plan
 
