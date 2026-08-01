@@ -877,3 +877,23 @@ func_8002D458 -- 42 differences, all of them the split-vs-bare barrier, and the
   both do what `default` does, or gcc emits `sltiu $v0,$a0,10` where retail has
   11 -- the table covers 0..10 with two entries pointing at the default block,
   and the range check follows the *written* case range, not the reachable one.
+
+func_8005C388 -- 11 differences, register assignment around the table base.
+  Reads a halfword pair out of D_8009151C at arg0*4, sums the first halfword of
+  every earlier pair, and hands the result to func_8005B8A0 through a
+  func_8007E600/func_8007E710 pair. Instruction-for-instruction right; retail
+  keeps the base in $a1 and the running index in $v1, we get the base in $v1
+  and the loop pointer in $a0, and gcc hoists the loop pointer's initialisation
+  above the counter's where retail has it after.
+  44 -> 11, and each step is a lever already in WORKFLOW.md:
+  - the base needs a local, or cc1psx folds the first reference's `+2` into
+    `%lo(D_8009151C+2)` and every later offset is 2 too small (4 differences,
+    but the wrong 4);
+  - that local must be **scoped to before the calls**, or it goes callee-saved
+    and costs a register everywhere (44);
+  - the loop needs its own pointer variable: retail's `addu $v1,$a1,$zero` is
+    a copy, and a copy is a second name (36 -> 18);
+  - and that pointer must be assigned *at* the loop, not at its declaration
+    (18 -> 11).
+  Also: the provisional prototype said `u8 *arg0`; arg0 indexes the table, so
+  it is an s32. Corrected in functions.h.

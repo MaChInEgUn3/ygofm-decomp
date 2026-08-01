@@ -504,6 +504,9 @@ extern u8 D_800F2878[];
 extern u8 D_800EFE38[];
 extern u16 D_8009B410;
 extern u16 D_8009B412;
+extern u8 D_8009151C[];
+extern u8 *D_800E9EB4[];
+extern u8 D_801D4200[];
 extern u8 D_800E9E18[];
 /* The second function inside the func_8002DD74 listing; splat has not split
  * it yet, so it is only reachable by address. func_8002DF2C passes it as a
