@@ -77,7 +77,12 @@ meaningful, and skipping to the last one wastes hours:
    else** — that is what put func_80019A60's `la` ahead of the argument swap.
    It only works if the local replaces *every* reference to the symbol;
    a local that merely names one operand stays live and costs a register
-   everywhere (func_8005A8C4, parked). The same local is also what stops
+   everywhere (func_8005A8C4, parked). **Where the local is assigned decides
+   which register it gets**, and both ends have bitten: assigned at the top of
+   a function with calls in it, it goes callee-saved and costs a register
+   everywhere (func_800234E4, 57 differences; func_8005C388, 44); assigned
+   immediately before the expression that uses it, it stays caller-saved and
+   dies where retail's does. Scope it to the block that needs it. The same local is also what stops
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
