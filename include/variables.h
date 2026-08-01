@@ -507,6 +507,7 @@ extern u16 D_8009B410;
 extern u16 D_8009B412;
 extern u8 D_8009151C[];
 extern u8 *D_800E9EB4[];
+extern u8 D_80090800[];
 extern u8 D_801D4200[];
 extern u8 D_800E9E18[];
 /* The second function inside the func_8002DD74 listing; splat has not split
