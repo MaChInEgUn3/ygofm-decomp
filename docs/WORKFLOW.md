@@ -47,6 +47,13 @@ puts the compiled object's `.rodata` in the hole. try_func normalises the
 symbol so the fast loop still works, but **only the full build can prove the
 table landed** — a jump-table function that try_func calls MATCH still has to
 be built. 37 functions and 62 KB, the largest class the project has opened.
+Two things to know before writing one: **a jump-table function cannot take
+`-mno-split-addresses`** (under it the table load itself goes through `$at`
+where retail has an ordinary register), so a function that also needs `$at`
+stores is blocked — 17 of the remaining 34 contain no `lui $at` and are the
+ones to take first. And the **case range follows what is written, not what is
+reachable**: retail's `sltiu $v0,$a0,0xB` for a switch whose cases 1 and 10 do
+what `default` does means both are spelled out in the source (func_8002D458).
 It tags instead. Two tags matter:
 - **`dup-%hi`** — retail materialised one address twice. Try
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare

@@ -858,3 +858,22 @@ func_8002ABB4 -- 22 positional differences, all scheduling; the instruction
   pair (50), the 0xC store moved after the 0x44 copy (50). Flag sweep: 22 is
   the floor, and -fno-schedule-insns does not help -- retail's schedule is not
   simply the unscheduled one.
+
+func_8002D458 -- 42 differences, all of them the split-vs-bare barrier, and the
+  first jump-table function to hit it.
+  An eleven-case `switch` on arg0 setting D_8009B26C. The table, the dispatch,
+  every case body and the two cross-jumped tails all match under plain
+  -O2 -G8. What does not: retail stores D_8009B27A, D_8009B3D4, D_8009B0D1 and
+  D_8009B365 through `lui $at` -- the assembler expanding a bare symbol -- while
+  storing and loading D_801D07DC through an ordinary register with %lo folded,
+  which is cc1psx's own pair. One file cannot produce both.
+  **A jump-table function cannot take -mno-split-addresses at all.** Under it
+  the table load itself becomes `lui $at,%hi(.rodata)` / `addu $at,$at,$v0` /
+  `lw $v0,%lo(.rodata)($at)` where retail has the base in an ordinary register
+  and `lw $v0,0($v1)`. So the usual escape for $at stores is closed for this
+  whole class, and 17 of the 34 remaining jump-table functions contain no
+  `lui $at` at all -- those are the ones to take first.
+  Getting to 42: `case 1:` and `case 10:` have to be written out even though
+  both do what `default` does, or gcc emits `sltiu $v0,$a0,10` where retail has
+  11 -- the table covers 0..10 with two entries pointing at the default block,
+  and the range check follows the *written* case range, not the reachable one.
