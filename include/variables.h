@@ -58,6 +58,7 @@ extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
 extern u8 D_8009B318;
 
+extern u8 D_8009B140;
 extern u16 D_8009AF76;
 /* Reached %hi/%lo by func_8003D46C. */
 /* func_8003D46C needs this one to keep cc1psx's own %hi/%lo pair while the

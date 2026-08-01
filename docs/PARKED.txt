@@ -867,6 +867,12 @@ func_8002D458 -- 42 differences, all of them the split-vs-bare barrier, and the
   D_8009B365 through `lui $at` -- the assembler expanding a bare symbol -- while
   storing and loading D_801D07DC through an ordinary register with %lo folded,
   which is cc1psx's own pair. One file cannot produce both.
+  The other escape does not work either, and this was measured rather than
+  assumed: a -G8 compiler with a **-G0 assembler** (the recipe that matched
+  func_800388D8 the same day) gives the four $at stores, but it also takes
+  D_8009B268/D_8009B26C/D_8009B26D out of the gp-relative form retail has for
+  them -- 79 differences. The function needs three addressing forms and there
+  are only two knobs.
   **A jump-table function cannot take -mno-split-addresses at all.** Under it
   the table load itself becomes `lui $at,%hi(.rodata)` / `addu $at,$at,$v0` /
   `lw $v0,%lo(.rodata)($at)` where retail has the base in an ordinary register
