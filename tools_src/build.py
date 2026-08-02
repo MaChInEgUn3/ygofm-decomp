@@ -192,6 +192,7 @@ PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
     "func_80014A5C": _O2_G8_NOSCHED1,
     "func_8005A53C": _O2_G0_NOSCHED1,
+    "func_8002EC74": _O2_G8_MACRO,
     "func_80037A58": _O2_G8_MACRO,
     "func_80031000": _O2_G8_MACRO,
     "func_80044DC0": _O2_G8_MACRO,
@@ -271,6 +272,7 @@ HOIST_EPILOGUE_FUNCS = {
 
 SMALL_DATA_NOP_FUNCS = {
     "func_8002DC38",
+    "func_8002D180",
     "func_8002D62C",
     "func_8003CDF8",
     "func_8003CE48",
@@ -344,6 +346,7 @@ PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80038530"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003C7A0"] = "-G1"
+PER_FUNC_AS_FLAGS["func_8002D180"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800289BC"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8005B4D8"] = "-G0"

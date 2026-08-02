@@ -216,7 +216,10 @@ extern u8 D_8009B3C0;
 /* func_80038530 reaches this and its six neighbours through the assembler's
  * bare form, which needs the scalar declaration plus a -G0 assembler; every
  * other user takes them as unsized arrays. */
-#ifdef D_8009B364_IS_SCALAR
+#ifdef D_8009B364_SIZED
+/* Two bytes for the same reason as D_8009B0C0; see func_8002D180. */
+extern u8 D_8009B364[2];
+#elif defined(D_8009B364_IS_SCALAR)
 extern u8 D_8009B364;
 #else
 extern u8 D_8009B364[];
@@ -583,6 +586,11 @@ extern u8 D_8009B0A3[];
  * this load out of the loop and the loop head moves. */
 #ifdef D_8009B0C0_IS_VOLATILE
 extern volatile u8 D_8009B0C0;
+#elif defined(D_8009B0C0_SIZED)
+/* Two bytes so an assembler at -G1 treats it as non-small and expands the bare
+ * store through $at, while the one-byte D_8009B26C in the same unit keeps
+ * %gp_rel (func_8002D180). The size is a codegen knob; see DECISIONS.md. */
+extern u8 D_8009B0C0[2];
 #elif defined(D_8009B0C0_IS_SCALAR)
 extern u8 D_8009B0C0;
 #else
@@ -924,6 +932,7 @@ typedef struct {
 
 extern Rec0C D_800EA030[];
 extern u8 D_800EA0E8[];
+extern u8 D_800EF658[];
 extern u8 D_800F3938[];
 extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
