@@ -4063,6 +4063,63 @@ fourth byte of argument 4's reassembly, and is a no-op there (only 24 bits are
 set at that point). Something in the source produces it and a plain struct
 copy does not.
 
+## The three-cycle register permutation: one class, five members, two negatives
+
+Five parked functions now differ from retail by nothing except which register
+holds which value, in the same shape each time. Keeping the shared facts here
+rather than repeating them in five PARKED entries, so the next lever gets
+tested against the class instead of against whichever member is in front of
+you.
+
+**The members.** func_8003B808 (82), func_80020BE4 (62), func_800434F4 (62),
+func_8002F4C0 and func_8003C328 (untried, same body) are one family: a
+three-case dispatch on arg1 that writes D_8009B0F4, D_8009B118 and a handful of
+struct fields. func_800135FC (16) and func_8001352C (38) are a different body
+with the same symptom. func_800245EC (68) and func_8005B4D8 (42) are leaves
+with the same symptom and more registers in play.
+
+**The shape.** In the switch family retail puts the 32-bit mask in `$a0`, the
+loaded D_8009B0F4 in `$v0` and the small constant in `$v1`; we get `$v1`, `$a0`,
+`$v0`. Instruction for instruction the two sides agree, including the `lui` of
+case 0's mask hoisted into a branch delay slot, so every reported difference
+is positional.
+
+**What is ruled out, measured:**
+
+- *Declaration order.* All 720 orderings of func_800135FC's five locals swept
+  through try_func. 16 is the floor and the natural order is one of the
+  winners.
+- *The number of pseudos a global reference costs.* func_8002E470 matched
+  partly by declaring its globals `[2]`, making each reference one
+  pseudo-instruction at schedule time. Applied to func_8003B808 -- the one
+  member where `-mno-split-addresses` is closed, so the sized route had never
+  been tried -- it goes 82 to 94 at -G4 and 91 at -G2.
+- *Flags.* Full sweep on every member; none beats the plain setting.
+- *Extra names for the copies.* Two-name and literal-vs-variable spellings
+  tried on func_80020BE4 and func_8003C7A0's neighbours; they move the count
+  by a few and never the allocation.
+
+**What has not been tried:** the permuter. `tools/decomp-permuter` is fetched
+per machine and has been run against exactly one function in this project's
+life. This class is the obvious candidate -- five functions, one shape, source
+that is already instruction-correct.
+
+## The $at pool, partitioned
+
+The remaining pool was suspected to be mostly clones of two families. Counted
+rather than eyeballed, over the 62 candidates that pass both filters:
+
+| family | signature | count |
+|---|---|---|
+| three-case switch clone | `%hi(D_8009B0F4)` + `%hi(D_8009B118)` + `%hi(D_801AF000)` | 4 |
+| display-list leaf | `%hi(D_800FE240)`, no `addiu $sp` | 2 |
+| genuinely distinct | — | 56 |
+
+So the clone worry was largely unfounded: six of sixty-two. The four switch
+clones are func_8002F4C0, func_8003C328, func_8003C120 and func_8003BF00, and
+they belong to the permutation class above; the two leaves are func_8005B260
+and func_8005B36C. Everything else is independent work.
+
 ## Repo layout / tooling plan
 
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
