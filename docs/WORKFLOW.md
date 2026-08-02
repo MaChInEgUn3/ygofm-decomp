@@ -131,6 +131,13 @@ meaningful, and skipping to the last one wastes hours:
    `lbu $a0,0($v0)` … `addu $s0,$a0,$zero` means `s32 c = *p; … op = c;`, not
    `s32 op = *p;` (func_800386B8). An extra copy in the target is almost
    always an extra name in the source; allocation does not invent one.
+   **A global read, then stores, then written back is a local.** Retail loading
+   `D_8009B0F4` *above* the two halfword stores that precede the mask is not
+   the scheduler being clever — a load cannot move across stores through a
+   pointer. It is `v = D_8009B0F4; …stores…; v &= mask; D_8009B0F4 = v;`, and
+   the compound assignment is separate from the local: it makes the value its
+   own destination, which is what `and $v0,$v0,$a0` shows. func_8003B808 went
+   95 differences to 82 and func_80020BE4 74 to 62 on those two together.
    **A literal and a variable holding the same value are two materialisations;
    one variable used twice is one.** `D_8009B408[0] = v; D_8009B37D = 1;`
    matched func_8003C7A0 where `= v; = v` and `= 1; = 1` both gave 54 — the
@@ -413,6 +420,16 @@ still excluded; everything parked since was being re-offered as a fresh
 candidate, and the tool said "0 clean candidates" in a band where it meant
 "none *left*". A filter that silently matches nothing looks exactly like a
 filter with nothing to match — print the size of the set once in a while.
+
+**A scan is only as good as the filters it copies.** The `lui $at` pool was
+counted three times and was wrong twice, each time because the ad-hoc scan
+skipped a filter `candidates.py` already applies. 167 became 136 when the
+signature was tightened from `lui $at` to `lui $at,%hi(` — the loose form
+catches the overflow check aspsx wraps around a `div` — and 136 became **66**
+when `candidates.HAND_WRITTEN` was applied, because 62 of the remainder are
+the GTE block (`lwc2`/`rtpt`/`avsz3`). func_80069E44 is the specimen: it saves
+`$s0`-`$s2` into the *caller's* struct rather than the stack. Import the
+filters rather than re-deriving them.
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern
