@@ -903,3 +903,20 @@ func_8005C388 -- 11 differences, register assignment around the table base.
     (18 -> 11).
   Also: the provisional prototype said `u8 *arg0`; arg0 indexes the table, so
   it is an s32. Corrected in functions.h.
+
+func_8003D518 -- 8 differences, two register pairs.
+  Creates a sprite once (guarded by bit 0x80 of D_8009B3C1), then counts the
+  two halfwords at +0x48/+0x4A down by 8 each call until the first crosses
+  zero. Structure, the guard, the create block and the countdown all match.
+  What is left: retail loads +0x4A into $v0 and +0x48 into $v1, we get them the
+  other way round (six lines), and retail's %hi/%lo pair for D_8009AF76 shares
+  one register where ours uses a separate temp (two).
+  Getting to 8: D_8009AF76 needs a per-file aggregate guard -- it is read as a
+  *byte* through %hi/%lo here and gp-relatively as a halfword everywhere else,
+  which is a third kind of per-symbol disagreement alongside addressing and
+  signedness. And the two decrements need their own locals; written as
+  `*(u16 *)(p + 0x48) -= 8;` the reload for the test breaks the interleave (20).
+  Tried at 8: both declaration orders for the two locals, the D_8009AF76 read
+  scoped into its own block. `f = D_8009AF76[0]` reusing the flag local is 11.
+  The -G0-assembler recipe is closed here: D_8009B3C1 is gp-relative in the
+  same function and a -G0 assembler takes it out (67).

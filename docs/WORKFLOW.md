@@ -235,6 +235,13 @@ on a combination that had been in the table for weeks.
   pseudo born before the load's own. **When the only difference left is that a
   whole block's registers are shifted by one, look for a pseudo that should not
   exist**; a cast that changes no instruction is the commonest source.
+- **A symbol read at one width in one file and another width elsewhere** takes
+  the same per-file guard as an addressing disagreement: D_8009AF76 is a
+  halfword read gp-relatively almost everywhere and a *byte* read through
+  %hi/%lo in func_8003D518, and the aggregate arm of its guard plus
+  `-mno-split-addresses` gives both. The mechanism is that an unsized extern
+  carries no `.extern` size, so the assembler will not treat it as small data
+  even at -G8, while the scalars around it stay gp-relative.
 - **A symbol read `lb` in one place and `lbu` in another** needs an lvalue
   cast, not a value cast: `*(s8 *)&D_8009B32C == 0` gives `lb` where
   `(s8)D_8009B32C == 0` still gives `lbu` (gcc has no reason to sign-extend

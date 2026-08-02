@@ -59,7 +59,13 @@ extern u8 D_8009B2EB;
 extern u8 D_8009B318;
 
 extern u8 D_8009B140;
+/* Read as a byte through %hi/%lo by func_8003D518, and gp-relatively as a
+ * halfword everywhere else. */
+#ifdef D_8009AF76_IS_AGGREGATE
+extern u8 D_8009AF76[];
+#else
 extern u16 D_8009AF76;
+#endif
 /* Reached %hi/%lo by func_8003D46C. */
 /* func_8003D46C needs this one to keep cc1psx's own %hi/%lo pair while the
  * same unit stores to D_8009B34D as a bare symbol; volatile is the only thing
