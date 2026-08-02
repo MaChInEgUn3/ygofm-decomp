@@ -85,7 +85,14 @@ extern u16 D_8009AF96;
  * func_80037A58 needs the same bare form while *other* symbols in the same
  * function stay gp-relative, so it cannot use a -G0 assembler; there the
  * aggregate declaration plus -mno-split-addresses is the only route. */
-#ifdef D_8009B146_IS_AGGREGATE
+#ifdef D_8009B146_SIZED
+/* Eight bytes each so an assembler at -G4 treats them as non-small and expands
+ * the bare stores through $at, while the four-byte D_8009B290 and the two-byte
+ * D_8009B270/D_8009B27C in the same unit keep %gp_rel (func_8002E470). The
+ * size is a codegen knob; see the -G-threshold section of DECISIONS.md. */
+extern u16 D_8009B146[4];
+extern u16 D_8009B148[4];
+#elif defined(D_8009B146_IS_AGGREGATE)
 extern u16 D_8009B146[];
 extern u16 D_8009B148[];
 #else
@@ -235,7 +242,12 @@ extern u8 D_800F5C83[];
 /* Non-volatile in the aggregate arm: both users read it once, and volatile
  * blocks the bare-symbol form whose assembler expansion reuses the
  * destination register -- which is what retail shows. */
-#ifdef D_8009B0F4_IS_AGGREGATE
+#ifdef D_8009B0F4_SIZED
+/* Eight bytes: at -G4 that is not small data, so the reference stays a single
+ * bare pseudo-instruction and the assembler expands it -- which is what stops
+ * the scheduler interleaving its %hi with a neighbour's (func_8002E470). */
+extern s32 D_8009B0F4[2];
+#elif defined(D_8009B0F4_IS_AGGREGATE)
 extern s32 D_8009B0F4[];
 extern s32 Base2_8009B0F4[];
 extern s32 Base3_8009B0F4[];
@@ -528,7 +540,9 @@ extern s32 D_8009B120;
 extern s32 D_8009B0F0;
 extern s32 D_8009B138;
 /* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
-#ifdef D_8009B134_IS_AGGREGATE
+#ifdef D_8009B134_SIZED
+extern s32 D_8009B134[2];
+#elif defined(D_8009B134_IS_AGGREGATE)
 extern s32 D_8009B134[];
 extern s32 Base2_8009B134[];
 #else
