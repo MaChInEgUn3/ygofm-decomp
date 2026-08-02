@@ -78,6 +78,10 @@ extern u8 D_800EF6EA[];
 extern u16 D_8009AF7A;
 extern u16 D_8009AF92;
 extern u16 D_8009AF96;
+/* func_80061008 reaches both through the assembler's bare form (`lui $at`).
+ * That is the scalar declaration plus a -G0 assembler, not a declaration
+ * change: cc1psx emits `sh $0,D_8009B148` for a scalar either way, and it is
+ * the assembler's -G that decides between %gp_rel and the $at expansion. */
 extern s16 D_8009B146;
 extern s16 D_8009B148;
 extern s16 D_8009B1A8;

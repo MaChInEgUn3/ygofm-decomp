@@ -89,12 +89,25 @@ HAND_WRITTEN = re.compile(r"wc2|rtps|mfc2|mtc2"
 
 
 def parked():
-    """Names recorded as parked in the docs, so they are not re-offered."""
+    """Names recorded as parked in the docs, so they are not re-offered.
+
+    An entry is a line starting at column 0 with the function name; anything
+    after it on that line, and every indented line under it, is the diagnosis.
+    This used to take the whole line as the name, which silently stopped
+    filtering the moment entries started carrying `-- diagnosis` inline: only
+    the oldest name-only entries were still being excluded, and every function
+    parked since was being re-offered as a fresh candidate."""
     path = os.path.join(ROOT, "docs", "PARKED.txt")
     if not os.path.exists(path):
         return set()
-    return {l.split("#")[0].strip() for l in open(path) if l.strip()
-            and not l.startswith("#")}
+    names = set()
+    for line in open(path):
+        if not line.strip() or line.startswith("#") or line[0].isspace():
+            continue
+        m = re.match(r"(func_[0-9A-Fa-f]{8})\b", line.strip())
+        if m:
+            names.add(m.group(1))
+    return names
 
 
 def read(name):

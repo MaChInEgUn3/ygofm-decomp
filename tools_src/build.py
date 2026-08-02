@@ -190,6 +190,8 @@ _G0_MACRO_FUNCS = [
 PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
     "func_80014A5C": _O2_G8_NOSCHED1,
+    "func_80031000": _O2_G8_MACRO,
+    "func_80044DC0": _O2_G8_MACRO,
     "func_800386B8": _O2_G8_MACRO,
     "func_800375A4": _O2_G8_MACRO,
     "func_8002DF2C": _O2_G8_MACRO,
@@ -320,6 +322,7 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # gp-relative load. The comment above says the two -G settings must match, and
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
+PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A660"] = "-G0"

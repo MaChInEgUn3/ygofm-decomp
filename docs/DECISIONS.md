@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-688 of 1794 functions decompiled and byte-matching.
+696 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~688 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~696 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3778,6 +3778,81 @@ instructions" could have been this and nothing else. **None of the 90 changed**
 suspicion would have sat over the whole park list indefinitely. The closest
 parks are still func_80038798 at 1 and func_80047864, func_80071424,
 func_80071460 at 2.
+
+## A fourth addressing form: a scalar plus a -G0 assembler
+
+WORKFLOW listed three ways a symbol reference can be spelled and said of the
+first, the scalar, that "the assembler's `-G` never enters into it". That was
+never measured. It is wrong, and the four-line probe that shows it costs one
+command:
+
+```c
+extern short A[];  extern short C;
+void f(void) { A[0] = 0; C = 0; }
+```
+
+`CC1PSX -quiet -O2 -G8` emits
+
+```
+lui  $2,%hi(A)
+sh   $0,%lo(A)($2)
+sh   $0,C            # bare, with .extern C,2 above
+```
+
+The array gets cc1psx's own `%hi`/`%lo` pair. The **scalar gets the bare
+symbol**, and it is the *assembler* that decides what to do with it: at `-G8` it
+knows `C` is small data and renders `%gp_rel($gp)`; at `-G0` it cannot assume
+that and expands through `$at`. So `lui $at` has two sources, not one:
+
+- **aggregate + `-mno-split-addresses`** — a compiler flag, and it applies to
+  every symbol in the file, including the ones that must keep their split pair;
+- **scalar + `PER_FUNC_AS_FLAGS[f] = "-G0"`** — an assembler flag, and it only
+  reaches symbols cc1psx already emitted bare, which is exactly the scalars.
+
+func_80061008 is the case that separates them. It stores zero to two scalars
+through `$at` *and* materialises two addresses (`D_801A8000`, and the address of
+`func_80060B38`) with `lui $v0,%hi(...)` / `addiu $s4,$v0,%lo(...)` — a separate
+temp, which is cc1psx's own pair and is destroyed by `-mno-split-addresses`
+(under it the assembler expands `la $s4,sym` through `$s4` itself). No compiler
+flag serves both. The `-G0` assembler serves both, and the function matches.
+
+This narrows a claim made when the jump-table class opened: that a jump-table
+function needing `$at` stores is blocked, because the table load also goes
+through `$at` under `-mno-split-addresses`. That still holds for `$at` stores to
+*aggregates*. For scalars it does not — the `-G0` assembler composes with a
+jump table, because it changes nothing cc1psx emitted as a `%hi`/`%lo` pair.
+Worth re-reading the 17 jump-table candidates that were set aside for this.
+
+## No epilogue at all means the last call does not return
+
+`func_80030FD0` sets up a frame, saves `$ra`, makes four calls and then simply
+stops: no `lw $ra`, no `jr $ra`, no stack release. That is not a truncated
+listing and not a tail call. It is gcc emitting a barrier after a call it knows
+cannot return, which deletes the epilogue while leaving the prologue (the
+prologue is still needed — `$ra` is clobbered by the *first* call).
+
+`void func_8008FB8C(u8 *, s32) __attribute__((noreturn));` reproduces it
+exactly. `volatile void func_8008FB8C();`, the older gcc spelling, does not —
+it parses, and it changes nothing.
+
+The same property is why splat merged the function with its successor: with no
+epilogue there is no boundary to find, and nothing in `.text` referenced
+`0x80031000` because it is reached through a pointer table
+(`asm/data/80EE0.data.s` has the `.word`). Both halves matched once split.
+
+## The park filter had not filtered since the entries grew diagnoses
+
+`candidates.py`'s `parked()` read `PARKED.txt` as one name per line. Entries
+have carried `func_XXXXXXXX -- <diagnosis>` inline for a long time now, so the
+set it built held whole sentences, and the only names still being excluded were
+the oldest entries from before the format changed. Everything parked since was
+being offered as a fresh candidate.
+
+It never announced itself, because a filter that matches nothing and a filter
+with nothing to match produce the same output. What made it visible was the
+opposite symptom: three candidates in the 46-60 band, two of which had detailed
+park entries. Fixed by anchoring on the leading `func_[0-9A-Fa-f]{8}` of any
+line that starts at column 0. The set went from 437 sentences to 132 names.
 
 ## Repo layout / tooling plan
 

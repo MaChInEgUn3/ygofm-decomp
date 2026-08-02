@@ -159,6 +159,8 @@ void func_80058B4C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7);  /* PROVISIONAL */
 u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
+u8 *func_8005C7BC(u8 **arg0);  /* PROVISIONAL */
+ByteFn func_8005C768(s32 arg0);
 void func_80022EEC(u8 *arg0);
 void func_80022F98(u8 *arg0, u8 *arg1);
 /* Handlers func_80070650 compares its dispatch entry against. */
@@ -317,7 +319,7 @@ void func_8016824C(u8 *arg0);  /* PROVISIONAL */
  * arg2 is unsigned -- the length is shifted with srl. */
 void func_800356A0(u8 *dst, u8 *src, u32 len);
 void func_8003D03C(u8 *arg0);  /* PROVISIONAL */
-void func_80044DC0(s32 arg0);  /* PROVISIONAL */
+void func_80044DC0(s16 arg0);
 void func_800540B4(s32 arg0);  /* PROVISIONAL */
 s32 func_80073704(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 s32 func_80073734(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
@@ -379,6 +381,7 @@ void func_80013C28(void);
 void func_800140A0(u8 arg0);
 void func_80014308(u8 arg0);
 s32 func_8004006C(void);
+void func_80060B38(u8 *arg0);  /* PROVISIONAL */
 u8 *func_800400AC(s32 arg0, s32 arg1);
 void func_80042918(u8 *arg0);
 s32 func_8003CEB8(u8 *arg0, s32 arg1);

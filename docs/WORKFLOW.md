@@ -50,8 +50,12 @@ be built. 37 functions and 62 KB, the largest class the project has opened.
 Two things to know before writing one: **a jump-table function cannot take
 `-mno-split-addresses`** (under it the table load itself goes through `$at`
 where retail has an ordinary register), so a function that also needs `$at`
-stores is blocked — 17 of the remaining 34 contain no `lui $at` and are the
-ones to take first. And the **case range follows what is written, not what is
+stores was called blocked — 17 of the remaining 34 contain no `lui $at` and are
+the ones to take first. That block is **narrower than it looks**: a `$at` store
+to a *scalar* comes from a `-G0` assembler, not from the compiler flag (see the
+four addressing forms below), and that composes with a jump table. Only a `$at`
+store to an aggregate still needs `-mno-split-addresses`.
+And the **case range follows what is written, not what is
 reachable**: retail's `sltiu $v0,$a0,0xB` for a switch whose cases 1 and 10 do
 what `default` does means both are spelled out in the source (func_8002D458).
 It tags instead. Two tags matter:
@@ -60,7 +64,23 @@ It tags instead. Two tags matter:
   form and an alias makes them worse. A quarter of them also want a hoisted
   split address in the same unit and cannot have both.
 - **`lib-call`** — calls a PsyQ library function. An implicit declaration is
-  enough; do not write a prototype unless a float or struct is involved.
+  enough; do not write a prototype unless a float or struct is involved — or
+  unless the callee **does not return**. A function whose listing sets up a
+  frame, saves `$ra` and then just *ends* after a `jal`, with no `lw $ra`/`jr`
+  at all, is gcc dropping the epilogue behind a noreturn call: declare the
+  callee `void f(...) __attribute__((noreturn));` (func_80030FD0). `volatile
+  void f();` does **not** do it.
+
+**A second stack-allocating prologue partway through a listing is two
+functions**, and candidates.py tags it `[MERGED]`: splat missed the boundary
+because nothing in `.text` references the second entry — look for its address as
+a `.word` in `asm/data/` and you will usually find the pointer table that calls
+it. Splitting is just editing `asm/nonmatchings/31D8/`: truncate the first `.s`
+at the boundary and write the tail into `func_<addr>.s` with its own
+`glabel`/`endlabel`. build.py globs that directory and orders by address, so
+nothing else has to change; add the `INCLUDE_ASM` line to `src/31D8.c` to keep
+it in sync. The first half being epilogue-less is the *reason* splat merged
+them, and it is also the noreturn tell above.
 
 **When it does not match, work in this order.** Each step makes the next
 meaningful, and skipping to the last one wastes hours:
@@ -104,6 +124,21 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **A plain statement written before the others moves with them.** A loop
+   counter's `i = 0` sitting above the four stores that precede the loop is not
+   cosmetic: it lands before them in the prologue, where the `for`-init form
+   lands after (func_80061008). Read the prologue's order and write that order.
+   What will *not* move that way is anything the compiler puts in the loop
+   preheader — a hoisted invariant, a biased induction variable. Naming those as
+   source locals makes it worse: `s16 *q = (s16 *)(p + 6);` alongside `p` gave
+   func_80061008 a *third* induction variable and went 10 differences to 51.
+   **Split an address computation out when the target keeps it.** `p + (i+1)*8`
+   followed by a load at `+4` gets distributed into `i*8` with `12($v0)` on the
+   load; assigning `e = p + (i + 1) * 8;` first and loading `*(u8 **)(e + 4)`
+   reproduces retail's `addu; lw 4(...)` — func_800593D0, 39 differences to a
+   match. Grouping is the same lever one level down: `arg1 + ((i << 2) + 0x1E0)`
+   adds the constant before the base, `arg1 + (i << 2) + 0x1E0` after
+   (func_8005C6A0, the last two differences).
 3. **Branch polarity and loop form.** cc1psx emits the fall-through for the
    branch written as not-taken — look at which path retail falls into. But check
    the **loop statement first**, because it decides block layout on its own:
@@ -141,6 +176,17 @@ meaningful, and skipping to the last one wastes hours:
    available to fill a load-delay slot at the top of the body:
    `for (i = 0; i < 10; p++, i++)` matched func_80021480 where `i++, p++`
    left a stray `nop` and 39 differences.
+   **A counter incremented inline moves its `addiu` to the use.** Where the
+   target bumps the counter in the middle of the body — before the call, not
+   after it — write `e[0x6A] = i++;` and drop the `for`'s third clause
+   (func_80061008). The induction variable for the loop's *other* pointer
+   follows it: with the bump inline, gcc placed both before the `jal`, which is
+   what retail does.
+   **Where an independent store lands is decided by what precedes it.** A store
+   written *after* a multiply gets scheduled into the `mult`→`mflo` latency;
+   written before, it stays before. That is the whole of func_80044DC0's last
+   three differences: `sp10[3] = 0;` after `sp10[0] = …` rather than before, and
+   the two arms of the `if` both writing index 1 first.
 5. **Which test is written first**, when the target has more exit blocks than
    you produce. `if (x == 0) return 0;` then the body, versus the body under
    `if (x != 0)` with `return 0` after it, are *different layouts*: the first
@@ -258,21 +304,34 @@ on a combination that had been in the table for weeks.
   guard expresses it (func_800375A4).
 - `common.h` does not define `NULL`. Write `(u8 *)0`.
 - Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
-  Three addressing forms can appear in one function; pick each by declaration:
-  - **scalar** — cc1psx knows the size, treats it as small data and emits
-    `%gp_rel($gp)` itself. The assembler's `-G` never enters into it.
+  **Four** addressing forms can appear in one function; pick each by declaration
+  and by the assembler's `-G`:
+  - **scalar** — cc1psx emits the *bare* symbol (`sh $0,D_8009B148`) and marks it
+    `.extern sym,2`. A `-G8` assembler knows it is small data and renders
+    `%gp_rel($gp)`.
+  - **scalar + a `-G0` assembler** (`PER_FUNC_AS_FLAGS[f] = "-G0"`) — same
+    compiler output, but now the assembler cannot assume small data and expands
+    it through `$at`. This is a *fourth* form, and it is the one that matters
+    when a function needs `lui $at` on one symbol while keeping cc1psx's own
+    split pair on another — `-mno-split-addresses` would wreck the second
+    (func_80061008: `lui $at` on two scalars, `lui $v0,%hi / addiu $s4,$v0,%lo`
+    on a function address, no compiler flag can do both).
+    This list used to say "the assembler's `-G` never enters into it" for
+    scalars. That was never measured; running cc1psx on a four-line probe
+    disproves it in one command.
   - **unsized array** — not small, so cc1psx emits an explicit `%hi`/`%lo` pair
     into an ordinary register.
   - **unsized array + `-mno-split-addresses`** — cc1psx emits the bare symbol and
     the *assembler* expands it: through the destination register for a load,
-    through `$at` for a store, which has no spare register. `lui $at` in the
-    target means this one.
+    through `$at` for a store, which has no spare register.
   A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
-  disagree about the same symbol. The tell for the third form is `lui $r,%hi(s)`
-  with the memory op through the **same** `$r`; but read it in one direction
-  only — a *separate* temp is always cc1psx's own pair, while one register can
-  be either (func_80022618 splits its own pair across a delay slot using one
-  register).
+  disagree about the same symbol. `lui $at` therefore means *either* of the two
+  bare forms; separate them by what else the function needs, and prefer the
+  `-G0` assembler when a `la` in the same function wants a separate temp.
+  The tell for the fourth form is `lui $r,%hi(s)` with the memory op through the
+  **same** `$r`; but read it in one direction only — a *separate* temp is always
+  cc1psx's own pair, while one register can be either (func_80022618 splits its
+  own pair across a delay slot using one register).
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs
@@ -294,6 +353,13 @@ patterns. Read try_func's last lines, not a grep of them. And when the differenc
 small number of **`nop`s**, suspect the reader: `objdump` collapses a run of
 identical words into `...`, which cost func_800357E8 two nops that were in the
 object all along (fixed with `-z`, but the class of bug recurs).
+The same class, seventh instance: `candidates.py`'s park filter took the whole
+line of `PARKED.txt` as the function name, so it stopped working the day entries
+started carrying `-- diagnosis` inline. Only the oldest name-only entries were
+still excluded; everything parked since was being re-offered as a fresh
+candidate, and the tool said "0 clean candidates" in a band where it meant
+"none *left*". A filter that silently matches nothing looks exactly like a
+filter with nothing to match — print the size of the set once in a while.
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern
