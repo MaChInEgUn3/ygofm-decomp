@@ -1117,3 +1117,20 @@ func_80020BE4 -- 62 differences, the same three-cycle register permutation as
   func_8003B808 and *worse* here -- 65 rather than 62 -- so the candidate kept
   is the plain form. That asymmetry is unexplained and is the one loose thread.
   Whatever unparks func_8003B808 or func_800135FC unparks this.
+
+func_800434F4 -- 62 differences, the third clone of the same body and the same
+  three-cycle register permutation. Written straight from parked/func_80020BE4.c
+  with two constants changed and it lands on the identical count, which is the
+  useful fact: the class is reproducible, not a property of one function.
+  Retail: mask in $a0, the loaded D_8009B0F4 in $v0, the 0x40 in $v1. Us: $v1,
+  $a0, $v0. Everything else, including the dispatch tree, the `lui` of case 0's
+  mask hoisted into a branch delay slot and the shared 0x100 hoisted into
+  another, is instruction-for-instruction right once the read-into-a-local form
+  from func_8003B808 is applied.
+  Tried on top of that: a named local for the 0x100 that case 2 stores twice
+  (62, unchanged -- gcc shares the constant either way).
+  Four functions now sit on this one permutation: func_8003B808 (82),
+  func_80020BE4 (62), func_800434F4 (62) and func_800135FC (16). Whatever
+  explains one explains all four, and it is worth more than any of them
+  individually.
+
