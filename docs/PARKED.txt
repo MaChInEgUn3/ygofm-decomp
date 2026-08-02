@@ -1029,3 +1029,21 @@ func_800533D8 -- 7 differences, all of them which caller-saved register the
   after the pointer, `sp10[0] = 0` moved below the pointer setup, `i != -1` as
   the exit test (56, much worse), and both declaration orders. Full flag
   sweep: 7 is the floor, at plain -O2 -G8.
+
+func_8003B808 -- 95 differences, and **none of them are the jump table**. This
+  is the first jump-table function matched against a -G0 assembler, and the
+  point of parking it is that the dispatch block is instruction-for-instruction
+  right: `sltiu $v0,$a1,5`, `%hi(.rodata)`/`%lo(.rodata)`, `jr $v0`, and all
+  four `lui $at` stores to D_8009B0F4 come out exactly as retail has them. The
+  claim that a jump-table function needing $at stores is unmatchable is
+  therefore false for the ten candidates whose listings contain no `%gp_rel`
+  (see the scan in DECISIONS.md); it stands only where the function also wants
+  gp-relative scalars, which is what killed func_8002D458.
+  What is left is scheduling inside the five case bodies. Retail materialises
+  the whole 32-bit mask (`lui`+`ori`, adjacent, into $a0) at the top of each
+  block and hoists the D_8009B0F4 load above the two halfword stores that
+  follow it; we split the `lui` from the `ori` and load late, and every block
+  cascades from there. The count overstates it -- the blocks have the right
+  instructions in the wrong order, and the diff is positional.
+  Tried: volatile and non-volatile D_8009B0F4 (92 plain, 95 volatile),
+  -fno-schedule-insns and -insns2 (95, 93), the full sweep (91 at -O2 -G0).

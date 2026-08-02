@@ -449,6 +449,8 @@ extern u8 D_801D0200[];
 extern u8 D_801D0250[];
 extern u8 D_8009B114;
 extern s32 D_8009B118;
+extern u8 *D_800101D8;
+extern u8 D_801AF000[];
 extern u8 D_8009B110;
 extern volatile u16 D_8009B100;
 extern s32 D_8009B104;

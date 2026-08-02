@@ -162,6 +162,11 @@ u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005C7BC(u8 **arg0);  /* PROVISIONAL */
 s32 func_8005FC1C(s32 arg0);  /* PROVISIONAL */
 void func_8005A53C(s32 (*arg0)(s32), u8 *arg1, s32 arg2, s32 arg3);
+/* Does not return: func_80030FD0 has a prologue and no epilogue at all, which
+ * is gcc dropping the epilogue behind the barrier this attribute puts after
+ * the call.  The attribute changes codegen, so it belongs here and not in one
+ * file -- a second caller declaring it plain would keep its epilogue. */
+void func_8008FB8C(u8 *arg0, s32 arg1) __attribute__((noreturn));
 void func_800154E4(void);  /* PROVISIONAL */
 void func_8005611C(s32 arg0);  /* PROVISIONAL */
 void func_800245EC(void);  /* PROVISIONAL */
@@ -323,7 +328,7 @@ void func_80023144(u8 *arg0, s32 arg1);  /* PROVISIONAL */
 void func_801683EC(void);  /* PROVISIONAL */
 s32 func_80169C08(void);  /* PROVISIONAL */
 void func_80031CD4(u8 *arg0, s32 arg1);  /* PROVISIONAL */
-void func_8003B808(void);  /* PROVISIONAL */
+void func_8003B808(u8 *arg0, s32 arg1);
 void func_8016824C(u8 *arg0);  /* PROVISIONAL */
 /* memcpy: word loop backwards then a tail, the mirror of func_80035748.
  * arg2 is unsigned -- the length is shifted with srl. */

@@ -3816,12 +3816,31 @@ temp, which is cc1psx's own pair and is destroyed by `-mno-split-addresses`
 (under it the assembler expands `la $s4,sym` through `$s4` itself). No compiler
 flag serves both. The `-G0` assembler serves both, and the function matches.
 
-This narrows a claim made when the jump-table class opened: that a jump-table
-function needing `$at` stores is blocked, because the table load also goes
-through `$at` under `-mno-split-addresses`. That still holds for `$at` stores to
-*aggregates*. For scalars it does not — the `-G0` assembler composes with a
-jump table, because it changes nothing cc1psx emitted as a `%hi`/`%lo` pair.
-Worth re-reading the 17 jump-table candidates that were set aside for this.
+**The `-G0` assembler is not per-symbol, and that is the constraint that
+decides it.** It takes *every* scalar in the file out of `%gp_rel`, not just
+the ones you wanted bare. func_8002D458 is the counterexample already on
+record: it wants four `$at` stores and three gp-relative scalars in the same
+function, and the -G0 assembler gives it 79 differences by taking
+D_8009B268/D_8009B26C/D_8009B26D out of the gp-relative form retail has.
+All three functions this route matched (func_80061008, func_800610E0,
+func_80024734) contain **no `%gp_rel` at all**, and that is the test:
+
+```
+grep -c '%gp_rel' asm/nonmatchings/31D8/<func>.s
+```
+
+Nonzero means the -G0 assembler is out and the aggregate plus
+`-mno-split-addresses` route (func_80037A58's) is the only one left; that route
+in turn is closed for jump-table functions, because the table load goes through
+`$at` under it.
+
+With that qualifier, the claim made when the jump-table class opened — that a
+jump-table function needing `$at` stores is blocked — narrows rather than
+disappears. It still holds for `$at` stores to aggregates, and for any function
+that also has gp-relative scalars. It does *not* hold for a jump-table function
+whose only bare accesses are scalars and which has no `%gp_rel`: there the -G0
+assembler composes, because it changes nothing cc1psx emitted as a `%hi`/`%lo`
+pair. That is a one-command filter over the 17 candidates, not a day of work.
 
 ## No epilogue at all means the last call does not return
 
@@ -3882,13 +3901,51 @@ gets ignored, and it is the one that paid: after the GPREL16 fix it reported
 `func_80015078: reported MATCH for a parked near miss`. The candidate was
 right. It built green with no edit at all.
 
-The entry was one of the oldest, from before the keep-the-candidate rule was
-even written down, and it carried no diagnosis — just the name. What changed
-around it is not recoverable, but the declarations it depends on
-(`D_8009B0F4`, `func_80013998`'s return type) have both been corrected since.
-The general point is the one WORKFLOW already makes about the park list being
-a source of matches: this time the tool found it without anyone re-reading
-anything.
+The obvious suspect was the GPREL16 fix itself — it is a *loosening*, and so
+is the `sym + 2` → `sym+2` collapse that went in with it, so either could turn
+a false difference into a match. **Measured, not assumed**: the pre-fix
+try_func out of `git show HEAD~1` reports MATCH on the same file. The tool
+change is not the cause. The candidate had simply been correct for some time
+and nobody had re-run it; the entry is one of the oldest, from before the
+keep-the-candidate rule was written down, and carries no diagnosis, just the
+name. Which earlier change made it correct is not recoverable and is not
+claimed here.
+
+Two limits on reading this as "the park list is now swept". check_try_func can
+only reach the ~100 entries that *have* a candidate file, and about a third of
+PARKED.txt predates that rule and is invisible to it. And a MATCH from
+try_func is still only a MATCH from try_func — this one was confirmed by a
+green build before the entry was removed.
+
+## The jump-table $at block, scanned instead of assumed
+
+With the `-G0`-assembler form in hand, the 32 remaining jump-table candidates
+sort by two greps -- `%gp_rel` and `lui $at` -- into three groups, and the
+sort is the whole answer:
+
+| `%gp_rel` | `lui $at` | count | route |
+|---|---|---|---|
+| 0 | 0 | 2 | nothing special needed |
+| >0 | 0 | 14 | nothing special needed |
+| 0 | >0 | 10 | **scalar + `-G0` assembler** -- newly available |
+| >0 | >0 | 6 | still blocked |
+
+The ten are func_8003B808, func_8003BF00, func_8005B64C, func_8002BD0C,
+func_80057544, func_800577B0, func_800171A8, func_80042188, func_80056D7C and
+func_8002ACA4, from 109 to 895 instructions. func_8003B808 was written as the
+test: under a `-G0` assembler its dispatch block and all four `$at` stores come
+out exactly as retail has them. It is parked on case-body *scheduling*, which
+has nothing to do with the addressing question the class was blocked on.
+
+The six that are still blocked (func_8001B170, func_800262D4, func_8003DC1C,
+func_8001F55C, func_8001BD88, func_8001D670) want gp-relative scalars *and*
+`$at` stores in one function, which is func_8002D458's situation exactly: two
+knobs, three forms.
+
+Note what this cost: two greps over 32 files. The previous estimate -- "17 of
+the remaining 34 contain no `lui $at` and are the ones to take first" -- was
+counting the wrong thing, because `lui $at` was being read as a single blocked
+class rather than as two.
 
 ## Repo layout / tooling plan
 

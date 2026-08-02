@@ -53,8 +53,13 @@ where retail has an ordinary register), so a function that also needs `$at`
 stores was called blocked — 17 of the remaining 34 contain no `lui $at` and are
 the ones to take first. That block is **narrower than it looks**: a `$at` store
 to a *scalar* comes from a `-G0` assembler, not from the compiler flag (see the
-four addressing forms below), and that composes with a jump table. Only a `$at`
-store to an aggregate still needs `-mno-split-addresses`.
+four addressing forms below), and that composes with a jump table. But the -G0
+assembler is **not per-symbol** — it takes every scalar in the file out of
+`%gp_rel` — so it only works on a function with no `%gp_rel` at all. Check with
+`grep -c '%gp_rel' asm/nonmatchings/31D8/<func>.s` before spending anything;
+nonzero means only the aggregate + `-mno-split-addresses` route is left, and
+that one *is* closed for jump tables. func_8002D458 is the measured
+counterexample: 79 differences under a -G0 assembler.
 And the **case range follows what is written, not what is
 reachable**: retail's `sltiu $v0,$a0,0xB` for a switch whose cases 1 and 10 do
 what `default` does means both are spelled out in the source (func_8002D458).
@@ -322,7 +327,10 @@ on a combination that had been in the table for weeks.
     `%gp_rel($gp)`.
   - **scalar + a `-G0` assembler** (`PER_FUNC_AS_FLAGS[f] = "-G0"`) — same
     compiler output, but now the assembler cannot assume small data and expands
-    it through `$at`. This is a *fourth* form, and it is the one that matters
+    it through `$at`. **File-wide, not per-symbol**: every scalar in the unit
+    loses `%gp_rel`, so this form is only available to a function that has no
+    gp-relative access left to lose (func_8002D458 wants both and gets 79).
+    It is the one that matters
     when a function needs `lui $at` on one symbol while keeping cc1psx's own
     split pair on another — `-mno-split-addresses` would wreck the second
     (func_80061008: `lui $at` on two scalars, `lui $v0,%hi / addiu $s4,$v0,%lo`
@@ -381,8 +389,9 @@ stays as assembly. `candidates.py` applies that filter; a hand-rolled grep over
 anyone checked.
 
 **`check_try_func.py` is also a park re-reader.** Its second direction — every
-file in `parked/` must still report a difference — is what surfaced
-func_80015078: an old name-only park entry whose candidate had been correct for
+file in `parked/` must still report a difference — reaches only the ~100
+entries that have a candidate file, so it is a sweep of that set and not of
+PARKED.txt. It is what surfaced func_80015078: an old name-only park entry whose candidate had been correct for
 some time, because the declarations around it changed after it was parked. It
 built green on the first try. Run it after touching try_func, and read the
 parked failures as candidates rather than as tool bugs.
