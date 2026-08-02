@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-711 of 1794 functions decompiled and byte-matching.
+713 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~711 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~713 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3983,7 +3983,21 @@ Two consequences worth chasing:
   already is.
 - It gives a fourth thing to try on every park whose diagnosis reads "needs
   three addressing forms and there are only two knobs" — func_80030FA0 and
-  func_8002D458 both say that in those words.
+  func_8002D458 both said that in those words, and **both matched the same
+  afternoon** the threshold was measured. func_8002D458 was 42 differences and
+  the first jump-table function to hit the barrier; func_80030FA0 was 7 and had
+  eight source forms tried against it. Neither needed a source change beyond
+  giving four one-byte symbols a declared size of 4 and assembling at -G2.
+  The scan that finds the rest is one loop over `parked/`: a listing with both
+  `%gp_rel` and `lui $at` in it is a candidate. After those two there is
+  exactly one left, func_8003D03C, and it is the counterexample — see below.
+
+**It is not free.** func_8003D03C wants the same split and gets *worse* under
+it: 10 differences to 39. The bare form is one pseudo-instruction when cc1psx
+schedules, and maspsx only expands it afterwards, so every bare load ends up
+with a `nop` in its load-delay slot where retail has a real instruction. When
+the threshold fixes the addressing and the count goes up, that is what
+happened, and the old route is the one to keep.
 
 The other half of func_800136E4 was the same size threshold read the other
 way. Retail re-materialises `%hi(D_80010038)`/`%lo` *inside* the loop; with the

@@ -141,7 +141,15 @@ extern u8 D_8009B478;
 /* Declared unsized so they are never treated as small data. */
 
 extern u8 D_800EAE90[];
+/* Sized under a guard: func_8002D458 assembles at -G2, where four bytes is
+ * not small data, so this one goes through the assembler's `$at` while the
+ * one-byte scalars beside it keep %gp_rel.  The size is a codegen knob, not a
+ * measurement -- see the -G-threshold section in DECISIONS.md. */
+#ifdef D_8009B27A_SIZED
+extern u8 D_8009B27A[4];
+#else
 extern u8 D_8009B27A[];
+#endif
 /* A table of object pointers; func_8002CE64 passes its address as a u8 *. */
 #ifdef D_800EAE98_IS_PTR_TABLE
 extern u8 *D_800EAE98[];
@@ -182,7 +190,11 @@ extern u8 D_8009B260;
 extern u8 D_800EAD88[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
+#ifdef D_8009B0D1_SIZED
+extern u8 D_8009B0D1[4];
+#else
 extern u8 D_8009B0D1[];
+#endif
 extern u8 D_801D3200[];
 extern u8 D_80010384[];
 /* Scalar by default -- func_8003FCD8 reaches it gp-relatively. func_80030EC8
@@ -385,7 +397,11 @@ extern u8 D_801D1200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
 extern u8 D_801D07DC[];
+#ifdef D_8009B3D4_SIZED
+extern u8 D_8009B3D4[4];
+#else
 extern u8 D_8009B3D4[];
+#endif
 extern u16 D_801D07BC[];
 /* 0x64-byte records. Declared by record type so a scaled index cannot be
  * reassociated past the base; see the base-formation recipe in DECISIONS.md. */
@@ -547,7 +563,12 @@ extern u8 D_80090AD4[];
 extern VoidFn D_80090B3C[];
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
-#ifdef D_8009B408_IS_AGGREGATE
+#ifdef D_8009B408_SIZED
+/* Eight bytes so an assembler at -G4 treats it as non-small and expands the
+ * bare reference through $at, while the four-byte scalars in the same unit
+ * keep %gp_rel.  The size is a codegen knob; see DECISIONS.md. */
+extern s8 D_8009B408[8];
+#elif defined(D_8009B408_IS_AGGREGATE)
 extern s8 D_8009B408[];
 extern s8 Base2_8009B408[];
 extern s8 Base3_8009B408[];
@@ -794,7 +815,9 @@ extern u8 *D_8009B274;
 extern u8 *D_8009B290;
 extern s8 D_8009B2F1;
 extern u8 D_8009B2B2;
-#ifdef D_8009B365_IS_SCALAR
+#ifdef D_8009B365_SIZED
+extern u8 D_8009B365[4];
+#elif defined(D_8009B365_IS_SCALAR)
 extern u8 D_8009B365;
 #else
 extern u8 D_8009B365[];
@@ -923,7 +946,9 @@ extern u8 D_8009B268[];
 /* Aggregate by default, because most users reach it through %hi/%lo. Files
  * that need the gp-relative form define D_8009B26C_IS_SCALAR first -- see the
  * per-file declaration note on D_8009B398. */
-#ifdef D_8009B26C_IS_SCALAR
+#ifdef D_8009B26C_SIZED
+extern u8 D_8009B26C[4];
+#elif defined(D_8009B26C_IS_SCALAR)
 extern u8 D_8009B26C;
 #else
 extern u8 D_8009B26C[];

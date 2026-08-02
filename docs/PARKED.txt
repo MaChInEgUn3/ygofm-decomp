@@ -587,14 +587,6 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-# func_80030FA0 needs three addressing forms at once: %gp_rel for two scalars,
-# lui $at + %lo for two aggregates, and an explicit la for the table it indexes.
-# -mno-split-addresses gives the first two (it is what matched its sibling
-# func_8002EB48) but then folds the indexed load into `lbu %lo(sym)($at)` where
-# retail forms the address in a register first. Seven differences without the
-# flag (the two stores bare instead of $at), nine with it; eight source forms
-# tried, including integer-cast pointers to block the fold.
-func_80030FA0
 func_8003F7D4
 func_8001BD48
 func_80030F40
@@ -857,32 +849,6 @@ func_8002ABB4 -- 22 positional differences, all scheduling; the instruction
   pair (50), the 0xC store moved after the 0x44 copy (50). Flag sweep: 22 is
   the floor, and -fno-schedule-insns does not help -- retail's schedule is not
   simply the unscheduled one.
-
-func_8002D458 -- 42 differences, all of them the split-vs-bare barrier, and the
-  first jump-table function to hit it.
-  An eleven-case `switch` on arg0 setting D_8009B26C. The table, the dispatch,
-  every case body and the two cross-jumped tails all match under plain
-  -O2 -G8. What does not: retail stores D_8009B27A, D_8009B3D4, D_8009B0D1 and
-  D_8009B365 through `lui $at` -- the assembler expanding a bare symbol -- while
-  storing and loading D_801D07DC through an ordinary register with %lo folded,
-  which is cc1psx's own pair. One file cannot produce both.
-  The other escape does not work either, and this was measured rather than
-  assumed: a -G8 compiler with a **-G0 assembler** (the recipe that matched
-  func_800388D8 the same day) gives the four $at stores, but it also takes
-  D_8009B268/D_8009B26C/D_8009B26D out of the gp-relative form retail has for
-  them -- 79 differences. The function needs three addressing forms and there
-  are only two knobs.
-  **A jump-table function cannot take -mno-split-addresses at all.** Under it
-  the table load itself becomes `lui $at,%hi(.rodata)` / `addu $at,$at,$v0` /
-  `lw $v0,%lo(.rodata)($at)` where retail has the base in an ordinary register
-  and `lw $v0,0($v1)`. So the usual escape for $at stores is closed for this
-  whole class, and 17 of the 34 remaining jump-table functions contain no
-  `lui $at` at all -- those are the ones to take first.
-  Getting to 42: `case 1:` and `case 10:` have to be written out even though
-  both do what `default` does, or gcc emits `sltiu $v0,$a0,10` where retail has
-  11 -- the table covers 0..10 with two entries pointing at the default block,
-  and the range check follows the *written* case range, not the reachable one.
-
 func_8005C388 -- 11 differences, register assignment around the table base.
   Reads a halfword pair out of D_8009151C at arg0*4, sums the first halfword of
   every earlier pair, and hands the result to func_8005B8A0 through a
@@ -1047,3 +1013,20 @@ func_8003B808 -- 95 differences, and **none of them are the jump table**. This
   instructions in the wrong order, and the diff is positional.
   Tried: volatile and non-volatile D_8009B0F4 (92 plain, 95 volatile),
   -fno-schedule-insns and -insns2 (95, 93), the full sweep (91 at -O2 -G0).
+
+func_8003D03C -- 10 differences, and the -G threshold gets the *addressing*
+  right and the *schedule* wrong. Recorded because it is the first case where
+  the new lever is measurably worse than the old one.
+  Retail materialises %hi(D_8009B408) three separate times -- $v1 for a `lb`,
+  $at for a `sb`, $v0 for a `lbu` -- which is the bare form, one expansion per
+  reference. Declaring it `[8]` and assembling at -G4 produces exactly that
+  (D_8009B3B8 stays gp-relative at four bytes), and the count goes *up*, from
+  10 to 39: every bare load then carries a `nop` in its load-delay slot,
+  because the bare reference is one pseudo-instruction when cc1psx schedules
+  and maspsx only expands it afterwards, so nothing is available to fill.
+  Retail fills that slot with the `sw $zero,0x600(arg0)` that follows.
+  If aspsx fills delay slots while expanding and maspsx does not, that is a
+  toolchain gap and the second one found (the first was --expand-div). Not
+  proven -- it is equally possible retail's unit reached the symbol some way
+  neither route reproduces. Left on the old route (aggregate, default flags,
+  10) rather than the new one.
