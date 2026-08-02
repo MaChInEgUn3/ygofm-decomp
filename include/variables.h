@@ -738,6 +738,11 @@ extern s32 D_8009B330;
 extern s32 D_8009B350;
 
 /* Cursor advanced by the reader in func_80030050. */
+extern u8 D_8009AF5C[];
+extern s8 D_8009B37D;
+extern u8 *D_8009B380;
+extern u8 *D_8009B388;
+extern u8 *D_8009B274;
 extern u8 *D_8009B290;
 extern s8 D_8009B2F1;
 extern u8 D_8009B2B2;

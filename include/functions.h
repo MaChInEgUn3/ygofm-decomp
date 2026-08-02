@@ -196,7 +196,8 @@ void func_80040D14(void);
 void func_8004A0FC(u8 *arg0, u8 *arg1);
 void func_8004A27C(s32 arg0, s32 arg1, s32 arg2);
 void func_8003B50C(s32 arg0);
-void func_80013998(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4,
+/* Returns arg0; the three callers discard it. */
+u8 *func_80013998(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4,
                    void *arg5, s32 arg6, s32 arg7);
 void func_800427DC(u8 *arg0, s32 arg1);
 void func_800300C8(void);

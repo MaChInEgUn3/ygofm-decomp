@@ -954,3 +954,27 @@ func_8005F1B8 -- 24 differences, and most of them hang off one thing this
   -fno-peephole, -msoft-float. `-mno-mult` and `-mint64` are not accepted by
   cc1psx. Whatever turns the magic off is not in the flags tried so far, and
   worth another look when a fifth example turns up.
+
+func_8003C568 -- 38 differences, one scheduling decision and the operand order
+  behind it. Copies a 6-byte record from D_8009AF5C onto the stack, appends two
+  halfword constants, and writes three fields into the records at D_8009B380
+  and D_8009B388. The struct copy needs **`u16 h[3]`, not `u8 b[6]`**: with
+  alignment 1 gcc copies the last two bytes one at a time where retail uses
+  `lh`/`sh` (51 -> 49). Reading D_8009B37D into a local before the two pointer
+  loads gets those into retail's order (49 -> 38).
+  What is left: retail emits the 0xC8 store *after* the three loads and we
+  hoist it above them, which offsets everything after by one; and
+  `addu $v0,$sp,$v0` versus our `addu $v1,$v1,$sp` -- base first, not index
+  first. Three placements of the 0xC8 store all give 38.
+
+func_80013998 -- 26 positional differences, all of them one instruction pair
+  in the wrong place. Sets up a sprite from eight arguments; every store, both
+  nested branches and the shared tail match. The `arg1 |= 0x10000` in the last
+  arm is `lui $v1,1` + `or`, and retail emits it first in that block where gcc
+  sinks it eleven instructions to fill a slot -- arg1 has no consumer until the
+  store at the join, so the scheduler is free to.
+  Tried: the `|=` written at the top, the middle and the end of the block (all
+  26), -fno-schedule-insns (32) and -fno-schedule-insns2 (28).
+  Settles one thing on the way: **func_80013998 returns arg0**, not void. The
+  three callers discard it, so the change costs them nothing -- re-checked
+  func_80014EEC and func_80015078, both still MATCH.
