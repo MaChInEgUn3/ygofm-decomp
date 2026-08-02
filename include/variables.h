@@ -403,6 +403,8 @@ extern u8 D_801B1238[];
 extern u8 D_801D1200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
+extern s16 D_8009B338;
+extern u8 D_8009B320;
 extern u8 D_801D07DC[];
 #ifdef D_8009B3D4_SIZED
 extern u8 D_8009B3D4[4];

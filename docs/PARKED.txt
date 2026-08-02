@@ -1049,3 +1049,21 @@ func_80048920 -- 20 differences, a $s1/$s2 swap and the two operand orders that
   obvious fix and makes it *worse* (65) in all four spellings tried: a separate
   `v` initialised at its declaration, assigned as the first statement, assigned
   after the guard, and reassigning the parameter itself.
+
+func_80031CD4 -- 8 differences, one scheduling decision in the first block, and
+  it is the first case where the `lui $at` expansion *hides* a load-use hazard
+  from the scheduler instead of exposing one.
+  Retail loads the halfword into $v1, computes the next address in $v0, and
+  only then stores it to D_8009B338 -- the `lh $v0,0x2D3C($s0)` fills the
+  `lhu`'s load-delay slot. We put the value and the address in the same $v0, so
+  the store follows the load immediately and maspsx's `lui $at` expansion lands
+  in the delay slot by accident. Same instruction count, one slot apart, and
+  everything after it shifts.
+  The two operand-order fixes that got it from 10 to 8 are worth reading: retail
+  wants `addu $v0,$s0,$v0` (base first) for `p + n * 16`, which `p[n * 16 + K]`
+  does not give and `*(p + (n << 4) + K)` does -- the same spelling that closed
+  func_8002A2F4.
+  Tried: naming the halfword as s32/u16/s16 (all 8), naming the byte as well
+  (61), and the full flag sweep (7 at -O2 -G0, which is the same block one
+  instruction better and not obviously the right unit flag for a function with
+  no gp-relative access left).

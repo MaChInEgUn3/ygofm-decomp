@@ -244,6 +244,9 @@ void func_80040510(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 u8 *func_80019564(u8 *arg0);
 void func_80070BB8(void);
 u8 *func_80035BE4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+s32 func_8002A6B8(void);  /* PROVISIONAL */
+s32 func_80029EB0(u8 *arg0, s32 arg1);  /* PROVISIONAL */
+void func_80039A60(u8 *arg0);  /* PROVISIONAL */
 void func_8003C4E0(s32 arg0);
 void func_800715C4(void);
 void func_8003FF58(s32 arg0);
@@ -386,6 +389,9 @@ void func_80039934(u8 *arg0, s32 arg1, s32 arg2);
 
 #endif /* FUNCTIONS_H */
 s32 func_80042B98(u8 *arg0);
+void func_80043178(u8 *arg0);  /* PROVISIONAL */
+void func_8004318C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);  /* PROVISIONAL */
+void func_8001ED20(u8 *arg0);  /* PROVISIONAL */
 void func_8004036C(s32 arg0);
 void func_80059700(s32 arg0, s32 arg1);
 void func_8005F3B8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
