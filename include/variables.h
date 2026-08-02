@@ -280,6 +280,18 @@ extern u8 D_8009B1D5;
 extern u8 D_8009B164;
 extern u16 D_8009B23A;
 extern u16 D_8009B162;
+/* func_800240B0 reaches these three through the assembler's bare form while
+ * keeping %gp_rel on the one- and two-byte symbols beside them, so they carry
+ * a declared size of four and the unit assembles at -G2. The size is a codegen
+ * knob; see the -G-threshold section of DECISIONS.md. */
+#ifdef D_8009B246_SIZED
+extern u16 D_8009B246[2];
+extern u8 D_8009B24B[4];
+#else
+extern u16 D_8009B246;
+extern u8 D_8009B24B;
+#endif
+extern u8 D_8009B1D4;
 extern s8 D_8009B160;
 extern s8 D_8009B1D6;
 extern s8 D_8009B1D7;
@@ -403,7 +415,9 @@ extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
 /* Aggregate by default; func_8002892C reaches it gp-relatively and defines
  * D_8009B254_IS_SCALAR. */
-#ifdef D_8009B254_IS_SCALAR
+#ifdef D_8009B254_SIZED
+extern u8 D_8009B254[4];
+#elif defined(D_8009B254_IS_SCALAR)
 extern u8 D_8009B254;
 #else
 extern u8 D_8009B254[];
