@@ -1140,3 +1140,20 @@ func_800434F4 -- 62 differences, the third clone of the same body and the same
   explains one explains all four, and it is worth more than any of them
   individually.
 
+func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
+  placement. Same category as func_80031CD4.
+  A two-axis smooth-scroll stepper: two `div`s to get per-frame deltas, then a
+  16.16 accumulator per axis whose high half is written back to D_8009B146 and
+  D_8009B148 each call, with a frame counter that snaps both to the target when
+  it runs out. The -G4 threshold splits it: %gp_rel for the four-byte
+  D_8009B284/88/94/98 and the two-byte D_8009B2A8/2AA/29C/27C, `lui $at` for
+  D_8009B146 and D_8009B148 at a declared eight bytes. Both are read `lh` and
+  the sized arm is `u16[4]`, so the reads need the lvalue cast
+  `*(s16 *)&D_8009B146[0]` -- 12 differences to 10.
+  What is left: retail issues all four accumulator loads before the first
+  `addu` and we interleave them, and retail's D_8009B29C decrement lands after
+  the D_8009B148 store rather than before. Tried: naming the two addends (11),
+  naming both sums (10), splitting the counter's read from its decrement so the
+  read sits between the two updates the way retail's does (18, much worse).
+  Full flag sweep: 10 at plain -O2 -G8.
+

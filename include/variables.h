@@ -131,6 +131,10 @@ extern u16 D_8009B270[];
 extern u16 D_8009B270;
 #endif
 extern u16 D_8009B278;
+extern s32 D_8009B284;
+extern s32 D_8009B288;
+extern s32 D_8009B294;
+extern s32 D_8009B298;
 #ifdef D_8009B27C_IS_AGGREGATE
 extern u16 D_8009B27C[];
 #else
