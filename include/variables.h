@@ -130,7 +130,12 @@ extern u8 D_8009B478;
 
 extern u8 D_800EAE90[];
 extern u8 D_8009B27A[];
+/* A table of object pointers; func_8002CE64 passes its address as a u8 *. */
+#ifdef D_800EAE98_IS_PTR_TABLE
+extern u8 *D_800EAE98[];
+#else
 extern u8 D_800EAE98[];
+#endif
 extern u8 D_800F5C7F[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];
@@ -726,6 +731,7 @@ extern u8 D_8009AFA3[];
 extern u8 D_8009AFA3;
 #endif
 extern u8 Base2_8009AFA3;
+extern u8 D_800F5768[];
 extern s32 D_8009B074;
 extern s32 D_8009B304;
 extern s32 D_8009B310;
