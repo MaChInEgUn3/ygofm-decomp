@@ -190,7 +190,9 @@ extern u8 D_8009B260;
 extern u8 D_800EAD88[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
-#ifdef D_8009B0D1_SIZED
+#ifdef D_8009B0D1_IS_SCALAR
+extern u8 D_8009B0D1;
+#elif defined(D_8009B0D1_SIZED)
 extern u8 D_8009B0D1[4];
 #else
 extern u8 D_8009B0D1[];
@@ -256,8 +258,13 @@ extern s8 D_8009B160;
 extern s8 D_8009B1D6;
 extern s8 D_8009B1D7;
 extern u8 *D_8009B22C;
+#ifdef D_8009B36A_IS_SCALAR
+extern u16 D_8009B36A;
+extern u8 D_8009B368;
+#else
 extern u16 D_8009B36A[];
 extern u8 D_8009B368[];
+#endif
 extern u16 D_8009B33A;
 extern u8 D_8009B336;
 #ifdef D_8009B34D_IS_AGGREGATE
@@ -445,12 +452,17 @@ extern s32 D_800E9EA8[];
 extern u8 D_801DC000[];
 extern u8 *D_8009078C[];
 extern u8 D_800E9DF0[];
-/* Sized, and the size is a codegen knob rather than a fact: func_800136E4
- * assembles at -G2, where a symbol bigger than two bytes is not small data,
- * so cc1psx's bare `la` gets expanded by the assembler through the
- * destination register -- one instruction at schedule time, which is what
- * stops the %hi being hoisted out of the loop the way retail does not. */
+/* The size is a codegen knob rather than a fact, so it sits behind a guard
+ * like every other per-file disagreement here: func_800136E4 assembles at -G2,
+ * where a symbol bigger than two bytes is not small data, so cc1psx's bare
+ * `la` gets expanded by the assembler through the destination register -- one
+ * instruction at schedule time, which is what stops the %hi being hoisted out
+ * of the loop the way retail does not. */
+#ifdef D_80010038_SIZED
 extern u8 D_80010038[4];
+#else
+extern u8 D_80010038[];
+#endif
 extern u8 D_8009B0E0;
 extern u8 D_8017A1D8[];
 /* Twelve-byte records. Declared as an array of the record type so the index

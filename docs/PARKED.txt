@@ -546,6 +546,9 @@ func_80032370
 func_80045BE8
 # func_800129D8 is crt0: it writes $sp, $gp and $fp and ends in `break 0,1`.
 # Filtered by candidates.py now, listed here so nobody re-derives that.
+# func_800129D8 is the C runtime entry stub, not a matching failure: it writes
+# $sp, $gp and $fp directly and ends in `break 0,1`.  candidates.py's
+# HAND_WRITTEN filter already excludes it; the PARKED entry is belt and braces.
 func_800129D8
 # func_8002C604: addressing solved (scalar D_80010000 + -G0 assembler gives the
 # lui/lw register reuse retail has). What is left is 22 differences from one
@@ -587,12 +590,9 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-func_8003F7D4
 func_8001BD48
-func_80030F40
 func_80037D2C
 func_8002C518
-func_8003594C
 func_8003D2B8
 func_80019CC8
 func_80035A64

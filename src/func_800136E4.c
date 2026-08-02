@@ -1,3 +1,4 @@
+#define D_80010038_SIZED
 #include "common.h"
 
 void func_800136E4(void) {

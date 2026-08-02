@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-715 of 1794 functions decompiled and byte-matching.
+718 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~715 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~718 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3988,9 +3988,34 @@ Two consequences worth chasing:
   the first jump-table function to hit the barrier; func_80030FA0 was 7 and had
   eight source forms tried against it. Neither needed a source change beyond
   giving four one-byte symbols a declared size of 4 and assembling at -G2.
-  The scan that finds the rest is one loop over `parked/`: a listing with both
-  `%gp_rel` and `lui $at` in it is a candidate. After those two there is
-  exactly one left, func_8003D03C, and it is the counterexample — see below.
+  The scan that finds the rest has to run over the **names in PARKED.txt**, not
+  over `parked/*.c` — a third of the list has no candidate file, and globbing
+  the directory silently skips them. It also must not require `%gp_rel`:
+  `%gp_rel` *and* `$at` together is the case that needs an intermediate `-G`,
+  but `$at` with no gp-relative access at all is the plain `-G0`-assembler
+  case, which is what four of today's matches were. The right signature is
+  simply `lui $at`:
+
+```
+.venv/bin/python -c "
+import sys, os, re; sys.path.insert(0,'tools_src'); import candidates as c
+for n in sorted(c.parked()):
+    p = os.path.join(c.ASM, n + '.s')
+    if os.path.exists(p) and re.search(r'lui\s+[$]at', open(p).read()): print(n)
+"
+```
+
+  That returns nine, four of which had no candidate file and had never been
+  re-read: func_800129D8, func_80030F40, func_8003594C, func_8003F7D4. **Three
+  of those four matched immediately** — two on a plain `-G0` assembler with the
+  symbols redeclared as scalars, and func_8003594C on `-G2`, because it wants
+  `%gp_rel` for the one-byte D_8009B318 and `$at` for the four-byte D_8009B0F4.
+  All three had been sitting on the glob's blind spot, not on any difficulty.
+  The fourth, func_800129D8, is the C runtime entry stub (`or $sp`, `break
+  0,1`) and was never a matching failure.
+  The same loop with the park filter inverted sizes the *unattempted* pool at
+  167 functions. func_8003D03C is the one counterexample among the nine — see
+  below.
 
 **It is not free.** func_8003D03C wants the same split and gets *worse* under
 it: 10 differences to 39. The bare form is one pseudo-instruction when cc1psx
@@ -3999,12 +4024,44 @@ with a `nop` in its load-delay slot where retail has a real instruction. When
 the threshold fixes the addressing and the count goes up, that is what
 happened, and the old route is the one to keep.
 
+**A third signature, which neither scan catches.** The D_80010038 half of
+func_800136E4 has no `$at` in it at all. The tell there is `lui $r,%hi(s)` /
+`addiu $r,$r,%lo(s)` through the *same* register, re-materialised inside a
+loop — where an unsized declaration makes cc1psx emit its own pair and hoist
+the `%hi` into a callee-saved register instead. Any park whose diagnosis
+mentions a hoisted `%hi` or one spare callee-saved register is a candidate on
+that signature; func_8001BD48's entry ("retail hoists %hi(D_800A5768) between
+them") reads exactly that way.
+
 The other half of func_800136E4 was the same size threshold read the other
 way. Retail re-materialises `%hi(D_80010038)`/`%lo` *inside* the loop; with the
 symbol unsized, cc1psx emits its own pair and hoists the `%hi` into a
 callee-saved register, costing a register and every offset after it. Sized at
 4 with `-G2` it becomes one bare `la`, which is a single pseudo-instruction at
 schedule time and cannot be split — 63 differences to 12.
+
+## func_80058838 is variadic, and that is why it was set aside
+
+Not parked -- it never reached a difference count -- but the reading cost an
+hour and it will come back as a fresh 64-instruction candidate.
+
+The frame is `-0x28`, so `sp+0x28` upward is the caller's outgoing area:
+`sp+0x30`/`0x34` are arguments 3 and 4, `sp+0x38` is 5, `sp+0x3C` is 6. The
+function takes the *address* `sp+0x3C` and walks upward four bytes at a time
+reading `s32`s until one is negative, setting a bit per value in an eight-byte
+bitmap it just cleared on the stack. That is a `...` list, not an array
+argument.
+
+Arguments 3 and 4 are `Word4` by value: they are spilled to `0x30`/`0x34` on
+entry, one byte of argument 3 is overwritten (`sb $v0,0x33($sp)` = `arg1 &
+0x7F`), and both are then reassembled byte by byte into `$a2`/`$a3` for the
+call to func_80058938 -- which functions.h already declares as taking two
+`Word4`s. The byte-wise reassembly around a call is the documented tell.
+
+The one thing not explained: `and $a3,$a3,0xFFFFFF` sits between the third and
+fourth byte of argument 4's reassembly, and is a no-op there (only 24 bits are
+set at that point). Something in the source produces it and a plain struct
+copy does not.
 
 ## Repo layout / tooling plan
 
