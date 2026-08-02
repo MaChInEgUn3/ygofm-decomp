@@ -338,6 +338,9 @@ PER_FUNC_AS_FLAGS["func_8004ACE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048920"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80030F40"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A2F4"] = "-G0"
+# Parked, so no src/ file reads this; kept so PARKED.txt's difference count
+# is reproducible from the repo.
+PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DC38"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003F7D4"] = "-G0"
@@ -551,7 +554,8 @@ def compile_c(name):
         if name in DELAY_SLOT_MACRO_FUNCS:
             text = fill_delay_slot_with_macro_tail(text)
         if name in SMALL_DATA_NOP_FUNCS:
-            text = insert_small_data_load_delay_nops(text)
+            text = insert_small_data_load_delay_nops(
+                text, sdata_limit=effective_sdata_limit(name))
         if name in LA_CALL_FUNCS:
             text = split_address_across_call(text)
         if name in HOIST_EPILOGUE_FUNCS:
@@ -660,6 +664,26 @@ _ANY_LOAD = re.compile(r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,")
 _LOAD_BARE_SYM = re.compile(
     r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
 _EXTERN = re.compile(r"^\s*\.extern\s+([A-Za-z_]\w*)\s*,\s*(\d+)")
+
+
+def effective_sdata_limit(name):
+    """The assembler's -G for one function: the default 8 unless overridden.
+
+    This matters to insert_small_data_load_delay_nops, which decides what is
+    small data by comparing `.extern sym,size` against the threshold. Passing
+    the default 8 for a function that assembles at -G1 or -G2 would insert a
+    nop after a load whose *next* instruction is going to expand through $at
+    and fill the slot by itself -- one instruction too many. The fictional
+    sizes make it sharper still: D_8009B368[2], D_8009B26C[4] and
+    D_8009B408[8] are all "small" at 8 and were each chosen to fall outside
+    the threshold their own function assembles at.
+    """
+    override = PER_FUNC_AS_FLAGS.get(name)
+    if override:
+        m = re.search(r"-G(\d+)", override)
+        if m:
+            return int(m.group(1))
+    return 8
 
 
 def insert_small_data_load_delay_nops(lines, sdata_limit=8):

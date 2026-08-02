@@ -313,7 +313,8 @@ def built_lines(func, csrc, extra_flags):
     if func in B.DELAY_SLOT_MACRO_FUNCS:
         text = B.fill_delay_slot_with_macro_tail(text)
     if func in B.SMALL_DATA_NOP_FUNCS:
-        text = B.insert_small_data_load_delay_nops(text)
+        text = B.insert_small_data_load_delay_nops(
+            text, sdata_limit=B.effective_sdata_limit(func))
     if func in B.LA_CALL_FUNCS:
         text = B.split_address_across_call(text)
     if func in B.HOIST_EPILOGUE_FUNCS:
