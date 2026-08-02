@@ -978,3 +978,16 @@ func_80013998 -- 26 positional differences, all of them one instruction pair
   Settles one thing on the way: **func_80013998 returns arg0**, not void. The
   three callers discard it, so the change costs them nothing -- re-checked
   func_80014EEC and func_80015078, both still MATCH.
+
+func_80026A3C -- 4 differences, all operand order gcc canonicalises away.
+  Either sets one field from D_80090800 or walks five records through
+  D_800907D8 checking a flag. Structure, both branches, the loop and the base
+  locals all match.
+  Retail writes `addu $v0,$s0,$v0` (i + k*20), `addu $v0,$v0,$s2` (index +
+  table) and `addu $a0,$v0,$s1` (offset + record base); we get the operands the
+  other way round in all three and the last into $v0 rather than a fresh $a0.
+  Writing the additions in retail's order explicitly -- `(i + k * 20) + tbl`,
+  `(n * 28) + rec` -- changes nothing: gcc canonicalises `int + pointer` back.
+  Getting to 4: a base local for D_80090800 (or the `+2` folds into %lo), base
+  locals for D_800907D8 and D_801A7AD8 before the loop, and `i = 0` assigned
+  *before* those two rather than in the `for` init -- 31 -> 11 -> 9 -> 4.
