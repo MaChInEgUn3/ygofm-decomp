@@ -214,6 +214,14 @@ on a combination that had been in the table for weeks.
   the callee and its other caller byte-identical and removed the `andi` that
   was blocking func_80021480. Re-run try_func over every decompiled caller
   when you change one — same hazard as adding a prototype.
+- **A prototype can need a per-file guard too.** func_80017F04 takes three
+  parameters and func_80018004 calls it with one — retail sets neither `$a1`
+  nor `$a2` at that call, so the caller's translation unit never saw the real
+  declaration. functions.h guards it on `FUNC_80017F04_FULL`, defined only by
+  the file that defines the function. When a caller matches while passing
+  fewer arguments than the callee reads, that is not a bug to fix: it is the
+  original build's missing prototype, and forcing one signature on both breaks
+  whichever side you did not measure.
 - **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`

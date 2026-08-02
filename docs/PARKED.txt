@@ -920,3 +920,21 @@ func_8003D518 -- 8 differences, two register pairs.
   scoped into its own block. `f = D_8009AF76[0]` reusing the flag local is 11.
   The -G0-assembler recipe is closed here: D_8009B3C1 is gp-relative in the
   same function and a -G0 assembler takes it out (67).
+
+func_80017F04 -- 12 differences: two registers and the scheduling behind them.
+  Creates a sprite for the record at arg0 and fills five bytes at +0x67..+0x6B,
+  one of which is the record's index computed as a pointer difference divided
+  by 28 (gcc factors that into `srl 2` plus the unsigned magic multiply for 7).
+  Retail puts the magic constant in $a0 and the D_801D4244 base in $v0; we get
+  $v1 for both, and the two `sb $zero` stores then schedule ahead of the
+  `lh 0xC($s1)` instead of into the gaps after it.
+  47 -> 12 with a base local for D_801D4244 assigned before the +0x68
+  statement. Tried at 12 or worse: five orderings of the four byte stores
+  (the division first is 20, the zero stores last 51).
+  Worth recording separately: this function needs a **per-file prototype**.
+  It has three parameters -- arg1/arg2 go to the sprite's +0x30/+0x32 -- but
+  func_80018004 calls it with one and retail sets neither $a1 nor $a2 there,
+  so that translation unit never saw the real declaration. functions.h now
+  guards it on FUNC_80017F04_FULL, which the definition's file defines and
+  nobody else does. First function prototype in the project to need the same
+  per-file treatment the variables have.

@@ -390,7 +390,16 @@ s32 func_8003FCD8(void);
 void func_8005B85C(void);
 void func_8005922C(u8 *arg0, s32 arg1);
 void func_8005F91C(s32 arg0, void *arg1, void *arg2, s32 arg3);
+/* Three parameters -- it stores arg1/arg2 into the sprite's +0x30/+0x32 --
+ * but func_80018004 calls it with one and retail sets neither $a1 nor $a2
+ * there, so that translation unit cannot have seen this declaration. The
+ * definition's file defines FUNC_80017F04_FULL; everyone else keeps the
+ * one-argument view the original callers had. */
+#ifdef FUNC_80017F04_FULL
+u8 *func_80017F04(u8 *arg0, s32 arg1, s32 arg2);
+#else
 u8 *func_80017F04(u8 *arg0);
+#endif
 u8 *func_80014EEC(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, void *arg4, s32 arg5, s32 arg6);
 void func_800289BC(void);
 s32 func_8002C7E8(s32 arg0, s32 arg1);
