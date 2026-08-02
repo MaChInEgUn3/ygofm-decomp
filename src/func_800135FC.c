@@ -8,5 +8,6 @@ void func_800135FC(void) {
     s32 y = x * func_800866A0(*(s16 *)(p + 4) + 0x400) / 4096;
     s32 w = x * func_80086770(*(s16 *)(p + 4) + 0x400) / 4096;
 
-    func_800134E0(p, w, y, z);
+    x = w;
+    func_800134E0(p, x, y, z);
 }
