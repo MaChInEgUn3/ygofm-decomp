@@ -1157,3 +1157,19 @@ func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
   read sits between the two updates the way retail's does (18, much worse).
   Full flag sweep: 10 at plain -O2 -G8.
 
+func_8003A01C -- 33 differences, and it ends up in the three-cycle register
+  permutation class (see DECISIONS) despite not being one of the four clones.
+  A variant of that body: no D_801AF000, case 0 computes `0x340 - n * 192` into
+  a field the family does not touch, case 2 reads `*(s32 *)(p + 0x38)` where the
+  family uses a global.
+  Three levers took it from 83 to 33 and the last is new:
+  - read D_8009B0F4 into a local before the field stores (the class lever);
+  - read `*(s32 *)(p + 0x3C)` and D_8009B118 into locals early, where retail
+    issues their loads (83 to 65 to 54);
+  - **give the two arms that share a tail the same local.** Cases 1 and 2 end
+    with the same three stores, but case 1's value is D_8009B118 and case 2's
+    is `*(s32 *)(p + 0x38)`. Written as different expressions gcc emits the
+    tail twice; assigned to one local `t` first, it cross-jumps to retail's
+    shared `.L8003A170`. 54 to 33.
+  What is left is the permutation and nothing else.
+
