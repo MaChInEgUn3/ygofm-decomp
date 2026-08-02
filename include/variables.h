@@ -258,7 +258,13 @@ extern s8 D_8009B160;
 extern s8 D_8009B1D6;
 extern s8 D_8009B1D7;
 extern u8 *D_8009B22C;
-#ifdef D_8009B36A_IS_SCALAR
+#ifdef D_8009B368_SIZED
+/* Two bytes so an assembler at -G1 treats it as non-small and expands the bare
+ * store through $at, while the one-byte D_8009B26C beside it keeps %gp_rel.
+ * The size is a codegen knob; see DECISIONS.md. */
+extern u8 D_8009B368[2];
+extern u16 D_8009B36A[];
+#elif defined(D_8009B36A_IS_SCALAR)
 extern u16 D_8009B36A;
 extern u8 D_8009B368;
 #else
@@ -440,6 +446,9 @@ typedef struct {
 } Rec64;
 
 extern Rec64 D_800EB0F8[];
+extern u16 D_8009B234;
+extern u16 D_8009B236;
+extern u16 D_8009B230;
 extern u8 D_80178130[];
 extern u8 D_8017808C[];
 extern u8 D_8018C2D8[];

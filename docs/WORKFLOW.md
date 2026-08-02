@@ -412,5 +412,11 @@ some time, because the declarations around it changed after it was parked. It
 built green on the first try. Run it after touching try_func, and read the
 parked failures as candidates rather than as tool bugs.
 
+**`git checkout -- .` is not "undo my last file".** It reverted four files of
+uncommitted work in this project once, to remove one bad `src/` file that
+`rm` would have handled. The untracked candidate in `parked/` survived and
+everything tracked did not, which is the worst shape for noticing. Name the
+path.
+
 Run `tools_src/sync_count.py` before committing a batch — the count has been
 typed wrong twice.

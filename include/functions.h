@@ -171,7 +171,7 @@ void func_8005A53C(s32 (*arg0)(s32), u8 *arg1, s32 arg2, s32 arg3);
 void func_8008FB8C(u8 *arg0, s32 arg1) __attribute__((noreturn));
 void func_800154E4(void);  /* PROVISIONAL */
 void func_8005611C(s32 arg0);  /* PROVISIONAL */
-void func_800245EC(void);  /* PROVISIONAL */
+void func_800245EC(u8 *arg0, s32 arg1);
 s32 func_80024704(s16 *arg0, s16 *arg1);
 void func_80059AE0(u16 arg0);
 void func_80014A5C(s32 arg0);
@@ -327,6 +327,10 @@ void func_80030250(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 void func_8002BAB4(void);   /* no read of $a0 before it writes one */
 void func_8002BFCC(void);   /* likewise */
 void func_8003FF34(void);
+void func_80180FD8(u16 *arg0, u16 *arg1, u16 *arg2);  /* PROVISIONAL */
+s32 func_801812B4(void);  /* PROVISIONAL */
+void func_80181E30(void);  /* PROVISIONAL */
+void func_8003FF08(s32 arg0);  /* PROVISIONAL */
 void func_80015A00(void);
 void func_8004763C(void);
 void func_80012D84(s32 arg0);

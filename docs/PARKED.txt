@@ -1067,3 +1067,18 @@ func_80031CD4 -- 8 differences, one scheduling decision in the first block, and
   (61), and the full flag sweep (7 at -O2 -G0, which is the same block one
   instruction better and not obviously the right unit flag for a function with
   no gp-relative access left).
+
+func_800245EC -- 68 differences, right instruction count (71 both sides), and
+  the whole thing is which caller-saved register holds what in a leaf.
+  A three-way dispatch on arg1 that ends each arm with `jr $ra` and a store in
+  the delay slot; the addressing is settled (scalar D_8009B0F4 plus a -G0
+  assembler gives all four `lui $at` stores and the two same-register loads).
+  Retail copies the pointer argument out of $a0 into $a2 as its first
+  instruction, keeps the list cursor in $a3 and a shared constant 1 in $t0,
+  which leaves $a0 free for the 32-bit masks. We keep the pointer in $a0 and
+  spread the masks over $v1. The copy is the usual tell for an extra name, and
+  it is not: `u8 *p = arg0;` and an `(u8 *)`-cast s32 parameter both coalesce
+  and change nothing (68).
+  Reading `*(s32 *)(p + 0x3C)` before the D_8009B0F4 read-modify-write, which
+  is the order retail shows, makes it worse (70). Full flag sweep: 57 at
+  -O2 -G0 -fno-schedule-insns, still all register naming.
