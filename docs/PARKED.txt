@@ -996,23 +996,25 @@ func_800533D8 -- 7 differences, all of them which caller-saved register the
   the exit test (56, much worse), and both declaration orders. Full flag
   sweep: 7 is the floor, at plain -O2 -G8.
 
-func_8003B808 -- 95 differences, and **none of them are the jump table**. This
-  is the first jump-table function matched against a -G0 assembler, and the
-  point of parking it is that the dispatch block is instruction-for-instruction
-  right: `sltiu $v0,$a1,5`, `%hi(.rodata)`/`%lo(.rodata)`, `jr $v0`, and all
-  four `lui $at` stores to D_8009B0F4 come out exactly as retail has them. The
-  claim that a jump-table function needing $at stores is unmatchable is
-  therefore false for the ten candidates whose listings contain no `%gp_rel`
-  (see the scan in DECISIONS.md); it stands only where the function also wants
-  gp-relative scalars, which is what killed func_8002D458.
-  What is left is scheduling inside the five case bodies. Retail materialises
-  the whole 32-bit mask (`lui`+`ori`, adjacent, into $a0) at the top of each
-  block and hoists the D_8009B0F4 load above the two halfword stores that
-  follow it; we split the `lui` from the `ori` and load late, and every block
-  cascades from there. The count overstates it -- the blocks have the right
-  instructions in the wrong order, and the diff is positional.
-  Tried: volatile and non-volatile D_8009B0F4 (92 plain, 95 volatile),
-  -fno-schedule-insns and -insns2 (95, 93), the full sweep (91 at -O2 -G0).
+func_8003B808 -- 82 differences, **and the diagnosis this entry used to carry
+  is now fixed**. It said retail "hoists the D_8009B0F4 load above the two
+  halfword stores that follow it" and we did not. Reading the global into a
+  local before those stores and writing it back after -- `v = D_8009B0F4;
+  ...stores...; v &= 0xFFDDFFFF; D_8009B0F4 = v;` -- puts the load exactly
+  where retail has it, in all five case bodies. 95 to 82, and the compound
+  assignment is what makes the value its own destination the way retail's
+  `and $v0,$v0,$a0` shows.
+  It remains the first jump-table function matched against a -G0 assembler:
+  the dispatch, `%hi(.rodata)`/`%lo(.rodata)`, `jr $v0` and all four `lui $at`
+  stores are instruction-for-instruction right, which is why the "$at stores
+  plus a jump table is unmatchable" claim is false for the ten candidates with
+  no `%gp_rel`.
+  What is left is a **three-cycle register permutation**, the func_800135FC
+  class: retail puts the 32-bit mask in $a0, the loaded value in $v0 and the
+  0x40 constant in $v1; we get $v1, $a0, $v0. Every instruction is otherwise
+  identical and in the same order, so the count is positional.
+  func_80020BE4 is the same body without the jump table and lands in exactly
+  the same place -- see its entry.
 
 func_8003D03C -- 10 differences, and the -G threshold gets the *addressing*
   right and the *schedule* wrong. Recorded because it is the first case where
@@ -1102,3 +1104,16 @@ func_8005B4D8 -- 42 differences, right instruction count, and the same class as
   sweep (43 at plain -O2 -G8).
   func_8005B260 is its sibling -- same body one word shorter -- and will have
   the same problem. Do not spend on it separately.
+
+func_80020BE4 -- 62 differences, the same three-cycle register permutation as
+  func_8003B808 and nothing else. A three-case `switch` that gcc compiles to a
+  comparison tree rather than a table; the dispatch matches exactly, including
+  the `lui` of case 0's mask hoisted into a branch delay slot and the 0xF8
+  constant hoisted into another.
+  The two levers that took it from 74 to 62 are the ones now in WORKFLOW:
+  read D_8009B0F4 into a local before the stores that precede the mask, and
+  put the `*(p+0x1C)` store between the first write-back and the second read.
+  Compound assignment (`v &= mask; D_8009B0F4 = v;`) is better for
+  func_8003B808 and *worse* here -- 65 rather than 62 -- so the candidate kept
+  is the plain form. That asymmetry is unexplained and is the one loose thread.
+  Whatever unparks func_8003B808 or func_800135FC unparks this.
