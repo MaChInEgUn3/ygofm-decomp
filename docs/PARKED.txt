@@ -1082,3 +1082,23 @@ func_800245EC -- 68 differences, right instruction count (71 both sides), and
   Reading `*(s32 *)(p + 0x3C)` before the D_8009B0F4 read-modify-write, which
   is the order retail shows, makes it worse (70). Full flag sweep: 57 at
   -O2 -G0 -fno-schedule-insns, still all register naming.
+
+func_8005B4D8 -- 42 differences, right instruction count, and the same class as
+  func_800245EC: a leaf with nine live temporaries where every difference is
+  which of $a0-$a3/$t0-$t4 holds what, cascading positionally from the first
+  instruction.
+  A GPU display-list builder: copies a tag word and n payload words into the
+  buffer at D_800FE240, appends two terminator words, and links the old buffer
+  pointer into the low 24 bits of an entry in the table at arg1+4 before
+  advancing D_800FE240 past what it wrote. Everything about the *shape*
+  reproduces -- the reversed `for (i = n - 1; i != -1; i--)` with a `*q++`
+  cursor walking the other way, the six separate reloads of D_800FE240, the
+  one local that stops the seventh, and the scalar-plus--G0-assembler
+  addressing that gives both the same-register loads and the `lui $at` store.
+  Retail hoists both 32-bit constants (0xE1000200, 0xE6000001) above the first
+  read of arg0 and keeps arg0 itself as the cursor; we schedule the constants
+  after and copy arg0 into $t1 first. Tried: a separate cursor variable (42,
+  one better), hoisting `k` to the top (71, much worse), and the full flag
+  sweep (43 at plain -O2 -G8).
+  func_8005B260 is its sibling -- same body one word shorter -- and will have
+  the same problem. Do not spend on it separately.
