@@ -938,3 +938,19 @@ func_80017F04 -- 12 differences: two registers and the scheduling behind them.
   guards it on FUNC_80017F04_FULL, which the definition's file defines and
   nobody else does. First function prototype in the project to need the same
   per-file treatment the variables have.
+
+func_8005F1B8 -- 24 differences, and most of them hang off one thing this
+  project has not seen before: **retail divides by a literal constant with a
+  real `div`**, materialising 750 into $a0 first, where gcc turns `/ 750` into
+  the magic multiply at every -O level (0, 1 and 2 all use it here).
+  Structure otherwise recovered: `if (arg0 < 2)` with the body inside rather
+  than an early return (30 -> 24, the same polarity lesson as func_8003FD14),
+  the 0x32 clamp, the -0x12C, the `(s16)` test, and the halve-if-positive.
+  The class is small and clustered: four in-scope functions divide by a
+  register that was just loaded with a constant, and three of them
+  (func_8005F1B8, func_8005F27C, func_8005F5C8) are neighbours, so it is
+  probably one translation unit built differently rather than a source shape.
+  Probed and rejected: -O0/-O1/-O2 (all magic), -fno-expensive-optimizations,
+  -fno-peephole, -msoft-float. `-mno-mult` and `-mint64` are not accepted by
+  cc1psx. Whatever turns the magic off is not in the flags tried so far, and
+  worth another look when a fifth example turns up.
