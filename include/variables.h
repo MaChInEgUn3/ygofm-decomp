@@ -81,9 +81,17 @@ extern u16 D_8009AF96;
 /* func_80061008 reaches both through the assembler's bare form (`lui $at`).
  * That is the scalar declaration plus a -G0 assembler, not a declaration
  * change: cc1psx emits `sh $0,D_8009B148` for a scalar either way, and it is
- * the assembler's -G that decides between %gp_rel and the $at expansion. */
+ * the assembler's -G that decides between %gp_rel and the $at expansion.
+ * func_80037A58 needs the same bare form while *other* symbols in the same
+ * function stay gp-relative, so it cannot use a -G0 assembler; there the
+ * aggregate declaration plus -mno-split-addresses is the only route. */
+#ifdef D_8009B146_IS_AGGREGATE
+extern u16 D_8009B146[];
+extern u16 D_8009B148[];
+#else
 extern s16 D_8009B146;
 extern s16 D_8009B148;
+#endif
 extern s16 D_8009B1A8;
 extern s16 D_8009B1A0;
 extern s16 D_8009B1D2;
@@ -143,6 +151,7 @@ extern u8 D_800EAE98[];
 extern u8 D_800F5C7F[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];
+extern u8 D_800F3A10[];
 extern u8 D_800FE148[];
 extern u8 D_800FE348[];
 extern u8 D_800938AE[];
@@ -193,6 +202,8 @@ extern u8 D_8009B3C0;
 extern u8 D_8009B364[];
 extern u16 D_800F5C80[];
 extern u8 D_8009AF94;
+extern u8 D_8009AF9B;
+extern s32 D_8009AF9C;
 extern u8 D_800F5C82[];
 extern u8 D_800F5C83[];
 /* Read twice in a row by func_80015038, once per condition, so the
@@ -405,6 +416,7 @@ typedef struct {
 
 extern Rec64 D_800EB0F8[];
 extern u8 D_80178130[];
+extern u8 D_8017808C[];
 extern u8 D_8018C2D8[];
 extern u8 D_801A7E20[];
 extern u8 D_8015C424[];
@@ -495,7 +507,11 @@ extern u8 D_8009B0C0[];
 #endif
 extern u8 D_8009B0C1;
 extern u16 D_8009B098;
+#ifdef D_8009B0CC_IS_AGGREGATE
+extern s32 D_8009B0CC[];
+#else
 extern s32 D_8009B0CC;
+#endif
 /* func_8003CBE8 reaches these two gp-relatively. */
 #ifdef D_8009B39C_IS_SCALAR
 extern u8 D_8009B39C;
@@ -512,6 +528,7 @@ extern ObjFn D_80090EAC[];
 extern u8 D_801D1880[];
 extern u8 *D_8009B3E0;
 extern u16 D_8009B322;
+extern u16 D_8009B348[2];
 extern s8 D_800909D4[][6];
 extern VoidFn D_80090A5C[];
 extern u8 D_80090AD4[];
@@ -831,6 +848,7 @@ extern u8 D_801D5800[];
 extern u8 D_801D0000[];
 extern u8 D_800917F0[];
 extern u8 D_800A5768[];
+extern u8 D_800F2B50[];
 extern u8 D_800F2C40[];
 extern u8 D_800E9DB0[];
 extern u8 D_800E9EF0[];

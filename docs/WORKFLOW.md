@@ -111,6 +111,12 @@ meaningful, and skipping to the last one wastes hours:
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
+   **A base local also decides how a large constant offset is spelled.**
+   `*(u16 *)(D_8015C424 + 0x1BD0C)` written against the symbol folds the whole
+   offset into `%hi`; against a local it becomes retail's `lui/ori 0x18000`
+   plus `0x3D0C` in the load — gcc splitting the constant because the base is
+   now a register. func_80024734, 40 differences to 4, and the local is the
+   same one the function stores at the end anyway.
    Before inventing a name for a copy, **check whether the copy is the return
    value**: retail's `addu $v0,$s0,$zero` before a tail that works through
    `$v0` is `return p;` on a function whose prototype only says `void`
@@ -182,6 +188,11 @@ meaningful, and skipping to the last one wastes hours:
    (func_80061008). The induction variable for the loop's *other* pointer
    follows it: with the bump inline, gcc placed both before the `jal`, which is
    what retail does.
+   **A pointer that walks up while the counter walks down is a real `*q++`.**
+   gcc reverses the counter after strength reduction has left it live only in
+   the exit test, so the address giv keeps going forward: no index expression
+   reproduces it in either direction, and an explicit cursor does
+   (func_800533D8, 55 differences to 10).
    **Where an independent store lands is decided by what precedes it.** A store
    written *after* a multiply gets scheduled into the `mult`→`mflo` latency;
    written before, it stays before. That is the whole of func_80044DC0's last
@@ -368,6 +379,13 @@ justify a decision — and then **filter the scan by scope**: anything at or abo
 stays as assembly. `candidates.py` applies that filter; a hand-rolled grep over
 `asm/` does not, and three functions were parked as matching failures before
 anyone checked.
+
+**`check_try_func.py` is also a park re-reader.** Its second direction — every
+file in `parked/` must still report a difference — is what surfaced
+func_80015078: an old name-only park entry whose candidate had been correct for
+some time, because the declarations around it changed after it was parked. It
+built green on the first try. Run it after touching try_func, and read the
+parked failures as candidates rather than as tool bugs.
 
 Run `tools_src/sync_count.py` before committing a batch — the count has been
 typed wrong twice.

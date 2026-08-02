@@ -26,6 +26,15 @@ typedef u8 *(*ByteFn)(u8 **);
 
 typedef void (*VoidFn)(void);
 
+/* PsyQ's SVECTOR: three signed halfwords and a pad, eight bytes. Copied whole
+ * by func_8005A1F4, which is how its size is known. */
+typedef struct {
+    s16 vx;
+    s16 vy;
+    s16 vz;
+    s16 pad;
+} SVector;
+
 /* Seven words passed by value: the o32 ABI copies anything over 16 bytes
  * into the caller's outgoing area and passes its address. */
 typedef struct {

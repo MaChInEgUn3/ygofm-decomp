@@ -195,6 +195,9 @@ def normalise(line):
     # splat had no name for, and our side spells the same address as a symbol.
     text = re.sub(r"(-?\d+)\(\$gp\)",
                   lambda m: GP_SYMS.get(int(m.group(1)), m.group(0)), text)
+    # `sym + 2` on one side and `sym+2` on the other are the same operand;
+    # the target's .s writes the spaces and objdump's relocation does not.
+    text = re.sub(r"\s*\+\s*", "+", text)
     text = text.lower()
     for alias, canon in ALIASES.items():
         text = text.replace(alias, canon)
@@ -377,13 +380,24 @@ def _from_objdump(dump, func):
                     tag = f"%lo({sym})" if not add else f"%lo({sym}+{add})"
                     prev = re.sub(r"-?\d+$", tag, prev)
             elif kind == "R_MIPS_GPREL16":
+                # The addend lives in the immediate field here too, exactly as
+                # for R_MIPS_LO16 above, and dropping it made `D_8009B348[1]`
+                # read as `D_8009B348[0]` -- two stores to the same halfword
+                # reported as a match against a target that writes two.
                 if re.search(r"-?\d+\(\$gp\)", prev):
-                    prev = re.sub(r"-?\d+(\(\$gp\))",
-                                  rf"%gp_rel({sym})\1", prev)
+                    m2 = re.search(r"(-?\d+)\(\$gp\)", prev)
+                    add = int(m2.group(1)) if m2 else 0
+                    tag = f"%gp_rel({sym})" if not add \
+                        else f"%gp_rel({sym}+{add})"
+                    prev = re.sub(r"-?\d+(\(\$gp\))", rf"{tag}\1", prev)
                 else:
                     # `addiu $r,$gp,0` -- taking the address rather than
                     # loading through it.
-                    prev = re.sub(r"(\$gp,)-?\d+$", rf"\1%gp_rel({sym})", prev)
+                    m2 = re.search(r"\$gp,(-?\d+)$", prev)
+                    add = int(m2.group(1)) if m2 else 0
+                    tag = f"%gp_rel({sym})" if not add \
+                        else f"%gp_rel({sym}+{add})"
+                    prev = re.sub(r"(\$gp,)-?\d+$", rf"\1{tag}", prev)
             elif kind == "R_MIPS_26":
                 # A jump inside the same section relocates against `.text`
                 # itself; that is not a callee name, and substituting it

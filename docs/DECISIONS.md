@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-701 of 1794 functions decompiled and byte-matching.
+705 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~701 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~705 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3853,6 +3853,42 @@ with nothing to match produce the same output. What made it visible was the
 opposite symptom: three candidates in the 46-60 band, two of which had detailed
 park entries. Fixed by anchoring on the leading `func_[0-9A-Fa-f]{8}` of any
 line that starts at column 0. The set went from 437 sentences to 132 names.
+
+## try_func dropped the addend on gp-relative relocations
+
+`D_8009B348[1]` and `D_8009B348[0]` came out of try_func as the same
+instruction. The target's `.s` writes `sh $a0,%gp_rel(D_8009B348 + 0x2)($gp)`;
+our object has `sh $a0,2($gp)` with an `R_MIPS_GPREL16` relocation against
+`D_8009B348` and an addend of 2 in the immediate field. try_func's
+reattachment rewrote the immediate to `%gp_rel(D_8009B348)` and threw the 2
+away.
+
+This is the same bug that was already fixed for `R_MIPS_LO16` — the comment
+above that branch even says so, and names func_80039E9C as the case that
+caught it. The GPREL16 branch three lines below was left alone. Both forms of
+the branch (`N($gp)` and `addiu $r,$gp,N`) now keep a non-zero addend, and the
+normaliser collapses `sym + 2` to `sym+2` so the two spellings compare.
+
+Worth noting what the failure looked like: two stores to *different* halfwords
+reported as two stores to the *same* one, which reads as a source bug in the
+candidate and not as a tool bug. The tell was that the target had `+ 0x2` and
+we did not — visible in the diff, and easy to read past.
+
+## An old park that had quietly become correct
+
+`check_try_func.py` runs in two directions: everything in `src/` must MATCH,
+and everything in `parked/` must not. The second direction is the one that
+gets ignored, and it is the one that paid: after the GPREL16 fix it reported
+`func_80015078: reported MATCH for a parked near miss`. The candidate was
+right. It built green with no edit at all.
+
+The entry was one of the oldest, from before the keep-the-candidate rule was
+even written down, and it carried no diagnosis — just the name. What changed
+around it is not recoverable, but the declarations it depends on
+(`D_8009B0F4`, `func_80013998`'s return type) have both been corrected since.
+The general point is the one WORKFLOW already makes about the park list being
+a source of matches: this time the tool found it without anyone re-reading
+anything.
 
 ## Repo layout / tooling plan
 

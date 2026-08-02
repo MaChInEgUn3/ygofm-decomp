@@ -447,7 +447,6 @@ func_800597C8
 # reading D_8009B0F4 for the final `|= 0x20`, and reads it into $v1; cc1psx uses
 # $v0 for the flag and copies the return value after. Nine differences, all the
 # epilogue. A separate `ret` local before the flag update does not move it.
-func_80015078
 # func_80025B28 is 34 out from ONE register: retail keeps the +0x6C flag byte in
 # $a0 (free, since arg0 was copied to $a1) and cc1psx uses $a2, which cascades
 # through every use and shifts the argument setup of the two calls. The head is
@@ -1013,3 +1012,20 @@ func_8001352C -- 38 differences, the same permutation as func_800135FC plus a
   are permuted exactly as in func_800135FC, and the third call's `sra` moves a
   slot because of it. Whatever unparks that one unparks this one; do not spend
   time on it separately.
+
+func_800533D8 -- 7 differences, all of them which caller-saved register the
+  three values in the first loop get. Everything else matches, including the
+  three spin loops on the library calls, the D_800F2B50 stride-0x18 walk and
+  the four gp-relative tail stores.
+  The loop fills 255 halfwords from sp+0x12 with 0xFFFF. Retail counts *down*
+  while the address walks *up*, which is gcc reversing the counter after
+  strength reduction has left it live only in the exit test: an index
+  expression (`sp10[i + 1] = 0xFFFF` either direction) reproduces neither, and
+  an explicit `u16 *q` with `*q++` reproduces both -- 55 differences to 10.
+  Writing `i = 0;` before `p = D_800F2B50;` rather than in the second loop's
+  `for`-init took it to 7, the same lever func_80061008 needed.
+  Retail assigns $v1 to the pointer, $a0 to the 0xFFFF and $v0 to the counter;
+  we get $v0, $v1, $a0. Tried: the constant as an explicit local before and
+  after the pointer, `sp10[0] = 0` moved below the pointer setup, `i != -1` as
+  the exit test (56, much worse), and both declaration orders. Full flag
+  sweep: 7 is the floor, at plain -O2 -G8.
