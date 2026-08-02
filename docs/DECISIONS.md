@@ -2026,9 +2026,9 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-705 of 1794 functions decompiled and byte-matching.
+711 of 1794 functions decompiled and byte-matching.
 
-The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~705 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
+The 1794 total is misleading as a denominator, though. Subtract 342 library functions and ~116 hand-written GTE/COP2 routines that will likely never become C, and the real target set is closer to **~1340 functions**, of which ~711 are done. Instruction count is probably the better measure of remaining work: ~128,000 still in assembly.
 
 ### Tooling: `tools_src/permute.py` (decomp-permuter)
 
@@ -3946,6 +3946,51 @@ Note what this cost: two greps over 32 files. The previous estimate -- "17 of
 the remaining 34 contain no `lui $at` and are the ones to take first" -- was
 counting the wrong thing, because `lui $at` was being read as a single blocked
 class rather than as two.
+
+## -G is a size threshold, and that dissolves the three-forms barrier
+
+The `-G0` assembler was written up as a file-wide switch: either every scalar
+keeps `%gp_rel` or none does. That is what `-G0` does, but it is not what `-G`
+*is*. `as` calls a symbol small data iff its declared size is `<= -G`, and
+cc1psx writes the size out with the reference:
+
+```
+.extern E, 4      /* extern int E;      -> sw $2,E     bare */
+.extern D, 8      /* extern int D[2];   -> sw $2,D     bare */
+.extern B, 16     /* extern int B[4];   -> lui/%lo pair, cc1psx's own */
+                  /* extern int A[];    -> lui/%lo pair, cc1psx's own */
+```
+
+So the bare form (the one the assembler gets to choose for) is emitted for
+anything whose size cc1psx knows and considers small at *its* `-G8`; an array
+of unknown size, or a known size over 8, gets cc1psx's own pair and the
+assembler never sees a choice. For everything bare, the assembler's own `-G`
+decides between `%gp_rel($gp)` and the `$at`/destination-register expansion.
+
+Set the two `-G`s to different numbers and the split is **per symbol, by
+size**. func_800136E4 is the first case: it wants `%gp_rel` for the `u8`
+D_8009B0E0, `lui $at` for the `s32` D_8009B10C, and cc1psx's own `%hi`/`%lo`
+pair for the unsized D_800E9DF0 and D_800E9EA8 — the three-forms-two-knobs
+barrier this file has recorded twice as unmatchable. Compiling at `-G8` and
+assembling at `-G2` gives all three, because 1 <= 2 < 4.
+
+Two consequences worth chasing:
+
+- Where the symbols happen to be the same width, the *declared* size is a knob
+  in its own right. D_80010038 is declared `[4]` in this function's unit for
+  exactly that reason, and the comment in variables.h says so — the size is a
+  codegen choice, not a claim about the object, in the same way scalar-vs-array
+  already is.
+- It gives a fourth thing to try on every park whose diagnosis reads "needs
+  three addressing forms and there are only two knobs" — func_80030FA0 and
+  func_8002D458 both say that in those words.
+
+The other half of func_800136E4 was the same size threshold read the other
+way. Retail re-materialises `%hi(D_80010038)`/`%lo` *inside* the loop; with the
+symbol unsized, cc1psx emits its own pair and hoists the `%hi` into a
+callee-saved register, costing a register and every offset after it. Sized at
+4 with `-G2` it becomes one bare `la`, which is a single pseudo-instruction at
+schedule time and cannot be split — 63 differences to 12.
 
 ## Repo layout / tooling plan
 

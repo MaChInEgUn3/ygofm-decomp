@@ -426,6 +426,16 @@ extern u8 D_801A7AD8[];
 extern u16 D_800F2B22[];
 extern u8 D_800E9EA7[];
 extern s32 D_800E9EA8[];
+extern u8 D_801DC000[];
+extern u8 *D_8009078C[];
+extern u8 D_800E9DF0[];
+/* Sized, and the size is a codegen knob rather than a fact: func_800136E4
+ * assembles at -G2, where a symbol bigger than two bytes is not small data,
+ * so cc1psx's bare `la` gets expanded by the assembler through the
+ * destination register -- one instruction at schedule time, which is what
+ * stops the %hi being hoisted out of the loop the way retail does not. */
+extern u8 D_80010038[4];
+extern u8 D_8009B0E0;
 extern u8 D_8017A1D8[];
 /* Twelve-byte records. Declared as an array of the record type so the index
  * scales naturally; see the base-formation notes in docs/DECISIONS.md. */
@@ -547,6 +557,9 @@ extern s8 D_8009B408;
 extern u8 D_800F2848[];
 extern u8 D_800F2878[];
 extern u8 D_800EFE38[];
+extern VoidFn D_80090FB0[];
+extern u8 D_80090FCC[];
+extern u8 D_80090FDC[];
 extern u16 D_8009B410;
 extern u16 D_8009B412;
 extern u8 D_8009151C[];

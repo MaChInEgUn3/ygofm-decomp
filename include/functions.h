@@ -37,7 +37,9 @@ void func_80040390(void);  /* PROVISIONAL */
 void func_8004A518(void);  /* PROVISIONAL */
 void func_8007BE00(void);  /* PROVISIONAL */
 s32 func_8007BF60(void);
-void func_800878D0(void);  /* PROVISIONAL */
+/* Called with an argument by func_80041340 and with none by func_800857C0;
+ * declared without a parameter list so both call sites compile as written. */
+void func_800878D0();
 void func_8008B4B8(void);  /* PROVISIONAL */
 void func_80038024(u8 *arg0, s32 arg1);
 void func_80039F90(u8 *arg0);
@@ -57,7 +59,7 @@ s32 func_80035598(u32 *arg0, u32 *arg1);
 s32 func_80045208(s32 arg0, s16 arg1);
 void func_800473F0(s32 arg0, s32 arg1);
 void func_80048658(s32 arg0, s32 arg1, s32 arg2);
-void func_80059908(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_80059908(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_80012D4C(void);  /* PROVISIONAL */
 void func_8004733C(s32 arg0, s32 arg1);
 void func_800490F0(s16 arg0, u8 arg1);
@@ -174,6 +176,7 @@ s32 func_80024704(s16 *arg0, s16 *arg1);
 void func_80059AE0(u16 arg0);
 void func_80014A5C(s32 arg0);
 void func_80041340(void);  /* PROVISIONAL */
+void func_80031784(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3);
 void func_800136D4(void);  /* PROVISIONAL */
 ByteFn func_8005C768(s32 arg0);
 void func_80022EEC(u8 *arg0);
@@ -336,6 +339,19 @@ void func_800356A0(u8 *dst, u8 *src, u32 len);
 void func_8003D03C(u8 *arg0);  /* PROVISIONAL */
 void func_80044DC0(s16 arg0);
 void func_800540B4(s32 arg0);  /* PROVISIONAL */
+void func_8004EB00(void);  /* PROVISIONAL */
+void func_8004FE2C(void);  /* PROVISIONAL */
+void func_800507D0(void);  /* PROVISIONAL */
+void func_8004DE24(void);  /* PROVISIONAL */
+void func_8004E9A0(void);  /* PROVISIONAL */
+void func_800528AC(void);  /* PROVISIONAL */
+void func_8005DBA4(void);  /* PROVISIONAL */
+void func_80051A48(void);  /* PROVISIONAL */
+void func_800559D4(s32 arg0);  /* PROVISIONAL */
+void func_800556E8(s32 arg0);  /* PROVISIONAL */
+s32 func_8005FB08(void);  /* PROVISIONAL */
+void func_80013898(s32 arg0);
+void func_800138F4(s32 *out, s32 arg1);
 s32 func_80073704(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 s32 func_80073734(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 void func_80073724(s32 arg0);  /* PROVISIONAL */

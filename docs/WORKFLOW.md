@@ -321,15 +321,25 @@ on a combination that had been in the table for weeks.
 - `common.h` does not define `NULL`. Write `(u8 *)0`.
 - Scalar vs unsized array is a codegen choice, and the mechanism is a size hint.
   **Four** addressing forms can appear in one function; pick each by declaration
-  and by the assembler's `-G`:
+  size and by the assembler's `-G`, which compare against each other:
   - **scalar** — cc1psx emits the *bare* symbol (`sh $0,D_8009B148`) and marks it
     `.extern sym,2`. A `-G8` assembler knows it is small data and renders
     `%gp_rel($gp)`.
-  - **scalar + a `-G0` assembler** (`PER_FUNC_AS_FLAGS[f] = "-G0"`) — same
+  - **scalar + a smaller `-G` in the assembler** (`PER_FUNC_AS_FLAGS[f]`) — same
     compiler output, but now the assembler cannot assume small data and expands
-    it through `$at`. **File-wide, not per-symbol**: every scalar in the unit
-    loses `%gp_rel`, so this form is only available to a function that has no
-    gp-relative access left to lose (func_8002D458 wants both and gets 79).
+    it: through `$at` for a store, through the destination register for a load
+    or an `la`. **`-G` is a size threshold, not a switch**, and that is the
+    thing to know: a symbol is small data iff its declared size is `<= -G`.
+    `-G0` takes every scalar in the unit out of `%gp_rel` at once, which is
+    only usable where there is no gp-relative access left to lose
+    (func_8002D458 wants both and gets 79). But an intermediate `-G` splits the
+    file **by size**: func_800136E4 assembles at `-G2`, where the `u8`
+    D_8009B0E0 (1 byte) stays gp-relative and the `s32` D_8009B10C (4 bytes)
+    goes through `$at`, in the same function. Read the sizes out of the
+    declarations, pick a threshold between them, and the "three forms, two
+    knobs" barrier is not one. Where the two groups are the same width, giving
+    one of them a *declared* size it does not need is the same kind of codegen
+    knob as scalar-vs-array (D_80010038 is `[4]` for exactly that reason).
     It is the one that matters
     when a function needs `lui $at` on one symbol while keeping cc1psx's own
     split pair on another — `-mno-split-addresses` would wreck the second
