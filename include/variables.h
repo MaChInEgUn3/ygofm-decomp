@@ -56,7 +56,15 @@ extern u8 D_8009B248;
 extern u8 D_8009B24A;
 extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
+/* Two bytes under the guard so an assembler at -G1 expands the bare reference
+ * through the destination register while the one-byte D_8009B428 beside it
+ * keeps %gp_rel (func_80043BCC). The size is a codegen knob. */
+#ifdef D_8009B318_SIZED
+extern u8 D_8009B318[2];
+#else
 extern u8 D_8009B318;
+#endif
+extern u8 D_8009B428;
 
 extern u8 D_8009B140;
 /* Read as a byte through %hi/%lo by func_8003D518, and gp-relatively as a
@@ -431,17 +439,23 @@ extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];
 extern u8 D_800EB15C[];
 extern u8 D_800F2B20[];
-#ifdef D_8009B142_IS_AGGREGATE
+#ifdef D_8009B142_SIZED
+extern u8 D_8009B142[2];
+#elif defined(D_8009B142_IS_AGGREGATE)
 extern u8 D_8009B142[];
 #else
 extern u8 D_8009B142;
 #endif
-#ifdef D_8009B143_IS_AGGREGATE
+#ifdef D_8009B143_SIZED
+extern u8 D_8009B143[2];
+#elif defined(D_8009B143_IS_AGGREGATE)
 extern u8 D_8009B143[];
 #else
 extern u8 D_8009B143;
 #endif
-#ifdef D_8009B144_IS_AGGREGATE
+#ifdef D_8009B144_SIZED
+extern u8 D_8009B144[2];
+#elif defined(D_8009B144_IS_AGGREGATE)
 extern u8 D_8009B144[];
 #else
 extern u8 D_8009B144;
