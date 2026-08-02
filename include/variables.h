@@ -694,6 +694,10 @@ extern void (*D_8009B128)(void);
  * symbol unsized globally; see the -G0-prediction section of DECISIONS.md. */
 #ifdef D_8009B398_IS_AGGREGATE
 extern u16 D_8009B398[];
+#elif defined(D_8009B398_IS_VOLATILE)
+/* func_8003C7A0 tests five different bits of it and retail loads it afresh
+ * for every one; without volatile gcc commons the lot into one register. */
+extern volatile u16 D_8009B398;
 #else
 extern u16 D_8009B398;
 #endif
@@ -758,6 +762,7 @@ extern u8 D_8009B4A1;
 extern u8 D_8009B4A2;
 
 extern u8 D_8009B37C;
+extern s8 D_8009B384;
 extern s32 D_8009B390;
 extern s32 D_8009B3A8;
 extern u8 D_800EF668[];

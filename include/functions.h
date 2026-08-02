@@ -289,7 +289,17 @@ s32 func_80070870(s32 arg0);
 s32 func_800708C4(s32 arg0);
 void func_8003B6AC(s32 arg0, s32 arg1);
 void func_80040CAC(void);
+/* The callee's parameter is genuinely s16 -- widening it to s32 costs 22
+ * differences in func_80046FA0 itself. But func_8003C7A0 passes an int-typed
+ * flag with no truncation at the call, so its translation unit saw a wider
+ * declaration; it defines FUNC_80046FA0_S32. Same per-file prototype guard as
+ * FUNC_80017F04_FULL. An empty parameter list will not serve here: a
+ * default-promoted argument type cannot match one. */
+#ifdef FUNC_80046FA0_S32
+void func_80046FA0(s32 arg0);
+#else
 void func_80046FA0(s16 arg0);
+#endif
 s32 func_80070920(s32 arg0, s32 arg1);
 void func_8003C628(void);
 void func_80035B7C(u8 *arg0);
@@ -446,7 +456,7 @@ u8 *func_80017F04(u8 *arg0, s32 arg1, s32 arg2);
 u8 *func_80017F04(u8 *arg0);
 #endif
 u8 *func_80014EEC(s32 arg0, u8 *arg1, s32 arg2, s32 arg3, void *arg4, s32 arg5, s32 arg6);
-void func_800289BC(void);
+void func_800289BC(u8 *arg0, s32 arg1);
 s32 func_8002C7E8(s32 arg0, s32 arg1);
 void func_8002FD10(s32 arg0);
 void func_8002FA54(void);

@@ -343,6 +343,8 @@ PER_FUNC_AS_FLAGS["func_8002A2F4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80038530"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8003C7A0"] = "-G1"
+PER_FUNC_AS_FLAGS["func_800289BC"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8005B4D8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DC38"] = "-G1"
