@@ -4115,6 +4115,13 @@ rather than eyeballed, over the 62 candidates that pass both filters:
 | display-list leaf | `%hi(D_800FE240)`, no `addiu $sp` | 2 |
 | genuinely distinct | — | 56 |
 
+func_8003A01C was checked against the signature by hand because it *looks*
+like a family member -- three-case dispatch, the same `0xFFDDFFFF` mask. It is
+a genuine variant: no `%hi(D_801AF000)` anywhere, case 0 computes
+`0x340 - n * 192` into a field the family does not touch, and case 2 reads
+`*(s32 *)(p + 0x3C)`. The signature was right to exclude it, so the count
+stands at four.
+
 So the clone worry was largely unfounded: six of sixty-two. The four switch
 clones are func_8002F4C0, func_8003C328, func_8003C120 and func_8003BF00, and
 they belong to the permutation class above; the two leaves are func_8005B260

@@ -325,6 +325,16 @@ on a combination that had been in the table for weeks.
   *comparisons*: a `u8` local compares in QImode and a `u16` local in HImode,
   and both are **unsigned**, so `u8 v = p[i]; if (v >= 0xB)` gives `sltiu` where
   the same byte in an `s32` gives retail's `slti`.
+- **Signedness at the same width is a third axis, and it decides whether gcc
+  narrows at all.** Both `s32 f` and `u32 f` are word-sized, so the
+  widest-natural-type rule says nothing between them — but with `s32 f`, gcc
+  narrows `f | 0x80` to QImode because the result only feeds a byte store, the
+  constant becomes a signed `-128` that no longer fits an `ori` immediate, and
+  it gets hoisted into a callee-saved register as a loop invariant. `u32 f`
+  keeps retail's `ori $v0,$v1,128`. That one word was 87 differences to a match
+  on func_80043BCC. Two negatives worth knowing before you doubt the
+  diagnosis: `f |= 0x80` gets to 4, and an explicit `(u8)` cast changes nothing
+  at all.
 - The reverse also happens: a narrow **return type** is sometimes the whole
   function. `u16 func(s32 arg0)` holds the value unmasked and puts the `andi` at
   the return, which is why retail copies the argument to `$v0` before clobbering
