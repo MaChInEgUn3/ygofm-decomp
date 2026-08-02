@@ -1030,3 +1030,22 @@ func_8003D03C -- 10 differences, and the -G threshold gets the *addressing*
   proven -- it is equally possible retail's unit reached the symbol some way
   neither route reproduces. Left on the old route (aggregate, default flags,
   10) rather than the new one.
+
+func_80048920 -- 20 differences, a $s1/$s2 swap and the two operand orders that
+  fall out of it. Worth reading for the lever that got it there.
+  Retail builds `(arg0 & 0x100) != 0` into a register and shifts it:
+  `andi $v1,$a0,256 / sltu $v1,$zero,$v1 / sll $v1,$v1,6`. Every one-expression
+  spelling of that -- `(x & 0x100) != 0` shifted, multiplied by 64, `!!`, a
+  ternary, an unsigned `0 < ...` -- lets gcc combine the whole thing into
+  `srl $v1,$s1,2 / andi $v1,$v1,64`, two instructions where retail has three,
+  and the shortfall cascades through the rest of the function (57, and the
+  ternary 72). **Splitting it across two statements against the same variable**
+  --- `f = arg0 & 0x100; f = f != 0;` --- blocks the combine and reproduces
+  retail exactly: 57 differences to 20. Same shape as the two-names rule, in
+  the opposite direction: one name reused is what stops a fold here.
+  What is left: retail keeps the pre-mask value in $a2 (caller-saved, dead
+  before the loop) and the masked id in $s2, with arg1 in $s1. We get one live
+  range in $s1 and arg1 in $s2. Splitting it into two source variables is the
+  obvious fix and makes it *worse* (65) in all four spellings tried: a separate
+  `v` initialised at its declaration, assigned as the first statement, assigned
+  after the guard, and reassigning the parameter itself.

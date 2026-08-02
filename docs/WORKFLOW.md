@@ -131,6 +131,12 @@ meaningful, and skipping to the last one wastes hours:
    `lbu $a0,0($v0)` … `addu $s0,$a0,$zero` means `s32 c = *p; … op = c;`, not
    `s32 op = *p;` (func_800386B8). An extra copy in the target is almost
    always an extra name in the source; allocation does not invent one.
+   **One name reused across two statements blocks a fold.** Retail's
+   `andi / sltu $zero / sll 6` for `(x & 0x100) != 0` shifted left is three
+   instructions; every one-expression spelling — `!= 0` shifted, `* 64`, `!!`,
+   a ternary, unsigned `0 < …` — lets gcc combine it to `srl / andi`, two
+   instructions, and the shortfall cascades. `f = x & 0x100; f = f != 0;`
+   against the same `f` reproduces retail: func_80048920, 57 differences to 20.
    The mirror of the two-names rule (func_8004318C, two multiplies of one
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
