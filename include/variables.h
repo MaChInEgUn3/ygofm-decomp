@@ -213,7 +213,14 @@ extern u8 D_8009B3EA;
 extern u8 D_8009B3EA[];
 #endif
 extern u8 D_8009B3C0;
+/* func_80038530 reaches this and its six neighbours through the assembler's
+ * bare form, which needs the scalar declaration plus a -G0 assembler; every
+ * other user takes them as unsized arrays. */
+#ifdef D_8009B364_IS_SCALAR
+extern u8 D_8009B364;
+#else
 extern u8 D_8009B364[];
+#endif
 extern u16 D_800F5C80[];
 extern u8 D_8009AF94;
 extern u8 D_8009AF9B;
@@ -406,7 +413,11 @@ extern u8 D_8009B144[];
 #else
 extern u8 D_8009B144;
 #endif
+#ifdef D_8009B360_IS_SCALAR
+extern s8 D_8009B360;
+#else
 extern s8 D_8009B360[];
+#endif
 extern u8 D_800F5918[];
 extern u8 D_801A8000[];
 extern u8 D_801B122B[];
@@ -528,10 +539,26 @@ extern u16 D_8009B124;
 extern s32 D_8009B0E8;
 extern s32 D_8009B130;
 extern s32 D_8009B0FC;
+#ifdef D_8009B374_IS_SCALAR
+extern u16 D_8009B374;
+#else
 extern u16 D_8009B374[];
+#endif
+#ifdef D_8009B370_IS_SCALAR
+extern u16 D_8009B370;
+#else
 extern u16 D_8009B370[];
+#endif
+#ifdef D_8009B372_IS_SCALAR
+extern u16 D_8009B372;
+#else
 extern u16 D_8009B372[];
+#endif
+#ifdef D_8009B369_IS_SCALAR
+extern u8 D_8009B369;
+#else
 extern u8 D_8009B369[];
+#endif
 extern s32 D_8009B424[];
 extern u8 D_8009AF0C;
 /* Scalar by default; func_80037110 reaches it %hi/%lo and defines
@@ -650,7 +677,11 @@ extern u8 D_800F39B0[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
+#ifdef D_8009B361_IS_SCALAR
+extern s8 D_8009B361;
+#else
 extern s8 D_8009B361[];
+#endif
 /* Holds a callback; reached through $at, so its unit was built -G0. */
 extern void (*D_8009B128)(void);
 /* Reached gp-relative in most files but through %hi/%lo in func_8001BD48,
