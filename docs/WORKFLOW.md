@@ -227,6 +227,14 @@ meaningful, and skipping to the last one wastes hours:
    keeps both exits, the second gets cross-jumped into one with the value in a
    delay slot. Rule of thumb: whichever condition the target **branches out on**
    is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
+   **The same pass from the other side: do not block a cross-jump.** gcc merges
+   two arms only when their instruction sequences are *identical*, and two arms
+   computing the same value from different expressions — one from a global, one
+   from a struct field — produce identical instructions only once the value is
+   in a named local. Written inline, the tail is emitted twice; assigned to one
+   local first, it merges to the target's shared block. func_8003A01C, 54
+   differences to 33. Step 5's rule is about creating a shared exit; this is
+   about not preventing one.
    **A value put in an argument register and then apparently unused is the
    next call's argument.** Retail's `addu $a0,$zero,$zero` followed by stores
    that use `$zero` directly reads as a wasted instruction; it was the argument

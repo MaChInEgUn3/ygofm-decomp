@@ -1157,8 +1157,13 @@ func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
   read sits between the two updates the way retail's does (18, much worse).
   Full flag sweep: 10 at plain -O2 -G8.
 
-func_8003A01C -- 33 differences, and it ends up in the three-cycle register
-  permutation class (see DECISIONS) despite not being one of the four clones.
+func_8003A01C -- 33 differences, the same *kind* of difference as the
+  three-cycle permutation class but **not** the documented rotation, so it is
+  not counted as a member. That class is mask=$a0 / value=$v0 / constant=$v1
+  against our $v1/$a0/$v0. Here retail is mask=$a1 / 0x18000=$a0 / value=$v1
+  and we get $v1/$v0/$a1 -- four registers, because this body keeps one more
+  value live (the 0x18000 and the `p + 0x3C` read). Checked rather than
+  assumed; adding members to that class on resemblance would weaken it.
   A variant of that body: no D_801AF000, case 0 computes `0x340 - n * 192` into
   a field the family does not touch, case 2 reads `*(s32 *)(p + 0x38)` where the
   family uses a global.
