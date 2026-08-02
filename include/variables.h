@@ -619,9 +619,11 @@ extern VoidFn D_80090B3C[];
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
 #ifdef D_8009B408_SIZED
-/* Eight bytes so an assembler at -G4 treats it as non-small and expands the
- * bare reference through $at, while the four-byte scalars in the same unit
- * keep %gp_rel.  The size is a codegen knob; see DECISIONS.md. */
+/* Eight bytes, so any assembler -G below 8 treats it as non-small and expands
+ * the bare reference through $at while the narrower symbols in the same unit
+ * keep %gp_rel. Two users at different thresholds: func_8003C7A0 at -G1
+ * (one-byte neighbours) and func_8003D03C's abandoned -G4 attempt (four-byte
+ * ones). The size is a codegen knob; see DECISIONS.md. */
 extern s8 D_8009B408[8];
 #elif defined(D_8009B408_IS_AGGREGATE)
 extern s8 D_8009B408[];
@@ -692,11 +694,18 @@ extern void (*D_8009B128)(void);
  *
  * This is the third knob for the same symptom, alongside -G0 and declaring a
  * symbol unsized globally; see the -G0-prediction section of DECISIONS.md. */
+/* Two independent knobs, so four arms rather than a chain: a file that wants
+ * the aggregate form *and* the re-reads would silently lose the volatile if
+ * these shared one #elif ladder. func_8003C7A0 tests five different bits and
+ * retail loads it afresh for every one; without volatile gcc commons the lot
+ * into a single register. */
 #ifdef D_8009B398_IS_AGGREGATE
+#ifdef D_8009B398_IS_VOLATILE
+extern volatile u16 D_8009B398[];
+#else
 extern u16 D_8009B398[];
+#endif
 #elif defined(D_8009B398_IS_VOLATILE)
-/* func_8003C7A0 tests five different bits of it and retail loads it afresh
- * for every one; without volatile gcc commons the lot into one register. */
 extern volatile u16 D_8009B398;
 #else
 extern u16 D_8009B398;

@@ -131,6 +131,11 @@ meaningful, and skipping to the last one wastes hours:
    `lbu $a0,0($v0)` … `addu $s0,$a0,$zero` means `s32 c = *p; … op = c;`, not
    `s32 op = *p;` (func_800386B8). An extra copy in the target is almost
    always an extra name in the source; allocation does not invent one.
+   **A literal and a variable holding the same value are two materialisations;
+   one variable used twice is one.** `D_8009B408[0] = v; D_8009B37D = 1;`
+   matched func_8003C7A0 where `= v; = v` and `= 1; = 1` both gave 54 — the
+   third member of the one-name/two-names family, and the first where the
+   *spelling of the constant* is the knob rather than a name.
    **One name reused across two statements blocks a fold.** Retail's
    `andi / sltu $zero / sll 6` for `(x & 0x100) != 0` shifted left is three
    instructions; every one-expression spelling — `!= 0` shifted, `* 64`, `!!`,
@@ -215,6 +220,19 @@ meaningful, and skipping to the last one wastes hours:
    keeps both exits, the second gets cross-jumped into one with the value in a
    delay slot. Rule of thumb: whichever condition the target **branches out on**
    is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
+   **A value put in an argument register and then apparently unused is the
+   next call's argument.** Retail's `addu $a0,$zero,$zero` followed by stores
+   that use `$zero` directly reads as a wasted instruction; it was the argument
+   to a `jal` after the join, whose own delay slot is a bare `nop`. When a
+   register is set and nothing in its block reads it, look at the next `jal`
+   before concluding anything else — func_8003C7A0, 65 differences to 1.
+   **Hoist a call's arguments into locals when the target evaluates them
+   early.** Where retail sets up `$a0` and loads `$a1` *before* the stores that
+   precede the call, assigning both to locals at the top of the block
+   reproduces it: func_800289BC, 53 differences to 13. It works only for the
+   values that cross the call — naming the field reads as well made it 36 —
+   except where the target issues one read before the base pointer's own load,
+   which needs its own local to get there (the last 13).
 6. **Count materialisations** of each value: one per write in the source.
    A value computed in a **branch's delay slot that the fall-through then
    overwrites** is an unconditional assignment followed by a conditional one,
