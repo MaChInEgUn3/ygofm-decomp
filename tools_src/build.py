@@ -150,6 +150,7 @@ _O2_G0_NOSCHED2_MACRO = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
 # hoist -- gcc 2.8 moves a non-volatile *and* a volatile load across a
 # volatile store -- so this is a flag, not a source shape.
 _O2_G8_NOSCHED1 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns"]
+_O2_G0_NOSCHED1 = ["-quiet", "-O2", "-G0", "-fno-schedule-insns"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
 # Macro-form addressing does *not* imply -G0. At -G8 with -mno-split-addresses
@@ -190,6 +191,7 @@ _G0_MACRO_FUNCS = [
 PER_FUNC_FLAGS = {
     "func_800493F8": _O2_G0,
     "func_80014A5C": _O2_G8_NOSCHED1,
+    "func_8005A53C": _O2_G0_NOSCHED1,
     "func_80031000": _O2_G8_MACRO,
     "func_80044DC0": _O2_G8_MACRO,
     "func_800386B8": _O2_G8_MACRO,
@@ -323,6 +325,8 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
 PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
+PER_FUNC_AS_FLAGS["func_800610E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A660"] = "-G0"

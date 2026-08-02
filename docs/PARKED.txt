@@ -991,3 +991,25 @@ func_80026A3C -- 4 differences, all operand order gcc canonicalises away.
   Getting to 4: a base local for D_80090800 (or the `+2` folds into %lo), base
   locals for D_800907D8 and D_801A7AD8 before the loop, and `i = 0` assigned
   *before* those two rather than in the `for` init -- 31 -> 11 -> 9 -> 4.
+
+func_800135FC -- 16 differences, and every one of them is which callee-saved
+  register holds which value. Instruction for instruction identical otherwise,
+  including the folded `%lo` on the first read and all four signed divides.
+  Retail: $s0=x, $s1=n, $s2=p, $s3=z. We get $s0=n, $s1=p, $s2=x, $s3=z -- a
+  three-cycle permutation of the same three pseudos, not an off-by-one shift,
+  so the "a pseudo that should not exist" recipe does not apply (tried anyway:
+  a redundant `(s32)` on the negation, an `s16` intermediate for the read, a
+  cast on the pointer, `&D_800F2848[0]`, and passing the symbol rather than the
+  local to the call -- all 16).
+  **All 720 declaration orders were swept** (five s32 locals x six positions
+  for the pointer, through try_func): 16 is the floor and the winning order is
+  the natural one. Full flag sweep: 16, best at plain -O2 -G8 and -O2 -G0.
+  The shape is settled and only the allocation is wrong, which is the closed
+  class -- but note the sweep measured *declaration* order, not the permuter.
+
+func_8001352C -- 38 differences, the same permutation as func_800135FC plus a
+  schedule knock-on. Sibling function: same body with the 2 and 4 offsets
+  swapped and the last two arguments to func_800134E0 exchanged. $s0/$s1/$s2
+  are permuted exactly as in func_800135FC, and the third call's `sra` moves a
+  slot because of it. Whatever unparks that one unparks this one; do not spend
+  time on it separately.

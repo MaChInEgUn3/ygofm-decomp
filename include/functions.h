@@ -160,6 +160,12 @@ void func_80058B4C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 u8 *func_8005CEF0(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005D378(u8 **arg0);  /* PROVISIONAL */
 u8 *func_8005C7BC(u8 **arg0);  /* PROVISIONAL */
+s32 func_8005FC1C(s32 arg0);  /* PROVISIONAL */
+void func_8005A53C(s32 (*arg0)(s32), u8 *arg1, s32 arg2, s32 arg3);
+void func_800154E4(void);  /* PROVISIONAL */
+void func_80014A5C(s32 arg0);
+void func_80041340(void);  /* PROVISIONAL */
+void func_800136D4(void);  /* PROVISIONAL */
 ByteFn func_8005C768(s32 arg0);
 void func_80022EEC(u8 *arg0);
 void func_80022F98(u8 *arg0, u8 *arg1);

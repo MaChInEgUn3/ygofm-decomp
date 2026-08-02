@@ -1,7 +1,7 @@
 #include "common.h"
 void func_8001455C(void);
 
-void func_80014A5C(void) {
+void func_80014A5C(s32 arg0) {
     if (D_8009B124 != 0) {
         D_8009B124 = 0;
         return;
