@@ -174,7 +174,12 @@ extern u8 D_8009B3ED[];
 #else
 extern u8 D_8009B3ED;
 #endif
+/* Aggregate by default; func_8003FD14 reaches it gp-relatively. */
+#ifdef D_8009B3EA_IS_SCALAR
+extern u8 D_8009B3EA;
+#else
 extern u8 D_8009B3EA[];
+#endif
 extern u8 D_8009B3C0;
 extern u8 D_8009B364[];
 extern u16 D_800F5C80[];
@@ -354,6 +359,10 @@ extern u8 D_8009B144;
 extern s8 D_8009B360[];
 extern u8 D_800F5918[];
 extern u8 D_801A8000[];
+extern u8 D_801B122B[];
+extern u8 D_801B1238[];
+extern u8 D_801D1200[];
+extern u8 D_801D160C[];
 extern s32 D_801D5608[];
 extern u8 D_801D07DC[];
 extern u8 D_8009B3D4[];
