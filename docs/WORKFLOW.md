@@ -75,6 +75,11 @@ meaningful, and skipping to the last one wastes hours:
    competes with the prologue. Specific shape: **a table read through a local
    declared before anything else has its address materialised before anything
    else** — that is what put func_80019A60's `la` ahead of the argument swap.
+   The mirror matters as much: when the target materialises the base **after**
+   the index computation, the local is wrong and the inline
+   `&D_801A7AD8[p[0x6A] * 28]` is right — func_8001EFD4 went 62 differences to
+   4 by *removing* the local that had just matched func_80019BD0. Read which
+   comes first in the target and write that.
    It only works if the local replaces *every* reference to the symbol;
    a local that merely names one operand stays live and costs a register
    everywhere (func_8005A8C4, parked). **Where the local is assigned decides
