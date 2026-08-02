@@ -1129,6 +1129,12 @@ func_800434F4 -- 62 differences, the third clone of the same body and the same
   from func_8003B808 is applied.
   Tried on top of that: a named local for the 0x100 that case 2 stores twice
   (62, unchanged -- gcc shares the constant either way).
+  **Measured negative on the newest lever**: func_8002E470 matched partly by
+  declaring its globals `[2]` so each reference is one pseudo at schedule time.
+  Applying that to func_8003B808's D_8009B0F4 -- the one clone where
+  `-mno-split-addresses` is closed and the sized route had never been tried --
+  makes it *worse*, 82 to 94 at -G4 and 91 at -G2. The permutation is not
+  downstream of how many pseudos the global reference costs.
   Four functions now sit on this one permutation: func_8003B808 (82),
   func_80020BE4 (62), func_800434F4 (62) and func_800135FC (16). Whatever
   explains one explains all four, and it is worth more than any of them

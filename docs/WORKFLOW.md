@@ -384,6 +384,16 @@ on a combination that had been in the table for weeks.
   - **unsized array + `-mno-split-addresses`** — cc1psx emits the bare symbol and
     the *assembler* expands it: through the destination register for a load,
     through `$at` for a store, which has no spare register.
+  **A declared size is also a scheduling knob, and it cuts both ways.** A bare
+  reference is *one pseudo-instruction* when cc1psx schedules — maspsx expands
+  it afterwards — so sizing a symbol out of small data does not only change the
+  addressing, it takes away the scheduler's freedom to split the `%hi` from the
+  `%lo`. func_8002E470's last nine differences were two globals whose `lui`s we
+  interleaved and retail did not; `[2]` (eight bytes, non-small at -G4) made
+  each reference indivisible and it matched. The same indivisibility *cost*
+  func_8003D03C 29 differences (10 to 39), because there the split halves were
+  what filled a load-delay slot. Read which way the target wants it before
+  reaching for the size.
   A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
   disagree about the same symbol. `lui $at` therefore means *either* of the two
   bare forms; separate them by what else the function needs, and prefer the
