@@ -795,8 +795,8 @@ cannot: a Portuguese query against this English prose retrieves correctly.
 
 **`asm/` is deliberately excluded, and widening the scope would break it.**
 The allowlist in `~/.config/rag-gpu/rag_sync.py` is `docs include src parked
-tools_src config` — 922 of 2770 tracked files, about 1 MB. The other 1848 are
-the `.s` listings, ~89% of the tree, and they are the worst possible embedding
+tools_src config` — roughly a third of the tracked files, about 1 MB. The rest
+are the `.s` listings, ~89% of the tree, and they are the worst possible embedding
 target: 1799 files of `lui`/`lw`/`addiu`/`jr $ra` collapse into near-identical
 vectors and would drown every real hit. They are also exactly where this
 project's retrieval must be **exact** — `grep -c '%gp_rel'`, `grep -l
@@ -811,7 +811,20 @@ general-purpose embedder would be.
 Hooks are `post-commit`, `post-merge`, `post-checkout` (branch switches only),
 `post-rewrite`; they are synchronous but cost **0.1s** on a typical 4-file
 commit, and every path out is `exit 0` — a RAG index is a convenience, a
-commit is not. **`git reset` is their blind spot** (no hook fires), so
+commit is not.
+
+**When the box is down it degrades, and that was measured rather than
+assumed.** An IPS that *drops* packets makes `urlopen` block for its whole
+timeout — a closed port and a blackholed IP both cost the full 8s — so the
+`initialize` probe gets 3s of its own, a breaker file mutes the box for 300s
+after a failure (second and later commits cost 0.1s), and the changes skipped
+while muted are **queued and replayed** on the next run that connects. Without
+that queue the mute would silently drop every commit made while the box was
+down, which is the staleness the whole design exists to prevent. Do not
+"fix" a slow hook by backgrounding it: a detached `rag_sync` outlives the
+commit and this repo's cadence would stack them against one collection.
+
+**`git reset` is still their blind spot** (no hook fires at all), so
 resync by hand now and then:
 
 ```
