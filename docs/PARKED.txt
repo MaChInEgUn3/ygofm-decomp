@@ -956,7 +956,14 @@ func_80026A3C -- 4 differences, all operand order gcc canonicalises away.
   Getting to 4: a base local for D_80090800 (or the `+2` folds into %lo), base
   locals for D_800907D8 and D_801A7AD8 before the loop, and `i = 0` assigned
   *before* those two rather than in the `for` init -- 31 -> 11 -> 9 -> 4.
-func_8001352C -- 38 differences, the same permutation as func_800135FC plus a
+func_8001352C -- 27 differences after the `x = w;` allocation hint that
+  matched func_800135FC (was 38), and **the permuter did not close it**: 2155
+  iterations on two cores, 36 errors and 91 typemap failures, best score 160
+  against the 0 it found for func_800135FC in 66. Stopped rather than died --
+  with two cores the search starves the build, and the main line was producing
+  matches. Worth restarting on a machine with more of them; the base in
+  parked/ already carries the hint, so a rerun starts from 27 not 38.
+  The rest of the original diagnosis still holds: same permutation as
   schedule knock-on. Sibling function: same body with the 2 and 4 offsets
   swapped and the last two arguments to func_800134E0 exchanged. $s0/$s1/$s2
   are permuted exactly as in func_800135FC, and the third call's `sra` moves a

@@ -4116,6 +4116,14 @@ is not a declaration, and reading the listing cannot suggest it because the
 instruction it produces is one retail does not have (the copy is coalesced
 away).
 
+**And a measured limit.** The same search on func_8001352C -- the sibling, same
+body, 27 differences after the hint was applied by hand -- ran 2155 iterations
+without finding a zero and was stopped. func_800135FC took 66. Two cores is
+part of it, but the honest reading is that the permuter closes some members of
+this class and not others, and it is not a substitute for understanding the
+shape. The typemap failure rate is also worth knowing: 91 in 2155, about 4%,
+all from implicitly-declared callees.
+
 The class is four members now, not five. Applied by hand to the sibling
 func_8001352C it gives 38 differences to 27, so the shape generalises but is
 not the whole story there; a permuter search is running on it.
