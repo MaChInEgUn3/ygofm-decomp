@@ -336,10 +336,13 @@ meaningful, and skipping to the last one wastes hours:
    Naming it moves it, and then *where the name is assigned* is the knob:
    before the first store is too early, after the first store is retail.
    func_80036C14, 37 differences to 12 to 2 on that one line's position in
-   three arms. The last 2 were the third instance of the two-names rule:
-   one `b` shared by all three arms takes a register that survives them all,
-   so the arm whose value retail keeps in the just-freed `$v0` gets `$v1`
-   instead — a separate local per arm matched.
+   three arms. The last 2 were the third instance of the two-names rule, and
+   it is narrower than "one local per arm": one `b` shared by all three arms
+   takes a register that has to survive all three, so the *middle* arm — the
+   one where retail reuses the just-freed `$v0` — gets `$v1` instead. Giving
+   that arm alone its own name matched. A third name for the last arm also
+   matches and changes nothing, so two is the measured shape and what is
+   installed.
    **Hoist a call's arguments into locals when the target evaluates them
    early.** Where retail sets up `$a0` and loads `$a1` *before* the stores that
    precede the call, assigning both to locals at the top of the block

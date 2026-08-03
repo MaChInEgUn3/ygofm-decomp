@@ -1382,10 +1382,24 @@ func_8003B5C8 -- unfinished, 18 differences and one instruction too many, and
     *signed* compare between two addresses, which is the fingerprint of gcc
     rewriting the original `k < 20` rather than of a pointer comparison in the
     source. We get the same three ivs plus the counter itself, and `slti`.
-    Our gcc will not build the address giv for a **stack array** indexed by
-    the counter, though it builds one for `D_800EAFF8[j]` in the same loop, so
-    strength reduction is running -- it is specifically the frame-relative
-    access. Measured against that, all landing worse:
+    Our gcc will not build the address giv for the array the loop **reads**,
+    though it builds one for `D_800EAFF8[j]`, which the loop **writes**. The
+    first reading of that was "frame-relative access", and it is wrong -- four
+    synthetic probes say so, and they cost one try_func run each:
+      * the same counted loop over a *global* `u8` array: no giv for the load
+        either, so the frame has nothing to do with it;
+      * a single read instead of two: same;
+      * the exit test moved onto the other counter, so the load's index is not
+        the test biv: same;
+      * both indices at unit stride: same. In every one, the store's
+        destination gets `addiu $reg,$reg,2` and the load's source is
+        recomputed with an `addu` each iteration.
+    So the measured statement is: **this cc1psx builds an address giv for a
+    store's destination and not for a load's source**, and retail's listing
+    shows one for a load, which is the thing not yet explained. Not a
+    toolchain-version difference either -- 4.6 behaves identically on the probe
+    and is 8 instructions worse on the candidate.
+    Measured source shapes, all landing worse:
       * `b[k]` and `b[k + 1]` (both spellings of the buffer, struct member and
         plain array): no giv at all, two `addu`s per iteration, 55/57.
       * naming the second index (`m = k + 1` as a loop clause): three
