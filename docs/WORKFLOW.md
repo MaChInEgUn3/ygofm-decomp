@@ -793,6 +793,16 @@ lines of prose diagnoses, and the recurring cost here is a retraction that was
 already written down somewhere. It also answers across languages, which grep
 cannot: a Portuguese query against this English prose retrieves correctly.
 
+**Ask it in this project's own vocabulary, not about the project.** Three
+queries measured: naming the mechanism — "two adjacent stores to globals come
+out reversed, mark both volatile", "PsyQ 4.5 versus 4.6, which function
+discriminates" — scores 0.60–0.65 and returns the exact paragraph, and in the
+volatile case it also returned the PARKED.txt entry that is a *counterexample*
+to the WORKFLOW rule, which is the whole reason to have it. A meta question
+about the work — "we claimed something could not match and later retracted it,
+what was the real mechanism" — scores 0.44 and returns tool comments. So it
+retrieves on the terms a listing would use, not on the shape of the argument.
+
 **`asm/` is deliberately excluded, and widening the scope would break it.**
 The allowlist in `~/.config/rag-gpu/rag_sync.py` is `docs include src parked
 tools_src config` — roughly a third of the tracked files, about 1 MB. The rest
