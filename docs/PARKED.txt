@@ -1250,3 +1250,24 @@ func_80048658 -- 65 differences, an **unfinished** park: the body is the same
   Next attempt should start from the argument-copy question rather than the
   table walk, which is already right.
 
+func_80071EB8 -- 47 differences with the candidate kept, 32 with a worse-shaped
+  one, and an **unfinished** park because the two numbers disagree about which
+  is closer to the truth.
+  Counts entries in D_801AB000 between two bounds that `func_800707C4` writes
+  through pointers, skipping ones whose flag word has 0x4000 when the key is
+  1, 3, 6 or 8.
+  The real question is the two out-parameters. Retail loads them once after the
+  call and keeps the lower bound in `$a0` for the whole loop. gcc 2.8 keeps an
+  address-taken local in memory unconditionally, so passing `&lo` directly
+  makes the loop reload and re-store it every iteration (that shape is 32
+  differences, kept as the smaller number but structurally wrong). Passing two
+  separate stack variables and copying them into `lo`/`hi` afterwards fixes the
+  reload -- the candidate in parked/ -- and costs 47 instead, because the
+  preheader then orders differently: retail materialises the four comparison
+  constants *before* computing the cursor, and reuses the `1` among them as the
+  `sllv` shift amount for `lo * 12`. That reuse is why the order matters, and I
+  could not make gcc hoist the constants first.
+  Tried: copying only the lower bound (48), only the upper (50), a separate
+  loop counter copied from the bound (48). Flag sweep: 43 on the kept
+  candidate, 32 on the other, neither at a plausible unit setting.
+
