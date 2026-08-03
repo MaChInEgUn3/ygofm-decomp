@@ -783,6 +783,49 @@ on a combination that had been in the table for weeks.
   materialises it twice inside one basic block. Needs a `-G0` assembler to be
   worth anything.
 
+## Semantic search over the prose (rag-gpu)
+
+A RAG server on the LAN GPU box indexes this repo into the collection
+**`ygofm-code`**, kept in sync by four git hooks. Use it for the one question
+grep is bad at: *"did we already measure this, and what happened?"* —
+`DECISIONS.md` is 4181 lines and is **not** preloaded, `PARKED.txt` is 1817
+lines of prose diagnoses, and the recurring cost here is a retraction that was
+already written down somewhere. It also answers across languages, which grep
+cannot: a Portuguese query against this English prose retrieves correctly.
+
+**`asm/` is deliberately excluded, and widening the scope would break it.**
+The allowlist in `~/.config/rag-gpu/rag_sync.py` is `docs include src parked
+tools_src config` — 922 of 2770 tracked files, about 1 MB. The other 1848 are
+the `.s` listings, ~89% of the tree, and they are the worst possible embedding
+target: 1799 files of `lui`/`lw`/`addiu`/`jr $ra` collapse into near-identical
+vectors and would drown every real hit. They are also exactly where this
+project's retrieval must be **exact** — `grep -c '%gp_rel'`, `grep -l
+'lui $at,%hi('`, the `0x80073840` scope cut, `candidates.HAND_WRITTEN`. A
+semantic layer that answers those *approximately* is not a neutral addition;
+it is a new way to be confidently wrong, in the same failure mode as the
+167 → 136 → 66 miscount. Read a listing with grep, never with search.
+And note `siblings.py` already *is* the similarity search over listings, on
+instruction n-grams — the right metric for this domain, and better than any
+general-purpose embedder would be.
+
+Hooks are `post-commit`, `post-merge`, `post-checkout` (branch switches only),
+`post-rewrite`; they are synchronous but cost **0.1s** on a typical 4-file
+commit, and every path out is `exit 0` — a RAG index is a convenience, a
+commit is not. **`git reset` is their blind spot** (no hook fires), so
+resync by hand now and then:
+
+```
+RAG_GPU_DEADLINE=900 python3 ~/.config/rag-gpu/rag_sync.py bulk-code ygofm-code
+```
+
+`.git/hooks/` is not tracked, so a fresh clone has none —
+`~/.config/rag-gpu/install-hooks.sh <repo> <collection>` reinstalls them and
+skips any hook that already exists. The log is `.git/rag-sync.log`.
+If the MCP connection times out it is the FortiGate cutting the long-lived
+SSE stream, not the box: ask for an AV/IPS exception on
+`192.168.50.104:8765`. An open TCP port does **not** clear this — inspection
+kills the stream after connect.
+
 ## Two habits that cost real time when skipped
 
 **A tool's answer only counts if it measured what you think.** Nine bugs in
