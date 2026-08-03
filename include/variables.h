@@ -792,6 +792,11 @@ extern u8 D_800F39B0[];
 
 #ifdef D_8009B361_IS_SCALAR
 extern s8 D_8009B361;
+#elif defined(D_8009B361_IS_SIZED)
+/* Eight bytes it does not have, so it clears an assembler -G4 and cc1psx's
+ * bare reference survives as a macro: see func_800175A0, which tests it on
+ * three paths and needs each `lui %hi` to be its own unhoistable instruction. */
+extern s8 D_8009B361[8];
 #else
 extern s8 D_8009B361[];
 #endif
@@ -1029,6 +1034,10 @@ typedef struct {
 
 extern u8 D_800E9F10[];
 extern Rec20 D_800E9FF0[];
+/* The last byte of D_800E9FF0[1] under its own name: func_800175A0 stores -1
+ * there through %hi/%lo of this symbol and the record's own base for the
+ * neighbouring store, so the two cannot share one materialisation. */
+extern s8 D_800EA02F[];
 typedef struct {
     u8 *unk0;
     u8 unk4[5];

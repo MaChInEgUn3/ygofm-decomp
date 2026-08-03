@@ -527,6 +527,18 @@ on a combination that had been in the table for weeks.
     *one* instruction to gcc, so the invariant pass has nothing to hoist. 28
     differences to 6, and no other threshold separates the two groups:
     -G0/-G1/-G2 take the gp-relative symbols out with it (+20, +18, +12).
+    **Same knob, second use the same day: it is the delay-slot lever for a
+    symbol that cannot take `-mno-split-addresses`.** func_800175A0 tests a
+    one-byte flag on three paths; with the unsized array cc1psx emits a
+    %hi/%lo pair, gcc CSEs the `%hi` from the entry test into a later arm and
+    hoists another into a branch delay slot retail leaves as a `nop`. The flag
+    would fix it and cannot be used, because the same file needs cc1psx's own
+    *split* pair for a table base in two different registers. Declaring the
+    flag `s8 sym[8]` and assembling at `-G4` gives the bare form for that one
+    symbol and leaves everything else alone: MATCH, where two symbol aliases
+    had got it only to within one instruction. **Prefer this to an alias** —
+    an alias makes each reference a separate two-instruction pair, which stops
+    the CSE but not the delay-slot fill.
     **And the two `-G`s are independent knobs, which the sweep table did not
     know.** Every row in `sweep_flags.py`'s COMBOS used to tie the compiler's
     `-G` to the assembler's, so "default compiler, smaller assembler" — the
