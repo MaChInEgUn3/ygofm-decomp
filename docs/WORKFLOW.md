@@ -446,6 +446,12 @@ on a combination that had been in the table for weeks.
   func_8003D03C 29 differences (10 to 39), because there the split halves were
   what filled a load-delay slot. Read which way the target wants it before
   reaching for the size.
+  **Eliminate before reaching for the threshold.** If the symbol that needs the
+  non-small form is *narrower* than one that needs `%gp_rel` in the same
+  function, no `-G` exists between them and the answer is the unsized array —
+  cc1psx's own pair, default flags. func_8003C950 wants `lui/sb` on a one-byte
+  symbol and `%gp_rel` on a four-byte one; running that check first made it a
+  first-try match with no iteration at all.
   A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
   disagree about the same symbol. `lui $at` therefore means *either* of the two
   bare forms; separate them by what else the function needs, and prefer the

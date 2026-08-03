@@ -1242,6 +1242,11 @@ func_80048658 -- 65 differences, an **unfinished** park: the body is the same
   documented cross-jump lever and gets 65 to 63; a second name for arg0; a
   `(u8)` cast instead of `& 0xFF` on the last argument. None of the argument
   copies reproduce -- gcc coalesces them.
+  Also eliminated: a narrow signature. Retail sign-extends `$a3` in place
+  (`sll 16 / sra 16`) right before the call and masks `$a2` with `0xFF`, which
+  is what narrow *parameters* look like rather than casts on s32 locals. But
+  `void func_80048658(s32, u8, s16)` with the casts dropped still gives 65,
+  and both decompiled callers match either way, so the signature is not it.
   Next attempt should start from the argument-copy question rather than the
   table walk, which is already right.
 
