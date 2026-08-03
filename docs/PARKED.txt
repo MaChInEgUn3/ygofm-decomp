@@ -1210,3 +1210,21 @@ func_80060E70 -- 7 differences: one hoist we cannot place and one register.
   initialisations in a `for` clause, and reordering them (both 7); indexing
   `e + i * 2 + 0xA` instead of a cursor (55).
 
+func_80014B30 -- 50 differences, and an **unfinished** park rather than a near
+  miss: the control flow is only half read, so the next move is to re-derive it
+  from the listing, not to nudge the candidate.
+  What is established. Case 0's `*(e+0x14) == 0` path does not break -- it
+  stores 2 to `p+0x40` and **falls through into case 1**. Case 1's
+  `*(e+0x18) == 0` path jumps into **case 2's body**, which is therefore both
+  a case and the shared exit for two tests. Both case 0's non-zero path and
+  case 1's tail reach a shared clamp block at .L80014C04
+  (`if (v < 0) *(s32 *)(p+0x1C) = -(v << 11);`). The candidate expresses all
+  three with `goto`s into case labels; that construct is load-bearing -- the
+  shared blocks are what the target's layout shows -- so do not tidy it away.
+  The one measurement that discriminated: assigning `e = D_801D4200` **per
+  case** gives 50, a single assignment before the `switch` gives 67, even
+  though retail materialises the address before the dispatch. That is
+  backwards from expectation and is where the next attempt should start.
+  Also tried, no change: an extra name for the `p` argument (retail copies $a0
+  to $a2 in a branch delay slot), with and without the per-case `e`.
+

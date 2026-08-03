@@ -68,6 +68,15 @@ It tags instead. Two tags matter:
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare
   form and an alias makes them worse. A quarter of them also want a hoisted
   split address in the same unit and cannot have both.
+**A call that sets only `$a0` is not always a missing prototype.** Twice it
+was (func_800878D0, func_80046FA0, both fixed with a per-file guard) and once
+it was gcc reusing a constant that another instruction had just put in `$a1`
+for its own purpose — `func_8003B6AC(0, 2)` next to `D_8009B290 = q + 2`,
+where the 2 was already live. The tell that separates them: look a few
+instructions back for something that *sets* the argument register for an
+unrelated reason. Cheap to check, and it saves adding a guard that is not
+needed.
+
 - **`lib-call`** — calls a PsyQ library function. An implicit declaration is
   enough; do not write a prototype unless a float or struct is involved — or
   unless the callee **does not return**. A function whose listing sets up a
