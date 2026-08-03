@@ -78,6 +78,11 @@
 # No form gives both, and the sweep's best is O2 G0 at 2 for the first shape,
 # 6 for the second, so no flag reaches across it either. The parked candidate
 # is the first shape.
+# The permuter was run on func_80071460 (2026-08-03, `--run`, fifteen
+# instructions) and found nothing usable: its best scored 40 and is the inline
+# shape plus a dead `volatile unsigned int v;`, which try_func calls 10 -- four
+# worse than the plain inline form. Third time its score and try_func's count
+# have disagreed in direction.
 # ---
 # func_80026D18 is func_80026C6C with `arg2 < 0 ||` in front of the comparison.
 # It reaches 4 differences and they are the loop counter and the accumulator
