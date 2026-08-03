@@ -535,14 +535,17 @@ diff, not an instruction count — run any candidate it produces through
 try_func and read the diff, not the number.
 
 **Two levers can be coupled, and each one measured alone reads as a
-regression.** func_80026D18 sat at 4 through nine shapes, one of which was the
+regression. Observed twice.** func_80026D18 sat at 4 through nine shapes, one of which was the
 declaration order that turns out to be half the answer — alone it is *6*, so
 it was correctly rejected every time it was tried. The other half is a
 `do { } while (0);` around an `if` body, which is 2 on its own; together they
 match. A bare `{ }` or `if (1) { }` is 6, so it is the loop node gcc's loop
 pass sees, not the block. **This is the specific thing the permuter is for**:
 it mutates from a base that already carries one lever, so it can find the
-partner that a one-at-a-time sweep by hand never will. When a park says "N
+partner that a one-at-a-time sweep by hand never will. func_80038334 is the
+second instance and the cleaner one: two extra names, `d = *slot; q = d;` and
+`a = p + …; slot = (u8 **)a;`. Alone they are 6 (no change) and 14 (worse);
+together they match. When a park says "N
 shapes measured, all the same", that is evidence about N shapes *individually*
 and none at all about pairs.
 

@@ -390,7 +390,6 @@ func_80071424
 func_80071460
 func_80047B68
 func_8004CABC
-func_80038334
 func_800466C8
 func_80026C0C
 # --- range-check fold: class emptied, see WORKFLOW.md. Both members
@@ -1776,3 +1775,28 @@ func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
     not established.
     Its caller func_80047DB0 is parked on the `$a0` argument at the call to
     this function; matching it would settle that too.
+
+func_800601D0 -- unfinished, 14 differences, two instructions short. A linear
+    search of D_800F5918's 0x50 eight-byte entries for a function pointer,
+    returning the word at +4. Twenty instructions, no %gp_rel, default flags.
+    Retail has **three** separate `jr $ra` exits -- an early `return -1` when
+    the argument equals func_80089E20, the found `return e[4]`, and the
+    exhausted `return -1` -- and gcc merges the two `-1`s into one however the
+    source is written. Three layouts measured: `if (f == …) return -1;` before
+    the loop with a trailing `return -1` (15), the loop wrapped in
+    `if (f != …) { … }` with one trailing return (14), and a `goto` into the
+    loop (15). All two short. The found-block's placement follows: retail puts
+    it *before* the loop body, reached by a backward branch, and every shape
+    puts it after. Discriminator not established.
+
+func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
+    Walks 0x2C-byte records from D_8009B458 checking a byte at +0x53C, returns
+    1 on the first mismatch and 3 otherwise. `as -G0` (in build.py's parked
+    section) for the bare read.
+    20 -> 15 on one shape: the count is **two names**. Retail loads it, tests
+    it against zero, and then *copies* it (`addu $a1,$v0,$zero`) for the loop
+    bound; one name gives one register and one instruction fewer.
+    What is left is the inner branch's polarity -- retail branches out on
+    `== 1` to the latch and falls through to `return 1`, and gcc inverts every
+    spelling. Writing it as `if (== 1) { advance } else { return 1; }` is 20
+    and two instructions long. Discriminator not established.
