@@ -41,9 +41,16 @@ assembler expanding a bare symbol -- so what they want is
 `-mno-split-addresses`, not a symbol alias. An alias makes them worse, because
 gcc then hoists both %hi values into callee-saved registers. 25 of the 96 also
 contain a %hi whose %lo is completed in another block, which is a hoisted
-split address that `-mno-split-addresses` cannot produce; a function with both
-shapes cannot be satisfied by one file flag. func_8004BBBC is that case and is
-parked for it.
+split address that `-mno-split-addresses` cannot produce.
+
+That used to read "a function with both shapes cannot be satisfied by one file
+flag", with func_8004BBBC parked as the example. It is not a barrier: the flag
+is per file but the *declaration* is per symbol. A scalar or sized declaration
+makes cc1psx emit the bare symbol for one name while an unsized array keeps
+the split pair for another, and the assembler's -G decides only for the bare
+ones. func_8004BBBC and func_8003D46C -- the two examples, in opposite
+directions -- both matched on default compiler flags plus `as -G0`. Where a
+function has no %gp_rel at all, any -G is free.
 
 The register-allocation class has no target-side signature, so a good fraction
 of what this prints will still miss. That is a fixed tax, not a sign the list

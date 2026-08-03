@@ -97,16 +97,17 @@
 # byte is needed for retail's signed `slti`: a u8 local compares in QImode,
 # which is unsigned, and that one is worth keeping.
 # ---
-# func_8004BBBC is the one dup-%hi candidate that a file flag cannot satisfy,
-# and it is worth keeping as the example. Under -mno-split-addresses both
-# D_8009B458 reads come out exactly right -- retail's bare form, one %hi each,
-# no hoisting -- but D_8009AF80 is handed to func_8004BAA0 by address and
-# retail hoists *its* %hi into $s1, completing the %lo inside the loop, which
-# is the split form the same flag turns off. Without the flag, gcc hoists
-# %hi(D_8009B458) into a callee-saved register instead and the frame grows.
-# An alias for the second read makes it worse (gcc hoists both), and so does
-# volatile: the %hi is loop-invariant whether or not the load is. Best is 17
-# at O2 G0 nosched2 macro; the shape is right in every other respect.
+# func_8004BBBC MATCHED 2026-08-03 and is out of the park. It had been the
+# standing example of "one dup-%hi candidate a file flag cannot satisfy": the
+# two D_8009B458 reads want the bare form and D_8009AF80 wants cc1psx's own
+# split pair hoisted into $s1, and -mno-split-addresses is per *file*, so it
+# could only ever give one of them. The resolution is that the choice is
+# per *symbol* after all -- a scalar declaration makes cc1psx emit the bare
+# symbol for that one name, and the assembler's -G decides whether it is
+# expanded, while an unsized array keeps the split pair whatever -G says. The
+# parked candidate had been forcing D_8009B458_IS_AGGREGATE, which was the
+# whole problem. Default compiler flags, `as -G0`, no source change beyond
+# dropping that define.
 # ---
 # func_8005C4F0 is sixteen instructions and every block is right: `if (v != 0)
 # { if (v != -1) return 0; } return -1;`, where retail's `-1` in the first
@@ -193,16 +194,19 @@
 # for retail's one-register D_8009B45C load inside the loop, and `p += i * 2;`
 # so the base is the addu's destination rather than the scaled index.
 # ---
-# func_8003D46C is the second instance of func_8004BBBC's barrier, with the
-# roles reversed, which is what makes it worth keeping. In one function retail
-# has an assembler-expanded bare *store* -- `lui $at,%hi(D_8009B34D)` with
-# `sb ...%lo($at)`, and only the assembler ever uses $at -- next to a cc1psx
-# split *load* of D_800EF6EA into two different registers, which the assembler
-# cannot produce for a bare symbol. -mno-split-addresses gives the store and
-# loses the load (28); the default gives the load and loses the store (26).
-# A sized array declaration does not restore the split pair under the macro
-# flags, so the size hint is not a fourth addressing form. Everything else,
-# including the six-argument call and the if/else-if tail, is exact.
+# func_8003D46C MATCHED 2026-08-03, with func_8004BBBC and for the same
+# reason. It was the second instance of that "barrier", roles reversed: an
+# assembler-expanded bare *store* (`lui $at,%hi(D_8009B34D)` / `sb %lo($at)`)
+# next to a cc1psx split *load* of D_800EF6EA into two registers. The old
+# entry ended "a sized array declaration does not restore the split pair under
+# the macro flags, so the size hint is not a fourth addressing form" -- and
+# the error is in the clause after the comma. The size hint was only ever
+# tested *with* -mno-split-addresses, which forces every symbol in the file
+# bare; with default compiler flags the declaration is per symbol, and the
+# assembler's -G then decides only for the ones cc1psx emitted bare. Scalar
+# D_8009B34D (the default arm, not the aggregate the candidate was forcing)
+# plus `as -G0`, and the split load is untouched because an unsized array is
+# never bare.
 # **volatile is a real per-symbol escape from the bare form, and it half works
 # here.** With -mno-split-addresses plus `volatile u8 D_800EF6EA[]` the store
 # comes out exactly right AND the load goes back to a cc1psx pair -- but to
@@ -342,7 +346,6 @@ func_80049AF4
 func_8004B854
 func_8003D03C
 func_80044F58
-func_8003D46C
 func_80047FAC
 func_80021810
 func_8004A6F8
@@ -351,7 +354,6 @@ func_80047A68
 func_8004A764
 func_8005C5D4
 func_80026D18
-func_8004BBBC
 func_80073220
 func_8003201C
 func_80071424

@@ -67,7 +67,18 @@ It tags instead. Two tags matter:
 - **`dup-%hi`** — retail materialised one address twice. Try
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare
   form and an alias makes them worse. A quarter of them also want a hoisted
-  split address in the same unit and cannot have both.
+  split address in the same unit — that was recorded here as "cannot have
+  both", and it is **wrong**. The flag is per *file*; the declaration is per
+  *symbol*. Give the symbol that wants the bare form a scalar or sized
+  declaration and leave the one that wants cc1psx's split pair unsized, then
+  pick an assembler `-G` below the first symbol's width and above every
+  `%gp_rel` symbol's. func_8004BBBC and func_8003D46C were the two standing
+  examples of the barrier, in opposite directions — a bare *load* beside a
+  hoisted split pair, and a bare *store* through `$at` beside a split load —
+  and both matched the same afternoon on default compiler flags plus
+  `as -G0`, with no source change beyond dropping an `_IS_AGGREGATE` the
+  candidates had been forcing. Check `grep -c '%gp_rel'` first: at zero, any
+  `-G` is free.
   **`-mno-split-addresses` is also a delay-slot lever, and that use leaves no
   trace in the addressing.** A bare symbol is *one* instruction to gcc's
   delay-slot filler, so it cannot be half-hoisted into a branch's slot; the
@@ -314,6 +325,17 @@ meaningful, and skipping to the last one wastes hours:
    Writing `case 0x17:` first and the rest ascending matches. Three orders
    tried, one works: when two arms are identical and the target merges only
    one of them, permute the case order.
+   **Permuting is also how you move an address giv's bias.** A run of stores
+   to one record inside a loop gets one biased giv, and every store is a
+   displacement off it — so if the bias is wrong, *all* of them differ and it
+   reads like a much bigger problem than it is. The bias follows the store
+   written **last** in the group: func_800175A0 stores at +0x12, 0x14, 0x16,
+   0x18, 0x19 and 0x1F, and retail biases at +0x1F. With `+0x16` written last
+   the bias is 0x16 and six displacements are wrong; moving the `+0x1F` store
+   to the end of the group gives retail's bias and costs nothing else (34
+   differences to 27). Writing it *first* instead is 36, as is putting `+0x16`
+   first — so it is the last position that decides, not the first. **Observed
+   once.**
    **The same pass from the other side: do not block a cross-jump.** gcc merges
    two arms only when their instruction sequences are *identical*, and two arms
    computing the same value from different expressions — one from a global, one
