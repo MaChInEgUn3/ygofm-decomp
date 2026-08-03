@@ -1755,3 +1755,31 @@ func_8002F4C0 -- unfinished, 45 differences with equal lengths (92/92), and
 # output was re-run through try_func rather than read off the score, and three
 # of the five were *worse* by that measure -- the fifth and sixth instances of
 # the score disagreeing with the count in direction.
+
+func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
+    record compactor: walk D_8009B45C's 0x30-byte slots from +0x80, and when a
+    slot's tag byte is 0x24, 0x29 or 0x2B, copy the next slot over it and
+    decrement the count at +0x4C without advancing. Seven bare reads, no
+    %gp_rel, plain scalar arm plus `as -G0`.
+    90 -> 93 -> 61 on two shapes:
+      * the three-way tag test is a **switch**, not an `||` chain. Retail
+        splits it `beq 0x29` / `slti 0x2A` / `beq 0x24` / `bne 0x2B`, which is
+        gcc's binary search over three sparse cases; the `||` chain gives
+        three linear compares and no `slti`. Both the loop's test and the
+        identical one on +0x7C at the end.
+      * one base local for the entry test, the loop-top test and the tag read,
+        with the symbol written inline in the move branch and at the bottom
+        test -- retail keeps `$v1` live across the loop head and re-reads in
+        the other two places.
+    What is left is mostly one missing instruction's worth of structure: gcc
+    **eliminates the loop-top `count == 0` test** because it CSEs the read
+    with the entry test's, where retail keeps it. Three shapes measured for
+    that and all are worse and change the length: reading the count through
+    the symbol at the loop top (93, -2), storing the decrement through the
+    base local instead of the symbol (92, -3), and a `volatile` cast on the
+    loop-top read (98, +3). The base-register and the initialisation order
+    (`i` in the `blez` delay slot, then the three switch constants, then
+    `nxt`, then `off` copied from `i`) are also unreproduced. Discriminator
+    not established.
+    Its caller func_80047DB0 is parked on the `$a0` argument at the call to
+    this function; matching it would settle that too.
