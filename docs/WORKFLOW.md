@@ -741,6 +741,14 @@ on a combination that had been in the table for weeks.
   check the symbol's *other* users still match, since the original had one
   declaration (func_80012DB4 matches either way, which is what makes the
   volatile credible rather than a knob).
+  **Both stores may need it, and neither alone is enough.** func_80037D2C
+  writes a `u16` global and then an `s32` one and gcc emits them in the other
+  order; marking *either* volatile leaves it at three differences and marking
+  **both** matches. Swapping the source order, naming the constant, and four
+  other shapes all stay at three. So when a pair of adjacent stores to
+  unrelated globals comes out reversed, try the pair, not one at a time — and
+  note this is a different case from the rule above, where one neighbour was
+  already volatile.
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs
