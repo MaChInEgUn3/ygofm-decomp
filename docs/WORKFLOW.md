@@ -401,6 +401,9 @@ on a combination that had been in the table for weeks.
     it: through `$at` for a store, through the destination register for a load
     or an `la`. **`-G` is a size threshold, not a switch**, and that is the
     thing to know: a symbol is small data iff its declared size is `<= -G`.
+    **The comparison is `<=`, so a size has to *clear* the threshold, not equal
+    it**: a two-byte symbol at `-G2` is still small data. That has now cost two
+    functions a round each (func_80024200, func_80012B50).
     `-G0` takes every scalar in the unit out of `%gp_rel` at once, which is
     only usable where there is no gp-relative access left to lose
     (func_8002D458 wants both and gets 79). But an intermediate `-G` splits the
@@ -442,6 +445,16 @@ on a combination that had been in the table for weeks.
   **same** `$r`; but read it in one direction only — a *separate* temp is always
   cc1psx's own pair, while one register can be either (func_80022618 splits its
   own pair across a delay slot using one register).
+- **`volatile` is also an ordering constraint between stores.** A run of
+  stores to unrelated globals that the target keeps in source order and we
+  reorder is usually not the scheduler: gcc sinks a non-volatile store past a
+  volatile one, so a block that mixes the two comes out shuffled. In
+  func_80012B50 two of four adjacent stores were volatile and two were not;
+  marking all four volatile was the last six differences. Check which
+  neighbours are already volatile before reaching for anything else — and
+  check the symbol's *other* users still match, since the original had one
+  declaration (func_80012DB4 matches either way, which is what makes the
+  volatile credible rather than a knob).
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs

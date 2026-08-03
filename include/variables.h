@@ -527,6 +527,11 @@ extern u16 D_8009B236;
 /* func_80012B50 stores it through $at while four-byte gp-relative symbols in
  * the same unit stay small, so it carries a declared size of eight and the
  * unit assembles at -G4. The threshold is `<=`: four would still be small. */
+/* The object is a *byte* -- func_80012B50 stores it with `sb` -- but the plain
+ * arm keeps `u16` on purpose: func_8002DC38 only takes its address, and it
+ * assembles at -G1, where a one-byte symbol becomes small data and the `la`
+ * collapses from two instructions to one. Declaring the truth here costs that
+ * function an instruction. The size is a codegen knob in both arms. */
 #ifdef D_8009B230_SIZED
 extern u8 D_8009B230[8];
 #else
@@ -667,10 +672,15 @@ extern u8 D_8009B0C0[];
 #endif
 extern u8 D_8009B0C1;
 extern u16 D_8009B098;
+/* Volatile in func_80012B50, which sets it beside the volatile D_8009B0C8 and
+ * D_8009B09C and where retail keeps all four stores in source order -- which
+ * only happens if this one is volatile too, otherwise gcc sinks the
+ * non-volatile ones past the volatile ones.
+ * Checked for consistency rather than assumed: func_80012DB4, the only other
+ * scalar user, matches either way, so a single volatile declaration for the
+ * whole program is consistent with everything measured. func_80037A58 takes
+ * the aggregate arm and is untouched by this. */
 #ifdef D_8009B0CC_IS_VOLATILE
-/* func_80012B50 sets it beside the volatile D_8009B0C8 and D_8009B09C, and
- * retail keeps all four stores in source order -- which only happens if this
- * one is volatile too; otherwise gcc sinks it past them. */
 extern volatile s32 D_8009B0CC;
 #elif defined(D_8009B0CC_IS_AGGREGATE)
 extern s32 D_8009B0CC[];
