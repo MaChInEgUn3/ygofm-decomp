@@ -1470,3 +1470,65 @@ func_8003CCD8 -- unfinished, 6 differences with equal lengths (72/72), and all
         not reach for volatile to pin a store order on the strength of that
         rule alone.
       * -fno-schedule-insns (+3, 43), -fno-schedule-insns2 (15), both (+7).
+
+func_800497E0 -- unfinished, 18 differences and one instruction too many.
+    A dup-%hi function from the reopened class: three bare reads of
+    D_8009B458, no %gp_rel, so the plain scalar arm plus `as -G0` (in
+    build.py's parked section). Everything up to the last block matches --
+    the two `return -1` exits share retail's block at .L80049864, the
+    `(s16)` cast on the third parameter, the `sltu` clamp, all of it.
+    The last block is the return value and it is the register-rotation
+    shape: retail's return pseudo *is* `$v0`, taking `addu $v0,$s2,$zero`
+    in the branch's delay slot and `addiu $v0,$zero,-2` on the
+    fall-through. Ours puts the same pseudo in `$a0` (or in `$s2` if the
+    accumulator reuses `h`) and copies to `$v0` at the end, and the extra
+    name rotates every register in the block by one -- `lui $v1`/`lw $v0`
+    where retail has `lui $v0`/`lw $v1`.
+    Measured, all +1 except where noted: the accumulator written as
+    `ret = h; if (c) ret = -2;` (18, the entry); reusing `h` as the
+    accumulator (17); a ternary (18); declaring `ret` first (18); `s32`
+    rather than `u32` for the position (18); reusing `avail` for it (23).
+    Two plain `return`s remove the copy and get **equal lengths** but
+    duplicate the `-1` block that retail shares (20), and inverting that
+    test is 21. A single-exit rewrite with one `ret` for all three values
+    is much worse (52).
+    The permuter was run and is not the answer here: base score 180, no
+    improvement in 43 iterations, then an internal randomizer failure
+    (traceback in src/randomizer.py:2564). Worth recording separately that
+    the first run of it produced *no output at all* through a backgrounded
+    `| tail -20` -- the crash text never reached the file, and an empty log
+    read as "it ran and found nothing".
+
+func_80047788 -- unfinished, 12 differences with equal lengths (55/55).
+    Another from the reopened dup-%hi class: three bare reads of
+    D_8009B45C, no %gp_rel, plain scalar arm plus `as -G0` (in build.py's
+    parked section). 48 -> 18 -> 12 with two source levers, both worth
+    reusing.
+    First, **gcc folds `(x * 8 + 0x7FF) / 2048` into `(x + 255) / 256`**
+    and retail does not, so the whole prologue was wrong by two
+    instructions. An intermediate assignment blocks the fold:
+    `n = *(u16 *)(p + 2) * 8;` then `n = (n + 0x7FF) / 2048 + 1;`. Writing
+    it as one expression, with `<< 3` instead of `* 8`, or splitting the
+    `+ 0x7FF` into its own statement instead, all keep the fold or cost
+    more (48, 48, 22).
+    Second, the tail's address wants its own name. Written as one
+    expression -- `*(s32 *)(off + *(u8 **)(p + 0x448) + 4)` -- it is one
+    instruction short; reusing `e` for it (`e = off + *(u8 **)(p + 0x448);`
+    then `*(s32 *)(e + 4)`) is the missing `addu`. 18 to 12 and equal
+    lengths.
+    What is left is two `addu` operand orders and one delay slot:
+      * retail has `addu $v1,$s0,$v1` and `addu $s0,$s0,$v0` -- the offset
+        first at both sites, with the *other* operand's register as the
+        destination. With `off` a named local we get the base first at
+        both. Inlining the index at either site or both changes nothing
+        (12 each), and `base + off` in source order is the same 12. This
+        is the func_8004DB14 lever pointing the wrong way: there a named
+        offset *gave* base-first and that was what retail wanted; here
+        retail wants index-first and naming is forced, because the value
+        is used again after two calls.
+      * retail leaves the `bgez` of the division sequence with a `nop`;
+        gcc duplicates the target `sra` into the slot and branches to
+        target+4. Naming the quotient separately, naming the biased
+        dividend, and four-statement long division all leave it (12, 12,
+        23). -fno-schedule-insns / -insns2 / -fno-delayed-branch are all
+        worse and change the length.

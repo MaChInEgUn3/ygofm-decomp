@@ -282,6 +282,15 @@ meaningful, and skipping to the last one wastes hours:
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and
    `(tbl + i)[K]` emits `addu base,index` — same address, opposite operands.
+   **gcc folds a scaled dividend and an intermediate assignment blocks it.**
+   `(x * 8 + 0x7FF) / 2048` comes out as `(x + 255) / 256` — two instructions
+   short of retail's `sll 3` / bias / `sra 11`, and the shortfall cascades
+   through the whole prologue. Splitting it in two against the same name —
+   `n = x * 8;` then `n = (n + 0x7FF) / 2048 + 1;` — reproduces retail.
+   `<< 3` for the multiply does not block it, and splitting at the `+ 0x7FF`
+   instead is worse (func_80047788, 48 to 18). This is the same family as the
+   `(x & 0x100) != 0` fold in step 2: one name reused across two statements
+   is what stops the combiner.
    **A named offset flips it the other way.** Where the base is a *parameter*
    rather than a symbol, no index spelling reaches `addu base,index` — four
    were tried on func_8004DB14 (`p + i * 4 + 0x1E0`, `((u8 **)p + i)[0x78]`,
