@@ -1260,13 +1260,17 @@ func_80071EB8 -- 47 differences with the candidate kept, 32 with a worse-shaped
   call and keeps the lower bound in `$a0` for the whole loop. gcc 2.8 keeps an
   address-taken local in memory unconditionally, so passing `&lo` directly
   makes the loop reload and re-store it every iteration (that shape is 32
-  differences, kept as the smaller number but structurally wrong). Passing two
-  separate stack variables and copying them into `lo`/`hi` afterwards fixes the
-  reload -- the candidate in parked/ -- and costs 47 instead, because the
+  differences). Passing two separate stack variables and copying them into
+  `lo`/`hi` afterwards fixes the reload -- the candidate in parked/ -- and
+  costs 47 instead, because the
   preheader then orders differently: retail materialises the four comparison
   constants *before* computing the cursor, and reuses the `1` among them as the
   `sllv` shift amount for `lo * 12`. That reuse is why the order matters, and I
   could not make gcc hoist the constants first.
+  **Which of the two is closer is unresolved.** The only measurement is 47
+  against 32, and it favours the one with the reload; the candidate in parked/
+  is the other one, kept because the reload is a concrete thing to have fixed,
+  not because it is known to be right. Do not read the choice as evidence.
   Tried: copying only the lower bound (48), only the upper (50), a separate
   loop counter copied from the bound (48). Flag sweep: 43 on the kept
   candidate, 32 on the other, neither at a plausible unit setting.

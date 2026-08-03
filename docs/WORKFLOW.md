@@ -228,6 +228,15 @@ meaningful, and skipping to the last one wastes hours:
    (func_80061008). The induction variable for the loop's *other* pointer
    follows it: with the bump inline, gcc placed both before the `jal`, which is
    what retail does.
+   **gcc 2.8 keeps an address-taken local in memory, always.** A value the
+   function passed by address to an out-parameter call and then uses as a loop
+   counter reloads and re-stores every iteration, where the target holds it in
+   a register — there is no "the address cannot escape past here" analysis in
+   this compiler. Passing separate variables to the call and copying them into
+   the loop's own locals afterwards does fix the reload. It is not
+   automatically the answer, though: on func_80071EB8 it cost more elsewhere
+   than it saved, and which shape is right is still open. Recognise the reload
+   for what it is before spending on anything else in the block.
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression
