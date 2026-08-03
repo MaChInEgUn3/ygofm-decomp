@@ -845,6 +845,14 @@ stays as assembly. `candidates.py` applies that filter; a hand-rolled grep over
 `asm/` does not, and three functions were parked as matching failures before
 anyone checked.
 
+**A name-only park may still carry stale flag-table entries, and they are
+worse than none.** func_80049CB0 had `PER_FUNC_FLAGS[...] = _O2_G0` from an
+attempt that predates every lever here, so try_func silently compiled at
+`-O2 -G0` and the candidate read 12 differences; at default compiler flags
+with the same `as -G0` it was 8, and two names later a match. The header line
+try_func now prints is what surfaces it — **read the flags before the count**,
+and when picking up a name-only park, `grep <func> tools_src/build.py` first.
+
 **The name-only park entries are the richest seam left.** A bare name in
 PARKED.txt with no `parked/<f>.c` and no diagnosis is the oldest kind, it
 predates every lever in this file, and `check_try_func`'s parked direction
