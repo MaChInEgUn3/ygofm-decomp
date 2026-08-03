@@ -847,6 +847,18 @@ some time, because the declarations around it changed after it was parked. It
 built green on the first try. Run it after touching try_func, and read the
 parked failures as candidates rather than as tool bugs.
 
+**A scripted paragraph replace must be bounded at both ends.** Rewriting one
+PARKED.txt entry with `s[:i] + new + s[j:]`, where `j` scanned forward for the
+next `# ---` separator, deleted **720 lines** — every entry after it, because
+the newer entries are appended without that separator. The build stayed green
+and `git status` showed one modified file, so nothing flagged it; it surfaced
+only when a later `grep` for an entry that should exist came back empty.
+Bound the end on whichever comes first of the separator *and* a blank line,
+assert the resulting slice is the size you expect, and check the file's line
+count before and after. Recovered with `git show HEAD~6:docs/PARKED.txt`, and
+the useful diagnostic was `for i in 0..10; do git show HEAD~$i:<file> | wc -l;
+done` — the drop is obvious in one column.
+
 **`git checkout -- .` is not "undo my last file".** It reverted four files of
 uncommitted work in this project once, to remove one bad `src/` file that
 `rm` would have handled. The untracked candidate in `parked/` survived and
