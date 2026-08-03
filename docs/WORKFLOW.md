@@ -463,7 +463,13 @@ parked at 16 through a 720-permutation declaration-order sweep. The permuter
 found it; it is now a shape to try by hand, and it took the sibling
 func_8001352C from 38 to 27 on its own.
 
-**Read what the permuter actually changed before believing its score.** The
+**Read what the permuter actually changed before believing its score.**
+Twice now the better-scoring program was the wrong one, and the second is
+worse than the first: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
+out of a copy loop and read `*new_var` inside, so every iteration copies the
+same word while the cursor advances — a score of 365 against a base of 1000
+for code that does not do what the function does. `diff.txt` in the output
+directory is three lines to read. The
 score is a weighted diff, not an instruction count; on func_8001352C it
 rewarded a `(char)0x400` -- zero under `-D__CHAR_UNSIGNED__` -- that deleted
 an instruction the target has, and try_func then reported *fewer* differences
@@ -739,6 +745,19 @@ when `candidates.HAND_WRITTEN` was applied, because 62 of the remainder are
 the GTE block (`lwc2`/`rtpt`/`avsz3`). func_80069E44 is the specimen: it saves
 `$s0`-`$s2` into the *caller's* struct rather than the stack. Import the
 filters rather than re-deriving them.
+
+**Never write *why* past what you measured, and never write "nothing else
+works".** Four times in one session a mechanism was asserted one step beyond
+the evidence, and three were falsified by something already in the repo: "gcc
+will not build the giv for a *stack* array" (it is store-destination versus
+load-source, the frame is irrelevant); "the byte-address load may alias the
+*escaped* local" (a global destination behaves identically, so it is the cast);
+"a base that is a pointer *value* fixes the `addu` order" (two matches from the
+same afternoon are plain `+` on exactly that); and "reachable only by making
+gcc want $a1" after two shapes. The rule that costs nothing: when a sentence is
+about to say *why*, either name the counterexample you checked, or write
+"**N shapes measured, discriminator not established**". A control probe is one
+try_func run — cheaper than the retraction.
 
 **Measure before concluding.** Claims here have been wrong by 4x from reasoning
 over a handful of samples. Scan the whole binary before letting a pattern

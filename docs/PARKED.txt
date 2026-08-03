@@ -1595,10 +1595,18 @@ func_8005B260 -- unfinished, 28 differences with equal lengths (67/67).
     it in `$a1` -- copying the `ctx` parameter to `$t3` in the function's
     *first* instruction to free it -- while `src` stays in `$a0` and is
     walked in place. We materialise it into `$a0` instead, so `src` gets
-    copied to `$t0` and every register after shifts. Naming the whole
-    header expression at the top, and reading `*(s32 *)(ctx + 4)` early to
-    make ctx die sooner, both leave it at 28. The retail choice is
-    reachable only by making gcc want $a1, and nothing in the source says
-    which parameter register a constant lands in.
+    copied to `$t0` and every register after shifts. Two shapes measured,
+    both 28 -- naming the whole header expression at the top, and reading
+    `*(s32 *)(ctx + 4)` early to make ctx die sooner. The discriminator is
+    not established. Do not read that as closed: func_80047CC4 looked shut
+    after seven spellings and the permuter found an eighth.
+    The permuter was run here (`permute.py func_8005B260 --run`) and found
+    nothing usable: base score 1000, eight saved candidates, best 365, and
+    that best one is **semantically wrong** -- it hoists
+    `new_var = &*(s32 *)src;` out of the copy loop and reads `*new_var`
+    inside, so every iteration copies the same word while `src` advances.
+    Second instance of the permuter scoring a wrong program better than a
+    right one, after func_8001352C's `(char)0x400`; the rule that catches
+    both is to read diff.txt before the score.
     Its neighbour func_8005B36C is the same routine with an extra argument
     and a negated count; whatever fixes this one should fix that.
