@@ -68,6 +68,16 @@ It tags instead. Two tags matter:
   `-mno-split-addresses` **first**; all 96 instances in the binary are the bare
   form and an alias makes them worse. A quarter of them also want a hoisted
   split address in the same unit and cannot have both.
+  **`-mno-split-addresses` is also a delay-slot lever, and that use leaves no
+  trace in the addressing.** A bare symbol is *one* instruction to gcc's
+  delay-slot filler, so it cannot be half-hoisted into a branch's slot; the
+  slot stays a `nop` and the assembler expands the pair after it. With the
+  split pair, reorg puts the `lui` in the slot. Both spellings assemble to the
+  same two instructions through the same register — the *only* difference is
+  retail's `nop`. func_80041D60 was one instruction short for exactly this and
+  matched on the flag alone. So when a candidate is byte-identical except that
+  the target leaves a delay slot empty in front of a global's address, reach
+  for this flag before re-reading the source.
 **A call that sets only `$a0` is not always a missing prototype.** Twice it
 was (func_800878D0, func_80046FA0, both fixed with a per-file guard) and once
 it was gcc reusing a constant that another instruction had just put in `$a1`
@@ -138,6 +148,18 @@ meaningful, and skipping to the last one wastes hours:
    plus `0x3D0C` in the load — gcc splitting the constant because the base is
    now a register. func_80024734, 40 differences to 4, and the local is the
    same one the function stores at the end anyway.
+   **A chain of pointer steps wants one name per step, not one cursor.**
+   Where the target walks a table by re-reading a 16-bit offset at each stage
+   — `q = t + rd16(q + p[k] * 2)` three times over — writing it against a
+   single reused `q` makes one long-lived pseudo, which takes an argument
+   register and pushes the table base out of the one retail uses. Five distinct
+   locals, each assigned once, gives five short-lived pseudos that ping-pong
+   through `$v0`/`$v1` the way retail does: func_80041D60, 34 differences to 7.
+   Fully inlining the chain into one expression is *not* the same thing and was
+   worse (29) — the names have to exist, they just must not be reused. This is
+   the counterpart of the reuse rule below: one name for two unrelated values
+   costs a register, and here it cost the allocation of every value in the
+   block.
    Before inventing a name for a copy, **check whether the copy is the return
    value**: retail's `addu $v0,$s0,$zero` before a tail that works through
    `$v0` is `return p;` on a function whose prototype only says `void`
@@ -213,6 +235,16 @@ meaningful, and skipping to the last one wastes hours:
    twice, look for a store between your two reads that gcc must assume aliases
    — `if (q[7]) x = q[7] << 4;` reloads across a store through another
    parameter, and one local was the whole of func_80059000.
+   **Write that same double read where there is no aliasing store and you get a
+   register copy instead of a second load** — and that copy is often the
+   instruction the target schedules into a branch's delay slot. func_80057E20's
+   last 12 differences were retail putting `addu $v1,$v0,$zero` in the delay
+   slot and the `sll` after the load, where every single-read spelling puts the
+   `sll` in the delay slot and a `nop` after the load. `if (e[7] != 0) { v =
+   e[7] << 4; … }` matched; `v = e[7]; if (v != 0)`, `v <<= 4`, and a second
+   name for the shift result all stayed at 12. So an unexplained
+   register-to-register copy is not always an extra *name* (step 2's rule) — it
+   is also what CSE leaves behind when the source read the same lvalue twice.
    Related, same pass: an expression the target recomputes in several blocks was
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and
