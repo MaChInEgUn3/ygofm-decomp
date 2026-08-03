@@ -4140,7 +4140,8 @@ positional diff, so "19" looked like progress. WORKFLOW's first debugging step
 is "instruction count right? nothing else is diagnostic until it is", and it
 applies to permuter output as much as to hand-written C.
 
-The class is four members now, not five. Applied by hand to the sibling
+The class is four members after func_800135FC came out, and five again with
+func_8002FB78 added on a checked rotation rather than a resemblance. Applied by hand to the sibling
 func_8001352C it gives 38 differences to 27, so the shape generalises but is
 not the whole story there; a permuter search is running on it.
 

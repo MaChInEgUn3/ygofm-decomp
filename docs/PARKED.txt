@@ -1176,3 +1176,18 @@ func_8003A01C -- 33 differences, the same *kind* of difference as the
     shared `.L8003A170`. 54 to 33.
   What is left is the permutation and nothing else.
 
+func_8002FB78 -- 52 differences, and **a measured member** of the three-cycle
+  permutation class, not a resemblance: retail is mask=$a0 / value=$v0 /
+  constant=$v1 and we get $v1 / $a0 / $v0, which is the documented rotation
+  exactly. Checked before claiming it.
+  A four-case variant of the clone body, with cases 1 and 3 sharing a tail. It
+  was written straight from the accumulated levers -- read D_8009B0F4 into a
+  local with a compound assignment and write-back, one named local for the
+  shared tail so gcc cross-jumps, the `ori` form for 0x8000 -- and came out at
+  52 on the first attempt with no structural differences at all. Full flag
+  sweep: 52 at plain -O2 -G8.
+  One thing tried and rejected: `t += 0x800;` before the second store, which
+  is what retail's `sw; addiu; sw` on one register looks like. It gives 53.
+  The `+ 0x800` version is the one kept.
+  Five functions on this rotation now. See the class section in DECISIONS.
+
