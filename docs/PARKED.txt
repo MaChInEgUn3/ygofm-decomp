@@ -1275,3 +1275,17 @@ func_80071EB8 -- 47 differences with the candidate kept, 32 with a worse-shaped
   loop counter copied from the bound (48). Flag sweep: 43 on the kept
   candidate, 32 on the other, neither at a plausible unit setting.
 
+
+func_80047DB0 -- unfinished, 67 differences. The func_80048920 family: a
+    0x8000 early exit, a 0x4000-keyed table lookup, then four iterations ORing
+    bits into a mask. Needs the -G0 assembler (D_8009B45C is bare); the flag is
+    in build.py's parked section so the count is reproducible.
+    The unread thing is retail's second copy at the top: `addu $a1,$a0,$zero`
+    then `addu $a0,$a1,$zero`, a round trip through $a1 before the first call.
+    Three spellings were measured and none of them emits the second copy --
+    `func_800464F0()`, `func_800464F0(arg0)`, `func_800464F0(arg0, arg0)` --
+    and all three stay at exactly 67, with both sides the same length. So the
+    copy is being traded against something else rather than simply missing,
+    which is the signal that the shape is structural and not a call-argument
+    question. Do not guess a fourth spelling; read what makes $a0 dead across
+    the branch.
