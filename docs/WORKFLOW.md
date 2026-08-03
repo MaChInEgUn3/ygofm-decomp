@@ -528,6 +528,18 @@ calling it wrong is what kept the function parked. The score is a weighted
 diff, not an instruction count — run any candidate it produces through
 try_func and read the diff, not the number.
 
+**Two levers can be coupled, and each one measured alone reads as a
+regression.** func_80026D18 sat at 4 through nine shapes, one of which was the
+declaration order that turns out to be half the answer — alone it is *6*, so
+it was correctly rejected every time it was tried. The other half is a
+`do { } while (0);` around an `if` body, which is 2 on its own; together they
+match. A bare `{ }` or `if (1) { }` is 6, so it is the loop node gcc's loop
+pass sees, not the block. **This is the specific thing the permuter is for**:
+it mutates from a base that already carries one lever, so it can find the
+partner that a one-at-a-time sweep by hand never will. When a park says "N
+shapes measured, all the same", that is evidence about N shapes *individually*
+and none at all about pairs.
+
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
 `parked/<func>.c` and runs it; func_800135FC took 66 iterations, about ninety

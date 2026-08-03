@@ -84,11 +84,21 @@
 # worse than the plain inline form. Third time its score and try_func's count
 # have disagreed in direction.
 # ---
-# func_80026D18 is func_80026C6C with `arg2 < 0 ||` in front of the comparison.
-# It reaches 4 differences and they are the loop counter and the accumulator
-# holding each other's register: retail gives count $a3 and i $t0, gcc gives
-# count $t0 and i $a3 whatever the declaration order, and the matched sibling
-# agrees with gcc. Nine shapes and the flag sweep all sit at 4.
+# func_80026D18 MATCHED 2026-08-03, on a pair of shapes neither of which works
+# alone. The old entry was accurate as far as it went -- 4 differences, the
+# loop counter and the accumulator holding each other's register, and nine
+# shapes including the declaration order all sitting at 4. What it could not
+# see is that the two levers are *coupled*:
+#   * `do { } while (0);` around the `if` body: 4 -> 2. Not a block -- `{ }`
+#     and `if (1) { }` are both 6. gcc's loop pass sees the extra loop node
+#     and numbers the blocks differently. The permuter found this one.
+#   * `count = 0;` initialised before `i = 0;`: on its own it is *worse*
+#     (4 -> 6), which is why nine earlier shapes rejected it. With the
+#     wrapper it matches.
+# That is the lesson worth keeping: a shape measured alone and found worse is
+# not eliminated, because two levers can only pay together. The permuter is
+# what breaks that deadlock -- it mutates from a base that already has one of
+# them.
 # ---
 # func_80073220 clears D_800EAE88[0..5] backwards and then copies the entries
 # of D_800F5BE8 that are >= 0xB into it. Every block is right, including the
@@ -370,7 +380,6 @@ func_8005C4F0
 func_80047A68
 func_8004A764
 func_8005C5D4
-func_80026D18
 func_80073220
 func_8003201C
 func_80071424
