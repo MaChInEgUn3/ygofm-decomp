@@ -516,6 +516,17 @@ on a combination that had been in the table for weeks.
     knobs" barrier is not one. Where the two groups are the same width, giving
     one of them a *declared* size it does not need is the same kind of codegen
     knob as scalar-vs-array (D_80010038 is `[4]` for exactly that reason).
+    **And that knob is also how you stop a loop-invariant address being
+    hoisted.** func_8003CCD8 reads one byte of a four-byte symbol inside a
+    loop where retail re-materialises `lui %hi` every iteration; the unsized
+    array gives cc1psx's own pair and gcc hoists the `%hi` out as an
+    invariant, which is one instruction too many in the preheader and one too
+    few in the body. Declaring the symbol `u8 sym[8]` — a size it does not
+    have — and assembling at `-G4` makes it non-small (8 > 4) while the real
+    four-byte scalars beside it stay gp-relative, and a bare reference is
+    *one* instruction to gcc, so the invariant pass has nothing to hoist. 28
+    differences to 6, and no other threshold separates the two groups:
+    -G0/-G1/-G2 take the gp-relative symbols out with it (+20, +18, +12).
     **And the two `-G`s are independent knobs, which the sweep table did not
     know.** Every row in `sweep_flags.py`'s COMBOS used to tie the compiler's
     `-G` to the assembler's, so "default compiler, smaller assembler" — the
