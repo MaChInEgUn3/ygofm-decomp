@@ -491,7 +491,17 @@ def main():
     # they must be compared -- they occupy real bytes.
     w, g = want, got
 
-    print(f"flags: {' '.join(flags)}")
+    # Print the *effective* assembler flags too, not just the compiler's.
+    # They come from build.py's PER_FUNC_AS_FLAGS or from
+    # config/flag_overrides.json, so a run can silently be at the wrong -G --
+    # deleting a leftover overrides file once made a whole batch of variant
+    # runs come back at the default assembler, and the numbers looked like a
+    # real result. Same fix as printing both instruction counts: make the
+    # thing that was inferred visible.
+    _as_over = B.PER_FUNC_AS_FLAGS.get(func)
+    print(f"flags: {' '.join(flags)}"
+          f"   as: {' '.join(B.AS_FLAGS)}"
+          f"{' ' + _as_over if _as_over else ''}")
     print(f"{'TARGET':<44} {'BUILT'}")
     print("-" * 90)
     bad = 0
