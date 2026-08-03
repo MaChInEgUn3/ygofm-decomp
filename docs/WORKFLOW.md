@@ -501,7 +501,7 @@ on a combination that had been in the table for weeks.
     the assembler, so retail's `nop` survives. func_8001944C went from 62
     differences with a length mismatch to 32 with equal lengths on that row
     alone. Four as-only rows are now in the table.
-    It is the one that matters
+    The scalar-with-a-smaller-assembler-`-G` form is the one that matters
     when a function needs `lui $at` on one symbol while keeping cc1psx's own
     split pair on another — `-mno-split-addresses` would wreck the second
     (func_80061008: `lui $at` on two scalars, `lui $v0,%hi / addiu $s4,$v0,%lo`
