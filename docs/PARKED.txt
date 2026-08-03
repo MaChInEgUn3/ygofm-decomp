@@ -1690,3 +1690,30 @@ func_8003700C -- unfinished, 26 differences and one instruction short, and
     inline, `!(less)`, `>=`, a named `r = 1` before the arm, and the same
     `r = 1` immediately before the test -- all 26 and all one short. The
     discriminator is not established.
+
+func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
+    like func_8003700C it is here to record that a recipe branch worked.
+    This is the **third** branch, used for the first time on a fresh
+    function: D_8009B3A4 wants the bare form for its six reads and
+    D_8009B098 must stay gp-relative, and both are `u16`, so no real
+    threshold separates them. Declaring D_8009B3A4 `volatile u16 [4]` --
+    eight bytes it does not have -- and assembling at `-G4` gives both:
+    8 > 4 takes it out of small data while 2 <= 4 keeps D_8009B098 in.
+    Guarded on D_8009B3A4_IS_VOLATILE_SIZED alongside the existing volatile
+    and aggregate arms. Volatile for the same reason func_80023FBC needs it:
+    six reads in a row that retail reloads each time.
+    Source shapes after that, 8 -> 7:
+      * the loop is the unrotated `while` -- a forward `j` into the bottom
+        test -- so `goto test;` at the top, and the back-edge tests
+        `(D_8009B398[0] & 0x800) == 0`, not `!= 0`. Reading the polarity
+        off the listing rather than off the sense of the code was the whole
+        of one difference.
+    What is left is the prologue's address pair. Retail materialises
+    D_800E9D28 into **one** register and schedules the offset-0 store
+    between the halves -- `lui $s0,%hi` / `sh $zero,%lo($s0)` /
+    `addiu $s0,$s0,%lo` -- where we get a separate temp for the `%hi` and
+    the address in another register. Five shapes measured, all 7: the store
+    through the symbol with the local assigned after, the local assigned
+    first, both stores through the local (gcc folds `p[0]` back to the
+    symbol form anyway), and the gp-relative `|=` moved to first and to
+    second. Discriminator not established.

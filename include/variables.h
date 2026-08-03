@@ -909,7 +909,13 @@ extern u8 D_8009B32C;
 extern u16 D_8009B3A0;
 /* func_80023FBC reads it five times in a row and retail reloads each time,
  * which only a volatile does. */
-#ifdef D_8009B3A4_IS_VOLATILE
+#ifdef D_8009B3A4_IS_VOLATILE_SIZED
+/* Eight bytes it does not have: func_80013360 needs the bare form for this
+ * symbol while D_8009B098, also two bytes, stays gp-relative, so no real
+ * threshold separates them -- see WORKFLOW's third dup-%hi branch. Volatile
+ * for the same reason as the plain volatile arm below. */
+extern volatile u16 D_8009B3A4[4];
+#elif defined(D_8009B3A4_IS_VOLATILE)
 extern volatile u16 D_8009B3A4;
 #elif defined(D_8009B3A4_IS_AGGREGATE)
 extern u16 D_8009B3A4[];
@@ -1039,6 +1045,7 @@ typedef struct {
 } Rec20;
 
 extern u8 D_800E9F10[];
+extern s16 D_800E9D28[];
 extern Rec20 D_800E9FF0[];
 /* The last byte of D_800E9FF0[1] under its own name: func_800175A0 stores -1
  * there through %hi/%lo of this symbol and the record's own base for the
