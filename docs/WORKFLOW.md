@@ -328,6 +328,18 @@ meaningful, and skipping to the last one wastes hours:
    to a `jal` after the join, whose own delay slot is a bare `nop`. When a
    register is set and nothing in its block reads it, look at the next `jal`
    before concluding anything else — func_8003C7A0, 65 differences to 1.
+   **A named byte read schedules where you put the name, and one statement
+   either way is the whole difference.** Where the target interleaves a load
+   between two stores — `sb`, `lbu`, `sb`, `sb` — writing the read inline in
+   its own store leaves it after both, and gcc will not hoist it because the
+   constant it just materialised is in the register the load would want.
+   Naming it moves it, and then *where the name is assigned* is the knob:
+   before the first store is too early, after the first store is retail.
+   func_80036C14, 37 differences to 12 to 2 on that one line's position in
+   three arms. The last 2 were the third instance of the two-names rule:
+   one `b` shared by all three arms takes a register that survives them all,
+   so the arm whose value retail keeps in the just-freed `$v0` gets `$v1`
+   instead — a separate local per arm matched.
    **Hoist a call's arguments into locals when the target evaluates them
    early.** Where retail sets up `$a0` and loads `$a1` *before* the stores that
    precede the call, assigning both to locals at the top of the block

@@ -432,6 +432,7 @@ extern u32 D_801D9000[];
 /* A table of four-byte entries terminated by a zero word: a big-endian
  * halfword key and two more bytes. Searched by func_8003B5C8. */
 extern u8 D_801D9004[];
+extern s16 D_801DA000[];
 extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
