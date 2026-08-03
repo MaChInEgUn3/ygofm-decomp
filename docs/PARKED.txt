@@ -1369,3 +1369,37 @@ func_8001944C -- unfinished, 30 differences with equal lengths (70/70).
     lever pointing the right way, but it then displaces the rectangle pointer
     into $a3. Not installed, because a third argument to a two-argument
     library function is a guess and the length got worse.
+
+func_8003B5C8 -- unfinished, 18 differences and one instruction too many, and
+    the whole of it is one induction variable. Twenty bytes of Shift-JIS
+    full-width digits are copied from D_80010330 onto the stack, then read as
+    ten big-endian halfword keys, each looked up in the four-byte-entry table
+    at D_801D9004 and its 1-based position stored to D_800EAFF8.
+    Everything matches except the loop bound. Retail eliminates the counter:
+    it keeps `a3 = &b[k]` as an address giv, `t0 = k + 1` as a biased biv for
+    the second byte, `t1` as the output giv, and tests `slt $a3,$t4` against a
+    limit `t4 = sp + 20` computed in the preheader. Note the `slt` -- a
+    *signed* compare between two addresses, which is the fingerprint of gcc
+    rewriting the original `k < 20` rather than of a pointer comparison in the
+    source. We get the same three ivs plus the counter itself, and `slti`.
+    Our gcc will not build the address giv for a **stack array** indexed by
+    the counter, though it builds one for `D_800EAFF8[j]` in the same loop, so
+    strength reduction is running -- it is specifically the frame-relative
+    access. Measured against that, all landing worse:
+      * `b[k]` and `b[k + 1]` (both spellings of the buffer, struct member and
+        plain array): no giv at all, two `addu`s per iteration, 55/57.
+      * naming the second index (`m = k + 1` as a loop clause): three
+        increments and *equal length*, but a3 holds `k` rather than `&b[k]`,
+        so every register in the body rotates -- 42.
+      * an explicit cursor for the first byte plus the named index for the
+        second: 18 and +1, the entry above. Four increments where retail has
+        three.
+      * bounding that cursor instead of the counter (`c < b + 20`, and with an
+        `end` local): +4 or +5. gcc recomputes `sp + 20` inside the loop and
+        compares `sltu`, and the counter's disappearance does not pay for it.
+      * indexing through a pointer local (`bp = b; bp[k]`): 33.
+    The flag sweep's best is 45 (O2 G8 nosched1+2), which is scheduling noise
+    and not this. What would settle it is a second function that indexes a
+    stack array by a counted loop variable and whose target *does* show the
+    giv; if that one also refuses, the class is the frame-relative access and
+    not this function.
