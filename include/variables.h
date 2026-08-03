@@ -778,6 +778,8 @@ extern s8 D_8009B361[];
 #endif
 /* Holds a callback; reached through $at, so its unit was built -G0. */
 extern void (*D_8009B128)(void);
+extern u16 D_8009B28C;
+extern u16 D_8009B2A4;
 /* Reached gp-relative in most files but through %hi/%lo in func_8001BD48,
  * which also needs gp-relative access to another symbol -- so -G0 is not an
  * option for it and the *declaration* has to differ per file, exactly as it

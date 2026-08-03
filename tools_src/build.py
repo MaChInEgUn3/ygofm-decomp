@@ -278,6 +278,7 @@ HOIST_EPILOGUE_FUNCS = {
 }
 
 SMALL_DATA_NOP_FUNCS = {
+    "func_8002E5AC",
     "func_8002DC38",
     "func_8002D180",
     "func_8002D62C",
