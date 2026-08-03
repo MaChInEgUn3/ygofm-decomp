@@ -493,6 +493,17 @@ mismatch differently from an instruction mismatch, so a large drop can mean
 nothing to the build. Run the winner through try_func before believing it is
 closer.
 
+**When the permuter's better-scoring candidate is semantically wrong, ask
+what the *target* does before discarding it.** func_8001352C sat parked for
+weeks because its best output "inserted `(char)0x400`, which is zero under
+`-D__CHAR_UNSIGNED__`, deleting the `addiu $a0,$a0,0x400` the target has" —
+and the target has no `0x400` at all. The candidate had been adapted from a
+sibling and carried the bias across; the permuter could not delete the term so
+it neutralised it, and its "wrong" 19 was closer than our "honest" 27. So:
+**diff the two listings before trusting any constant an adapted candidate
+inherited**, and read a wrong-but-better candidate as a pointer at the target
+rather than as noise.
+
 **Read what the permuter actually changed before believing its score.**
 Twice now the better-scoring program was the wrong one, and the second is
 worse than the first: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
