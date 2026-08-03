@@ -214,6 +214,14 @@ def main():
     print(f"\nprepared {work.relative_to(ROOT)}")
     print(f"compiler flags: {' '.join(flags)}")
     print(f"\n{cmd}\n")
+    if not args.run:
+        # Say so loudly. Without --run this tool only *prints* the command,
+        # and a log containing nothing but that command reads exactly like a
+        # permuter run that finished and found nothing. That misreading went
+        # into a park entry ("the permuter was run and is not the answer")
+        # before anyone noticed the permuter had never started.
+        print("NOT RUN: this only prepared the directory. Pass --run to "
+              "start the permuter, or paste the command above.\n")
 
     if args.run:
         # Windows resolves a child's program name against the *parent's*

@@ -273,12 +273,18 @@ meaningful, and skipping to the last one wastes hours:
    struct and *then* loads from a global, gcc hoists the load above the store
    to cover its latency — it knows an array indexed by name is a different
    object from the local. Writing the same read as a computed byte address,
-   `*(s32 *)((u8 *)tbl + i * 4)` instead of `tbl[i]`, makes it a load through
-   a pointer that may alias the local whose address escaped to the callee, and
-   the store stays first. func_80049CF8, 4 differences to a match; permuting
-   the four stores, naming the loaded value, and naming it before or after the
-   constant store all stayed at 4, and an explicit `s32 *` cursor is much
-   worse (43) because it becomes a second induction variable.
+   `*(s32 *)((u8 *)tbl + i * 4)` instead of `tbl[i]`, keeps the store first.
+   func_80049CF8, 4 differences to a match; permuting the four stores, naming
+   the loaded value, and naming it before or after the constant store all
+   stayed at 4, and an explicit `s32 *` cursor is much worse (43) because it
+   becomes a second induction variable.
+   **It is the cast, not the escape.** The obvious reading is that the local's
+   address escaped to the callee so the byte-address load might alias it — that
+   is wrong, and a two-line probe says so: the same loop storing into a
+   *global* struct, where nothing escapes, still hoists the load in the indexed
+   form and still keeps the store first in the byte-address form. So reach for
+   this spelling wherever a load is being hoisted past a store, not only where
+   something escaped.
    **Write that same double read where there is no aliasing store and you get a
    register copy instead of a second load** — and that copy is often the
    instruction the target schedules into a branch's delay slot. func_80057E20's

@@ -1492,12 +1492,16 @@ func_800497E0 -- unfinished, 18 differences and one instruction too many.
     duplicate the `-1` block that retail shares (20), and inverting that
     test is 21. A single-exit rewrite with one `ret` for all three values
     is much worse (52).
-    The permuter was run and is not the answer here: base score 180, no
-    improvement in 43 iterations, then an internal randomizer failure
-    (traceback in src/randomizer.py:2564). Worth recording separately that
-    the first run of it produced *no output at all* through a backgrounded
-    `| tail -20` -- the crash text never reached the file, and an empty log
-    read as "it ran and found nothing".
+    The permuter is not the answer here: base score 180, no improvement in
+    43 iterations, then an internal randomizer failure (traceback in
+    src/randomizer.py:2564). That is from running `permuter.py` directly.
+    The first attempt, `tools_src/permute.py func_800497E0`, produced a log
+    containing nothing but the command it would have run -- because
+    **permute.py only prepares unless you pass `--run`**, and a log holding
+    just the command reads exactly like a run that finished and found
+    nothing. permute.py now says NOT RUN in that case. Tenth instance of a
+    tool answering about something it never measured, and the first where
+    the tool was telling the truth and the reader supplied the fiction.
 
 func_80047788 -- unfinished, 12 differences with equal lengths (55/55).
     Another from the reopened dup-%hi class: three bare reads of

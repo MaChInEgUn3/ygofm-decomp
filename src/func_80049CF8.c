@@ -12,6 +12,10 @@ void func_80049CF8(void) {
         e = D_8009B458 + i * 0x28;
         if ((e[0x183] >> 4) == 0 && e[0x18D] != 0) {
             *(s32 *)(c + 4) = 3;
+            /* NOT D_80011434[i]. The byte-address form is load-bearing: the
+             * indexed form lets gcc hoist this load above the store above it
+             * to cover its latency, and retail keeps the store first. See
+             * WORKFLOW, "a load the target does not hoist". */
             *(s32 *)c = *(s32 *)((u8 *)D_80011434 + i * 4);
             *(s16 *)(c + 8) = 0;
             *(s16 *)(c + 0xA) = 0;
