@@ -4099,10 +4099,32 @@ is positional.
   tried on func_80020BE4 and func_8003C7A0's neighbours; they move the count
   by a few and never the allocation.
 
-**What has not been tried:** the permuter. `tools/decomp-permuter` is fetched
-per machine and has been run against exactly one function in this project's
-life. This class is the obvious candidate -- five functions, one shape, source
-that is already instruction-correct.
+**The permuter, tried at last, and it wins.** `python tools_src/permute.py
+func_800135FC` found a zero score in 66 iterations -- about ninety seconds on
+six threads -- after this same function had survived a 720-permutation
+declaration-order sweep. The whole change:
+
+```c
+    x = w;
+    func_800134E0(p, x, y, z);
+```
+
+Assigning the last value to a variable whose live range ended two statements
+earlier. It computes nothing; it is a hint to the allocator, and it is what
+retail's allocation shows. The declaration sweep could not reach it because it
+is not a declaration, and reading the listing cannot suggest it because the
+instruction it produces is one retail does not have (the copy is coalesced
+away).
+
+The class is four members now, not five. Applied by hand to the sibling
+func_8001352C it gives 38 differences to 27, so the shape generalises but is
+not the whole story there; a permuter search is running on it.
+
+Two things learned wiring the harness, both in tools_src/permute.py's
+docstring: `prelude.inc`'s `.set gp=64` is rejected by our assembler on a
+32-bit processor, and implicitly-declared callees make the permuter's typemap
+raise KeyError during some randomizations -- three failures in sixty-six
+iterations, survivable, but prototypes in the candidate cost nothing.
 
 ## The $at pool, partitioned
 

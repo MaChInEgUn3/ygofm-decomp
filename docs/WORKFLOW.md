@@ -273,8 +273,23 @@ meaningful, and skipping to the last one wastes hours:
    `volatile` does not stop that hoist on either object — gcc 2.8 moves a load
    across a volatile store and moves a volatile load too.
 
+**Assigning to an already-dead local before a call is a register-allocation
+hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
+statements earlier computes nothing and matched func_800135FC, which had been
+parked at 16 through a 720-permutation declaration-order sweep. The permuter
+found it; it is now a shape to try by hand, and it took the sibling
+func_8001352C from 38 to 27 on its own.
+
+**The permuter is the lever for the register-allocation class, and it works.**
+`python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
+`parked/<func>.c` and runs it; func_800135FC took 66 iterations, about ninety
+seconds on six threads. Reach for it as soon as a candidate is
+instruction-for-instruction right and only the allocation is wrong — that is
+precisely the state the park rule below describes.
+
 **Stop and park** when the only remaining difference is which register holds a
-value, or when the target has more duplicated tails than you produce. Record the
+value, or when the target has more duplicated tails than you produce. Run the
+permuter *before* writing the park entry, not after. Record the
 name in `docs/PARKED.txt` with its class **and keep the candidate in
 `parked/<func>.c`**.
 
