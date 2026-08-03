@@ -1,7 +1,9 @@
 #define FUNC_80017F04_FULL
 #include "common.h"
-void func_80016778(u8 *arg0);
-void func_80016D04(u8 *arg0);
+/* Both are stored as function pointers only, so the parameter list is
+ * immaterial here; these must match the real definitions, which grew a
+ * second parameter after this candidate was parked. */
+void func_80016D04(u8 *arg0, s32 arg1);
 
 u8 *func_80017F04(u8 *arg0, s32 arg1, s32 arg2) {
     u8 *p = func_800400AC(func_8004002C(), 6);

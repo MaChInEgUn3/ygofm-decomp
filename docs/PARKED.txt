@@ -910,6 +910,22 @@ func_80017F04 -- 12 differences: two registers and the scheduling behind them.
   guards it on FUNC_80017F04_FULL, which the definition's file defines and
   nobody else does. First function prototype in the project to need the same
   per-file treatment the variables have.
+  Re-measured 2026-08-03. The candidate had stopped compiling: it carried its
+  own one-parameter prototypes for func_80016778 and func_80016D04, both of
+  which have since been decompiled with a second parameter. They are only ever
+  stored as function pointers here, so the parameter list is immaterial and the
+  fix is to match the real definitions -- but this is the second time a park
+  has rotted because the declarations around it moved, and check_try_func's
+  parked direction is what caught it. Still 12, and now with equal lengths so
+  the count is real.
+  Four more spellings of the `- 1` measured against the fold, all 12: a byte
+  base with an explicit `* 4`, the constant grouped before the base, `(tbl -
+  1)[n]`, and `&tbl[n - 1]` as its own element pointer. gcc distributes the
+  `- 1` into the load's displacement every time, which costs one instruction
+  and gains a `nop` -- net zero, which is why the length matches. Naming the
+  index as a local *costs* an instruction (47) whether declared at the top or
+  scoped to its own block. The fold is a symptom of the register choice the
+  entry already names, not a separate lever.
 
 func_8005F1B8 -- 24 differences, and most of them hang off one thing this
   project has not seen before: **retail divides by a literal constant with a
