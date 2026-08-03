@@ -392,6 +392,13 @@ func_80058A7C
 # Naming the loaded word, naming the masked flag, and `f &= 0xBF` as its own
 # statement all leave it at 2 (or make it 27). Everything else, including the
 # shared store block at .L80030E1C reached with two different values, matches.
+# Re-measured 2026-08-03 with the -mno-split-addresses-as-a-delay-slot-lever
+# from func_80041D60, which is the same shape one level up: still 2, and the
+# lengths are equal (53/53), so the count is real and not a shift. The flag is
+# already on this function; what it cannot do is stop reorg hoisting a `lui`
+# for a plain *constant*, because only a symbol has a bare form. Swapping the
+# `&` operands, spelling the test `!= 0`, and inverting the branch all leave
+# the same 2. The lever does not reach this class.
 func_80030D5C
 # func_80045114 checks the same slot field at n, n-1 and n-2 before appending.
 # The addressing needs a -G0 assembler entry (restore it when picked up) and
@@ -1289,3 +1296,25 @@ func_80047DB0 -- unfinished, 67 differences. The func_80048920 family: a
     which is the signal that the shape is structural and not a call-argument
     question. Do not guess a fourth spelling; read what makes $a0 dead across
     the branch.
+
+func_80045334 -- unfinished, 52 differences and one instruction too many.
+    Structure is fully read and three levers landed on it, in this order:
+    the aggregate form of D_8009B45C (retail's `lui/lw %lo` pair, where the
+    scalar at -G8 is gp-relative and gcc then parks the pointer in a
+    callee-saved register); a *local* `b` for the pointer, because the arms
+    reuse it while the default arm and the post-call block re-read the symbol,
+    and writing `D_8009B45C[0]` inline in the arms costs an extra `lw %lo`
+    each; and the arms as a **switch**, not an if/else-if chain -- retail
+    branches out to both cases and falls through into the default, which is
+    switch layout, and the chain puts the first arm inline. 66 -> 59 -> 52.
+    What is left is allocation and one instruction. `x = a` coalesces: retail
+    keeps the parameter in $a0 for the 0x8000/0xF000 tests and the 0x534 store
+    while `x` lives in $s3, and every spelling tried collapses both onto one
+    register (using `x` for all the tests, using `a` for all of them, and the
+    inverse assignment all give the identical 52). `b` lands in $s0 where
+    retail has $a1, `t` in $s1 where retail has $v0, and `k`/`x` are swapped
+    between $s2 and $s3. Six declaration orders change nothing -- literally
+    nothing, all six report 52. The flag sweep's best is 53.
+    The remaining +1 is in the default arm: retail fills the second `beq`'s
+    delay slot with `x += 0x6000` and the `j`'s with `k = 0x70`; we take a nop
+    in the first and put the add in the second.

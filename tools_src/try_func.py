@@ -503,6 +503,24 @@ def main():
             bad += 1
         print(f"{a:<44} {b:<40} {mark}")
     print("-" * 90)
+    # Always print both lengths, and say so loudly when they differ.
+    #
+    # The diff above is positional -- line i against line i, no alignment
+    # pass -- so ONE missing instruction marks every line after it as
+    # differing. A candidate that is a single `nop` short of retail scores as
+    # badly as the length of its tail, and a candidate with seven genuine
+    # register disagreements scores seven. Ranking variants by this number
+    # therefore inverts the truth exactly when you are closest:
+    # func_80041D60's winner scored 15 (one missing nop, thirteen lines of
+    # shift) against a 7 that was seven real differences, and pruning by score
+    # would have thrown the match away. Same family as the objdump `...`
+    # collapse and the grep that matches nothing -- see WORKFLOW's "a tool's
+    # answer only counts if it measured what you think".
+    print(f"{len(w)} target instruction(s), {len(g)} built"
+          + ("" if len(w) == len(g) else
+             f"  <-- LENGTH DIFFERS by {len(g) - len(w):+d}; the count below "
+             f"is inflated by the shift, read the first difference, not the "
+             f"total"))
     print("MATCH" if bad == 0 and len(w) == len(g)
           else f"{bad} differing instruction(s)")
     return 0 if bad == 0 else 1

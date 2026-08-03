@@ -77,7 +77,10 @@ It tags instead. Two tags matter:
   retail's `nop`. func_80041D60 was one instruction short for exactly this and
   matched on the flag alone. So when a candidate is byte-identical except that
   the target leaves a delay slot empty in front of a global's address, reach
-  for this flag before re-reading the source.
+  for this flag before re-reading the source. **Observed once**, and it does
+  *not* generalise to a plain constant: func_80030D5C is the same shape with a
+  `lui` for 0x2000000 instead of an address, already has the flag, and is still
+  two off.
 **A call that sets only `$a0` is not always a missing prototype.** Twice it
 was (func_800878D0, func_80046FA0, both fixed with a per-file guard) and once
 it was gcc reusing a constant that another instruction had just put in `$a1`
@@ -557,7 +560,17 @@ says "no", ask whether it could have said "yes"; when it says "yes", ask whether
 the run it judged completed. The cheapest way to fall into this is a **filter**:
 `try_func.py ... | grep -E '<<|differing|MATCH'` prints nothing both for a clean
 match and for a compile error, because the error text matches none of the three
-patterns. Read try_func's last lines, not a grep of them. And when the difference is a
+patterns. Read try_func's last lines, not a grep of them.
+**And never rank candidates by the difference count alone.** The diff is
+positional — line *i* against line *i*, no alignment pass — so one missing
+instruction marks every line after it as differing. A candidate one `nop` short
+scores as badly as the length of its tail; a candidate with seven genuine
+register disagreements scores seven. Ranking inverts the truth exactly when you
+are closest: func_80041D60's winner scored **15** against a **7** that was
+seven real differences, and pruning by score would have thrown the match away.
+try_func now prints both instruction counts on every run and shouts when they
+differ — read that line first, and when the lengths differ read the *first*
+difference rather than the total. And when the difference is a
 small number of **`nop`s**, suspect the reader: `objdump` collapses a run of
 identical words into `...`, which cost func_800357E8 two nops that were in the
 object all along (fixed with `-z`, but the class of bug recurs).
