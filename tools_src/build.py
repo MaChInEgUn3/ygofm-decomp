@@ -150,6 +150,10 @@ _O2_G0_NOSCHED2_MACRO = ["-quiet", "-O2", "-G0", "-fno-schedule-insns2",
 # hoist -- gcc 2.8 moves a non-volatile *and* a volatile load across a
 # volatile store -- so this is a flag, not a source shape.
 _O2_G8_NOSCHED1 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns"]
+# First user is func_80060E70 (parked): retail keeps a cursor at the loop's
+# base with `+0xA` in every offset, and strength reduction biases it to
+# base+10 with zero offsets instead.
+_O2_G8_NOSTRENGTH = ["-quiet", "-O2", "-G8", "-fno-strength-reduce"]
 _O2_G0_NOSCHED1 = ["-quiet", "-O2", "-G0", "-fno-schedule-insns"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
@@ -195,6 +199,8 @@ PER_FUNC_FLAGS = {
     "func_8002EC74": _O2_G8_MACRO,
     "func_80037A58": _O2_G8_MACRO,
     "func_80012B50": _O2_G8_NOSCHED1,
+    # Parked; kept so PARKED.txt's difference count is reproducible.
+    "func_80060E70": _O2_G8_NOSTRENGTH,
     "func_80031000": _O2_G8_MACRO,
     "func_80044DC0": _O2_G8_MACRO,
     "func_800386B8": _O2_G8_MACRO,
@@ -354,6 +360,7 @@ PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800240B0"] = "-G2"
 PER_FUNC_AS_FLAGS["func_80024200"] = "-G2"
 PER_FUNC_AS_FLAGS["func_80012B50"] = "-G4"
+PER_FUNC_AS_FLAGS["func_80060E70"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8002FB78"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043BCC"] = "-G1"

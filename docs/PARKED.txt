@@ -1191,3 +1191,22 @@ func_8002FB78 -- 52 differences, and **a measured member** of the three-cycle
   The `+ 0x800` version is the one kept.
   Five functions on this rotation now. See the class section in DECISIONS.
 
+func_80060E70 -- 7 differences: one hoist we cannot place and one register.
+  A seven-iteration loop that builds sprite entries from a pair of parallel
+  arrays. Three levers took it from 58 to 7, and the second is new:
+  - a named local for `*(u16 *)s`, read where retail reads it (between the
+    D_801D5608[0] store and the D_8009B338 store) rather than at its use: 57
+    to 9. The read-early lever again.
+  - **`-fno-strength-reduce`, and the tell is an induction variable whose
+    offsets are all zero.** Retail keeps the cursor at the loop's base and
+    writes `10($s0)` every time; strength reduction biases it to base+10 and
+    writes `0($s0)`. 9 to 7, and this is the flag's first user for that reason.
+  - the earlier `-G0` assembler for the `lui $at` store to D_8009B338.
+  What is left: retail materialises D_801D5608's base first in the preheader
+  and we do it last, plus one $v0/$v1. Naming that base as a source local --
+  the obvious fix -- gives 59 and 22 depending on whether the first store also
+  goes through it, which is WORKFLOW's "naming a preheader hoist makes it
+  worse" confirmed rather than contradicted. Also tried: the four
+  initialisations in a `for` clause, and reordering them (both 7); indexing
+  `e + i * 2 + 0xA` instead of a cursor (55).
+

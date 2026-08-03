@@ -202,6 +202,13 @@ def normalise(line):
     for alias, canon in ALIASES.items():
         text = text.replace(alias, canon)
 
+    # $30 has two ABI names: the target's .s writes `$fp`, and objdump prints
+    # `s8` for the same register. Every function that uses a frame pointer --
+    # or that simply runs out of callee-saved registers and reaches $30 --
+    # showed four phantom differences before this (func_80060E70 was the case
+    # that surfaced it).
+    text = re.sub(r"(?<![\w$.])\$?s8\b", "$fp", text)
+
     # Label definitions occupy no bytes; the two sides can never agree on
     # their names, and renumber_labels only handles references.
     if re.match(r"^(?:\$|\.)?l?\w*:$", text) or text.endswith(":"):

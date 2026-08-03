@@ -465,8 +465,9 @@ on a combination that had been in the table for weeks.
 
 ## Two habits that cost real time when skipped
 
-**A tool's answer only counts if it measured what you think.** Six bugs in this
-project were tools reporting confidently on something they had not measured — a
+**A tool's answer only counts if it measured what you think.** Nine bugs in
+this project were tools reporting confidently on something they had not
+measured — a
 stale object, an unverified flag, a crashed build read as clean. When a tool
 says "no", ask whether it could have said "yes"; when it says "yes", ask whether
 the run it judged completed. The cheapest way to fall into this is a **filter**:
@@ -476,6 +477,13 @@ patterns. Read try_func's last lines, not a grep of them. And when the differenc
 small number of **`nop`s**, suspect the reader: `objdump` collapses a run of
 identical words into `...`, which cost func_800357E8 two nops that were in the
 object all along (fixed with `-z`, but the class of bug recurs).
+The same class, ninth instance: `$30` has two ABI names. The target's `.s`
+writes `$fp` and objdump prints `s8` for the same register, so every function
+that reaches $30 showed four phantom differences (func_80060E70 surfaced it).
+try_func's register table only rewrote the *numbered* form. Fixed, and
+check_try_func run in both directions afterwards -- 105/105 of src still
+MATCH and 106/106 of parked still differ, so the loosening ate nothing.
+
 The same class, seventh instance: `candidates.py`'s park filter took the whole
 line of `PARKED.txt` as the function name, so it stopped working the day entries
 started carrying `-- diagnosis` inline. Only the oldest name-only entries were
