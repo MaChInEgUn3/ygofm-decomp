@@ -252,6 +252,17 @@ meaningful, and skipping to the last one wastes hours:
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and
    `(tbl + i)[K]` emits `addu base,index` — same address, opposite operands.
+   **A named offset flips it the other way.** Where the base is a *parameter*
+   rather than a symbol, no index spelling reaches `addu base,index` — four
+   were tried on func_8004DB14 (`p + i * 4 + 0x1E0`, `((u8 **)p + i)[0x78]`,
+   `((u8 **)p)[i + 0x78]`, the cast-to-`s32` sum) and all four give
+   `addu index,base`. Assigning the scaled index to a local first —
+   `off = i * 4; e = *(u8 **)(p + off + 0x1E0);` — gives retail's
+   `addu $v0,$a0,$v0`, and it was the last difference in that function. The
+   tell is in the same listing: a loop giv added to the same parameter
+   (`addu $v0,$a0,$a3`) already came out base-first, so when one `addu` in a
+   function has the base first and another has it second, the difference is
+   that one index is a variable and the other is an expression.
    **But only when `tbl` is the symbol.** Through a *base local* every
    spelling gives `addu base,index`: four were tried on func_8002778C
    (regrouping the index, `x * 28 + rec`, a named index variable, `&rec[…]`)

@@ -160,6 +160,7 @@ extern u8 D_8009B478;
 /* Declared unsized so they are never treated as small data. */
 
 extern u8 D_800EAE90[];
+extern s16 D_800EAFF8[];
 /* A four-halfword rectangle: x, y, w, h. func_8001944C fills it twice and
  * hands its address to two library calls. */
 extern s16 D_800E9D70[];
@@ -228,6 +229,8 @@ extern u8 D_8009B0D1[];
 #endif
 extern u8 D_801D3200[];
 extern u8 D_80010384[];
+/* Twenty bytes of Shift-JIS full-width digits, copied to the stack whole. */
+extern u8 D_80010330[];
 /* Scalar by default -- func_8003FCD8 reaches it gp-relatively. func_80030EC8
  * needs %hi/%lo and defines D_8009B3ED_IS_AGGREGATE. */
 #ifdef D_8009B3ED_IS_AGGREGATE
@@ -426,6 +429,9 @@ extern u8 D_8009B14C;
 /* Word-entry lookup table walked by func_8003BC40: the low halfword is the
  * key and a zero word terminates it. */
 extern u32 D_801D9000[];
+/* A table of four-byte entries terminated by a zero word: a big-endian
+ * halfword key and two more bytes. Searched by func_8003B5C8. */
+extern u8 D_801D9004[];
 extern u8 D_801D9174[];
 /* Alias for D_801D9174; see config/symbol_aliases.txt. */
 extern u8 KeyTable_801D9174[];
