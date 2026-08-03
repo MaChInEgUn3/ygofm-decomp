@@ -630,7 +630,6 @@ func_8004C560
 # and the whole flag sweep is 1.
 func_80038798
 func_8001BD48
-func_8002C518
 func_8003D2B8
 func_80019CC8
 func_80035A64
