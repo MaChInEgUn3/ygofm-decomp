@@ -1228,3 +1228,20 @@ func_80014B30 -- 50 differences, and an **unfinished** park rather than a near
   Also tried, no change: an extra name for the `p` argument (retail copies $a0
   to $a2 in a branch delay slot), with and without the per-case `e`.
 
+func_80048658 -- 65 differences, an **unfinished** park: the body is the same
+  D_8009B45C table walk as func_80048920 (parked at 20) and the same
+  `f = x & 0x100; f = f != 0;` split is needed, but the *call setup* has a
+  shape I have not reproduced and the count has barely moved from the first
+  attempt.
+  What retail does that we do not: it copies all three arguments out of
+  $a0/$a1/$a2 into $t0/$a2/$a3 and makes a *second* copy of arg0 into $t1
+  before the dispatch, and it computes the last call's second and third
+  arguments (`0` and `arg1 & 0xFF`) *inside each arm* rather than at the join,
+  along with `*(D_8009B45C+0x444)` and `v * 8`.
+  Tried: assigning all four of those to locals in both arms, which is the
+  documented cross-jump lever and gets 65 to 63; a second name for arg0; a
+  `(u8)` cast instead of `& 0xFF` on the last argument. None of the argument
+  copies reproduce -- gcc coalesces them.
+  Next attempt should start from the argument-copy question rather than the
+  table walk, which is already right.
+
