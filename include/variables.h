@@ -205,7 +205,14 @@ extern u8 D_800EAE88[];
 extern u8 D_800EAE92[];
 extern u8 D_800EAE8E[];
 extern u8 D_800EAE8F[];
+/* Two bytes under the guard so an assembler at -G2 treats it as non-small (two would still be small):
+ * func_80024200 stores it through $at and loads it through the destination
+ * register while the two-byte gp-relative symbols beside it stay small. */
+#ifdef D_8009B260_SIZED
+extern u8 D_8009B260[4];
+#else
 extern u8 D_8009B260;
+#endif
 extern u8 D_800EAD88[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
@@ -286,6 +293,10 @@ extern u8 *D_8009B1F8;
 extern u8 D_8009B1D5;
 #endif
 extern u8 D_8009B164;
+extern u16 D_8009B16C;
+extern u8 D_8009B174;
+extern u8 D_800EB224[];
+extern VoidFn D_80090998[];
 extern u16 D_8009B23A;
 extern u16 D_8009B162;
 /* func_800240B0 reaches these three through the assembler's bare form while
@@ -324,7 +335,9 @@ extern u8 D_8009B368[];
 #endif
 extern u16 D_8009B33A;
 extern u8 D_8009B336;
-#ifdef D_8009B34D_IS_AGGREGATE
+#ifdef D_8009B34D_SIZED
+extern s8 D_8009B34D[4];
+#elif defined(D_8009B34D_IS_AGGREGATE)
 extern s8 D_8009B34D[];
 #else
 extern s8 D_8009B34D;
