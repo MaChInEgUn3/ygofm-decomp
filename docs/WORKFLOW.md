@@ -55,11 +55,17 @@ the ones to take first. That block is **narrower than it looks**: a `$at` store
 to a *scalar* comes from a `-G0` assembler, not from the compiler flag (see the
 four addressing forms below), and that composes with a jump table. But the -G0
 assembler is **not per-symbol** — it takes every scalar in the file out of
-`%gp_rel` — so it only works on a function with no `%gp_rel` at all. Check with
-`grep -c '%gp_rel' asm/nonmatchings/31D8/<func>.s` before spending anything;
-nonzero means only the aggregate + `-mno-split-addresses` route is left, and
-that one *is* closed for jump tables. func_8002D458 is the measured
-counterexample: 79 differences under a -G0 assembler.
+`%gp_rel` — so `-G0` only works on a function with no `%gp_rel` at all. Check
+with `grep -c '%gp_rel' asm/nonmatchings/31D8/<func>.s` before spending
+anything. func_8002D458 is the measured counterexample: 79 differences under a
+-G0 assembler.
+Nonzero `%gp_rel` used to mean only the aggregate + `-mno-split-addresses`
+route was left, which *is* closed for jump tables. It does not: `-G` is a
+threshold and the **declaration is per symbol**, so give the symbol that needs
+the bare form a declared size above the threshold and leave the gp-relative
+ones below it. The usable window is `max(gp symbol size) <= G < 8`, and since
+the widths here are 1, 2 and 4, it nearly always exists — check it rather than
+assuming, because one 8-byte gp-relative symbol closes it.
 And the **case range follows what is written, not what is
 reachable**: retail's `sltiu $v0,$a0,0xB` for a switch whose cases 1 and 10 do
 what `default` does means both are spelled out in the source (func_8002D458).
