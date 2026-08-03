@@ -839,6 +839,14 @@ stays as assembly. `candidates.py` applies that filter; a hand-rolled grep over
 `asm/` does not, and three functions were parked as matching failures before
 anyone checked.
 
+**The name-only park entries are the richest seam left.** A bare name in
+PARKED.txt with no `parked/<f>.c` and no diagnosis is the oldest kind, it
+predates every lever in this file, and `check_try_func`'s parked direction
+cannot even see it. Four fell in two iterations — func_80037D2C, func_8002C518,
+func_80035A64, func_8003B9BC — three of them straight off `siblings.py`, and
+two needed nothing but a correct reading of the listing. Cross `siblings.py`
+against the entries that are just a name and work that list first.
+
 **`check_try_func.py` is also a park re-reader.** Its second direction — every
 file in `parked/` must still report a difference — reaches only the ~100
 entries that have a candidate file, so it is a sweep of that set and not of
