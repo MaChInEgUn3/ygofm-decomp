@@ -160,6 +160,9 @@ extern u8 D_8009B478;
 /* Declared unsized so they are never treated as small data. */
 
 extern u8 D_800EAE90[];
+/* A four-halfword rectangle: x, y, w, h. func_8001944C fills it twice and
+ * hands its address to two library calls. */
+extern s16 D_800E9D70[];
 /* Sized under a guard: func_8002D458 assembles at -G2, where four bytes is
  * not small data, so this one goes through the assembler's `$at` while the
  * one-byte scalars beside it keep %gp_rel.  The size is a codegen knob, not a
@@ -655,6 +658,11 @@ extern volatile s32 D_8009B0C4;
 #endif
 extern volatile s32 D_8009B0C8;
 extern u8 D_8009B0A3[];
+#ifdef D_8009B0AC_IS_AGGREGATE
+extern u8 D_8009B0AC[];
+#else
+extern u8 D_8009B0AC;
+#endif
 /* func_80012DB4 reaches this gp-relatively AND re-reads it every iteration of
  * its wait loop, next to the volatile D_8009B0C8 -- without volatile gcc hoists
  * this load out of the loop and the loop head moves. */

@@ -66,6 +66,24 @@ COMBOS = [
                                "-mno-split-addresses"], "-G0"),
     ("O2 G8 nodelay macro",   ["-quiet", "-O2", "-G8", "-fno-delayed-branch",
                                "-mno-split-addresses"], None),
+    # Default compiler, *smaller assembler* -G. Every row above ties the two
+    # -G values together, so this whole quadrant was unreachable through the
+    # sweep -- and WORKFLOW's own rule says the two knobs are independent:
+    # "scalar + a smaller -G in the assembler -- **same compiler output**, but
+    # now the assembler cannot assume small data and expands it". A scalar
+    # small enough to stay gp-relative at -G8 is one instruction to gcc's
+    # delay-slot filler and gets hoisted into a branch slot; at as -G0 it is
+    # still one instruction to gcc but a macro to the assembler, so the slot
+    # keeps its nop. func_8001944C went from 62 differences with a length
+    # mismatch to 32 with equal lengths on this row alone, and no combination
+    # in the table above can produce it.
+    # -G1/-G2/-G4 are thresholds, not switches: a symbol is small iff its
+    # declared size is <= -G, so these split a file by symbol width.
+    ("O2 G8 / as G0",         ["-quiet", "-O2", "-G8"], "-G0"),
+    ("O2 G8 / as G2",         ["-quiet", "-O2", "-G8"], "-G2"),
+    ("O2 G8 / as G4",         ["-quiet", "-O2", "-G8"], "-G4"),
+    ("O2 G8 macro / as G0",   ["-quiet", "-O2", "-G8",
+                               "-mno-split-addresses"], "-G0"),
 ]
 
 

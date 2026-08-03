@@ -1334,3 +1334,38 @@ func_80045334 -- unfinished, 52 differences and one instruction too many.
     The remaining +1 is in the default arm: retail fills the second `beq`'s
     delay slot with `x += 0x6000` and the `j`'s with `k = 0x70`; we take a nop
     in the first and put the add in the second.
+
+func_8001944C -- unfinished, 30 differences with equal lengths (70/70).
+    Needs the **default compiler with a -G0 assembler**, which is a
+    combination the flag sweep could not produce until today: D_8009B0AC is a
+    one-byte scalar, small data at -G8, so cc1psx emits one instruction and
+    gcc's delay-slot filler hoists it into the preceding branch's slot where
+    retail keeps a nop. At as -G0 the same one compiler instruction is a macro
+    to the assembler and the nop survives. That row alone was 62 differences
+    with a length mismatch to 32 with equal lengths; sweep_flags now carries
+    four as-only rows for it.
+    Then 32 -> 30 by fixing two offsets (0x8000 + 0x565C is 0xD65C, and I had
+    written 0xDC5C) and moving the `b = D_8015C424` assignment after the first
+    rectangle store so the two symbols materialise in retail's order.
+    What is left is one allocation question that pulls two ways, and it is
+    worth reading before spending anything here:
+      * Retail copies the table base into a cursor before the loop
+        (`addu $a1,$s0,$zero`) *and* re-materialises D_8015C424 after it. With
+        one local reused for both, we get the copy and no rematerialisation
+        (30). With a separate local for the block after the loop, we get the
+        rematerialisation and gcc then walks the first local itself, dropping
+        the copy -- 67 instructions, three short. Three loop forms (a forward
+        `for` with a cursor, an index expression, `*q++`) all land at 68.
+      * The four rectangle stores are 0, 4, 6, 2 in retail. Through the symbol
+        gcc reorders them to 4, 6, 0, 2 because it can prove the offsets
+        disjoint; through a local pointer the order is retail's, but the local
+        then takes $a3 and costs an `addu $a0,$a3,$zero` (+2). The offset-0
+        store is `%lo(sym)($hi)` in retail and the others are `n($a0)`, which
+        is exactly the mixed shape, so the answer is probably a narrower split
+        than "all symbol" or "all local" -- I did not find it.
+    Also measured: passing the 0/0x140 value as a third argument to
+    func_80081ED4 puts it in $a2 where retail has it (53 from 58), which is
+    the "a value left in an argument register is the next call's argument"
+    lever pointing the right way, but it then displaces the rectangle pointer
+    into $a3. Not installed, because a third argument to a two-argument
+    library function is a guess and the length got worse.

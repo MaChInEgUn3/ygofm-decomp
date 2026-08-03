@@ -490,6 +490,17 @@ on a combination that had been in the table for weeks.
     knobs" barrier is not one. Where the two groups are the same width, giving
     one of them a *declared* size it does not need is the same kind of codegen
     knob as scalar-vs-array (D_80010038 is `[4]` for exactly that reason).
+    **And the two `-G`s are independent knobs, which the sweep table did not
+    know.** Every row in `sweep_flags.py`'s COMBOS used to tie the compiler's
+    `-G` to the assembler's, so "default compiler, smaller assembler" — the
+    exact combination this bullet describes — was unreachable through the
+    tool. It is also a **delay-slot** lever, the same one `-mno-split-addresses`
+    gives for a symbol: a scalar small enough to stay gp-relative at `-G8` is
+    one instruction to gcc's delay-slot filler and gets hoisted into a branch
+    slot, while at as `-G0` it is still one instruction to gcc but a macro to
+    the assembler, so retail's `nop` survives. func_8001944C went from 62
+    differences with a length mismatch to 32 with equal lengths on that row
+    alone. Four as-only rows are now in the table.
     It is the one that matters
     when a function needs `lui $at` on one symbol while keeping cc1psx's own
     split pair on another — `-mno-split-addresses` would wreck the second
