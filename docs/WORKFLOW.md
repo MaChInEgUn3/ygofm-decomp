@@ -503,19 +503,30 @@ it neutralised it, and its "wrong" 19 was closer than our "honest" 27. So:
 **diff the two listings before trusting any constant an adapted candidate
 inherited**, and read a wrong-but-better candidate as a pointer at the target
 rather than as noise.
+The whole park was swept for that error afterwards — every constant `>= 8` in
+every `parked/*.c` checked against its own target's listing, allowing for
+`lui`/`ori` halves and byte-vs-element scaling. Eleven flags, all false:
+offsets we had folded a `0x8000` base into (func_8001944C), a negative
+constant the listing spells as its two's complement (`arg1 - 0xD000` is
+`ori 0xFFFF3000`), a 32-bit constant split across a pair, and a *biased
+induction variable* — func_80026D18 reads `r + 0x16` and `r + 0xC` in source
+while retail walks a second cursor at `base + 0xC` and reads `0xA(cursor)`
+and `0(cursor)`, so neither offset appears in the listing at all. **That last
+one is the trap**: a missing constant is as often gcc's giv as it is a real
+error. The sweep is worth running after any adapted candidate; the false-flag
+rate is high and each one takes a minute to clear.
 
 **Read what the permuter actually changed before believing its score.**
-Twice now the better-scoring program was the wrong one, and the second is
-worse than the first: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
+One genuine instance: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
 out of a copy loop and read `*new_var` inside, so every iteration copies the
 same word while the cursor advances — a score of 365 against a base of 1000
 for code that does not do what the function does. `diff.txt` in the output
-directory is three lines to read. The
-score is a weighted diff, not an instruction count; on func_8001352C it
-rewarded a `(char)0x400` -- zero under `-D__CHAR_UNSIGNED__` -- that deleted
-an instruction the target has, and try_func then reported *fewer* differences
-than the correct source. Run any candidate it produces through try_func and
-read the diff, not the number.
+directory is three lines to read. func_8001352C used to be cited here as a
+second instance and **is retracted**: the term it neutralised was one the
+target never had, so that candidate was directionally right and the entry
+calling it wrong is what kept the function parked. The score is a weighted
+diff, not an instruction count — run any candidate it produces through
+try_func and read the diff, not the number.
 
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
