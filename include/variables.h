@@ -663,7 +663,11 @@ extern s32 D_8009B0C4[];
 #else
 extern volatile s32 D_8009B0C4;
 #endif
+#ifdef D_8009B0C8_IS_AGGREGATE
+extern volatile s32 D_8009B0C8[];
+#else
 extern volatile s32 D_8009B0C8;
+#endif
 extern u8 D_8009B0A3[];
 #ifdef D_8009B0AC_IS_AGGREGATE
 extern u8 D_8009B0AC[];
@@ -1042,6 +1046,13 @@ extern u8 D_80090D28[];
 extern u8 D_80090D44[];
 #ifdef D_8009B0D8_IS_SCALAR
 extern s32 D_8009B0D8;
+#elif defined(D_8009B0D8_IS_SIZED)
+/* Eight bytes it does not have: the size is a codegen knob. func_8003CCD8
+ * reads one byte of it inside a loop and retail re-materialises the address
+ * every iteration, which needs the bare form (one instruction to gcc, so not
+ * hoistable) while the four-byte scalars around it stay gp-relative. A
+ * declared size clears an assembler -G4 where the real four would not. */
+extern u8 D_8009B0D8[8];
 #else
 extern s32 D_8009B0D8[];
 #endif

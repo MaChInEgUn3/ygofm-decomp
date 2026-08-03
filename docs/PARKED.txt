@@ -1417,3 +1417,42 @@ func_8003B5C8 -- unfinished, 18 differences and one instruction too many, and
     stack array by a counted loop variable and whose target *does* show the
     giv; if that one also refuses, the class is the frame-relative access and
     not this function.
+
+func_8003CCD8 -- unfinished, 6 differences with equal lengths (72/72), and all
+    six are the order of the last six stores. The controller decoder: 32 bits
+    of held state walked from bit 31 down, an auto-repeat counter per button in
+    D_800EF6B0, and the result written out as three 32-bit values in halfword
+    pairs.
+    68 -> 28 -> 6 on addressing alone, and the second step is a **new use of
+    the declared-size knob**. D_8009B39C and D_8009B3A2 are gp-relative here,
+    so they want the scalar guards. D_8009B0D8 is read one byte at a time
+    *inside the loop* and retail re-materialises `lui %hi` every iteration --
+    with the unsized-array form cc1psx emits its own %hi/%lo pair and gcc
+    hoists the %hi out as a loop invariant, which is one instruction too many
+    in the preheader and one too few in the body. The fix is the same
+    mechanism as D_80010038's `[4]`: give the symbol a *declared size it does
+    not have* (`u8 D_8009B0D8[8]`, guarded on D_8009B0D8_IS_SIZED) and
+    assemble at **-G4**. Eight bytes clears the -G4 threshold so the symbol is
+    not small data and the assembler expands the bare reference through the
+    destination register; the four-byte scalars around it (D_8009B3A8,
+    D_8009B390, D_8009B3B0, D_8009B3B4) are `<= 4` and stay gp-relative. And
+    because the bare form is *one* instruction to gcc, there is nothing for
+    the loop-invariant pass to hoist. -G0/-G1/-G2 all wreck the gp-relative
+    group (+20, +18, +12); -G4 is the only threshold that separates them.
+    What is left: retail stores the three pairs in source order --
+    `sh lo; sh hi` for each of D_8009B3A4/6, D_8009B398/9A, D_8009B394/6 --
+    and we sink all three `lo` stores past the `hi` stores, which all reuse
+    $v0 from their own `srl`. Measured against it, none of these moves it:
+      * writing the pairs hi-first (8, worse);
+      * naming each shifted half in a local, one name reused or three separate
+        names (both 6, byte-identical to the inline form);
+      * declaring each pair as one two-element `u16` array so the stores are
+        to a single object (7 -- gcc reorders stores within one object too,
+        so aliasing is not the lever here);
+      * declaring the two low halves **volatile**, using the guards that
+        already exist for them: **byte-identical output**. Worth knowing on
+        its own -- WORKFLOW says gcc sinks a non-volatile store past a
+        volatile one, and here the volatile store is the one that moves. Do
+        not reach for volatile to pin a store order on the strength of that
+        rule alone.
+      * -fno-schedule-insns (+3, 43), -fno-schedule-insns2 (15), both (+7).
