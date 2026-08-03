@@ -4124,6 +4124,22 @@ this class and not others, and it is not a substitute for understanding the
 shape. The typemap failure rate is also worth knowing: 91 in 2155, about 4%,
 all from implicitly-declared callees.
 
+**The permuter's score is not the difference count, and it will reward a
+semantically broken source.** func_8001352C's best output scored 160 and
+reports 19 differences through try_func -- better than the 27 the hand
+candidate gets. It arrives there by wrapping one of the two `+ 0x400`
+arguments in `(char)`, which under this project's `-D__CHAR_UNSIGNED__` is
+*zero*: the `addiu $a0,$a0,0x400` the target has simply disappears. The
+function is one instruction short and computes something else.
+
+Two things follow. The score is a weighted diff, not an instruction count, so
+a permuter number cannot be compared against a PARKED entry's number without
+running the output through try_func. And try_func does not shout about a
+length mismatch -- its aligner absorbed the missing instruction into the
+positional diff, so "19" looked like progress. WORKFLOW's first debugging step
+is "instruction count right? nothing else is diagnostic until it is", and it
+applies to permuter output as much as to hand-written C.
+
 The class is four members now, not five. Applied by hand to the sibling
 func_8001352C it gives 38 differences to 27, so the shape generalises but is
 not the whole story there; a permuter search is running on it.

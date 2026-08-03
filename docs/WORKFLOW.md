@@ -280,6 +280,13 @@ parked at 16 through a 720-permutation declaration-order sweep. The permuter
 found it; it is now a shape to try by hand, and it took the sibling
 func_8001352C from 38 to 27 on its own.
 
+**Read what the permuter actually changed before believing its score.** The
+score is a weighted diff, not an instruction count; on func_8001352C it
+rewarded a `(char)0x400` -- zero under `-D__CHAR_UNSIGNED__` -- that deleted
+an instruction the target has, and try_func then reported *fewer* differences
+than the correct source. Run any candidate it produces through try_func and
+read the diff, not the number.
+
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
 `parked/<func>.c` and runs it; func_800135FC took 66 iterations, about ninety

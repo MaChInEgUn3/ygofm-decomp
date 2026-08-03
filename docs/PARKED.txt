@@ -963,6 +963,13 @@ func_8001352C -- 27 differences after the `x = w;` allocation hint that
   with two cores the search starves the build, and the main line was producing
   matches. Worth restarting on a machine with more of them; the base in
   parked/ already carries the hint, so a rerun starts from 27 not 38.
+  **Its best output is not a better candidate.** Scored 160, and run through
+  try_func it reports 19 differences -- but it gets there by inserting
+  `(char)0x400` into one of the two calls, which under `-D__CHAR_UNSIGNED__`
+  is *zero*, deleting the `addiu $a0,$a0,0x400` the target has. It is one
+  instruction short and computes something else. The honest number for this
+  function is 27. See the note in DECISIONS on what the permuter's score is
+  and is not.
   The rest of the original diagnosis still holds: same permutation as
   schedule knock-on. Sibling function: same body with the 2 and 4 offsets
   swapped and the last two arguments to func_800134E0 exchanged. $s0/$s1/$s2
