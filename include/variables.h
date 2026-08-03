@@ -999,6 +999,7 @@ extern u8 D_80091570[];
 extern u8 D_800E9EC8[];
 extern u8 D_800E9ECE[];
 extern u8 D_800E9ECF[];
+extern s32 D_8009B378;
 typedef struct {
     u8 unk0[0x14];
     s16 unk14;
