@@ -1664,3 +1664,29 @@ func_80048F14 -- unfinished, 15 differences with equal lengths (63/63), all
     of the second group's three stores measured -- three give 15 and three
     are a whole instruction worse -- as are naming the 255 and moving the
     third base read earlier.
+
+func_8003700C -- unfinished, 26 differences and one instruction short, and
+    the point of the entry is that **the second recipe branch worked on a
+    fresh function**. Three bare reads of D_8009B394 (`u16`, 2 bytes) next to
+    nine gp-relative accesses of D_8009B34D and two of D_8009B345 (both `s8`,
+    1 byte). Window `max(gp size) <= G < 8` is `1 <= G < 2`, so `as -G1` is
+    the only threshold, real declarations throughout, no size inflation --
+    and it gives retail's addressing exactly. -G2 takes the gp group out
+    with it (one instruction worse).
+    Two source shapes after that, 61 -> 28 -> 26:
+      * D_8009B394 is **volatile** here. Three reads on one path, and gcc
+        CSEs a plain read into one; retail re-loads for each test. Guarded on
+        D_8009B394_IS_VOLATILE so the three other users keep the plain type.
+      * `return 0` belongs *last*, with the whole body under
+        `if (D_8009B394 & 0x5008) { … return 1; }`. Written as an early
+        `if (… == 0) return 0;` gcc puts the zero block inline after the test
+        and branches over it, where retail branches out to a block at the end.
+      * the byte counter is read `lbu` and the declaration is `s8`, so the
+        reads want `*(u8 *)&D_8009B34D` -- the lvalue cast, not a value cast.
+    What is left is one instruction in the second arm. Retail materialises
+    the `1` in the test branch's *delay slot* and leaves the following `j` to
+    the epilogue with a `nop`; we sink the `1` into the `j`'s slot and save
+    an instruction. Five spellings measured -- `goto act` with the restore
+    inline, `!(less)`, `>=`, a named `r = 1` before the arm, and the same
+    `r = 1` immediately before the test -- all 26 and all one short. The
+    discriminator is not established.

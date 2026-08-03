@@ -895,7 +895,13 @@ extern s32 D_8009B3A8;
 extern u8 D_800EF668[];
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
+#ifdef D_8009B394_IS_VOLATILE
+/* func_8003700C reads it three times on one path and gcc CSEs a plain read;
+   retail re-loads for each test. */
+extern volatile u16 D_8009B394;
+#else
 extern u16 D_8009B394;
+#endif
 extern u16 D_8009B396;
 extern u16 D_8009B39A;
 extern u16 D_8009B39E;
