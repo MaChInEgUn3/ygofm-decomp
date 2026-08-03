@@ -1717,3 +1717,21 @@ func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
     first, both stores through the local (gcc folds `p[0]` back to the
     symbol form anyway), and the gp-relative `|=` moved to first and to
     second. Discriminator not established.
+
+func_8002F4C0 -- unfinished, 45 differences with equal lengths (92/92), and
+    they are one register choice cascading through a 92-instruction body.
+    Eleven bare accesses across D_8009B0F4 (stored through `$at`, so the
+    bare form for a store) and D_8009B118, no %gp_rel, scalar arms plus
+    `as -G0`. A three-way `switch` on the second parameter, written as a
+    switch because retail's dispatch is gcc's binary search on 0/1/2.
+    64 -> 45 on one shape: `v = D_8009B118;` belongs *before* the
+    `*(s16 *)(p + 6) = 0x10;` store, not after. Read last it takes a
+    load-delay `nop`; read first the two constant stores fill the delay,
+    which is what retail does and is worth one instruction.
+    What is left: retail materialises the two masks into `$a0` and `$a1` --
+    the parameter registers, both dead by then -- and we get `$v1` and
+    `$a0`, which rotates every register in the arm. The `lui` of the first
+    mask is in the dispatch branch's delay slot in both, so the placement is
+    already right; only the register differs. Two further orderings of the
+    `p + 4` store measured (after the mask, and after the 0x1C store), both
+    47. Discriminator not established.

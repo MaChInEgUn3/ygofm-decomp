@@ -484,6 +484,15 @@ parked at 16 through a 720-permutation declaration-order sweep. The permuter
 found it; it is now a shape to try by hand, and it took the sibling
 func_8001352C from 38 to 27 on its own.
 
+**The permuter's score and try_func's difference count are different
+measurements — do not cross-read them.** On func_80013360 the permuter took a
+base of 625 down to 195 by wrapping the whole body in `do { … } while (0);`,
+which is semantically a no-op; try_func calls both candidates 7, on the same
+seven prologue instructions, just permuted. Its score weights a register
+mismatch differently from an instruction mismatch, so a large drop can mean
+nothing to the build. Run the winner through try_func before believing it is
+closer.
+
 **Read what the permuter actually changed before believing its score.**
 Twice now the better-scoring program was the wrong one, and the second is
 worse than the first: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
