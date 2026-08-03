@@ -99,6 +99,13 @@ them, and it is also the noreturn tell above.
 **When it does not match, work in this order.** Each step makes the next
 meaningful, and skipping to the last one wastes hours:
 
+0. **Read the addressing before writing any C.** Not a debugging step — a
+   first step, and it has decided the last four functions without a single
+   round. Count `%gp_rel` and `lui $at,%hi(` in the listing, read the symbols'
+   widths out of `variables.h`, and pick the form from the four-forms list
+   below before typing anything. Most functions come back `gp>0, at=0`, which
+   means default flags and no addressing work at all; knowing that in a minute
+   is worth more than any lever further down this list.
 1. **Instruction count right?** Nothing else is diagnostic until it is. If a
    function is the wrong size, remove it before reading the rest of the report —
    the linker script is regenerated from object sizes, so one wrong size can
@@ -253,6 +260,14 @@ meaningful, and skipping to the last one wastes hours:
    keeps both exits, the second gets cross-jumped into one with the value in a
    delay slot. Rule of thumb: whichever condition the target **branches out on**
    is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
+   **And the case order decides *which* of several identical arms gets
+   merged.** func_80024C1C's `case 0x14` and `case 0x17` both store 1; retail
+   merges 0x14 into the shared block with 0x15 and 0x16 and leaves 0x17
+   standalone. Written in numeric order gcc merges 0x17 instead — two
+   differences, and no flag reaches it because cross-jumping is closed.
+   Writing `case 0x17:` first and the rest ascending matches. Three orders
+   tried, one works: when two arms are identical and the target merges only
+   one of them, permute the case order.
    **The same pass from the other side: do not block a cross-jump.** gcc merges
    two arms only when their instruction sequences are *identical*, and two arms
    computing the same value from different expressions — one from a global, one
