@@ -76,15 +76,28 @@ It tags instead. Two tags matter:
   split address in the same unit — that was recorded here as "cannot have
   both", and it is **wrong**. The flag is per *file*; the declaration is per
   *symbol*. Give the symbol that wants the bare form a scalar or sized
-  declaration and leave the one that wants cc1psx's split pair unsized, then
-  pick an assembler `-G` below the first symbol's width and above every
-  `%gp_rel` symbol's. func_8004BBBC and func_8003D46C were the two standing
-  examples of the barrier, in opposite directions — a bare *load* beside a
-  hoisted split pair, and a bare *store* through `$at` beside a split load —
-  and both matched the same afternoon on default compiler flags plus
-  `as -G0`, with no source change beyond dropping an `_IS_AGGREGATE` the
-  candidates had been forcing. Check `grep -c '%gp_rel'` first: at zero, any
-  `-G` is free.
+  declaration, leave the one that wants cc1psx's split pair unsized (an
+  unsized array is never bare, whatever `-G` says), and pick the assembler
+  `-G`. Which of the three cases you are in is decided by
+  `grep -c '%gp_rel'` and the symbol widths, and getting this wrong is how
+  the barrier looked real in the first place:
+  - **no `%gp_rel` at all** — any `-G` is free. Use the symbol's *real*
+    declaration (usually the plain scalar arm) and `as -G0`. func_8004BBBC and
+    func_8003D46C, the two standing examples of the barrier and in opposite
+    directions — a bare *load* beside a hoisted split pair, and a bare *store*
+    through `$at` beside a split load — both matched this way with no source
+    change beyond dropping an `_IS_AGGREGATE` their candidates were forcing.
+  - **`%gp_rel` present, and the bare-wanting symbol is *wider* than every
+    gp-relative one** — real declarations, and a `-G` between the two widths.
+  - **`%gp_rel` present, and the bare-wanting symbol is *narrower*** (the
+    common case: a one-byte flag beside four-byte gp scalars) — no real
+    threshold exists, so **inflate the declaration**: `u8 sym[8]` and `as -G4`.
+    Eight still clears cc `-G8`, so cc1psx keeps emitting the bare symbol,
+    while `8 > 4` takes it out of small data at the assembler.
+    func_800175A0 is the worked example, func_8003CCD8 the second.
+  The usable window is `max(gp symbol size) <= G < 8`; the widths in this
+  codebase are 1, 2 and 4, so it nearly always exists — but check, because one
+  eight-byte gp-relative symbol closes it with no warning.
   **`-mno-split-addresses` is also a delay-slot lever, and that use leaves no
   trace in the addressing.** A bare symbol is *one* instruction to gcc's
   delay-slot filler, so it cannot be half-hoisted into a branch's slot; the
