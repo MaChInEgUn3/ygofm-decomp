@@ -268,6 +268,17 @@ meaningful, and skipping to the last one wastes hours:
    twice, look for a store between your two reads that gcc must assume aliases
    — `if (q[7]) x = q[7] << 4;` reloads across a store through another
    parameter, and one local was the whole of func_80059000.
+   **The mirror: a load the target does *not* hoist wants an address the
+   compiler cannot disambiguate.** Where retail stores a constant into a stack
+   struct and *then* loads from a global, gcc hoists the load above the store
+   to cover its latency — it knows an array indexed by name is a different
+   object from the local. Writing the same read as a computed byte address,
+   `*(s32 *)((u8 *)tbl + i * 4)` instead of `tbl[i]`, makes it a load through
+   a pointer that may alias the local whose address escaped to the callee, and
+   the store stays first. func_80049CF8, 4 differences to a match; permuting
+   the four stores, naming the loaded value, and naming it before or after the
+   constant store all stayed at 4, and an explicit `s32 *` cursor is much
+   worse (43) because it becomes a second induction variable.
    **Write that same double read where there is no aliasing store and you get a
    register copy instead of a second load** — and that copy is often the
    instruction the target schedules into a branch's delay slot. func_80057E20's
