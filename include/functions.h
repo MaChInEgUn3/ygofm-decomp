@@ -126,6 +126,7 @@ void func_8005B64C(void);  /* PROVISIONAL */
 /* Was PROVISIONAL void(void): it searches D_801D0200 for a halfword and
  * returns the index or -1. */
 s32 func_8002C4DC(s32 arg0);
+s32 func_8002C518(s32 arg0);  /* returns 1, or its callee's result */
 void func_80032184(void);  /* PROVISIONAL */
 void func_800137E4(void);  /* PROVISIONAL */
 void func_80044F58(s32 arg0);  /* PROVISIONAL */

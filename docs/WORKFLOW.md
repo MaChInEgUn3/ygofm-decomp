@@ -107,8 +107,14 @@ It tags instead. Two tags matter:
   retail's `nop`. func_80041D60 was one instruction short for exactly this and
   matched on the flag alone. So when a candidate is byte-identical except that
   the target leaves a delay slot empty in front of a global's address, reach
-  for this flag before re-reading the source. **Observed once**, and it does
-  *not* generalise to a plain constant: func_80030D5C is the same shape with a
+  for this flag before re-reading the source. **Two routes give the same
+  bytes**, and which you pick is a judgement about the smaller claim:
+  func_8001BD48 matches either with `-mno-split-addresses` (a compiler flag
+  over the whole file) or with the symbol's real scalar declaration plus
+  `as -G1` (the second recipe branch — the bare-wanting `u16` is wider than
+  the one-byte gp-relative symbol beside it). The `-G` route keeps the
+  compiler at default flags, so it is the one installed. **Observed once**,
+  and it does *not* generalise to a plain constant: func_80030D5C is the same shape with a
   `lui` for 0x2000000 instead of an address, already has the flag, and is still
   two off.
 **A call that sets only `$a0` is not always a missing prototype.** Twice it
