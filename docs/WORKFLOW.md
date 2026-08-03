@@ -210,6 +210,14 @@ meaningful, and skipping to the last one wastes hours:
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and
    `(tbl + i)[K]` emits `addu base,index` — same address, opposite operands.
+   **But only when `tbl` is the symbol.** Through a *base local* every
+   spelling gives `addu base,index`: four were tried on func_8002778C
+   (regrouping the index, `x * 28 + rec`, a named index variable, `&rec[…]`)
+   and none recovers the first form. Writing the symbols inline matched, and
+   gcc hoists them into the same two registers by itself — so a target that
+   materialises a table base once before a loop does *not* imply a source
+   local. Second time D_801A7AD8 has punished a base local for a different
+   reason; func_8001EFD4 is the other.
    And the order of two increments in one `for` clause decides which is
    available to fill a load-delay slot at the top of the body:
    `for (i = 0; i < 10; p++, i++)` matched func_80021480 where `i++, p++`
@@ -446,6 +454,11 @@ on a combination that had been in the table for weeks.
   func_8003D03C 29 differences (10 to 39), because there the split halves were
   what filled a load-delay slot. Read which way the target wants it before
   reaching for the size.
+  **Run this check before writing any C — it is cheap and it keeps paying.**
+  Two of the last three matches went in without an addressing round at all,
+  one of them first-try, because counting `%gp_rel` and `lui $at,%hi(` in the
+  listing and reading the widths out of variables.h settles the question in a
+  minute.
   **Eliminate before reaching for the threshold.** If the symbol that needs the
   non-small form is *narrower* than one that needs `%gp_rel` in the same
   function, no `-G` exists between them and the answer is the unsized array —
