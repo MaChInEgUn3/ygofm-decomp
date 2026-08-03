@@ -1536,3 +1536,46 @@ func_80047788 -- unfinished, 12 differences with equal lengths (55/55).
         dividend, and four-statement long division all leave it (12, 12,
         23). -fno-schedule-insns / -insns2 / -fno-delayed-branch are all
         worse and change the length.
+
+func_80047CC4 MATCHED 2026-08-03, and the last instruction came from the
+    **permuter** -- its second win in this project. Kept as an entry because
+    the shape is reusable. Sixth from the reopened dup-%hi class: four bare
+    reads of D_8009B45C, no %gp_rel, plain scalar arm plus `as -G0`.
+    32 differences to 1 on one source shape: retail's counter wrap is **two
+    statements**, `i++;` then `i &= 3;`, which gives `addiu $s0,$s0,1` and
+    `andi $s0,$s0,3` against the same register with the mask free to sink
+    into the loop branch's delay slot. `i = (i + 1) & 3;` builds a temp,
+    emits both before the counter bump, leaves the slot a `nop`, and rotates
+    $s0/$s1 through the whole function.
+    The last one was an `addu` operand order: retail has the loaded base
+    first and every `+` spelling gives index-first, because the base is a
+    pointer *value* and not a symbol -- seven were measured (offset grouped
+    with the base, constant first, `((u16 *)p + i)[0x202]`,
+    `((u16 *)p)[i + 0x202]`, an `(s32)` cast sum, a base local, and naming
+    the scaled index, which is 42 and one instruction short). The permuter
+    found it at iteration 79 from a base score of 10:
+
+        p + 0x404 - -(i * 2)      instead of      p + i * 2 + 0x404
+
+    A subtraction of a negation is arithmetically identical and puts the
+    base first. Unlike the `(char)0x400` the permuter produced for
+    func_8001352C, this one changes no value and deletes no instruction --
+    read the diff, then keep it. src/func_80047CC4.c carries a comment
+    saying so, because it looks exactly like something a later pass would
+    tidy back.
+    Also recorded: retail passes `1 << ((u8)i + 0x14)` to func_80047C70 in
+    `$a0` with a bare `nop` in the delay slot -- computed at the top,
+    shifted once per iteration, read nowhere else, so it can only be the
+    argument. src/func_80047C70.c declares its parameter `u8 *`, which
+    cannot be what this caller passes; the call site matches through an
+    implicit declaration and no prototype was added.
+
+func_80049010 -- unfinished, 5 differences with equal lengths (56/56).
+    Seventh from the dup-%hi class: seven bare reads of D_8009B45C, no
+    %gp_rel, scalar arm plus `as -G0`, and the obvious C. Every block is
+    right; the five are one register rotation in the first block, where
+    retail loads the compared halfword into `$a0` and the base into `$v0`
+    and we get `$v0` and `$v1`. Measured, all 5: one pseudo reloaded across
+    the call versus two names, `s16` for the shared `-1`, assigning it after
+    the first load instead of before, and a base local for the block. The
+    permuter ran 828 iterations from a base score of 35 and found nothing.

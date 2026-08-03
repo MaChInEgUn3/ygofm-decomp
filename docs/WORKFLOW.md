@@ -319,6 +319,17 @@ meaningful, and skipping to the last one wastes hours:
    (`addu $v0,$a0,$a3`) already came out base-first, so when one `addu` in a
    function has the base first and another has it second, the difference is
    that one index is a variable and the other is an expression.
+   **When the base is a pointer *value* — a global pointer read at runtime,
+   not a symbol — the order is fixed and no `+` spelling reaches it.**
+   func_80047CC4 wants `addu base,index` and seven spellings all give
+   index-first: the offset grouped with the base, the constant written first,
+   `((u16 *)p + i)[K]`, `((u16 *)p)[i + K]`, an `(s32)` cast sum, a base
+   local, and a named scaled index. What does reach it is a **subtraction of
+   a negation** — `p + K - -(i * 2)` instead of `p + i * 2 + K` — which is
+   arithmetically identical and puts the base first. The permuter found that,
+   not a person; it is the shape to try by hand now. Note the direction is
+   fixed *both* ways through a value base: func_8002778C could not get
+   index-first through a base local either.
    **But only when `tbl` is the symbol.** Through a *base local* every
    spelling gives `addu base,index`: four were tried on func_8002778C
    (regrouping the index, `x * 28 + rec`, a named index variable, `&rec[…]`)
