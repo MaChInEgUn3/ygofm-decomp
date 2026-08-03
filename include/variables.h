@@ -339,7 +339,11 @@ extern u8 D_8009B368;
 #else
 extern u8 D_8009B368[];
 #endif
+#ifdef D_8009B33A_IS_VOLATILE
+extern volatile u16 D_8009B33A;
+#else
 extern u16 D_8009B33A;
+#endif
 extern u8 D_8009B336;
 #ifdef D_8009B34D_SIZED
 extern s8 D_8009B34D[4];
@@ -1007,7 +1011,11 @@ extern s32 D_8009B0BC;
 extern s32 D_8009B0D4;
 extern s32 D_8009AF08;
 extern s32 D_8009B330;
+#ifdef D_8009B350_IS_VOLATILE
+extern volatile s32 D_8009B350;
+#else
 extern s32 D_8009B350;
+#endif
 
 /* Cursor advanced by the reader in func_80030050. */
 extern u8 D_8009AF5C[];
