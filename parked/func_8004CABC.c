@@ -18,6 +18,8 @@ s32 func_8004CABC(void) {
             return 1;
         }
         i++;
+        i--;
+        i++;
         p += 0x2C;
     } while (i < n);
     return 3;

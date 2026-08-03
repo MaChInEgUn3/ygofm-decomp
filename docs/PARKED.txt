@@ -1787,7 +1787,15 @@ func_800601D0 -- unfinished, 14 differences, two instructions short. A linear
     `if (f != …) { … }` with one trailing return (14), and a `goto` into the
     loop (15). All two short. The found-block's placement follows: retail puts
     it *before* the loop body, reached by a backward branch, and every shape
-    puts it after. Discriminator not established.
+    puts it after.
+    **Permuter, 14 -> 12**, via two changes that are another coupled pair:
+    `*(s32 *)(e - -4)` for the found-return and an `inline int inline_fn() {
+    return -1; }` called at the tail. The negation alone is 14, unchanged --
+    the same lever that closed func_80047CC4 does nothing here by itself. The
+    12-difference output is in build/permuter/func_800601D0/output-700-1/; the
+    parked candidate is still the honest 14, since a helper function invented
+    to hold a constant is not a shape worth propagating without knowing why it
+    pays. Discriminator not established.
 
 func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
     Walks 0x2C-byte records from D_8009B458 checking a byte at +0x53C, returns
@@ -1799,4 +1807,11 @@ func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
     What is left is the inner branch's polarity -- retail branches out on
     `== 1` to the latch and falls through to `return 1`, and gcc inverts every
     spelling. Writing it as `if (== 1) { advance } else { return 1; }` is 20
-    and two instructions long. Discriminator not established.
+    and two instructions long.
+    **Permuter, 15 -> 9**, and the load-bearing mutation is a semantic no-op:
+    `i++; i--; i++;` in place of `i++`. Decomposed -- naming the loop bound a
+    second time and naming the `3` are both 15, alone or together -- so it is
+    the redundant increment pair and nothing else. gcc's induction-variable
+    handling sees a different RTL sequence. The parked candidate carries it
+    with this note, because it looks exactly like a typo. Discriminator for
+    the branch polarity still not established.

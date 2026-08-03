@@ -558,7 +558,12 @@ precisely the state the park rule below describes.
 
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Run the
-permuter *before* writing the park entry, not after. Record the
+permuter *before* writing the park entry, not after — and for anything under
+about 25 instructions treat that as mandatory rather than advisory. It is
+3-for-3 on matches in that band (func_80047CC4, func_80026D18, func_80038334)
+and improved two more parks the same afternoon (func_8004CABC 15→9,
+func_800601D0 14→12). Two of the three wins were **coupled pairs**, which a
+one-at-a-time hand sweep cannot reach by construction. Record the
 name in `docs/PARKED.txt` with its class **and keep the candidate in
 `parked/<func>.c`**.
 
