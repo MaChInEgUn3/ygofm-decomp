@@ -432,6 +432,15 @@ meaningful, and skipping to the last one wastes hours:
    except where the target issues one read before the base pointer's own load,
    which needs its own local to get there (the last 13).
 6. **Count materialisations** of each value: one per write in the source.
+   **A return constant that appears both in a branch's delay slot and again at
+   the join is *one* `return`, not two.** Write the last test as a nested `if`
+   with a single trailing `return c;` and gcc duplicates the constant into the
+   branch's slot while keeping it at the join; two explicit `return c;`
+   statements get merged into one materialisation and the function comes out
+   an instruction short. func_8004B734 — four early exits, three returning 1
+   and the fourth 0, and the fourth is `if (…== 0) { body }` with the `return
+   0` after it. Nine differences and one instruction to a match. This is the
+   duplicated-store rule below applied to the return register.
    A value computed in a **branch's delay slot that the fall-through then
    overwrites** is an unconditional assignment followed by a conditional one,
    not two arms of an `if` — `v = a; if (c) v = b;`, never

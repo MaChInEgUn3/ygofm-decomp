@@ -268,7 +268,7 @@ void func_80047788(s32 arg0);
 void func_8003767C(u8 *arg0);
 s32 func_8004C77C(void);  /* returns 0; the one decompiled caller ignores it */
 /* Callback func_8004B854 hands to func_80073860. */
-void func_8004B734(void);
+s32 func_8004B734(void);
 void func_80049BAC(s32 arg0);
 void func_8003771C(u8 *arg0);
 void func_8003BC40(u8 *arg0, u8 *arg1, s32 arg2);
