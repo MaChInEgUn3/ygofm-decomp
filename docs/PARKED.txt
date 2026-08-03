@@ -1579,3 +1579,26 @@ func_80049010 -- unfinished, 5 differences with equal lengths (56/56).
     the call versus two names, `s16` for the shared `-1`, assigning it after
     the first load instead of before, and a base local for the block. The
     permuter ran 828 iterations from a base score of 35 and found nothing.
+
+func_8005B260 -- unfinished, 28 differences with equal lengths (67/67).
+    A GPU packet copier and ordering-table insert: six bare loads of
+    D_800FE240 plus one bare *store* through `$at`, no %gp_rel, so the
+    scalar arm plus `as -G0`. 49 -> 39 -> 28 on two shapes worth reusing:
+    the second ordering-table address is a **compound assignment** on the
+    offset (`off += *(s32 *)(ctx + 4);`, giving retail's `addu $a0,$a0,$v0`
+    where a fresh name gives a fresh register), and the word read back from
+    that address wants its own local before the D_800FE240 update, or gcc
+    hoists the update's `sll`/`addiu` into the load's delay slot where
+    retail takes a `nop`.
+    What is left is one register decision that rotates the whole prologue.
+    The 0xE1000200 packet header needs a `lui`/`ori` pair, and retail puts
+    it in `$a1` -- copying the `ctx` parameter to `$t3` in the function's
+    *first* instruction to free it -- while `src` stays in `$a0` and is
+    walked in place. We materialise it into `$a0` instead, so `src` gets
+    copied to `$t0` and every register after shifts. Naming the whole
+    header expression at the top, and reading `*(s32 *)(ctx + 4)` early to
+    make ctx die sooner, both leave it at 28. The retail choice is
+    reachable only by making gcc want $a1, and nothing in the source says
+    which parameter register a constant lands in.
+    Its neighbour func_8005B36C is the same routine with an extra argument
+    and a negated count; whatever fixes this one should fix that.
