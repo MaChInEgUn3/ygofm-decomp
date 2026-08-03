@@ -268,6 +268,15 @@ meaningful, and skipping to the last one wastes hours:
    twice, look for a store between your two reads that gcc must assume aliases
    — `if (q[7]) x = q[7] << 4;` reloads across a store through another
    parameter, and one local was the whole of func_80059000.
+   **A pointer just stored into a struct, then used, wants reading back.**
+   Where the target has a register copy of an address it has just stored --
+   `sw $a1,K(base)` then `addu $a0,$a1,$zero` and a store through `$a0` --
+   write the second use as `*(u16 *)(*(s32 *)(base + K))`, not as the literal
+   and not as a local holding it. Both of those give no copy, and two locals
+   holding the same address give no copy either; only the read-back does
+   (func_80048F14, 45 differences to 15). Related: a halfword store of
+   `0xFFFF` through `s16` gets folded into a `-1` the function already has in
+   a register, which is one instruction short; `u16` materialises it.
    **The mirror: a load the target does *not* hoist wants an address the
    compiler cannot disambiguate.** Where retail stores a constant into a stack
    struct and *then* loads from a global, gcc hoists the load above the store

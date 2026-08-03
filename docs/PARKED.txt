@@ -1639,3 +1639,28 @@ func_8005B36C -- unfinished, **two instructions short**, and it is
     structurally *worse*: it hoists the `andi`/`sll` into the prologue where
     retail keeps `idx` raw in a register and masks it late. The parked
     candidate is the honest shape, not the lower number.
+
+func_80048F14 -- unfinished, 15 differences with equal lengths (63/63), all
+    in one block. Tenth from the dup-%hi class: three bare reads of
+    D_8009B45C, no %gp_rel, scalar arm plus `as -G0`. An init routine --
+    three groups of stores through three separate reads of the base, then a
+    handful through the pointer it just stored at +0x1564.
+    42 -> 15 on two shapes, both worth reusing:
+      * the halfword `0xFFFF` store must be `*(u16 *)` and not `*(s16 *)`.
+        Through `s16` gcc notices the stored halfword is the same as the -1
+        it already has in a register for the four stores above and reuses it,
+        which is one instruction short; through `u16` it materialises
+        `ori $v0,$zero,0xFFFF` the way retail does.
+      * that store's address must be **read back** from the struct --
+        `*(u16 *)(*(s32 *)(q + 0x1564)) = 0xFFFF;` -- and not the literal or
+        a local holding it. Retail has `addu $a0,$a1,$zero`, a copy of the
+        0x801EA800 it just stored; writing the literal or one local gives no
+        copy, and two locals both holding it gives no copy either. The
+        read-back is what produces it. 45 -> 15.
+    What is left is a register rotation in the second and third store
+    groups: retail puts the base reads in `$v0,$v0,$v1` and the constant 255
+    in `$v1`, we get `$v1,$v1,$v1` and `$v0`, and the `0x1582` store
+    schedules before the third read instead of after it. All six orderings
+    of the second group's three stores measured -- three give 15 and three
+    are a whole instruction worse -- as are naming the 255 and moving the
+    third base read earlier.
