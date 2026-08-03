@@ -170,6 +170,7 @@ void func_8005A53C(s32 (*arg0)(s32), u8 *arg1, s32 arg2, s32 arg3);
  * file -- a second caller declaring it plain would keep its epilogue. */
 void func_8008FB8C(u8 *arg0, s32 arg1) __attribute__((noreturn));
 void func_800154E4(void);  /* PROVISIONAL */
+void func_80012CD4(void);  /* PROVISIONAL */
 void func_8005611C(s32 arg0);  /* PROVISIONAL */
 void func_800245EC(u8 *arg0, s32 arg1);
 s32 func_80024704(s16 *arg0, s16 *arg1);

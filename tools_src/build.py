@@ -194,6 +194,7 @@ PER_FUNC_FLAGS = {
     "func_8005A53C": _O2_G0_NOSCHED1,
     "func_8002EC74": _O2_G8_MACRO,
     "func_80037A58": _O2_G8_MACRO,
+    "func_80012B50": _O2_G8_NOSCHED1,
     "func_80031000": _O2_G8_MACRO,
     "func_80044DC0": _O2_G8_MACRO,
     "func_800386B8": _O2_G8_MACRO,
@@ -352,6 +353,7 @@ PER_FUNC_AS_FLAGS["func_8002E470"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800240B0"] = "-G2"
 PER_FUNC_AS_FLAGS["func_80024200"] = "-G2"
+PER_FUNC_AS_FLAGS["func_80012B50"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80043BCC"] = "-G1"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8003A01C"] = "-G0"

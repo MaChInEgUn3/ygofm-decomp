@@ -524,7 +524,17 @@ typedef struct {
 extern Rec64 D_800EB0F8[];
 extern u16 D_8009B234;
 extern u16 D_8009B236;
+/* func_80012B50 stores it through $at while four-byte gp-relative symbols in
+ * the same unit stay small, so it carries a declared size of eight and the
+ * unit assembles at -G4. The threshold is `<=`: four would still be small. */
+#ifdef D_8009B230_SIZED
+extern u8 D_8009B230[8];
+#else
 extern u16 D_8009B230;
+#endif
+extern u8 D_8009B4A8[];
+extern u8 D_800E9EC0[];
+extern s32 D_8009B0B4;
 extern u8 D_80178130[];
 extern u8 D_8017808C[];
 extern u8 D_8018C2D8[];
@@ -657,7 +667,12 @@ extern u8 D_8009B0C0[];
 #endif
 extern u8 D_8009B0C1;
 extern u16 D_8009B098;
-#ifdef D_8009B0CC_IS_AGGREGATE
+#ifdef D_8009B0CC_IS_VOLATILE
+/* func_80012B50 sets it beside the volatile D_8009B0C8 and D_8009B09C, and
+ * retail keeps all four stores in source order -- which only happens if this
+ * one is volatile too; otherwise gcc sinks it past them. */
+extern volatile s32 D_8009B0CC;
+#elif defined(D_8009B0CC_IS_AGGREGATE)
 extern s32 D_8009B0CC[];
 #else
 extern s32 D_8009B0CC;
@@ -1103,7 +1118,9 @@ extern u8 D_8009B26D[];
 extern u8 D_800E9DC0[];
 /* Aggregate by default; func_8002D62C reaches it gp-relatively. See the
  * per-file declaration note on D_8009B398. */
-#ifdef D_8009B269_IS_SCALAR
+#ifdef D_8009B269_SIZED
+extern u8 D_8009B269[8];
+#elif defined(D_8009B269_IS_SCALAR)
 extern u8 D_8009B269;
 #else
 extern u8 D_8009B269[];
