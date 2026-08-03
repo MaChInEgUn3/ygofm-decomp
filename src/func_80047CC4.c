@@ -21,6 +21,9 @@ void func_80047CC4(s32 arg0) {
          * see docs/PARKED.txt's former entry for this function. */
         if ((D_8009B45C[0x434] & bit) != 0 &&
             *(u16 *)(D_8009B45C + 0x404 - -((u8)i * 2)) == (u16)key) {
+            /* No prototype: src/func_80047C70.c declares its parameter
+             * `u8 *`, and what retail leaves in $a0 here is this bitmask.
+             * Adding a declaration to functions.h breaks this file. */
             func_80047C70(hi);
             D_8009B45C[0x435] = i;
             D_8009B45C[0x434] &= ~bit;
