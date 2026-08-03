@@ -1610,3 +1610,32 @@ func_8005B260 -- unfinished, 28 differences with equal lengths (67/67).
     both is to read diff.txt before the score.
     Its neighbour func_8005B36C is the same routine with an extra argument
     and a negated count; whatever fixes this one should fix that.
+
+func_8005B36C -- unfinished, **two instructions short**, and it is
+    func_8005B260's diagnosis confirmed on a second specimen. Same routine
+    with three extra stack arguments and a 0xE2000000 texture-window word
+    built from four `(-x & 0xFF) / 8` fields; same recipe (six bare loads of
+    D_800FE240 plus a bare store through `$at`, no %gp_rel, scalar arm plus
+    `as -G0`).
+    Read this entry with func_8005B260's. In **both**, everything is right
+    except which register a D_800FE240 read lands in, and in both the
+    consequence is a parameter copy in retail that we do not emit:
+      * B260 -- retail materialises the 0xE1000200 header into `$a1`, so
+        `ctx` is copied to `$t3` in the first instruction and `src` stays in
+        `$a0`; we materialise into `$a0`, so `src` gets copied instead.
+      * B36C -- retail's *first* D_800FE240 read lands in `$a2`, so `idx` is
+        copied to `$t2` in the fifth instruction; ours lands in `$t2`, `$a2`
+        survives, and no copy is needed.
+    Two specimens, one shape: gcc picks a caller-saved register for a
+    global's value and the parameter copy follows from that choice. Nothing
+    in the source names the register. Four shapes measured here (a named
+    local for the header read, computing the ordering-table offset early,
+    the copy loop through its own cursor, and the tail rewritten to retail's
+    exact order); the copy-loop cursor and the tail order are real gains --
+    86 -> 87 -> 76 differences with the shift, but the *length* gap only
+    ever moves between -3 and -2 -- and the discriminator for the register
+    is not established.
+    Computing the ordering-table offset at the top scores better (76) and is
+    structurally *worse*: it hoists the `andi`/`sll` into the prologue where
+    retail keeps `idx` raw in a register and masks it late. The parked
+    candidate is the honest shape, not the lower number.
