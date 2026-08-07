@@ -580,7 +580,6 @@ func_80045BE8
 # func_800129D8 is the C runtime entry stub, not a matching failure: it writes
 # $sp, $gp and $fp directly and ends in `break 0,1`.  candidates.py's
 # HAND_WRITTEN filter already excludes it; the PARKED entry is belt and braces.
-func_800129D8
 # func_8002C604: addressing solved (scalar D_80010000 + -G0 assembler gives the
 # lui/lw register reuse retail has). What is left is 22 differences from one
 # register: retail keeps the object returned by func_8002C5CC in $a0 and we put
@@ -1892,16 +1891,3 @@ func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     and the new store order (20 and 8, unchanged either way). Discriminator not
     established.
 
-func_80035AF0 -- 6 differences, 35/35, and they are one instruction's position.
-    Fills fourteen fields of a Rec64 at D_800EB0F8[arg0] and reads two halfwords
-    from D_80090E58[arg0 * 2]. Two things were needed and both are in the
-    candidate: the fields go through the Rec64 struct (the offsets are encoded in
-    the unkNN names, and the 100-byte stride confirms the record type), and the
-    function RETURNS the record pointer -- functions.h declares `u8 *`, the
-    listing never sets $v0 explicitly, and $v0 is the address computed at entry.
-    That is the return-value-is-a-copy tell.
-    What is left: retail emits `ori $a2,$a2,0x8000` immediately after the address
-    computation and before the first three byte stores; gcc sinks it to just
-    before its use at +0x34. Measured: the `|=` written before the address
-    computation, and a separate local `v = arg2 | 0x8000` assigned at the top.
-    Both 6. Discriminator not established.
