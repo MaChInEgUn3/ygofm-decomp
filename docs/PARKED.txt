@@ -1836,12 +1836,29 @@ func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     a hoist rather than causing one, and the byte-address cast that solved that
     one has no obvious analogue in this direction.
 
-func_8004CA60 -- 12 differences, 23/23. A loop clearing two fields of a 0x2C-byte
-    record for each of *(u16 *)(D_8009B458 + 0x7FA) entries, re-reading the base
-    pointer every iteration. Written with the symbol inline at each use, which is
-    what produces the per-iteration reload. Not yet diagnosed beyond that; the
-    candidate is a first attempt and the permuter has not been run on it.
-
+func_8004CA60 -- 9 differences, 23/23. Clears a byte at +0x53C and a word at
+    +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, where
+    the base pointer D_8009B458 is RE-READ every iteration. Went 12 -> 9 on
+    three separate things, and two of them are recorded levers used in a new
+    combination:
+      - the plain SCALAR declaration plus an assembler `-G0`, which the
+        candidate needs to reproduce and which is not optional. The default
+        gp-relative form is the wrong addressing entirely, and the unsized-array
+        arm gives cc1psx's own %hi/%lo pair, which gcc then hoists out of the
+        loop as an invariant -- retail re-materialises the `lui` every
+        iteration. A bare reference is ONE instruction to gcc, so the invariant
+        pass has nothing to take. Exactly the func_8003CCD8 mechanism, reached
+        through recipe branch 1 (no %gp_rel anywhere in the function) rather
+        than through an inflated declaration.
+      - a base local REASSIGNED inside the loop, because retail uses the
+        pre-loop read for the first store of each iteration and the re-read for
+        the second store and the bound.
+      - naming the stored constant 1 and assigning it before `off = 0`, which
+        is worth the last one: retail materialises the 1 before zeroing the
+        offset.
+    What is left is register allocation, $v1 against $a0 through the whole
+    loop. The permuter was run before any of this, from the stale 12 base, and
+    returned 12; it has NOT been run from the 9. Discriminator not established.
 func_80015780 -- 3 differences, 23/23, and they are three adjacent instructions
     in one window. Retail issues both loads -- `lbu %gp_rel(D_8009B141)` and
     `lbu 0x4($s0)`, the second being the argument to func_800156B8 -- BEFORE the
