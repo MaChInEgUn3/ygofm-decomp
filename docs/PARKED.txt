@@ -625,7 +625,6 @@ func_8004C560
 func_80038798
 func_8003D2B8
 func_80019CC8
-func_80015780
 func_800708C4
 func_80035AF0
 func_80059134
@@ -1867,3 +1866,16 @@ func_8004CA60 -- 12 differences, 23/23. A loop clearing two fields of a 0x2C-byt
     pointer every iteration. Written with the symbol inline at each use, which is
     what produces the per-iteration reload. Not yet diagnosed beyond that; the
     candidate is a first attempt and the permuter has not been run on it.
+
+func_80015780 -- 3 differences, 23/23, and they are three adjacent instructions
+    in one window. Retail issues both loads -- `lbu %gp_rel(D_8009B141)` and
+    `lbu 0x4($s0)`, the second being the argument to func_800156B8 -- BEFORE the
+    `sh $zero,8($s0)`, and gcc emits the halfword store first. Nothing moves it.
+    Measured: naming both loads in locals and writing them above the store in
+    source order (3, unchanged -- gcc reorders anyway), `-fno-schedule-insns`
+    (30) and `-fno-schedule-insns2` (30), both far worse. The permuter ran 200s
+    from a base score of 60 and never beat it, so it produced no output at all.
+    Same aliasing family as func_800466C8 in this batch: two accesses through
+    different globals that gcc will not reorder the way retail did, and the
+    byte-address cast that solved func_80049CF8 is for causing the opposite
+    effect. Discriminator not established.
