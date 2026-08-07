@@ -389,7 +389,6 @@ func_8003201C
 func_80071424
 func_80071460
 func_8004CABC
-func_800466C8
 func_80026C0C
 # --- range-check fold: class emptied, see WORKFLOW.md. Both members
 # (func_80049544, func_80049640) matched once the condition was written as
@@ -627,7 +626,6 @@ func_80038798
 func_8003D2B8
 func_80019CC8
 func_80015780
-func_8004CA60
 func_800708C4
 func_80035AF0
 func_80059134
@@ -1846,3 +1844,26 @@ func_8004A8E4 -- 21 differences, two instructions short. Reads a byte at +3 of a
     than through a base local (identical, 23 both ways -- gcc hoists the `lui`
     either way, so a base local is not what moves it here), and a base local
     with the offset named. Discriminator not established.
+
+func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
+    D_8009B45C: one at entry, one re-read at the end of the `if` body, one for
+    the final read-modify-write of the halfword at +0x40. A local `p` reassigned
+    inside the `if` reproduces the first two exactly, and the halfword store of
+    -0x40 must go through `s16` -- `u16` gives `ori $v1,$zero,65472` where retail
+    has `addiu $v0,$zero,-64`, which is the signed-store rule from the func_80048F14
+    entry read in the other direction.
+    What is left is scheduling: retail hoists the third `lw` ABOVE the store to
+    +0x512, filling its own load-delay slot, and gcc keeps the store first
+    because both addresses derive from the same global and it cannot
+    disambiguate them. Naming the third read is worse (10), and moving the
+    read-modify-write above the +0x512 store is much worse (15). The permuter
+    ran from the 6 base and returned 6. Discriminator not established -- note
+    this is the mirror of the func_80049CF8 case, where the problem was stopping
+    a hoist rather than causing one, and the byte-address cast that solved that
+    one has no obvious analogue in this direction.
+
+func_8004CA60 -- 12 differences, 23/23. A loop clearing two fields of a 0x2C-byte
+    record for each of *(u16 *)(D_8009B458 + 0x7FA) entries, re-reading the base
+    pointer every iteration. Written with the symbol inline at each use, which is
+    what produces the per-iteration reload. Not yet diagnosed beyond that; the
+    candidate is a first attempt and the permuter has not been run on it.
