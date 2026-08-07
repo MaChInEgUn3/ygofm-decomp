@@ -389,7 +389,6 @@ func_8003201C
 func_80071424
 func_80071460
 func_8004CABC
-func_80026C0C
 # --- range-check fold: class emptied, see WORKFLOW.md. Both members
 # (func_80049544, func_80049640) matched once the condition was written as
 # nested ifs rather than &&. Neither had a candidate saved; both were
@@ -1858,3 +1857,22 @@ func_80015780 -- 3 differences, 23/23, and they are three adjacent instructions
     different globals that gcc will not reorder the way retail did, and the
     byte-address cast that solved func_80049CF8 is for causing the opposite
     effect. Discriminator not established.
+
+func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
+    fail in opposite ways, which is what makes this a coupled pair that has not
+    closed. Scans five 28-byte records from
+    D_801A7AD8[(D_8009B1D5 * 15 + arg0) * 28] for one whose halfword at +0x16
+    has bit 0x8000 clear, returning that record's absolute index or -1.
+    Retail computes the return value `n + i` in the branch's DELAY SLOT, into
+    $v0 directly, and its target block is a bare `jr $ra` / `nop`.
+      - With the permuter's extra names (`r = n; new_var = r;` before the loop,
+        which is what fixes the register allocation -- without them this is 12)
+        and the sum written inline in the `return`, the allocation is right but
+        the slot is a `nop` and the `addu` lands in the target block.
+      - Naming the sum in the loop before the test puts the `addu` in the slot,
+        but into $a2, and the target block copies it to $v0 -- the extra name
+        costs the copy.
+    So one shape has the right position and the wrong register, the other the
+    right register and the wrong position, and both are 2. Reusing `r` for the
+    sum instead of a fresh name is 22. Discriminator not established; the
+    permuter found the naming from a base of 12 and saturated at 2.
