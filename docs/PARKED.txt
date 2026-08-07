@@ -1803,7 +1803,10 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     two initialisations, and `i = 0` as its own statement before `crc = 0` with
     an empty for-init. `u32 i` is 3. So the remaining instruction is a constant
     CSE between two variables that both start at zero, and no shape here stops
-    it. Discriminator not established.
+    it. Rerun from the 1 base after learning that the permuter is worth
+    restarting from an improved base (that took func_8004CA60 from 9 to 1); here
+    it produced no output at all in 200s, so 1 is where it saturates from both
+    sides. Discriminator not established.
 
 func_8004A8E4 -- 21 differences, two instructions short. Reads a byte at +3 of a
     40-byte record, and if it is not 0x63 uses it to index 24-byte records and
