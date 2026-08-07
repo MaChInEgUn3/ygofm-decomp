@@ -622,7 +622,6 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-func_800708C4
 func_80035AF0
 func_80059134
 func_80040390
