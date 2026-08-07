@@ -627,8 +627,6 @@ func_80038798
 func_8003D2B8
 func_80019CC8
 func_80015780
-func_8003CEB8
-func_8004A8E4
 func_8004CA60
 func_800708C4
 func_80035AF0
@@ -1820,3 +1818,31 @@ func_8003A198 -- 3 differences, 21/21, instruction-for-instruction identical.
     found it, 11 -> 3. Measured and no better: the same hint in the third block
     (3), `p` as s32 with casts (3), a second permuter run from the 11 base,
     which saturated at 3 in ~4 minutes. Discriminator not established.
+
+func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes,
+    outer loop over the buffer, inner loop of 8 shifts. Everything matches except
+    the two initialisations: retail materialises zero twice
+    (`addu $v1,$zero,$zero` for crc, `addu $a3,$zero,$zero` for i) and gcc
+    materialises it once and copies (`addu $a3,$v1,$zero`). The permuter got
+    from 2 to 1 with `i = crc & 0xFFFF; return i;` -- reusing the dead loop
+    counter as the return value, the assign-to-an-already-dead-local hint -- and
+    then saturated. Measured and still 1: `j` instead of `i` for that reuse (2,
+    worse), declaring i before crc, crc as u32, a `do { } while (0);` between the
+    two initialisations, and `i = 0` as its own statement before `crc = 0` with
+    an empty for-init. `u32 i` is 3. So the remaining instruction is a constant
+    CSE between two variables that both start at zero, and no shape here stops
+    it. Discriminator not established.
+
+func_8004A8E4 -- 21 differences, two instructions short. Reads a byte at +3 of a
+    40-byte record, and if it is not 0x63 uses it to index 24-byte records and
+    decrements a nibble at +6. Two things are already right in the candidate and
+    both were needed: D_8009B458_IS_AGGREGATE for retail's %hi/%lo pair (the
+    scalar arm gives the gp-relative bare form), and a named scaled offset,
+    without which the whole address folds differently. What is left is that
+    retail keeps `addiu $v0,$v0,384` as its own instruction and then
+    `addu $a1,$a2,$v0` / `lbu $v1,3($a1)`, while every spelling here folds the
+    384 into the load displacement as `lbu ...,387(...)`. Measured: the constant
+    grouped with the index inside parentheses, the symbol written inline rather
+    than through a base local (identical, 23 both ways -- gcc hoists the `lui`
+    either way, so a base local is not what moves it here), and a base local
+    with the offset named. Discriminator not established.
