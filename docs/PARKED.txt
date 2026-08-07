@@ -621,8 +621,6 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-func_80035AF0
-func_80059134
 func_80040390
 func_800594C0
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
@@ -1876,3 +1874,34 @@ func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
     right register and the wrong position, and both are 2. Reusing `r` for the
     sum instead of a fresh name is 22. Discriminator not established; the
     permuter found the naming from a base of 12 and saturated at 2.
+
+func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
+    into D_800F2C40[arg0 * 3616] at +0xD70..+0xD9E, no branches. The index math
+    and the addressing match on the first attempt; everything since has been the
+    order in which gcc materialises the constants.
+    20 -> 8 came from ONE line moved: the `*(s32 *)(p + 0xD94) = -0x1388;` store
+    belongs four positions later, after the 0xD7C/D/E byte group rather than
+    before the 0xD74 word. The permuter found it wrapped in three invented
+    locals and a chained `p[0xD7E] = (p[0xD7D] = (p[0xD7C] = 0x80))`; decomposed,
+    the reorder alone is 8 and the chaining adds nothing, so only the reorder is
+    installed.
+    What is left: retail interleaves `addiu $a1,$zero,5000` and
+    `addiu $a0,$zero,128` -- the two constants used more than once -- early among
+    the stores, while gcc materialises them together at first use. Naming both in
+    locals assigned at the top does not move it, measured against both the old
+    and the new store order (20 and 8, unchanged either way). Discriminator not
+    established.
+
+func_80035AF0 -- 6 differences, 35/35, and they are one instruction's position.
+    Fills fourteen fields of a Rec64 at D_800EB0F8[arg0] and reads two halfwords
+    from D_80090E58[arg0 * 2]. Two things were needed and both are in the
+    candidate: the fields go through the Rec64 struct (the offsets are encoded in
+    the unkNN names, and the 100-byte stride confirms the record type), and the
+    function RETURNS the record pointer -- functions.h declares `u8 *`, the
+    listing never sets $v0 explicitly, and $v0 is the address computed at entry.
+    That is the return-value-is-a-copy tell.
+    What is left: retail emits `ori $a2,$a2,0x8000` immediately after the address
+    computation and before the first three byte stores; gcc sinks it to just
+    before its use at +0x34. Measured: the `|=` written before the address
+    computation, and a separate local `v = arg2 | 0x8000` assigned at the top.
+    Both 6. Discriminator not established.
