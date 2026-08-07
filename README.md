@@ -1,49 +1,161 @@
 # Yu-Gi-Oh! Forbidden Memories — Matching Decompilation
 
-Matching decompilation of the PS1 game *Yu-Gi-Oh! Forbidden Memories* (NTSC-U, `SLUS_014.11`), in the same style as [OpenDriver2](https://github.com/OpenDriver2/REDRIVER2), [sotn-decomp](https://github.com/xeeynamo/sotn-decomp), and [mgs_reversing](https://github.com/FoxdieTeam/mgs_reversing): the goal is byte-exact C recompilation of the original executable using the original PsyQ SDK toolchain, not a reimplementation.
-
-**The disc image, extracted executable, and downloaded toolchain binaries (Ghidra, PsyQ SDK) are never committed** — you need your own legally-owned copy of the disc and your own copy of the PsyQ SDK to build/verify anything here. This matches the posture of every comparable community project (sotn-decomp, mgs_reversing, OpenDriver2, Severed Chains).
-
-The disassembly output itself (`asm/`, `src/`) **is** committed, same as those projects do — publishing disassembly/decompilation-in-progress of a binary you don't redistribute is the whole point of a project like this, and is the long-standing, untouched practice across the PS1 decomp community. See `docs/DECISIONS.md` for the exact line between what's in and what's out.
-
-## Building
-
-The build reproduces the retail executable **byte for byte** (sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`). That check is the project's regression test — if it passes, nothing has drifted.
-
-A fresh clone cannot build until you supply the game and the toolchains, because none of them are committed. Full sequence:
-
-1. **Provide the executable.** Dump your own disc, then extract `SLUS_014.11` from it into `extracted/`.
-2. **Fetch the toolchains** into `tools/` — the PsyQ 4.6 SDK, a `mipsel-none-elf` binutils build, and `maspsx`. See `docs/DECISIONS.md` ("Local PsyQ 4.6 toolchain" and "Build harness") for exact sources and expected paths.
-3. **Set up Python tooling** (project-local venv, never the system Python):
-   ```
-   python -m venv .venv
-   .venv/Scripts/python.exe -m pip install "splat64[mips]"
-   ```
-4. **Generate the disassembly**, from the repo root:
-   ```
-   .venv/Scripts/splat.exe split config/SLUS_014.11.yaml
-   ```
-   This is required even though `asm/` is committed: the large data dumps (notably `asm/data/carddata.data.s`) are gitignored, and the linker script references them. It is safe to re-run at any time — decompiled sources live in per-function `src/func_*.c` files that splat never touches.
-5. **Build and verify:**
-   ```
-   .venv/Scripts/python.exe tools_src/build.py
-   ```
+Matching decompilation of the PS1 game *Yu-Gi-Oh! Forbidden Memories* (NTSC-U,
+`SLUS_014.11`), in the same style as
+[OpenDriver2](https://github.com/OpenDriver2/REDRIVER2),
+[sotn-decomp](https://github.com/xeeynamo/sotn-decomp) and
+[mgs_reversing](https://github.com/FoxdieTeam/mgs_reversing): the goal is
+byte-exact C recompilation of the original executable using the original PsyQ
+SDK toolchain — **not** a reimplementation. Every function must assemble to the
+retail bytes.
 
 ## Status
 
-See `docs/DECISIONS.md` for the current state of the project (toolchain, confirmed facts, open questions) and `docs/FUNCTION_INVENTORY.txt` for the current function-by-function breakdown.
+| | functions | instructions |
+|---|---|---|
+| decompiled and matching | **712** (59.4%) | **18,707** (18.7%) |
+| remaining | 486 (40.6%) | 81,294 (81.3%) |
 
-## Layout
+Both columns are worth reading, because they disagree sharply. Function count
+is past halfway; **instruction count is not, and it is the honest number.** The
+functions matched so far average 26 instructions and the ones remaining average
+167 — the short bands get emptied first and refill only when a rule is
+retracted. Scope is the 1,198 game functions below `0x80073840`, excluding PsyQ
+library code (`docs/LIBRARY_FUNCS.txt`) and hand-written assembly.
 
-- `docs/` — RAM/ROM map notes, decisions log, function inventory (source of truth, kept in sync with the code as the project evolves)
-- `tools_src/ghidra_scripts/` — our own Ghidra headless-analysis scripts (Java)
-- `config/` — splat config and the generated linker script
-- `asm/` — disassembly output (per-function `.s` under `asm/nonmatchings/`)
-- `src/` — matched C source, one file per decompiled function (`src/func_XXXXXXXX.c`)
-- `tools_src/` — our own tooling: `build.py` (build + sha1 verify) and `try_func.py` (fast single-function match loop)
+`src/` holds 764 files; 712 of them are in scope and the rest are library or
+above-scope functions matched along the way. There are 149 parked functions
+(`docs/PARKED.txt`), 122 of which keep their best candidate in `parked/` — these
+are the ones where a shape is known to be close but not exact, and they are a
+source of matches rather than a graveyard: re-reading them whenever a new lever
+is measured has repeatedly produced matches.
+
+Numbers above are from the commit that last touched this file. To re-derive:
+`.venv/bin/python tools_src/sync_count.py` and `tools_src/candidates.py`.
+
+## What is and is not committed
+
+**The disc image, the extracted executable, and the downloaded toolchains
+(PsyQ SDK, Ghidra, binutils) are never committed.** You need your own
+legally-owned copy of the disc and your own copy of the PsyQ SDK to build or
+verify anything here. `asm/data/carddata.data.s` (~27 MB of mostly zero
+padding) is gitignored too, so **a fresh clone cannot reconstruct the
+executable** — you regenerate it from your own dump with splat.
+
+The disassembly and decompilation output (`asm/`, `src/`) **is** committed, as
+in every comparable project. Publishing disassembly of a binary you do not
+redistribute is long-standing practice in the PS1 decomp community and is
+distinct from redistributing the binary or its media assets.
+`docs/DECISIONS.md` records the exact line between what is in and what is out.
+
+## Building
+
+The build reproduces the retail executable **byte for byte** (sha1
+`84747e64f6da8e764206ec203e489acf8c9dcf7d`). That check is the whole regression
+suite: if it passes, nothing has drifted.
+
+It exits non-zero on any failure, so **check the exit status, not the last
+lines of output** — piping through `tail` reads as green when the build died
+early, because the last thing printed is then the function count.
+
+```
+.venv/bin/python tools_src/build.py && echo GREEN
+```
+
+A fresh clone cannot build until you supply the game and the toolchains:
+
+1. **Provide the executable.** Dump your own disc and extract `SLUS_014.11`
+   from it.
+2. **Fetch the toolchains** into `tools/` (gitignored, and must be re-fetched
+   per machine): the **PsyQ 4.5** SDK, MIPS binutils, and
+   [maspsx](https://github.com/mkst/maspsx). See `docs/DECISIONS.md` for exact
+   sources and expected paths. The PsyQ binaries are 32-bit Windows
+   executables; `build.py` runs them under Wine on Linux and natively on
+   Windows, and the two are byte-identical (verified by hashing `cc1psx`
+   output on both).
+3. **Set up Python tooling** — always the project-local venv, never a bare
+   `pip install`:
+   ```
+   python3 -m venv .venv
+   .venv/bin/pip install "splat64[mips]"
+   ```
+4. **Generate the disassembly** from the repo root:
+   ```
+   .venv/bin/splat split config/SLUS_014.11.yaml
+   ```
+   Required even though `asm/` is committed, because the large data dumps are
+   gitignored and the linker script references them. Safe to re-run at any
+   time — decompiled sources live in per-function `src/func_*.c` files that
+   splat never touches.
+5. **Build and verify** with the command above.
+
+On Windows the venv paths are `.venv/Scripts/python.exe` and
+`.venv/Scripts/splat.exe`; `build.py` detects the platform and picks
+`mips-linux-gnu-*` or `mipsel-none-elf-*` accordingly.
+
+### Toolchain
+
+**PsyQ 4.5** (gcc 2.8.1, aspsx 2.79), not 4.6. 4.6 was assumed for the first
+219 functions and produced a byte-identical build anyway, because most
+functions are too small for the two versions to differ; `func_800495A4` is the
+discriminating case. `YGOFM_PSYQ=46` selects 4.6 for comparison. Pipeline is
+`CPPPSX → CC1PSX → maspsx → as → ld → objcopy`.
+
+Layout is linker-driven and load-bearing: `build.py` emits one object per
+decompiled function plus one per run of consecutive undecompiled ones, then
+rewrites splat's linker script to place them in order. This is because `-G8`
+makes cc1psx defer all C function output to the end of a translation unit, so
+mixing `INCLUDE_ASM` with real C in one file scrambles `.text`.
 
 ## Decompiling a function
 
-Write `src/func_XXXXXXXX.c` and re-run the build. Placement is handled automatically — the harness positions every function via the linker script, so a decompiled function slots into the address the original occupied with no further bookkeeping.
+Write `src/func_XXXXXXXX.c` and rebuild — placement is automatic.
 
-`tools_src/try_func.py` gives a faster inner loop while hunting for the right C, without a full rebuild.
+**Read `docs/WORKFLOW.md` first.** It is the operational minimum: the ordered
+list of what to check when a function does not match, the four global
+addressing forms and how the `-G` size threshold picks between them, and the
+source-shape levers that have actually been measured on this binary.
+`docs/DECISIONS.md` is the long-form reasoning behind those rules, including
+the ones that were retracted.
+
+Both documents are written to a specific standard that is worth knowing about
+before contributing: **a claim about mechanism has to name the counterexample
+that was checked, or say explicitly that it was not established.** Every
+"cannot match" filter this project has written has eventually been retracted —
+six of six — each one reasoned from a couple of samples instead of counted.
+If a claim is about the whole binary, scan the whole binary.
+
+### Tooling
+
+| tool | what it does |
+|---|---|
+| `build.py` | full build + sha1 verify; the only arbiter |
+| `try_func.py` | fast single-function loop, no full rebuild |
+| `check_try_func.py` | validates try_func both ways: every `src/` file must MATCH, every `parked/` file must not |
+| `candidates.py` | ranked list of remaining work, with tags (`dup-%hi`, `[MERGED]`, `[PARKED]`) |
+| `siblings.py` | pairs each unmatched candidate with the decompiled function it most resembles, on instruction n-grams |
+| `permute.py` | wraps decomp-permuter; mandatory below ~25 instructions before parking |
+| `sweep_try.py` / `sweep_flags.py` | flag sweeps, the fast one through try_func and the confirming one through the build |
+| `sync_count.py` | derives the function count; run before committing a batch |
+
+## Layout
+
+- `docs/` — `WORKFLOW.md` (operational), `DECISIONS.md` (reasoning),
+  `PARKED.txt` (per-function diagnoses), function inventory, RAM/ROM map
+- `src/` — matched C, one file per function (`src/func_XXXXXXXX.c`)
+- `parked/` — best-known-but-not-matching candidates, paired with `PARKED.txt`
+- `include/` — `variables.h` and `functions.h`; every global and every
+  cross-file function is declared once, because two files disagreeing about a
+  type breaks matching somewhere far away
+- `asm/` — disassembly (`asm/nonmatchings/` per function, `asm/data/`)
+- `config/` — splat config and the generated linker script
+- `tools_src/` — the tooling above, plus `ghidra_scripts/` (Java)
+
+## License
+
+No license file is present, and that is deliberate rather than an oversight.
+`tools_src/` is original work; `asm/` and `src/` are derived from a
+copyrighted executable and are published as reverse-engineering research, not
+as material this project is in a position to license to anyone. If you want to
+reuse the tooling specifically, open an issue and it can be split out under a
+permissive license.
