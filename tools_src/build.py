@@ -445,6 +445,12 @@ PER_FUNC_AS_FLAGS["func_80049F10"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049200"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800855B0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
+# D_8009B361 declared [8] (_IS_SIZED) so 8 > 4 takes it out of small data while
+# the one-byte gp-relative D_8009B1D5 beside it stays in. The point is the
+# delay slot, not the addressing: bare, the reference is one instruction to
+# gcc, so it cannot be half-hoisted into the bgez's slot and retail's nop
+# survives. Same lever as func_800175A0.
+PER_FUNC_AS_FLAGS["func_80019CC8"] = "-G4"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
