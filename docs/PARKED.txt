@@ -1836,29 +1836,32 @@ func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     a hoist rather than causing one, and the byte-address cast that solved that
     one has no obvious analogue in this direction.
 
-func_8004CA60 -- 9 differences, 23/23. Clears a byte at +0x53C and a word at
-    +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, where
-    the base pointer D_8009B458 is RE-READ every iteration. Went 12 -> 9 on
-    three separate things, and two of them are recorded levers used in a new
-    combination:
-      - the plain SCALAR declaration plus an assembler `-G0`, which the
-        candidate needs to reproduce and which is not optional. The default
-        gp-relative form is the wrong addressing entirely, and the unsized-array
-        arm gives cc1psx's own %hi/%lo pair, which gcc then hoists out of the
-        loop as an invariant -- retail re-materialises the `lui` every
-        iteration. A bare reference is ONE instruction to gcc, so the invariant
-        pass has nothing to take. Exactly the func_8003CCD8 mechanism, reached
-        through recipe branch 1 (no %gp_rel anywhere in the function) rather
-        than through an inflated declaration.
-      - a base local REASSIGNED inside the loop, because retail uses the
-        pre-loop read for the first store of each iteration and the re-read for
-        the second store and the bound.
-      - naming the stored constant 1 and assigning it before `off = 0`, which
-        is worth the last one: retail materialises the 1 before zeroing the
-        offset.
-    What is left is register allocation, $v1 against $a0 through the whole
-    loop. The permuter was run before any of this, from the stale 12 base, and
-    returned 12; it has NOT been run from the 9. Discriminator not established.
+func_8004CA60 -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
+    +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, with
+    the base pointer D_8009B458 re-read every iteration. Four levers, all
+    load-bearing, taking it 23 -> 12 -> 9 -> 1:
+      - the plain SCALAR declaration plus an assembler `-G0`. The default
+        gp-relative form is the wrong addressing outright; the unsized-array arm
+        gives cc1psx's own %hi/%lo pair, which gcc hoists out of the loop as an
+        invariant while retail re-materialises the `lui` every iteration. A bare
+        reference is ONE instruction to gcc, so the invariant pass has nothing
+        to take. Same mechanism as func_8003CCD8, reached through recipe
+        branch 1 (no %gp_rel in the function) instead of an inflated size.
+      - a base local REASSIGNED inside the loop: retail uses the pre-loop read
+        for the first store of each iteration and the re-read for the second
+        store and the bound.
+      - naming the stored constant 1 and assigning it before `off = 0`, because
+        retail materialises the 1 before zeroing the offset.
+      - a `do { } while (0)` around the WHOLE body, which the permuter found
+        from the 9 base and which is worth 8 on its own. Third use of that lever
+        in the project (func_80026D18, func_80035AF0) and the first where it
+        wraps an entire function rather than a statement pair.
+    What is left is one instruction: retail's `addu $v0,$v1,$a0` for the second
+    store's address against our `addu $v0,$a0,$v1`. Measured: `(p + off) + 0x518`
+    (1, installed), `p + (off + 0x518)` (2), `(p + 0x518) + off` (2), an explicit
+    `u8 *e = p + off` local (1, no change), and the subtraction-of-a-negation
+    `p + 0x518 - -off` (19, much worse -- that trick is not general).
+    Discriminator not established.
 func_80015780 -- 3 differences, 23/23, and they are three adjacent instructions
     in one window. Retail issues both loads -- `lbu %gp_rel(D_8009B141)` and
     `lbu 0x4($s0)`, the second being the argument to func_800156B8 -- BEFORE the
