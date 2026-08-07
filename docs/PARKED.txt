@@ -517,7 +517,6 @@ func_8001D5B4
 # $t0-$t2 with a 40-byte frame against retail's 56, and places the indirect
 # call inline where retail branches to it. 40 differences; flipping the
 # polarity so the call is the out-of-line arm makes it 46.
-func_80014EEC
 # func_800137E4: 45 differences down to 16 once the three reads of D_8009B0F4
 # and two of D_8009B134 got a name each -- without them cc1psx hoists both
 # addresses into callee-saved registers and grows the frame. What is left is a
@@ -623,8 +622,6 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
-func_8003D2B8
-func_80019CC8
 func_800708C4
 func_80035AF0
 func_80059134
@@ -882,23 +879,6 @@ func_8005C388 -- 11 differences, register assignment around the table base.
     (18 -> 11).
   Also: the provisional prototype said `u8 *arg0`; arg0 indexes the table, so
   it is an s32. Corrected in functions.h.
-
-func_8003D518 -- 8 differences, two register pairs.
-  Creates a sprite once (guarded by bit 0x80 of D_8009B3C1), then counts the
-  two halfwords at +0x48/+0x4A down by 8 each call until the first crosses
-  zero. Structure, the guard, the create block and the countdown all match.
-  What is left: retail loads +0x4A into $v0 and +0x48 into $v1, we get them the
-  other way round (six lines), and retail's %hi/%lo pair for D_8009AF76 shares
-  one register where ours uses a separate temp (two).
-  Getting to 8: D_8009AF76 needs a per-file aggregate guard -- it is read as a
-  *byte* through %hi/%lo here and gp-relatively as a halfword everywhere else,
-  which is a third kind of per-symbol disagreement alongside addressing and
-  signedness. And the two decrements need their own locals; written as
-  `*(u16 *)(p + 0x48) -= 8;` the reload for the test breaks the interleave (20).
-  Tried at 8: both declaration orders for the two locals, the D_8009AF76 read
-  scoped into its own block. `f = D_8009AF76[0]` reusing the flag local is 11.
-  The -G0-assembler recipe is closed here: D_8009B3C1 is gp-relative in the
-  same function and a -G0 assembler takes it out (67).
 
 func_80017F04 -- 12 differences: two registers and the scheduling behind them.
   Creates a sprite for the record at arg0 and fills five bytes at +0x67..+0x6B,
