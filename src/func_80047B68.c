@@ -1,11 +1,10 @@
-#define D_8009B45C_IS_AGGREGATE
 #include "common.h"
 
-s32 func_80047B68(s32 arg0) {
-    u8 *p = D_8009B45C[0];
+s32 func_80047B68(u16 arg0) {
+    u8 *p = D_8009B45C;
     u16 v;
 
-    if (*(u16 *)(p + 0x442) == (u16)arg0) {
+    if (*(u16 *)(p + 0x442) == arg0) {
         return 1;
     }
     v = *(u16 *)(p + 0x40);

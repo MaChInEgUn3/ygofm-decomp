@@ -250,6 +250,7 @@ extern u8 D_8009B3C0;
  * other user takes them as unsized arrays. */
 #ifdef D_8009B364_SIZED
 /* Two bytes for the same reason as D_8009B0C0; see func_8002D180. */
+/* Data Crystal RAM map, UNVERIFIED: terrain type */
 extern u8 D_8009B364[2];
 #elif defined(D_8009B364_IS_SCALAR)
 extern u8 D_8009B364;
@@ -286,6 +287,7 @@ typedef struct {
     s16 value;
 } Threshold;
 
+/* Data Crystal RAM map, UNVERIFIED: table of score change to rank, 200 bytes */
 extern Threshold D_801798A8[][5];
 extern u8 D_801AB00C[];
 /* Scalar by default -- three functions reach it gp-relatively. func_8007154C
@@ -419,6 +421,7 @@ extern u8 *D_8009B2E4;
 extern u8 D_8009B2F0;
 extern u8 D_8009B2E9;
 extern u8 D_8009B2E8;
+/* Data Crystal RAM map, UNVERIFIED: debug menu scene ID, or sound ID */
 extern u16 D_8009B2C8;
 extern u8 D_8009B2DC;
 extern u8 D_8009B2B8;
@@ -447,6 +450,7 @@ extern u8 D_8009B3EE;
 extern u8 *D_8009B3D8;
 extern u8 D_801B125A[];
 extern s32 D_800E9E90[];
+/* Data Crystal RAM map, UNVERIFIED: shuffled deck (player), 80 bytes */
 extern u8 D_80177FE8[];
 /* Aggregate by default; func_8002892C reaches it gp-relatively and defines
  * D_8009B254_IS_SCALAR. */
@@ -487,6 +491,7 @@ extern u8 D_8009B144[];
 #else
 extern u8 D_8009B144;
 #endif
+/* Data Crystal RAM map, UNVERIFIED: read by the duel-end path (wiki gives a function offset that does not resolve to any boundary in asm/nonmatchings -- unresolved) */
 #ifdef D_8009B360_IS_SCALAR
 extern s8 D_8009B360;
 #else
@@ -499,6 +504,7 @@ extern u8 D_801B1238[];
 extern u8 D_801D1200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
+/* Data Crystal RAM map, UNVERIFIED: selected card ID */
 extern s16 D_8009B338;
 extern u8 D_8009B320;
 extern u8 D_801D07DC[];
@@ -557,6 +563,7 @@ extern s32 D_8009B0B4;
 extern u8 D_80178130[];
 extern u8 D_8017808C[];
 extern u8 D_8018C2D8[];
+/* Data Crystal RAM map, UNVERIFIED: player's hand, 30 bytes */
 extern u8 D_801A7E20[];
 extern u8 D_8015C424[];
 extern s16 D_800908A0[];
@@ -794,6 +801,7 @@ extern u8 D_800F39B0[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
+/* Data Crystal RAM map, UNVERIFIED: opponent ID */
 #ifdef D_8009B361_IS_SCALAR
 extern s8 D_8009B361;
 #elif defined(D_8009B361_IS_SIZED)
@@ -978,6 +986,7 @@ extern s32 D_800F2B00[];
 extern u8 D_80010538[];
 extern u16 D_8009B434;
 /* 1460 bytes per entry, walked as halfwords by func_80021810. */
+/* Data Crystal RAM map, UNVERIFIED: SA-POW card drops, 1444 bytes */
 extern u8 D_8017878C[];
 /* Two signed byte counters func_8002A6B8 turns into a score. */
 extern u8 D_8009B258;
@@ -1105,6 +1114,7 @@ extern Rec1C D_800EB288[];
 extern u8 D_800EF6B0[];
 extern u8 D_800EF6E0[];
 extern u8 D_801B0000[];
+/* Data Crystal RAM map, UNVERIFIED: fusion table, 65536 bytes */
 extern u16 D_8017C2D8[];
 extern u8 D_801C0000[];
 extern u8 D_801D5800[];

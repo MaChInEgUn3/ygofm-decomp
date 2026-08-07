@@ -818,6 +818,33 @@ And note `siblings.py` already *is* the similarity search over listings, on
 instruction n-grams — the right metric for this domain, and better than any
 general-purpose embedder would be.
 
+**The community's RAM map is a second collection, `ygofm-community`, and it is
+kept separate on purpose.** Data Crystal documents ~27 NTSC-U addresses, ten of
+which are already symbols here — `D_8009B361` is "opponent ID", `D_8009B364` is
+"terrain type", `D_8017C2D8` is the 64 KB fusion table. That is worth having,
+and it is worth *nothing* for matching: every blocker in this file is codegen
+shape, and no community note touches a delay slot or a `-G` threshold. What it
+buys is comprehension, which starts to matter now that the remaining functions
+average 167 instructions instead of 26 — knowing a loop walks the fusion table
+tells you its bounds before you write a line.
+
+It must never be merged into `ygofm-code`. Several entries are literally `?`,
+and a wiki guess ranked beside a measured paragraph, with no visible
+difference, is the same failure mode that keeps `asm/` out of the index. So
+every document is ingested under a `source` label beginning **`UNVERIFIED
+datacrystal/`** and with that word in its body, because the label is what comes
+back on every hit. The same marker is on the ten annotations in `variables.h`.
+Treat all of it as a hypothesis to check against a listing, never as evidence —
+the wiki's own function offsets do **not** resolve: `0x218F0` under this
+binary's confirmed `0x8000F800` file-to-vram delta lands at `0x800310F0`, which
+is not a function boundary in `asm/nonmatchings/`, and neither is any other
+delta tried. Names are annotated, offsets are not.
+
+Ingest is manual and has no git lifecycle, so it is deliberately outside the
+hook path. TCRF blocks scripted fetches with a bot interstitial — `curl` and
+the MediaWiki API both fail — and a browser `User-Agent` alone does not clear
+it; the fetch has to go through a client that renders.
+
 Hooks are `post-commit`, `post-merge`, `post-checkout` (branch switches only),
 `post-rewrite`; they are synchronous but cost **0.1s** on a typical 4-file
 commit, and every path out is `exit 0` — a RAG index is a convenience, a

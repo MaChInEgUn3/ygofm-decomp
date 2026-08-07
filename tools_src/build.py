@@ -451,6 +451,11 @@ PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
 # gcc, so it cannot be half-hoisted into the bgez's slot and retail's nop
 # survives. Same lever as func_800175A0.
 PER_FUNC_AS_FLAGS["func_80019CC8"] = "-G4"
+# No %gp_rel anywhere in the function, so any -G is free: recipe branch 1.
+# The real scalar declaration plus -G0 gives the assembler's own expansion
+# through the destination register, which is retail's lui $v1 / lw $v1(...$v1).
+# The unsized-array arm is cc1psx's pair and splits it across two registers.
+PER_FUNC_AS_FLAGS["func_80047B68"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
