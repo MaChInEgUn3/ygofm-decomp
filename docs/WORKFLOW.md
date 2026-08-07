@@ -843,11 +843,13 @@ RAG_GPU_DEADLINE=900 python3 ~/.config/rag-gpu/rag_sync.py bulk-code ygofm-code
 
 `.git/hooks/` is not tracked, so a fresh clone has none —
 `~/.config/rag-gpu/install-hooks.sh <repo> <collection>` reinstalls them and
-skips any hook that already exists. The log is `.git/rag-sync.log`.
-If the MCP connection times out it is the FortiGate cutting the long-lived
-SSE stream, not the box: ask for an AV/IPS exception on
-`192.168.50.104:8765`. An open TCP port does **not** clear this — inspection
-kills the stream after connect.
+skips any hook that already exists. The log is `.git/rag-sync.log`, and the
+endpoint comes from `RAG_GPU_URL`.
+If the MCP connection times out, suspect a content-inspecting firewall or IPS
+cutting the long-lived SSE stream rather than the server: ask for an exception
+on the RAG host and port. An open TCP port does **not** clear this —
+inspection kills the stream after connect, so a clean handshake proves
+nothing.
 
 ## Two habits that cost real time when skipped
 

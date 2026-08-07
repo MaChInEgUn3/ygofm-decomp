@@ -24,13 +24,32 @@ retracted. Scope is the 1,198 game functions below `0x80073840`, excluding PsyQ
 library code (`docs/LIBRARY_FUNCS.txt`) and hand-written assembly.
 
 `src/` holds 764 files; 712 of them are in scope and the rest are library or
-above-scope functions matched along the way. There are 149 parked functions
-(`docs/PARKED.txt`), 122 of which keep their best candidate in `parked/` — these
-are the ones where a shape is known to be close but not exact, and they are a
-source of matches rather than a graveyard: re-reading them whenever a new lever
-is measured has repeatedly produced matches.
+above-scope functions matched along the way.
 
-Numbers above are from the commit that last touched this file. To re-derive:
+### Where the remaining work is
+
+| size (instructions) | remaining | parked | unclaimed |
+|---|---|---|---|
+| ≤ 25 | 28 | 28 | **0** |
+| 26–50 | 65 | 63 | 2 |
+| 51–100 | 119 | 47 | 72 |
+| 101–200 | 172 | 3 | 169 |
+| 201–400 | 70 | 0 | 70 |
+| 400+ | 32 | 0 | 32 |
+
+**The short bands are exhausted.** Every remaining function under 25
+instructions is already parked, which is why `tools_src/candidates.py` reports
+zero clean candidates in its default band — that is the tool being correct, not
+broken. Unclaimed work starts at ~51 instructions.
+
+"Parked" means a candidate is known to be close but not exact, with a
+per-function diagnosis in `docs/PARKED.txt` and, for 122 of them, the actual
+candidate in `parked/`. These are a source of matches rather than a graveyard:
+a park records that a shape was not found, not that none exists, and re-reading
+them whenever a new lever is measured has repeatedly produced matches years
+into the same file.
+
+Numbers above are from the commit that last touched this file. Re-derive with
 `.venv/bin/python tools_src/sync_count.py` and `tools_src/candidates.py`.
 
 ## What is and is not committed
@@ -149,13 +168,20 @@ If a claim is about the whole binary, scan the whole binary.
   type breaks matching somewhere far away
 - `asm/` — disassembly (`asm/nonmatchings/` per function, `asm/data/`)
 - `config/` — splat config and the generated linker script
-- `tools_src/` — the tooling above, plus `ghidra_scripts/` (Java)
+- `tools_src/` — the tooling above, plus `ghidra_scripts/` (Java) and
+  `hooks/pre-push`, which refuses to rewrite already-published history.
+  `.git/hooks/` is not tracked, so install it after cloning:
+  `ln -sf ../../tools_src/hooks/pre-push .git/hooks/pre-push`
 
 ## License
 
-No license file is present, and that is deliberate rather than an oversight.
-`tools_src/` is original work; `asm/` and `src/` are derived from a
-copyrighted executable and are published as reverse-engineering research, not
-as material this project is in a position to license to anyone. If you want to
-reuse the tooling specifically, open an issue and it can be split out under a
-permissive license.
+Deliberately split, and there is no repository-root license file because a
+single one would claim more than this project can.
+
+- **`tools_src/` is MIT** — see `tools_src/LICENSE`. The build harness and the
+  matching tools are original work, and several of them (`try_func.py`,
+  `siblings.py`, the flag sweeps) are useful to any PsyQ-era decompilation.
+  Take them.
+- **`asm/` and `src/` are not licensed by this project.** They are derived
+  from a copyrighted executable and are published as reverse-engineering
+  research. Nobody here is in a position to grant you rights to them.

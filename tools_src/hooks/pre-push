@@ -1,0 +1,54 @@
+#!/bin/sh
+# Refuse to rewrite history that has already been pushed.
+#
+# This repo is public and every commit is gated by a byte-identical build, so
+# master is never in a broken state and there is no reason to work on a
+# branch.  The invariant that does matter is that a published commit stays
+# put: once anyone has cloned, a force-push silently diverges their history.
+#
+# Local rewrites are untouched -- `git reset --hard` on unpushed commits is a
+# normal part of the loop here, and this only fires at the moment work leaves
+# the machine.
+#
+# Install:  ln -sf ../../tools_src/hooks/pre-push .git/hooks/pre-push
+# Override once, deliberately:  FORCE_PUSH_OK=1 git push --force-with-lease ...
+
+PROTECTED="master"
+ZERO=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$remote_ref" in
+        refs/heads/*) branch=${remote_ref#refs/heads/} ;;
+        *) continue ;;
+    esac
+
+    # Only guard the protected branches.
+    case " $PROTECTED " in *" $branch "*) ;; *) continue ;; esac
+
+    # Branch deletion, or a branch that does not exist remotely yet.
+    [ "$local_sha" = "$ZERO" ] && continue
+    [ "$remote_sha" = "$ZERO" ] && continue
+
+    # Fast-forward iff the remote tip is an ancestor of what we are pushing.
+    if git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        continue
+    fi
+
+    if [ "$FORCE_PUSH_OK" = "1" ]; then
+        echo "pre-push: non-fast-forward to $branch, allowed by FORCE_PUSH_OK" >&2
+        continue
+    fi
+
+    echo "" >&2
+    echo "pre-push: REFUSING non-fast-forward push to '$branch'." >&2
+    echo "" >&2
+    echo "  remote tip $(git rev-parse --short "$remote_sha") is not an ancestor" >&2
+    echo "  of $(git rev-parse --short "$local_sha"), so this would rewrite" >&2
+    echo "  published history. This repo is public; someone may have cloned it." >&2
+    echo "" >&2
+    echo "  Intended?  FORCE_PUSH_OK=1 git push --force-with-lease" >&2
+    echo "" >&2
+    exit 1
+done
+
+exit 0
