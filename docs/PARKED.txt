@@ -626,7 +626,6 @@ func_8004C560
 func_80038798
 func_8003D2B8
 func_80019CC8
-func_8003A198
 func_80059A50
 func_80015780
 func_8001EF1C
@@ -1812,3 +1811,16 @@ func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
     handling sees a different RTL sequence. The parked candidate carries it
     with this note, because it looks exactly like a typo. Discriminator for
     the branch polarity still not established.
+
+func_8003A198 -- 3 differences, 21/21, instruction-for-instruction identical.
+    Register allocation in the second block only: retail keeps the intermediate
+    base in $v0 and the final address in $a1, this coalesces both into $a1.
+    Two levers are already in the candidate and both are load-bearing. Nested
+    `if`s rather than three `if (v == 0) return 0;` statements: 18 -> 11,
+    because retail reaches one `addu $v0,$zero,$zero` from all three paths
+    while the early-return form emits the first exit inline and folds the last
+    pair into `sltu`. And `p = (e = arg0 + v)`, a dead store to a local that is
+    overwritten two lines later, acting as an allocation hint -- the permuter
+    found it, 11 -> 3. Measured and no better: the same hint in the third block
+    (3), `p` as s32 with casts (3), a second permuter run from the 11 base,
+    which saturated at 3 in ~4 minutes. Discriminator not established.
