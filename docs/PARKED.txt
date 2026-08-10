@@ -1939,3 +1939,16 @@ func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     Retail's allocation is s6=arg0, s5=arg1, s4=arg0&0xFF, s3=q, s2=off,
     s1=mask, s0=i. Ours adds an eighth; which value is spilling into it is not
     yet identified. The permuter has not been run.
+    The extra register is identified: gcc hoists `arg1 & 0xFF` out of the loop
+    into a callee-saved, while retail recomputes it every iteration in the
+    first `bne`'s delay slot (`andi $v0,$s5,255`) and keeps only raw arg1.
+    Retail does hoist `arg0 & 0xFF`, which is reused by the final store, so
+    exactly one of the two masks is loop-invariant to it and both are to us.
+    Measured and all still 76/63: naming the masked value in a local inside the
+    loop body, `u8 arg1`, and `u8 arg0, u8 arg1` with the masks dropped.
+    The permuter reached 75/48 and its candidate is SEMANTICALLY WRONG -- it
+    pins a second base name before the loop, never updates it, and reads the
+    `while` bound from that stale pointer, where retail's `lh 0x510` uses the
+    base it just re-read. Reconstructing the same shape correctly is 76/63
+    again, so the permuter's gain came from the bug. Third broken candidate
+    from it today.
