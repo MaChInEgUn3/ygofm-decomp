@@ -376,6 +376,7 @@ func_80049434
 func_80049AF4
 func_8004B854
 func_8003D03C
+    A stored permuter output measures 9 against 10; not yet decomposed.
 func_80044F58
 func_80047FAC
 func_80021810
@@ -619,6 +620,7 @@ func_8004C560
 func_80038798
 func_80040390
 func_800594C0
+    A stored permuter output measures 15 against 16; not yet decomposed.
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
 func_800732A0
 func_8002CCE4
@@ -635,6 +637,11 @@ func_8004733C
 func_80040510
 func_8005F7B0
 func_8004C84C
+    A stored permuter output measures 14 and is INVALID: it deletes the
+    `*(u16 *)(p + 0x1E) = 0;` store, and the listing has both halfword stores
+    to +0x1E (`sh $v0` and `sh $zero`). Its other change, splitting
+    `s32 o = 0x180;` into a declaration and a statement, measures the same 25
+    and one instruction short on its own.
 func_80039E9C
 func_80036F80
     **30 -> 11.** The pointer at arg0+0x30 is dereferenced seven times in the
