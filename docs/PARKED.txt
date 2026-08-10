@@ -631,6 +631,12 @@ func_8005F7B0
 func_8004C84C
 func_80039E9C
 func_80036F80
+    **30 -> 11.** The pointer at arg0+0x30 is dereferenced seven times in the
+    source; naming it once before the `if` and using the name for the FIRST
+    store only -- leaving the other six as inline re-reads -- is the whole
+    change. Found in an unscored permuter output; its version also carried ten
+    chained `& 0xFFFFFFFF` masks, which are identity and contribute nothing
+    (the name alone measures the same 11).
 func_80045484
 func_8004A854
 func_80016DDC
