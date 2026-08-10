@@ -645,6 +645,12 @@ func_80024D34
 func_800496C4
 func_8005A3D0
 func_8003B744
+    A stored permuter output measures 8 and is INVALID: it casts the index to
+    `(unsigned char)` in the second return, and the listing contains no `andi`
+    anywhere -- retail does not mask that index. Its other two changes,
+    `if (0) {}` and `t += 0;`, are inert and measure the same 18 without the
+    cast, so the whole gain was the wrong semantics. Fifth wrong-but-better
+    candidate from the permuter on 2026-08-10.
 
 func_80014E1C MATCHED 2026-08-03. The entry that stood here diagnosed it as
   register allocation -- "retail keeps p in $v0 and copies it in with
