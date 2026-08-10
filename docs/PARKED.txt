@@ -666,6 +666,8 @@ func_800472A8
     value fits a positive s16 and the sign extension cannot bite. Another
     type-width answer, and it only works in this one branch. Found in an
     unscored permuter output.
+    Permuter rerun from the new 1 base on 2026-08-10: no output at all, base not
+    beaten.
 func_800382A8
 func_8004733C
 func_80040510
@@ -1910,6 +1912,8 @@ func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     instructions against 21, so retail is not sharing them either.
     Found by harvesting an OLD permuter directory that had never been scored --
     output-205-1 had been sitting there at 2 while the entry said 6.
+    Permuter rerun from the new 2 base on 2026-08-10: best output measures 3,
+    worse than the base.
 
 func_8004CA60 -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
     +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, with
