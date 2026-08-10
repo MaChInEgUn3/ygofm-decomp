@@ -1822,6 +1822,7 @@ func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     this is the mirror of the func_80049CF8 case, where the problem was stopping
     a hoist rather than causing one, and the byte-address cast that solved that
     one has no obvious analogue in this direction.
+    sweep_try.py run 2026-08-10: best is 6 at the defaults. No flag helps.
 
 func_8004CA60 -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
     +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, with
@@ -1901,6 +1902,7 @@ func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     locals assigned at the top does not move it, measured against both the old
     and the new store order (20 and 8, unchanged either way). Discriminator not
     established.
+    sweep_try.py run 2026-08-10: best is 8 at -O2 -G0, no better than the base.
 
 
 func_80070710 / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
@@ -1927,6 +1929,7 @@ func_80070710 / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     One trap from that exercise: `D_800F5B98[...] = D_8009B361;` against our
     array declaration stores the symbol's ADDRESS and measures 4, better than
     the correct `[0]` form at 6. Read the semantics before the count.
+    sweep_try.py run 2026-08-10: best is 8 at -O1 -G0, same as the base.
 
 func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     is the whole problem: gcc uses eight callee-saved registers ($s0-$s7) where
