@@ -13,37 +13,42 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **712** (59.4%) | **18,707** (18.7%) |
-| remaining | 486 (40.6%) | 81,294 (81.3%) |
+| decompiled and matching | **727** (64.9%) | **18,458** (22.5%) |
+| remaining | 394 (35.1%) | 63,420 (77.5%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
-is past halfway; **instruction count is not, and it is the honest number.** The
-functions matched so far average 26 instructions and the ones remaining average
-167 — the short bands get emptied first and refill only when a rule is
-retracted. Scope is the 1,198 game functions below `0x80073840`, excluding PsyQ
-library code (`docs/LIBRARY_FUNCS.txt`) and hand-written assembly.
+is well past halfway; **instruction count is not, and it is the honest
+number.** The functions matched so far average 25 instructions and the ones
+remaining average 161 — the short bands get emptied first and refill only when
+a rule is retracted. Scope is the 1,121 game functions below `0x80073840`,
+excluding PsyQ library code (`docs/LIBRARY_FUNCS.txt`) and hand-written
+assembly (77 GTE-block functions, filtered by `candidates.HAND_WRITTEN`). An
+earlier revision of this table said 1,198: that number excluded the library
+list but not the hand-written block its own caption claimed to exclude — the
+same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
+miscounts.
 
-`src/` holds 764 files; 712 of them are in scope and the rest are library or
+`src/` holds 779 files; 727 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
 
 | size (instructions) | remaining | parked | unclaimed |
 |---|---|---|---|
-| ≤ 25 | 28 | 28 | **0** |
-| 26–50 | 65 | 63 | 2 |
-| 51–100 | 119 | 47 | 72 |
-| 101–200 | 172 | 3 | 169 |
-| 201–400 | 70 | 0 | 70 |
-| 400+ | 32 | 0 | 32 |
+| ≤ 25 | 20 | 20 | **0** |
+| 26–50 | 61 | 61 | **0** |
+| 51–100 | 97 | 43 | 54 |
+| 101–200 | 131 | 3 | 128 |
+| 201–400 | 58 | 0 | 58 |
+| 400+ | 27 | 0 | 27 |
 
-**The short bands are exhausted.** Every remaining function under 25
+**The short bands are exhausted.** Every remaining function up to 50
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
-broken. Unclaimed work starts at ~51 instructions.
+broken. Unclaimed work starts at 51 instructions.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 122 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 126 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
