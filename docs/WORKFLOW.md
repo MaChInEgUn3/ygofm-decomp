@@ -556,6 +556,18 @@ seconds on six threads. Reach for it as soon as a candidate is
 instruction-for-instruction right and only the allocation is wrong — that is
 precisely the state the park rule below describes.
 
+**The "mandatory below 25 instructions" rule below became a *never above 25*
+rule, and that was costing matches.** Checked on three parked functions of 54,
+76 and 102 instructions, every one of them diagnosed as a register or
+scheduling problem: the permuter had **never been run on any of them**. It was
+run on the 102-instruction one and went 7 differences to 5 immediately. The
+size threshold is about when the permuter is *required*, not about when it is
+*allowed* — if the diagnosis says "one register" or "one scheduling decision",
+run it whatever the size. Also **rerun it from an improved base**: it mutates
+from what it is given, so a run that saturated against the old candidate says
+nothing about the new one (func_8004CA60 went 9 to 1 that way after an earlier
+run from 12 returned 12).
+
 **Stop and park** when the only remaining difference is which register holds a
 value, or when the target has more duplicated tails than you produce. Run the
 permuter *before* writing the park entry, not after — and for anything under

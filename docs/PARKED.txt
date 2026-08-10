@@ -1174,6 +1174,14 @@ func_80060E70 -- 7 differences: one hoist we cannot place and one register.
   worse" confirmed rather than contradicted. Also tried: the four
   initialisations in a `for` clause, and reordering them (both 7); indexing
   `e + i * 2 + 0xA` instead of a cursor (55).
+    **7 -> 5 from the permuter, run on this function for the first time.** Two
+    changes, both needed: the store and the read that feeds it chained into one
+    expression, `n = (*(u16 *)(q + 0xA) = *(u16 *)p);` rather than two
+    statements, and the address of that same halfword named in a local hoisted
+    ABOVE the `if` that uses it rather than written inline twice inside it.
+    Either alone is 7. What is left is unchanged: retail materialises
+    D_801D5608's base first in the preheader and we do it last. A rerun from
+    the 5 base has not beaten it.
 
 func_80014B30 -- 50 differences, and an **unfinished** park rather than a near
   miss: the control flow is only half read, so the next move is to re-derive it

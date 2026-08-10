@@ -1,6 +1,7 @@
 #include "common.h"
 
 void func_80060E70(u8 *p, s32 idx, s32 flag) {
+    u16 *w;
     u8 *e;
     u8 *q;
     u8 *r;
@@ -27,8 +28,7 @@ void func_80060E70(u8 *p, s32 idx, s32 flag) {
     s = p + 2;
 
     do {
-        n = *(u16 *)p;
-        *(u16 *)(q + 0xA) = n;
+        n = (*(u16 *)(q + 0xA) = *(u16 *)p);
         m = *(u16 *)p;
         if (m != 0) {
             n = m;
@@ -45,9 +45,10 @@ void func_80060E70(u8 *p, s32 idx, s32 flag) {
         o = func_80035BE4(idx + 1, m, *(s16 *)(e + 4), *(s16 *)(e + 6),
                           0x120, 0xB0);
         *(s16 *)(o + 0x3A) = y;
+        w = (u16 *)(q + 0xA);
         if (*(u16 *)s == 0) {
             o[0x54] = 4;
-            *(u16 *)(q + 0xA) = *(u16 *)(q + 0xA) | 0x8000;
+            *w = *w | 0x8000;
         }
         if (i != 0) {
             *(u16 *)(o + 0x34) = *(u16 *)(o + 0x34) | 0x40;
