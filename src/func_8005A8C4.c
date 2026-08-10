@@ -1,4 +1,3 @@
-#define D_800FE240_IS_AGGREGATE
 #include "common.h"
 
 s32 func_8005A8C4(s32 arg0, s32 arg1) {
@@ -7,7 +6,7 @@ s32 func_8005A8C4(s32 arg0, s32 arg1) {
     u8 *p;
     s32 n;
 
-    used = D_800FE240[0] - (s32)D_800A5768;
+    used = D_800FE240 - (s32)D_800A5768;
     used -= D_8009AFA2 * 140000;
     room = 0x222E0 - used;
     p = &D_800F2C40[arg0 * 3616];

@@ -456,6 +456,13 @@ PER_FUNC_AS_FLAGS["func_80019CC8"] = "-G4"
 # through the destination register, which is retail's lui $v1 / lw $v1(...$v1).
 # The unsized-array arm is cc1psx's pair and splits it across two registers.
 PER_FUNC_AS_FLAGS["func_80047B68"] = "-G0"
+# Recipe branch 2: the bare-wanting symbol is WIDER than the gp-relative one.
+# D_800FE240 is a four-byte scalar and needs the assembler's own expansion
+# through the destination register (retail's lui $a0 / lw $a0,...($a0)); the
+# only other access is the one-byte D_8009AFA2, which must stay %gp_rel. Small
+# data is size <= -G, so the window is 1 <= G < 4 and -G2 sits in the middle.
+# -G0 takes D_8009AFA2 out with it and costs 43.
+PER_FUNC_AS_FLAGS["func_8005A8C4"] = "-G2"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

@@ -646,24 +646,6 @@ func_800496C4
 func_8005A3D0
 func_8003B744
 
-func_8005A8C4 -- 3 differences, register allocation.
-  Matches everything but the two-instruction materialisation of D_800FE240.
-  Retail: lui $a0,%hi(D_800FE240) / lw $a0,%lo(D_800FE240)($a0) -- the %hi temp
-  and the loaded value share $a0, and %hi(D_800A5768) is scheduled ahead of
-  both. We emit lui $v1,%hi / lw $a0,%lo($v1) with a separate temp, which puts
-  the two luis in the other order; the swap is a consequence of the register,
-  not a second fault.
-  Needs D_800FE240 as an unsized array (D_800FE240_IS_AGGREGATE): the scalar
-  declaration goes gp-relative and collapses the pair to one instruction --
-  that alone was 44 differences down to 3.
-  -mno-split-addresses gets the register right and the schedule wrong (4): the
-  bare form is one pseudo-instruction at schedule time, so nothing can be
-  hoisted between its halves, and retail hoists %hi(D_800A5768) between them.
-  Ten source shapes tried at 3 (single expression, split statements, statement
-  reorder, pointer-typed array, &D_800A5768[0], separate base variable). The
-  only one that reproduced retail's *order* introduced a live local and cost a
-  register everywhere (24). Full flag sweep: best is plain -O2 -G8.
-
 func_80014E1C MATCHED 2026-08-03. The entry that stood here diagnosed it as
   register allocation -- "retail keeps p in $v0 and copies it in with
   `addu $v0,$s0,$zero`; we coalesce p with the D_800E9E60 pseudo" -- and 13
