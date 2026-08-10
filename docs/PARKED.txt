@@ -643,13 +643,20 @@ func_800732A0
     A stored permuter output measures 12, better than this entry. Found by
     tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
-    Attempted to reconstruct the stored output's 12 and FAILED: its visible
     change is a `short` copy of the loop index used in `p[k + 0x38]`, and
     that alone measures 25 instructions against 24 with 23 differences --
     worse than the base, in both the inner-block and function-scope
     placements. So something else in
-    build/permuter/func_800732A0/output-90-1/source.c is carrying it. Diff
-    that file in full rather than trusting the summary above.
+    **22 -> 12, and the length fixed** (24 against 24; the base was 23). A
+    `short` copy of the loop index used as `p[new_var + 0x38]`, declared at
+    function scope while `s32 c = p[new_var + 0x38];` stays an initialiser
+    INSIDE the loop body.
+    My first attempt at this failed and I wrongly recorded that the diff must
+    be hiding something. It was not: I hoisted `c` out of the loop into a bare
+    declaration plus an assignment, which undoes the initialiser-versus-
+    statement lever that closed func_80045484 three hours earlier. Rebuilding
+    the stored output VERBATIM reproduces it. Copy the winner; do not retype
+    it.
 func_8002CCE4
 func_80048C0C
 func_800472A8
