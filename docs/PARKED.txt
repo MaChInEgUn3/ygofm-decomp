@@ -1895,21 +1895,27 @@ func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     established.
 
 
-func_80070710 / func_80071424 / func_80071460 -- 8, 6 and 6 differences, all with
-    the right length and instruction sequence; what is left in each is which
-    register holds the table base and which the index.
-    These three were cross-checked against gonzaloberteri/ygofm-decomp, an
-    independent YGOFM decomp that has them in src/manual/ with per-function flag
-    comments. Their C is sound and their reading of the shapes agrees with ours
-    -- D_800917F0 is a 9-byte record array indexed by D_8009B361, and the other
-    two are `D_800F5B98[func_8007058C()] = <a global>`. Adopting it changed
-    nothing: their annotated flags (-O2 -G0, plus -fno-schedule-insns2 on two of
-    them) give exactly the same counts as our defaults, and the scalar arm of
-    D_8009B361 gives the same 6 as the array arm. So the overlap confirmed the
-    semantics and moved no instruction.
-    One trap worth recording from that exercise: writing `D_800F5B98[...] =
-    D_8009B361;` against our default array declaration stores the symbol's
-    ADDRESS, not its value, and measures 4 -- better than the correct
-    `D_8009B361[0]` at 6. A wrong-but-closer candidate again, the func_8001352C
-    shape. Read the semantics before the count.
-    Permuter run on func_80070710 from the 8 base: no output, base not beaten.
+func_80070710 / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
+    with the right length and instruction sequence.
+    The two `D_800F5B98[func_8007058C()] = <global>` functions went 6 -> 3 via
+    siblings.py, which pairs them at ratio 1.000 and 0.933 with func_80071688
+    and func_8007164C -- both already matched, both the same one-liner. The
+    matched ones put the table base in $a0 and the value in $v1; these two want
+    the reverse. $v1 is allocated before $a0, so the table's pseudo has to be
+    created FIRST, and writing the address into its own pointer does it:
+    `s32 *p = &D_800F5B98[func_8007058C()]; *p = <global>;`. Plain pointer
+    arithmetic and a computed byte address are also 3; a base local for the
+    table is 11 and a local for the value symbol is 10, so it is specifically
+    the whole address that must be named.
+    What is left in both is one scheduling step: retail materialises the table
+    before the `sll $v0,$v0,2` that scales the index, and gcc emits the shift
+    first. The permuter was run on both from the 3 base and returned 6 and 10.
+    Cross-checked against gonzaloberteri/ygofm-decomp, which has all three in
+    src/manual/ with per-function flag comments. Their C agrees with ours on
+    semantics and their annotated flags (-O2 -G0, -fno-schedule-insns2 on two)
+    give the same counts as our defaults, so the overlap confirmed the reading
+    and moved nothing. Their D_8009B361 is a scalar and ours an array; both
+    measure the same.
+    One trap from that exercise: `D_800F5B98[...] = D_8009B361;` against our
+    array declaration stores the symbol's ADDRESS and measures 4, better than
+    the correct `[0]` form at 6. Read the semantics before the count.
