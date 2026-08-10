@@ -47,14 +47,29 @@ def main():
     # register-allocation class asserts the *shape* is already right, and a
     # matching sibling proves the same thing, so the sibling carries no new
     # information. Ranking them first inverts the list against its own yield.
-    parked = {l.split("#")[0].strip()
-              for l in open(os.path.join(ROOT, "docs", "PARKED.txt"))
-              if l.startswith("func_")}
+    # Imported rather than re-derived. Both filters were wrong here in exactly
+    # the ways candidates.py has already been fixed for, and re-deriving them
+    # is how that keeps happening -- see WORKFLOW's "a scan is only as good as
+    # the filters it copies".
+    #   * the park set took the whole line as the name, so every entry
+    #     carrying an inline `-- diagnosis` produced a string that matches no
+    #     function and was silently never flagged. Only the oldest name-only
+    #     entries were being marked [PARKED].
+    #   * there was no HAND_WRITTEN filter at all, so the GTE block
+    #     (lwc2/rtps/swc2) was offered as ordinary leads. func_80015D18 came
+    #     out of this list looking like the cheapest fresh candidate and is
+    #     hand-written assembly.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import candidates as _C
+    parked = _C.parked()
+    hand_written = _C.HAND_WRITTEN
 
     seqs = {}
     for p in glob.glob(os.path.join(ASM, "*.s")):
         name = os.path.basename(p)[:-2]
         if name in lib or int(name[5:], 16) >= LIBRARY_REGION:
+            continue
+        if name not in done and hand_written.search(open(p).read()):
             continue
         seqs[name] = mnemonics(p)
 
