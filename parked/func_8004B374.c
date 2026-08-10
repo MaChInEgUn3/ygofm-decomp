@@ -1,7 +1,6 @@
-/* Reproduce with:
- *   echo '{"func_8004B374": {"cc": ["-quiet","-O2","-G8","-mno-split-addresses"], "as": null}}' > config/flag_overrides.json
- * The flag is load-bearing: without it this is 76 instructions against 74. */
-#define D_8009B458_IS_AGGREGATE
+/* Reproduce with:  echo '{"func_8004B374": {"as": "-G0"}}' > config/flag_overrides.json
+ * The -G0 assembler is load-bearing; without it this is 76 instructions
+ * against 74. See the PARKED.txt entry. */
 #include "common.h"
 
 void func_8004B374(s32 arg0, s32 arg1) {
@@ -15,7 +14,7 @@ void func_8004B374(s32 arg0, s32 arg1) {
     s32 r;
 
     i = 0;
-    p = D_8009B458[0];
+    p = D_8009B458;
     mask = i;
     if (*(s16 *)(p + 0x510) > 0) {
         a = arg0 & 0xFF;
@@ -28,7 +27,7 @@ void func_8004B374(s32 arg0, s32 arg1) {
                 mask |= *q;
             }
             q++;
-            p = D_8009B458[0];
+            p = D_8009B458;
             i++;
             off += 0x28;
         } while (i < *(s16 *)(p + 0x510));
@@ -39,5 +38,5 @@ void func_8004B374(s32 arg0, s32 arg1) {
             r = func_80077090(mask);
         } while (r != 2 && r != 0);
     }
-    D_8009B458[0][(arg0 & 0xFF) * 24 + 4] = 0;
+    D_8009B458[(arg0 & 0xFF) * 24 + 4] = 0;
 }

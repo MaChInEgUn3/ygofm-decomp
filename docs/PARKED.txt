@@ -1969,3 +1969,15 @@ func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     before saving $s0 and zeroing the counter, and reads D_8009B458 before the
     frame is even set up. Reading the base before `i = 0` and copying arg1 into
     an early local are both still 25.
+    **The per-symbol route reaches the same 25 without any compiler flag**, and
+    is what the candidate now carries: the plain SCALAR declaration of
+    D_8009B458 plus `as -G0`. There is no %gp_rel in the function, so recipe
+    branch 1 applies and any -G is free (-G0 and -G2 both give 25; -G4 is 71
+    instructions and 72). This matters because -mno-split-addresses is
+    file-wide while D_80011434 wants cc1psx's own pair with a separate temp,
+    which the flag takes away -- the declaration is per symbol and the flag is
+    not.
+    A permuter rerun from the 25 base reached 9 and it is INVALID: it drops the
+    `& 0xFF` from the second comparison, so the code compares $s5 raw where
+    retail has `andi $v0,$s5,255`. Verified by grepping the diff for the andi.
+    Fourth wrong-but-better candidate from the permuter today.
