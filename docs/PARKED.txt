@@ -1981,3 +1981,8 @@ func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     `& 0xFF` from the second comparison, so the code compares $s5 raw where
     retail has `andi $v0,$s5,255`. Verified by grepping the diff for the andi.
     Fourth wrong-but-better candidate from the permuter today.
+    Two more shapes aimed at the hoist, both still 25: writing BOTH masks
+    inline (so gcc would common the arg0 one, which the final store reuses, and
+    leave arg1's alone the way retail does), and giving arg1's mask a side
+    effect so it cannot be a pure loop invariant. Seven shapes total against
+    this one decision now; it is not reachable from the source.
