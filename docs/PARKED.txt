@@ -990,8 +990,13 @@ func_8003D03C -- 10 differences, and the -G threshold gets the *addressing*
   because the bare reference is one pseudo-instruction when cc1psx schedules
   and maspsx only expands it afterwards, so nothing is available to fill.
   Retail fills that slot with the `sw $zero,0x600(arg0)` that follows.
-  If aspsx fills delay slots while expanding and maspsx does not, that is a
-  toolchain gap and the second one found (the first was --expand-div). Not
+  That toolchain-gap hypothesis is now **checked and mis-framed**: maspsx has a
+  `nop_at_expansion` knob, but it *inserts* a nop before an `$at` expansion --
+  the opposite of filling a slot -- and neither maspsx nor the real aspsx
+  reschedules at all. Scheduling is cc1psx's, so the empty slot is a compiler
+  decision about a reference it treats as one instruction, not an assembler
+  one. Whatever is left here, patching maspsx is not it.
+  Original note, kept because the alternative in it is still open: not
   proven -- it is equally possible retail's unit reached the symbol some way
   neither route reproduces. Left on the old route (aggregate, default flags,
   10) rather than the new one.

@@ -100,7 +100,9 @@ ASPSX_VERSION = "2.79"  # PsyQ 4.5 ships aspsx 2.79 (4.6 shipped 2.86).
 # Set from the SDK we now know the game used, not from a measurement: the
 # corpus does not currently discriminate -- 2.79 and 2.86 both produce a
 # byte-identical build, because the only behaviour maspsx varies between them
-# is gp_allow_la, which no decompiled function exercises yet. Provenance is
+# is gp_allow_la, which no decompiled function exercises yet -- re-measured at
+# 777 functions on 2026-08-10 by building the whole corpus at 2.86, still
+# byte-identical, so the "yet" is holding much longer than expected. Provenance is
 # the tiebreaker, and the distinction is recorded so nobody reads the passing
 # build as evidence for the number.
 
