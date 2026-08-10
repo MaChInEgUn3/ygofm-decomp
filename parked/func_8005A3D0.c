@@ -28,7 +28,11 @@ s32 func_8005A3D0(u8 *arg0, s32 arg1) {
 
                 do {
                     if (*(s32 *)(q + 0x4C) == (s32)t) {
-                        break;
+                        if (n || o) {
+                            break;
+                        } else {
+                            break;
+                        }
                     }
                     j++;
                     q += 0x50;

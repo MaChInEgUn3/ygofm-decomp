@@ -671,8 +671,13 @@ func_80024D34
 func_800496C4
 func_8005A3D0
     A stored permuter output measures 13, better than this entry. Found by
-    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
+    **33 -> 13**, and the change is semantically inert: the inner `break` wrapped
+    in `if (n || o) { break; } else { break; }`. Both arms break, so behaviour
+    is identical and only the structure gcc's jump threading sees changes.
+    Same family as the `do { } while (0)` lever -- a control-flow node that
+    costs nothing at runtime and is not decoration. Found by
+    score_permuter_outputs.py; decomposed and checked before installing.
 func_8003B744
     A stored permuter output measures 8 and is INVALID: it casts the index to
     `(unsigned char)` in the second return, and the listing contains no `andi`
