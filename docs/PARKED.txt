@@ -395,8 +395,14 @@ func_8004CABC
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
 func_800601D0
     A stored permuter output measures 12, better than this entry. Found by
-    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
+    **14 -> 12**, and the exact spelling of the helper is load-bearing.
+    `e - -4` for the found-return plus `inline int inline_fn() { return -1; }`
+    called at the tail. Written as `static inline int inline_fn(void)` the
+    function comes out 18 instructions against 20 and measures 14 -- the
+    `static` and the `(void)` change whether gcc 2.8 emits the out-of-line
+    copy, and that is worth the two instructions. Copy the declaration
+    verbatim; do not tidy it.
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
 # func_80070710: ten instructions, sequence identical, every register name
