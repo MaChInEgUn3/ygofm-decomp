@@ -14,11 +14,13 @@ s32 func_8005A618(s32 arg0) {
 
     p = func_8005F1A4(r[r[0x106] + 0xA] & 0x1F);
 
-    if (arg0 > 0) {
-        t = *(s16 *)(p + 2) + 0x1400;
-    } else {
-        t = *(s16 *)(p + 2) + 0x1C00;
-    }
+    do {
+        if (arg0 > 0) {
+            t = *(s16 *)(p + 2) + 0x1400;
+        } else {
+            t = *(s16 *)(p + 2) + 0x1C00;
+        }
 
-    return t % 4096;
+        return t % 4096;
+    } while (0);
 }

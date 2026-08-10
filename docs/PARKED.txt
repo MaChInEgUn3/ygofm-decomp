@@ -672,8 +672,12 @@ func_8004A854
 func_80016DDC
 func_8005A618
     A stored permuter output measures 15, better than this entry. Found by
-    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
+    **18 -> 15** with a `do { } while (0);` around the if/else and the trailing
+    `return t % 4096;` together -- the whole tail of the function. Fourth use
+    of that lever here (func_80026D18, func_80035AF0, func_8004CA60), and the
+    second where it wraps a return rather than a statement pair. Semantically
+    inert; do not tidy it away. Decomposed from a stored permuter output.
 func_80024D34
 func_800496C4
 func_8005A3D0
