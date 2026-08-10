@@ -629,6 +629,13 @@ func_800732A0
     A stored permuter output measures 12, better than this entry. Found by
     tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
+    Attempted to reconstruct the stored output's 12 and FAILED: its visible
+    change is a `short` copy of the loop index used in `p[k + 0x38]`, and
+    that alone measures 25 instructions against 24 with 23 differences --
+    worse than the base, in both the inner-block and function-scope
+    placements. So something else in
+    build/permuter/func_800732A0/output-90-1/source.c is carrying it. Diff
+    that file in full rather than trusting the summary above.
 func_8002CCE4
 func_80048C0C
 func_800472A8
