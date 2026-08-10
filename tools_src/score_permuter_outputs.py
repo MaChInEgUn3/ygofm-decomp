@@ -1,0 +1,43 @@
+"""Score every stored permuter output against its parked candidate.
+
+The permuter writes each improvement it finds to
+build/permuter/<func>/output-<score>-<n>/source.c and then exits. Reading
+those files is a separate act, and for most of this project's life nobody
+performed it: the first run of this script over 72 directories found TEN
+functions whose stored output beat the installed candidate, including one
+(func_80031EE4) that was a complete MATCH and had been sitting unnoticed.
+
+Two things this cannot do for you. The dirname score is the permuter's own
+weighted metric and does not agree with try_func's difference count, so every
+output is re-scored here. And a better count is not a better candidate: two of
+the first seven finds were semantically WRONG and scored far better than the
+correct source -- one deleted a store the target has, another cast an index the
+target does not mask. Diff any winner against the base with whitespace
+normalised, decompose it, and check the claim against the listing before
+installing anything.
+
+Run it after any batch of permuter work, and after picking up an old park.
+"""
+import subprocess, pathlib, re, json, os
+root=pathlib.Path('/home/marchaleski/ygofm')
+os.chdir(root)
+hits=0; checked=0
+for d in sorted(root.glob('build/permuter/func_*')):
+    f=d.name
+    outs=sorted(d.glob('output-*/source.c'))
+    cand=root/f'parked/{f}.c'
+    if not outs or not cand.exists(): continue
+    txt=cand.read_text()
+    ov={f:{"as":"-G0"}} if '"as": "-G0"' in txt else None
+    if ov: open('config/flag_overrides.json','w').write(json.dumps(ov))
+    def score(p):
+        r=subprocess.run(['.venv/bin/python','tools_src/try_func.py',f,str(p)],
+                         capture_output=True,text=True)
+        m=re.search(r'(\d+) differing', r.stdout)
+        return int(m.group(1)) if m else (0 if 'MATCH' in r.stdout else 999)
+    base=score(cand); checked+=1
+    best=min((score(p),str(p)) for p in outs)
+    if os.path.exists('config/flag_overrides.json'): os.remove('config/flag_overrides.json')
+    if best[0] < base:
+        hits+=1; print(f"MELHOR {f}: {base} -> {best[0]}  {best[1]}", flush=True)
+print(f"FIM: {checked} funcoes checadas, {hits} com saida melhor", flush=True)

@@ -549,6 +549,25 @@ together they match. When a park says "N
 shapes measured, all the same", that is evidence about N shapes *individually*
 and none at all about pairs.
 
+**Scoring the permuter's stored output is a separate act, and nobody was doing
+it.** The permuter writes every improvement it finds to
+`build/permuter/<func>/output-<score>-<n>/source.c` and exits; reading those
+files is not part of running it. `tools_src/score_permuter_outputs.py` walks
+every directory and re-scores each output through try_func against the
+installed `parked/<func>.c`. Its first run over 72 directories found **ten**
+functions whose stored output beat what was installed — including
+func_80031EE4, which was a complete MATCH sitting unread, and func_800472A8 at
+20 differences down to 1. A directory existing is not evidence anyone looked
+inside it. Run this after any batch of permuter work and whenever picking up an
+old park.
+Two cautions the same run established. The dirname score is the permuter's own
+weighted metric and does not track try_func's count, so re-score everything.
+And a better count is **not** a better candidate: two of the first seven finds
+were semantically wrong and scored far better than the correct source — one
+deleted a store the target has (func_8004C84C, 14 against a correct 25), the
+other cast an index the target does not mask (func_8003B744, 8 against 18).
+Both would have gone in as silent bugs on the number alone.
+
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
 `parked/<func>.c` and runs it; func_800135FC took 66 iterations, about ninety
