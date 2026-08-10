@@ -624,6 +624,12 @@ func_800732A0
 func_8002CCE4
 func_80048C0C
 func_800472A8
+    **20 -> 1.** Hold the masked argument in an `s16` local and compare
+    `(u32)v` instead of `(u32)(arg0 & 0xFFFF)`. Safe because of the guard it
+    sits under: the `else` arm is only reached when bit 15 is clear, so the
+    value fits a positive s16 and the sign extension cannot bite. Another
+    type-width answer, and it only works in this one branch. Found in an
+    unscored permuter output.
 func_800382A8
 func_8004733C
 func_80040510

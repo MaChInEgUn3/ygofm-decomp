@@ -1,11 +1,14 @@
 #include "common.h"
 
 void func_800472A8(s32 arg0) {
+    s16 v;
+
+    v = arg0 & 0xFFFF;
     if (D_8009B45C[0x4A] & 2) {
         if (arg0 & 0x8000) {
             func_80045334(arg0 & 0xFFFF);
         } else {
-            if ((u32)(arg0 & 0xFFFF) >= 0x7000) {
+            if ((u32)v >= 0x7000) {
                 arg0 -= 0x7000;
             }
 
