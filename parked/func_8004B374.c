@@ -1,3 +1,6 @@
+/* Reproduce with:
+ *   echo '{"func_8004B374": {"cc": ["-quiet","-O2","-G8","-mno-split-addresses"], "as": null}}' > config/flag_overrides.json
+ * The flag is load-bearing: without it this is 76 instructions against 74. */
 #define D_8009B458_IS_AGGREGATE
 #include "common.h"
 

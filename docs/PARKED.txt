@@ -1952,3 +1952,12 @@ func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     base it just re-read. Reconstructing the same shape correctly is 76/63
     again, so the permuter's gain came from the bug. Third broken candidate
     from it today.
+    **63 -> 25 and the length fixed, from sweep_try.py, which I had not run.**
+    `-mno-split-addresses` (the sweep's "O2 G8 macro" row) takes it to 74/74
+    with 25 differences: the bare form frees the register the eighth
+    callee-saved was eating, so the two-instruction excess is gone. Everything
+    else in the sweep is 63 or worse, and the four as-only -G rows are all 63.
+    What is left is prologue ORDER: retail saves $s5 and copies arg1 into it
+    before saving $s0 and zeroing the counter, and reads D_8009B458 before the
+    frame is even set up. Reading the base before `i = 0` and copying arg1 into
+    an early local are both still 25.
