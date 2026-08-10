@@ -630,6 +630,14 @@ func_80038798
 func_80040390
 func_800594C0
     A stored permuter output measures 15 against 16; not yet decomposed.
+    **16 -> 15**, marginal, and still one instruction short (23 against 24) --
+    the base was too, so the shortfall is older than this change. The shape is
+    `if (p) { four stores } else { the same four stores; return; }` with the
+    0x1000 stores after it. Inert: p is `&D_800F2C40[arg0 * 3616]`, the address
+    of an array element, so it is never null, `if (p)` is always taken and the
+    else arm is dead. Same family as func_8005A3D0's double `break` -- a
+    control-flow node with no runtime cost. Verify p cannot be null before
+    reusing this shape anywhere else; here that check is what made it safe.
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
 func_800732A0
     A stored permuter output measures 12, better than this entry. Found by
