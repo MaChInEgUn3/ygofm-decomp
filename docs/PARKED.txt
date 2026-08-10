@@ -1919,3 +1919,23 @@ func_80070710 / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     One trap from that exercise: `D_800F5B98[...] = D_8009B361;` against our
     array declaration stores the symbol's ADDRESS and measures 4, better than
     the correct `[0]` form at 6. Read the semantics before the count.
+
+func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
+    is the whole problem: gcc uses eight callee-saved registers ($s0-$s7) where
+    retail uses seven ($s0-$s6), and the extra sw/lw pair is the length.
+    Structure is right on the first attempt. It scans records of 0x28 bytes
+    while `*(s16 *)(base + 0x510)` allows, comparing two bytes at +0x183 and
+    +0x185 against `arg0 & 0xFF` and `arg1 & 0xFF`, ORing `*q++` from
+    D_80011434 into a mask on a hit; then a retry loop around func_80076ED0 /
+    func_80077090 that exits when the result is 2 or 0; then a byte store at
+    `D_8009B458[0][(arg0 & 0xFF) * 24 + 4]`.
+    D_8009B458 needs the aggregate arm, and the base is RE-READ every
+    iteration -- same shape as func_8004CA60, and the pre-loop read is what the
+    first iteration uses.
+    74 -> 63 differences by initialising the loop counter FIRST and deriving
+    the other two zeros from it (`i = 0; mask = i; ... off = i;`) rather than
+    writing three separate zeros: retail materialises zero once and copies it
+    twice, `addu $s1,$s0,$zero` and `addu $s2,$s0,$zero`. Length did not move.
+    Retail's allocation is s6=arg0, s5=arg1, s4=arg0&0xFF, s3=q, s2=off,
+    s1=mask, s0=i. Ours adds an eighth; which value is spilling into it is not
+    yet identified. The permuter has not been run.
