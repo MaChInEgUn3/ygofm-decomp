@@ -638,6 +638,10 @@ func_80036F80
     chained `& 0xFFFFFFFF` masks, which are identity and contribute nothing
     (the name alone measures the same 11).
 func_80045484
+    **8 -> 6** by splitting `s32 i = 1;` into a bare declaration and a separate
+    `i = 1;` placed after the other initialiser. The initialiser-versus-
+    statement distinction again: an initialiser lands with the declarations and
+    a statement lands where it is written. Found in an unscored permuter output.
 func_8004A854
 func_80016DDC
 func_8005A618

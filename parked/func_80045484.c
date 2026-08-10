@@ -2,9 +2,10 @@
 #include "common.h"
 
 s32 func_80045484(void) {
-    s32 i = 1;
+    s32 i;
     s32 o = 0x30;
 
+    i = 1;
     while (i < *(s16 *)(D_8009B45C + 0x4C)) {
         u8 *p = D_8009B45C + o;
 
