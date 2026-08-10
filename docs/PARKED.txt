@@ -394,6 +394,9 @@ func_8004CABC
 # decompiled again from the listing in a few minutes.
 # --- cross-jumping (closed: no -fno-crossjumping until gcc 3) ---
 func_800601D0
+    A stored permuter output measures 12, better than this entry. Found by
+    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
+    semantically checked -- two of the audit's finds so far were wrong.
 func_8002F440
 # --- addressing / individual causes, described in DECISIONS.md ---
 # func_80070710: ten instructions, sequence identical, every register name
@@ -623,6 +626,9 @@ func_800594C0
     A stored permuter output measures 15 against 16; not yet decomposed.
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
 func_800732A0
+    A stored permuter output measures 12, better than this entry. Found by
+    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
+    semantically checked -- two of the audit's finds so far were wrong.
 func_8002CCE4
 func_80048C0C
 func_800472A8
@@ -658,9 +664,15 @@ func_80045484
 func_8004A854
 func_80016DDC
 func_8005A618
+    A stored permuter output measures 15, better than this entry. Found by
+    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
+    semantically checked -- two of the audit's finds so far were wrong.
 func_80024D34
 func_800496C4
 func_8005A3D0
+    A stored permuter output measures 13, better than this entry. Found by
+    tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
+    semantically checked -- two of the audit's finds so far were wrong.
 func_8003B744
     A stored permuter output measures 8 and is INVALID: it casts the index to
     `(unsigned char)` in the second return, and the listing contains no `andi`
