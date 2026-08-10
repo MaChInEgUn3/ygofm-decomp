@@ -1770,6 +1770,8 @@ func_8003A198 -- 3 differences, 21/21, instruction-for-instruction identical.
     found it, 11 -> 3. Measured and no better: the same hint in the third block
     (3), `p` as s32 with casts (3), a second permuter run from the 11 base,
     which saturated at 3 in ~4 minutes. Discriminator not established.
+    sweep_try.py run 2026-08-10: best is 3, reached at both the defaults and
+    -O1 -G0. No flag combination helps.
 
 func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes,
     outer loop over the buffer, inner loop of 8 shifts. Everything matches except
@@ -1787,6 +1789,8 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     restarting from an improved base (that took func_8004CA60 from 9 to 1); here
     it produced no output at all in 200s, so 1 is where it saturates from both
     sides. Discriminator not established.
+    sweep_try.py run 2026-08-10: best is 1 at -O2 -G0, the same as the current
+    base. No flag combination helps.
 
 func_8004A8E4 -- 21 differences, two instructions short. Reads a byte at +3 of a
     40-byte record, and if it is not 0x63 uses it to index 24-byte records and
@@ -1857,6 +1861,8 @@ func_80015780 -- 3 differences, 23/23, and they are three adjacent instructions
     different globals that gcc will not reorder the way retail did, and the
     byte-address cast that solved func_80049CF8 is for causing the opposite
     effect. Discriminator not established.
+    sweep_try.py run 2026-08-10: best is 3 at -O2 -G8, the current defaults. No
+    flag combination helps.
 
 func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
     fail in opposite ways, which is what makes this a coupled pair that has not
@@ -1876,6 +1882,8 @@ func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
     right register and the wrong position, and both are 2. Reusing `r` for the
     sum instead of a fresh name is 22. Discriminator not established; the
     permuter found the naming from a base of 12 and saturated at 2.
+    sweep_try.py run 2026-08-10: best is 2 at -O2 -G8, the current defaults. No
+    flag combination helps.
 
 func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     into D_800F2C40[arg0 * 3616] at +0xD70..+0xD9E, no branches. The index math
