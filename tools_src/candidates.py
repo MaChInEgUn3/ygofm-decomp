@@ -111,9 +111,17 @@ def parked():
     for line in open(path):
         if not line.strip() or line.startswith("#") or line[0].isspace():
             continue
-        m = re.match(r"(func_[0-9A-Fa-f]{8})\b", line.strip())
-        if m:
-            names.add(m.group(1))
+        if not re.match(r"func_[0-9A-Fa-f]{8}\b", line.strip()):
+            continue
+        # One entry can cover several functions -- `func_A / func_B -- shared
+        # diagnosis`. Taking only the first name silently re-offered the rest
+        # as fresh candidates, which is how func_80071424 and func_80071460
+        # turned up in a "not parked" scan while sitting in parked/. Split the
+        # heading from the diagnosis at the first ` -- ` and take every name on
+        # the heading side only; the diagnosis body routinely cites other
+        # functions and must not be swept in.
+        head = line.strip().split(" -- ", 1)[0]
+        names.update(re.findall(r"func_[0-9A-Fa-f]{8}", head))
     return names
 
 
