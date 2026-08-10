@@ -1,5 +1,4 @@
 #include "common.h"
-void func_80024954(void);
 
 void func_80026A3C(void) {
     s32 i;
@@ -15,14 +14,11 @@ void func_80026A3C(void) {
     } else {
         i = 0;
         {
-        u8 *tbl = D_800907D8;
-        u8 *rec = D_801A7AD8;
-
         for (; i < 5; i++) {
-            u8 *e = &rec[tbl[i + D_8009B1D5 * 20] * 28];
+            u8 *e = &D_801A7AD8[D_800907D8[i + D_8009B1D5 * 20] * 28];
 
             if (*(u16 *)(e + 0x16) & 0x8000) {
-                func_80024954();
+                func_80024954(e);
             }
         }
         }
