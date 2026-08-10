@@ -15,6 +15,7 @@
 #include "common.h"
 
 void func_80031EE4(u8 *arg0, s32 arg1) {
+    s32 n;
     u8 *p = arg0 + arg1;
     s32 raw = p[0x5D97];
     s32 c = raw & 0xFF;
@@ -28,13 +29,14 @@ void func_80031EE4(u8 *arg0, s32 arg1) {
         do {
             s32 e = *(s16 *)(q + 4);
 
-            q += 0x10;
+            n = 0x10;
+            q += n;
             if (e == arg1) {
                 break;
             }
         } while (1);
 
-        q -= 0x10;
+        q -= n;
         q[0xD] = 1;
         func_80032C48(arg0 + 4);
     } else if (c != 0xFA) {

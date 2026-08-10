@@ -636,12 +636,6 @@ func_8004A854
 func_80016DDC
 func_8005A618
 func_80024D34
-func_80031EE4
-# func_800496C4: recorded at 16 while the candidate was declared void. It is
-# not -- func_80049308 stores its result -- and with the signature corrected
-# and a `return 0;` added it is 38. The old number was measuring a different
-# function. The open question in the candidate's header (an unused eight-byte
-# frame, so a local had its address taken) still stands.
 func_800496C4
 func_8005A3D0
 func_8003B744
