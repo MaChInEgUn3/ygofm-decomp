@@ -880,6 +880,16 @@ nothing.
 
 ## Two habits that cost real time when skipped
 
+**The GitHub repo is private again** (it was public for a few hours on
+2026-08-07). Two consequences worth knowing. Pushing over HTTPS needs a
+credential helper now that anonymous access is gone -- `gh auth setup-git`
+configures it and the existing token already has `repo` scope; without it
+`git push` fails with a bare 403. And the traffic figures from the public
+window are worth reading correctly: 0 forks, 0 stars, 7 unique visitors, but
+115 clones from 69 unique sources. That ratio is scraper bots, which hit new
+public repos within minutes -- not human interest, and not undoable. Going
+private stops future exposure; it does not recall what was already mirrored.
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a
