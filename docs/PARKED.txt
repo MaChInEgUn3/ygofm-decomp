@@ -386,8 +386,6 @@ func_8004A764
 func_8005C5D4
 func_80073220
 func_8003201C
-func_80071424
-func_80071460
 func_8004CABC
 # --- range-check fold: class emptied, see WORKFLOW.md. Both members
 # (func_80049544, func_80049640) matched once the condition was written as
@@ -400,7 +398,6 @@ func_8002F440
 # func_80070710: ten instructions, sequence identical, every register name
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
 # and puts the table address in $v0. Six source forms, both -G settings, all 8.
-func_80070710
 # func_80058A7C packs a GPU word from seven halfwords. Structure and the two
 # offset adjustments are right -- the -0x280 has to be s32 arithmetic in a
 # local, or gcc folds it to `+ 0xFD80` in a register because the u16 store makes
@@ -1914,3 +1911,22 @@ func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     and the new store order (20 and 8, unchanged either way). Discriminator not
     established.
 
+
+func_80070710 / func_80071424 / func_80071460 -- 8, 6 and 6 differences, all with
+    the right length and instruction sequence; what is left in each is which
+    register holds the table base and which the index.
+    These three were cross-checked against gonzaloberteri/ygofm-decomp, an
+    independent YGOFM decomp that has them in src/manual/ with per-function flag
+    comments. Their C is sound and their reading of the shapes agrees with ours
+    -- D_800917F0 is a 9-byte record array indexed by D_8009B361, and the other
+    two are `D_800F5B98[func_8007058C()] = <a global>`. Adopting it changed
+    nothing: their annotated flags (-O2 -G0, plus -fno-schedule-insns2 on two of
+    them) give exactly the same counts as our defaults, and the scalar arm of
+    D_8009B361 gives the same 6 as the array arm. So the overlap confirmed the
+    semantics and moved no instruction.
+    One trap worth recording from that exercise: writing `D_800F5B98[...] =
+    D_8009B361;` against our default array declaration stores the symbol's
+    ADDRESS, not its value, and measures 4 -- better than the correct
+    `D_8009B361[0]` at 6. A wrong-but-closer candidate again, the func_8001352C
+    shape. Read the semantics before the count.
+    Permuter run on func_80070710 from the 8 base: no output, base not beaten.
