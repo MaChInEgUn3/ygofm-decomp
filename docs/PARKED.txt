@@ -376,7 +376,13 @@ func_80049434
 func_80049AF4
 func_8004B854
 func_8003D03C
-    A stored permuter output measures 9 against 10; not yet decomposed.
+    The stored 9 decomposed 2026-08-11 and installed: the D_8009B408 byte
+    read named into an s8 local plus a dead if with identical arms
+    conditioned on arg0 (the permuter's version read an uninitialized
+    variable in the condition; arg0 works the same and is clean). The two
+    are coupled -- the name alone stays at 10. A fresh 30-minute permuter
+    run from the 9 base found nothing: its best-scoring outputs measure
+    35-41 through try_func.
 func_80044F58
 func_80047FAC
 func_80021810
