@@ -48,7 +48,7 @@ zero clean candidates in its default band — that is the tool being correct, no
 broken. Unclaimed work starts at 51 instructions.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 128 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 127 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
