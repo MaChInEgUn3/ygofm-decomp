@@ -13,8 +13,8 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **727** (64.9%) | **18,458** (22.5%) |
-| remaining | 394 (35.1%) | 63,420 (77.5%) |
+| decompiled and matching | **732** (65.3%) | **18,760** (22.9%) |
+| remaining | 389 (34.7%) | 63,118 (77.1%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 779 files; 727 of them are in scope and the rest are library or
+`src/` holds 784 files; 732 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -36,8 +36,8 @@ above-scope functions matched along the way.
 | size (instructions) | remaining | parked | unclaimed |
 |---|---|---|---|
 | ≤ 25 | 20 | 20 | **0** |
-| 26–50 | 61 | 61 | **0** |
-| 51–100 | 97 | 43 | 54 |
+| 26–50 | 59 | 59 | **0** |
+| 51–100 | 94 | 46 | 48 |
 | 101–200 | 131 | 3 | 128 |
 | 201–400 | 58 | 0 | 58 |
 | 400+ | 27 | 0 | 27 |
@@ -48,7 +48,7 @@ zero clean candidates in its default band — that is the tool being correct, no
 broken. Unclaimed work starts at 51 instructions.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 126 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 128 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
