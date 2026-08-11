@@ -203,6 +203,7 @@ void func_80017DB4(u8 *arg0);
 void func_800726F4(void);
 void func_80039C94(u8 *arg0);
 void func_8003A440(u8 **arg0, u32 arg1, s32 arg2);
+void func_8003AC48(u8 *p);
 void func_8003F388(void);
 void func_800428EC(u8 *arg0, s32 arg1);
 void func_80017E3C(u8 *arg0);

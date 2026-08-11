@@ -349,6 +349,7 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # gp-relative load. The comment above says the two -G settings must match, and
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
+PER_FUNC_AS_FLAGS["func_8003AC48"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800610E0"] = "-G0"
