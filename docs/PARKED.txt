@@ -1108,6 +1108,10 @@ func_80048920 -- 20 differences, a $s1/$s2 swap and the two operand orders that
   obvious fix and makes it *worse* (65) in all four spellings tried: a separate
   `v` initialised at its declaration, assigned as the first statement, assigned
   after the guard, and reassigning the parameter itself.
+  2026-08-11: first permuter run (30 min) on this function, 20 -> 18 with two
+  inert names decomposed and verified: the scaled index (arg0 & 0x1F) * 2
+  named before f's two-statement mask, and a copy of id for the 0xFFFF
+  comparison. The $s1/$s2 swap itself did not move.
 
 func_80031CD4 -- 8 differences, one scheduling decision in the first block, and
   it is the first case where the `lui $at` expansion *hides* a load-use hazard
