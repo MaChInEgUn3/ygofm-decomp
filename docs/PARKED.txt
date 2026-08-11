@@ -2176,3 +2176,15 @@ func_8002C6C8 -- 58 positional at 71/72 under _O2_G8_NOSTRENGTH (third user
     its inert pieces alone (a p alias assigned mid-arm, a dead identical-arms
     if around the loop increments) measure 50 with the length off. Sixth
     wrong-but-better this week; rerun from a better base when one exists.
+
+func_8003CA5C -- 4 differences at 72/72, a $v0/$v1 swap in one basic block:
+    retail keeps the first return's delay-slot 1 live in $v0 and runs the
+    D_8009B398 load chain through $v1; we reuse $v0. The path 13 -> 4 is two
+    permuter finds, both inert and decomposed: the +0x5A halfword read named
+    into a local, and a dead identical-arms if on D_8009B378 around the
+    second return 0 -- which is what finally stops gcc folding that test
+    into a setcc; the plain returns, a named mask value, a nested
+    accumulator, a do-while wrapper and a dead-if INSIDE the arm all fold
+    (13, 13, 12, 13, 14). Two permuter runs from 13 and from 4 saturated,
+    and a named return-1 to keep the constant live does not move the chain
+    register. First user of D_8009B398_IS_AGGREGATE outside its own note.
