@@ -348,6 +348,14 @@ meaningful, and skipping to the last one wastes hours:
    that worked the index is a loop giv and the base is reloaded per
    iteration, and in func_80047CC4 it is `(u8)i * 2` computed inside a
    conditional.
+   **The opposite direction has its own route: cast the sum to integer
+   arithmetic.** When retail wants the *index* first and every pointer `+`
+   spelling gives `addu base,index` — `(i + o) + base` and `&base[i + o]`
+   both did on func_80058938 — the base being a pointer is itself the
+   canonicalisation, and `(u8 *)((i + o) + (s32)base)` takes it out of
+   pointer arithmetic: the plain integer PLUS keeps the written order and
+   the addu comes out `sum,base`. **Observed once**, the last hand lever in
+   that function.
    **But only when `tbl` is the symbol.** Through a *base local* every
    spelling gives `addu base,index`: four were tried on func_8002778C
    (regrouping the index, `x * 28 + rec`, a named index variable, `&rec[…]`)
@@ -482,6 +490,15 @@ meaningful, and skipping to the last one wastes hours:
    load-delay slot is `-fno-schedule-insns` (func_80014A5C, the first user).
    `volatile` does not stop that hoist on either object — gcc 2.8 moves a load
    across a volatile store and moves a volatile load too.
+   And a **struct assigned by value through a pointer inside a loop** is a
+   `-fno-strength-reduce` case: the block-move expansion forces the
+   destination address into a register, strength reduction anchors a giv on
+   it, and every neighbouring store gets rebased on the anchor (`sh -8/-6/-10`
+   off a cursor+20 register where retail has plain displacements). No source
+   spelling removes the anchor — index-only loop, derived cursor, struct
+   members and a goto-out-of-line arm were all measured on func_80058938, the
+   flag's second user after func_80017708 — because the address computation is
+   the expander's, not the source's.
 
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
