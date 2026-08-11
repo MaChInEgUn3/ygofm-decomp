@@ -987,6 +987,13 @@ func_8005F1B8 -- 24 differences, and most of them hang off one thing this
   cc1psx. Whatever turns the magic off is not in the flags tried so far, and
   worth another look when a fifth example turns up.
 
+func_8003C568 MATCHED 2026-08-11, the operand-order seam's third payout in one
+  day. The negation spelling gave both stack addus (a frame array flips with
+  neither grouping nor the int cast), and the last block was the k-indexed
+  load named into a local before the 0x48 store -- retail issues the load
+  early, sp0 never escapes so the reorder is safe -- found by the permuter's
+  first run on this function, reaching zero in under 30 minutes.
+  The entry that stood here:
 func_8003C568 -- 38 differences, one scheduling decision and the operand order
   behind it. Copies a 6-byte record from D_8009AF5C onto the stack, appends two
   halfword constants, and writes three fields into the records at D_8009B380
