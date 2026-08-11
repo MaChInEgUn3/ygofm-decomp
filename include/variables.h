@@ -348,6 +348,7 @@ extern volatile u16 D_8009B33A;
 #else
 extern u16 D_8009B33A;
 #endif
+extern u8 D_8009B327;
 extern u8 D_8009B336;
 #ifdef D_8009B34D_SIZED
 extern s8 D_8009B34D[4];
