@@ -693,7 +693,16 @@ func_80045484
     a statement lands where it is written. Found in an unscored permuter output.
 func_8004A854
 func_80016DDC
-func_8005A618
+func_8005A618 MATCHED 2026-08-11, first user of the int-cast lever from
+    func_80058938's park: the two computations of the same base+offset want
+    opposite addu operand orders, so one is pointer arithmetic
+    ((D_800F3938 + o)[0x106]) and the other a named integer sum
+    (r2 = o + (s32)D_800F3938), whose name also frees it to fill the lbu's
+    load-delay slot. Plus the modulo written per return arm -- gcc
+    cross-jumps the tail and keeps retail's per-arm folded biases -- and the
+    0x1C00 arm written first for the bgtz polarity. The do-while wrapper the
+    old entry carried was not needed in the final shape.
+    The entry that stood here:
     A stored permuter output measures 15, better than this entry. Found by
     semantically checked -- two of the audit's finds so far were wrong.
     **18 -> 15** with a `do { } while (0);` around the if/else and the trailing
