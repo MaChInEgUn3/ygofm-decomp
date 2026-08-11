@@ -267,6 +267,11 @@ PER_FUNC_FLAGS = {
     # (sh -8/-6/-10 off an r+20 anchor). Retail addresses everything as plain
     # displacements off the cursor; only the flag removes the anchor.
     "func_80058938": _O2_G8_NOSTRENGTH,
+    # func_8002C6C8: same anchor phenomenon without a block move -- the
+    # record walk's field references get rebased on a base+0x14 giv that
+    # retail does not have, and the anchor also eats the callee-saved
+    # register the D_800F2848 address hoist wants. Third user of the flag.
+    "func_8002C6C8": _O2_G8_NOSTRENGTH,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})

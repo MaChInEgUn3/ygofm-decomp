@@ -2156,3 +2156,23 @@ func_80058938 -- 8 differences at 81/81, register/schedule class, first user
     from 11, 30 min from 8 -- the last found nothing at all, so the
     remaining block-order decision is not reachable by its mutations from
     this base either.
+
+func_8002C6C8 -- 58 positional at 71/72 under _O2_G8_NOSTRENGTH (third user
+    of the flag, and the first where the giv anchor appears WITHOUT a block
+    move: the record walk's field references get rebased on a base+0x14
+    anchor retail does not have, and the anchor also eats the callee-saved
+    register that the D_800F2848 address hoist wants -- so at default flags
+    the function is two phenomena and under the flag it is one). Walks 8
+    records of 0x20 at D_800EAD88 through a flag-byte cursor at +0x1C;
+    D_8009B261/D_8009B264 declared for the first time here. Base local t for
+    D_800E9D90 stops %lo(sym+4) folding (the func_800300C8 lever); a third
+    base local for D_800F2848 is worse in both flag states, as are field
+    refs through p versus q -- the rebase is canonical either way. What is
+    left after the flag: the missing D_800F2848 address hoist (one
+    instruction short) and register roles. The permuter's first 30-minute
+    run produced only a wrong-but-better 46: it moved the unconditional
+    D_8009B264 store inside the 0x40 guard and turned the lh at
+    D_800F2848+0xE into a byte load -- both contradict the listing -- and
+    its inert pieces alone (a p alias assigned mid-arm, a dead identical-arms
+    if around the loop increments) measure 50 with the length off. Sixth
+    wrong-but-better this week; rerun from a better base when one exists.

@@ -217,6 +217,8 @@ extern u8 D_8009B260[4];
 #else
 extern u8 D_8009B260;
 #endif
+extern u8 D_8009B261;
+extern u8 *D_8009B264;
 extern u8 D_800EAD88[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
