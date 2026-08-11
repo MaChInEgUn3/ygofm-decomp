@@ -21,6 +21,20 @@ def main():
     scratch = out.parent
     asm = scratch / (src.stem + ".s")
     masm = scratch / (src.stem + ".maspsx.s")
+    try:
+        return _compile(src, out, asm, masm)
+    finally:
+        # The permuter removes its own .o but knows nothing about these two;
+        # 350k of them once filled the per-user /tmp quota and took every
+        # shell on the machine down with it.
+        for p in (asm, masm):
+            try:
+                p.unlink()
+            except OSError:
+                pass
+
+
+def _compile(src, out, asm, masm):
 
     flags = B.PER_FUNC_FLAGS.get(FUNC, B.CC1_FLAGS)
     r = subprocess.run([*B.PSYQ_RUNNER, str(B.CC1PSX), *flags,
