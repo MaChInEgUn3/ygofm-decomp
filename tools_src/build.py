@@ -261,6 +261,12 @@ PER_FUNC_FLAGS = {
     "func_80049394": _O2_G8_MACRO,
     "func_8002D2D8": _O2_G8_MACRO,
     "func_80017708": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # func_80058938: the found-record arm's two Word4 block copies force their
+    # destination addresses into registers, and strength reduction turns the
+    # r+0x14 one into a giv that every neighbouring store is then rebased on
+    # (sh -8/-6/-10 off an r+20 anchor). Retail addresses everything as plain
+    # displacements off the cursor; only the flag removes the anchor.
+    "func_80058938": _O2_G8_NOSTRENGTH,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})

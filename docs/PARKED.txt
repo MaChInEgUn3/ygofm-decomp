@@ -2080,3 +2080,47 @@ func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     leave arg1's alone the way retail does), and giving arg1's mask a side
     effect so it cannot be a pure loop invariant. Seven shapes total against
     this one decision now; it is not reachable from the source.
+
+func_80058938 -- 8 differences at 81/81, register/schedule class, first user
+    of _O2_G8_NOSTRENGTH after func_80017708. The free-slot allocator over
+    the 10-record table at D_800F2B50 (stride 0x18) that func_80058838 and
+    func_80059AF8 feed. Candidate in parked/, flag in PER_FUNC_FLAGS.
+    The path, every step measured through try_func:
+    - 79 raw. The two Word4 by-value copies into the found record expand as
+      block moves whose destination addresses are forced into registers, and
+      strength reduction turns r+0x14 into a giv that every neighbouring
+      store gets rebased on (sh -8/-6/-10 off an r+20 anchor). Retail
+      addresses everything as displacements off the marching cursor. No
+      source spelling removes the anchor -- index-only loop, derived cursor,
+      struct members, goto-out-of-loop arm all keep it or break worse -- and
+      -fno-strength-reduce is the only lever that does: 55. The goto shape
+      is disproved by the prologue: retail computes both argument masks and
+      the inner loop's 0xFF before the loop, which is invariant hoisting, so
+      the found-arm is inside the loop.
+    - 18 after three names: o = off copied mid-arm; the inner loop's dst
+      named once and computed in the beq delay slot for both arms; and the
+      permuter's find of reusing the dead off as the name for the unkA value
+      (off = *(u16 *)(tbl + 0xE06); r->unkA = off;), which also recovered
+      the one-instruction length gap -- retail's nop after the lhu that our
+      early arg4*2 sll had been filling.
+    - 14 with do { } while (0) around the six-statement h chain. Fourth
+      function that wrapper moves.
+    - 11 with base = D_800F2B50 hoisted above tbl and the unkA store fused
+      into the off reuse (off = (r->unkA = ...)). Permuter finds, both.
+    - 9 with ONE mask named -- new_var = (arg0 & 1) << 1; placed between tbl
+      and off = 0 -- another permuter find. Naming the arg1 mask the same
+      way is 77/-4 alone and 78/-3 on top of this base, so the pair is NOT
+      the coupled shape it resembles; the asymmetry is measured, not
+      understood.
+    - 8 with the dst sum cast to integer arithmetic:
+      (u8 *)((i + o) + (s32)base). Pointer + canonicalizes the base first
+      whatever the spelling (&base[i + o] included); the int cast is what
+      lets the sum keep retail's addu $v1,$v0,$t4 operand order.
+    What is left is ONE phenomenon: the preheader emits [off=0, base,
+    r=copy, end] then [m1 mask, 0xFF] where retail emits the two groups the
+    other way around -- the hoisted invariants land after the explicit
+    inits for us and before them in retail. sweep_try on the 11 base:
+    every non-nostrength row is 55-85. Permuter: 10 min from 11, 30 min
+    from 11, 30 min from 8 -- the last found nothing at all, so the
+    remaining block-order decision is not reachable by its mutations from
+    this base either.
