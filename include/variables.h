@@ -220,6 +220,8 @@ extern u8 D_8009B260;
 extern u8 D_8009B261;
 extern u8 *D_8009B264;
 extern u8 D_800EAD88[];
+extern s32 D_800EB12C[];
+extern VoidFn D_80090C50[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
 #ifdef D_8009B0D1_IS_SCALAR
