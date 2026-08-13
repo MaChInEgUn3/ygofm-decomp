@@ -466,6 +466,20 @@ meaningful, and skipping to the last one wastes hours:
    to a `jal` after the join, whose own delay slot is a bare `nop`. When a
    register is set and nothing in its block reads it, look at the next `jal`
    before concluding anything else — func_8003C7A0, 65 differences to 1.
+   **The same rule catches a *computation* that should have been folded
+   away.** Retail sign-extends a halfword countdown into `$a3` and then
+   branches on it, where gcc drops the `sra` entirely: after `sll 16` the
+   value's sign and zeroness are already what `bgtz` wants, so `(s16)x > 0`
+   needs no extension and the instruction has nowhere to come from. It comes
+   from the value *also* being the next call's fourth argument, which is what
+   `$a3` says. So when your build is one instruction short and the missing one
+   computes something the branch does not need, read the register it writes as
+   an argument number and check the callee's real parameter count —
+   func_80043230 takes four and the call site appeared to set three, because
+   the fourth was already in place (func_8003D614, one difference to a match).
+   This is the missing-prototype tell read backwards: there a caller passes
+   too few arguments because it never saw the declaration, here it passes all
+   of them and the listing hides one.
    **A named byte read schedules where you put the name, and one statement
    either way is the whole difference.** Where the target interleaves a load
    between two stores — `sb`, `lbu`, `sb`, `sb` — writing the read inline in
