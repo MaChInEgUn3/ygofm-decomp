@@ -2188,3 +2188,18 @@ func_8003CA5C -- 4 differences at 72/72, a $v0/$v1 swap in one basic block:
     (13, 13, 12, 13, 14). Two permuter runs from 13 and from 4 saturated,
     and a named return-1 to keep the constant live does not move the chain
     register. First user of D_8009B398_IS_AGGREGATE outside its own note.
+
+func_80045208 -- 25 differences at 75/75, register-allocation class. The
+    command builder that fills the 0x24 packet from the a & 0xF000 switch
+    (the addu with the mask register in case 0x8000 is w = a + m against
+    the named switch value; the default arm re-reads D_8009B45C inline
+    because the sh through q blocks CSE, while the cases read fields off
+    the local). Two decisions differ from retail and both are allocation:
+    the switch-join pointer e lives in a callee-saved where retail keeps
+    it in $v0 dead at the call (declaration order does not move it), and
+    retail's q lives in $a1 -- the second parameter's register, free
+    because arg1 is declared and never read; the existing two-parameter
+    prototype in functions.h is load-bearing for that. Two 30-minute
+    permuter runs produced only outputs that score better on its weighted
+    metric and measure 42-77 through try_func against the base's 25 --
+    the divergence documented in WORKFLOW, in its strongest form yet.
