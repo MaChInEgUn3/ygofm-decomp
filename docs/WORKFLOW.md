@@ -669,7 +669,11 @@ on a combination that had been in the table for weeks.
   parameters, return values, locals and loop counters. It also changes
   *comparisons*: a `u8` local compares in QImode and a `u16` local in HImode,
   and both are **unsigned**, so `u8 v = p[i]; if (v >= 0xB)` gives `sltiu` where
-  the same byte in an `s32` gives retail's `slti`.
+  the same byte in an `s32` gives retail's `slti`. The narrowness is also the
+  only source of a redundant-looking `andi 0xFFFF`: a `u16` local's HImode
+  `== 0` test normalises through the mask, where an `s32` holding the same
+  `lhu` folds an explicit `(u16)` cast away because gcc knows the load's
+  upper bits. One declaration was all 17 differences of func_8002FA54.
 - **Signedness at the same width is a third axis, and it decides whether gcc
   narrows at all.** Both `s32 f` and `u32 f` are word-sized, so the
   widest-natural-type rule says nothing between them — but with `s32 f`, gcc
