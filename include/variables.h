@@ -447,6 +447,8 @@ extern u8 D_8009B2C1;
 extern u8 D_8009B2C2;
 extern u8 D_8009B2E0;
 extern u8 D_800117C8[];
+/* Sixteen words of .rodata, indexed by a pad code's high nibble. */
+extern s32 D_80011484[];
 extern u8 D_8009B14A;
 extern u8 D_8009B14B;
 extern u8 D_8009B14C;

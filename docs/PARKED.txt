@@ -2203,3 +2203,46 @@ func_80045208 -- 25 differences at 75/75, register-allocation class. The
     permuter runs produced only outputs that score better on its weighted
     metric and measure 42-77 through try_func against the base's 25 --
     the divergence documented in WORKFLOW, in its strongest form yet.
+
+func_8005F27C -- ONE instruction: the multiply's operand order. Everything
+    else in the 79 matches, including the real `div` that aspsx wraps with
+    break 7 / break 6, which is the interesting half of the function: gcc
+    only emits a runtime div when the divisor is not a compile-time
+    constant, so retail's `/ 750` went through a local variable. Written as
+    a literal it becomes a reciprocal multiply (mult/mfhi/sra) and the
+    function is seven instructions short. `k = 750;` assigned inside the
+    block that divides gives retail's `addiu $a0,$zero,0x2EE` and the div;
+    assigned at the top of the function it is 78 and the length is wrong.
+    What is left is `mult $v1,$v0` against our `mult $v0,$v1` -- d first
+    versus t first, same registers, same result. Measured: with the product
+    assigned to `t` (t = d * t, t *= d, t = t * d, t = (s32)d * t, all
+    four) gcc puts the destination's own register first and emits (t, d);
+    with a fresh name `u` it emits retail's (d, t) and then allocates the
+    product to $v1 instead of $v0, which is three differences instead of
+    one. So the two halves are reachable separately and not together: the
+    product needs a pseudo distinct from t (for the operand order) that
+    lands in t's register (for the allocation). Also measured and not it:
+    24 declaration-order permutations of (v, d, t, k), five of (v, d, t, k,
+    u), a two-step `t = d * t; t = t / k;` (14), `v = d * t / k + v` (3),
+    `d = t * d` (7), the full flag sweep (every row 1 or worse, and both
+    as-G rows also 1), and a 4700-iteration permuter run from this base
+    that never beat the base's own score of 10.
+
+func_8004C420 -- 16 differences, two register swaps and one delay slot that
+    follows them. The structure is settled: retail branches out on
+    `(c & 0x80) != 0` so the `== 0` arm is written first; the second name
+    `d = c` is real and load-bearing (without it the function is 65 and a
+    length mismatch, because b = c makes c live across the whole tail); and
+    the three-way tail is `if (x != 0xF0) { if (x != 0xFF) goto other;
+    BE88; } else { C0AC; } return 0; other: BE80;` -- the goto is what puts
+    C0AC before BE80 in the layout, where every if/else and switch spelling
+    puts BE80 first (switch 39 and a length mismatch, an if/else-if chain
+    35, early returns 20, the goto 16).
+    What is left: c and d are swapped ($a1/$a0 in retail, $a0/$a2 here) and
+    so are v and t ($s1/$s3 against $s3/$s1), and because our `c & 0xFF` is
+    then CSEd across the join it fills the delay slot retail gives to
+    `addiu $v0,$zero,0xF0`. Measured and not it: all 24 declaration-order
+    permutations of (c, v, t, d) -- every one 16 -- routing the two 0xFF
+    tests through d instead of c (65 and a length mismatch, both of them),
+    `s32 v` with an explicit (u32) cast on the shift, and a named index for
+    the table lookup (20).
