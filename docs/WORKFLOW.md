@@ -300,6 +300,16 @@ meaningful, and skipping to the last one wastes hours:
    form and still keeps the store first in the byte-address form. So reach for
    this spelling wherever a load is being hoisted past a store, not only where
    something escaped.
+   **The same marking works in reverse: a cast store loses its struct
+   membership and the scheduler moves genuinely aliasing accesses across
+   it.** func_800592AC stores two halfwords into a stack packet and then
+   copies the whole packet; spelled `*(s16 *)(src.b + 4) = …` the whole-
+   struct copy's lwl/lwr hoist *above* the stores into the very bytes they
+   read — volatile does not pin it and no flag row reaches it. Spelled as a
+   member through a view struct, `((HalfView *)&src)->h2 = …`, the access
+   carries the in-struct MEM marking, the dependency is seen, and the order
+   holds. One mechanism, two directions: strip the marking to *allow* a
+   move retail has (func_80049CF8), keep it to *forbid* one retail lacks.
    **Write that same double read where there is no aliasing store and you get a
    register copy instead of a second load** — and that copy is often the
    instruction the target schedules into a branch's delay slot. func_80057E20's
