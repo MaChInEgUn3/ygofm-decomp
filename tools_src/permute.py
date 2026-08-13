@@ -164,6 +164,19 @@ def main():
     ap.add_argument("-j", default="4", help="permuter worker threads")
     args = ap.parse_args()
 
+    # A run killed by timeout leaves its in-flight candidate .c/.o pairs in
+    # /tmp (the permuter cleans them only on a clean exit). By the time this
+    # script runs again every previous owner is dead, so sweep them here --
+    # 182 of them accumulated across two sessions of bounded runs, and /tmp
+    # on this machine has a per-user quota with a documented failure mode.
+    import glob as _glob
+    import tempfile as _tempfile
+    for _p in _glob.glob(_tempfile.gettempdir() + "/permuter0*"):
+        try:
+            os.unlink(_p)
+        except OSError:
+            pass
+
     src = None
     for cand in (ROOT / "parked" / f"{args.func}.c",
                  ROOT / "src" / f"{args.func}.c"):
