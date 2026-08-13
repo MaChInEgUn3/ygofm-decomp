@@ -1106,7 +1106,17 @@ extern s32 D_8009B0D8[];
  * array of the record type so the base lands in a register before any
  * field offset -- see the two-field addressing note in docs/DECISIONS.md. */
 typedef struct {
-    u8 unk0[0x11];
+    /* The head is four words, not seventeen bytes. It has to be:
+     * func_80039D64 assigns one whole record to another and retail expands
+     * that with aligned lw/sw, which gcc only emits when the struct's own
+     * alignment is 4. All-u8 members give alignment 1 and the copy comes
+     * out lwl/lwr. Byte offsets are unchanged, so every other user of the
+     * type is unaffected -- checked with try_func, not assumed. */
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;    /* +0x10 */
     u8 unk11;    /* +0x11 */
     u8 unk12;
     u8 unk13;    /* +0x13 */
@@ -1118,6 +1128,10 @@ typedef struct {
 } Rec1C;
 
 extern Rec1C D_800EB288[];
+/* Dispatch table indexed by a record's unk13 masked to 0x1F; four entries,
+ * but the mask is what the source spells, so the array stays unsized. */
+typedef void (*Rec1CFn)(Rec1C *, u8 *);
+extern Rec1CFn D_80090F58[];
 extern u8 D_800EF6B0[];
 extern u8 D_800EF6E0[];
 extern u8 D_801B0000[];
