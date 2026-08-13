@@ -241,7 +241,33 @@ def main():
         # PATH, so setting it on the child env alone would not work.
         if bindir:
             os.environ["PATH"] = f"{bindir}{os.pathsep}{os.environ['PATH']}"
-        subprocess.run(cmd, shell=True, cwd=ROOT)
+        # shell=True puts the permuter behind a /bin/sh the signal never
+        # reaches: `timeout N permute.py --run` TERMs this process, the sh
+        # and its -j workers survive as orphans, and one such tree burned
+        # four cores for two days after its function was already parked.
+        # Run the tree in its own process group and forward the signal.
+        import signal
+        proc = subprocess.Popen(cmd, shell=True, cwd=ROOT,
+                                start_new_session=True)
+
+        def _forward(signum, _frame):
+            try:
+                os.killpg(proc.pid, signum)
+            except OSError:
+                pass
+
+        for _sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            try:
+                signal.signal(_sig, _forward)
+            except (ValueError, OSError):
+                pass
+        try:
+            proc.wait()
+        finally:
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except OSError:
+                pass
     return 0
 
 
