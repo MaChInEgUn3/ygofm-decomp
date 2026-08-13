@@ -477,6 +477,13 @@ PER_FUNC_AS_FLAGS["func_80047B68"] = "-G0"
 # data is size <= -G, so the window is 1 <= G < 4 and -G2 sits in the middle.
 # -G0 takes D_8009AFA2 out with it and costs 43.
 PER_FUNC_AS_FLAGS["func_8005A8C4"] = "-G2"
+# Recipe branch 1 again (no %gp_rel in the function at all), but reached from
+# the delay-slot side rather than the addressing side: the two instructions
+# are the same either way, and what differs is that retail leaves the branch
+# in front of them holding a nop. cc1psx's split pair is two instructions to
+# the delay-slot filler, so it hoists the lui; the scalar declaration is one,
+# so the slot stays empty and the assembler expands it after the branch.
+PER_FUNC_AS_FLAGS["func_800151D8"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
