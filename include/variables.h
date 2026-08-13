@@ -30,7 +30,17 @@
 
 /* --- small data: accessed gp-relative ------------------------------------ */
 
+/* gp-relative in five functions and a %hi/%lo pair in two, which is the
+ * ordinary per-file addressing disagreement: the aggregate arm is not small
+ * data, so cc1psx emits its own pair and the scalars beside it stay
+ * gp-relative at the default -G8 (func_80037B40). */
+#ifdef D_8009B112_IS_AGGREGATE
+extern volatile u16 D_8009B112[];
+#else
 extern volatile u16 D_8009B112;
+#endif
+
+extern u8 D_8009B335;
 
 extern u8 D_8009AFA0;
 extern u8 Base2_8009AFA4[];
