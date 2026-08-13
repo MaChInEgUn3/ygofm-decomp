@@ -674,6 +674,18 @@ on a combination that had been in the table for weeks.
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
   finds the callers that also need updating.
+- **A struct copy's expansion is decided by the type's *alignment*, and an
+  all-`u8` record has alignment 1.** gcc expands `*dst = *src;` with aligned
+  `lw`/`sw` only when it can prove alignment 4; otherwise it emits an
+  `lwl`/`lwr` + `swl`/`swr` pair per word, which is exactly twice as many
+  instructions and reads like a completely different function. So when a
+  record type invented for this project turns up in a by-value copy, the
+  question is not the field names but whether its head is really bytes:
+  `Rec1C`'s was `u8 unk0[0x11]`, and retail's seven aligned `lw`/`sw` say it
+  is four `s32`s plus one `u8`. Same byte offsets, alignment 4, and every
+  other user of the type is unaffected — but **re-run try_func over them**,
+  because alignment is a codegen input everywhere the type appears, not only
+  in the copy (func_80039D64; four users rechecked, all still MATCH).
 - **Hold values in the widest natural type; cast at the point of use.** A narrow
   type inside a computation costs an `andi` or a sign-extend — this has bitten
   parameters, return values, locals and loop counters. It also changes
