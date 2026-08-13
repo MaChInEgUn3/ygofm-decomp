@@ -238,6 +238,30 @@ meaningful, and skipping to the last one wastes hours:
    preheader — a hoisted invariant, a biased induction variable. Naming those as
    source locals makes it worse: `s16 *q = (s16 *)(p + 6);` alongside `p` gave
    func_80061008 a *third* induction variable and went 10 differences to 51.
+   That is about a preheader gcc *builds*; the two rules below are about a
+   preheader whose contents you can order, and both were measured on
+   func_8005611C in one afternoon.
+   **A preheader constant is a name, and where you assign it decides the
+   preheader's order.** A loop storing a literal 1 hoists the `addiu` into the
+   preheader, and its position among the other preheader instructions follows
+   the source: `n = 1;` written *above* `i = 3;` emits retail's
+   `addiu $a2,1` / `addiu $a0,3` / `addu $a1,$s0,$a0`, and written below it
+   emits the same three in the other order. Two differences, one line's
+   position, and the loop is otherwise identical. Related, same function:
+   a cursor initialised `q = p + 3` folds to one `addiu`, where `i = 3;
+   q = p + i;` keeps retail's `addu` through the counter's register — write
+   the cursor against the counter, not against the constant.
+   **A run of stores sharing one constant wants to be written next to the
+   other such run, not where it is emitted.** Three `sw` of 0x1000 and three
+   of 0x800 come out separated by an unrelated run of byte stores; written in
+   *emission* order the 0x1000 is materialised late and shares `$v0` with the
+   bytes, written next to the 0x800 group it gets `$v1` of its own and lives
+   across to a fourth use further down, which is what retail does. That is
+   func_8005611C's 24 differences to 2 — and it rotated the register of every
+   value downstream, both loop cursors included, so it read like a loop
+   problem and was an ordering one. **When a whole function's registers are
+   shifted and the instructions are right, look for a constant whose live
+   range should span a neighbouring block.**
    **Split an address computation out when the target keeps it.** `p + (i+1)*8`
    followed by a load at `+4` gets distributed into `i*8` with `12($v0)` on the
    load; assigning `e = p + (i + 1) * 8;` first and loading `*(u8 **)(e + 4)`
