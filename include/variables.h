@@ -155,6 +155,8 @@ extern u32 D_8009AF64[2];
 extern s32 D_8009AF68;
 
 extern u8 D_8009B478;
+extern u16 D_8009B47A;
+extern u16 D_8009B47C;
 
 /* --- aggregates reached with an explicit %hi/%lo pair --------------------- */
 /* Declared unsized so they are never treated as small data. */
