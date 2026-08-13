@@ -39,7 +39,9 @@ functions that matched. The fifth, `break`, was the first that was a
 **toolchain** gap and not a misread target: `break 7`/`break 6` are the checks
 aspsx wraps around a real `div`, and maspsx only emits them with
 `--expand-div`, which build.py now passes globally. A real division in C is
-ordinary. What is still filtered on `break` is the two-operand form
+ordinary — and it also *tells you something*: see the divisor rule in step 4,
+because a `break 7` means the divisor was a variable rather than a literal.
+What is still filtered on `break` is the two-operand form
 (`break 0,260`), which is the BIOS syscall stubs.
 The sixth, `jr $v`/`jr $a`/`jr $t`, went the same day: those are `switch` jump
 tables. Write the `switch`; build.py splits splat's rodata at the table and
@@ -357,6 +359,21 @@ meaningful, and skipping to the last one wastes hours:
    instead is worse (func_80047788, 48 to 18). This is the same family as the
    `(x & 0x100) != 0` fold in step 2: one name reused across two statements
    is what stops the combiner.
+   **A real `div` in the listing means the divisor was a *variable*.** This
+   is the strongest single tell in the arithmetic family and it costs nothing
+   to check: gcc emits a runtime `div` — the one aspsx wraps in
+   `break 7` / `break 6` — only when the divisor is not a compile-time
+   constant. Division by a literal that is not a power of two becomes a
+   reciprocal multiply (`lui`/`ori` of a magic number, `mult`, `mfhi`, `sra`,
+   `subu`), which is a completely different instruction sequence and about
+   seven instructions longer, so the whole tail of the function reads as
+   wrong. Write the divisor as a local: `k = 750;` then `/ k`. **Where you
+   assign it matters** — inside the block that divides gives retail's
+   `addiu $a0,$zero,0x2EE` scheduled into the preceding branch's delay slot,
+   at the top of the function it is a length mismatch (func_8005F27C, 34
+   differences to 1). The divisor being a literal in the *source* is
+   therefore not what the listing shows; read the `break 7` and stop
+   guessing.
    **A named offset flips it the other way.** Where the base is a *parameter*
    rather than a symbol, no index spelling reaches `addu base,index` — four
    were tried on func_8004DB14 (`p + i * 4 + 0x1E0`, `((u8 **)p + i)[0x78]`,
