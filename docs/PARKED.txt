@@ -2252,3 +2252,27 @@ func_8004C420 -- 16 differences, two register swaps and one delay slot that
     rather than trusting the score, and the same shape as the named-1 that
     matched func_8005611C -- a constant the compiler would otherwise
     materialise wherever it likes becomes a pseudo with a birth position.
+
+func_80049FB4 -- 74 differences, and listed here as a *decode* rather than a
+    near miss, so that the reading is not redone. The arithmetic is settled
+    and reads back cleanly:
+        n = (s16)(arg1 + arg3);  q = n / 128;  r = n % 128;
+        d = (s16)(arg0 + q - arg2);
+        d >= 0:  return D_80010834[(d % 12) * 128 + r] << (d / 12);
+        d <  0:  m = -d;
+                 return D_80010834[((12 - m % 12) % 12) * 128 + r]
+                        >> ((m + 11) / 12);
+    Both `/ 12` are reciprocal multiplies by 0x2AAAAAAB (mfhi, sra 1,
+    subtract the sign), so the divisor really was the literal 12 -- the
+    opposite of func_8005F27C's `div`, and the two together are the pair
+    that makes that rule readable.
+    What is open, in the order it shows up: retail sign-extends the sum
+    *into the parameter's own register* and the copy that costs fills the
+    `bgez` delay slot, where every spelling tried leaves a nop there and
+    computes the quotient candidate in one register; and retail falls
+    through into the d < 0 arm (`bgez -> the positive arm`) where gcc
+    inlines the positive one whichever way the source is written.
+    Measured and not it: `s16` versus `s32` for n and r in four
+    combinations, `n - q * 128` against `n % 128` (77 and a length mismatch
+    against 74 and the right length, which is what is installed), an
+    `s16 arg1` reassigned in place, and if/else against two returns.

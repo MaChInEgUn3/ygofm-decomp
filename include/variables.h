@@ -447,6 +447,10 @@ extern u8 D_8009B2C1;
 extern u8 D_8009B2C2;
 extern u8 D_8009B2E0;
 extern u8 D_800117C8[];
+/* .rodata halfwords. func_80049FB4 indexes it as rows of 128 with a row
+ * number taken modulo 12 -- twelve rows is what the code implies, not
+ * something measured against the data. */
+extern u16 D_80010834[];
 /* Sixteen words of .rodata, indexed by a pad code's high nibble. */
 extern s32 D_80011484[];
 extern u8 D_8009B14A;
