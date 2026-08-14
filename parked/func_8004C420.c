@@ -7,6 +7,7 @@ s32 func_8004C420(u8 *p) {
     s32 e;
     s32 t;
     s32 d;
+    s32 m;
 
     e = 0;
     c = func_8004BAE4(p);
@@ -34,13 +35,16 @@ s32 func_8004C420(u8 *p) {
             e = func_8004BAE4(p);
         }
         func_8004C114(p, (u8)v, (u8)b, (u8)e);
-    } else if ((c & 0xFF) != 0xF0) {
+    } else {
+        m = 0xF0;
+        if ((c & 0xFF) != m) {
         if ((c & 0xFF) != 0xFF) {
             goto other;
         }
         func_8004BE88(p, (u8)func_8004BAE4(p));
-    } else {
-        func_8004C0AC(p);
+        } else {
+            func_8004C0AC(p);
+        }
     }
 
     return 0;

@@ -2246,3 +2246,9 @@ func_8004C420 -- 16 differences, two register swaps and one delay slot that
     tests through d instead of c (65 and a length mismatch, both of them),
     `s32 v` with an explicit (u32) cast on the shift, and a named index for
     the table lookup (20).
+    A 25-minute permuter run from that base found one thing and it is
+    installed: naming the 0xF0 the tail compares against (`m = 0xF0;` then
+    `!= m`) is 16 to 15. Semantically a no-op, verified by reading diff.txt
+    rather than trusting the score, and the same shape as the named-1 that
+    matched func_8005611C -- a constant the compiler would otherwise
+    materialise wherever it likes becomes a pseudo with a birth position.
