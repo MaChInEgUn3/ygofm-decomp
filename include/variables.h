@@ -801,6 +801,7 @@ extern s8 D_8009B408;
 #endif
 extern u8 D_800F2848[];
 extern u8 D_800F2878[];
+extern u8 D_801AC000[];
 extern u8 D_800EFE38[];
 extern VoidFn D_80090FB0[];
 extern u8 D_80090FCC[];
