@@ -450,6 +450,17 @@ meaningful, and skipping to the last one wastes hours:
    keeps both exits, the second gets cross-jumped into one with the value in a
    delay slot. Rule of thumb: whichever condition the target **branches out on**
    is the one to write first. Confirmed on `func_80033500` and `func_800440B4`.
+   **A branch immediately in front of a counted loop is usually the loop's
+   own entry guard, not a test the source wrote.** Writing both — `if (n !=
+   0) { for (i = 0; i < p[K]; i++) … }` — emits *two* branches even when gcc
+   knows `p[K] == n` from the store above, because `n != 0` and `0 < p[K]`
+   are still different expressions and it tests each. One instruction too
+   many, and the shortfall cascades (func_80072DC0, 58 differences to a
+   match on deleting the `if`). The tell is what the single branch tests:
+   retail masks the call's return with `andi 0xFF` and branches once, which
+   is a guard comparing zero against the *byte field* just written, not
+   against the word the call returned. Count the branches in front of the
+   loop before inventing a guard for it.
    **And the case order decides *which* of several identical arms gets
    merged.** func_80024C1C's `case 0x14` and `case 0x17` both store 1; retail
    merges 0x14 into the shared block with 0x15 and 0x16 and leaves 0x17
