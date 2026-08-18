@@ -2326,3 +2326,22 @@ func_80022D94 -- 8 differences, and they are a coupled pair in the strict
     `div`s wrapped in break 7 / break 6 because the divisor is the *first
     parameter*. That is the same rule func_8005F27C needed a local for and
     func_80049FB4 shows the other side of.
+
+func_80050F24 -- TWO differences, and both are one instruction: retail
+    computes a halfword's address into $v1 and loads through it, where we
+    reuse the index's own $v0 for the sum. The rest matched on three
+    documented levers.
+    The second cursor is built from the *symbol*, not from the first one:
+    `q = D_800F2C40 + 0xCF8 + arg0 * 3616;` gives retail's `addiu` on the
+    base plus a shared index (and the addiu fills a load delay slot), where
+    `q = p + 0xCF8;` is one instruction off it and 65 differences.
+    All three `base + index` adds want the base first, which needs the
+    scaled index in a local -- `o = n * 118;` then `p + o + 0x7C4`. Written
+    inline every one comes out index-first, exactly as func_8004DB14
+    recorded.
+    And the call whose $a1 is never set is not a missing prototype: $a1
+    already holds `p[0xDFE] + 3` from the index computation, so the source
+    passes it and gcc reuses the register. Same family as func_8003B6AC.
+    Measured and not it for the last two: naming the halfword's address,
+    scaling inline instead of in the local, an explicit paren around the
+    base-plus-index, and four separate index names instead of one reused.
