@@ -124,6 +124,28 @@ extern s16 D_8009B33C;
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
 extern u16 D_8009B220;
+extern u16 D_8009B210;
+/* func_80022D94 writes all thirteen: the five `sh` are the target values it
+ * was handed, the eight `sw` are fixed-point accumulators (current << 16 |
+ * 0x8000) and their per-step deltas. */
+extern s16 D_8009B204;
+extern s16 D_8009B1EE;
+extern s16 D_8009B192;
+extern s16 D_8009B190;
+extern s16 D_8009B166;
+extern s32 D_8009B1C4;
+extern s32 D_8009B15C;
+extern s32 D_8009B158;
+extern s32 D_8009B224;
+extern s32 D_8009B1FC;
+extern s32 D_8009B198;
+extern s32 D_8009B194;
+extern s32 D_8009B168;
+/* Indexed by a small offset and reached as `&D_8009AF38[i]`, which cc1psx
+ * only spells `addiu $v0,$gp,%gp_rel(...)` while the symbol is small data.
+ * The eight is a codegen knob for that -- it has to clear -G8 as small, and
+ * the real extent is not known from the listing (func_8002525C). */
+extern u8 D_8009AF38[8];
 #ifdef D_8009B2A8_IS_AGGREGATE
 extern u16 D_8009B2A8[];
 extern u16 Base2_8009B2A8[];

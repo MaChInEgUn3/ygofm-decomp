@@ -2276,3 +2276,53 @@ func_80049FB4 -- 74 differences, and listed here as a *decode* rather than a
     combinations, `n - q * 128` against `n % 128` (77 and a length mismatch
     against 74 and the right length, which is what is installed), an
     `s16 arg1` reassigned in place, and if/else against two returns.
+
+func_8002525C -- 32 differences, and the aligned diff says they are ONE
+    problem rather than several. The structure is settled and every piece of
+    it was a documented shape:
+      - the two tails are written out in full, not reached by a goto. The
+        discriminator is in the listing: D_800E9FF0 is materialised twice,
+        one per source write, and gcc cross-jumps the common suffix starting
+        at the `sll` -- a goto-into-a-label version materialises the base
+        once, in the tail.
+      - the index is a named local in each arm (`i = D_8009B1D5 ^ 1;` then
+        `&D_800E9FF0[i]`). Written inline the D_8009AF38 read is scheduled
+        into the arm prefix instead of the shared suffix and the function is
+        three instructions long.
+      - the second tail is reached by `goto`, which is what puts the
+        func_8002C68C block in the natural flow and the tail after it; the
+        if/else spelling puts them the other way round.
+      - the call's result is assigned to `p`, the same name the tails use.
+        A fresh name gives no `addu $v1,$v0,$zero` -- retail's copy is the
+        extra name, and reusing p is what produces it (38 to 32).
+      - D_8009AF38 has to be declared with a size <= 8. The listing reaches
+        it as `addiu $v0,$gp,%gp_rel(...)`, which cc1psx only spells while
+        the symbol is small data; unsized gives its own %hi/%lo pair.
+      - D_8009B22A is read `lh` here and is a u16 elsewhere, so the test is
+        `*(s16 *)&D_8009B22A == 0`. The value cast does not do it.
+    What is left is one register rotation in the shared tail: retail puts
+    the record base in $a0 and reuses $v1 for both the D_8009AF38 byte and
+    the record halfword, and that anti-dependence is why retail has a
+    load-delay `nop` we fill. Rotate the allocation and the nop comes back
+    for free -- so the whole 32 is one allocation, not two problems.
+    Measured and not it: all 120 declaration-order permutations of the five
+    locals, every one exactly 32.
+
+func_80022D94 -- 8 differences, and they are a coupled pair in the strict
+    sense: each half is reachable alone and the two do not compose yet.
+    The store order in the source already matches retail exactly (B204,
+    B1EE, B192, B190, B166, B1C4, B15C, B158, B224, then the four deltas),
+    which is why no permutation of it moves the number -- three orderings
+    tried, 8, 11 and 18. The only float is the two `sll`/`ori` pairs sitting
+    four slots early.
+    `-fno-schedule-insns2` puts the pairs exactly where retail has them and
+    comes out at **9**: it then emits `sh D_8009B166`, `sw D_8009B1C4` and
+    `sw D_8009B158` each about four slots early instead. So one flag fixes
+    the pairs and breaks three stores, and the default fixes the stores and
+    misplaces the pairs. Naming the shifted values into their own locals is
+    42 under either flag, and putting all four pairs before the stores is
+    42 as well.
+    Worth knowing for the divisor rule: all four divisions here are real
+    `div`s wrapped in break 7 / break 6 because the divisor is the *first
+    parameter*. That is the same rule func_8005F27C needed a local for and
+    func_80049FB4 shows the other side of.
