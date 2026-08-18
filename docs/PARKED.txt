@@ -2345,3 +2345,21 @@ func_80050F24 -- TWO differences, and both are one instruction: retail
     Measured and not it for the last two: naming the halfword's address,
     scaling inline instead of in the local, an explicit paren around the
     base-plus-index, and four separate index names instead of one reused.
+
+func_8005F5C8 -- ONE difference, and it is the SAME one as func_8005F27C:
+    `mult $v1,$v0` against our `mult $v0,$v1`, same registers, operands
+    swapped. That matters more than either function alone. The candidate is
+    func_8005F27C's, adapted in four lines (a fourth parameter, two extra
+    arguments on the tail call, func_8005D994 for func_8005F3B8), and it
+    came out 83/83 at one difference on the first compile -- so the residue
+    is systematic and not this function's register pressure.
+    The mechanism, as far as it is established: gcc's expand_binop swaps a
+    commutative operator's operands when the destination is one of them, so
+    `t = d * t` and `t = t * d` both emit (t, d) with the result in t's
+    register. A fresh destination emits retail's (d, t) and is then
+    allocated $v1 -- d's own register, which dies at the multiply -- where
+    retail has $v0. Both halves are reachable and they do not compose.
+    Measured here as well as on the sibling: fresh name declared first and
+    last, the one-expression form, `t = t * d`, and `v = v + d * t / k`.
+    Solving it is worth two functions, so it is the best permuter target in
+    the park list.
