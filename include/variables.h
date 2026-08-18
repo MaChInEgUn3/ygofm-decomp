@@ -1216,6 +1216,8 @@ typedef struct {
 } ByteReader;
 
 extern ByteReader D_800F5BE8[];
+extern s16 D_800F5C88[];
+extern u8 D_800F5C8B[];
 /* printf format and assert strings from src/hirata/H_mctrl1.c. */
 extern u8 D_800118AC[];
 /* Head of the heap block list: {header, size} pairs, header bit 31 free,
