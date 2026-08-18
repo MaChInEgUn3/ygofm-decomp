@@ -614,6 +614,8 @@ extern u8 D_8015C424[];
 extern s16 D_800908A0[];
 extern s8 D_8015C410[];
 extern u8 D_801A7AD8[];
+/* Ten-byte records: an id halfword, three lookup halfwords and a result. */
+extern u8 D_801799D8[];
 extern u16 D_800F2B22[];
 extern u8 D_800E9EA7[];
 extern s32 D_800E9EA8[];

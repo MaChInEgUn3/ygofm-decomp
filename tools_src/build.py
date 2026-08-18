@@ -484,6 +484,12 @@ PER_FUNC_AS_FLAGS["func_8005A8C4"] = "-G2"
 # the delay-slot filler, so it hoists the lui; the scalar declaration is one,
 # so the slot stays empty and the assembler expands it after the branch.
 PER_FUNC_AS_FLAGS["func_800151D8"] = "-G0"
+# Recipe branch 1 again, and the same delay-slot use as func_800151D8: no
+# %gp_rel anywhere, so any -G is free, and the scalar declaration makes
+# D_8009B1D5 one instruction to gcc. Under the aggregate arm cc1psx's own
+# %hi/%lo pair is two, and gcc hoists the lui out of the block into the
+# search loop's load delay slot, where retail leaves a nop.
+PER_FUNC_AS_FLAGS["func_8002C7E8"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

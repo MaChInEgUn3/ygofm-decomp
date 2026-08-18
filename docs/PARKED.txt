@@ -2363,3 +2363,29 @@ func_8005F5C8 -- ONE difference, and it is the SAME one as func_8005F27C:
     last, the one-expression form, `t = t * d`, and `v = v + d * t / k`.
     Solving it is worth two functions, so it is the best permuter target in
     the park list.
+
+func_8002C7E8 -- 17 differences and every one of them is a single register
+    rotation: retail's loop counter is $a3 where ours is $a2 (both loops),
+    and in the fill loop retail has the record cursor in $a1 with the slot
+    cursor in $v1 while we have them the other way round. No instruction is
+    missing or extra.
+    NOTE: this function carries `PER_FUNC_AS_FLAGS["func_8002C7E8"] = "-G0"`
+    in build.py while it is parked, so try_func compiles it that way. That
+    is deliberate and load-bearing: there is no %gp_rel anywhere in the
+    function, so recipe branch 1 applies, and the scalar declaration of
+    D_8009B1D5 plus a -G0 assembler makes the reference ONE instruction to
+    gcc. Under the _IS_AGGREGATE arm cc1psx emits its own %hi/%lo pair, gcc
+    hoists the `lui` out of the block and into the search loop's load delay
+    slot, and retail's `nop` there has nowhere to come from -- the same
+    delay-slot use of the knob as func_800151D8 and func_8003CCD8.
+    Three other shapes were needed and all of them are recorded elsewhere:
+    the two stack arrays are declared out[3] before sl[5] (the frame layout
+    is declaration order, and the wrong way round is 69 differences); the
+    search loop is `while (1)` with the exit inside, because its back edge
+    is an unconditional `j`; and the halfword the match loop walks is
+    written as `*(u16 *)(t + n * 2)` so gcc builds the giv itself -- an
+    explicit `c` cursor puts its initialisation and its `+= 2` two slots
+    early each and costs seven.
+    Measured and not it: all 24 declaration-order permutations of the four
+    counters, an explicit slot cursor with the two increments in both
+    orders, and `c = t + 2` before the advance instead of after.
