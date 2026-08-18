@@ -497,6 +497,19 @@ meaningful, and skipping to the last one wastes hours:
    This is the missing-prototype tell read backwards: there a caller passes
    too few arguments because it never saw the declaration, here it passes all
    of them and the listing hides one.
+   **Two independent chains interleave only if the source order lets them,
+   and a name is how you give the scheduler both.** A counter's read-add-write
+   on a global and a load from a record address just computed are independent,
+   so retail issues *both loads*, then both computations, then the store,
+   filling the second load's delay slot with the first chain's `addiu`. Write
+   the second read inline in the `if` that tests it and gcc finishes the whole
+   counter chain before the record address even exists — the two never overlap,
+   the delay slot gets a `nop`, and the function is one instruction long and 86
+   differences out. `f = *(u16 *)(r + 8);` above the increment is the entire
+   fix (func_800400AC, 86 to a match). The tell is a `nop` in a load delay slot
+   where the target has an instruction belonging to a *different* computation:
+   that is not a missing name in the usual sense, it is a read that has to
+   *exist as a statement* before the other chain starts.
    **A named byte read schedules where you put the name, and one statement
    either way is the whole difference.** Where the target interleaves a load
    between two stores — `sb`, `lbu`, `sb`, `sb` — writing the read inline in
