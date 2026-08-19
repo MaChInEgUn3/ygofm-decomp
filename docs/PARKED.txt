@@ -2740,3 +2740,51 @@ func_80071FC8 -- 54 differences at equal length; gcc hoists two more loop
     Same loop, same flags, different movable set: the discriminator is how
     the loop RTL was built, not what is in it.
 
+
+func_8004C8C8 -- 5 differences, and only ONE of them is real: where the
+    cursor's initialising copy sits. Everything else in the function is
+    byte-identical, including the inner retry loop around func_8004C420 /
+    func_8004BB34 and the shared decrement store that two predecessors reach
+    with the `addiu -1` in their own delay slots.
+    Retail emits `addu $s0,$s1,$zero` (p = b) AFTER the loop's entry-guard
+    branch, in the preheader; we emit it before the guard's own load. Six
+    placements measured and all identical: `for (i = 0, p = b; ...)`,
+    `for (p = b, i = 0; ...)`, `p = b;` as a statement above the `for`,
+    `i = 0;` above with `p = b` as the sole init, `p = D_8009B458 + 0x518`
+    as the init, and an explicit `if (count != 0)` around the whole loop --
+    that last one is 88, exactly the double-branch WORKFLOW warns about.
+    Two levers did land and are installed: `-fno-strength-reduce`, because
+    gcc otherwise builds a second cursor biased at +0x1C (five uses of that
+    field) and the two givs cost a spill and a wider frame; and distinct
+    names for the three values through the 0x1C field -- `t` for the first
+    read, `r` for func_8004BB34's return, `d` for the decrement -- where one
+    shared name cost a register copy on the return and rotated the whole
+    chain to $v1. That pair took it from 101 to 18, and the increment order
+    in the `for`'s third clause (`p += 0x2C, i++`, not the reverse) took 18
+    to 5 by putting the counter's `addiu` in the bound load's delay slot.
+    Needs PER_FUNC_AS_FLAGS -G0: gp == 0 here, so recipe branch 1 applies
+    and the scalar D_8009B458 plus a -G0 assembler gives the %hi/%lo form.
+    Handed to the permuter.
+
+func_80052528 -- 2 differences, one scheduling tie. The whole function is
+    byte-identical except that retail computes `v - 0x10` before the reload
+    of D_8009B47C and `v + 0x10` after it, in the load's delay slot, and we
+    do it the other way round. Nine source orders measured -- all six
+    permutations of the three statements, both declaration orders, and
+    deriving one from the other -- and every one of them emits `v + 0x10`
+    first. Inlining either expression instead of naming it is +1. Full flag
+    sweep: default is the best row and nothing else is close.
+    Two readings that did matter and are in the candidate. The `/ 100` is
+    written `/ -100`: retail's reciprocal sequence ends `subu $a1,$v0,$v1`
+    with the operands the other way round from a normal divide by 100, which
+    is gcc folding the negation into the division, and `-(x / 100)` instead
+    emits a separate `subu $a1,$zero,$v1`. And D_800F56F0 needs a base local
+    -- written against the symbol, cc1psx folds the first reference's +0x10
+    into the `%lo` and every later offset is 16 too small.
+    Also worth recording: the four call sites are four separate
+    `func_80058434(1, 0, d, 0, 0)` statements in the source, not one call
+    reached by gotos. gcc cross-jumps only the identical tail -- the `jal`
+    and the `addu $a3,$a1,$zero` in its delay slot -- and leaves each path
+    its own `sw $zero,0x10($sp)` / `addiu $a0,1` / `addu $a1,$zero,$zero`,
+    which is exactly what the listing shows.
+    Handed to the permuter.
