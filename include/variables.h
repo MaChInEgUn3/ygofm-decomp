@@ -211,6 +211,12 @@ extern s16 D_8009AF8E;
 extern s16 D_8009AF90;
 extern u8 D_8009B478;
 extern u8 D_8009B480;
+/* Three small parallel arrays indexed by the slot number, reached as
+ * `&D_8009B488[i]` -- so they carry declared sizes and stay small data
+ * (func_80053248). */
+extern s16 D_8009B488[4];
+extern u8 D_8009B48E[2];
+extern u8 D_8009B490[2];
 extern u16 D_8009B47A;
 extern u16 D_8009B47C;
 
@@ -240,6 +246,8 @@ extern u8 D_800EAE98[];
 extern u8 D_800F569F[];
 extern u8 D_80091508[];
 extern u8 D_800F5C7F[];
+extern u16 D_800F5678[];
+extern u8 D_80091008[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];
 extern u8 D_800F5710[];

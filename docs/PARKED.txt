@@ -2643,3 +2643,28 @@ func_800478EC -- 16 differences, 95/95, and the real edits are about eight
     +0x434 byte and does `acc |= mask` after it; we do the two the other way
     round. Measured and not it: `acc |= mask` in all three positions in that
     block and a named local for the call's argument.
+
+func_80053248 -- 45 differences at 100/100, and the open half is register
+    allocation around a parameter-homing shape I do not have a clean
+    explanation for. Six parameters; retail homes the first four into the
+    incoming argument area and re-reads them, which costs about seventeen
+    instructions that no plain-parameter spelling produces (85 built against
+    100). Declaring `a` and `b` `volatile` reproduces the homing and the
+    reloads and is what the candidate carries -- but that is a KNOB, not a
+    claim about the original: nothing here takes an address. Measured
+    alternatives: `a` alone (96 built), `b` alone (90), all six (115),
+    a+b+c+d (106), and -O1 and -O0 on the plain signature (91 and 166).
+    Two things that are settled and not knobs:
+      - the base local is assigned INSIDE each of the five blocks. Held
+        outside, gcc hoists it and the whole function shifts; written with
+        no local at all, cc1psx folds each store's constant offset into the
+        `%lo` (`%lo(D_800F2C40+3576)`) where retail keeps it as the store's
+        displacement. That is the func_800300C8 rule, and this is its
+        clearest instance: five blocks, five materialisations.
+      - the tail is `D_8009AF94 = 0xF;` after the if/else, which I missed on
+        the first read because it is past the last label.
+    Field map, so nobody re-derives it: +0xDF8 <- b (halfword, also mirrored
+    to D_8009B488[a]), +0xDFA <- c, +0xDFC <- d, +0xDFE <- (e != 0) with a
+    mirror to D_8009B48E[a], +0xDFF <- (f != 0) mirrored to D_8009B490[a],
+    each guarded by its own `>= 0` test, and the c..f group only when
+    a < 2; otherwise D_8009AF88 = D_80091008 + D_800F5678[0] * 178.
