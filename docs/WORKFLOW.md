@@ -641,6 +641,19 @@ meaningful, and skipping to the last one wastes hours:
    flag's second user after func_80017708 — because the address computation is
    the expander's, not the source's.
 
+**A plain copy also survives when the two names want different register
+classes.** The rule below is that `e = o;` coalesces and only a *derived*
+value produces a copy — true when both names live in the same place.
+func_8007308C is the exception that shows the boundary: a base local used
+once before a loop and then throughout it comes out as a single `addiu
+$s3,$v0,%lo(sym)`, where retail has cc1psx's pair into `$v0` and then
+`addu $s3,$v0,$zero`. Splitting it into two names — `a` for the pre-loop
+store, `s = a;` for the loop — gives retail's copy and matched, because `a`
+dies before the loop and gets a caller-saved register while `s` has to
+survive it. Same value, same spelling, two live ranges, and the copy is the
+class change. So before reaching for a derived offset, ask whether the copy
+sits on a boundary where the register class changes.
+
 **A dead assignment only works if gcc cannot prove it redundant, and that is
 usually an offset.** Where the target has a plain copy of a pointer into a
 caller-saved register and you have none, `e = o;` will not produce it --

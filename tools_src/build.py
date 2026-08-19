@@ -277,6 +277,8 @@ PER_FUNC_FLAGS = {
     # reads are there, which costs a callee-saved register and four frame
     # instructions; retail has one cursor with displacements 0, 2, 6 and 9.
     "func_80071B64": _O2_G8_NOSTRENGTH,
+    "func_8004C8C8": _O2_G8_NOSTRENGTH,
+    "func_8007308C": _O2_G8_NOSTRENGTH,
     # Parked: this row is the permuter's base, not a match. At default flags
     # the store order is right and the two sll/ori pairs float (8); under
     # -fno-schedule-insns2 the pairs are right and three stores float (9),
@@ -467,6 +469,10 @@ PER_FUNC_AS_FLAGS["func_80049640"] = "-G0"
 # difference they were parked on, and a future try_func bug that hid the real
 # difference would still pass the check.
 PER_FUNC_AS_FLAGS["func_8004C84C"] = "-G0"
+# gp == 0 in func_8004C8C8, so any -G is free; it reaches D_8009B458 through
+# %hi/%lo four times and the scalar declaration plus a -G0 assembler is the
+# form that gives it (recipe branch 1).
+PER_FUNC_AS_FLAGS["func_8004C8C8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80045484"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A854"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
