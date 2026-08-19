@@ -2381,7 +2381,11 @@ func_8005F5C8 MATCHED 2026-08-18. The answer was `u = d * t;` into a FRESH
     Solving it is worth two functions, so it is the best permuter target in
     the park list.
 
-func_8002C7E8 -- 17 differences and every one of them is a single register
+func_8002C7E8 -- (re-read 2026-08-18 against the loop-guard lever: its
+    `if (arg0 != 0) { for (i = 0; i < 3; i++) ... }` is a genuine guard, not
+    the loop's own entry test, because the bound is the constant 3 and the
+    condition is a parameter. The lever does not reach it.)
+    17 differences and every one of them is a single register
     rotation: retail's loop counter is $a3 where ours is $a2 (both loops),
     and in the fill loop retail has the record cursor in $a1 with the slot
     cursor in $v1 while we have them the other way round. No instruction is
@@ -2495,6 +2499,11 @@ func_80031574 -- 24 differences and ONE missing instruction, all of them in
     Measured and not it: the tail name in both orders, the four cases as
     separate bodies (+2 length), `case 0x17` written first, and the switch
     in plain ascending order.
+    Three more spellings of the copy measured afterwards and all identical
+    at 24: `e = (u8 *)(s32)o;`, `e = o + 0;` and `e = &o[0];`. gcc coalesces
+    every source-level copy of a pointer into itself, so this one is not
+    reachable from the source at all -- which makes it a permuter target
+    rather than a shape to keep hunting by hand. A run was started on it.
 
 func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
     structure settled rather than as a near miss. The arithmetic reads back
