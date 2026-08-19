@@ -156,6 +156,7 @@ _O2_G8_NOSCHED1 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns"]
 # base with `+0xA` in every offset, and strength reduction biases it to
 # base+10 with zero offsets instead.
 _O2_G8_NOSTRENGTH = ["-quiet", "-O2", "-G8", "-fno-strength-reduce"]
+_O2_G8_NOSCHED2 = ["-quiet", "-O2", "-G8", "-fno-schedule-insns2"]
 _O2_G0_NOSCHED1 = ["-quiet", "-O2", "-G0", "-fno-schedule-insns"]
 _O1_G0 = ["-quiet", "-O1", "-G0"]
 _O2_G0 = ["-quiet", "-O2", "-G0"]
@@ -276,6 +277,11 @@ PER_FUNC_FLAGS = {
     # reads are there, which costs a callee-saved register and four frame
     # instructions; retail has one cursor with displacements 0, 2, 6 and 9.
     "func_80071B64": _O2_G8_NOSTRENGTH,
+    # Parked: this row is the permuter's base, not a match. At default flags
+    # the store order is right and the two sll/ori pairs float (8); under
+    # -fno-schedule-insns2 the pairs are right and three stores float (9),
+    # and store position is the half a source mutation can actually reach.
+    "func_80022D94": _O2_G8_NOSCHED2,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
