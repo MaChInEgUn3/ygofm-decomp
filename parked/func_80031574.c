@@ -27,6 +27,7 @@ void func_80031574(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_800428EC(o, 0xA);
 
     e = o;
+    o = e + 8;
     *(s32 *)(e + 0x44) = 0;
     *(s16 *)(e + 0x18) = arg3;
     *(s16 *)(e + 0x1A) = arg4;

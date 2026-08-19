@@ -2501,9 +2501,28 @@ func_80031574 -- 24 differences and ONE missing instruction, all of them in
     in plain ascending order.
     Three more spellings of the copy measured afterwards and all identical
     at 24: `e = (u8 *)(s32)o;`, `e = o + 0;` and `e = &o[0];`. gcc coalesces
-    every source-level copy of a pointer into itself, so this one is not
-    reachable from the source at all -- which makes it a permuter target
-    rather than a shape to keep hunting by hand. A run was started on it.
+    every source-level copy of a pointer into itself.
+    UPDATE, 24 -> 14. The permuter found it and the mechanism is worth more
+    than the number: a copy of a pointer into ITSELF coalesces away, but an
+    assignment of a *derived* address does not -- `o = e + 8;` is a dead
+    store (o is never read again) that gcc still allocates, and allocating
+    it is what produces retail's `addu $v0,$s3,$zero`. Any non-zero offset
+    works (4, 8, 0x18, 0x1A, 0x24, 0x44 all give 14); `o = e + 0` folds back
+    to the plain copy and is 24 again. Where it goes matters as much: at the
+    TOP of the tail block it is 14 with retail's copy in the right place, at
+    the bottom -- which is where the permuter first put it, inside the last
+    expression as `*(u16 *)(o = e + 8)` -- it is 16 with the copy emitted
+    after all the stores.
+    This is the dead-assignment register hint (func_800135FC) in its
+    sharpest form yet: the assignment has to be of something gcc cannot
+    prove equal to what it is copying.
+    The permuter's own best-by-score output was a different candidate that
+    retyped the fifth parameter to `unsigned long long` -- it measures 16
+    but the caller (func_8003353C) stores exactly one word at 0x10($sp), so
+    the parameter is 32 bits and that candidate is wrong. Reading the caller
+    is what settled it.
+    What is left at 14: retail does the +4 word's read-modify-write before
+    the +8 halfword's and we do them the other way round.
 
 func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
     structure settled rather than as a near miss. The arithmetic reads back
