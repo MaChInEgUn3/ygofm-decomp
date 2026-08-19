@@ -2432,3 +2432,27 @@ func_800260D0 -- 25 differences, all of them the scheduling of one block:
     store (27) and below it (25, no change), moving the whole `e`
     computation above the +0x1A store (33) and the `m` read alone (32).
     Progression for anyone picking this up: 93, 40, 31, 25.
+func_80049920 -- 21 differences, 81/81, and they are all the *order* of the
+    prologue: retail sets the counter to zero between two register saves and
+    fills the guard's delay slot with the accumulator's zero, where we group
+    the initialisations. No instruction is missing or extra.
+    NOTE: carries `PER_FUNC_AS_FLAGS["func_80049920"] = "-G0"` while parked.
+    There is no %gp_rel in the function and D_8009B458 is a four-byte scalar
+    pointer, so at -G8 it would be gp-relative; retail reaches it lui/lw
+    through one register, which is recipe branch 1 -- the scalar arm plus a
+    -G0 assembler. Fifth use of that knob in this session.
+    Three shapes were needed to get here and two are already rules:
+      - no outer `if` around the loop. The `blez` in front of it is the
+        for's own entry guard; writing `if (n > 0) { for (...) }` emits two
+        tests and two extra instructions, exactly as func_80072DC0 did.
+      - the inner do-while gets its OWN name for the handle pointer
+        (`s = t;`). Retail has a copy into a sixth callee-saved register
+        right where the inner loop starts, and without it we use five
+        registers, a smaller frame and 81 differences. The extra copy is the
+        extra name, again.
+      - `(D_8009B458 + o)[0x18D]`, not `D_8009B458[o + 0x18D]`: the adds
+        want the base first.
+    Measured and not it for the last 21: the for-clause in both increment
+    orders, the counter initialised before the accumulator, the cursor
+    initialisations sunk into the for-init, and all three written as copies
+    of the counter (retail's `addu $s3,$s4,$zero` shape).
