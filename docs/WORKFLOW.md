@@ -575,6 +575,19 @@ meaningful, and skipping to the last one wastes hours:
    that arm alone its own name matched. A third name for the last arm also
    matches and changes nothing, so two is the measured shape and what is
    installed.
+   **A constant argument cannot be hoisted by naming it — name something
+   else in the block instead.** func_80025F3C's whole 16-difference residue
+   was retail materialising `addiu $a0,$zero,0x23`, the argument to the call
+   that *ends* the first block, fifteen instructions earlier at the top of
+   it, and holding it in $a0 throughout — which pushes the address load and
+   both store constants into $a1. A local for the argument does nothing at
+   either position: gcc constant-propagates it back to the call. What moves
+   it is naming an unrelated *read* in the same block — `d = D_8009B1D5;`
+   assigned in front of the store before the call, where the source had the
+   symbol inline twice. One line, and every register in the block falls into
+   place. The permuter found it paired with a dead `q = p;` copy that turns
+   out to be unnecessary and costs 7 on its own, so **decompose a permuter
+   win before installing it**: half of this one was the whole answer.
    **Hoist a call's arguments into locals when the target evaluates them
    early.** Where retail sets up `$a0` and loads `$a1` *before* the stores that
    precede the call, assigning both to locals at the top of the block

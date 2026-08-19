@@ -7,6 +7,7 @@ void func_80025F3C(void) {
     s32 f;
     s32 i;
     s32 n;
+    s32 d;
 
     if (func_80024E24() == 0) {
         p = func_8002C604(0x15);
@@ -14,8 +15,9 @@ void func_80025F3C(void) {
         D_8009B1F0[D_8009B1D5 ^ 1] = p;
         *(s16 *)(p + 0) = 0xA0;
         p[0x1C] |= 0x20;
+        d = D_8009B1D5;
         *(s16 *)(p + 2) = 0x78;
-        *(s16 *)(p + 0x1A) = D_8009B1D5 ^ 1;
+        *(s16 *)(p + 0x1A) = d ^ 1;
         func_8003FEE0(0x23);
         return;
     }
