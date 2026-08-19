@@ -617,6 +617,21 @@ meaningful, and skipping to the last one wastes hours:
    flag's second user after func_80017708 — because the address computation is
    the expander's, not the source's.
 
+**A dead assignment only works if gcc cannot prove it redundant, and that is
+usually an offset.** Where the target has a plain copy of a pointer into a
+caller-saved register and you have none, `e = o;` will not produce it --
+gcc coalesces every source-level copy of a value into itself, and so do
+`(u8 *)(s32)o`, `o + 0` and `&o[0]` (all measured, all identical).
+`o = e + 8;` does: the store is dead, `o` is never read again, but the
+address is *derived* rather than equal, so gcc allocates it, and allocating
+it is the copy. Any non-zero offset works -- 4, 8, 0x18, 0x1A, 0x24 and
+0x44 all give the same result -- and `+ 0` folds back to the plain copy.
+**Where you put it decides where the copy lands**: at the top of the block
+it is retail's position, at the bottom (inside the last expression, which
+is where the permuter first found it) the copy is emitted after all the
+stores instead. func_80031574, 24 differences to 14. This is the sharpest
+form of the rule below.
+
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
 statements earlier computes nothing and matched func_800135FC, which had been
