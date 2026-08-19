@@ -2766,25 +2766,3 @@ func_8004C8C8 -- 5 differences, and only ONE of them is real: where the
     and the scalar D_8009B458 plus a -G0 assembler gives the %hi/%lo form.
     Handed to the permuter.
 
-func_80052528 -- 2 differences, one scheduling tie. The whole function is
-    byte-identical except that retail computes `v - 0x10` before the reload
-    of D_8009B47C and `v + 0x10` after it, in the load's delay slot, and we
-    do it the other way round. Nine source orders measured -- all six
-    permutations of the three statements, both declaration orders, and
-    deriving one from the other -- and every one of them emits `v + 0x10`
-    first. Inlining either expression instead of naming it is +1. Full flag
-    sweep: default is the best row and nothing else is close.
-    Two readings that did matter and are in the candidate. The `/ 100` is
-    written `/ -100`: retail's reciprocal sequence ends `subu $a1,$v0,$v1`
-    with the operands the other way round from a normal divide by 100, which
-    is gcc folding the negation into the division, and `-(x / 100)` instead
-    emits a separate `subu $a1,$zero,$v1`. And D_800F56F0 needs a base local
-    -- written against the symbol, cc1psx folds the first reference's +0x10
-    into the `%lo` and every later offset is 16 too small.
-    Also worth recording: the four call sites are four separate
-    `func_80058434(1, 0, d, 0, 0)` statements in the source, not one call
-    reached by gotos. gcc cross-jumps only the identical tail -- the `jal`
-    and the `addu $a3,$a1,$zero` in its delay slot -- and leaves each path
-    its own `sw $zero,0x10($sp)` / `addiu $a0,1` / `addu $a1,$zero,$zero`,
-    which is exactly what the listing shows.
-    Handed to the permuter.

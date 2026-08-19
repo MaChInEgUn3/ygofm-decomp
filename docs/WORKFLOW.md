@@ -726,7 +726,16 @@ declaration order that turns out to be half the answer — alone it is *6*, so
 it was correctly rejected every time it was tried. The other half is a
 `do { } while (0);` around an `if` body, which is 2 on its own; together they
 match. A bare `{ }` or `if (1) { }` is 6, so it is the loop node gcc's loop
-pass sees, not the block. **This is the specific thing the permuter is for**:
+pass sees, not the block.
+**And it is a scheduling lever in its own right, not only a partner.**
+func_80052528's last two differences were which of `v - 0x10` and
+`v + 0x10` lands in a reload's delay slot; all six orderings of the three
+statements, both declaration orders and deriving one from the other emit
+them the same wrong way round, and wrapping just the two assignments in
+`do { … } while (0);` matched. Reach for it whenever a pair of adjacent
+statements comes out in the wrong order and no permutation of them moves it
+— and read it as a **macro** in the original, which is what that idiom is
+for. **This is the specific thing the permuter is for**:
 it mutates from a base that already carries one lever, so it can find the
 partner that a one-at-a-time sweep by hand never will. func_80038334 is the
 second instance and the cleaner one: two extra names, `d = *slot; q = d;` and

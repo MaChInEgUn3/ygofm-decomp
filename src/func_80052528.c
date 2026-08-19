@@ -23,8 +23,14 @@ void func_80052528(void) {
 
         v = (f * 3755 + (0x1000 - f) * 3968) / 4096;
         lo = v - 0x10;
-        c = *(s16 *)&D_8009B47C;
-        d = v + 0x10;
+        /* The do/while(0) is load-bearing: it is what puts `v - 0x10` ahead
+         * of the reload and `v + 0x10` in its delay slot. Nine plain
+         * orderings of these two statements all emit them the other way
+         * round. Almost certainly a macro in the original. */
+        do {
+            c = *(s16 *)&D_8009B47C;
+            d = v + 0x10;
+        } while (0);
 
         if (d < c) {
             d = d - c;
