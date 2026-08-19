@@ -896,6 +896,21 @@ on a combination that had been in the table for weeks.
   one of them first-try, because counting `%gp_rel` and `lui $at,%hi(` in the
   listing and reading the widths out of variables.h settles the question in a
   minute.
+  **`gp == 0` is a first-line check, not a last resort.** When the listing has
+  *no* `%gp_rel` at all, recipe branch 1 says any `-G` is free — and in one
+  session that single fact decided four functions, three of them from the
+  **delay-slot / splitting** side rather than the addressing side:
+  func_800151D8 (a `nop` retail leaves in front of the pair), func_8002C7E8
+  (a `lui` hoisted into a search loop's load delay slot), func_8003AAE4 (the
+  `lui` hoisted thirty instructions back into an earlier block, halves ending
+  up nowhere near each other) and historically func_8003CCD8. The shape is
+  always the same: **retail keeps `%hi` and `%lo` adjacent or leaves a slot
+  empty in front of them, and we split them or fill it.** Both declarations
+  assemble to the same two instructions; only the scalar is *one* instruction
+  to gcc, so there is nothing to hoist, split or schedule. So when a function
+  greps `gp=0` and the remaining differences are about where the halves of an
+  address sit, reach for the scalar arm plus `as -G0` before re-reading the
+  source — it is two lines and it has never yet been wrong in that state.
   **Eliminate before reaching for the threshold.** If the symbol that needs the
   non-small form is *narrower* than one that needs `%gp_rel` in the same
   function, no `-G` exists between them and the answer is the unsized array —
