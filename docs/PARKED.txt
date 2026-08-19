@@ -2701,3 +2701,41 @@ func_8005BE3C -- 75 differences at -6 length; the decode is settled and the
     pair goes through TWO registers holding the same base+0x40000
     (`addu $a3,$a2,$zero`), the second pair through one. A second name does
     not survive coalescing.
+
+func_80071FC8 -- 54 differences at equal length; gcc hoists two more loop
+    invariants than retail and the discriminator is upstream of the loop pass.
+    Sibling of func_8007214C (same D_800F5B98 handles, same 12-byte
+    D_801AB000 records, same func_800707C4 range call, same 1/3/6/8 mask
+    set), and the decode is settled and confirmed against the listing:
+    want/k/out are three func_8007058C results, two of them indexed through
+    D_800F5B98; the body is the k-in-{1,3,6,8} 0x4000 test, then
+    `*(s16 *)r != 0` splitting the 0x1000 test (want==2) from its else
+    (want==1), with the zero side breaking on want==0; the tail is
+    `if (i > hi) D_800F5B98[out] = 0; else D_800F5B98[out] = i;` written in
+    that order, which is what shares the store-0 block with the entry guard.
+    All the polarity and store-order work is done. What is left:
+      - retail RELOADS `hi` from its stack slot three times (the entry guard,
+        the loop's bottom test, the post-loop test); gcc commons ours into
+        one preheader load plus `addu $a2,$v1,$zero`, which takes the
+        register retail spends on the constant 8 and rotates every name in
+        the loop.
+      - retail materialises the constant 2 at its use, in a branch delay
+        slot; gcc hoists it into a register. Independent of the above: with
+        the reload forced, the 2 is still hoisted.
+    `volatile s32 hi` DOES force the reloads (97/97, 24 differences, of which
+    most are label renumbering) and is NOT installed -- and the reason is
+    measured, not stylistic: applied to the sibling, whose target has the
+    identical three-reload signature, volatile makes it WORSE (59 -> 66). A
+    knob that fixes one of two functions with the same signature is not the
+    mechanism.
+    Measured and dead: `s32 rng[2]` with `&rng[0], &rng[1]` (64, unchanged --
+    with no store and no call in the loop every MEM is invariant whatever
+    the spelling), declaration order swapped (64), reading hi through a
+    pointer local (+4 length), `lo` as the counter (64). Loop form DID move
+    it: the source-written guard plus `do { } while (i <= hi)` is 97/97
+    against the `for`'s +1, so the `for`'s manufactured guard was costing an
+    instruction -- that is installed. Flag sweep best is 47 at
+    `-O2 -G0 -fno-schedule-insns`, which is a different cascade and not the
+    hoist.
+    Same loop, same flags, different movable set: the discriminator is how
+    the loop RTL was built, not what is in it.
