@@ -155,6 +155,7 @@ extern s32 D_8009B168;
  * only spells `addiu $v0,$gp,%gp_rel(...)` while the symbol is small data.
  * The eight is a codegen knob for that -- it has to clear -G8 as small, and
  * the real extent is not known from the listing (func_8002525C). */
+extern u8 D_8009AF30[8];
 extern u8 D_8009AF38[8];
 #ifdef D_8009B2A8_IS_AGGREGATE
 extern u16 D_8009B2A8[];

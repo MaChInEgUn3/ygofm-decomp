@@ -232,6 +232,17 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **And two arms of a branch are two values, even though only one runs.**
+   func_800250C8 accumulates into a field in two mutually exclusive blocks,
+   `+ c * 100` in one and `- c * 100` in the other; one `v` for both is 13
+   differences, entirely the `$v0`/`$v1` rotation that follows the `addu`'s
+   destination, and a second name for the second arm is a MATCH. The arms
+   never both execute, so nothing forces them to share — but one name makes
+   one pseudo, and the pseudo is numbered before the branch. Compound
+   assignment gets the destination right for a different reason and costs
+   more than it saves: `v += c * 100;` gives retail's `addu $v1,$v1,$v0`
+   and then lets gcc sink the store that follows it into the branch's delay
+   slot, which is -1 or -2 instructions.
    **A plain statement written before the others moves with them.** A loop
    counter's `i = 0` sitting above the four stores that precede the loop is not
    cosmetic: it lands before them in the prologue, where the `for`-init form
