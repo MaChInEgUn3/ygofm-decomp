@@ -2204,7 +2204,9 @@ func_80045208 -- 25 differences at 75/75, register-allocation class. The
     metric and measure 42-77 through try_func against the base's 25 --
     the divergence documented in WORKFLOW, in its strongest form yet.
 
-func_8005F27C -- ONE instruction: the multiply's operand order. Everything
+func_8005F27C MATCHED 2026-08-18, together with func_8005F5C8 and on one
+    shape -- see that entry. What stood here follows.
+    ONE instruction: the multiply's operand order. Everything
     else in the 79 matches, including the real `div` that aspsx wraps with
     break 7 / break 6, which is the interesting half of the function: gcc
     only emits a runtime div when the divisor is not a compile-time
@@ -2346,7 +2348,15 @@ func_80050F24 -- TWO differences, and both are one instruction: retail
     scaling inline instead of in the local, an explicit paren around the
     base-plus-index, and four separate index names instead of one reused.
 
-func_8005F5C8 -- ONE difference, and it is the SAME one as func_8005F27C:
+func_8005F5C8 MATCHED 2026-08-18. The answer was `u = d * t;` into a FRESH
+    name followed by `t = u;`: the fresh destination gives retail's (d, t)
+    operand order, because expand_binop swaps a commutative operator's
+    operands when the destination is one of them, and the copy back links
+    the new pseudo to t's register, which is where retail puts the product.
+    The copy coalesces away. Either half alone is three differences, which
+    is why nine hand shapes and two permuter runs all floored at one.
+    What stood here follows.
+    ONE difference, and it is the SAME one as func_8005F27C:
     `mult $v1,$v0` against our `mult $v0,$v1`, same registers, operands
     swapped. That matters more than either function alone. The candidate is
     func_8005F27C's, adapted in four lines (a fourth parameter, two extra
