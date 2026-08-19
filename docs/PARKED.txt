@@ -2478,3 +2478,20 @@ func_8004A0FC -- 38 differences, and the candidate installed is deliberately
     What is left besides the rotation: retail interleaves the two final
     products -- sra, andi, mult, re-read p[0xE], mflo, sra, andi, mult, sra,
     sh, mflo, sra, sh -- where we finish one chain before starting the other.
+
+func_80031574 -- 24 differences and ONE missing instruction, all of them in
+    the tail block after the last call. Everything up to there matches: the
+    ten-argument call, the shifted-and-masked switch selector, and the four
+    cases with 0x14 and 0x17 sharing one body (two separate bodies with the
+    same statement do NOT cross-jump here and cost two instructions; the
+    shared `case 0x14: case 0x17:` spelling is what gives retail's three
+    blocks plus a shared store).
+    What is missing is retail's `addu $v0,$s3,$zero` -- a plain copy of the
+    object pointer into a caller-saved register, with all ten tail stores
+    then going through the copy. Writing `e = o;` before the block does not
+    produce it: gcc coalesces the copy away and stores through $s3, which is
+    correct code and one instruction short. This is the extra-copy-is-an-
+    extra-name tell in the case where the obvious extra name is not enough.
+    Measured and not it: the tail name in both orders, the four cases as
+    separate bodies (+2 length), `case 0x17` written first, and the switch
+    in plain ascending order.

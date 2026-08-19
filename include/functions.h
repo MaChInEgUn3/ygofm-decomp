@@ -491,4 +491,6 @@ void func_80058938(s32 arg0, s32 arg1, Word4 arg2, Word4 arg3, s32 arg4, s32 arg
 void func_80058838(s32 arg0, s32 arg1, Word4 arg2, Word4 arg3, s32 arg4, ...);
 void func_800428EC(u8 *arg0, s32 arg1);
 s32 func_8004002C(void);
+/* Installed as an object handler by func_80031574. */
+void func_800313E8(u8 *arg0);
 void func_80015DB8(u8 *arg0);
