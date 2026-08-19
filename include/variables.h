@@ -119,6 +119,11 @@ extern s16 D_8009B148;
 #endif
 extern s16 D_8009B1A8;
 extern s16 D_8009B1A0;
+/* Reached as `%gp_rel(D_8009B20C + 0x2)` -- a member access on a small-data
+ * object. The size has to be declared (an unsized array is never small
+ * data, whatever -G says) and eight still clears -G8 (func_800260D0). */
+extern s16 D_8009B20C[4];
+extern u16 D_8009B1D0;
 extern s16 D_8009B1D2;
 extern s16 D_8009B33C;
 extern u16 D_8009B22A;

@@ -2328,6 +2328,13 @@ func_80022D94 -- 8 differences, and they are a coupled pair in the strict
     `div`s wrapped in break 7 / break 6 because the divisor is the *first
     parameter*. That is the same rule func_8005F27C needed a local for and
     func_80049FB4 shows the other side of.
+    UPDATE: 9 -> 7 under the flag, from a 25-minute permuter run, and both
+    of its mutations are no-ops read out of diff.txt: a named pointer for
+    the first read (`pa = (s16 *)D_800F2848; a = *pa;`) and swapping the
+    D_8009B1C4 and D_8009B166 stores. Measured on the installed candidate:
+    7 under -fno-schedule-insns2, 10 at default flags -- so the flag row in
+    build.py is the right base and stays. The three stores still floating
+    about four slots early are D_8009B166, D_8009B1C4 and D_8009B158.
 
 func_80050F24 -- TWO differences, and both are one instruction: retail
     computes a halfword's address into $v1 and loads through it, where we
@@ -2399,3 +2406,29 @@ func_8002C7E8 -- 17 differences and every one of them is a single register
     Measured and not it: all 24 declaration-order permutations of the four
     counters, an explicit slot cursor with the two increments in both
     orders, and `c = t + 2` before the advance instead of after.
+
+
+func_800260D0 -- 25 differences, all of them the scheduling of one block:
+    the one between func_8002C604 returning and func_8003FEE0 being called.
+    Retail evaluates every input of that block first -- %hi/%lo(D_80090800),
+    `lh D_8009B20C+2`, `lbu D_8009B1D5` -- and only then stores into the
+    record; we build the table address just before its use.
+    Four things got it from 93 to 25 and three are worth reading:
+      - D_8009B20C is reached as `%gp_rel(D_8009B20C + 0x2)`, which is a
+        member access on a SMALL-DATA object. An unsized array is never
+        small data whatever -G says, so the declaration carries a size --
+        `s16 D_8009B20C[4]`, eight bytes, still clearing -G8. Unsized costs
+        a %hi/%lo pair at every touch and seven instructions of length.
+      - the `>= 5` arm is the `else` of a `< 5` body, not an early return:
+        retail branches out on it and puts it last.
+      - the counter's store has to be written inline in the compare's own
+        statement -- `D_8009B20C[1] = *(u16 *)&D_8009B20C[1] + 1;` then a
+        fresh read for the test. Through a named `m` the store is scheduled
+        after the sign extension instead of before it (31 against 25).
+    Measured and not it: the index written four ways (the constant grouped
+    with the base, with the index, flat, and in a named offset -- 61 for the
+    named one), naming the table base (26, and func_8002778C already says
+    base locals are punished), naming the two loaded values above the first
+    store (27) and below it (25, no change), moving the whole `e`
+    computation above the +0x1A store (33) and the `m` read alone (32).
+    Progression for anyone picking this up: 93, 40, 31, 25.

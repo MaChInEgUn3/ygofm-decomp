@@ -9,8 +9,10 @@ void func_80022D94(s32 n, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 db;
     s32 dc;
     s32 dd;
+    s16 *pa;
 
-    a = *(s16 *)D_800F2848;
+    pa = (s16 *)D_800F2848;
+    a = *pa;
     da = ((arg1 - a) << 16) / n;
     b = *(s16 *)(D_800F2848 + 4);
     db = ((arg2 - b) << 16) / n;
@@ -23,8 +25,8 @@ void func_80022D94(s32 n, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_8009B1EE = arg1;
     D_8009B192 = arg2;
     D_8009B190 = arg3;
-    D_8009B166 = arg4;
     D_8009B1C4 = (a << 16) | 0x8000;
+    D_8009B166 = arg4;
     D_8009B15C = (b << 16) | 0x8000;
     D_8009B158 = (c << 16) | 0x8000;
     D_8009B224 = (d << 16) | 0x8000;
