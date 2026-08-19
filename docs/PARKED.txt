@@ -2619,3 +2619,27 @@ func_80046DE8 -- 17 differences at +2 length, and both extra instructions
     Measured and not it: naming that base inside the loop and using it after
     (18), the parenthesised base-plus-index spelling (18), and keeping the
     per-group base local (83).
+
+func_800478EC -- 16 differences, 95/95, and the real edits are about eight
+    register renames in one block plus the loop counter's increment landing
+    one slot early. Everything structural is settled and eight readings got
+    it there from 80:
+      - `u8 v` and `u8 w` for the two byte reads, which is what gives the
+        `andi 0xFF` before the test AND the *unsigned* `sltu` comparison; as
+        s32 locals the compare is `slt` and the mask is gone.
+      - `if (v >= w) { = 0; } else { = w - v; }`, not the other way round:
+        retail branches out on `v < w`.
+      - the func_80047864 arm is the THEN and the clearing block is the
+        else; there is no `continue`, the arm just ends and falls into the
+        timer block below.
+      - no base local for D_8009B45C, same as func_80046DE8: every group
+        re-reads the global.
+      - `(D_8009B45C + i)[K]` for the byte accesses and a named `o = i * 2`
+        for the halfword, so all the adds come out base-first.
+      - `PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"` with the scalar
+        declaration: no %gp_rel in the function, so recipe branch 1, and the
+        reference is one register.
+    What is left: retail sets up the call's `$a1 = mask` before reading the
+    +0x434 byte and does `acc |= mask` after it; we do the two the other way
+    round. Measured and not it: `acc |= mask` in all three positions in that
+    block and a named local for the call's argument.
