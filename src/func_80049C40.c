@@ -1,3 +1,4 @@
+#define FUNC_80049C40_VOID
 #include "common.h"
 
 void func_80049C40(void) {

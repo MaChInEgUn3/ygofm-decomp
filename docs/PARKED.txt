@@ -2597,3 +2597,25 @@ func_8007214C -- 59 differences at +2 length, and the diagnosis is one
     66), the byte-base and &-index spellings of the record address (both
     59), and the four flag rows -- nostrength 59, nosched 57, nosched2 69,
     O1 71.
+
+func_80046DE8 -- 17 differences at +2 length, and both extra instructions
+    are load-delay `nop`s we cannot fill. The structure is settled.
+    Two readings mattered to get here and both are reusable:
+      - there is NO base local. Writing `p = D_8009B45C;` once per group and
+        indexing `p` keeps the pointer in a caller-saved register across the
+        whole function and rotates every register in it: 83 differences. The
+        global is re-read at every group in retail, because a store through
+        the pointer may alias the pointer itself, so each source reference
+        is its own `lw`. Written inline it is 18.
+      - the loop's halfword store wants the scaled index in a local
+        (`o = i * 2;`) so the add comes out base-first, one more instance of
+        the func_8004DB14 rule.
+    Also here: func_80049C40 takes no argument and this caller passes one,
+    so its prototype is now guarded on FUNC_80049C40_VOID, defined only by
+    the file that defines the function -- the same per-file guard shape as
+    FUNC_80017F04_FULL. The callee was re-verified MATCH afterwards.
+    What is left: retail reuses the base register the LOOP loaded for the
+    two stores just after it, where we reload, and fills both delay slots.
+    Measured and not it: naming that base inside the loop and using it after
+    (18), the parenthesised base-plus-index spelling (18), and keeping the
+    per-group base local (83).

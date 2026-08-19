@@ -288,7 +288,14 @@ void func_8003BC40(u8 *arg0, u8 *arg1, s32 arg2);
 s32 func_800496C4(u8 *arg0, s16 arg1, s32 arg2);
 void func_80049308(void);
 void func_8004CA60(void);
+/* Takes no argument, but func_80046DE8 passes one: that translation unit
+ * never saw the declaration in the original build, and forcing the real
+ * signature on it removes an instruction retail has. Guarded so only the
+ * file that defines it sees the prototype -- same shape as
+ * FUNC_80017F04_FULL. */
+#ifdef FUNC_80049C40_VOID
 void func_80049C40(void);
+#endif
 s32 func_8004CABC(void);
 s16 func_80049F50(void);
 void func_8002A660(u8 *arg0);
