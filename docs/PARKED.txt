@@ -2553,3 +2553,25 @@ func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
     delay slot where retail fills it with the `lui` of the `% 3` reciprocal,
     which is +2, and something in the case-4 block is one short. Moving the
     modulo computations up in either arm does not change it (63 and 65).
+
+func_8003C628 -- 45 positional differences at +1 length, and the count is
+    inflated: the real edits are about six instructions misplaced inside two
+    otherwise-identical blocks. The function is otherwise settled -- three
+    object allocations, a nine-argument call, an eight and a ten, and the
+    handles stored to three gp-relative globals.
+    The addressing is worth the entry on its own. D_8009B408 is reached
+    through ONE register (`lui $v1` then `lbu $v1,%lo(...)($v1)`), which is
+    the assembler's own expansion of a bare symbol, not cc1psx's pair --
+    under the _IS_AGGREGATE arm cc1psx emits a two-register pair and the
+    function is three instructions long. So it takes the _SIZED arm (eight
+    bytes) and `PER_FUNC_AS_FLAGS["func_8003C628"] = "-G4"`, the same
+    4 <= G < 8 window as func_80025BEC: the gp-relative neighbours here are
+    one and four bytes wide. That row is live while the function is parked.
+    What is left: retail reads `o[8]` BEFORE reading D_8009B408 in the first
+    block and fills the second block's load-delay slot with the
+    `sw D_8009B388`, where we finish one chain before starting the other.
+    Measured and not it: all twelve orderings of the four statements in the
+    first block (45 is the best, 62/66/67/70 the rest), splitting the read
+    out of the read-or-write in one block and in both (62 and 66), the
+    compound `|=` spelling, and `v` as s8, u8 and s32 with the cast moved to
+    the test.

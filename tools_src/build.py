@@ -421,6 +421,9 @@ PER_FUNC_AS_FLAGS["func_80024200"] = "-G2"
 # the window is 4 <= G < 8, and the declaration is inflated to eight to open
 # it (func_80025BEC).
 PER_FUNC_AS_FLAGS["func_80025BEC"] = "-G4"
+# Same window as func_80025BEC: D_8009B408 declared eight and bare, the
+# gp-relative neighbours are one and four bytes, so 4 <= G < 8.
+PER_FUNC_AS_FLAGS["func_8003C628"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80012B50"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80060E70"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
