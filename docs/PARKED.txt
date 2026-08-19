@@ -2575,3 +2575,25 @@ func_8003C628 -- 45 positional differences at +1 length, and the count is
     out of the read-or-write in one block and in both (62 and 66), the
     compound `|=` spelling, and `v` as s8, u8 and s32 with the cast moved to
     the test.
+
+func_8007214C -- 59 differences at +2 length, and the diagnosis is one
+    sentence: gcc hoists three loop invariants that retail keeps inside the
+    loop. The structure is settled -- a linear search over 12-byte records
+    for the first whose halfword at +0 matches, skipping two exclusion
+    cases, then the index or zero stored to a handle slot.
+    The three it hoists are the constant 8 (retail materialises it inline
+    each time), `k < 5` (retail's `slti $v0,$s1,5` is in the loop body), and
+    the D_800F5B98 base for the two final stores (retail shares only the
+    `lui` and emits each `%lo` in its own arm, which is the split-pair form
+    an unsized array gives). Retail also RELOADS the loop bound from its
+    stack slot at both the continue and the exit, where we cache it in a
+    register -- and it is an address-taken local, which by the rule in
+    WORKFLOW should stay in memory.
+    One real bug found on the way and worth repeating: D_801AB000 is
+    declared `Rec12[]`, so `D_801AB000 + i * 12` advances **144** bytes, not
+    12. The listing said so immediately -- `sll 4` where retail has `sll 2`.
+    Use `(u8 *)&D_801AB000[i]`.
+    Measured and not it: volatile on one and both out-parameters (62 and
+    66), the byte-base and &-index spellings of the record address (both
+    59), and the four flag rows -- nostrength 59, nosched 57, nosched2 69,
+    O1 71.
