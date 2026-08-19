@@ -2456,3 +2456,25 @@ func_80049920 -- 21 differences, 81/81, and they are all the *order* of the
     orders, the counter initialised before the accumulator, the cursor
     initialisations sunk into the for-init, and all three written as copies
     of the counter (retail's `addu $s3,$s4,$zero` shape).
+
+func_8004A0FC -- 38 differences, and the candidate installed is deliberately
+    NOT the lowest-scoring one. Two shapes of the three-way volume test were
+    measured at equal length:
+      - `if (vol < 0x40) {...} else if (vol == 0x40) {...} else {...}` is 28,
+        but it puts the `< 0x40` block INLINE where retail has it last, so
+        five instructions are in the wrong place and the count is flattered.
+      - `if (vol >= 0x40) { l = t; if (vol == 0x40) ... } else { ... }` is 38
+        and has retail's block order exactly. Its extra count is one register
+        rotation (retail keeps the volume in $a2, we get $a0) plus the same
+        tail interleave both share.
+    The second is installed because a rotation is what the permuter is for
+    and a misplaced block is not. This is the ranking hazard WORKFLOW warns
+    about, in a form where both candidates are the same length.
+    Measured and not it: all 24 declaration-order permutations of the four
+    locals (every one 38), and hoisting `r = t` out of the branch to explain
+    retail's `addu $a1,$v1,$zero` in the delay slot -- that reads like the
+    unconditional-then-conditional shape but costs three instructions here
+    (93 built against 96) in both polarities.
+    What is left besides the rotation: retail interleaves the two final
+    products -- sra, andi, mult, re-read p[0xE], mflo, sra, andi, mult, sra,
+    sh, mflo, sra, sh -- where we finish one chain before starting the other.

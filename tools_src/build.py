@@ -506,6 +506,7 @@ PER_FUNC_AS_FLAGS["func_800151D8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002C7E8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003AAE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049920"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8004A0FC"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
