@@ -191,6 +191,15 @@ extern u16 D_8009B27C;
 extern u32 D_8009AF64[2];
 extern s32 D_8009AF68;
 
+/* Four halfwords the code hands to func_8007FA38 by the address of the
+ * first, but which splat named individually and retail reaches by name --
+ * so they are four scalars, small data at -G8, and `&D_8009B468` gives the
+ * `addiu $a0,$gp,%gp_rel(...)` the listing has (func_8004E9A0). */
+extern s16 D_8009B468;
+extern s16 D_8009B46A;
+extern s16 D_8009B46C;
+extern s16 D_8009B46E;
+extern u8 *D_8009AF88;
 extern u8 D_8009B478;
 extern u16 D_8009B47A;
 extern u16 D_8009B47C;
@@ -218,6 +227,8 @@ extern u8 *D_800EAE98[];
 #else
 extern u8 D_800EAE98[];
 #endif
+extern u8 D_800F569F[];
+extern u8 D_80091508[];
 extern u8 D_800F5C7F[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];

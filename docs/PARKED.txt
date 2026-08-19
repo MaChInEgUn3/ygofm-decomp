@@ -2495,3 +2495,33 @@ func_80031574 -- 24 differences and ONE missing instruction, all of them in
     Measured and not it: the tail name in both orders, the four cases as
     separate bodies (+2 length), `case 0x17` written first, and the switch
     in plain ascending order.
+
+func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
+    structure settled rather than as a near miss. The arithmetic reads back
+    cleanly and is worth having written down:
+        if (D_800F569F[0] == 0) return;
+        switch (D_8009AF88[0xA0]) {
+        case 1: u = func_80074170(-1) / 8;   r = u % 3;
+                D_8009B46A = 0x1C0; D_8009B46C = 0x10; D_8009B46E = 0x40;
+                D_8009B468 = r * 16 + 0x2D0;
+                func_8007FA38(&D_8009B468, 0x2C0, 0x1C0, r);   break;
+        case 4: u = func_80074170(-1) / 10;  n = 8; r = u % n;
+                D_8009B468 = 0x260; D_8009B46C = 0x20; D_8009B46E = 0x18;
+                D_8009B46A = D_80091508[r] * 3 * 8 + 0x180;
+                func_8007FA38(&D_8009B468, 0x220, 0x168, r);   break;
+        }
+    Three readings settled and are in the candidate: the dispatch is a
+    `switch` (an if/else-if chain emits bne chains where retail has
+    beq/beq/j); D_800F569F is an unsized array, because retail reaches it
+    %hi/%lo and a scalar would be gp-relative at -G8; and the four
+    D_8009B46x are separate small-data scalars, so `&D_8009B468` gives
+    retail's `addiu $a0,$gp,%gp_rel(...)`.
+    Note the two different divides in one function, which is the divisor
+    rule from both sides: `/ 8` and `/ 10` are reciprocal/shift expansions
+    because the divisors are literals, while `% 8` is a REAL div wrapped in
+    break 7 / break 6 -- so that 8 was a variable in the source and is a
+    local here.
+    What is open: gcc copies the `/ 8`'s `sra` into the preceding branch's
+    delay slot where retail fills it with the `lui` of the `% 3` reciprocal,
+    which is +2, and something in the case-4 block is one short. Moving the
+    modulo computations up in either arm does not change it (63 and 65).
