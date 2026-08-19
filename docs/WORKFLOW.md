@@ -376,6 +376,17 @@ meaningful, and skipping to the last one wastes hours:
    instead is worse (func_80047788, 48 to 18). This is the same family as the
    `(x & 0x100) != 0` fold in step 2: one name reused across two statements
    is what stops the combiner.
+   **A `bgez` / `addiu` / `sra` triple around one value is a signed DIVIDE,
+   not a shift, and writing it as a shift costs delay slots.** gcc expands
+   `x / (1 << k)` as "if x is negative add (1 << k) - 1, then arithmetic
+   shift right by k" -- so `bgez; addiu 0xFFF; sra 12` is `/ 4096` and
+   `bgez; addiu 3; sra 2` is `/ 4`. Hand-expanding it into `if (x < 0) x +=
+   0xFFF; x >>= 12;` computes the same thing but leaves the shift a separate
+   statement, and gcc then does not have it available to fill the *next*
+   test's delay slot the way retail does: func_8003A990 went ten differences
+   to a match on writing `/ 4096` instead, after three attempts at moving
+   the hand-written shift around. Read the bias constant -- it is always
+   `(1 << k) - 1` -- and write the division.
    **A real `div` in the listing means the divisor was a *variable*.** This
    is the strongest single tell in the arithmetic family and it costs nothing
    to check: gcc emits a runtime `div` — the one aspsx wraps in
