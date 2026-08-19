@@ -2668,3 +2668,36 @@ func_80053248 -- 45 differences at 100/100, and the open half is register
     mirror to D_8009B48E[a], +0xDFF <- (f != 0) mirrored to D_8009B490[a],
     each guarded by its own `>= 0` test, and the c..f group only when
     a < 2; otherwise D_8009AF88 = D_80091008 + D_800F5678[0] * 178.
+
+func_8005BE3C -- 75 differences at -6 length; the decode is settled and the
+    open half is how many times D_8009B498 is reloaded.
+    Retail loads that pointer global THREE times -- once for the x group,
+    once for the y group and the func_8008FD38 base, once for the
+    func_8008FDB4 base -- and we load it once and keep it. Neither writing
+    the global inline at every reference nor reassigning a base local once
+    per group produces the reloads: gcc CSEs all of them, so it is treating
+    the `sh` through the derived pointer as not aliasing the pointer itself.
+    Declaring the global `volatile` DOES produce them (95 built against 93,
+    74 differences) but that is a knob with no justification -- nothing here
+    needs it and no other file uses the symbol -- so it is NOT installed and
+    the candidate carries the plain declaration. Whoever picks this up
+    should look for the real reason gcc reloads before reaching for it.
+    Settled, from the listing:
+      - `func_8008FD38(D_8009B498 + D_8009B066 * 0xE000 + 0x1B000,
+         D_8009B060)`; the scaling is `sll 3, subu` = 7k then `sll 13`, and
+        the second argument is the `lbu` twenty instructions earlier, which
+        is the early-evaluated-argument shape.
+      - `func_8008FDB4(D_8009B498 + D_8009B067 * 0x2D00 + 0x37000,
+         *(s16 *)(...0x4242C) * *(s16 *)(...0x4242E) / 2)`; scaling is
+        `3m * 16 - 3m` = 45m then `sll 8`.
+      - the tail returns func_8005BFC8's own value, not a literal: the edge
+        that skips func_8005C5D4 carries $v0 through untouched, so there is
+        no second materialisation of 1 there.
+      - `x` is `*(s16 *)buf` and `y` is `*(u16 *)(buf + 2)` -- lh against
+        lhu, deliberate.
+      - one call to func_8007FEC8; the doubled `addiu $a0,$sp,0x10` is
+        per-path argument materialisation, not two calls.
+    Also open, and probably one instruction of the six: retail's first store
+    pair goes through TWO registers holding the same base+0x40000
+    (`addu $a3,$a2,$zero`), the second pair through one. A second name does
+    not survive coalescing.

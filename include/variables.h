@@ -51,6 +51,11 @@ extern u8 D_8009AFA4;
 #endif
 extern u8 D_8009AFA2;
 extern u8 D_8009AFA6;
+extern u8 D_8009B060;
+extern u8 D_8009B065;
+extern u8 D_8009B066;
+extern u8 D_8009B067;
+extern u8 *D_8009B498;
 extern u8 D_8009B063;
 extern u8 D_8009B064;
 extern u8 D_8009B078;
