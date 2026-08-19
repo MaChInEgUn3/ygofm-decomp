@@ -296,6 +296,23 @@ meaningful, and skipping to the last one wastes hours:
    the first operand; `t = a + b;` into a fresh variable keeps the tree order.
    Pick by which one retail shows — this unparked four functions in one direction
    and matched `func_80035748` in the other.
+   **For a *commutative* operator the destination decides the operand order,
+   and undoing that needs a fresh name AND a copy back.** gcc's expand_binop
+   swaps a commutative operator's operands when the destination is one of
+   them, so `t = d * t`, `t = t * d` and `t *= d` all emit `mult t,d` — no
+   spelling of the multiply reaches retail's `mult d,t` while `t` is the
+   destination. A fresh name does (`u = d * t`), and is then allocated the
+   register of whichever operand dies at the multiply, which is the *other*
+   one. So each half is reachable alone and they do not compose: fresh name
+   gives the order and loses the register, `t` as destination gives the
+   register and loses the order, both are three differences. `u = d * t;
+   t = u;` takes both — the copy links the new pseudo to `t` and coalesces
+   away. func_8005F27C and func_8005F5C8 matched on it together, having sat
+   at exactly one difference each through nine hand shapes, a full flag
+   sweep and two permuter runs. **The identical residue in two
+   independently written functions is what said it was systematic**; a
+   one-instruction difference in a single function reads like local pressure
+   and would have been parked.
    The inverse too: where the target reads something **once** and you read it
    twice, look for a store between your two reads that gcc must assume aliases
    — `if (q[7]) x = q[7] << 4;` reloads across a store through another
