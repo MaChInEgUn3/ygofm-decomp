@@ -2739,3 +2739,31 @@ func_80071FC8 -- 54 differences at equal length; gcc hoists two more loop
     hoist.
     Same loop, same flags, different movable set: the discriminator is how
     the loop RTL was built, not what is in it.
+
+func_80025F3C -- 16 differences, equal length, and every one of them is
+    downstream of a single instruction's position. Structurally complete:
+    the second and third blocks are byte-identical, including the loop that
+    walks `D_800907D8[i + D_8009B1D5 * 20]` for i in 5..9 and installs
+    func_80025B28 at +0x24 of every D_801A7AD8 record whose +0x14 word has
+    all of 0x90000000 set -- lifted from its matched sibling func_80025BEC,
+    which is the same loop with 0xF as the bound.
+    The one difference: retail materialises `addiu $a0,$zero,0x23` -- the
+    argument to the func_8003FEE0 call that ENDS the first block --
+    immediately after the func_8002C604 call that begins it, fifteen
+    instructions early, and holds it in $a0 across the whole block. That
+    pushes `la $a1,D_8009B1F0` and both store constants (0xA0, 0x78) into
+    $a1; ours are all in $a0 and the constant is emitted at the call, so
+    the block is the same instructions with two registers exchanged and one
+    insn moved.
+    Measured and dead: a named local for the argument, assigned before the
+    first call and after it (gcc constant-propagates either way, no change);
+    named locals for 0xA0 and 0x78, separately and shared; `p[0x1C] |= 0x20`
+    moved ahead of the 0xA0 store; the pointer-array store moved to the end
+    of the block (+2); a named index for it (+5). A two-argument
+    `func_8003FEE0(0x23, 0x78)` through a temporarily un-prototyped
+    declaration -- the shape suggested by $a1 holding 0x78 at the call --
+    is +1 and 89, so the live $a1 is the store's constant and not a second
+    argument. Full flag sweep: default `-O2 -G8` is the best row, everything
+    else 82 or worse.
+    Left running under the permuter; this is its class -- one instruction's
+    placement and a two-register exchange.

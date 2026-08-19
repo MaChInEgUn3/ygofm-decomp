@@ -381,6 +381,7 @@ extern u8 D_8009B1D5[];
 #else
 extern u8 *D_8009B1B4;
 extern u8 *D_8009B1C8;
+extern u8 *D_8009B1F0[2];
 extern u8 *D_8009B1F8;
 extern u8 D_8009B1D5;
 #endif
