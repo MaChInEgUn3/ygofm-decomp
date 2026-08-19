@@ -13,13 +13,13 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **741** (66.1%) | **19,446** (23.7%) |
-| remaining | 380 (33.9%) | 62,432 (76.3%) |
+| decompiled and matching | **749** (66.8%) | **20,121** (24.6%) |
+| remaining | 372 (33.2%) | 61,757 (75.4%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
-number.** The functions matched so far average 26 instructions and the ones
-remaining average 164 — the short bands get emptied first and refill only when
+number.** The functions matched so far average 27 instructions and the ones
+remaining average 166 — the short bands get emptied first and refill only when
 a rule is retracted. Scope is the 1,121 game functions below `0x80073840`,
 excluding PsyQ library code (`docs/LIBRARY_FUNCS.txt`) and hand-written
 assembly (77 GTE-block functions, filtered by `candidates.HAND_WRITTEN`). An
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 793 files; 741 of them are in scope and the rest are library or
+`src/` holds 801 files; 749 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -37,7 +37,7 @@ above-scope functions matched along the way.
 |---|---|---|---|
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
-| 51–100 | 85 | 50 | 35 |
+| 51–100 | 77 | 54 | 23 |
 | 101–200 | 131 | 3 | 128 |
 | 201–400 | 58 | 0 | 58 |
 | 400+ | 27 | 0 | 27 |
@@ -46,10 +46,10 @@ above-scope functions matched along the way.
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
 broken. Unclaimed work starts at 51 instructions, and as of this revision the
-lowest unclaimed function is 76: the 51-75 range is parked out too.
+lowest unclaimed function is 81: the 51-80 range is parked out too.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 131 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 135 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
