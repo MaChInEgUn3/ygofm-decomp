@@ -272,6 +272,10 @@ PER_FUNC_FLAGS = {
     # retail does not have, and the anchor also eats the callee-saved
     # register the D_800F2848 address hoist wants. Third user of the flag.
     "func_8002C6C8": _O2_G8_NOSTRENGTH,
+    # The record walk builds a second giv biased at +2 because most of the
+    # reads are there, which costs a callee-saved register and four frame
+    # instructions; retail has one cursor with displacements 0, 2, 6 and 9.
+    "func_80071B64": _O2_G8_NOSTRENGTH,
 }
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
