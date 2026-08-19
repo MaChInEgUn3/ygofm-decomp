@@ -247,10 +247,15 @@ extern u8 D_800EAE8F[];
  * func_80024200 stores it through $at and loads it through the destination
  * register while the two-byte gp-relative symbols beside it stay small. */
 #ifdef D_8009B260_SIZED
-extern u8 D_8009B260[4];
+/* Eight, not the four it has: func_80025BEC needs it non-small while a
+ * four-byte pointer beside it stays %gp_rel, so the window is 4 <= G < size
+ * and only a declared eight opens one. func_80024200 assembles at -G2 and
+ * is unaffected -- four and eight are both non-small there (rechecked). */
+extern u8 D_8009B260[8];
 #else
 extern u8 D_8009B260;
 #endif
+extern u8 *D_8009B17C;
 extern u8 D_8009B261;
 extern u8 *D_8009B264;
 extern u8 D_800EAD88[];

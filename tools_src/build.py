@@ -417,6 +417,10 @@ PER_FUNC_AS_FLAGS["func_8004BAE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004CABC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800240B0"] = "-G2"
 PER_FUNC_AS_FLAGS["func_80024200"] = "-G2"
+# D_8009B260 bare while the four-byte D_8009B17C beside it keeps %gp_rel:
+# the window is 4 <= G < 8, and the declaration is inflated to eight to open
+# it (func_80025BEC).
+PER_FUNC_AS_FLAGS["func_80025BEC"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80012B50"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80060E70"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
