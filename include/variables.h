@@ -195,6 +195,12 @@ extern s32 D_8009AF68;
  * first, but which splat named individually and retail reaches by name --
  * so they are four scalars, small data at -G8, and `&D_8009B468` gives the
  * `addiu $a0,$gp,%gp_rel(...)` the listing has (func_8004E9A0). */
+/* A second four-halfword rectangle handed to the library by the address of
+ * its first member, same shape as D_8009B468 (func_800582C0). */
+extern s16 D_8009B470;
+extern s16 D_8009B472;
+extern s16 D_8009B474;
+extern s16 D_8009B476;
 extern s16 D_8009B468;
 extern s16 D_8009B46A;
 extern s16 D_8009B46C;
