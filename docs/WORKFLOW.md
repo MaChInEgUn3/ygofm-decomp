@@ -328,6 +328,15 @@ meaningful, and skipping to the last one wastes hours:
    twice, look for a store between your two reads that gcc must assume aliases
    — `if (q[7]) x = q[7] << 4;` reloads across a store through another
    parameter, and one local was the whole of func_80059000.
+   **And the same shape run forwards stops a store being sunk.** A field
+   bumped and then tested — `c = p[K] + 1; p[K] = c; if ((s8)c < 6)` — gives
+   gcc a second register for the result and it sinks the `sb` into the test's
+   branch delay slot; written with no local at all, `p[K] = p[K] + 1;` then
+   `if ((s8)p[K] < 6)`, the second read forces the store to stay where it is
+   and CSE folds the read back into the stored value, so it costs nothing.
+   func_8003B378, the last difference. `c = p[K]; c += 1;` and `c = c + 1;`
+   are both still 16, so it is the second *read*, not the compound
+   assignment.
    **A pointer just stored into a struct, then used, wants reading back.**
    Where the target has a register copy of an address it has just stored --
    `sw $a1,K(base)` then `addu $a0,$a1,$zero` and a store through `$a0` --
