@@ -3171,7 +3171,7 @@ func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
     the constants land in exchanged registers.
 
 
-func_80032184 -- 29 differences at equal length, and everything left is
+func_80032184 -- 27 differences at equal length, and everything left is
     register rotation. Fourth member of the dispatcher family (func_8003C328,
     func_8003C120, func_8004BCE8), same `goto` layout with the arms in
     retail's address order, four modes and a shared tail for modes 0 and 1.
@@ -3202,6 +3202,17 @@ func_80032184 -- 29 differences at equal length, and everything left is
     dead, since mode 2 returns on the next line -- ties mode 3's constant to
     `one`'s pseudo and is 29 at exact length. Same borrowed-local class as
     func_8002A4A8, here with the borrow in a different arm from the use.
+    29 -> 27 by borrowing the DEAD second parameter for the mask constant --
+    `mode = 0xFFDDFFFF;` at the top of each arm that uses it, `mode` being
+    finished the moment the dispatcher branches. That moves the mask from
+    $v1 to $a1, which is the register `mode` arrives in; retail has it in
+    $a0, the register the FIRST parameter arrives in. Borrowing that one too
+    -- a separate cursor local so the parameter itself is dead, then
+    `arg0 = (u8 *)0xFFDDFFFF;` -- is 37 and much worse.
+    The borrow does NOT transfer to func_8003BD14: the same edit there is +4
+    and 108 against a base of 42, whether applied to the three 0xFFDCFFFF
+    arms or to all four. Third lever in this family that works on one member
+    and not its siblings.
     The volatile lever does NOT transfer to the siblings, measured: 21 either
     way on func_8003C328 (its arms already have a store between the two
     read-modify-writes, so nothing to fold), -7 on func_8003C120 (it is at

@@ -26,6 +26,7 @@ void func_80032184(u8 *p, s32 mode) {
     return;
 
 m0:
+    mode = 0xFFDDFFFF;
     *(s16 *)(p + 0x30) = 0x300;
     *(s16 *)(p + 0x32) = 0x100;
     *(s16 *)(p + 4) = 0x40;
@@ -43,6 +44,7 @@ m0:
     return;
 
 m1:
+    mode = 0xFFDDFFFF;
     *(s16 *)(p + 0x30) = 0x340;
     *(s16 *)(p + 4) = 0x40;
     t = D_8009B0F4;
