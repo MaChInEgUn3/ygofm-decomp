@@ -2927,6 +2927,10 @@ func_8001B938 -- 3 differences, one register. 107 of 110 instructions are
     `>> 26` from the `& 0x1F` against one name (4), naming the halfword read
     between them, and the declaration order of the four locals -- and every
     one of them is 3.
+    Also measured after the fact: the borrowed-later-live-local hint that
+    took func_8002A4A8 from 14 to 3 does not apply here -- borrowing the
+    loop counter for the record index is 6, borrowing the byte-table index
+    is 18, and using one name for both the index and the field is 10.
     Two readings got it here and both are now WORKFLOW lines: a base local
     for D_8015C424 (against the symbol the 0x4B6B8 folds into `%hi`), and
     then a SECOND name for the intermediate pointer, because retail splits
@@ -2953,6 +2957,14 @@ func_8005F3B8 -- 11 differences, and every one is $s1 and $s2 exchanged. The
     the fifth parameter (+3), the `b` store moved above the `e` block (-1),
     and three borrowed-local hints of the kind that took func_8002A4A8 from
     14 to 3 (25, +3, and no change).
+    A permuter run produced a 7 and it is NOT installed. Its edit was to
+    duplicate the two calls into both arms of `if (D_8009B07B) { … } else
+    { … }` -- semantically a no-op, and gcc merges the arms back -- and what
+    it actually does is trade this $s1/$s2 swap for an $s5/$s6 one on the
+    second and fourth parameters. Fewer sites touch those two, so the count
+    falls; the function is no closer. Read it as evidence that the whole
+    callee-saved assignment here is one permutation away and that nothing in
+    the source is choosing it.
 
 
 func_80025D30 -- 38 differences at -1 instruction; the addressing is solved
