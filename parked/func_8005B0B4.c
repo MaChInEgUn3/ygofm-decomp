@@ -3,10 +3,10 @@
 u8 *func_8005B0B4(u8 *out, u8 r, u8 g, u8 b, s32 mode, u16 scale, u8 lvl) {
     u8 hsv[8];
     u8 rgb[4];
-    u8 k;
+    s32 k;
     s32 m;
     s32 t;
-    u8 h;
+    s32 h;
     s32 c;
     s32 d;
     s32 e;
@@ -16,16 +16,17 @@ u8 *func_8005B0B4(u8 *out, u8 r, u8 g, u8 b, s32 mode, u16 scale, u8 lvl) {
 
     m = mode & 8;
     k = mode & 7;
-    t = (k == 6);
+    t = ((u8)k == 6);
 
     func_8005A98C(hsv, r, g, b, lvl);
 
-    if (k < 7) {
+    if ((u8)k < 7) {
         h = k;
         if (m != 0) {
-            h = (h + 3) % 6;
+            h += 3;
+            h %= 6;
         }
-        *(s32 *)hsv = h << 12;
+        *(s32 *)hsv = (h & 0xFF) << 12;
     }
 
     if (t != 0) {
