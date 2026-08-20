@@ -262,6 +262,9 @@ PER_FUNC_FLAGS = {
     "func_80049394": _O2_G8_MACRO,
     "func_8002D2D8": _O2_G8_MACRO,
     "func_80017708": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # func_800722CC: the two reads at +6 inside the search loop get their own
+    # biased giv, which costs a callee-saved register and five instructions.
+    "func_800722CC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # func_80058938: the found-record arm's two Word4 block copies force their
     # destination addresses into registers, and strength reduction turns the
     # r+0x14 one into a giv that every neighbouring store is then rebased on
