@@ -307,6 +307,9 @@ HOIST_EPILOGUE_FUNCS = {
 }
 
 SMALL_DATA_NOP_FUNCS = {
+    # `lbu` of a struct field followed by a gp-relative `sb` of it: maspsx
+    # expects the store to expand through $at and fill the slot.
+    "func_80015310",
     "func_8002E5AC",
     "func_8002DC38",
     "func_8002D180",
@@ -523,6 +526,10 @@ PER_FUNC_AS_FLAGS["func_800257A0"] = "-G4"
 # func_80024E58: D_8009B364 inflated to eight bytes for the $at store, while
 # the four-byte D_8009B17C/D_8009B1C8/D_8009B214 stay %gp_rel.
 PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"
+# func_80015310: every gp-relative symbol in it is one byte, so the four-byte
+# D_8009B0D8 goes bare at -G2 -- one instruction to the delay-slot filler,
+# which is retail's nop in front of the pair.
+PER_FUNC_AS_FLAGS["func_80015310"] = "-G2"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

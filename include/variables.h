@@ -1231,6 +1231,8 @@ extern u8 D_80091570[];
 /* Read once by func_800154E4 through cc1psx's own %hi/%lo pair, so unsized. */
 extern s32 D_800E9D94[];
 extern u8 D_800E9EC8[];
+/* Stored by func_80015310 through cc1psx's own %hi/%lo pair, so unsized. */
+extern u8 D_800E9ECC[];
 extern u8 D_800E9ECE[];
 extern u8 D_800E9ECF[];
 extern s32 D_8009B378;
