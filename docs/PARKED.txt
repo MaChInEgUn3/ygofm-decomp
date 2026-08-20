@@ -2975,8 +2975,14 @@ func_80025D30 -- 38 differences at -1 instruction; the addressing is solved
     position, is -2.
 
 
-func_8004A940 -- 91 differences at -4; the decode is written down and the
-    loop shapes are half solved. Five loops, all over the same 0x28-byte
+func_8004A940 -- 77 differences at -3, after m2c corrected the decode in
+    three places the hand-read had wrong. THE SIGNATURE WAS WRONG: it takes
+    FOUR parameters, not two, it RETURNS a value, and func_8004A8E4 takes
+    four arguments. m2c saw it because $a2/$a3 are read before being written
+    on the path where the first loop does not run, and because the `addu
+    $v0,$a0,$zero` this entry used to call "a dead copy of the loop counter
+    into a register nothing reads" is the return value being set to the loop
+    index. Two of the three things this entry listed as open were that bug. Five loops, all over the same 0x28-byte
     records starting at D_8009B458 and bounded by `*(s16 *)(base + 0x510)`:
       1. bail out entirely if any record's 0x183 byte is 0x63;
       2. take the first record whose 0x18D byte is zero;
@@ -2997,9 +3003,11 @@ func_8004A940 -- 91 differences at -4; the decode is written down and the
     tests the raw load in the guard and the loop compares against a hoisted
     copy of it, which is exactly what an invariant load in the condition
     gives; a named `n` gets one register for both and is -3 instructions.
-    Still open: loop 3's `o = i` copy comes out in the wrong direction
-    (retail sets `i` then copies it into the offset; ours does the reverse,
-    and `for (i = 0, o = i; ...)` and the two-statement form are identical),
-    and loop 1 has a dead `addu $v0,$a0,$zero` in its exit branch's delay
-    slot that we do not produce at all -- a copy of the loop counter into a
-    register nothing reads.
+    Also corrected: loop 1 compares the record byte against the VARIABLE
+    holding 0x63 (retail keeps it in $a3 and does `beq $v0,$a3`), not against
+    the literal; the literal costs a spare copy. 92 -> 80 on that alone, and
+    80 -> 77 with the first loop's bound written inline.
+    Still open, and it is the known reload class: retail re-reads the
+    D_8009B458 pointer global at the bottom of loop 3 every iteration, and
+    gcc hoists ours into a base local however the source spells it -- the
+    same thing func_80071FC8's `hi` does, unsolved there too.
