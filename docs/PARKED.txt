@@ -3282,3 +3282,47 @@ func_8004A8E4 goes from 21 at -2 to 21 at -1 on D_8009B458_IS_VOLATILE. The
 length error improves and the difference count does not, which is the weakest
 shape a hit can have, and `volatile` on the game's main record array is a large
 claim to make on it. Left for whoever next reads that function's residue.
+
+
+func_8004D75C -- 40 differences at equal length (110/110), and every one of
+    them is a register. The instruction sequence is identical: two loop nests
+    over one 0xE20-byte record, the first walking a linked structure and
+    accumulating byte weights, the second taking a running maximum per row.
+    What paid, in order:
+      - all three of the first nest's cursors are **givs**, not source
+        variables: `t + i * 4` (retail's `addu $t2,$a3,$zero` + `lw 480($t2)`),
+        `i * 2` and `i * 2 + 0x74`. Writing the first as an index and the other
+        two as explicit scalars is what retail has -- an all-index version
+        collapses the `+0x2C8` store into a t-based giv and loses 5
+        instructions, an all-explicit one builds the wrong giv for the first.
+      - the `v >= 0` arm is out of line, after the negative path's blocks, so
+        it needs a `goto`, not an inline `if`.
+      - `s = (u32)v >> 16; s = s & 0x7F;` as two statements against one name.
+        Retail leaves the `bgez`'s delay slot empty because `s` is live on the
+        taken path; one expression puts the shift in a dead temp and the
+        filler hoists it. Now a WORKFLOW rule.
+      - the second nest's index, cursor and counter need **their own names**.
+        Reusing the first nest's is 63 differences and separate names are 40 --
+        no instruction moves, the shared name just outlives its phase and
+        outranks `t` in the allocator. Also now a WORKFLOW rule.
+    What is left: `t` should be `$a3` and is `$t1`, `o` the reverse, and the
+    hoisted 0xFFFF is materialised fifth in the preheader where retail has it
+    second. Everything else follows from those.
+    Measured and not installed, both with their exact shapes:
+      - hoisting `b = r; u = n;` above the second nest's entry guard puts `t`
+        in `$a3` and is 31 differences -- but at +1, because gcc then biases
+        `r`'s giv by 0x7C4 and the two per-iteration copies retail has
+        disappear. Ten shapes tried to keep the allocation and the structure
+        together (index-based outer loop, explicit `b = t + n`, the zero store
+        through four different lvalues, `for` versus `do`/`while`, and the
+        dead-assignment hint, which gcc deletes because a plain copy
+        coalesces); none does. `-fno-strength-reduce` is 85 -- it removes the
+        givs the first nest needs.
+      - the permuter reaches 21 differences by wrapping the second nest's
+        store in `if (r || t) { store } else { store }`, identical arms that
+        gcc cross-jumps back. That is semantically a no-op and correct, and it
+        does put `t` in `$a3` -- but nobody writes it, and the
+        `do { } while (0)` that stands in for this shape elsewhere does
+        nothing here (40). Recorded rather than installed; a plausible source
+        shape with the same effect is the open question.
+      - declaration order does nothing: four orders, all 40.

@@ -268,6 +268,18 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **The rule scales to whole *phases* of a function, and there it rotates
+   every register rather than one pair.** func_8004D75C is two sequential
+   loop nests over the same record: reusing the first nest's index, cursor
+   and counter in the second is 63 differences, and giving the second nest
+   its own three names is 40 -- the entire drop is allocation, no instruction
+   moved. A name reused across two phases lives from the first phase's start
+   to the second's end, which raises its allocation priority above values
+   that genuinely need a good register, and every register downstream shifts.
+   The two nests never overlap, so nothing forced the sharing; it was tidiness
+   in the source and it cost a register class. When a function has two clearly
+   separate halves and the whole allocation is rotated, count the names that
+   cross the boundary before reaching for the permuter.
    **And two arms of a branch are two values, even though only one runs.**
    func_800250C8 accumulates into a field in two mutually exclusive blocks,
    `+ c * 100` in one and `- c * 100` in the other; one `v` for both is 13
@@ -532,6 +544,18 @@ meaningful, and skipping to the last one wastes hours:
    automatically the answer, though: on func_80071EB8 it cost more elsewhere
    than it saved, and which shape is right is still open. Recognise the reload
    for what it is before spending on anything else in the block.
+   **A `nop` in a branch's delay slot can mean the value the filler wanted is
+   still live on the branch's other path.** func_8004D75C extracts a field
+   with `srl`/`andi` right after a `bgez`, and retail leaves the slot empty.
+   Written as one expression the shift lands in a fresh temp that is dead on
+   the taken path, so the filler may legally hoist it into the slot; written
+   as two statements against the *same* name -- `s = (u32)v >> 16; s = s &
+   0x7F;` -- both instructions write `s`'s own register, `s` is read on the
+   taken path, and the hoist is illegal. Same two instructions, and the `nop`
+   comes back. This is the `(x & 0x100) != 0` fold rule read for its
+   *scheduling* effect rather than its instruction count: one name across two
+   statements does not only block a combine, it pins the value's register.
+
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression
