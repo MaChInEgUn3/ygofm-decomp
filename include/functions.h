@@ -84,6 +84,8 @@ s32 func_80025028(s32 arg0);
 void func_8003FEE0(s32 arg0);
 /* Installed as a record's +0x24 handler by func_80025BEC. */
 void func_80025B28(u8 *arg0);
+/* Installed as a record's +0x24 handler by func_80020D4C. */
+void func_80042BC0(u8 *arg0);
 void func_8003F758(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3);
 s32 func_8003F8D4(void);
 void func_80049010(void);  /* PROVISIONAL */
