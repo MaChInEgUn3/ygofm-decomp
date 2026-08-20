@@ -43,7 +43,12 @@ void func_800243F4(s32 src, u8 *out16, u8 *out8) {
                         n++;
                         out16 += 2;
                         out8 += 1;
-                        *q = *q + 1;
+                        /* `t16` is the block-copy temp forty lines down; its
+                         * live range resumes there, and borrowing the name
+                         * here is 10 differences against 4. A fresh local is
+                         * not the same thing (the permuter found this). */
+                        t16 = *q + 1;
+                        *q = t16;
                     }
                     break;
                 }

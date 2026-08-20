@@ -564,6 +564,21 @@ meaningful, and skipping to the last one wastes hours:
    *scheduling* effect rather than its instruction count: one name across two
    statements does not only block a combine, it pins the value's register.
 
+   **A constant subtraction on a call's result can belong on the far side of
+   the *next* call.** func_8005A6A8 takes a square root and subtracts 700
+   from it. Written next to the call, gcc fuses the call-result move and the
+   subtraction into one `addiu $s0,$v0,-700` and the function is an
+   instruction short; retail has `addu $s0,$v0,$zero` followed by
+   `addiu $s0,$s0,-700`, which only appears once the raw result has to
+   survive a *second* call in a callee-saved register before anything is done
+   to it. Ten spellings at the near position -- two statements against one
+   name, `-=`, a fresh name, a fresh name plus a copy, four placements among
+   the neighbouring statements -- are all identical, which is the usual tell
+   that the axis is wrong; moving the subtraction after the next call is the
+   whole fix. So when a call result and an arithmetic on it come out fused
+   and retail keeps them apart, ask which side of the *following* call the
+   arithmetic sits on.
+
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression

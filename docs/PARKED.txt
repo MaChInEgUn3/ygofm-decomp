@@ -3396,3 +3396,68 @@ func_80024E58 -- 2 differences at equal length (116/116), and both are the
     (2, 7, 2). `volatile` on D_8009B364 is +2 and 68 -- it forces re-reads at
     the other two sites. The full flag sweep says the current row is best, and
     880 permuter iterations from a base score of 60 produced nothing.
+
+
+func_8004D58C -- 13 differences at equal length (116/116). The sibling of
+    func_8004D75C: same 0xE20 record, same 0x2C8/0x750/0x7C4/0xBEC fields,
+    and it is the *reset* pass where func_8004D75C is the accumulate pass.
+    What paid:
+      - `*(u16 *)` on the 0xFFFF store. Through `s16` gcc folds the constant
+        into a `-1` and emits `addiu $t6,$zero,-1`; retail has
+        `ori $t7,$zero,65535`, which only the unsigned store produces.
+      - naming that constant and assigning it among the prologue's zero
+        initialisers. It is a hoisted loop invariant, and its position in the
+        preheader follows the source line's position (func_8005611C's rule):
+        56 differences to 46 on one line's placement.
+      - the two `p += K; if (p != 0)` shapes are written with the pointer
+        bumped IN PLACE inside the `if`, not into a second name -- retail puts
+        the `addiu` in the branch's own delay slot, which a separate name
+        cannot produce.
+      - `g += 4;` before `i++`, not after: with `i++` last, gcc schedules the
+        increment ahead of the loop condition's own load and leaves a `nop`.
+        56 to 25.
+      - naming the `1` that is shifted, and assigning it before the cursor
+        copy that follows it in the preheader: 25 to 23.
+      - and the prologue assignment ORDER, which is the whole remaining
+        question. Five locals are initialised to zero and gcc materialises one
+        zero and copies it four times. Writing the two loop cursors FIRST
+        gives retail's exact register mapping -- p3=$t3, p2=$t6, i=$t0,
+        n=$t5, m=$t4 -- and is 13; writing them in retail's *emission* order
+        (p3, p2, i, ff, n, m) gives the right instruction order and rotates
+        three registers, and is 23. The two cannot be had together by any
+        ordering, because the pseudo assigned first becomes the master of the
+        copy chain and is emitted first.
+    Measured and dead: six assignment orders (13, 13, 13, 22, 24, 24);
+    declaration order (no effect at all, three tries); writing the copies
+    explicitly as `p2 = p3; n = (s32)p3;` so the chain is in the source (23,
+    same as the plain order, three spellings); `d = d * 8` against one name
+    for the modulo (16); `d = d << 3` (14); `i - d * 8` and `i - (d << 3)`
+    (13, no change); inlining the division into the address (15). The
+    permuter's best of eight outputs is 12 and carries a `new_var` artifact.
+
+func_8005A6A8 -- 1 difference at equal length (116/116): retail negates in
+    place, `subu $v1,$zero,$v1`, and we read the copy's source instead,
+    `subu $v1,$zero,$v0`. Both are correct; it is which pseudo gcc's copy
+    propagation picked. A geometry helper -- two square roots, a reciprocal
+    /12, a real `div` by a variable, and a clamp.
+    What paid:
+      - naming the `+8` field read so the four table reads happen in retail's
+        order ([8], [0xC], [0x14], [0]): 79 to 71.
+      - and the one worth remembering: **the `- 0x2BC` on the first square
+        root's result belongs AFTER the second call.** Written before it, gcc
+        fuses the call-result move and the subtraction into one
+        `addiu $s0,$v0,-700` and the function is an instruction short;
+        written after, retail's `addu $s0,$v0,$zero` / `addiu $s0,$s0,-700`
+        pair appears, because the raw result now has to survive a call in a
+        callee-saved register before anything is done to it. Ten spellings of
+        the subtraction measured at the earlier position -- two statements,
+        `-=`, a fresh name, a fresh name plus a copy, and four placements
+        among the neighbouring multiplies -- all 79 at -1. Moving it past the
+        call is 9 at equal length.
+      - three names for the clamp chain rather than two, and *which* name
+        takes which role: `w = h / 16; v = w; ... w = v;` is 1, the same three
+        statements with v and w exchanged is 9, and a genuinely third name is
+        3.
+    Measured and dead on the last difference: four spellings of the negation
+    (test on the other name, `0 - v`, an explicit if/else, negating the other
+    name) -- all 1, which is the tell that this is not a source axis.
