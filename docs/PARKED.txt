@@ -3600,6 +3600,7 @@ func_800336F0 -- 2 differences at equal length (125/125): retail leaves the
     comparison written with the constant on the left, a named constant (+2,
     much worse -- gcc materialises it twice), and `do { } while (0)` around
     the whole `if` or around its body. All 2.
+    A full permuter run from this base produced no improvement at all.
 
 
 func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
