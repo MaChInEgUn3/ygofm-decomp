@@ -1385,6 +1385,14 @@ extern u8 *D_80092B88[];
 extern s32 D_800F8394[];
 extern s32 D_800F8398[];
 extern s32 D_800F5D70;
+/* Eight bytes under the guard, four in truth: func_8005C1F4 needs it out of
+ * small data while the four-byte D_8009B498 stays gp-relative, and 4 <= G < 4
+ * is empty -- so inflate this side and assemble at -G4 (recipe branch 3). */
+#ifdef D_800F5D44_SIZED
+extern s32 D_800F5D44[2];
+#else
+extern s32 D_800F5D44;
+#endif
 extern s32 D_800F5D4C;
 extern s32 D_800F5D6C;
 extern s32 D_800FE424;

@@ -3013,7 +3013,7 @@ func_8004A940 -- 77 differences at -3, after m2c corrected the decode in
     same thing func_80071FC8's `hi` does, unsolved there too.
 
 
-func_8003C328 -- 28 differences at equal length, and the layout is solved. A three-way
+func_8003C328 -- 21 differences at equal length, and the layout is solved. A three-way
     dispatcher on the second parameter: mode 1 sets the +0x1C word to 0x800,
     clears two bits of D_8009B0F4 and points +8/+0xC at D_8009B118; mode 0
     builds a 0x18000 window, clears a different bit pair, sets one, writes
@@ -3051,11 +3051,21 @@ func_8003C328 -- 28 differences at equal length, and the layout is solved. A thr
     ABOVE the `+0x6` store is 49 -> 28, because a store through the record
     pointer may alias the global and gcc will not move the load across it in
     either direction -- the emitted order is the source order, pinned.
-    What is left: the `sh $zero,0x30` / `sw $a1,0x1C` pair sits three
-    instructions early, mode 2's `+0x6` store should be in the `jal`'s delay
-    slot and is emitted before it, and two constants are in exchanged
-    registers. Naming the second D_8009B0F4 read to move the store pair is
-    -2: gcc knows the value it just stored and folds the reload away.
+    The same load-above-the-store lever then applied a second time, in mode
+    2: naming the D_8009B118 read and putting it above the `+0x0` store is
+    28 -> 21, and it is what puts the `+0x6` store in the `jal`'s delay slot.
+    Two positions matter and both were measured -- above the `+0x4` store
+    instead is 26 -- and the name must be the SAME `v` mode 0 uses; giving
+    mode 2 its own name is 23, which is the one-name/two-names rule pointing
+    the other way for once.
+    What is left: the `sh $zero,0x30` / `sw $a1,0x1C` pair in mode 0 sits
+    three instructions early, and mode 2's 0xFFDCFFFF mask is completed late
+    with its `+0x1C` store hoisted above the D_8009B0F4 read. Measured and
+    dead on the store pair: `do { } while (0)` around it (32), swapping the
+    two (21, no change), moving it after the second read-modify-write (-4).
+    Measured and dead on mode 2: naming its D_8009B0F4 read the way mode 0's
+    worked, at either position (28 and 31) -- gcc folds the reload because it
+    knows the value it just stored.
 
 
 func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the
@@ -3127,3 +3137,35 @@ func_8003C120 -- 80 differences at +1, inflated by the shift; the real
     where the question is confounded; at -G0 all three of that function's
     references are pairs and it needs them all. The per-unit rule stands, the
     reason given for it did not.
+
+
+func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
+    unclaimed function in the tree. It flushes a pending job if D_8009B060 and
+    D_800F5D44 are both set, copies an EIGHT-BYTE UNALIGNED record from
+    D_8009B498+0x42428 to +0x42400 indexed by D_8009B067 * 8 (that is the
+    `lwl`/`lwr` + `swl`/`swr` quartet -- an all-u8 struct, alignment 1, per
+    the struct-copy rule), calls func_8007F978 with that record and a
+    0x2D00-strided buffer, advances `D_8009B067 = (D_8009B067 + 1) % 4`, adds
+    a halfword delta into +0x42428 and either calls func_8008FDB4 with
+    `field0x4242C * field0x4242E / 2` or sets D_8009B062.
+    The `andi 0x1FC` is the modulo's mask narrowed to the range gcc can prove
+    (the counter is a u8, so the value is at most 256) -- it is `% 4`, not
+    some 9-bit field.
+    Two addressing decisions, both recipe branch 3 and both installed:
+      - D_800F5D44 needs the non-small form while the 4-byte D_8009B498 stays
+        gp-relative, and `4 <= G < 4` is empty. Declared `[2]` behind a guard
+        and assembled at -G4, which is the same trick func_80025D30 needed
+        from the other side (there the gp symbol was shrunk instead).
+      - the 0x40000 must stay a CONSTANT in a register, added at each use.
+        A `g = base + 0x40000` local computes the sum once and is -1 and
+        wrong; writing the full `base + 0x42428` offsets inline lets gcc hoist
+        just the constant, which is what retail holds in $s0.
+    Also measured: the base pointer must NOT be a local that spans the
+    func_8007F978 call. Retail reads D_8009B498 into a caller-saved register
+    before the call and re-reads it after; one local across the call takes a
+    callee-saved register, widens the frame and costs 18 differences (88 vs
+    70).
+    What is left: retail copies BOTH the index and the base into fresh
+    registers before computing the two record addresses (`addu $v0,$v1,$zero`
+    / `addu $v1,$a2,$zero`), which is two more names than the source has, and
+    the constants land in exchanged registers.
