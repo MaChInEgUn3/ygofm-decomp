@@ -3487,3 +3487,33 @@ func_8002E730 -- 3 differences at equal length (122/122), all of them one
     after the RMW instead of before (6), the store and `t = D_800EAE98`
     swapped (3, no change), `do { } while (0)` around the pair (4), and a
     name for the 0x2000000 constant (6, gcc propagates it).
+
+
+func_8004DC38 -- 117 differences at +1, which reads far worse than it is: the
+    instruction *sequence* is right almost everywhere (28 of 30 aligned blocks
+    are the same length) and the residue is a whole-function register rotation
+    plus two local shape questions. A leaf function, no calls, third member of
+    the 0xE20-record family after func_8004D75C and func_8004D58C: it walks a
+    run of 4-byte entries subtracting `entry[-2] * 16` from a modulo residue
+    until it runs out.
+    What is understood and written:
+      - the two strides, `c * 0x74` and `c * 0x76`, and the `divu` -- an
+        unsigned modulo by a *variable* (`w * 0x10`), which is why there is a
+        `break 7` in the listing.
+      - the first loop's two arms both re-read `cur[-2]` and re-shift it,
+        because gcc 2.8 has no global CSE; written inline in each arm.
+      - the `t[0xE16] == 0x3C` test hoisted into a local before the loop.
+    What is NOT solved, and what was measured:
+      - retail puts `e += 4` in the outer loop's branch delay slot and we emit
+        it two instructions early. Three orderings of the three increments all
+        score the same.
+      - the second loop is a `while (1)` with a `bltz` break and a counted
+        loop-back whose `b += 4` sits in the delay slot. Written as
+        `do { ... } while (i < v)` it is +5, not +1 -- the `break` inside a
+        do/while costs extra jumps here. The while(1) form with the test last
+        is what is installed.
+      - retail's first instruction is `addu $t3,$a0,$zero`, a copy of the
+        parameter, because `$a0` is reused for `t + k`. An explicit
+        `tt = arg0;` does NOT produce it (117 either way, the copy coalesces),
+        and naming `b = t + k` separately is worse (119). That copy is the
+        likely key to the rotation and no source spelling has produced it yet.
