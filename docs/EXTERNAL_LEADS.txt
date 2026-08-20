@@ -1,0 +1,77 @@
+External naming leads — UNVERIFIED
+==================================
+
+Same contract as the `UNVERIFIED datacrystal/` annotations in variables.h and
+the `ygofm-community` RAG collection: everything here is a hypothesis to check
+against a listing, never evidence, and it must never be ranked beside a
+measured paragraph. Nothing below has been used to justify a line of C.
+
+Source
+------
+https://github.com/Unchiga/YuGiOhForbiddenMemoriesRecomp — a static
+recompilation of the same binary (SLUS-01411 = our SLUS_014.11), built on
+PSXRecomp. Different technique entirely: the MIPS is translated to C ahead of
+time and compiled native, with no byte-exactness requirement anywhere. It
+therefore cannot help a single codegen decision. What it has is ~300 KB of
+hand-written enhancement code that reads the game's live memory, commented.
+
+Its LICENSE is NOASSERTION. **Do not copy its code or its prose.** Addresses
+and strides of a third party's game are facts, not their authorship; their
+sentences are theirs. Everything below is our own restatement, and every
+structural claim was re-derived from our own listings before being written.
+
+What was actually new, honestly
+-------------------------------
+Less than it first looked. The two structural claims worth checking both
+turned out to be things this repo already had:
+
+  * "the weight table is tiered, `0x8017878C + tier*1460`" — our own
+    PARKED.txt entry for func_80021810 already said "walks 0x2D2 halfwords of
+    a 1460-byte record". Re-derived independently anyway: the shift chain at
+    the head of func_80021810 is 8a → 9a → 72a → 73a → 292a → 365a → 1460a,
+    so the stride is 1460 exactly, and D_8017878C − D_801781D8 = 1460.
+  * their "walks 722" is CORRECT and was mis-checked here at first: 0x2D2 is
+    func_80021810's bound. func_800243F4's is 0x2D0. Two functions, two
+    bounds. The error was ours, not theirs.
+
+The one genuinely new thing is a cross-reference we had never written down:
+**func_80021810 and func_800243F4 run the same weighted pick over the same
+table family** — both `(func_8008E590() & 0x7FF) + 1` against a running total
+of halfword weights — at different tiers. Recorded in variables.h beside
+D_801781D8 and in both park entries.
+
+Function-name leads
+-------------------
+Their names, our status. Names are guesses about intent; none has been checked
+against behaviour.
+
+  func_80021480  MATCHED   drop: page-apply
+  func_80021810  parked    drop: roll  (confirmed by our own listing above)
+  func_80021894  MATCHED   drop: award
+  func_800218F0  open      drop: results-state / nav
+  func_800170C8  MATCHED   (prose only — called by the card-list walk)
+  func_800323F8  open      chest: build
+  func_80032C48  open      chest: sort
+  func_80036C14  MATCHED   glyph draw ("NP")
+  func_80037DA4  open      text draw ("NP")
+  func_800393B0  open      drop: widget draw
+  func_80040410  MATCHED   drop: hide
+
+Interior addresses they annotate, mapped to our functions:
+
+  0x800175D0 in func_800175A0 MATCHED  |  0x800214A0 in func_80021480 MATCHED
+  0x80021C44 in func_800218F0 open     |  0x80024A94 in func_800249E0 open
+  0x8002DC70 in func_8002DC38 MATCHED  |  0x80031A7C in func_80031874 open
+  0x800324B4 in func_800323F8 open     |  0x80033004 in func_80032C48 open
+  0x800393CC in func_800393B0 open
+
+Data addresses: they reference 64, of which 20 we already declare. The other
+44 are mostly code addresses, not data.
+
+How to use this
+---------------
+Only for comprehension, and only on the big remaining functions — knowing a
+loop walks the fusion table tells you its bounds before you write a line. If a
+name here ever turns out to be worth keeping, verify it against behaviour
+first and then annotate the symbol in the usual place; do not promote anything
+out of this file by citation alone.

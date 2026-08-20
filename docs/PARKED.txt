@@ -207,7 +207,11 @@
 # it 7.
 # ---
 # func_80021810 walks 0x2D2 halfwords of a 1460-byte record and returns the
-# index where the running sum passes a random limit. Everything from the call
+# index where the running sum passes a random limit.
+# Sibling: func_800243F4 runs the identical pick -- same
+# `(func_8008E590() & 0x7FF) + 1`, same running total of halfword weights --
+# over D_801781D8, which is D_8017878C minus one 1460-byte tier. Decode either
+# and the other follows. Everything from the call
 # on is exact; the eleven differences are the multiply chain. Retail computes
 # `arg0 * 1460` step by step *into* $s0 -- the callee-saved register the pointer
 # lives in, saved before the first shift -- and we compute it in $v0/$v1 and
@@ -2863,8 +2867,9 @@ func_800243F4 -- 10 differences, all of them register names inside the
     byte-identical. Decode: a 40-entry deck builder. With a null source it
     zeroes a 0x2D2-byte stack histogram and then draws 40 distinct cards by
     walking D_801781D8's 0x2D0 halfword weights against a running total
-    until it passes `(rand() & 0x7FF) + 1`, rejecting any index already used
-    three times; with a non-null source it copies 40 halfwords straight
+    until it passes `(rand() & 0x7FF) + 1` -- the same pick func_80021810
+    makes one 1460-byte tier further into the table, see that entry --
+    rejecting any index already used three times; with a non-null source it copies 40 halfwords straight
     through. Either way it then does 160 random pair swaps of both the
     halfword and the byte arrays.
     Four levers landed and are worth reading:

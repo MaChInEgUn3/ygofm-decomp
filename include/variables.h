@@ -709,7 +709,12 @@ typedef struct {
     u8 unk9[3];
 } Rec12;
 
-/* 0x2D0 halfword weights, walked as a running total by func_800243F4. */
+/* 0x2D0 halfword weights, walked as a running total by func_800243F4.
+ * Tier 0 of a tiered table: func_80021810 runs the SAME weighted pick --
+ * `(func_8008E590() & 0x7FF) + 1` against a running total -- over
+ * D_8017878C + tier * 1460, and D_8017878C - D_801781D8 is exactly 1460.
+ * The stride is measured from that function's own shift chain
+ * (8a, 9a, 72a, 73a, 292a, 365a, 1460a), not assumed. */
 extern u8 D_801781D8[];
 extern Rec12 D_801AB000[];
 extern s16 D_800EFE3C[];
