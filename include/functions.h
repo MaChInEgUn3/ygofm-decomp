@@ -417,7 +417,8 @@ void func_80046990(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
 void func_8003BF00(void);  /* PROVISIONAL */
 void func_80045F3C(void);  /* PROVISIONAL */
 void func_80046A08(void);  /* PROVISIONAL */
-void func_8005ABA0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);  /* PROVISIONAL */
+/* arg4 is a u8: func_8005ABA0 loads its stack slot with `lbu`. */
+void func_8005ABA0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4);
 void func_80019B2C(u8 *arg0);
 void func_8004544C(void);
 

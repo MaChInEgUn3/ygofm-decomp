@@ -3643,3 +3643,30 @@ func_8005A98C -- 54 differences at equal length (133/133), all of them
     What is left: `hi` and `lo` are exchanged ($t0/$t1) and the two `lbu`s in
     the loop body come out in the other order. Six init orders measured
     (55/77/57/76/77/77) and swapping the two comparisons is 59.
+
+
+func_8005ABA0 -- 175 differences at -2 (178/176). The HSV-to-RGB inverse of
+    func_8005A98C, leaf, gp == 0. The instruction sequence is broadly right
+    and the residue is one whole-function register offset plus two
+    instructions.
+    What paid, in order:
+      - **`u8 arg4`, not `s32`.** The listing loads the fifth argument's
+        stack slot with `lbu`, so the parameter is a byte; declared `s32` it
+        becomes an `lw` that lands in `$a2` and forces a copy of `arg2` out
+        of its argument register, which shifts every register after it.
+        functions.h's PROVISIONAL prototype was the `s32` one and is now
+        fixed (func_8005AE68, its only decompiled caller, is unaffected --
+        rechecked at 22).
+      - `u32` for the `s & 0xFFFF` selector, for retail's `sltiu`.
+      - `(sa * 2) * L` written through a named `d = sa * 2;`: as
+        `sa * 2 * L` gcc reassociates to `sa * (2 * L)` and emits
+        `sll $v0,L,1` where retail has `sll $v0,sa,1`.
+      - a second name for the third clamped byte only -- `e2 = r2;` --
+        which m2c's own naming had spotted. Giving the first one the same
+        treatment is a further -1, so it is that one variable.
+    What is left: retail computes `&c[m]` before the load that uses it and
+    keeps a copy of the first packed byte right after its shift; we fold both.
+    Measured and dead: a `u32 *pm = &c[m];` before the `if` or in both arms
+    (-3 either way), a `u32 *pa` for each arm's early store target (-5), a
+    second name for the first clamped byte (-3), and splitting the first
+    shift into `r0 = c[0] + 0x800; r0 = r0 >> 12;` (-4).

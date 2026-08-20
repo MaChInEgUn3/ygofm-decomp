@@ -1068,6 +1068,15 @@ on a combination that had been in the table for weeks.
 
 - Every global once in `include/variables.h`, every cross-file function in
   `include/functions.h`. Two files disagreeing breaks matching far away.
+- **A `u8` parameter is also right when the CALLEE loads its stack slot with
+  `lbu`.** The rule below is about the call site; the fifth-and-later
+  arguments give you the callee's own evidence, because a byte parameter is
+  read out of the frame with `lbu` and a word one with `lw`. Getting it wrong
+  costs more than the load: the `lw` lands in an argument register and forces
+  a copy of a *real* argument out of its own, which shifts every register
+  after it. func_8005ABA0's PROVISIONAL prototype said `s32` and the listing
+  says `lbu` -- read the callee before trusting a PROVISIONAL signature, and
+  re-run try_func over the callers when you change one.
 - **A `u8` parameter is only right when the target masks at the call site.**
   The narrowness usually belongs to the store inside the callee, which
   truncates anyway. Widening `func_80040410`'s second parameter to `s32` left
