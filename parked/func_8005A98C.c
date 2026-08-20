@@ -10,6 +10,8 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
     u8 c[3];
     HsvT t;
     u8 x;
+    s32 j1;
+    s32 j2;
     s32 i;
     s32 hi;
     s32 lo;
@@ -58,7 +60,9 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
         } else {
             t.v = n / (d2 - sum);
         }
-        n = (c[(hi + 1) % 3] - c[(hi + 2) % 3]) << 12;
+        j1 = (hi + 1) % 3;
+        j2 = (hi + 2) % 3;
+        n = (c[j1] - c[j2]) << 12;
         n = (hi << 13) + n / df;
         t.h = n;
         if (n < 0) {
