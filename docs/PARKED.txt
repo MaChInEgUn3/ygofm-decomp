@@ -3110,6 +3110,20 @@ func_8003C120 -- 80 differences at +1, inflated by the shift; the real
     What is left: retail materialises the `lui` halves of both masks
     (0xFFDDFFFF and 0xFFDCFFFF) in the dispatcher's own branch delay slots
     and completes them with `ori` inside the arms; we build them whole inside
-    the arms and spend the slots on other constants. Same shape that would
-    not move on func_8003C328, where naming both constants and assigning them
-    first changed nothing. Flag sweep finds nothing better.
+    the arms and spend the slots on other constants. Flag sweep finds nothing
+    better.
+    MEASURED AND FALSE, so it is written down here rather than assumed again:
+    the two levers that took func_8003C328 from 60 to 28 do NOT transfer,
+    even though the two are siblings with the same dispatcher. Naming the
+    first D_8009B0F4 read is worth exactly nothing (80 either way) and
+    hoisting the D_8009B118 load above the `+0x6` store is -3. The arms store
+    in a different order -- func_8003C328 writes 0x32, 0x4, 0x30 and this one
+    writes 0x32, 0x30, 0x4 -- and that is enough to change which reload gcc
+    folds. The `-G` differs too: this one wants -G4 where its sibling wants
+    -G0, and at -G0 here a whole D_8009B0F4 read-modify-write folds away
+    (-5). Same shape is not the same residue.
+    ALSO CORRECTED: the sentence above about D_8009B118 said func_8003C328
+    wants only SOME of its references expanded. That was measured at -G4,
+    where the question is confounded; at -G0 all three of that function's
+    references are pairs and it needs them all. The per-unit rule stands, the
+    reason given for it did not.
