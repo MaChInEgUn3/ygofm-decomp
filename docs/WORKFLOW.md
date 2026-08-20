@@ -463,6 +463,17 @@ meaningful, and skipping to the last one wastes hours:
    materialises a table base once before a loop does *not* imply a source
    local. Second time D_801A7AD8 has punished a base local for a different
    reason; func_8001EFD4 is the other.
+   **A symbol added last is emitted last; a base local is how you move it.**
+   func_800255FC computes `(idx + 5) * 4 + d * 80` and adds a table base.
+   Retail groups the two products first and the base last — `D_80090800 +
+   (…)` reassociates to `A + (B + base)` and is wrong — but it also
+   *materialises* the base first, right after the preceding call, where
+   writing the symbol as the last term emits its `lui`/`addiu` immediately
+   before the `addu`. Assigning it to a local after the call and adding the
+   local gives both: grouping from the source, position from the
+   assignment. The same function's other index wants the mirror treatment —
+   `D_800907D8[idx + (d * 20 + 5)]` still lets gcc re-associate the `+ 5`
+   onto `idx`, and a named `n = d * 20 + 5;` is what pins it.
    And the order of two increments in one `for` clause decides which is
    available to fill a load-delay slot at the top of the body:
    `for (i = 0; i < 10; p++, i++)` matched func_80021480 where `i++, p++`
