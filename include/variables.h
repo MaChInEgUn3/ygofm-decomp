@@ -251,6 +251,9 @@ extern u8 D_8009B48E[2];
 extern u8 D_8009B490[2];
 extern s16 D_8009B35A;
 extern u8 D_8009B356;
+/* func_8004E7B0's previous-frame pair for D_8009B47A/D_8009B47C. */
+extern s16 D_8009B482;
+extern s16 D_8009B484;
 extern u16 D_8009B47A;
 extern u16 D_8009B47C;
 

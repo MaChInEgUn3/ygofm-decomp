@@ -3517,3 +3517,47 @@ func_8004DC38 -- 117 differences at +1, which reads far worse than it is: the
         `tt = arg0;` does NOT produce it (117 either way, the copy coalesces),
         and naming `b = t + k` separately is worse (119). That copy is the
         likely key to the rotation and no source spelling has produced it yet.
+
+
+func_8005AE68 -- 26 differences at equal length (123/123), and the bulk is a
+    three-way rotation of $s3/$s4/$s5. A colour transform: unpack a 15-bit
+    BGR word, optionally rotate the hue by three sixths, scale the value, pack
+    it back.
+    What paid, and one of them is the whole reason it is close at all:
+      - **`u8 m`**, where `m = (arg1 & 7) & 0xFF` is the switch-ish selector.
+        As `s32` gcc folds the mask away entirely and the function comes out
+        five instructions short; as `u8` the truncation survives, the `m < 7`
+        test becomes `sltiu` in QImode, and the value needs a callee-saved
+        register across the call -- which is the seventh saved register retail
+        has and we were missing. -5 to 0 on that one word.
+      - `u32` for the packed colour, so the two `>> 5` and `>> 10` are `srl`
+        and not `sra`.
+      - a name for the 0x1F used by the three `0x1F - x` subtractions; retail
+        holds it in $s4 while the two call sites materialise their own.
+      - the three subtractions written r, g, b -- 30 differences to 26. The
+        source order and the emitted order are not the same here (gcc hoists
+        the second load), so this is the permute-the-statements case again.
+    What is left: retail has arg0 in $s3, the 0x1F in $s4 and the 8-bit flag
+    in $s5; we have them in $s5, $s3, $s4. Measured and dead: a local copy of
+    arg0 assigned after the e6 computation or before the 0x1F (+1 and much
+    worse, 116 and 102), six orders of the three subtractions (26/30/30/32/
+    32/30), three spellings of `m`'s assignment (all 30 before the reorder).
+    One instruction also differs in kind rather than position: retail masks
+    with `andi $s0,$s1,255` where we emit a plain copy, because gcc knows
+    `arg1 & 7` already fits in a byte -- no spelling found that keeps the
+    mask.
+
+func_8004E7B0 -- 94 differences at -5. A camera-angle update with two
+    reciprocal divides (`/384` and `/85`), one real `div` (a variable
+    divisor, hence the `break 7`), and an eight-byte *unaligned* struct copy
+    at the end -- `lwl`/`lwr` + `swl`/`swr` between two gp-relative symbols,
+    which is what an all-`u8` record of alignment 1 gives.
+    What paid: writing `/ 85` per arm rather than through a shared `z` local,
+    which stops gcc cross-jumping the three arms together -- -17 to -5.
+    What is left, and it is all the same shape: retail keeps **three** copies
+    of the `* 0x1A` expansion and three materialisations of the 0x60606061
+    magic, one per arm, sharing only the `mult`/`mfhi`/`sra` tail; and it has
+    **two** `addiu $v1,-313` for the two out-of-range arms where we emit one.
+    gcc is cross-jumping what retail keeps apart. Measured and dead: swapping
+    the inner arms (no change), naming the four halfword reads (no change),
+    `z` shared versus per-arm (that one is the -17 to -5).

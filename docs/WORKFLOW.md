@@ -1095,6 +1095,17 @@ on a combination that had been in the table for weeks.
   function. `u16 func(s32 arg0)` holds the value unmasked and puts the `andi` at
   the return, which is why retail copies the argument to `$v0` before clobbering
   `$a0` with the test — func_80047C50.
+- **A narrow local can also be what *creates* an instruction, and with it a
+  whole register.** func_8005AE68 masks a selector with `& 0xFF` after an
+  `& 7`; as `s32` gcc folds the mask away entirely -- correctly, the value
+  already fits -- and the function comes out five instructions short. As
+  `u8` the truncation survives, the later `< 7` test becomes `sltiu` in
+  QImode, and the value now needs a callee-saved register across a call,
+  which was the seventh saved register retail had and we did not. So when a
+  function is short by a few instructions *and* saves fewer registers than
+  retail, look for a redundant-looking mask that a narrow declaration would
+  keep. This is the mirror of the func_80027060 entry below, where a
+  redundant *cast* was the pseudo that should not have existed.
 - And a narrow **local** can be the whole function without changing one
   instruction. `s8 v = p[0x18];` matched func_80027060 where
   `s32 v = (s8)p[0x18];` gave 18 differences — same instructions, same order,
