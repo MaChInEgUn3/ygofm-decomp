@@ -3625,7 +3625,7 @@ func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
     return, a different shape again. The full flag sweep says the default row
     is best.
 
-func_8005A98C -- 43 differences at equal length (133/133), all of them
+func_8005A98C -- 20 differences at equal length (133/133), all of them
     register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
     work at all.
     What paid:
@@ -3644,6 +3644,14 @@ func_8005A98C -- 43 differences at equal length (133/133), all of them
         -- rather than writing them inside the subscripts: 54 to 43. The
         permuter's third run found the `j2` half alone (49); doing the same to
         `j1` is six more, which the permuter had not reached.
+      - naming `sum << 12` and placing it before the `d2` computation: 43 to
+        24. The permuter's fourth run found it; it is the same
+        statement-order lever as the `mx + mn` swap above.
+      - **`x > c[hi]` rather than `c[hi] < x`** in the max/min loop: 24 to
+        20. Semantically identical, and it decides which of the two bytes is
+        loaded first -- the loaded value on the left of the comparison is
+        loaded first. Three spellings measured: `c[hi] < x` is 24,
+        `x > c[hi]` and `!(x <= c[hi])` are both 20.
     What is left: `hi` and `lo` are exchanged ($t0/$t1) and the two `lbu`s in
     the loop body come out in the other order. Six init orders measured
     (55/77/57/76/77/77) and swapping the two comparisons is 59.
@@ -3674,3 +3682,30 @@ func_8005ABA0 -- 175 differences at -2 (178/176). The HSV-to-RGB inverse of
     (-3 either way), a `u32 *pa` for each arm's early store target (-5), a
     second name for the first clamped byte (-3), and splitting the first
     shift into `r0 = c[0] + 0x800; r0 = r0 >> 12;` (-4).
+
+
+func_8002A9C0 -- 6 differences at equal length (125/125): three scratchpad
+    addresses materialised in the order 310, 308, 318 where retail has 310,
+    318, 308. A sprite blit that fills four scratchpad points and calls the
+    GTE quad routine twice.
+    Everything else came from four levers, in the order they paid:
+      - **base locals for every scratchpad block.** Written as literals
+        inline -- `((u8 *)0x1F8002A0)[3]` -- gcc folds each field's offset
+        into its own `lui`/`ori` constant (0x1F8002A3, 0x1F8002A7, ...) and
+        the function is nine instructions long. One local per block, used
+        with displacements, is +9 to -3. The *call arguments* stay literals:
+        retail materialises 0x1F800300 twice, once for the base and once for
+        the call, which is the two-materialisations rule.
+      - a separate name for the frame countdown. `v = p[0x60] - 0x10;` reused
+        for the later u16 arithmetic gives the subtraction and the
+        sign-extend different registers; its own name puts both in `$v0` and
+        is -1 and 111 differences to 125/125 and 34.
+      - names for the 0x55555555 constant and the `p[0xC]` read, placed
+        before the byte stores that follow them: 29 to 21.
+      - a name for the `p[0x14]` call argument, read BEFORE the
+        read-modify-write that precedes the call. Without it gcc hoists the
+        RMW's load above the two byte stores and fills the call's delay slot
+        with the `addiu $a3,1` instead of the RMW's store: 14 to 6.
+    Measured and dead on the last six: all 24 orders of the four base-local
+    assignments (best 6, then 8, 8, 10) and all 24 orders of their
+    declarations (all 6).

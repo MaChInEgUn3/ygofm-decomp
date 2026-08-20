@@ -21,6 +21,7 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
     s32 sum;
     s32 q;
     s32 df;
+    s32 sh;
     s32 n;
 
     hi = 0;
@@ -32,7 +33,7 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
 
     do {
         x = c[i];
-        if (c[hi] < x) {
+        if (x > c[hi]) {
             hi = i;
         }
         if (x < c[lo]) {
@@ -44,8 +45,9 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
     mx = c[hi];
     mn = c[lo];
     sum = mx + mn;
+    sh = sum << 12;
     d2 = (lim & 0xFF) * 2;
-    q = (sum << 12) / d2;
+    q = sh / d2;
 
     t.v = 0;
     t.h = 0;

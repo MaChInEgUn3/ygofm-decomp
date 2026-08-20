@@ -614,6 +614,21 @@ meaningful, and skipping to the last one wastes hours:
    makes the divide unsigned and deletes the bias, which is eight
    instructions. 5 differences to 2 on one keyword.
 
+   **Which side of a comparison the loaded value sits on decides which
+   operand is loaded first.** `if (c[hi] < x)` loads `c[hi]` first;
+   `if (x > c[hi])` loads `x` first. The two are the same expression to a
+   reader and the same `sltu` to the assembler, and on func_8005A98C the
+   difference was 24 against 20. So when two loads feeding one comparison
+   come out in the wrong order, flip the comparison rather than reordering
+   anything.
+   **And a hardware address written inline gets its field offset folded into
+   the constant.** `((u8 *)0x1F8002A0)[3]` becomes a `lui`/`ori` of
+   0x1F8002A3, and a block with six fields becomes six constants -- nine
+   instructions of overhead on func_8002A9C0. A base local per block, used
+   with displacements, is the fix; but keep the *call arguments* as literals,
+   because retail materialises the same address twice when the source names
+   it once and passes it once.
+
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression
