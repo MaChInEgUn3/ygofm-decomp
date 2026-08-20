@@ -34,7 +34,15 @@
  * ordinary per-file addressing disagreement: the aggregate arm is not small
  * data, so cc1psx emits its own pair and the scalars beside it stay
  * gp-relative at the default -G8 (func_80037B40). */
-#ifdef D_8009B112_IS_AGGREGATE
+#ifdef D_8009B112_SIZED
+/* Eight bytes it does not have. The gp-relative symbols beside it in
+ * func_800257A0 are one and two bytes, so no real threshold separates them;
+ * `[4]` clears cc's own -G8 (bare symbol, ONE instruction to the delay-slot
+ * filler) and 8 > 4 takes it out of small data at `as -G4`. Retail leaves a
+ * `nop` in the branch delay slot in front of the pair; the aggregate arm is
+ * two instructions and gets the `lui` hoisted into it. */
+extern volatile u16 D_8009B112[4];
+#elif defined(D_8009B112_IS_AGGREGATE)
 extern volatile u16 D_8009B112[];
 #else
 extern volatile u16 D_8009B112;
@@ -140,6 +148,8 @@ extern s16 D_8009B1D2;
 extern s16 D_8009B33C;
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
+/* Passed to func_80040410 by func_80024E58; gp-relative there. */
+extern u8 *D_8009B214;
 extern u16 D_8009B220;
 extern u16 D_8009B210;
 /* func_80022D94 writes all thirteen: the five `sh` are the target values it
@@ -355,7 +365,14 @@ extern u8 D_8009B3C0;
 /* func_80038530 reaches this and its six neighbours through the assembler's
  * bare form, which needs the scalar declaration plus a -G0 assembler; every
  * other user takes them as unsized arrays. */
-#ifdef D_8009B364_SIZED
+#ifdef D_8009B364_SIZED8
+/* Eight bytes it does not have, so that at `as -G4` it is not small data while
+ * the four-byte gp scalars beside it are (func_80024E58, recipe branch 3).
+ * Still at or below cc's own -G8, so cc1psx keeps emitting the bare symbol and
+ * the assembler expands the store through $at. */
+/* Data Crystal RAM map, UNVERIFIED: terrain type */
+extern u8 D_8009B364[8];
+#elif defined(D_8009B364_SIZED)
 /* Two bytes for the same reason as D_8009B0C0; see func_8002D180. */
 /* Data Crystal RAM map, UNVERIFIED: terrain type */
 extern u8 D_8009B364[2];
