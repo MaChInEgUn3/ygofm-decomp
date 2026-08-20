@@ -2889,3 +2889,30 @@ func_800243F4 -- 10 differences, all of them register names inside the
     also flips the `addu` to base-first, which is a second difference). The
     byte half of the same swap comes out in retail's order with no help at
     all, so it is specifically the halfword pair.
+    A permuter run produced a 6 and it is REJECTED: pycparser's round trip
+    had rewritten `s32 func_800358FC(s32)` to `long long func_800358FC(s32)`
+    and the function body was character-for-character the base, so the whole
+    gain is the wider return type shuffling register pressure. The target
+    reads no $v1 after either call. Third instance of this class -- when a
+    permuter output's body matches the base, diff the *declarations*.
+
+
+func_8002A4A8 -- 14 differences, two register rotations, and the other 96
+    instructions are byte-identical including both `break 7` / `break 6`
+    wrappers. Decode: caches a (row, column) pair in D_8009B258/9 and returns
+    early if unchanged, then writes a cursor record at D_800EA1E8 --
+    `u = (a % 10) * 14 + (a >= 10 ? 0xAE : 0xE)` with the whole modulo
+    expression written out in BOTH arms (retail duplicates it, so do not
+    factor it), `v = (b / 10) * 178 + (b % 10) * 16 + 0xE`, and two
+    velocities `((s16)x - field) << 16` divided by the third parameter.
+    Those two divisions are a real `div`, which is the tell that the divisor
+    is a variable -- here it is simply the parameter, no local needed.
+    What is left: retail runs the first velocity's shift/subtract chain
+    through $v0 and lands the quotient in $a1; ours runs the chain through
+    $a1 itself, so the intermediate and the quotient coalesce. And the second
+    `mflo` takes $a0 in retail and $v0 in ours, which exchanges the register
+    the 0x8000 and 1 constants live in. Nine shapes measured and every one is
+    14: splitting the shift from the divide against the same name and against
+    two fresh names, a named 0x8000, a named divisor, declaration order of
+    the four locals both ways, the two `sw`s moved ahead of the halfword
+    stores, and the second velocity written inline into its store.
