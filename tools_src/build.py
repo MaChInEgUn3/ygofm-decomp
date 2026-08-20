@@ -496,6 +496,9 @@ PER_FUNC_AS_FLAGS["func_8005C1F4"] = "-G4"
 # func_80032184: gp == 0, so -G0 is free and both D_8009B0F4 and D_8009B118
 # get the %hi/%lo pairs retail has (recipe branch 1).
 PER_FUNC_AS_FLAGS["func_80032184"] = "-G0"
+# func_8003BD14: same dispatcher shape as func_80032184 -- gp == 0, so -G0,
+# and the volatile arm for the back-to-back read-modify-writes in mode 0.
+PER_FUNC_AS_FLAGS["func_8003BD14"] = "-G0"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

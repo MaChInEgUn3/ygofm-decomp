@@ -3200,3 +3200,27 @@ func_80032184 -- 33 differences at +1, and everything left is register
     read-modify-writes, so nothing to fold), -7 on func_8003C120 (it is at
     -G4, where volatile does cost the bare form), and func_8004BCE8 never
     reads the symbol.
+
+
+func_8003BD14 -- 42 differences at equal length, and every one is the same
+    register rotation the rest of the family has. Fifth dispatcher
+    (func_8003C328, func_8003C120, func_8004BCE8, func_80032184), and the
+    first one where the whole recipe went in at once: `goto` arms in retail's
+    address order, the volatile scalar arm of D_8009B0F4 for mode 0's
+    back-to-back read-modify-writes, `as -G0` because gp == 0, and the
+    D_8009B118 load written ABOVE the `+0x1C` store. First draft with all of
+    that was 58 at +1; the load hoist alone took it to 42 at exact length.
+    Signature was PROVISIONAL `(void)` and is `(u8 *, s32)`.
+    Modes 1 and 3 share a real tail -- both set `+0x1C`, pick a pointer
+    (D_8009B118 or D_800101D8, the latter a const pointer to 0x80168000 that
+    lives in rodata) and mask D_8009B0F4, then the join stores all three and
+    writes `+0x46 = 1`. Written with the two arms falling into one `join:`
+    label, which is what retail has.
+    THE FAMILY RESIDUE, now seen in three of the five and worth stating once:
+    the mask constant whose `lui` half sits in the dispatcher branch's delay
+    slot lands in **$a0** in retail and in $v0 or $v1 in ours, and the read
+    that consumes it is exchanged to match. $a0 is the incoming parameter
+    register in every case, free from the moment the parameter is copied to
+    its callee-saved home at the top of the function. Nothing tried so far
+    reaches it: naming the constant is propagated back to the use, and the
+    delay-slot placement is already correct.
