@@ -480,6 +480,10 @@ PER_FUNC_AS_FLAGS["func_8004C8C8"] = "-G0"
 # gp == 0 in func_8004C5C8; scalar D_8009B458 plus a -G0 assembler gives the
 # %hi/%lo pair the listing has (recipe branch 1).
 PER_FUNC_AS_FLAGS["func_8004C5C8"] = "-G0"
+# func_8003C328: gp == 0, and D_8009B0F4 declared [2] (eight bytes) is not
+# small at -G4, so the bare reference is expanded by the assembler -- lui $at
+# for the stores, the destination register for the loads, which is retail.
+PER_FUNC_AS_FLAGS["func_8003C328"] = "-G4"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

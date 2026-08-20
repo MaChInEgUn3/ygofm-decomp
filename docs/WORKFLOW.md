@@ -575,6 +575,21 @@ meaningful, and skipping to the last one wastes hours:
    differences to 27). Writing it *first* instead is 36, as is putting `+0x16`
    first — so it is the last position that decides, not the first. **Observed
    once.**
+   **A three-way dispatcher with out-of-line arms is `goto`, and the
+   instruction count says so before you guess.** func_8003C328 tests one
+   parameter against 1, then <2, then 0, then 2, and the arms sit after the
+   dispatcher in address order. Written as nested `if`s with the bodies
+   inline it is -6, and the six missing instructions are exactly the jumps a
+   fall-through layout cannot emit: two `j epilogue`/`nop` pairs in the
+   dispatcher, plus one terminal jump from each arm that does not fall into
+   the shared tail. Flipping the polarity does nothing -- gcc canonicalises
+   both spellings, and two attempts that differ only in `!=` versus `==`
+   scoring identically is the tell that you are on the wrong axis entirely.
+   Lay the arms out as `goto` targets in retail's own address order, with an
+   explicit `goto tail;` on any arm that must reach the shared tail rather
+   than fall into its neighbour: 83 differences to 60, and the length
+   error from -6 to -2. Same lever as func_8003B378's single out-of-line
+   arm, one level up.
    **A switch whose arms share a tail may want that tail written out per
    arm, not once after the switch.** func_8004C5C8 has six arms that all end
    `field18 = field1C & mask; field1C >>= shift;` with three different

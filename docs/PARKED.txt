@@ -3011,3 +3011,39 @@ func_8004A940 -- 77 differences at -3, after m2c corrected the decode in
     D_8009B458 pointer global at the bottom of loop 3 every iteration, and
     gcc hoists ours into a base local however the source spells it -- the
     same thing func_80071FC8's `hi` does, unsolved there too.
+
+
+func_8003C328 -- 60 differences at -2, and the layout is solved. A three-way
+    dispatcher on the second parameter: mode 1 sets the +0x1C word to 0x800,
+    clears two bits of D_8009B0F4 and points +8/+0xC at D_8009B118; mode 0
+    builds a 0x18000 window, clears a different bit pair, sets one, writes
+    +0x46 = 2 and points +8/+0xC at D_8009B118 and D_8009B118 + 0x800; mode 2
+    calls func_80081DE8 and points both at D_801AF000. Modes 1 and 2 share a
+    `+0x46 = 1` tail, mode 0 does not.
+    The lever was already in WORKFLOW and was re-derived the hard way here:
+    **only a `goto` moves an arm out of line.** Written as nested ifs with the
+    blocks inline -- either polarity, gcc canonicalises both to the same
+    thing -- it is 83 differences at -6, and the six are precisely the jumps
+    a fall-through layout can never emit: the dispatcher's two
+    `j epilogue`/`nop` pairs, mode 0's terminal jump, and mode 1's jump to
+    the shared tail. Rewritten as a dispatcher of `goto m0/m1/m2` with the
+    blocks laid out in retail's own address order and an explicit
+    `goto tail;` at the end of m1, it is 60 at -2.
+    Signature corrected on the way: it takes `(u8 *, s32)`, not `(void)`.
+    functions.h had it PROVISIONAL as void; it is a callback passed by
+    pointer to func_80014E1C from func_8003C498, which still MATCHes after
+    the change.
+    Addressing: `as -G4` with D_8009B0F4 declared `[2]`, which is eight bytes
+    and so not small at that threshold -- that is what gives the `lui $at`
+    stores and destination-register loads retail shows. gp == 0 here so the
+    threshold is free.
+    What is left: the -2 is D_8009B118, which at -G4 is still small (four
+    bytes) and comes out as one instruction where retail has the %hi/%lo
+    pair. Sizing it `[2]` behind its own guard fixes those but costs five
+    elsewhere (+3 overall, 69) because the other three references then expand
+    too and retail wants only some of them paired -- so the two symbols want
+    different thresholds in one unit, which no single `-G` provides. The rest
+    is register naming and store order inside mode 0: retail materialises
+    0xFFDDFFFF and 0x18000 into $a0/$a1 at the top of the block and we build
+    them into $v1/$a0 interleaved with the stores; naming both constants and
+    assigning them first changes nothing.
