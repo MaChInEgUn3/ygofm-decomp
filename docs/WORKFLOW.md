@@ -787,7 +787,17 @@ them the same wrong way round, and wrapping just the two assignments in
 `do { … } while (0);` matched. Reach for it whenever a pair of adjacent
 statements comes out in the wrong order and no permutation of them moves it
 — and read it as a **macro** in the original, which is what that idiom is
-for. **This is the specific thing the permuter is for**:
+for.
+**Third use, and this one is register allocation, not scheduling.**
+func_8005F3B8 held the fifth parameter and a call result in $s1 and $s2
+exchanged, ten sites wrong, through declaration order, a local copy of the
+parameter, a moved store and three borrowed-local hints. Wrapping the two
+calls that start the function in `do { … } while (0);` matches. The permuter
+reached the same allocation by duplicating those two calls into both arms of
+an `if` whose arms are identical — semantically a no-op that gcc merges back,
+and a shape nobody writes; the `do`/`while` gets there and reads as source.
+When a permuter win is *correct* but implausible, look for the plausible
+shape with the same effect before installing what it found. **This is the specific thing the permuter is for**:
 it mutates from a base that already carries one lever, so it can find the
 partner that a one-at-a-time sweep by hand never will. func_80038334 is the
 second instance and the cleaner one: two extra names, `d = *slot; q = d;` and

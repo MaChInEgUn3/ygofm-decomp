@@ -7,8 +7,13 @@ void func_8005F3B8(s32 a, s32 b, s32 c, s32 d, s32 e) {
     s32 s;
     s32 x;
 
+    /* The do/while(0) is load-bearing: without it the fifth parameter and
+     * func_80059208's result exchange $s1 and $s2 and ten sites differ.
+     * Almost certainly a macro in the original. */
+    do {
     p = func_800591FC();
     q = func_80059208();
+    } while (0);
 
     if (D_8009B07B == 1 && D_8009B07C == 1) {
         return;
