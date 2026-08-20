@@ -727,7 +727,16 @@ extern u8 D_80090D0C[];
 extern u8 D_801D0200[];
 extern u8 D_801D0250[];
 extern u8 D_8009B114;
+/* Eight bytes under the guard, four in truth. func_8003C120 assembles at -G4
+ * for D_8009B0F4's sake and needs this one non-small at that threshold too,
+ * or every reference comes out one instruction short of retail's %hi/%lo
+ * pair. Its sibling func_8003C328 is the counterexample: there only SOME of
+ * the references want expanding, so the guard makes it worse. */
+#ifdef D_8009B118_SIZED
+extern s32 D_8009B118[2];
+#else
 extern s32 D_8009B118;
+#endif
 extern u8 *D_800101D8;
 extern u8 D_801AF000[];
 extern u8 D_8009B110;

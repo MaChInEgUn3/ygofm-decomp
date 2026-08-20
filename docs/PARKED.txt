@@ -3047,3 +3047,60 @@ func_8003C328 -- 60 differences at -2, and the layout is solved. A three-way
     0xFFDDFFFF and 0x18000 into $a0/$a1 at the top of the block and we build
     them into $v1/$a0 interleaved with the stores; naming both constants and
     assigning them first changes nothing.
+
+
+func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the
+    shift; the real residue is four instructions. Decode, settled: it resets
+    a block at D_8009B458 (+0x801 byte, +0x7F0/+0x7F4 words, +0x518 = 8),
+    takes func_8004BCA8's result into +0x7FC and func_8004BC2C's >> 8 into
+    +0x808, computes `60000000 / rate * 100 / 115`, clamps it to 0xFF, then
+    halves or quarters it by mode -- 0x1E gives >> 2, 0x18 and 0x3C give
+    >> 1, anything else no shift -- masks to a byte into +0x16 and +0x14,
+    calls func_8004BAE4, and finally writes +0x7FC into +0x804 (twice: once
+    under an `>= 0x60` test with a zero in the else arm, then again
+    unconditionally, which is what the listing shows).
+    The divisor 115 was recovered by solving gcc's unsigned reciprocal
+    (magic 0x1CF06ADB with the add-correction and a final `>> 6`) rather
+    than guessed; the first divide is a real `divu` with `break 7`, so its
+    divisor is the variable, per the WORKFLOW rule.
+    The layout lever from func_8003C328 applies again and got it from -3 to
+    +1: the four shift arms are out of line, reached by `goto`, with the
+    no-shift arm carrying its own `& 0xFF` and jumping past the shared one.
+    Retail has TWO `andi $v0,$a1,0xFF`, not one -- count them before
+    factoring the mask out.
+    What is left, all four of them: we emit a THIRD `andi`, because gcc fills
+    the `m != 0x3C` branch's delay slot by copying the shared mask, where
+    retail fills it with `addu $a0,$s0,$zero` -- the func_8004BAE4 argument,
+    which retail sets up in three delay slots and we set up in two. Naming
+    the argument at the join to try to produce it is +4 and much worse. Plus
+    the first D_8009B458 load takes $v0 in ours and $v1 in retail, and the
+    +0x808 store lands after the `divu` in ours and before it in retail --
+    three source orderings of the store and the divide are identical, so
+    that is not the axis.
+
+
+func_8003C120 -- 80 differences at +1, inflated by the shift; the real
+    residue is where two mask constants are materialised. Direct sibling of
+    func_8003C328: the same three-way-plus-one dispatcher on the second
+    parameter, and the same `goto` layout applies with the arms in retail's
+    address order (m0 < m1 < m2 < m3 < join < tail). Mode 3 is the extra one:
+    it points +8/+0xC at the literal 0x80140000 and shares the join block
+    with mode 2, which is where the +0x1C word (0x800 or 0x8000) and the
+    second D_8009B0F4 mask are written once for both.
+    Signature was PROVISIONAL `(void)` and is `(u8 *, s32)`; it is a callback
+    passed by pointer from func_8003C2B4, which still MATCHes.
+    THE ADDRESSING FINDING, and it is the useful half: this function needs
+    `as -G4` for D_8009B0F4's `lui $at` stores AND D_8009B118 declared `[2]`
+    behind its own guard so it is non-small at that same threshold -- every
+    one of its references in retail is a %hi/%lo pair, and left small it is
+    one instruction short at each, which was -7. Its sibling func_8003C328 is
+    the exact counterexample: there only SOME of the D_8009B118 references
+    expand, so the same guard costs +3. Two functions, one symbol, opposite
+    answers -- the threshold has to be decided per unit by counting the pairs
+    in the listing, not by precedent.
+    What is left: retail materialises the `lui` halves of both masks
+    (0xFFDDFFFF and 0xFFDCFFFF) in the dispatcher's own branch delay slots
+    and completes them with `ori` inside the arms; we build them whole inside
+    the arms and spend the slots on other constants. Same shape that would
+    not move on func_8003C328, where naming both constants and assigning them
+    first changed nothing. Flag sweep finds nothing better.
