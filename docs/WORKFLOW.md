@@ -710,6 +710,17 @@ is where the permuter first found it) the copy is emitted after all the
 stores instead. func_80031574, 24 differences to 14. This is the sharpest
 form of the rule below.
 
+**Assigning to a local that is not yet live is the same hint, and a fresh
+name is not.** func_8002A4A8 sat at 14 through nine hand shapes. The
+permuter's fix was to write `y = a;` in one arm of an `if` and take the
+modulo of `y` — where `y` is the function's *second* result variable, whose
+real assignment is forty instructions later. Semantically a no-op, and it is
+7. A brand-new local in the same position is 14, so it is specifically
+borrowing a name whose live range resumes downstream: that ties the temp's
+pseudo to that variable's allocation. Applied a second time to the other
+residue — `y = (…) << 16; x = y / n;` for a value retail runs through a
+caller-saved temp — it went 7 to 3. Two instances in one function, and both
+came from reading what the permuter changed rather than from the number.
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
 statements earlier computes nothing and matched func_800135FC, which had been
