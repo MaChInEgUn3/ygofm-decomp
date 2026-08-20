@@ -3461,3 +3461,29 @@ func_8005A6A8 -- 1 difference at equal length (116/116): retail negates in
     Measured and dead on the last difference: four spellings of the negation
     (test on the other name, `0 - v`, an explicit if/else, negating the other
     name) -- all 1, which is the tell that this is not a source axis.
+
+
+func_8002E730 -- 3 differences at equal length (122/122), all of them one
+    store two positions early. A screen-state toggle: it either recentres a
+    rect or creates/destroys an overlay sprite.
+    What paid:
+      - the addressing, which is most of the function. Five symbols want the
+        non-small form and the gp-relative ones top out at four bytes, so
+        every bare-wanting symbol is sized into the window `4 < N <= 8`:
+        D_8009B0F4 and D_8009B134 take their `_SIZED` arms ([2]), D_8009B146
+        and D_8009B148 take theirs ([4]), and D_8009B145 and D_8009B0AC
+        needed new `_SIZED8` arms written for them. `as -G4`.
+      - the `D_8009B27C & 0x2000` arm written as an `else` rather than an
+        early return, so its block lands after everything instead of inline;
+        that alone is 32 differences to 9.
+      - a base local for D_8009B0AC assigned at the *top of the function*,
+        before the first call, where the symbol is only read inside the first
+        branch. 9 to 3. A fresh name and a borrowed one score the same, so it
+        is the hoist that matters, not the name. The permuter found it.
+    What is left: retail puts `sw $s0, D_8009B280` between the `lui` of the
+    0x2000000 constant and the `or` that consumes it; we emit it two
+    instructions earlier. Measured and dead: naming the read-modify-write's
+    load and placing it either side of the store (4 and 4), the store written
+    after the RMW instead of before (6), the store and `t = D_800EAE98`
+    swapped (3, no change), `do { } while (0)` around the pair (4), and a
+    name for the 0x2000000 constant (6, gcc propagates it).

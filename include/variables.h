@@ -72,7 +72,14 @@ extern u8 D_8009B07C;
 extern u8 D_8009B079;
 extern s8 D_8009B07A;
 extern u8 D_8009B141;
+#ifdef D_8009B145_SIZED8
+/* Eight bytes it does not have: func_8002E730 reaches it %hi/%lo while
+ * four-byte gp-relative symbols in the same unit stay small, so it needs a
+ * size above that function's `as -G4` and at or below cc's own -G8. */
+extern u8 D_8009B145[8];
+#else
 extern u8 D_8009B145;
+#endif
 extern s8 D_8009B238;
 extern u16 D_8009B244;
 extern u8 D_8009B248;
@@ -207,6 +214,8 @@ extern s32 D_8009B298;
 extern u16 D_8009B27C[];
 #else
 extern u16 D_8009B27C;
+/* Holds func_800400AC's result for func_8002E730; gp-relative there. */
+extern u8 *D_8009B280;
 #endif
 
 /* Two words of PRNG state, mixed together by func_8003CE74. Eight bytes, so
@@ -846,7 +855,11 @@ extern volatile s32 D_8009B0C8[];
 extern volatile s32 D_8009B0C8;
 #endif
 extern u8 D_8009B0A3[];
-#ifdef D_8009B0AC_IS_AGGREGATE
+#ifdef D_8009B0AC_SIZED8
+/* Eight bytes it does not have, so that at `as -G4` the reference is bare and
+ * the assembler's expansion keeps the pair in one register (func_8002E730). */
+extern u8 D_8009B0AC[8];
+#elif defined(D_8009B0AC_IS_AGGREGATE)
 extern u8 D_8009B0AC[];
 #else
 extern u8 D_8009B0AC;

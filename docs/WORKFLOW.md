@@ -1407,6 +1407,19 @@ window are worth reading correctly: 0 forks, 0 stars, 7 unique visitors, but
 public repos within minutes -- not human interest, and not undoable. Going
 private stops future exposure; it does not recall what was already mirrored.
 
+**Never run a background job that rewrites `build.py` (or any shared config)
+while you are measuring.** A sweep that patches `SMALL_DATA_NOP_FUNCS` per
+candidate and restores the file afterwards restores the copy it read at
+*start-up* -- so every `PER_FUNC_AS_FLAGS` line added while it ran was
+silently deleted when it finished. The build then went red with 550
+"differing" functions, all fallout from one function that had matched an hour
+earlier. `git diff tools_src/build.py` showed it in one line. Two rules: have
+such a sweep write to a *copy* of the tree or hold the file for the whole run,
+and when a build goes red with hundreds of diffs, read `git diff` on the
+tooling before reading any of the functions. The sweep itself was a clean
+negative -- 43 short parked candidates, no hits -- so the missing-nop gap is
+rarer than the one instance suggested.
+
 **When a length error is all `nop`s, scan the whole binary for the sequence
 you are producing before hunting for a source shape.** func_80015310 came out
 three instructions short in one block, and the built code was
