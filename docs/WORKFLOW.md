@@ -1399,6 +1399,22 @@ window are worth reading correctly: 0 forks, 0 stars, 7 unique visitors, but
 public repos within minutes -- not human interest, and not undoable. Going
 private stops future exposure; it does not recall what was already mirrored.
 
+**When a length error is all `nop`s, scan the whole binary for the sequence
+you are producing before hunting for a source shape.** func_80015310 came out
+three instructions short in one block, and the built code was
+`lbu $v0,0($a0)` followed straight by `sb $v0,%gp_rel(...)` -- a load-delay
+violation. Twenty lines of Python over all 1799 listings found **zero**
+adjacent `lbu`->`sb` pairs on one register anywhere in the retail binary, so
+the sequence cannot be right and it is a toolchain gap, not codegen. It is
+the one `SMALL_DATA_NOP_FUNCS` already exists for: maspsx assumes the
+instruction after a load will expand through `$at` and fill the slot, which
+is false when the symbol is small data. Adding the name to that set was -3 to
+0. A four-line control probe reproduced it in isolation first, which is what
+turned "gcc scheduled differently" into "the assembler did not insert a nop".
+**The general move: when your build contains an instruction pair, ask whether
+the target contains that pair anywhere.** It costs one command and it
+distinguishes "wrong source" from "wrong tool", which nothing else does.
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a
