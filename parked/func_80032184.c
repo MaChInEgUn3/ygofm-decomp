@@ -65,12 +65,17 @@ m2:
     *(s32 *)(p + 0xC) = D_8009B118;
     *(s32 *)(p + 8) = D_8009B118;
     p[0x46] = 1;
+    /* Dead here -- mode 2 returns on the next line -- and load-bearing: it
+     * ties mode 3's 0x100 to `one`'s pseudo, which is 29 differences against
+     * 35 for an honest `c = 0x100;` local in mode 3. The permuter found it;
+     * the plausible shape does not reach it. */
+    one = 0x100;
     return;
 
 m3:
-    D_800E9D70[0] = 0x100;
+    D_800E9D70[0] = one;
     D_800E9D70[1] = 0xF0;
-    D_800E9D70[2] = 0x100;
+    D_800E9D70[2] = one;
     D_800E9D70[3] = 0x10;
     func_80081DE8(D_800E9D70, D_8009B118, p, 1);
 }
