@@ -2953,3 +2953,33 @@ func_8005F3B8 -- 11 differences, and every one is $s1 and $s2 exchanged. The
     the fifth parameter (+3), the `b` store moved above the `e` block (-1),
     and three borrowed-local hints of the kind that took func_8002A4A8 from
     14 to 3 (25, +3, and no change).
+
+
+func_80025D30 -- 38 differences at -1 instruction; the addressing is solved
+    and what is left is one constant's materialisation. Decode: a five-step
+    timer that decrements D_8009B20C[1], reloads it to 0x10, picks a record
+    out of D_800907D8 by `D_8009B1D0 + (D_8009B1D5 * 20 + 5)`, and if the
+    record's 0x8000 flag is set spawns a func_8002C604(0xD) packet carrying
+    the record's 0x30/0x32/0x34 halfwords, `D_8009B1D0 << 14` added into the
+    packet's +0x14 word, and a 2/-0x1F4 or 1/-0x3E8 pair chosen on
+    `D_8009B1D2 == 0x15D`; then bumps D_8009B1D0 and sets 0x40 in D_8009B220
+    at five.
+    Two things landed and both are now WORKFLOW lines or close to it:
+      - the `-G4` window. D_8009B260 needs the bare form while D_8009B20C
+        stays gp-relative, and D_8009B20C is eight bytes, so no threshold
+        exists as declared. The unit touches only element [1], so a per-file
+        `D_8009B20C_HALF` guard declares it `s16 [2]` and the window opens.
+        Without this the `%hi` is hoisted into a branch delay slot retail
+        leaves as a `nop`.
+      - naming the 0x34 read and storing it after the +0x14 update. That is
+        what puts the packet pointer in retail's $a1: the named halfword
+        occupies $a0 across the branch, and every one of the ten sites that
+        touch the packet was wrong before it.
+    What is left: retail materialises the -0x1F4 / -0x3E8 that goes into the
+    packet's +0x12 at the END of each arm, reusing the register the record
+    update just freed, and we hoist it to the top of the arm into a register
+    of its own. `s16 k` is the best of the four types (an `s32` k also makes
+    the record's own subtraction an `addu` through that register instead of
+    retail's immediate, which is +1); `u16` is the same as `s16`, and
+    `0 - 0x1F4` changes nothing. Naming the shifted counter, in either
+    position, is -2.

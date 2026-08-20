@@ -127,7 +127,14 @@ extern s16 D_8009B1A0;
 /* Reached as `%gp_rel(D_8009B20C + 0x2)` -- a member access on a small-data
  * object. The size has to be declared (an unsized array is never small
  * data, whatever -G says) and eight still clears -G8 (func_800260D0). */
+#ifdef D_8009B20C_HALF
+/* Two elements, not the four it has: func_80025D30 needs D_8009B260 out of
+ * small data while this stays in it, and only a -G4 threshold opens that
+ * window. Element [1] is the only one this unit touches. */
+extern s16 D_8009B20C[2];
+#else
 extern s16 D_8009B20C[4];
+#endif
 extern u16 D_8009B1D0;
 extern s16 D_8009B1D2;
 extern s16 D_8009B33C;
@@ -289,7 +296,12 @@ extern u8 D_800EAE8F[];
 /* Two bytes under the guard so an assembler at -G2 treats it as non-small (two would still be small):
  * func_80024200 stores it through $at and loads it through the destination
  * register while the two-byte gp-relative symbols beside it stay small. */
-#ifdef D_8009B260_SIZED
+/* Sixteen, for a unit whose gp-relative neighbours include the eight-byte
+ * D_8009B20C: the window 8 <= G < size needs a size above eight, and then
+ * the default -G8 assembler is already enough (func_80025D30). */
+#ifdef D_8009B260_SIZED16
+extern u8 D_8009B260[16];
+#elif defined(D_8009B260_SIZED)
 /* Eight, not the four it has: func_80025BEC needs it non-small while a
  * four-byte pointer beside it stays %gp_rel, so the window is 4 <= G < size
  * and only a declared eight opens one. func_80024200 assembles at -G2 and

@@ -1052,6 +1052,14 @@ on a combination that had been in the table for weeks.
   greps `gp=0` and the remaining differences are about where the halves of an
   address sit, reach for the scalar arm plus `as -G0` before re-reading the
   source — it is two lines and it has never yet been wrong in that state.
+  **Both sizes are yours to set, and that is what opens a closed window.**
+  The window is `max(gp symbol size) <= G < size(bare symbol)`, and the rule
+  above treats the gp side as fixed. It is not. func_80025D30 needs
+  D_8009B260 bare while D_8009B20C stays `%gp_rel`; D_8009B20C is declared
+  `s16 [4]`, eight bytes, so `8 <= G < 8` is empty and the function looks
+  blocked. The unit only ever touches element [1], so a per-file guard
+  declaring it `s16 [2]` moves the gp side to four and `-G4` fits. Check what
+  the *unit* actually reaches before believing a threshold does not exist.
   **Eliminate before reaching for the threshold.** If the symbol that needs the
   non-small form is *narrower* than one that needs `%gp_rel` in the same
   function, no `-G` exists between them and the answer is the unsized array —

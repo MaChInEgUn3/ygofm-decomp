@@ -420,6 +420,9 @@ PER_FUNC_AS_FLAGS["func_8004BAE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004CABC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800240B0"] = "-G2"
 PER_FUNC_AS_FLAGS["func_80024200"] = "-G2"
+# func_80025D30: D_8009B260 declared [8] must be non-small while D_8009B20C,
+# declared [2] in that unit, stays gp-relative -- the window is 4 <= G < 8.
+PER_FUNC_AS_FLAGS["func_80025D30"] = "-G4"
 # D_8009B260 bare while the four-byte D_8009B17C beside it keeps %gp_rel:
 # the window is 4 <= G < 8, and the declaration is inflated to eight to open
 # it (func_80025BEC).
