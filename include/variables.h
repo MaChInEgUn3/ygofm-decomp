@@ -697,6 +697,8 @@ typedef struct {
     u8 unk9[3];
 } Rec12;
 
+/* 0x2D0 halfword weights, walked as a running total by func_800243F4. */
+extern u8 D_801781D8[];
 extern Rec12 D_801AB000[];
 extern s16 D_800EFE3C[];
 extern s16 D_800EFE44[];
