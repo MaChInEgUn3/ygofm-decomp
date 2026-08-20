@@ -475,8 +475,11 @@ meaningful, and skipping to the last one wastes hours:
    `+` spellings all came out index-first — the offset grouped with the base,
    the constant written first, `((u16 *)p + i)[K]`, `((u16 *)p)[i + K]`, an
    `(s32)` cast sum, a base local, and a named scaled index — and the
-   permuter found the negation at iteration 79. **Observed once**, and write
-   the plain `+` first: it is *not* true that a base which is a pointer value
+   permuter found the negation at iteration 79. **Observed twice** now --
+   func_8003353C's last index went 3 differences to 2 on
+   `e + 0xD - -(n * 0x10)`, after the plain `+`, the base-first
+   `(e + n * 0x10)[0xD]` spelling and a named scaled index all left the
+   `addu` index-first. Write the plain `+` first: it is *not* true that a base which is a pointer value
    forces index-first, because func_80049CF8 and its clone func_80049DD8 get
    `addu base,index` out of a plain `D_8009B458 + i * 0x28` on exactly that
    kind of base. What differs between them is not established; in the two

@@ -501,6 +501,8 @@ PER_FUNC_AS_FLAGS["func_80032184"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003BD14"] = "-G0"
 # gp == 0 in func_80048768; scalar D_8009B45C plus a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_80048768"] = "-G0"
+# gp == 0 in func_8003353C; every global there is %hi/%lo, so -G0 is free.
+PER_FUNC_AS_FLAGS["func_8003353C"] = "-G0"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the
