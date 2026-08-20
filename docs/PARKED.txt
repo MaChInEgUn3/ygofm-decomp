@@ -3624,7 +3624,7 @@ func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
     return, a different shape again. The full flag sweep says the default row
     is best.
 
-func_8005A98C -- 55 differences at equal length (133/133), all of them
+func_8005A98C -- 54 differences at equal length (133/133), all of them
     register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
     work at all.
     What paid:
@@ -3636,6 +3636,9 @@ func_8005A98C -- 55 differences at equal length (133/133), all of them
         extra name; the plain swap is worth exactly the same, so it is the
         order and not the name.
       - initialising hi, lo, i in that order: 57 to 55.
+      - `df = mn; df = mx - df;` rather than `df = mx - mn;`, 55 to 54. The
+        permuter's rerun found it paired with a `(sum << 8) << 4` split that
+        is worth nothing on its own -- decomposed before installing.
     What is left: `hi` and `lo` are exchanged ($t0/$t1) and the two `lbu`s in
     the loop body come out in the other order. Six init orders measured
     (55/77/57/76/77/77) and swapping the two comparisons is 59.

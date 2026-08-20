@@ -47,7 +47,8 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
 
     t.v = 0;
     t.h = 0;
-    df = mx - mn;
+    df = mn;
+    df = mx - df;
     t.s = q;
 
     if (df != 0) {
