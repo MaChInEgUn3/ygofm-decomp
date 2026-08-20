@@ -27,6 +27,32 @@ gitignored and must be re-fetched per machine.
 
 ## Adding a function
 
+**Start with the m2c draft.** `tools_src/m2c_draft.py func_XXXXXXXX` prints
+structurally-correct C for the listing in about a second: loop and switch
+shapes, case groupings, reciprocal multiplies read back as `/ 3`, field
+offsets, the signedness of each load. On a 767-instruction function that is
+the ten to fifteen minutes of hand-decoding, gone. Measured on a random 60 of
+the open in-scope functions: **60/60 produce a draft** (median 147
+instructions), and 25/25 already-matched ones still do, so it is not
+size-limited. The wrapper passes `asm/data/*.rodata.s` automatically -- five
+of that sample were `jr $v0` switches that emit *nothing* without their jump
+table, which is the class this file calls the largest one open.
+
+It closes no matches. Every lever below -- which register holds a value,
+where a `lui` sits, whether a store sinks into a delay slot -- is invisible
+to it, and that is where the hours go. Two of its comments are worth reading
+rather than deleting:
+- **"Duplicate return node #N. Try simplifying control flow for better
+  match"** -- it found a tail retail shares and it does not. That is step 5's
+  cross-jumping question; on func_8004C5C8 the answer was to write the shared
+  tail out per arm instead of once after the `switch`.
+- **`var_s1`, `var_s1_2`, `var_s1_3`** -- the suffix is the register. Three
+  names on one register is a standing hint that the source had *one* name;
+  func_8002C9B4 matched exactly that way, one variable for the selector and
+  the loop counter both.
+Its types are guesses and its `unkNN` field names are its own. Nothing it
+prints is evidence; try_func is.
+
 Write `src/func_XXXXXXXX.c` and rebuild; placement is automatic. Get candidates
 from `tools_src/candidates.py`, and from `tools_src/siblings.py`, which pairs
 each unmatched candidate with the decompiled function it most resembles. Run

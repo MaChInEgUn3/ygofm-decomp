@@ -4179,3 +4179,41 @@ and func_8005B36C. Everything else is independent work.
 - `tools_src/ghidra_scripts/` — `FunctionInventory.java` (dumps library vs. game function lists + memory map), `DumpFunction.java` (dumps disassembly + Ghidra's decompiler guess for one function, given a hex address as `-postScript` arg), `OverlayCheck.java` (searches for CD-read call sites and indirect-jump patterns, used for the overlay investigation above). All run via `analyzeHeadless ... -process SLUS_014.11 -noanalysis -scriptPath tools_src/ghidra_scripts -postScript <Name>.java [args]`.
 - Ghidra + `ghidra_psx_ldr`, the PsyQ SDK, and `asm-differ` are NOT vendored in the repo (`/tools/` gitignored) — anyone picking this up needs to redownload/reclone all three themselves (see the sources cited above for each).
 - Next concrete task: the Makefile/compile-and-diff wiring described above, then start actually matching functions, prioritizing ones DataCrystal's RAM map already gives us names/context for.
+
+## m2c (added 2026-08-20)
+
+`tools_src/m2c_draft.py` wraps [simonlindholm/m2c](https://github.com/simonlindholm/m2c)
+-- the MIPS decompiler built for matching decomps, same author as the
+decomp-permuter already in `tools/`. It is a *first-draft* generator, not a
+matcher; see the section at the top of `docs/WORKFLOW.md` for how to read its
+output and what it cannot do.
+
+Fetch (per machine -- `tools/` is gitignored):
+
+```
+git clone --depth 1 https://github.com/simonlindholm/m2c.git tools/m2c
+python3 -m venv tools/m2c/.venv
+tools/m2c/.venv/bin/pip install 'pycparser>=2.21,<3' 'graphviz>=0.20'
+```
+
+**Why a second virtualenv rather than the project one.** m2c pins
+`pycparser ^2.21`; the project `.venv` has pycparser 3.00, which the
+decomp-permuter uses and which dropped the `plyparser` module m2c imports.
+Downgrading in place would have traded one tool for the other -- the exact
+"installing globally once broke another tool's pins" failure `WORKFLOW.md`
+already warns about -- so m2c gets its own venv and the project `.venv` is
+untouched. `build.py` and `try_func.py` do not know m2c exists.
+
+Two shims the wrapper has to apply, both because splat's output is not gas
+input and pycparser is a strict C99 parser:
+- the listings begin with a bare `nonmatching <sym>, 0x1B4` line and end with
+  `endlabel`/`enddlabel`; m2c parses the first as an instruction and rejects
+  it. Stripped.
+- the preprocessed context needs `__asm__(...)` and `__attribute__((...))`
+  removed, or pycparser stops at the first one (`common.h`'s `.include` of
+  `macro.inc`, and the `noreturn` on func_8008FB8C).
+
+Coverage measured on a random 60 of the open in-scope functions: 60/60 with
+the rodata passed, 55/60 without -- the five are `jr $v0` jump-table switches,
+which emit nothing at all unless m2c can read the table. The wrapper therefore
+always appends `asm/data/*.rodata.s`.
