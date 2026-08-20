@@ -493,6 +493,9 @@ PER_FUNC_AS_FLAGS["func_8003C120"] = "-G4"
 # func_8005C1F4: D_800F5D44 declared [8] must be non-small while the 4-byte
 # D_8009B498 stays gp-relative -- the window is 4 <= G < 8.
 PER_FUNC_AS_FLAGS["func_8005C1F4"] = "-G4"
+# func_80032184: gp == 0, so -G0 is free and both D_8009B0F4 and D_8009B118
+# get the %hi/%lo pairs retail has (recipe branch 1).
+PER_FUNC_AS_FLAGS["func_80032184"] = "-G0"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

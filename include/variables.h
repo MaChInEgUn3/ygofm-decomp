@@ -365,7 +365,15 @@ extern u8 D_800F5C83[];
  * hardware register it shadows is not cached across the test. */
 /* Non-volatile in the aggregate arm: both users read it once, and volatile
  * blocks the bare-symbol form whose assembler expansion reuses the
- * destination register -- which is what retail shows. */
+ * destination register -- which is what retail shows.
+ * NARROWED 2026-08-20: that is true at -G4, not in general. func_80032184
+ * assembles at -G0 and uses the VOLATILE scalar arm, and still gets the bare
+ * form -- `lui $at` stores and destination-register loads. It needs volatile
+ * for a different reason: two read-modify-writes back to back with no store
+ * between them, where gcc otherwise folds the second read into the value it
+ * just wrote and one whole RMW disappears. 81 differences to 33 on that
+ * declaration alone. So: volatile and the bare form are compatible at -G0,
+ * and the note above should be read as being about -G4. */
 #ifdef D_8009B0F4_SIZED
 /* Eight bytes: at -G4 that is not small data, so the reference stays a single
  * bare pseudo-instruction and the assembler expands it -- which is what stops

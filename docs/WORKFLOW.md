@@ -1156,6 +1156,16 @@ on a combination that had been in the table for weeks.
   unrelated globals comes out reversed, try the pair, not one at a time — and
   note this is a different case from the rule above, where one neighbour was
   already volatile.
+- **`volatile` also blocks a read-modify-write fold, and that is a different
+  use from re-reading.** Two RMWs on one global back to back with no store
+  between them -- `g &= a; g |= b;` -- let gcc fold the second read into the
+  value it just wrote, and a whole load/or/store disappears. Nothing in the
+  source blocks it: a name for either read folds too, and only an intervening
+  store through a pointer gcc must assume aliases will do it. Where retail
+  keeps both, declare the global volatile. func_80032184 went 81 differences
+  to 33 on that word alone. It composes with the bare-symbol form at `-G0`
+  (the `lui $at` stores survive), which the note in variables.h had said it
+  would not -- that note is about `-G4`.
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs

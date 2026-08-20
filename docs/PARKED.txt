@@ -3169,3 +3169,29 @@ func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
     registers before computing the two record addresses (`addu $v0,$v1,$zero`
     / `addu $v1,$a2,$zero`), which is two more names than the source has, and
     the constants land in exchanged registers.
+
+
+func_80032184 -- 33 differences at +1, and everything left is register
+    rotation. Fourth member of the dispatcher family (func_8003C328,
+    func_8003C120, func_8004BCE8), same `goto` layout with the arms in
+    retail's address order, four modes and a shared tail for modes 0 and 1.
+    Signature was PROVISIONAL `(void)` and is `(u8 *, s32)`; it is a callback
+    passed by pointer from func_80032328, which still MATCHes.
+    Three things took it from 81/-10 to 33/+1, in order of size:
+      - **VOLATILE, and it is not the usual reason.** Modes 0 and 1 each do
+        two D_8009B0F4 read-modify-writes back to back with nothing between,
+        and gcc folds the second read into the value it just stored, losing a
+        whole RMW. The volatile scalar arm blocks the fold: 81 -> 33. It also
+        narrows a note in variables.h that said volatile blocks the
+        bare-symbol form -- at -G0 it does not, and this function gets its
+        `lui $at` stores with volatile on.
+      - **the shared tail written out per arm.** Modes 0 and 1 end with seven
+        identical instructions and gcc cross-jumps them where retail does
+        not; writing the tail into both arms is -10 to -3. Same lever as
+        func_8004C5C8, and note the failed alternative: a separate name for
+        the B118 load in one arm does not break the identity (still -10).
+      - the named D_8009B0F4 read placed between the `+0x4` and `+0x6`
+        stores, which is the delay-slot lever from func_8003C328.
+    What is left: the 0xFFDDFFFF mask lives in $a0 in retail and $v1 in ours,
+    and the read that consumes it is correspondingly exchanged. $a0 is free
+    from the moment the parameter is copied into $a2, and retail reuses it.
