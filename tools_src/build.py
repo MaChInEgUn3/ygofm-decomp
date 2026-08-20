@@ -279,6 +279,7 @@ PER_FUNC_FLAGS = {
     "func_80071B64": _O2_G8_NOSTRENGTH,
     "func_8004C8C8": _O2_G8_NOSTRENGTH,
     "func_8007308C": _O2_G8_NOSTRENGTH,
+    "func_80039794": _O2_G8_NOSTRENGTH,
     # Parked: this row is the permuter's base, not a match. At default flags
     # the store order is right and the two sll/ori pairs float (8); under
     # -fno-schedule-insns2 the pairs are right and three stores float (9),
@@ -480,6 +481,9 @@ PER_FUNC_AS_FLAGS["func_8002C9B4"] = "-G0"
 # hoists into a branch delay slot retail leaves empty, so take the scalar and
 # a -G0 assembler instead (recipe branch 1, the delay-slot side).
 PER_FUNC_AS_FLAGS["func_80020D4C"] = "-G0"
+# func_80039794 needs D_8009B0C1 non-small while D_8009B35A (2 bytes) and
+# D_8009B356 (1) stay gp-relative: recipe branch 3, declared size 8 and -G4.
+PER_FUNC_AS_FLAGS["func_80039794"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80045484"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A854"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"

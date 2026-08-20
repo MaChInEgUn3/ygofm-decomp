@@ -2818,3 +2818,44 @@ func_8005B0B4 -- 18 differences at equal length, and they all hang off one
     against 20 on the s32 spelling but 80 on the u8 one; declaration order of
     the cursor changes nothing either way.
     Handed to the permuter.
+
+func_80039794 -- 43 differences, six of them real, and the decode plus three
+    addressing decisions are done. Structure: four 0x64-byte records from
+    D_800EB0F8 walked by two cursors (the record base for the three calls,
+    base+0x30 for the flag word at +4 and the pointer at +0), an inner retry
+    loop around func_800393B0 bounded by D_8009B0C1, and a tail that maps
+    D_8009B35A through D_801D9000 into func_8003B50C's argument.
+    Installed and load-bearing:
+      - `-fno-strength-reduce`. Without it gcc rebases the +0x30 cursor at
+        +0x34 (the flag field is read five times, the pointer twice) and
+        every displacement in the loop is wrong. Sixth user.
+      - D_8009B0C1 declared `u8 [8]` behind a per-file _IS_AGGREGATE guard,
+        assembled at `-G4`. Recipe branch 3: it needs the non-small form
+        while D_8009B35A (2 bytes) and D_8009B356 (1) stay gp-relative, and
+        it is *narrower* than the widest of those, so no real threshold
+        exists. With the plain unsized array gcc hoists its `%hi` out of the
+        inner loop as an invariant, which retail re-materialises.
+      - a base local for D_801D9000 assigned before the loop. Written
+        against the symbol, `&D_801D9000[v] + 2` folds the +2 into the `%lo`
+        and the hoisted invariant becomes base+2; against a register base
+        the +2 stays a displacement, which is what retail has.
+      - `k = -1;` unconditionally with `if (v >= 0)` overwriting it, the
+        delay-slot form; `goto` rather than `else` for the 0x1C00 arm; the
+        `for` third clause in the order `q += 0x64, j--, p += 0x64`.
+    What is left, all in the preheader and the block that follows it:
+      - gcc hoists the constant -1 (both `D_8009B35A = -1` stores) and puts
+        it LAST among the preheader instructions; retail has it second, right
+        after the loop counter. Every ordering of the three named setup
+        assignments leaves it last, so the position is the loop pass's, not
+        the source's. Naming it (`m1 = -1;`) does put it second -- and then
+        gcc hoists the *store* out of the inner loop as an invariant and the
+        whole `reset:` block disappears (-3). Naming it for one of the two
+        sites only is +3. That coupling is the thing to break.
+      - retail hoists the second `lhu 4($s1)` above the `sh $zero` to
+        D_8009B35A and we do not, so we spend a `nop`. Writing the store
+        after the test, or naming the read, are -4 and -1.
+      - the first `D_8009B35A = -1` uses the loop counter's own -1 register
+        in ours ($s0) and the hoisted one in retail ($s4); swapping the two
+        statements changes nothing.
+    Flag sweep on top of the installed pair: nothing better.
+    Handed to the permuter.

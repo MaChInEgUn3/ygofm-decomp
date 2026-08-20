@@ -223,6 +223,8 @@ extern u8 D_8009B480;
 extern s16 D_8009B488[4];
 extern u8 D_8009B48E[2];
 extern u8 D_8009B490[2];
+extern s16 D_8009B35A;
+extern u8 D_8009B356;
 extern u16 D_8009B47A;
 extern u16 D_8009B47C;
 
@@ -797,7 +799,15 @@ extern u8 D_8009B0C0;
 #else
 extern u8 D_8009B0C0[];
 #endif
+/* Scalar and gp-relative in func_80012B50 and func_80012DB4; func_80039794
+ * reaches it %hi/%lo and defines D_8009B0C1_IS_AGGREGATE. */
+#ifdef D_8009B0C1_IS_AGGREGATE
+extern u8 D_8009B0C1[8];  /* a size it does not have: 8 > the -G4 this
+                           * file assembles at, so the reference stays bare
+                           * and gcc has no %hi to hoist out of the loop */
+#else
 extern u8 D_8009B0C1;
+#endif
 extern u16 D_8009B098;
 /* Volatile in func_80012B50, which sets it beside the volatile D_8009B0C8 and
  * D_8009B09C and where retail keeps all four stores in source order -- which
