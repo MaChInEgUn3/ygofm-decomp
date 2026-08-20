@@ -670,6 +670,19 @@ meaningful, and skipping to the last one wastes hours:
    place. The permuter found it paired with a dead `q = p;` copy that turns
    out to be unnecessary and costs 7 on its own, so **decompose a permuter
    win before installing it**: half of this one was the whole answer.
+   **Second instance, and it is a delay slot rather than an argument.**
+   func_8003C328 builds a mask constant whole inside a dispatcher arm where
+   retail puts the constant's `lui` half in the branch's own delay slot and
+   completes it with `ori` at the top of the arm -- the filler can only take
+   that `lui` if it is the arm's first instruction, and it is only first if
+   the constant is materialised before the arm's stores. Naming the constant
+   does nothing, for the reason above. Naming an unrelated *read* in the same
+   arm -- `t = D_8009B0F4[0];` where the source had the symbol inline -- moves
+   it: 60 differences to 57, and to 49 once the name sits *after* the arm's
+   first store rather than before it. Where the borrowed name is assigned is
+   as much of the lever as the name. It does **not** generalise to the
+   sibling func_8003C120, whose arm stores in a different order: there the
+   same edit is worth nothing at all.
    **Hoist a call's arguments into locals when the target evaluates them
    early.** Where retail sets up `$a0` and loads `$a1` *before* the stores that
    precede the call, assigning both to locals at the top of the block

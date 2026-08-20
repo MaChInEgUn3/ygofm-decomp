@@ -3013,7 +3013,7 @@ func_8004A940 -- 77 differences at -3, after m2c corrected the decode in
     same thing func_80071FC8's `hi` does, unsolved there too.
 
 
-func_8003C328 -- 60 differences at -2, and the layout is solved. A three-way
+func_8003C328 -- 28 differences at equal length, and the layout is solved. A three-way
     dispatcher on the second parameter: mode 1 sets the +0x1C word to 0x800,
     clears two bits of D_8009B0F4 and points +8/+0xC at D_8009B118; mode 0
     builds a 0x18000 window, clears a different bit pair, sets one, writes
@@ -3037,16 +3037,25 @@ func_8003C328 -- 60 differences at -2, and the layout is solved. A three-way
     and so not small at that threshold -- that is what gives the `lui $at`
     stores and destination-register loads retail shows. gp == 0 here so the
     threshold is free.
-    What is left: the -2 is D_8009B118, which at -G4 is still small (four
-    bytes) and comes out as one instruction where retail has the %hi/%lo
-    pair. Sizing it `[2]` behind its own guard fixes those but costs five
-    elsewhere (+3 overall, 69) because the other three references then expand
-    too and retail wants only some of them paired -- so the two symbols want
-    different thresholds in one unit, which no single `-G` provides. The rest
-    is register naming and store order inside mode 0: retail materialises
-    0xFFDDFFFF and 0x18000 into $a0/$a1 at the top of the block and we build
-    them into $v1/$a0 interleaved with the stores; naming both constants and
-    assigning them first changes nothing.
+    RETRACTION on the addressing: this entry used to say the two symbols
+    wanted different `-G` thresholds and no single one worked. Wrong -- the
+    threshold is `-G0`, not `-G4`. gp == 0 here, so recipe branch 1 makes any
+    threshold free, and at -G0 D_8009B118 is non-small too, which is what all
+    three of its references need. That alone took the length error from -2 to
+    exactly 0. The -G4/-G0 comparison had been read across different length
+    errors, which try_func's own header warns against.
+    Two source levers then took 60 to 28, and the first is now a WORKFLOW
+    entry: naming an unrelated read in the arm (`t = D_8009B0F4[0];`, placed
+    AFTER the arm's first store) is what lets the delay-slot filler take the
+    mask constant's `lui`, 60 -> 57 -> 49; and moving the D_8009B118 load
+    ABOVE the `+0x6` store is 49 -> 28, because a store through the record
+    pointer may alias the global and gcc will not move the load across it in
+    either direction -- the emitted order is the source order, pinned.
+    What is left: the `sh $zero,0x30` / `sw $a1,0x1C` pair sits three
+    instructions early, mode 2's `+0x6` store should be in the `jal`'s delay
+    slot and is emitted before it, and two constants are in exchanged
+    registers. Naming the second D_8009B0F4 read to move the store pair is
+    -2: gcc knows the value it just stored and folds the reload away.
 
 
 func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the

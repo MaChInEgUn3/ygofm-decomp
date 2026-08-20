@@ -482,10 +482,12 @@ PER_FUNC_AS_FLAGS["func_8004C8C8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004C5C8"] = "-G0"
 # gp == 0 in func_8004BCE8; scalar D_8009B458 plus a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004BCE8"] = "-G0"
-# func_8003C328: gp == 0, and D_8009B0F4 declared [2] (eight bytes) is not
-# small at -G4, so the bare reference is expanded by the assembler -- lui $at
-# for the stores, the destination register for the loads, which is retail.
-PER_FUNC_AS_FLAGS["func_8003C328"] = "-G4"
+# func_8003C328: gp == 0, so any -G is free (recipe branch 1). -G0 rather than
+# -G4 because D_8009B118 must be non-small here too -- all three of its
+# references in retail are %hi/%lo pairs, and at -G4 (four bytes) it stays
+# small and each one comes out an instruction short. Its sibling func_8003C120
+# wants -G4: there the same guard costs +3. Decide per unit, not by precedent.
+PER_FUNC_AS_FLAGS["func_8003C328"] = "-G0"
 # func_8003C120 is func_8003C328's sibling and wants the same threshold.
 PER_FUNC_AS_FLAGS["func_8003C120"] = "-G4"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
