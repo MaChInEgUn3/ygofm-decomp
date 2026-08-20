@@ -276,6 +276,15 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **The commonest cheap instance is a scratch name reused for the same
+   *kind* of value in three unrelated places.** func_800154E4 computes
+   `0xFF - x` in a loop, again after it, and a clamped difference three times
+   in a third block; one `v` for all of them is 22 differences, every one of
+   them that name's register, and three names is a first-try MATCH. Retail
+   gives each a different caller-saved register precisely because each is
+   short-lived. When a diff is nothing but one variable's register repeated,
+   count how many *unrelated* values are wearing that name.
+
    **The rule scales to whole *phases* of a function, and there it rotates
    every register rather than one pair.** func_8004D75C is two sequential
    loop nests over the same record: reusing the first nest's index, cursor

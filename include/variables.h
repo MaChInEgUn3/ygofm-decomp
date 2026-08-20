@@ -1228,6 +1228,8 @@ extern u8 D_80091550[];
 extern u8 D_80091570[];
 
 /* Tables reached by address, so never small data. */
+/* Read once by func_800154E4 through cc1psx's own %hi/%lo pair, so unsized. */
+extern s32 D_800E9D94[];
 extern u8 D_800E9EC8[];
 extern u8 D_800E9ECE[];
 extern u8 D_800E9ECF[];
