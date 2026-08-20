@@ -539,6 +539,8 @@ PER_FUNC_AS_FLAGS["func_8002E730"] = "-G4"
 # func_800307B8: D_8009B398 inflated to eight bytes goes non-small at -G4
 # while the one- and two-byte gp scalars around it stay %gp_rel.
 PER_FUNC_AS_FLAGS["func_800307B8"] = "-G4"
+# gp == 0 in func_8004AAFC; scalar D_8009B458 with a -G0 assembler.
+PER_FUNC_AS_FLAGS["func_8004AAFC"] = "-G0"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the
