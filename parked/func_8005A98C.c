@@ -56,16 +56,15 @@ HsvT *func_8005A98C(HsvT *out, s8 r, u8 g, s8 b, u8 lim) {
     t.s = q;
 
     if (df != 0) {
-        n = df << 12;
         if ((u32)(q & 0xFFFF) < 0x801) {
-            t.v = n / sum;
+            t.v = (df << 12) / sum;
         } else {
-            t.v = n / (d2 - sum);
+            t.v = (df << 12) / (d2 - sum);
         }
         j1 = (hi + 1) % 3;
         j2 = (hi + 2) % 3;
         n = (c[j1] - c[j2]) << 12;
-        n = (hi << 13) + n / df;
+        n = n / df + (hi << 13);
         t.h = n;
         if (n < 0) {
             t.h = n + 0x6000;

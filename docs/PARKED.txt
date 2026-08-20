@@ -3625,7 +3625,7 @@ func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
     return, a different shape again. The full flag sweep says the default row
     is best.
 
-func_8005A98C -- 20 differences at equal length (133/133), all of them
+func_8005A98C -- 2 differences at equal length (133/133), all of them
     register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
     work at all.
     What paid:
@@ -3647,14 +3647,23 @@ func_8005A98C -- 20 differences at equal length (133/133), all of them
       - naming `sum << 12` and placing it before the `d2` computation: 43 to
         24. The permuter's fourth run found it; it is the same
         statement-order lever as the `mx + mn` swap above.
+      - **writing `df << 12` inline in BOTH arms** of the saturation branch
+        rather than through a shared `n` above them: 20 to 3. gcc 2.8 has no
+        global CSE, so the shared name is what makes the two arms differ from
+        retail -- the same lever as func_8004E7B0's per-arm `/ 85`. The
+        permuter found it bundled with two changes worth nothing (an `int`
+        third parameter and a two-name split of `c[lo]`, both 20 alone).
+      - `n / df + (hi << 13)` rather than `(hi << 13) + n / df`: 3 to 2.
       - **`x > c[hi]` rather than `c[hi] < x`** in the max/min loop: 24 to
         20. Semantically identical, and it decides which of the two bytes is
         loaded first -- the loaded value on the left of the comparison is
         loaded first. Three spellings measured: `c[hi] < x` is 24,
         `x > c[hi]` and `!(x <= c[hi])` are both 20.
-    What is left: `hi` and `lo` are exchanged ($t0/$t1) and the two `lbu`s in
-    the loop body come out in the other order. Six init orders measured
-    (55/77/57/76/77/77) and swapping the two comparisons is 59.
+    What is left: two registers exchanged on the final add -- retail has the
+    quotient in $v0 and `hi << 13` in $v1. Measured and dead: a name for the
+    quotient (2 or 3 depending on the add's operand order), a name for the
+    shift (2), splitting the add into two statements (2), and six orders of
+    the three initialisations (55/77/57/76/77/77 at the time).
 
 
 func_8005ABA0 -- 175 differences at -2 (178/176). The HSV-to-RGB inverse of
