@@ -2933,3 +2933,23 @@ func_8001B938 -- 3 differences, one register. 107 of 110 instructions are
     that offset as 0x48000 in a register plus 0x36B8 as the load's
     displacement and one local only gets you the whole constant in the
     register.
+
+
+func_8005F3B8 -- 11 differences, and every one is $s1 and $s2 exchanged. The
+    other 96 instructions are byte-identical. Retail holds the fifth
+    parameter (loaded from 0x50($sp)) in $s2 and func_80059208's result in
+    $s1; we hold them the other way round, and the ten sites that touch
+    either register all differ as a result.
+    Decode, settled: `if (D_8009B07B == 1 && D_8009B07C == 1) return;` then
+    an `a >= 0` block that calls func_80058FB0 into an 8-byte stack buffer
+    and widens three halfwords into the first record, an `e != 0` block that
+    adds e's three halfwords with a sign of `s = -1; if (a <= 0) s = 1;`
+    applied to the FIRST and THIRD only (the middle one has no multiply in
+    the listing), and three `(x + K) % 4096` wraps -- 0x1C00 or 0x1400 by
+    `a <= 0`, sharing one cross-jumped tail, and 0x1000 for the fourth
+    parameter. The 0x23FF and 0x2BFF arms are the modulo's own 0xFFF bias
+    folded into the constant.
+    Measured and dead: declaration order of the two pointers, a local copy of
+    the fifth parameter (+3), the `b` store moved above the `e` block (-1),
+    and three borrowed-local hints of the kind that took func_8002A4A8 from
+    14 to 3 (25, +3, and no change).
