@@ -778,6 +778,17 @@ pseudo to that variable's allocation. Applied a second time to the other
 residue — `y = (…) << 16; x = y / n;` for a value retail runs through a
 caller-saved temp — it went 7 to 3. Two instances in one function, and both
 came from reading what the permuter changed rather than from the number.
+**And the name you borrow can be one that is only live in a *mutually
+exclusive* arm.** func_8002596C's call result has to land in `$s0` --
+`addu $s0,$v0,$zero` right at the definition, which is step 2's tell for a
+second name. A fresh local does not produce it: `x = call(); p = x;` coalesces
+away at both placements tried, and the function is one instruction short.
+Writing `q = call(); p = q;`, where `q` is the *other* branch's allocation
+pointer and can never be live at the same time, gives retail's copy and
+matched. The two live ranges do not overlap, so nothing forces them apart --
+but they are one pseudo, and the pseudo is numbered before the branch, which
+is the same mechanism as the two-arms-are-two-values rule read backwards.
+
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
 statements earlier computes nothing and matched func_800135FC, which had been
@@ -881,6 +892,21 @@ were semantically wrong and scored far better than the correct source — one
 deleted a store the target has (func_8004C84C, 14 against a correct 25), the
 other cast an index the target does not mask (func_8003B744, 8 against 18).
 Both would have gone in as silent bugs on the number alone.
+
+**The per-file guards in `variables.h` are a sweepable pool, and nobody was
+sweeping them.** Each one exists because some *other* function needed that
+symbol spelled differently, and each carries a comment naming the symptom it
+fixed. A park whose residue describes the same symptom is a free match.
+`tools_src/sweep_guards.py` tries every guard belonging to a symbol a parked
+candidate references but does not already define, and prints only strict
+improvements on `(abs(length_error), differences)`. First run: **one match** --
+func_8003353C, 2 differences to 0 on `D_8009B3A4_IS_VOLATILE` -- plus three
+park improvements. The guard's comment said "retail reloads each time, which
+only a volatile does"; the park's own residue said "retail leaves a `nop` in
+the preceding volatile load's delay slot". The same sentence, written twice,
+weeks apart, in two files nobody read together. Run it after any batch of park
+work, and read a hit as a lead: a guard changes what the symbol *is*, so check
+its comment against the listing before installing it.
 
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
@@ -1119,6 +1145,17 @@ on a combination that had been in the table for weeks.
   greps `gp=0` and the remaining differences are about where the halves of an
   address sit, reach for the scalar arm plus `as -G0` before re-reading the
   source — it is two lines and it has never yet been wrong in that state.
+  **When every gp-relative symbol in the function is one byte, the window is
+  as wide as it gets and the *real* declarations fit.** func_800371A8 reads
+  four one-byte scalars gp-relatively and needs D_8009B398 -- a real `u16` --
+  bare, so `1 <= G < 2` and `as -G1` does it with no inflated size and no
+  guard at all. The residue that pointed here was the usual one: retail
+  leaves a `nop` in a `bnez`'s delay slot in front of the `%hi`/`%lo` pair and
+  we hoist the `lui` into it, because the aggregate arm is two instructions to
+  the delay-slot filler and the bare symbol is one. So run the widths *before*
+  assuming the `gp > 0` case is hard -- one-byte flags are the commonest
+  gp-relative symbol in this binary, and against them almost anything is
+  non-small.
   **Both sizes are yours to set, and that is what opens a closed window.**
   The window is `max(gp symbol size) <= G < size(bare symbol)`, and the rule
   above treats the gp side as fixed. It is not. func_80025D30 needs

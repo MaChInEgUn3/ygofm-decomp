@@ -3268,30 +3268,17 @@ func_80048768 -- 100 differences at +3. Decode settled: a volume/pan update.
     not, which is a different problem from the one func_80048920 had.
 
 
-func_8003353C -- 2 differences at equal length, on a 109-instruction function
-    that started at 74/-4. A duel-state step: it derives a sub-record at
-    `p + (p[0x6342] * 0x2D4C + 4)`, calls func_80032B38 and func_800330BC,
-    then branches four ways on D_8009B398's 0x10 bit, D_8009B3A4 being
-    0x8000, D_8009B398's 0x20 bit and D_8009B394's 0xC0 bits.
-    Four readings, in the order they paid:
-      - **`volatile` on D_8009B398** -- retail reads it afresh for the 0x10
-        and 0x20 tests and gcc commons them into one register. The guard was
-        already in variables.h with a comment saying exactly this; 65 -> 3.
-      - the widths, taken from the listing rather than from m2c: `+0x6340` is
-        a HALFWORD store, not the byte m2c inferred, and the two fields the
-        index is built from are `lh` and `lb`, not `lbu`.
-      - D_8009B254 is the SCALAR arm here, not the aggregate one: retail
-        stores through `$at`, which is the bare form.
-      - the `+ 4` grouped with the scaled index rather than added to the base
-        after it, which decides whether the `addiu` comes before or after the
-        `addu`.
-    Then the last index needed the subtraction-of-a-negation trick from
-    func_80047CC4 -- `e + 0xD - -(n * 0x10)` -- for retail's `addu
-    base,index`; the plain `+`, the base-first `(e + n * 0x10)[0xD]` spelling
-    and a named scaled index are all index-first. Second observed instance of
-    that lever.
-    What is left: retail materialises the 0x8000 it compares D_8009B3A4
-    against inside that test's own block and leaves a `nop` in the preceding
-    volatile load's delay slot; we hoist the constant into the slot. Measured
-    and dead: naming the D_8009B3A4 read, the comparison with the constant on
-    the left, and borrowing a dead local for the constant (5).
+
+# --- guard sweep, 2026-08-20 -------------------------------------------------
+tools_src/sweep_guards.py's first run, over every parked candidate at or below
+50 differences. One match promoted (func_8003353C) and three parks improved:
+
+  func_80013998   26 -> 20 at equal length, D_8009B118_SIZED
+  func_8002C604   28 at -1 -> 24 at equal length, D_80010000_IS_AGGREGATE
+  func_800496C4   38 at -6 -> 33 at -5, D_8009B458_IS_AGGREGATE
+
+All three installed. A fourth hit is recorded and NOT installed:
+func_8004A8E4 goes from 21 at -2 to 21 at -1 on D_8009B458_IS_VOLATILE. The
+length error improves and the difference count does not, which is the weakest
+shape a hit can have, and `volatile` on the game's main record array is a large
+claim to make on it. Left for whoever next reads that function's residue.

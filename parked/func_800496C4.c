@@ -1,3 +1,4 @@
+#define D_8009B458_IS_AGGREGATE
 /* 16 differing instructions under -O1 -G0 -fno-delayed-branch
  * -mno-split-addresses (found by sweep_try.py, not confirmed by a build).
  *

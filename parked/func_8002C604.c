@@ -1,3 +1,4 @@
+#define D_80010000_IS_AGGREGATE
 #include "common.h"
 
 u8 *func_8002C604(s32 arg0) {

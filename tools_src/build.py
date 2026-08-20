@@ -503,6 +503,13 @@ PER_FUNC_AS_FLAGS["func_8003BD14"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048768"] = "-G0"
 # gp == 0 in func_8003353C; every global there is %hi/%lo, so -G0 is free.
 PER_FUNC_AS_FLAGS["func_8003353C"] = "-G0"
+# func_8002596C: same pair as func_80025D30 -- D_8009B260 declared [8] must be
+# non-small while D_8009B20C, declared [2] here, stays gp-relative.
+PER_FUNC_AS_FLAGS["func_8002596C"] = "-G4"
+# func_800371A8: every gp-relative symbol here is one byte, so the window
+# 1 <= G < 2 exists -- D_8009B398 (u16 scalar) goes bare and stays one
+# instruction to the delay-slot filler, which is retail's nop.
+PER_FUNC_AS_FLAGS["func_800371A8"] = "-G1"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

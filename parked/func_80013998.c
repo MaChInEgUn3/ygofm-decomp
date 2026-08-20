@@ -1,3 +1,4 @@
+#define D_8009B118_SIZED
 #include "common.h"
 
 u8 *func_80013998(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, void *arg5,

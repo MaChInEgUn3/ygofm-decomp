@@ -1,3 +1,4 @@
+#define D_8009B3A4_IS_VOLATILE
 #define D_8009B254_IS_SCALAR
 #define D_8009B398_IS_VOLATILE
 #include "common.h"
