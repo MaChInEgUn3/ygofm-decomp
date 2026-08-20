@@ -25,7 +25,10 @@ s32 func_8005AE68(s32 arg0, s32 arg1, s32 arg2) {
     s32 h;
     u8 m;
     s32 e6;
-    s32 x;
+    /* s16, not s32: the permuter found it and it is the same lever as the
+     * `u8 m` above -- the narrower type is what makes gcc keep the
+     * truncation. 26 differences to 22. */
+    s16 x;
     s32 y;
     s32 a;
     s32 b;

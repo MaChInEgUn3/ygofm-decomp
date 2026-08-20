@@ -3528,8 +3528,8 @@ func_8004DC38 -- 117 differences at +1, which reads far worse than it is: the
         likely key to the rotation and no source spelling has produced it yet.
 
 
-func_8005AE68 -- 26 differences at equal length (123/123), and the bulk is a
-    three-way rotation of $s3/$s4/$s5. A colour transform: unpack a 15-bit
+func_8005AE68 -- 22 differences at equal length (123/123), and ALL of them are
+    now a three-way rotation of $s3/$s4/$s5. A colour transform: unpack a 15-bit
     BGR word, optionally rotate the hue by three sixths, scale the value, pack
     it back.
     What paid, and one of them is the whole reason it is close at all:
@@ -3555,7 +3555,11 @@ func_8005AE68 -- 26 differences at equal length (123/123), and the bulk is a
     with `andi $s0,$s1,255` where we emit a plain copy, because gcc knows
     `arg1 & 7` already fits in a byte -- no spelling found that keeps the
     mask.
-    The permuter reaches 23 from a base of 26 and its win is **semantically
+    The permuter's second run, from the improved base, found the last real
+    thing: `s16 x` rather than `s32` for the packed-colour temp, 26 to 22 --
+    the same narrow-type lever as the `u8 m` above. Narrowing `y`, `lim` or
+    `f` the same way is +2, -1 and +3, so it is that one variable.
+    An earlier run reached 23 from 26 with a win that is **semantically
     wrong**: it moves `lim = 0x1F;` to after a `return`, so the variable is
     read uninitialised at the three subtractions. The declaration reorder it
     also made is worth nothing on its own (26, unchanged), so the whole gain
@@ -3575,3 +3579,24 @@ func_8004E7B0 -- 94 differences at -5. A camera-angle update with two
     gcc is cross-jumping what retail keeps apart. Measured and dead: swapping
     the inner arms (no change), naming the four halfword reads (no change),
     `z` shared versus per-arm (that one is the -17 to -5).
+
+
+func_800336F0 -- 2 differences at equal length (125/125): retail leaves the
+    first branch's delay slot empty and we hoist `addiu $v0,$zero,0x2000`
+    into it, so the constant is materialised once too early and once too
+    late. A duel-state dispatcher on the same `p + (p[0x6342] * 0x2D4C + 4)`
+    sub-record as func_8003353C.
+    What paid, and both were step-0 reads rather than iteration:
+      - gp == 0 with three `$at` stores, so recipe branch 1: every symbol's
+        real scalar declaration plus `as -G0`. D_8009B254 needs its
+        `_IS_SCALAR` arm because its default is an unsized array, which gives
+        cc1psx's own pair rather than the assembler's `$at`.
+      - **`D_8009B398_IS_VOLATILE`**: the `& 0x10` and `& 0x20` tests are on
+        different paths, so two loads look automatic -- but gcc's CSE reaches
+        across the branch and commons them, and retail reloads. -3 to 0.
+      - `(p + r)[0x5AC4]` rather than `p[r + 0x5AC4]`, for retail's
+        `addu base,index`.
+    Measured and dead on the last two: naming the D_8009B3A4 read, the
+    comparison written with the constant on the left, a named constant (+2,
+    much worse -- gcc materialises it twice), and `do { } while (0)` around
+    the whole `if` or around its body. All 2.
