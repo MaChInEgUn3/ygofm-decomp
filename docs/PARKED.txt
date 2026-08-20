@@ -3555,6 +3555,11 @@ func_8005AE68 -- 26 differences at equal length (123/123), and the bulk is a
     with `andi $s0,$s1,255` where we emit a plain copy, because gcc knows
     `arg1 & 7` already fits in a byte -- no spelling found that keeps the
     mask.
+    The permuter reaches 23 from a base of 26 and its win is **semantically
+    wrong**: it moves `lim = 0x1F;` to after a `return`, so the variable is
+    read uninitialised at the three subtractions. The declaration reorder it
+    also made is worth nothing on its own (26, unchanged), so the whole gain
+    was the bug. Third such find this session -- read every permuter diff.
 
 func_8004E7B0 -- 94 differences at -5. A camera-angle update with two
     reciprocal divides (`/384` and `/85`), one real `div` (a variable
