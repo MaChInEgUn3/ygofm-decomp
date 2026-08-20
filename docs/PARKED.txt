@@ -2766,3 +2766,24 @@ func_8004C8C8 -- 5 differences, and only ONE of them is real: where the
     and the scalar D_8009B458 plus a -G0 assembler gives the %hi/%lo form.
     Handed to the permuter.
 
+
+func_80016E70 -- 8 differences, one scheduling slot and the register that
+    follows from it. The whole function is otherwise byte-identical: two
+    func_80016DDC calls on D_800E9FF0 and D_800E9FF0+0x20, the packet at
+    0x1F800320 built in retail's own store order (0x10, 0x00, 0x0C, 0x0E,
+    0x08, 0x14 -- ascending order is 13, so that odd sequence IS the source
+    order and gcc did not reorder them), and four func_80016D2C calls whose
+    x/y are written into the packet just before each one.
+    What is left: retail issues `lbu D_8009B1D5` immediately after the first
+    store, reusing the register the 0xF10100 constant just freed, so that
+    constant lives in $v1 and ours lives in $v0. Naming the read moves it
+    three instructions closer but no further, and its position in the source
+    does not matter at all -- seven placements measured (before the base
+    local, before the pointer load, before and after each of the first three
+    stores) and every one emits the load in the same slot. Also measured and
+    dead: declaration order, a named local for the 0xF10100, passing the
+    packet local instead of the literal at the four calls (identical -- gcc
+    rematerialises the constant either way), the symbol written inline for
+    D_800E9FF0, and `do { } while (0)` around the store run (13) or around
+    the store-plus-read pair (13).
+    Handed to the permuter.

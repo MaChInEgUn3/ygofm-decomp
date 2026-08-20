@@ -661,6 +661,9 @@ extern u8 D_8015C424[];
 extern s16 D_800908A0[];
 extern s8 D_8015C410[];
 extern u8 D_801A7AD8[];
+/* D_801A7AD8 + 0x8C, i.e. record 5 of the same 28-byte table, under its own
+ * splat symbol; func_8002C9B4 walks it and D_801A7B64+0x1A4 in lockstep. */
+extern u8 D_801A7B64[];
 /* Ten-byte records: an id halfword, three lookup halfwords and a result. */
 extern u8 D_801799D8[];
 extern u16 D_800F2B22[];
