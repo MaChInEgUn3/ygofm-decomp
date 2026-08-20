@@ -1902,19 +1902,28 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     sweep_try.py run 2026-08-10: best is 1 at -O2 -G0, the same as the current
     base. No flag combination helps.
 
-func_8004A8E4 -- 21 differences, two instructions short. Reads a byte at +3 of a
-    40-byte record, and if it is not 0x63 uses it to index 24-byte records and
-    decrements a nibble at +6. Two things are already right in the candidate and
-    both were needed: D_8009B458_IS_AGGREGATE for retail's %hi/%lo pair (the
-    scalar arm gives the gp-relative bare form), and a named scaled offset,
-    without which the whole address folds differently. What is left is that
-    retail keeps `addiu $v0,$v0,384` as its own instruction and then
-    `addu $a1,$a2,$v0` / `lbu $v1,3($a1)`, while every spelling here folds the
-    384 into the load displacement as `lbu ...,387(...)`. Measured: the constant
-    grouped with the index inside parentheses, the symbol written inline rather
-    than through a base local (identical, 23 both ways -- gcc hoists the `lui`
-    either way, so a base local is not what moves it here), and a base local
-    with the offset named. Discriminator not established.
+func_8004A8E4 -- 17 differences at equal length (23/23), down from 21 at -2.
+    Reads a byte at +3 of a 40-byte record, and if it is not 0x63 uses it to
+    index 24-byte records and decrements a nibble at +6.
+    What paid: D_8009B458_IS_AGGREGATE for retail's %hi/%lo pair, a named
+    scaled offset, and -- the fix for the two missing instructions -- writing
+    the first address as TWO statements against one name,
+    `e = D_8009B458[0]; e = e + off;`. As one expression gcc folds the 0x180
+    into the load displacement (`lbu ...,387`) and flips the `addu`'s operands
+    to index-first; split, retail's `addiu $v0,$v0,384` and
+    `addu $a1,$a2,$v0` both come back. **A base local re-enables the fold**:
+    four spellings with `b = D_8009B458[0];` -- the offset as one expression,
+    as two statements, with the base assigned before or after -- are all -2
+    again, so the split only works when `e`'s first definition is the load
+    itself rather than a copy.
+    What is left: retail loads D_8009B458 once into `$a2` and reuses it in
+    both blocks; our two symbol reads become two `lw`, and retail has an
+    `addu $v0,$v1,$zero` copy before the second multiply that we lack. Those
+    two cancel in the instruction count, which is why 23/23 hides them. A
+    second name for the byte (`w = v; off = w * 24;`) does not produce the
+    copy -- it coalesces, in both the one-expression and two-statement forms.
+    The two wants are in tension: the single load needs a base local and the
+    base local re-folds the 0x180.
 
 func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     D_8009B45C: one at entry, one re-read at the end of the `if` body, one for
