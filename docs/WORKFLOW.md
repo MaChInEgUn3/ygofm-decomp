@@ -794,6 +794,14 @@ meaningful, and skipping to the last one wastes hours:
    members and a goto-out-of-line arm were all measured on func_80058938, the
    flag's second user after func_80017708 — because the address computation is
    the expander's, not the source's.
+   **The same flag, third user, and a much plainer trigger: two reads at one
+   constant offset inside a search loop.** func_800722CC reads `e->unk6`
+   twice per iteration and gcc gives that offset its own biased giv, which
+   costs a callee-saved register and five instructions -- 112 differences to
+   37 on the flag alone. So it is not only the block-move shape: whenever a
+   loop's cursor picks up a *second* register that is the first plus a
+   constant, and retail has one cursor with plain displacements, reach for
+   the flag.
 
 **A plain copy also survives when the two names want different register
 classes.** The rule below is that `e = o;` coalesces and only a *derived*
