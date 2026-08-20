@@ -510,6 +510,10 @@ PER_FUNC_AS_FLAGS["func_8002596C"] = "-G4"
 # 1 <= G < 2 exists -- D_8009B398 (u16 scalar) goes bare and stays one
 # instruction to the delay-slot filler, which is retail's nop.
 PER_FUNC_AS_FLAGS["func_800371A8"] = "-G1"
+# func_8002FD10: D_8009B146/D_8009B148 declared [4] (eight bytes) go non-small
+# at -G4 and expand through $at, while the four-byte D_8009B2A0 and the
+# two-byte D_8009B2A4 keep %gp_rel. Same pair of knobs as func_8002E470.
+PER_FUNC_AS_FLAGS["func_8002FD10"] = "-G4"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

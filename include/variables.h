@@ -255,6 +255,15 @@ extern u8 D_8009B27A[];
 /* A table of object pointers; func_8002CE64 passes its address as a u8 *. */
 #ifdef D_800EAE98_IS_PTR_TABLE
 extern u8 *D_800EAE98[];
+#elif defined(D_800EAE98_SIZED)
+/* Eight bytes it does not have -- func_8002FD10 reaches +0x3C. The size has to
+ * sit in the window `4 < size <= 8`: at or below the compiler's own -G8 so
+ * cc1psx keeps emitting the bare symbol, and above the assembler's -G4 so the
+ * assembler expands it. A bare symbol is ONE instruction to the scheduler, so
+ * the `lui`/`addiu` pair stays in the destination register instead of being
+ * split across a temp. 0x40 does NOT work: it clears cc -G8 too, and cc1psx
+ * emits its own splittable pair. Same knob as D_8009B146 above. */
+extern u8 D_800EAE98[8];
 #else
 extern u8 D_800EAE98[];
 #endif
@@ -484,7 +493,12 @@ typedef struct {
 
 extern Slot70 D_800F0548[];
 extern Slot70 D_800EFE48[];
-#ifdef D_80010000_IS_AGGREGATE
+#ifdef D_80010000_SIZED
+/* Eight bytes it does not have, for the same reason as D_800EAE98: at -G4 the
+ * symbol is non-small, so the `lui`/`lw` pair the assembler expands stays in
+ * one register (func_8002FD10). */
+extern u8 *D_80010000[2];
+#elif defined(D_80010000_IS_AGGREGATE)
 extern u8 *D_80010000[];
 #else
 /* 48-byte record: func_80045BE8 appends one with a struct assignment,
@@ -960,6 +974,9 @@ extern s8 D_8009B361[];
 /* Holds a callback; reached through $at, so its unit was built -G0. */
 extern void (*D_8009B128)(void);
 extern u16 D_8009B28C;
+/* Set to 0 on entry to func_8002FD10 and to func_8002E3FC's result on the
+ * way out, both gp-relative. */
+extern u8 *D_8009B2A0;
 extern u16 D_8009B2A4;
 /* Reached gp-relative in most files but through %hi/%lo in func_8001BD48,
  * which also needs gp-relative access to another symbol -- so -G0 is not an

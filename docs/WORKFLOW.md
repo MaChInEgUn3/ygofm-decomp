@@ -122,6 +122,12 @@ It tags instead. Two tags matter:
     threshold exists, so **inflate the declaration**: `u8 sym[8]` and `as -G4`.
     Eight still clears cc `-G8`, so cc1psx keeps emitting the bare symbol,
     while `8 > 4` takes it out of small data at the assembler.
+    **The window is `G_as < N <= 8` and it is bounded at BOTH ends** -- a
+    size that is merely "big enough to be non-small" fails, because it also
+    clears cc1psx's own `-G8` and cc1psx then emits its own splittable pair
+    instead of the bare symbol. func_8002FD10 wants `u8 D_800EAE98[8]`; the
+    *honest* `[0x40]` for a table that reaches +0x3C is worth nothing at all.
+    So when you inflate a size, inflate it to eight, not to the truth.
     func_800175A0 is the worked example, func_8003CCD8 the second.
   The usable window is `max(gp symbol size) <= G < 8`; the widths in this
   codebase are 1, 2 and 4, so it nearly always exists — but check, because one
@@ -178,7 +184,9 @@ meaningful, and skipping to the last one wastes hours:
 
 0. **Read the addressing before writing any C.** Not a debugging step — a
    first step, and it has decided the last four functions without a single
-   round. Count `%gp_rel` and `lui $at,%hi(` in the listing, read the symbols'
+   round. Count `%gp_rel` and `lui  *\$at, %hi(` in the listing (splat writes a
+   space after the comma -- the pattern without it matches **zero** files, and
+   that silent zero survived in this document for months), read the symbols'
    widths out of `variables.h`, and pick the form from the four-forms list
    below before typing anything. Most functions come back `gp>0, at=0`, which
    means default flags and no addressing work at all; knowing that in a minute
@@ -1151,7 +1159,7 @@ on a combination that had been in the table for weeks.
   reaching for the size.
   **Run this check before writing any C — it is cheap and it keeps paying.**
   Two of the last three matches went in without an addressing round at all,
-  one of them first-try, because counting `%gp_rel` and `lui $at,%hi(` in the
+  one of them first-try, because counting `%gp_rel` and `lui  *\$at, %hi(` in the
   listing and reading the widths out of variables.h settles the question in a
   minute.
   **`gp == 0` is a first-line check, not a last resort.** When the listing has
@@ -1272,7 +1280,7 @@ are the `.s` listings, ~89% of the tree, and they are the worst possible embeddi
 target: 1799 files of `lui`/`lw`/`addiu`/`jr $ra` collapse into near-identical
 vectors and would drown every real hit. They are also exactly where this
 project's retrieval must be **exact** — `grep -c '%gp_rel'`, `grep -l
-'lui $at,%hi('`, the `0x80073840` scope cut, `candidates.HAND_WRITTEN`. A
+'lui  *\$at, %hi('`, the `0x80073840` scope cut, `candidates.HAND_WRITTEN`. A
 semantic layer that answers those *approximately* is not a neutral addition;
 it is a new way to be confidently wrong, in the same failure mode as the
 167 → 136 → 66 miscount. Read a listing with grep, never with search.
@@ -1396,10 +1404,22 @@ candidate, and the tool said "0 clean candidates" in a band where it meant
 "none *left*". A filter that silently matches nothing looks exactly like a
 filter with nothing to match — print the size of the set once in a while.
 
+**The `lui $at` grep in this file was wrong for months, and it failed
+silently.** Every prose copy of the step-0 check said `grep 'lui $at,%hi('`;
+splat writes `lui        $at, %hi(`, with a space after the comma, so that
+pattern matches **zero** of the 1799 listings. Anyone following step 0
+literally got `at=0` for every function in the binary -- which reads exactly
+like "this one needs no addressing work", the most common and most welcome
+answer. The real counts are 392 files with a loose `lui $at` and 346 with the
+tight form. No *tool* used the broken pattern, only the prose, which is why
+nothing ever went red. Surfaced on func_8002FD10, whose two `$at` stores the
+check had just told me did not exist. Same lesson as the park filter and the
+`| grep -E` hazard: **when a filter says zero, prove it can say one.**
+
 **A scan is only as good as the filters it copies.** The `lui $at` pool was
 counted three times and was wrong twice, each time because the ad-hoc scan
 skipped a filter `candidates.py` already applies. 167 became 136 when the
-signature was tightened from `lui $at` to `lui $at,%hi(` — the loose form
+signature was tightened from `lui $at` to `lui $at, %hi(` — the loose form
 catches the overflow check aspsx wraps around a `div` — and 136 became **66**
 when `candidates.HAND_WRITTEN` was applied, because 62 of the remainder are
 the GTE block (`lwc2`/`rtpt`/`avsz3`). func_80069E44 is the specimen: it saves

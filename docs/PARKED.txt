@@ -3326,3 +3326,37 @@ func_8004D75C -- 40 differences at equal length (110/110), and every one of
         nothing here (40). Recorded rather than installed; a plausible source
         shape with the same effect is the open question.
       - declaration order does nothing: four orders, all 40.
+
+
+func_8002FD10 -- 8 differences at equal length (112/112), and all eight are the
+    *position* of one three-instruction group in the prologue. A screen
+    set-up: it zeroes three globals, registers a callback with func_80014E1C,
+    resets three 0x14-byte records, spins on func_80082324, then runs a 25-step
+    loop that blits two sprites per step and walks a 5-wide grid.
+    What paid:
+      - the addressing. Two `$at` stores (D_8009B146, D_8009B148) beside
+        gp-relative D_8009B2A0 (4 bytes) and D_8009B2A4 (2), so the window is
+        `4 <= G < 8`: `D_8009B146_SIZED` declares both [4] and the unit
+        assembles at `as -G4`. Same pair of knobs as func_8002E470.
+      - `D_80010000` and `D_800EAE98` each want a size in the window
+        `4 < N <= 8` -- at or below cc's own -G8 so cc1psx emits the *bare*
+        symbol, above the assembler's -G4 so the assembler expands it. A bare
+        symbol is one instruction to the scheduler, so the `lui`/`lo` pair
+        stays in the destination register; the unsized array gives cc1psx's
+        own splittable pair and it lands in a temp. `[0x40]` on D_800EAE98 --
+        an honest size for a table that reaches +0x3C -- does NOT work,
+        because it clears cc -G8 too. That is the sharp edge of this knob and
+        it cost a round.
+      - `lhu` not `lh` on D_800E9D70[5]: `*(u16 *)&D_800E9D70[5] + 1`, since
+        the symbol is declared `s16 []`.
+      - the three-record loop wants `p += 0x14;` before `i++`, not after.
+    What is left: retail materialises `p = D_800EAE98` at prologue position 6,
+    after the call's argument set-up and the `$s0` save; we put it at position
+    1, before the `sh $a0` of the first global store. Nothing in the source
+    moves it. Measured: four placements of the assignment (all 8), `p` written
+    before the D_8009B2A4 store (8), `&D_800EAE98[0]` (8), naming the callback
+    pointer (8), naming the two zero arguments (8) -- five shapes at the same
+    number, which is the tell that this is not a source axis at all. Placing
+    it *after* either call is catastrophic (+16). `do { } while (0)` around it
+    moves it the wrong way (14 and 16). The full flag sweep says the current
+    row is best; the permuter's only output is 22 and semantically broken.
