@@ -1,3 +1,10 @@
+/* Volatile, and that is the whole of the last two differences: retail
+ * materialises the 0x2000 it compares D_8009B3A4 against inside the test's
+ * own block, and a plain read lets gcc hoist the constant into the preceding
+ * branch's delay slot. Found by sweep_guards.py, whose comment on this
+ * symbol -- "func_80023FBC reads it five times in a row and retail reloads
+ * each time" -- is the same observation. */
+#define D_8009B3A4_IS_VOLATILE
 #define D_8009B254_IS_SCALAR
 #define D_8009B398_IS_VOLATILE
 #include "common.h"

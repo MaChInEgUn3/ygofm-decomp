@@ -1015,7 +1015,14 @@ fixed. A park whose residue describes the same symptom is a free match.
 candidate references but does not already define, and prints only strict
 improvements on `(abs(length_error), differences)`. First run: **one match** --
 func_8003353C, 2 differences to 0 on `D_8009B3A4_IS_VOLATILE` -- plus three
-park improvements. The guard's comment said "retail reloads each time, which
+park improvements.
+**Second run, weeks later: another match, on the same guard.** func_800336F0
+was parked at 2 with the residue "retail materialises the 0x2000 it compares
+D_8009B3A4 against inside the test's own block and we hoist it into the
+preceding branch's delay slot" -- `D_8009B3A4_IS_VOLATILE` closes it. So the
+sweep is not a one-off: **re-run it after every batch of park work**, because
+each newly parked candidate is a fresh chance for a guard that already
+exists. The guard's comment said "retail reloads each time, which
 only a volatile does"; the park's own residue said "retail leaves a `nop` in
 the preceding volatile load's delay slot". The same sentence, written twice,
 weeks apart, in two files nobody read together. Run it after any batch of park
