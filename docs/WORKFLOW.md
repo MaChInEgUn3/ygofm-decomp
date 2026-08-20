@@ -596,6 +596,24 @@ meaningful, and skipping to the last one wastes hours:
    and retail keeps them apart, ask which side of the *following* call the
    arithmetic sits on.
 
+   **`(x & M) / K * K` is a real divide in the source and gcc will fold it
+   away if you write it as one expression.** func_80036DBC computes
+   `(D_8009B34C & 0x30) / 16 * 0x10`; written whole, gcc proves the result
+   equals `x & 0x30` and emits one `andi`, and the function comes out twelve
+   instructions short. Split against one name -- `a = D_8009B34C & 0x30;
+   a = a / 16 * 0x10;` -- and the `bgez` / `addiu 15` / mask expansion
+   survives. Then **two names rather than one is a further four
+   instructions**: retail keeps the masked value and the quotient in
+   different registers, and one name makes the no-bias path a register copy
+   where retail duplicates the mask into the branch's delay slot. Same family
+   as func_80047788's scaled dividend, and the two levers stack.
+   **And the shift's *kind* follows the intermediate's declared width.** With
+   the masked value in an `s32` the quotient shifts `sra`; declared `s16` it
+   shifts `srl`, which is what retail has -- gcc only proves the sign bit
+   clear when the narrower type bounds it. `u32` is not the answer: that
+   makes the divide unsigned and deletes the bias, which is eight
+   instructions. 5 differences to 2 on one keyword.
+
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression
