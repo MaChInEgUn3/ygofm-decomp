@@ -1166,6 +1166,13 @@ on a combination that had been in the table for weeks.
   to 33 on that word alone. It composes with the bare-symbol form at `-G0`
   (the `lui $at` stores survive), which the note in variables.h had said it
   would not -- that note is about `-G4`.
+  Probed on the three sibling dispatchers the same afternoon and it moved
+  none of them: func_8003C328 is unchanged at 21 because its arms already
+  have stores between the two read-modify-writes, so there is no fold to
+  block; func_8003C120 is -7 and much worse, because it assembles at `-G4`
+  where volatile really does cost the bare form; func_8004BCE8 never touches
+  the symbol. The lever is for the back-to-back shape specifically, not for
+  the family.
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs

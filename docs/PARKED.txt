@@ -3195,3 +3195,8 @@ func_80032184 -- 33 differences at +1, and everything left is register
     What is left: the 0xFFDDFFFF mask lives in $a0 in retail and $v1 in ours,
     and the read that consumes it is correspondingly exchanged. $a0 is free
     from the moment the parameter is copied into $a2, and retail reuses it.
+    The volatile lever does NOT transfer to the siblings, measured: 21 either
+    way on func_8003C328 (its arms already have a store between the two
+    read-modify-writes, so nothing to fold), -7 on func_8003C120 (it is at
+    -G4, where volatile does cost the bare form), and func_8004BCE8 never
+    reads the symbol.
