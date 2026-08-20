@@ -3360,3 +3360,39 @@ func_8002FD10 -- 8 differences at equal length (112/112), and all eight are the
     it *after* either call is catastrophic (+16). `do { } while (0)` around it
     moves it the wrong way (14 and 16). The full flag sweep says the current
     row is best; the permuter's only output is 22 and semantically broken.
+
+
+func_80024E58 -- 2 differences at equal length (116/116), and both are the
+    position of one `andi`. A duel-phase step machine: four mutually exclusive
+    arms on D_8009B220's 0x40 and 0x20 bits, then a 30-record sweep.
+    What paid:
+      - the addressing. D_8009B364 is stored through `$at` and loaded twice
+        through its own register, so it wants the bare form; the gp-relative
+        symbols beside it are up to four bytes, so recipe branch 3 applies --
+        `D_8009B364_SIZED8` (a new arm, `u8 [8]`) plus `as -G4`.
+      - D_8009B0F4 and D_8009B134 are loaded back to back and retail keeps
+        each `lui`/`lw` adjacent; unsized, cc1psx interleaves the two `lui`s.
+        Their `_SIZED` arms ([2], eight bytes) make each reference one
+        pseudo-instruction and indivisible. func_8002E470's lever, third use.
+      - D_8009B1D2 is declared `s16` and read `lbu` here: `*(u8 *)&D_8009B1D2`.
+      - three names that were being shared: the D_8009B1C8 record pointer with
+        the loop cursor (it went callee-saved), and the 0x1A value with the
+        loop counter.
+      - hoisting func_80040410's two arguments into locals above the `-2`
+        store, which is what sinks that store into the call's delay slot.
+      - and the last one, worth remembering: `n = v & 0xFF;` before
+        func_8002C604 and `n = n - 1;` AFTER it. Both before the call is 3,
+        because gcc then fills the call's delay slot with the *mask* instead
+        of the subtract; retail's `addiu $s0,$s0,-1` is in that slot, which
+        only happens when the subtract is the last thing the filler sees.
+    What is left: retail emits the `andi` after the `lui $at`/`sb` pair and we
+    emit it before -- two independent instructions reading the same register,
+    and gcc gives the one with the longer downstream chain priority. Measured
+    and dead: `u8 v` so the mask comes from the type (4), an `(u8)` cast at
+    the use (3), reading the value back out of D_8009B364 (4), the mask
+    written above the store (3), `do { } while (0)` around the store or
+    around both (+1 and much worse), a separate name for the masked value
+    (4), `n -= 1` (3), and three placements of the decrement after the call
+    (2, 7, 2). `volatile` on D_8009B364 is +2 and 68 -- it forces re-reads at
+    the other two sites. The full flag sweep says the current row is best, and
+    880 permuter iterations from a base score of 60 produced nothing.
