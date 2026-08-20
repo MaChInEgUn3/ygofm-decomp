@@ -13,13 +13,13 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **752** (67.1%) | **20,378** (24.9%) |
-| remaining | 369 (32.9%) | 61,500 (75.1%) |
+| decompiled and matching | **768** (68.5%) | **21,975** (26.8%) |
+| remaining | 353 (31.5%) | 59,903 (73.2%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
-number.** The functions matched so far average 27 instructions and the ones
-remaining average 167 — the short bands get emptied first and refill only when
+number.** The functions matched so far average 29 instructions and the ones
+remaining average 170 — the short bands get emptied first and refill only when
 a rule is retracted. Scope is the 1,121 game functions below `0x80073840`,
 excluding PsyQ library code (`docs/LIBRARY_FUNCS.txt`) and hand-written
 assembly (77 GTE-block functions, filtered by `candidates.HAND_WRITTEN`). An
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 804 files; 752 of them are in scope and the rest are library or
+`src/` holds 820 files; 768 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -37,19 +37,20 @@ above-scope functions matched along the way.
 |---|---|---|---|
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
-| 51–100 | 74 | 58 | 16 |
-| 101–200 | 131 | 3 | 128 |
+| 51–100 | 68 | 67 | 1 |
+| 101–200 | 121 | 13 | 108 |
 | 201–400 | 58 | 0 | 58 |
 | 400+ | 27 | 0 | 27 |
 
 **The short bands are exhausted.** Every remaining function up to 50
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
-broken. Unclaimed work starts at 51 instructions, and as of this revision the
-lowest unclaimed function is 88: the 51-87 range is parked out too.
+broken. As of this revision the lowest unclaimed function is **96**
+instructions: everything shorter is either matched or parked, and the bulk of
+what is left is the 101–200 band.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 139 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 158 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
@@ -92,8 +93,10 @@ A fresh clone cannot build until you supply the game and the toolchains:
 1. **Provide the executable.** Dump your own disc and extract `SLUS_014.11`
    from it.
 2. **Fetch the toolchains** into `tools/` (gitignored, and must be re-fetched
-   per machine): the **PsyQ 4.5** SDK, MIPS binutils, and
-   [maspsx](https://github.com/mkst/maspsx). See `docs/DECISIONS.md` for exact
+   per machine): the **PsyQ 4.5** SDK, MIPS binutils,
+   [maspsx](https://github.com/mkst/maspsx),
+   [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) and
+   [m2c](https://github.com/simonlindholm/m2c). See `docs/DECISIONS.md` for exact
    sources and expected paths. The PsyQ binaries are 32-bit Windows
    executables; `build.py` runs them under Wine on Linux and natively on
    Windows, and the two are byte-identical (verified by hashing `cc1psx`
@@ -134,7 +137,20 @@ mixing `INCLUDE_ASM` with real C in one file scrambles `.text`.
 
 ## Decompiling a function
 
-Write `src/func_XXXXXXXX.c` and rebuild — placement is automatic.
+**Start with `tools_src/m2c_draft.py func_XXXXXXXX`.** It runs
+[m2c](https://github.com/simonlindholm/m2c) over the splat listing and prints
+structurally-correct C in about a second: loop and switch shapes, case
+groupings, reciprocal multiplies read back as ordinary division, field offsets,
+load signedness. Measured on a random 60 of the open in-scope functions it
+drafts 60 of 60. It has also caught things a hand-read missed — that
+`func_8004A940` takes four parameters and returns a value, not two and void.
+
+It closes no matches. Everything in `docs/WORKFLOW.md` — which register holds a
+value, where a `lui` sits, whether a store sinks into a delay slot — is
+invisible to it, and that is where the time goes. Treat it as the draft you
+would have typed.
+
+Then write `src/func_XXXXXXXX.c` and rebuild — placement is automatic.
 
 **Read `docs/WORKFLOW.md` first.** It is the operational minimum: the ordered
 list of what to check when a function does not match, the four global
@@ -159,6 +175,7 @@ If a claim is about the whole binary, scan the whole binary.
 | `check_try_func.py` | validates try_func both ways: every `src/` file must MATCH, every `parked/` file must not |
 | `candidates.py` | ranked list of remaining work, with tags (`dup-%hi`, `[MERGED]`, `[PARKED]`) |
 | `siblings.py` | pairs each unmatched candidate with the decompiled function it most resembles, on instruction n-grams |
+| `m2c_draft.py` | first-draft C for one function, via m2c; start here |
 | `permute.py` | wraps decomp-permuter; mandatory below ~25 instructions before parking |
 | `sweep_try.py` / `sweep_flags.py` | flag sweeps, the fast one through try_func and the confirming one through the build |
 | `sync_count.py` | derives the function count; run before committing a batch |
@@ -166,7 +183,9 @@ If a claim is about the whole binary, scan the whole binary.
 ## Layout
 
 - `docs/` — `WORKFLOW.md` (operational), `DECISIONS.md` (reasoning),
-  `PARKED.txt` (per-function diagnoses), function inventory, RAM/ROM map
+  `PARKED.txt` (per-function diagnoses), `EXTERNAL_LEADS.txt` (naming guesses
+  from outside this repo, all UNVERIFIED and never used to justify a line of
+  C), function inventory, RAM/ROM map
 - `src/` — matched C, one file per function (`src/func_XXXXXXXX.c`)
 - `parked/` — best-known-but-not-matching candidates, paired with `PARKED.txt`
 - `include/` — `variables.h` and `functions.h`; every global and every

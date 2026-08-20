@@ -1196,6 +1196,13 @@ buys is comprehension, which starts to matter now that the remaining functions
 average 167 instructions instead of 26 — knowing a loop walks the fusion table
 tells you its bounds before you write a line.
 
+A third source sits in `docs/EXTERNAL_LEADS.txt` under the same contract:
+eleven function-name guesses lifted from a static *recompilation* of the same
+binary. Same rules -- hypothesis, never evidence, never promoted by citation --
+and the same caution earned the hard way: both structural claims in it that
+were worth checking turned out to be things this repo already had, and the one
+apparent error in it was a misreading on our side.
+
 It must never be merged into `ygofm-code`. Several entries are literally `?`,
 and a wiki guess ranked beside a measured paragraph, with no visible
 difference, is the same failure mode that keeps `asm/` out of the index. So
