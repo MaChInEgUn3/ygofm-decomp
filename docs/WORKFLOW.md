@@ -539,6 +539,17 @@ meaningful, and skipping to the last one wastes hours:
    differences to 27). Writing it *first* instead is 36, as is putting `+0x16`
    first — so it is the last position that decides, not the first. **Observed
    once.**
+   **A switch whose arms share a tail may want that tail written out per
+   arm, not once after the switch.** func_8004C5C8 has six arms that all end
+   `field18 = field1C & mask; field1C >>= shift;` with three different
+   (mask, shift) pairs, and retail keeps a full copy of the load/mask/shift
+   sequence in every arm, sharing only the two stores and the `jr`. Hoisting
+   the pair into `a`/`b` locals assigned in each arm and stored once after
+   the `switch` lets gcc cross-jump the three arms that share a (mask,
+   shift) all the way back, which is six instructions short and two join
+   labels instead of one. Written inline in each arm it is a first-try
+   MATCH. So when a switch's arms look repetitive, count the target's copies
+   before factoring them out.
    **The same pass from the other side: do not block a cross-jump.** gcc merges
    two arms only when their instruction sequences are *identical*, and two arms
    computing the same value from different expressions — one from a global, one

@@ -474,6 +474,9 @@ PER_FUNC_AS_FLAGS["func_8004C84C"] = "-G0"
 # %hi/%lo four times and the scalar declaration plus a -G0 assembler is the
 # form that gives it (recipe branch 1).
 PER_FUNC_AS_FLAGS["func_8004C8C8"] = "-G0"
+# gp == 0 in func_8004C5C8; scalar D_8009B458 plus a -G0 assembler gives the
+# %hi/%lo pair the listing has (recipe branch 1).
+PER_FUNC_AS_FLAGS["func_8004C5C8"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the
 # scalar declaration plus a -G0 assembler is free here (recipe branch 1).
 PER_FUNC_AS_FLAGS["func_8002C9B4"] = "-G0"
