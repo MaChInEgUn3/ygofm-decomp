@@ -1173,6 +1173,9 @@ typedef struct {
 } Rec20;
 
 extern u8 D_800E9F10[];
+/* 112-byte records indexed by D_8009B1D5; func_8001B938 caches the current
+ * one in D_8009B1B4. */
+extern u8 D_800E9F48[];
 extern s16 D_800E9D28[];
 extern Rec20 D_800E9FF0[];
 /* The last byte of D_800E9FF0[1] under its own name: func_800175A0 stores -1

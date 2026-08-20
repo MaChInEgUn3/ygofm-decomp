@@ -183,6 +183,16 @@ meaningful, and skipping to the last one wastes hours:
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
+   **And a large offset can want splitting in two, which one local cannot
+   do.** func_8001B938 reads `D_8015C424 + idx * 28 + 0x4B6B8`. Against the
+   symbol the whole thing folds into `%hi`/`%lo`; against a base local gcc
+   materialises 0x4B6B8 with `lui`/`ori` and leaves the load at `0($v0)`;
+   retail materialises **0x48000** and leaves **0x36B8** as the load's
+   displacement. Getting that needs a second name — an intermediate pointer
+   `g = b + idx * 28 + 0x48000;` read as `*(s32 *)(g + 0x36B8)`, or the
+   0x48000 assigned to its own variable — because as one expression gcc
+   folds the two constants before it ever picks a split. 84 differences to
+   5 on the base local, 5 to 3 on the second name.
    **A base local also decides how a large constant offset is spelled.**
    `*(u16 *)(D_8015C424 + 0x1BD0C)` written against the symbol folds the whole
    offset into `%hi`; against a local it becomes retail's `lui/ori 0x18000`

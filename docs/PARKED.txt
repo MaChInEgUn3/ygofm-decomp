@@ -2916,3 +2916,20 @@ func_8002A4A8 -- 14 differences, two register rotations, and the other 96
     two fresh names, a named 0x8000, a named divisor, declaration order of
     the four locals both ways, the two `sw`s moved ahead of the halfword
     stores, and the second velocity written inline into its store.
+
+
+func_8001B938 -- 3 differences, one register. 107 of 110 instructions are
+    byte-identical; retail holds the unpacked 5-bit field in $a0 (reusing the
+    register the record index just freed) and we hold it in $v1 (reusing the
+    one the D_801D4244 base just freed). Both are free at that point and
+    nothing else in the function differs. Seven shapes measured -- naming the
+    record index and reusing the field's own name for it, splitting the
+    `>> 26` from the `& 0x1F` against one name (4), naming the halfword read
+    between them, and the declaration order of the four locals -- and every
+    one of them is 3.
+    Two readings got it here and both are now WORKFLOW lines: a base local
+    for D_8015C424 (against the symbol the 0x4B6B8 folds into `%hi`), and
+    then a SECOND name for the intermediate pointer, because retail splits
+    that offset as 0x48000 in a register plus 0x36B8 as the load's
+    displacement and one local only gets you the whole constant in the
+    register.
