@@ -2787,3 +2787,34 @@ func_80016E70 -- 8 differences, one scheduling slot and the register that
     D_800E9FF0, and `do { } while (0)` around the store run (13) or around
     the store-plus-read pair (13).
     Handed to the permuter.
+
+func_8005B0B4 -- 18 differences at equal length, and they all hang off one
+    instruction: retail's `andi $s0,$s1,255`, where we emit `addu
+    $s0,$s1,$zero`. The decode is settled -- seven parameters (the last three
+    on the stack at 0x58/0x5C/0x60), `k = mode & 7` and `m = mode & 8`, a
+    func_8005A98C call that fills an 8-byte packet at sp+0x18, `(k + 3) % 6`
+    through the 0x2AAAAAAB reciprocal when m is set, the 0x1E field either
+    zeroed or scaled by arg5 / 4096, func_8005ABA0 into a 4-byte buffer at
+    sp+0x20, an optional `lvl - c` inversion of the three bytes, a
+    zero-to-one fixup on each, and three `lb`/`sb` copies into the out
+    pointer with `return out;`.
+    The causal chain, which is what makes this worth another look: retail's
+    $s0 holds `(u8)k` across the func_8005A98C call, so the modulo's cursor
+    gets $a0; ours holds the cursor, so the first zero-fixup value takes $a0
+    instead of retail's $v0, all three fixup values stay live to the end, and
+    gcc reuses them where retail reloads with three `lb`s. Fix the first
+    instruction and the rest should follow.
+    What produces `andi $s0,$s1,255` is the open question. `u8 k = mode & 7`
+    gets us the pseudo in the right register but gcc knows the value already
+    fits and emits a copy; `s32 u = k & 0xFF` and `u32 u = k & 0xFF` as a
+    separate name both fold away entirely (-3 instructions, 100). So gcc has
+    to NOT know the value is three bits wide, and nothing tried so far
+    arranges that.
+    Measured and dead elsewhere: three distinct fixup names beat two (two is
+    +1); the tail needs the lvalue cast `*(s8 *)(rgb + i)` for retail's `lb`
+    against the `u8` array the fixups want as `lbu`, and naming those three
+    reads makes it worse (-3, gcc folds them into the fixup values); `h += 3;
+    h %= 6;` gives retail's in-place `addiu`/`subu` destinations and is 19
+    against 20 on the s32 spelling but 80 on the u8 one; declaration order of
+    the cursor changes nothing either way.
+    Handed to the permuter.
