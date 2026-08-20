@@ -530,6 +530,9 @@ PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"
 # D_8009B0D8 goes bare at -G2 -- one instruction to the delay-slot filler,
 # which is retail's nop in front of the pair.
 PER_FUNC_AS_FLAGS["func_80015310"] = "-G2"
+# func_8003DA40: the only gp-relative symbol is a one-byte flag, so the u16
+# D_8009AF76 goes bare at -G1 and the pair stays in one register.
+PER_FUNC_AS_FLAGS["func_8003DA40"] = "-G1"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the

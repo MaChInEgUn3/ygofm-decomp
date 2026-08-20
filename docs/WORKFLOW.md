@@ -276,6 +276,14 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **And the rule runs in both directions -- read which register retail
+   uses before splitting anything.** func_8003DA40 has two pointers that
+   never coexist, one per half of the function, and retail keeps both in
+   `$s1`. Two names is 29 differences, every one of them `$s0` against `$s1`;
+   *one* name is a MATCH. Six declaration orders moved nothing, which is the
+   usual tell. So the question is never "how many names" in the abstract: it
+   is whether the target's registers say two live ranges or one.
+
    **The commonest cheap instance is a scratch name reused for the same
    *kind* of value in three unrelated places.** func_800154E4 computes
    `0xFF - x` in a loop, again after it, and a clamped difference three times
