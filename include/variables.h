@@ -574,6 +574,15 @@ extern u16 D_8009B2C8;
 extern u8 D_8009B2DC;
 extern u8 D_8009B2B8;
 extern u8 D_8009B2C0;
+/* func_800307B8 passes its address to func_80030250 through cc1psx's own
+ * %hi/%lo pair, so unsized. */
+extern u8 D_80090CB4[];
+/* func_800307B8's saved/live pairs: C4/C8, C6/CC, DA/CA. */
+extern u16 D_8009B2C4;
+extern u16 D_8009B2C6;
+extern u16 D_8009B2CA;
+extern u16 D_8009B2CC;
+extern u16 D_8009B2DA;
 extern u8 D_8009B2C1;
 extern u8 D_8009B2C2;
 extern u8 D_8009B2E0;
@@ -1021,7 +1030,13 @@ extern u16 D_8009B2A4;
  * these shared one #elif ladder. func_8003C7A0 tests five different bits and
  * retail loads it afresh for every one; without volatile gcc commons the lot
  * into a single register. */
-#ifdef D_8009B398_IS_AGGREGATE
+#ifdef D_8009B398_SIZED_VOLATILE
+/* Eight bytes it does not have. func_800307B8 reads it three times with no
+ * store between -- so volatile -- and needs the non-small form while the one-
+ * and two-byte gp scalars around it stay %gp_rel, which puts the size in the
+ * window `4 < N <= 8` at `as -G4`. */
+extern volatile u16 D_8009B398[4];
+#elif defined(D_8009B398_IS_AGGREGATE)
 #ifdef D_8009B398_IS_VOLATILE
 extern volatile u16 D_8009B398[];
 #else

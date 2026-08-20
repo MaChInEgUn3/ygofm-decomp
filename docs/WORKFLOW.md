@@ -1407,6 +1407,14 @@ window are worth reading correctly: 0 forks, 0 stars, 7 unique visitors, but
 public repos within minutes -- not human interest, and not undoable. Going
 private stops future exposure; it does not recall what was already mirrored.
 
+**`timeout` on `git push` can leave the remote ahead of your tracking ref.**
+The transfer completes, the server accepts, and the client is killed during
+the final ack -- so `git status` still says "ahead 1" and the retry fails
+with `cannot lock ref 'refs/heads/master': is at <new> but expected <old>`.
+That message means **the push already worked**: `git fetch origin` fixes it,
+and re-pushing or force-pushing would be wrong. Read the two hashes in the
+error before doing anything.
+
 **Never run a background job that rewrites `build.py` (or any shared config)
 while you are measuring.** A sweep that patches `SMALL_DATA_NOP_FUNCS` per
 candidate and restores the file afterwards restores the copy it read at
