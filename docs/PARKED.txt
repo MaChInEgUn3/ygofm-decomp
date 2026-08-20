@@ -3600,3 +3600,42 @@ func_800336F0 -- 2 differences at equal length (125/125): retail leaves the
     comparison written with the constant on the left, a named constant (+2,
     much worse -- gcc materialises it twice), and `do { } while (0)` around
     the whole `if` or around its body. All 2.
+
+
+func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
+    table: it looks `arg0` up in D_800F5918's 80 eight-byte entries, then
+    dispatches on the found value's high and low halves to one of twelve
+    hand-written GTE routines.
+    What paid, and it is almost entirely one lever: **the case order decides
+    the arm order in memory**, and the target's is not numeric. Reading the
+    arm addresses out of the listing gives 9, 0x209, 0x11, 0x211, 0xD, 0x20D,
+    0x15, 0x215 for the first group and 0xD, 0x20D, 0x15, 0x215 for the
+    second -- an interleaving of the two 0x200 ranges, not a sort. Writing
+    the cases in that order is 30 differences to 27, and every arm's label
+    then lands where retail's does.
+    What is left: retail's SECOND dispatch has two inline `jr $ra` /
+    `addu $v0,$a0,$zero` returns, one per subtree leaf, where we emit one
+    shared block and two `j` to it (+2). The first dispatch, which has a
+    deeper tree, already comes out with its four inline returns. Measured and
+    dead: explicit `default:` labels in one or both switches (27, unchanged),
+    an explicit `default:` in the outer switch too (27), and hand-writing the
+    second dispatch as the nested `if` tree retail's branches describe --
+    that is -2 rather than +2 and inlines each arm's address load into its
+    return, a different shape again. The full flag sweep says the default row
+    is best.
+
+func_8005A98C -- 55 differences at equal length (133/133), all of them
+    register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
+    work at all.
+    What paid:
+      - a name for `c[i]` inside the max/min loop: retail reads the byte once
+        into `$a1` and uses it for both comparisons, and without the name the
+        two reads stay separate. -1 and 118 differences to 133/133 and 73.
+      - **computing `mx + mn` BEFORE `(lim & 0xFF) * 2`, not after.** 73 to
+        57 on swapping two adjacent statements. The permuter found it as an
+        extra name; the plain swap is worth exactly the same, so it is the
+        order and not the name.
+      - initialising hi, lo, i in that order: 57 to 55.
+    What is left: `hi` and `lo` are exchanged ($t0/$t1) and the two `lbu`s in
+    the loop body come out in the other order. Six init orders measured
+    (55/77/57/76/77/77) and swapping the two comparisons is 59.

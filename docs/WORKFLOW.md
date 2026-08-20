@@ -641,6 +641,15 @@ meaningful, and skipping to the last one wastes hours:
    is a guard comparing zero against the *byte field* just written, not
    against the word the call returned. Count the branches in front of the
    loop before inventing a guard for it.
+   **The case order also decides the arm ORDER IN MEMORY, and the target's
+   order is worth reading off the listing rather than guessed.**
+   func_8005FC1C dispatches on twelve values and retail's arms are laid out
+   9, 0x209, 0x11, 0x211, 0xD, 0x20D, 0x15, 0x215 -- an interleaving of two
+   0x200-apart ranges, not a sort. The arm addresses are in the listing next
+   to their `%lo(func_...)`, so the order is free to recover: grep the arm
+   labels in address order and write the cases that way. 30 differences to
+   27, and every label then lands where retail's does.
+
    **And the case order decides *which* of several identical arms gets
    merged.** func_80024C1C's `case 0x14` and `case 0x17` both store 1; retail
    merges 0x14 into the shared block with 0x15 and 0x16 and leaves 0x17
