@@ -4059,3 +4059,28 @@ func_80071700 -- 146 built against 137, and the whole +9 is loop-invariant
   condition's spelling is not the axis. The axis is register pressure, and
   the same class as func_8004A518's hoisted 0x63: retail's build had one more
   pseudo in play and therefore hoisted less.
+
+func_80021598 -- 161 built against 158, and the residue is gcc *eliminating
+  two induction variables that retail keeps*. The loop walks five cursors: a
+  Rec20 record, that record + 1, two into D_801D5608, and the D_8009B1E8
+  pointer carrying a running total at +0x2C. Retail strength-reduces exactly
+  one of them -- the D_801D5608 pair, `$s2 = $s4 + 0x78` with negative
+  displacements, which is gcc's own giv and appears in our build too -- and
+  leaves the other two as plain biv cursors, `addu $s0,$a0,$zero` with
+  `44($s0)` / `48($s0)` and `addiu $s1,$s3,1` with sixteen displacements from
+  0 to 0x17. We get biased givs instead: `$s0 = $a0 + 44` and `$s1 = $s3 + 6`,
+  so every displacement in the body is shifted and the preheader stores move
+  to a different base.
+  `-fno-strength-reduce` removes the biases *and* the giv retail has, which is
+  -4. Writing the second D_801D5608 cursor explicitly (`u = t + 0x1E;`) and
+  taking the flag gets to -1 with 134 differences, but that source shape --
+  a second cursor into the same array at a fixed +0x78 -- is not something
+  anyone writes, so it is recorded as a measurement rather than installed.
+  Measured and dead at default flags: moving `f += 0x20;` from the middle of
+  the body to the end, which should move the bias from +5 to 0 by the
+  bias-follows-the-last-use rule and moves nothing at all.
+  The rest is right first try: one `v` for every loaded field (retail passes
+  the loaded register straight to the call and stores the same register), the
+  `lb`/`lh`/`lbu` widths per field, and the accumulate written as
+  `*(s32 *)(p + 0x2C) = *(s32 *)(p + 0x2C) + func_80021558(n, v);` so the
+  reload lands where retail has it.
