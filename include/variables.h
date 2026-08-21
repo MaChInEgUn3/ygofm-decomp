@@ -303,6 +303,9 @@ extern u16 D_800F5678[];
 extern u8 D_80091008[];
 extern u8 D_800F56A0[];
 extern u8 D_800F56F0[];
+/* The second of the pair of 12-byte vectors at D_800F56F0; func_80058434
+ * reaches it as `D_800F56FC` and derives the other as `- 0xC`. */
+extern u8 D_800F56FC[];
 extern u8 D_800F5710[];
 extern u8 D_800F3A10[];
 extern u8 D_800FE148[];

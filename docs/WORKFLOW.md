@@ -513,6 +513,17 @@ meaningful, and skipping to the last one wastes hours:
    **not** a variable in the source. gcc 2.8 has no global CSE, so write it inline
    in each block. Also here: `tbl[i + K]` emits `addu index,base` and
    `(tbl + i)[K]` emits `addu base,index` — same address, opposite operands.
+   **The partial sum inside a modulo-wrap wants to be gcc's OWN temp.** The
+   idiom `x = (v + d + 0x1000); x -= x / 0x1000 * 0x1000;` shows up wherever
+   this binary wraps an angle. Writing the partial sum as a second named local
+   -- `a = v + d; t = a + 0x1000;` -- is the obvious decomposition and it is
+   *wrong*: `a` then takes the register gcc wants for the division's own
+   temporary and both halves of the expansion rotate (func_80058434, 11
+   differences on two identical blocks). One name for the whole sum,
+   `t = v + d + 0x1000;`, is a MATCH, and so is naming only the *load*
+   (`a = v; t = a + d + 0x1000;`). Writing it with no name at all -- the
+   whole thing twice in one expression -- is +6, because gcc then computes the
+   sum twice. So: name the value the division consumes, and nothing else.
    **gcc folds a scaled dividend and an intermediate assignment blocks it.**
    `(x * 8 + 0x7FF) / 2048` comes out as `(x + 255) / 256` — two instructions
    short of retail's `sll 3` / bias / `sra 11`, and the shortfall cascades
