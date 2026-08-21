@@ -13,14 +13,14 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **768** (68.5%) | **21,975** (26.8%) |
-| remaining | 353 (31.5%) | 59,903 (73.2%) |
+| decompiled and matching | **803** (71.6%) | **26,492** (32.4%) |
+| remaining | 319 (28.4%) | 55,386 (67.6%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
-number.** The functions matched so far average 29 instructions and the ones
-remaining average 170 — the short bands get emptied first and refill only when
-a rule is retracted. Scope is the 1,121 game functions below `0x80073840`,
+number.** The functions matched so far average 32 instructions and the ones
+remaining average 173 — the short bands get emptied first and refill only when
+a rule is retracted. Scope is the 1,122 game functions below `0x80073840`,
 excluding PsyQ library code (`docs/LIBRARY_FUNCS.txt`) and hand-written
 assembly (77 GTE-block functions, filtered by `candidates.HAND_WRITTEN`). An
 earlier revision of this table said 1,198: that number excluded the library
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 820 files; 768 of them are in scope and the rest are library or
+`src/` holds 855 files; 803 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -37,27 +37,31 @@ above-scope functions matched along the way.
 |---|---|---|---|
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
-| 51–100 | 68 | 67 | 1 |
-| 101–200 | 121 | 13 | 108 |
-| 201–400 | 58 | 0 | 58 |
-| 400+ | 27 | 0 | 27 |
+| 51–100 | 69 | 69 | **0** |
+| 101–200 | 86 | 52 | 34 |
+| 201–400 | 58 | 1 | 57 |
+| > 400 | 27 | 0 | 27 |
 
 **The short bands are exhausted.** Every remaining function up to 50
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
-broken. As of this revision the lowest unclaimed function is **96**
+broken. As of this revision the lowest unclaimed function is **123**
 instructions: everything shorter is either matched or parked, and the bulk of
 what is left is the 101–200 band.
 
 "Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 158 of them, the actual
+per-function diagnosis in `docs/PARKED.txt` and, for 201 of them, the actual
 candidate in `parked/`. These are a source of matches rather than a graveyard:
 a park records that a shape was not found, not that none exists, and re-reading
 them whenever a new lever is measured has repeatedly produced matches years
 into the same file.
 
-Numbers above are from the commit that last touched this file. Re-derive with
-`.venv/bin/python tools_src/sync_count.py` and `tools_src/candidates.py`.
+Every number in this section is derived, not typed:
+`.venv/bin/python tools_src/status.py` prints them and `--write` rewrites the
+two tables in place. Run it in the same batch as `tools_src/sync_count.py`
+before committing. It imports candidates.py's scope filters rather than
+restating them, because both of the past miscounts in this repo came from an
+ad-hoc scan that skipped a filter the tool already applied.
 
 ## What is and is not committed
 
@@ -179,6 +183,9 @@ If a claim is about the whole binary, scan the whole binary.
 | `permute.py` | wraps decomp-permuter; mandatory below ~25 instructions before parking |
 | `sweep_try.py` / `sweep_flags.py` | flag sweeps, the fast one through try_func and the confirming one through the build |
 | `sync_count.py` | derives the function count; run before committing a batch |
+| `status.py` | recomputes the Status tables above from the tree; `--write` rewrites README.md |
+| `sweep_guards.py` | tries every per-file declaration guard against each parked candidate |
+| `score_permuter_outputs.py` | re-scores every stored permuter output through try_func |
 
 ## Layout
 
