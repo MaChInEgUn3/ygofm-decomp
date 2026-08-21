@@ -310,6 +310,17 @@ meaningful, and skipping to the last one wastes hours:
    usual tell. So the question is never "how many names" in the abstract: it
    is whether the target's registers say two live ranges or one.
 
+   **But register reuse in the listing is NOT evidence of name reuse in the
+   source, and believing it is expensive.** func_8002E128 reuses `$s1` for the
+   argument, then the decoded index, then a flag byte read in the *other* arm
+   of the function's top-level `if` -- so the obvious reading is one name for
+   all three. Writing it that way is 49 differences, every one of them a
+   register; giving the flag byte its own name is 22, and the split fixes the
+   whole function's allocation rather than just that block. The rule above
+   ("read which register retail uses") tells you when to *stop* splitting; it
+   does not tell you to merge. Two values that never coexist *may* share a
+   register without sharing a pseudo, because the allocator is free to reuse a
+   dead register whether or not the source did.
    **The commonest cheap instance is a scratch name reused for the same
    *kind* of value in three unrelated places.** func_800154E4 computes
    `0xFF - x` in a loop, again after it, and a clamped difference three times
