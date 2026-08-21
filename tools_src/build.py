@@ -269,6 +269,9 @@ PER_FUNC_FLAGS = {
     # register ($s0 = $s3 + 4, reading 2($s0) where retail reads 6($s3)),
     # which is +13 and four differences worse.
     "func_80071700": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # PARKED at 131/131. Without it gcc gives the record cursor a biased giv
+    # for the +0x5150 store and the function is +5.
+    "func_80013154": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at 60 differences.  Without this the last nested loop is reversed
     # (countdown + bgez) where retail counts up against slti 32, and the outer
     # `sll i,6` becomes a giv -- one instruction short and much further out.
@@ -389,6 +392,8 @@ PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80046768"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800339D0"] = "-G4"
+PER_FUNC_AS_FLAGS["func_80043960"] = "-G1"
+PER_FUNC_AS_FLAGS["func_80013154"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
 PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"

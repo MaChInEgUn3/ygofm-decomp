@@ -604,9 +604,24 @@ extern u8 D_800117C8[];
 extern u16 D_80010834[];
 /* Sixteen words of .rodata, indexed by a pad code's high nibble. */
 extern s32 D_80011484[];
+/* Same knob as D_8009B142 below: two bytes under the guard, so that an
+ * assembler at -G1 expands the reference through $at while the one-byte
+ * gp-relative symbols in the same unit stay small (func_80013154). */
+#ifdef D_8009B14A_SIZED
+extern u8 D_8009B14A[2];
+#else
 extern u8 D_8009B14A;
+#endif
+#ifdef D_8009B14B_SIZED
+extern u8 D_8009B14B[2];
+#else
 extern u8 D_8009B14B;
+#endif
+#ifdef D_8009B14C_SIZED
+extern u8 D_8009B14C[2];
+#else
 extern u8 D_8009B14C;
+#endif
 /* Word-entry lookup table walked by func_8003BC40: the low halfword is the
  * key and a zero word terminates it. */
 extern u32 D_801D9000[];
@@ -895,7 +910,21 @@ extern volatile s32 D_8009B0C8[];
 #else
 extern volatile s32 D_8009B0C8;
 #endif
+/* func_80013154 reaches it gp-relatively; the array arm is for the units that
+ * take its address. */
+#ifdef D_8009B0A3_IS_SCALAR
+extern u8 D_8009B0A3;
+#else
 extern u8 D_8009B0A3[];
+#endif
+extern u8 D_8009B0A0;
+extern u8 D_8009B0A1;
+extern u8 D_8009B0A2;
+extern u8 D_8009B0A8;
+extern u8 D_8009B0AD;
+extern u8 D_8009B0D0;
+extern u8 D_800FE048[];
+extern u8 D_800FE0A8[];
 #ifdef D_8009B0AC_SIZED8
 /* Eight bytes it does not have, so that at `as -G4` the reference is bare and
  * the assembler's expansion keeps the pair in one register (func_8002E730). */

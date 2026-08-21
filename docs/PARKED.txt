@@ -4092,3 +4092,26 @@ func_80021598 -- 161 built against 158, and the residue is gcc *eliminating
   which is precisely what stops gcc replacing the biv. Same lesson either way
   -- the mechanism is now named, and no plausible spelling of it has been
   found.
+
+func_80013154 -- 131/131 with `-fno-strength-reduce` (recorded in build.py;
+  without it gcc builds a biased giv for the +0x5150 store and the function is
+  +5), and 117 differences, nearly all of them a register rotation downstream
+  of two loop-invariant hoists retail does not have: the `2` stored at +0x5110
+  and the loop bound `arg0 + 0xA2C0`. Retail materialises both *inside* the
+  loop -- `addiu $v0,$zero,2` and `ori $v0,$zero,0xA2C0` / `addu $v0,$s4,$v0`
+  every iteration -- and keeps five callee-saved values; we hoist both, need
+  seven, and every register after them shifts.
+  This is the fourth instance of the standing open problem (func_8004A518,
+  func_80071700, func_80021598 are the others): gcc hoists small loop
+  invariants where retail does not, and the permuter only reaches it through
+  shapes that cannot be written.
+  The addressing is right and was the interesting part: SIX one-byte symbols
+  (D_8009B142/3/4 and D_8009B14A/B/C) need the bare `lui $at` store while
+  SEVEN one-byte symbols beside them (D_8009B0A0..D_8009B0D0) keep %gp_rel.
+  Equal widths, so no real threshold -- the `_SIZED` arms declare two bytes and
+  the unit assembles at `as -G1`, which is the same knob as D_8009B318 and
+  the first time it has been needed for a whole group rather than one symbol.
+  D_8009B0A3 needed a new `_IS_SCALAR` arm for the same reason in reverse.
+  Also right: `six = 6;` as a local (retail's $s3 serves the D_8009B0A1 store
+  and both +0x5124 / +0x514C stores), and the 20-byte unaligned copy at the
+  end as a `struct { u8 b[20]; }` assignment.
