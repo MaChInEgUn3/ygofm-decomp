@@ -4084,3 +4084,11 @@ func_80021598 -- 161 built against 158, and the residue is gcc *eliminating
   `lb`/`lh`/`lbu` widths per field, and the accumulate written as
   `*(s32 *)(p + 0x2C) = *(s32 *)(p + 0x2C) + func_80021558(n, v);` so the
   reload lands where retail has it.
+  A permuter run's best correct-length output re-scores at 27 against our
+  154, and what it changed is one expression: `v = (*(new_var = &f))[8];` --
+  taking the address of the cursor, into a variable that is then dead. That is
+  a **seventh** instance of the not-installable permuter class and a new
+  sub-kind: not an uninitialised read this time but an address-taken local,
+  which is precisely what stops gcc replacing the biv. Same lesson either way
+  -- the mechanism is now named, and no plausible spelling of it has been
+  found.
