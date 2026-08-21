@@ -4537,7 +4537,7 @@ func_80048A28 -- 65 differences at the right length (121/121), first written
   in $s2 -- but worth nothing on its own), and `s8`/`u16` parameter types.
   `s32 arg0` is worth 1. Permuter running from this base.
 
-func_8005D994 -- 11 differences at the right length (132/132), first written
+func_8005D994 -- 5 differences at the right length (132/132), first written
   2026-08-21. gp=5 at=0, all one-byte flags, default flags, no addressing work.
   A sound-position setup: it builds two eight-byte packets on the stack, wraps
   two angles into (-0x800, 0x800] and hands both to func_8005F91C, which is
@@ -4564,7 +4564,18 @@ func_8005D994 -- 11 differences at the right length (132/132), first written
   named value is the whole sum and the partial sum must not be named; here the
   whole difference is the *outer* subtraction, and naming it costs six.
   Read which register the target gives the intermediate before choosing.
-  The residue is two clusters. The larger: retail stores the first wrapped
+  A fifth lever, again from the permuter and again one line: **name the
+  read-back of the stack slot for the FIRST correction only.**
+  `r = b[1];` after the store, with `if (*(s16 *)&b[1] >= 0x801) b[1] = r -
+  0x1000;` and the second correction left reading `b[1]`, is 11 -> 5. That is
+  what forces retail's store-then-reload-twice: the `lh` for the compare comes
+  from `b[1]`, the `lhu` for the subtraction from `r`. A *fresh* name is 5 and
+  the permuter's borrowed `q` is 7, so here the fresh name wins -- the
+  opposite of func_8002E128, where the borrow was worth 7 over a fresh name.
+  The permuter's best output wrapped the store in `if (arg0) { A } else { A }`
+  and also scores 5; the named read is the plausible spelling of it.
+  Historic residue description follows.
+  The residue was two clusters. The larger: retail stores the first wrapped
   angle to the stack slot and then **reloads it twice** (`lh` for the compare,
   `lhu` for the subtraction), where we keep it in a register and store it in
   the branch's delay slot -- and the *second* angle, twenty instructions
@@ -4575,3 +4586,37 @@ func_8005D994 -- 11 differences at the right length (132/132), first written
   divide from the multiply) and every one is 17 or worse. The smaller cluster
   is `$s4`/`$s5` exchanged between arg1 and arg2, both used once and
   adjacently. Full flag sweep is 17 at the default row. Permuter next.
+
+func_8003BA14 -- 29 differences at the right length (121/121), first written
+  2026-08-21. The SIXTH member of the D_8009B0F4 dispatcher family
+  (func_8003B808, func_80020BE4, func_800434F4, func_80032184, func_8003C328,
+  func_8003C120 are the others) and the first with four modes. gp=0 at=5, so
+  recipe branch 1: default declarations plus `as -G0`, and the `lui $at`
+  stores come out right with no guard at all.
+  Its own shape: modes 2 and 3 share a tail that stores the masked D_8009B0F4,
+  two pointer words and the `1`, and the `and` is computed *per arm* in the
+  branch's delay slot -- so the source computes `x = D_8009B0F4 & mask;` in
+  each arm and the tail stores `x`.
+  Four levers, in order, all from the family:
+  * the goto dispatcher with the arms in retail's address order (m0, m1, m2,
+    m3) and the mode-1 test first;
+  * **separate names per arm.** Sharing `v`/`w`/`d` between the mode-0 and
+    mode-1 arms is 65; giving mode 1 its own three is 48. This is
+    func_8003B808's "do not share the name across two switch arms" and it is
+    worth 17 here.
+  * `do { k = 0x18000; } while (0);` round the ONE constant assignment
+    (48 -> 39). Without it gcc's scheduler splits that constant's `lui` from
+    its `ori` and moves the `lui` fifteen instructions earlier, which shortens
+    the value's live range to one instruction and flips it from `$a1` to
+    `$a0`. Sixth use of the idiom and the first on a single statement.
+  * a named mask in modes 2 and 3 as well, sharing the mode-0 name `m`
+    (39 -> 29). **Separate mask names per arm is 39** -- the opposite of the
+    v/w/d result above, and worth knowing: retail keeps all three masks in the
+    same register, so they are one pseudo, while the three D_8009B0F4 reads
+    are three.
+  The residue is 29: every mask is in `$a1` where retail has `$a0` (and mode
+  0's `k` is the mirror), plus mode 3's `0x100` where retail hoists it into
+  the dispatcher's branch delay slot and we hoist mode 3's `0xF0` instead --
+  which is exactly func_800434F4's standing residue. Nine further spellings
+  measured (the constant inline, three orderings of `m` and `k`, a `u32` k,
+  three do/while(0) groupings) and all are 29, 30, 38 or 39.

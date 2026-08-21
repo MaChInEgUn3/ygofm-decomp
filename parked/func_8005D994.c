@@ -11,6 +11,7 @@ void func_8005D994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4,
     s32 m;
     s32 t;
     s32 q;
+    s32 r;
     s32 x;
     s32 first;
 
@@ -47,8 +48,9 @@ void func_8005D994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4,
         x = x - 0x400;
     }
     b[1] = (t - x) - (t - x) / 0x1000 * 0x1000;
+    r = b[1];
     if (*(s16 *)&b[1] >= 0x801) {
-        b[1] = b[1] - 0x1000;
+        b[1] = r - 0x1000;
     }
     if (*(s16 *)&b[1] < -0x800) {
         b[1] = b[1] + 0x1000;

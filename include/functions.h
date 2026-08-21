@@ -143,7 +143,7 @@ void func_80044F58(s32 arg0);  /* PROVISIONAL */
 /* arg0 indexes the halfword pairs at D_8009151C, so it is an s32 and not the
    pointer the provisional signature guessed. */
 void func_8005C388(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_8003BA14(void);  /* PROVISIONAL */
+void func_8003BA14(u8 *p, s32 mode);
 void func_8003BD14(u8 *arg0, s32 arg1);
 void func_8003C328(u8 *arg0, s32 arg1);
 s32 func_8003D288(u8 *arg0, u8 *arg1);

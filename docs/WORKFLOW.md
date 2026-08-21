@@ -499,6 +499,19 @@ meaningful, and skipping to the last one wastes hours:
    carries the in-struct MEM marking, the dependency is seen, and the order
    holds. One mechanism, two directions: strip the marking to *allow* a
    move retail has (func_80049CF8), keep it to *forbid* one retail lacks.
+   **A named read-back of a stack slot is how you get a store-then-reload that
+   gcc would otherwise forward.** Where the target stores a computed value into
+   an address-taken local and then loads it *twice* -- `lh` for a comparison
+   and `lhu` for the arithmetic -- gcc's own output keeps the value in a
+   register and sinks the store into the branch's delay slot. `r = b[1];`
+   written after the store, with the comparison still reading `b[1]` and only
+   the arithmetic reading `r`, splits the two: func_8005D994, 11 differences
+   to 5. Naming it for *both* corrections is 9, and a borrowed local rather
+   than a fresh one is 7, so this one wants a fresh name used exactly once --
+   the opposite of func_8002E128, where the borrow beat the fresh name by 7.
+   The permuter reached the same 5 by wrapping the store in
+   `if (arg0) { A } else { A }`; the named read is the spelling anyone would
+   write.
    **Write that same double read where there is no aliasing store and you get a
    register copy instead of a second load** — and that copy is often the
    instruction the target schedules into a branch's delay slot. func_80057E20's
