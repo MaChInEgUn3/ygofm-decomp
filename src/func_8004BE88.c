@@ -12,6 +12,7 @@ void func_8004BE88(u8 *p, s32 arg1) {
     s32 off;
     s32 mode;
     s32 t;
+    s32 z;
 
     mode = arg1 & 0xFF;
 
@@ -21,6 +22,7 @@ void func_8004BE88(u8 *p, s32 arg1) {
         goto one;
 
     case 0x51:
+        z = 0;
         v = func_8004BAE4(p) << 16;
         v = v | (func_8004BAE4(p) << 8);
         v = v | func_8004BAE4(p);
@@ -43,8 +45,8 @@ void func_8004BE88(u8 *p, s32 arg1) {
         }
         f = D_8009B458;
         if (*(u16 *)(f + 0x7FA) != 0) {
-            off = 0;
-            i = 0;
+            off = z;
+            i = z;
             do {
                 *(s16 *)(f + off + 0x52E) = v;
                 *(s16 *)(f + off + 0x52C) = v;

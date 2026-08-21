@@ -1048,6 +1048,15 @@ the mechanism; the permuter then found the borrowed local declared `short`,
 which is not installable there because the same name holds a pointer in the
 other arm. When a borrow helps, try the same name narrowed, and try a fresh
 name narrowed, before writing down which lever it was.
+**Two initialisations to the same constant want ONE name holding it.**
+Retail zeroes a loop counter's register and *copies* it into the offset's;
+writing `off = 0; i = 0;` gives two independent zeroings, and so does the
+other order, `i = off = 0;`, `off = i = 0;`, `off = i;` after `i = 0;`, a
+declaration-order swap, a type change and three `do { } while (0);`
+groupings -- twelve spellings, all 2 or 6 differences. `z = 0;` at the top of
+the block with `off = z; i = z;` is a MATCH (func_8004BE88). Same family as
+the one-name-for-two-sequential-constants rule in step 2, read for a constant
+that is used twice at once rather than twice in sequence.
 **Assigning to a local that is not yet live is the same hint, and a fresh
 name is not.** func_8002A4A8 sat at 14 through nine hand shapes. The
 permuter's fix was to write `y = a;` in one arm of an `if` and take the
