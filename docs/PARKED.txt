@@ -4537,7 +4537,7 @@ func_80048A28 -- 65 differences at the right length (121/121), first written
   in $s2 -- but worth nothing on its own), and `s8`/`u16` parameter types.
   `s32 arg0` is worth 1. Permuter running from this base.
 
-func_8005D994 -- 17 differences at the right length (132/132), first written
+func_8005D994 -- 11 differences at the right length (132/132), first written
   2026-08-21. gp=5 at=0, all one-byte flags, default flags, no addressing work.
   A sound-position setup: it builds two eight-byte packets on the stack, wraps
   two angles into (-0x800, 0x800] and hands both to func_8005F91C, which is
@@ -4556,6 +4556,14 @@ func_8005D994 -- 17 differences at the right length (132/132), first written
     reassociates to `arg2 - (x - 0x1000)` and folds the constant into the
     other arm's `addiu`; the two statements against one name keep retail's
     `addiu $a2,$s5,0x1000` in the branch's delay slot. 70 differences to 17.
+  A fourth lever came from the permuter and is the **opposite** of the one
+  that matched func_80058434 the same hour: the first wrap wants its
+  subtraction written INLINE, `b[1] = (t - x) - (t - x) / 0x1000 * 0x1000;`,
+  not as `t = t - x;` first. 17 -> 11. So "name the value the division
+  consumes" is not a rule about naming in general -- in func_80058434 the
+  named value is the whole sum and the partial sum must not be named; here the
+  whole difference is the *outer* subtraction, and naming it costs six.
+  Read which register the target gives the intermediate before choosing.
   The residue is two clusters. The larger: retail stores the first wrapped
   angle to the stack slot and then **reloads it twice** (`lh` for the compare,
   `lhu` for the subtraction), where we keep it in a register and store it in

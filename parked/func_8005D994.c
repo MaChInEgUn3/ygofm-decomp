@@ -46,8 +46,7 @@ void func_8005D994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4,
     } else {
         x = x - 0x400;
     }
-    t = t - x;
-    b[1] = t - t / 0x1000 * 0x1000;
+    b[1] = (t - x) - (t - x) / 0x1000 * 0x1000;
     if (*(s16 *)&b[1] >= 0x801) {
         b[1] = b[1] - 0x1000;
     }

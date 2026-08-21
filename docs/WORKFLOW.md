@@ -524,6 +524,13 @@ meaningful, and skipping to the last one wastes hours:
    (`a = v; t = a + d + 0x1000;`). Writing it with no name at all -- the
    whole thing twice in one expression -- is +6, because gcc then computes the
    sum twice. So: name the value the division consumes, and nothing else.
+   **And the mirror, measured the same hour: in func_8005D994 the same wrap
+   wants its OUTER subtraction inline.** `b[1] = (t - x) - (t - x) / 0x1000 *
+   0x1000;` is 11 differences where `t = t - x;` first is 17. So this is not a
+   rule about naming in general -- it is a rule about *which* value the
+   division consumes getting a register of its own. Read the target's
+   registers before choosing, and expect the two functions to want opposite
+   spellings of the same idiom.
    **gcc folds a scaled dividend and an intermediate assignment blocks it.**
    `(x * 8 + 0x7FF) / 2048` comes out as `(x + 255) / 256` — two instructions
    short of retail's `sll 3` / bias / `sra 11`, and the shortfall cascades
