@@ -184,15 +184,17 @@ If a claim is about the whole binary, scan the whole binary.
 | `sweep_try.py` / `sweep_flags.py` | flag sweeps, the fast one through try_func and the confirming one through the build |
 | `sync_count.py` | derives the function count; run before committing a batch |
 | `status.py` | recomputes the Status tables above from the tree; `--write` rewrites README.md |
+| `disc.py` | reads the retail CD image and measures MIPS density per file; answers "is there code outside the executable?" |
 | `sweep_guards.py` | tries every per-file declaration guard against each parked candidate |
 | `score_permuter_outputs.py` | re-scores every stored permuter output through try_func |
 
 ## Layout
 
 - `docs/` — `WORKFLOW.md` (operational), `DECISIONS.md` (reasoning),
-  `PARKED.txt` (per-function diagnoses), `EXTERNAL_LEADS.txt` (naming guesses
-  from outside this repo, all UNVERIFIED and never used to justify a line of
-  C), function inventory, RAM/ROM map
+  `PARKED.txt` (per-function diagnoses), `DISC.txt` (what is on the retail CD,
+  and why the 24 off-executable `jal` targets are not the next thing to do),
+  `EXTERNAL_LEADS.txt` (naming guesses from outside this repo, all UNVERIFIED
+  and never used to justify a line of C), function inventory, RAM/ROM map
 - `src/` — matched C, one file per function (`src/func_XXXXXXXX.c`)
 - `parked/` — best-known-but-not-matching candidates, paired with `PARKED.txt`
 - `include/` — `variables.h` and `functions.h`; every global and every

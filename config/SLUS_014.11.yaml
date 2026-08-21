@@ -75,10 +75,22 @@ segments:
     type: data
     start: 0x8B890
     vram: 0x800fe728       # explicit override: file content resumes here but vram jumps past the bss gap
-    # 923864 bytes, mostly zero padding/reserved space -- NOT code, do not disassemble as .text.
-    # Contains one dense (~85-90% non-zero) ~188KB block around vram 801ab728-801d9728,
-    # very likely the card database (722 cards). Investigate as data, not functions.
-    # DataCrystal's documented fusion-table address (0x8017C2D8) falls in this range
-    # and is all-zero on disc -- it's a runtime-computed cache, not shipped data.
+    # 1331056 bytes, 9.7% non-zero -- mostly reserved space. NOT code: measured
+    # 0 `jr $ra` and 0 stack prologues across the whole segment.
+    # The dense content is three blocks near the END of the file, not the middle:
+    #   vram 8020f728-80211728    8 KB  68% non-zero
+    #   vram 80213728-80230728  116 KB  87% non-zero   <- the bulk
+    #   vram 80237728-8023c728   20 KB  88% non-zero
+    # An earlier revision of this comment put a single ~188KB block at vram
+    # 801ab728-801d9728. That is wrong and was never measured: 801ab728 has ONE
+    # non-zero byte in the next 188 KB. The density figure it quoted (85-90%)
+    # was right, the address was off by 0x68000. Re-derive with
+    # `.venv/bin/python tools_src/disc.py` and the block scan in docs/DISC.txt.
+    # Whether the 116 KB block is the card database (722 cards) is still a
+    # guess -- nothing has been decoded out of it.
+    # DataCrystal's documented fusion-table address (0x8017C2D8) falls in this
+    # segment and is all-zero on disc -- a runtime-computed cache, not shipped
+    # data. So is 0x80168000, which the game nonetheless `jal`s into; see
+    # docs/DISC.txt.
 
   - [0x1D0800]

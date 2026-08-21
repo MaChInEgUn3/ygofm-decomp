@@ -1,0 +1,120 @@
+The retail disc, and the 24 addresses that are not in the executable
+====================================================================
+
+Written 2026-08-21, the day the CloneCD image (`YUGIOH.ccd`/`.img`/`.sub`)
+was put in the repo root. `.gitignore` covers `*.ccd`/`*.img`/`*.sub` and
+`/extracted/`; the disc is copyrighted and must never be committed. Re-derive
+everything below with `.venv/bin/python tools_src/disc.py`.
+
+The question this answers
+-------------------------
+`config/undefined_funcs_auto.txt` lists 24 addresses the game `jal`s into that
+have no listing in `asm/nonmatchings/`, in two tight clusters plus one outlier:
+
+    0x801680F4 .. 0x8016AA6C    11 functions
+    0x8018001C .. 0x80183FE4    12 functions
+    0x801462B0                   1 function
+
+The natural reading is CD overlays -- FM swapping code per game mode -- and the
+natural next step is a second splat target. Both were checked before spending
+anything on either.
+
+What the disc actually contains
+-------------------------------
+Nine entries. No `.OVL`, no second executable, no `PS-X EXE` header outside
+`SLUS_014.11`:
+
+    SLUS_014.11             1,902,592
+    SYSTEM.CNF                     68
+    DATA/MODEL.MRG        351,019,008
+    DATA/WA_MRG.MRG        37,748,736
+    DATA/MOVIE.STR         35,430,400
+    DATA/SD_BGM.DAT        14,675,968
+    DATA/MASTER.XA          5,742,592
+    DATA/SU.MRG             2,537,472
+    DATA/SD_SE.DAT          1,521,664
+
+`disc.py` measures MIPS density as `jr $ra` occurrences per megabyte, against
+the executable's own `.text` as the reference -- the reference is the point,
+because "looks like data" means nothing without a number for what code looks
+like on this same disc:
+
+    SLUS_014.11 .text        3788 per MB     <- reference
+    SLUS_014.11 whole file   1026 per MB     (diluted by data and zero fill)
+    MODEL.MRG                  44 per MB
+    SU.MRG                     18 per MB
+    every other file            0 per MB
+
+So there is **no uncompressed MIPS code anywhere on the disc outside
+`SLUS_014.11`**. The 44 and 18 are structure noise, two orders of magnitude
+below code.
+
+Three things this falsified
+---------------------------
+1. **"The bytes are not here."** They were not, until the disc arrived. This
+   entry exists partly because that answer was given without asking whether
+   the image could be supplied -- it could, and was, in one message.
+
+2. **"The code is in the executable's data section, just typed as data."** A
+   good hypothesis and wrong. Every one of the 24 addresses maps inside the
+   `carddata` segment's file range, and every one reads as `00000000`. The
+   whole segment is 9.7% non-zero and contains 0 `jr $ra` and 0 stack
+   prologues.
+
+3. **A comment in `config/SLUS_014.11.yaml`.** It claimed one dense ~188 KB
+   block at vram `801ab728-801d9728`, "very likely the card database". That
+   address has ONE non-zero byte in the next 188 KB. The real dense content is
+   three blocks at the end of the file -- 8 KB at `8020f728`, **116 KB at
+   `80213728`**, 20 KB at `80237728`, at 68/87/88% non-zero. The density
+   figure in the old comment was right and the address was off by 0x68000,
+   which is the signature of a number that was reasoned about rather than
+   measured. Corrected in place. Whether the 116 KB block is the card table is
+   still a guess; nothing has been decoded out of it.
+
+What is established about the 24 addresses
+------------------------------------------
+* The `jal`s are real, not a splat artefact. `func_80043960` at 0x80043AFC
+  encodes `0C05A03D`, which is `jal 0x801680F4` and nothing else. **20 of the
+  24 have at least one caller already in `src/`** -- that is, in a function
+  that reproduces the retail bytes exactly, so the call is in the shipped code
+  and not in something we mis-split.
+* Their target region is all-zero on disc.
+* `D_800101D8`, a `u8 *` in rodata, **equals 0x80168000**, and five display-list
+  functions (`func_8003B808`, `func_8003BA14`, `func_8003BD14`, `func_8003BF00`,
+  `func_80043328`) use it as a *buffer* pointer.
+
+That last point is the interesting one: the same address is both a call target
+and a GPU work buffer. Overlay RAM being recycled as a buffer once the overlay
+is done is ordinary PS1 practice, so this is consistent -- but it is
+consistency, not proof.
+
+What is NOT established
+-----------------------
+Where the code comes from. The live hypothesis is a **compressed** overlay
+inside one of the archives, most likely `SU.MRG` (2.5 MB, the only small one)
+or `WA_MRG.MRG`. `disc.py` cannot see that by construction: a packed overlay is
+indistinguishable from data by an instruction-pattern metric. **Do not read a
+low density as "no code here" -- read it as "no code here in a form this
+measures".**
+
+Also unestablished: whether anything is *swapped*. Two clusters is not
+per-screen overlays. Two auxiliary modules resident for the whole run produce
+the identical signature.
+
+What it would take, and why it is not next
+------------------------------------------
+(a) find which archive holds it, (b) work out the container format and any
+compression, (c) extract exact bytes, (d) build something that reproduces
+them. (a) to (c) is ordinary reverse engineering. (d) is the one that decides
+whether the work is real: this project rests entirely on `build.py` producing
+one file whose sha1 either matches or does not, and every rule in WORKFLOW.md
+is there because it survived that comparator. A second target with no
+byte-exact reference produces C that is plausible and indistinguishable from
+C that is correct -- which is the exact failure mode this repo documents over
+and over.
+
+And the decompressor, if there is one, is in the main executable, probably
+among the functions still in assembly. So the path to the overlays runs
+*through* the current scope, not around it. Nothing in the remaining in-scope
+work is blocked on any of this; it is additive scope for later, not an
+obstacle now.
