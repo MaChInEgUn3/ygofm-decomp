@@ -454,6 +454,8 @@ extern u8 *D_8009B1F0[2];
 extern u8 *D_8009B1F8;
 extern u8 D_8009B1D5;
 #endif
+extern u8 D_8009B1EC;
+extern u8 D_8009B1ED;
 extern u8 D_8009B164;
 extern u16 D_8009B16C;
 extern u8 D_8009B174;
@@ -818,6 +820,8 @@ extern s16 D_800EFE40[];
  * different symbol -- two phantom differences. */
 extern s16 D_800EFE42[];
 extern u8 D_8009AF40[];
+/* Five bytes per side, indexed by D_8009B1D5 * 5 (func_80018DB4). */
+extern u8 D_800907CC[];
 extern u8 D_800907D8[];
 /* Two tables of per-card display flags, indexed by the BCD card id decoded
  * as `((n >> 4) & 0xF) * 10 + (n & 0xF)`: six bytes per entry at 0xC00 and

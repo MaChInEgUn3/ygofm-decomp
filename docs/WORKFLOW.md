@@ -224,6 +224,22 @@ meaningful, and skipping to the last one wastes hours:
    cc1psx folding the *first* reference's constant offset into the base —
    without it func_800300C8 gets `%lo(D_800EB15C+60)` and every later offset
    is 60 too small.
+   **The base local for that split must be assigned where the base is
+   materialised, and the whole sum written as ONE expression.**
+   func_80018DB4 has func_8001B938's shape exactly -- `D_8015C424 + idx * 28 +
+   0x48000` read at `+0x36B8` -- and the difference between 21 differences and
+   a MATCH is only how it is spelled. `g = &D_8015C424[idx * 28]; g = g +
+   off;` with `off` a named local reassociates to `(base + off) + idx * 28`
+   and splits the constant's `lui`/`ori` pair across the block; `base =
+   D_8015C424;` immediately before, then `g = base + idx * 28 + 0x48000;` as
+   one expression, is retail's `(idx * 28 + base) + off` with the pair
+   adjacent. Assigning the base earlier (before the preceding call) is 24, and
+   writing the symbol inline with a named `off` is 24. A named `off` is fine
+   *if* the base is a local and the sum is one expression -- that spelling
+   also matches -- so the lever is the base local and the single expression,
+   not the constant's name. Six placements of the `off` assignment, a `u32`
+   declaration and two `do { } while (0);` groupings were measured first and
+   every one of them is 21 or worse.
    **And a large offset can want splitting in two, which one local cannot
    do.** func_8001B938 reads `D_8015C424 + idx * 28 + 0x4B6B8`. Against the
    symbol the whole thing folds into `%hi`/`%lo`; against a base local gcc
