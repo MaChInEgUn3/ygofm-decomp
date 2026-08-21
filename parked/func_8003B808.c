@@ -4,19 +4,22 @@ void func_8003B808(u8 *p, s32 mode) {
     s32 v;
     s32 w;
     s32 d;
+    s32 m;
+    s32 e;
+    s32 x;
 
     switch (mode) {
     case 0:
         *(s16 *)(p + 0x32) = 0x100;
-        v = D_8009B0F4;
         *(s16 *)(p + 0x30) = 0;
+        v = D_8009B0F4;
         *(s16 *)(p + 4) = 0x40;
-        v &= 0xFFDDFFFF;
-        D_8009B0F4 = v;
+        m = 0xFFDDFFFF;
+        D_8009B0F4 = v & m;
         w = D_8009B0F4;
-        *(s32 *)(p + 0x1C) = 0x10000;
-        w |= 0x10000;
-        D_8009B0F4 = w;
+        m = 0x10000;
+        *(s32 *)(p + 0x1C) = m;
+        D_8009B0F4 = w | m;
         p[0x46] = 2;
         d = D_8009B118;
         *(s16 *)(p + 6) = 0x10;
@@ -26,9 +29,7 @@ void func_8003B808(u8 *p, s32 mode) {
 
     case 1:
         *(s32 *)(p + 0x1C) = 0x800;
-        v = D_8009B0F4;
-        v &= 0xFFDCFFFF;
-        D_8009B0F4 = v;
+        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
         *(s32 *)(p + 0xC) = D_8009B118;
         *(s32 *)(p + 8) = D_8009B118;
         p[0x46] = 1;
@@ -37,23 +38,21 @@ void func_8003B808(u8 *p, s32 mode) {
     case 2:
         *(s16 *)(p + 2) = 0xF0;
         *(s16 *)(p + 4) = 0x100;
+        e = D_8009B118;
         *(s16 *)p = 0;
         *(s16 *)(p + 6) = 4;
-        func_80081DE8(p, D_8009B118);
+        func_80081DE8(p, e);
         *(s32 *)(p + 0xC) = (s32)D_801AF000;
         *(s32 *)(p + 8) = (s32)D_801AF000;
+        x = D_8009B0F4;
         *(s32 *)(p + 0x1C) = 0x800;
-        v = D_8009B0F4;
-        v &= 0xFFDCFFFF;
-        D_8009B0F4 = v;
+        D_8009B0F4 = x & 0xFFDCFFFF;
         p[0x46] = 1;
         break;
 
     case 3:
         *(s32 *)(p + 0x1C) = 0x18000;
-        v = D_8009B0F4;
-        v &= 0xFFDCFFFF;
-        D_8009B0F4 = v;
+        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
         *(s32 *)(p + 0xC) = (s32)D_80010000;
         *(s32 *)(p + 8) = (s32)D_80010000;
         p[0x46] = 1;
@@ -61,9 +60,7 @@ void func_8003B808(u8 *p, s32 mode) {
 
     case 4:
         *(s32 *)(p + 0x1C) = 0x2800;
-        v = D_8009B0F4;
-        v &= 0xFFDCFFFF;
-        D_8009B0F4 = v;
+        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
         *(s32 *)(p + 0xC) = (s32)D_800101D8;
         *(s32 *)(p + 8) = (s32)D_800101D8;
         p[0x46] = 1;

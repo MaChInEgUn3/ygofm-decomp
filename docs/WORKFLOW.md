@@ -283,6 +283,25 @@ meaningful, and skipping to the last one wastes hours:
    value need two names): **two unrelated values must not share one name.**
    Reusing a `y` for both halfword results in func_800300C8 swapped a
    `$v0`/`$v1` pair; splitting it into `y` and `z` was 11 differences to 7.
+   **One name for two SEQUENTIAL constants is how you make the second reuse
+   the first's register.** Retail holds 0xFFDDFFFF and then 0x10000 in `$a0`,
+   the second materialised into the register the mask has just vacated. No
+   ordering of two separate literals reaches that, and neither does naming
+   them separately -- gcc allocates each a register by its own live range, and
+   the short one wins `$v0`/`$v1`. Writing both against **one** name does:
+   `m = 0xFFDDFFFF; … D_8009B0F4 = v & m; w = D_8009B0F4; m = 0x10000;
+   *(s32 *)(p + 0x1C) = m; D_8009B0F4 = w | m;` is func_80020BE4's 14
+   differences to 11. The two values never coexist, so one pseudo is legal;
+   one pseudo is one register, and gcc then places it where the *sum* of the
+   two live ranges says rather than where either alone would. This is the
+   two-names rule read backwards: two unrelated values must not share a name
+   when the target gives them different registers, and they **must** share one
+   when it gives them the same register. Read the listing, then count.
+   **A switch can want the local form in one arm and the direct form in the
+   others**, which is the same rule at arm granularity. func_8003B808's case 0
+   needs `v = D_8009B0F4; v &= mask; D_8009B0F4 = v;` and its cases 1, 3 and 4
+   need the plain `D_8009B0F4 = D_8009B0F4 & mask;`; writing all four the same
+   way is 45 differences and splitting them is 15.
    **And the rule runs in both directions -- read which register retail
    uses before splitting anything.** func_8003DA40 has two pointers that
    never coexist, one per half of the function, and retail keeps both in
