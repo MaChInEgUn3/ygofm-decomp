@@ -4336,14 +4336,35 @@ func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
   global. The full flag sweep is 3 at the installed row and 81+ everywhere
   else. Permuter running.
 
-func_800408D0 -- 13 differences, first written 2026-08-21. 202 instructions,
+func_800408D0 -- 3 differences (13 when first written, 2026-08-21; taken to 3
+  the same day by decomposing a permuter output -- see the coupled pair
+  below). 202 instructions,
   the fifth member of the func_80040DD8 sprite-list family: same 0x1F800320 /
   0x1F800344 / 0x1F800378 scratchpad packets, same D_8009B146 / D_8009B148
   offsets, same func_80041F90 / func_80042188 / func_80082840 tail, but it
   draws one sprite in horizontal slices with a `do`/`while` over a remaining
   count rather than walking the object list.
   Declarations: `D_8009B146_SIZED` plus `as -G4` (as func_80040588) and
-  `D_8009B424_IS_SCALAR`. The three-way tail is one loop with two entry
+  `D_8009B424_IS_SCALAR`.
+  **The 13 -> 3 was a COUPLED PAIR, and neither half is installable alone.**
+  Its permuter output re-scored 8 against 13, and what it had done was three
+  things plus a junk `volatile long long` return type. Decomposed: the junk
+  type is the whole of its 8 and is not installable; the `fl` borrow for the
+  0x1F800378 address and the `0 >= call` flip are both worth nothing. But
+  taking its `g[3] = 9` inline (with the load named instead: `v =
+  *(s32 *)(q + 0x14); g[3] = 9; *(s32 *)(g + 4) = v;`) is **-1 and 116** on
+  its own, and swapping the loop's last two statements to
+  `q[0xE] = q[0xE] + q[8]; rem = rem - *(u16 *)(q + 8);` is **also -1 and
+  116** on its own -- and the two together are 202/202 and 3. Each half
+  deletes an instruction the other restores, which is exactly the shape that
+  a one-at-a-time hand sweep cannot find and the permuter can. Read a
+  permuter win for its *parts* even when the part that scores is unusable.
+  Residue: retail issues the `lhu $a2,6($s0)` for `u6` before the call's
+  fourth-argument `addiu $a3,$s2,32` and the `sw $zero,d_8009b424`, and we
+  issue it after. All 23 permutations of the four statements in that block
+  were measured (3 is the floor, 4 and 5 the rest), as were a named
+  fourth argument (3), a named third-argument sum (7) and a named
+  `*(s16 *)(e + 0x1A)` (7). The three-way tail is one loop with two entry
   points in the listing (`.L80040AE8` loads 0x40, `.L80040AEC` stores it) and
   both entries carry the same 0x40, so it is one `do { *(u16 *)(q + 8) = 0x40;
   … } while (rem != 0);` and the second label is only the delay slot of the
@@ -4658,3 +4679,123 @@ func_8005B64C -- 2 differences at the right length (132/132), first written
   arms -- which is exactly what the idiom is for.
   The residue is 2: retail emits `sh $zero,0x32(p)` between the `addiu 64` and
   the `sh 4`, we emit it after the `and`. Five spellings measured.
+
+func_80012E5C -- 132/132, 26 differences (31 by hand; the permuter's only
+  change was moving `i--` to after the call in the loop body). Scheduling and one load order, after
+  a long chain of levers that each paid.
+  Addressing: gp=12, at=1, and the whole function is decided by one assembler
+  `-G4` plus three guard arms.  The gp side is D_8009B0B4 (4 bytes),
+  D_8009B0A0/A8/AD/D0 (1), D_8009B098 (2), D_8009B0AC; the bare side is
+  D_800FE048, D_800E9D90/D28, D_800A5768, D_8009B4A8 (unsized arrays,
+  cc1psx's own pair), D_8009B142/143/144 (`_IS_AGGREGATE`), D_8009B141 and
+  D_8009B318 (`_SIZED8`), and D_8009AFA2 (`_SIZED8`, the `lui $at` store).
+  **The two `_SIZED8` arms are the load-bearing ones and they are the
+  CSE lever, not an addressing lever.** Both flags are read twice with a
+  call or a branch between the reads, and retail re-materialises the
+  `%hi`/`%lo` pair each time.  Under `_IS_AGGREGATE` cc1psx emits its own
+  pair, gcc CSEs the `%hi` half into a callee-saved register, and the
+  function grows a *fifth* saved register ($s4) that retail does not have --
+  which rotates every callee-saved allocation downstream and reads as a
+  loop problem.  Under `_SIZED8` at `as -G4` the reference is a single bare
+  symbol, there is nothing to CSE, and the pair comes back twice.
+  D_8009B141 alone was -1/89 from +1/126; D_8009B318 alone was -1/119; the
+  two together only work once the rest of the block is right (they were
+  +1/126 early on and 132/132/41 at the end).  **A `_SIZED8` arm that scores
+  worse today is worth re-trying after every other lever lands.**
+  The rest, in the order they paid: batch-naming the four bytes that are both
+  stored into D_800FE048 and passed to func_80085500 (135 -> 131, 129 -> 115),
+  moving `func_800862C0(e)` to *after* the `D_8009B0B4 =` assignment so the
+  masked selector stops being callee-saved (that is the $s0 the fifth saved
+  register was stealing), `qb = D_800E9D90; q = qb + 0xC;` in two names to
+  stop `+12` folding into the `%lo` (retail has `addiu %lo` then `addiu 12`),
+  `bp = &D_8009B0A0;` assigned *after* the func_80085320 call rather than
+  before it (35 -> 36 -> 31 with the next one), and `ab = D_800A5768;` as a
+  base local, which is what puts the `& 0xFF` in retail's `$v1` instead of
+  `$a1` (35 -> 31).
+  Residue is three clusters, all scheduling: the ten loads in the first `if`
+  come out in a different order (same count, same set of registers bar one);
+  `n = 0x514C` is materialised at the top of the selector block where retail
+  has it in the func_800862C0 delay slot; and the loop's rotated copy is the
+  index computation where retail's is `addu $a0,$zero,$zero`.
+  Measured and worthless: `z = 0;` as the loop body's first statement (the
+  two zero arguments are already CSEd), `do { } while (0);` round the body
+  head or the whole body, the index written last, five orderings of the
+  first block's reads, `u8` for the four batch names (+4), a named mask,
+  `(u8)v` for the mask, splitting the a5768 add in two so the base comes
+  last (36), a base local for D_8009B4A8 as well (43), and four placements
+  of `n = 0x514C`.  sweep_try confirms default compiler flags with `as -G4`
+  (31; the next best row is `as -G2` at 95).
+
+func_8005BFC8 -- 139/139, 22 differences, and the first half is exact.
+  gp=19, at=0, no addressing work at all: default flags.
+  Decoded shapes worth keeping: `one = 1;` is a real local -- retail holds 1
+  in $s3 across three calls for the three `sb $s3` stores of D_8009B063 and
+  D_8009B064, and it is assigned in the `if (arg0 != 0)` test's own delay
+  slot, so it is written before that test.  func_800902A0 and func_800784D0
+  each *look* like they take one more argument than they do: $a2 holds
+  D_8009B498 because the base was needed for the `addu` that builds $a1.
+  `D_8009B066 = (D_8009B066 + 1) & 1;` must be written with **no local at
+  all** -- the second read is what produces retail's `andi $v0,$v0,255`
+  (the QImode-to-SImode zero-extend), and a `u8 m` local does not, because
+  gcc knows `(x+1)&1` fits (that one line was -1 and 58 -> 41).
+  `e = D_8009B498 + 0x40000;` twice, with the stores as plain `0x2424`,
+  `0x2426`, `0x242C`, `0x242E` displacements, is retail's two
+  materialisations; one `e` is +2 and worse.
+  The last big step was two names in the final block: `f = D_8009B060;`
+  read before the 0x2426 store, and `a = sp10;` hoisted as the call's first
+  argument -- 41 -> 38 -> 22 and the length error from +3 to 0, because
+  without them both loads sit in delay slots retail fills.
+  Residue: $s0 and $s1 are exchanged (the retry counter and the second
+  timestamp), and two load positions -- retail reads D_8009B498 *before* the
+  D_8009B066 read-modify-write and reads sp14 before D_8009B498 in the final
+  block.  Every attempt to name either read coalesces away.
+  Wrong axes, all measured: three declaration orders, `cnt = 0` moved above
+  the first func_80074170 call (30) or duplicated at the top, `do { } while
+  (0);` round the initialisation (23) or round `cnt = 0`, a dead `t2 = 0;`
+  first use, `cnt = t2;`, an explicit `goto reset` matching retail's branch
+  structure, the `&&` spelling, and four spellings of the func_800902A0
+  argument (an embedded assignment, a `bb` local at two positions, a
+  pre-biased `bb`, and an `(s32)` cast sum) -- all 22 or worse.
+
+func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
+  A panning/attenuation setter: two `func_80086E50` square roots over the pair
+  of 12-byte vectors at D_800F56F0, a distance-derived volume clamped to
+  [0x10, 0xFF], and a signed pan clamped to [-0x7F, 0x7F].
+  gp=0, at=0, and sweep_try says every row from `-G0` to `as -G4` gives the
+  same 1 -- so the addressing is not the axis and default flags are installed.
+  Five things decided it, and four are recorded levers firing exactly as
+  written:
+  * **The two locals are one `u8 st[2]` whose address is taken.** Retail
+    stores zero to both slots before the first call and then overwrites both
+    a few instructions later; gcc deletes the first pair as dead unless the
+    object is address-taken, and it also materialises `addiu $s4,$sp,0x11`
+    into a *callee-saved* register. `s8 *pp = (s8 *)&st[1];` assigned **above
+    the first call** gives both -- assigned later it folds into the store's
+    own addressing and lands in $a2, which is -3 and a whole register class
+    wrong. This is the address-taken-local rule (WORKFLOW step 4) used
+    deliberately rather than diagnosed as a problem.
+  * **The `- 0x2BC` on the first square root belongs after the SECOND call**
+    -- func_8005A6A8's lever, second instance. Written next to the call gcc
+    fuses it into `addiu $s0,$v0,-700`; moved across the second
+    func_80086E50 the raw result has to survive in a callee-saved register
+    and retail's `addu $s0,$v0,$zero` / `addiu $s0,$s0,-700` pair appears.
+    That one move was -1/86 to 133/133 and 16.
+  * **The quotient reuses the name of the distance** (`r`), whose live range
+    ended at the `r > 0` test -- the mutually-exclusive borrow. A fresh `q`
+    puts it in $a0 where retail has $s0. 16 -> 5 with the next one.
+  * **`st[1]` is read `lb` at the calls and `lbu` would be wrong**: the array
+    is `u8` because element 0 is, so the pan read needs the lvalue cast
+    `*(s8 *)&st[1]`, not `(s8)st[1]`. 8 -> 3.
+  * The clamp chain is **three assignments and two names, not one**:
+    `w = r / 16; v = w; if (w < 0) v = -v;` … `w = v; if (r <= 0) w = -w;`
+    -- the third assignment reusing `w` is what puts the second copy back in
+    retail's $v0. One name throughout is 10; `w`/`v`/`u` as three names is 3.
+  Residue: retail negates `$v1` in place (`subu $v1,$zero,$v1`) and we negate
+  the copy's source (`subu $v1,$zero,$v0`). Same layout, same delay slot, same
+  registers otherwise -- gcc has folded one copy through. Ten spellings
+  measured, all exactly 1: testing `v` instead of `w`, `0 - v`, `v -= v + v`,
+  an `if`/`else`, a ternary, `v = -w` explicitly, `do { } while (0);` round
+  the pair and round the `if` alone, a redundant `v = v;`, and a trailing
+  `w = v;`. Six borrowed names for `v` were also tried (`dx` 26, `dz` 20,
+  `a` 3, `b` 3, `c` 16, `ex` 7) -- none is better than the plain name.
+  This is a permuter case: one instruction, one operand.

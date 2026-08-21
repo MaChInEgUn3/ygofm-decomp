@@ -553,6 +553,17 @@ meaningful, and skipping to the last one wastes hours:
    instead is worse (func_80047788, 48 to 18). This is the same family as the
    `(x & 0x100) != 0` fold in step 2: one name reused across two statements
    is what stops the combiner.
+   **A read-modify-write on a byte global wants NO local, because the
+   second read is where the zero-extend comes from.** `D_8009B066 =
+   (D_8009B066 + 1) & 1;` followed by a use of `D_8009B066` in arithmetic
+   emits `addiu` / `andi 1` / `sb` / **`andi 0xFF`** -- the last one is the
+   QImode-to-SImode conversion of the value read back. Written with a `u8 m`
+   local for the same value the `andi 0xFF` does not appear at all, because
+   gcc knows `(x + 1) & 1` already fits a byte and the local never crosses a
+   mode boundary. func_8005BFC8 was one instruction short and 58 differences
+   on exactly that, and dropping the local was -1 to 0 and 41. This is the
+   mirror of the narrow-local rules above: there a narrow declaration
+   *creates* a mask, here reading the global back does.
    **A `bgez` / `addiu` / `sra` triple around one value is a signed DIVIDE,
    not a shift, and writing it as a shift costs delay slots.** gcc expands
    `x / (1 << k)` as "if x is negative add (1 << k) - 1, then arithmetic
@@ -1529,6 +1540,21 @@ on a combination that had been in the table for weeks.
     *one* instruction to gcc, so the invariant pass has nothing to hoist. 28
     differences to 6, and no other threshold separates the two groups:
     -G0/-G1/-G2 take the gp-relative symbols out with it (+20, +18, +12).
+    **Third use, and the tell is an EXTRA SAVED REGISTER rather than a
+    delay slot.** A bare symbol is one instruction to gcc, so there is
+    nothing for CSE to share either -- where the aggregate form's `%hi` half
+    gets commoned across a call or a branch into a callee-saved register,
+    the bare form re-materialises the pair at each reference, which is what
+    retail does. func_80012E5C reads two one-byte flags twice each with a
+    call between; under `_IS_AGGREGATE` gcc hoists both `%hi`s into `$s0`
+    and the function saves a *fifth* register retail does not have, which
+    rotates every callee-saved allocation downstream and reads as a loop
+    problem. `u8 sym[8]` plus `as -G4` on each of them is the fix. So when
+    your prologue saves one more register than the target's and the extra
+    one holds a `%hi`, size that symbol out of small data -- and note the
+    arms have to go in **together with the rest of the block being right**:
+    each was measured as +1 and worse earlier in the same function's life,
+    and only became correct once the allocation around it was.
     **Same knob, second use the same day: it is the delay-slot lever for a
     symbol that cannot take `-mno-split-addresses`.** func_800175A0 tests a
     one-byte flag on three paths; with the unsized array cc1psx emits a

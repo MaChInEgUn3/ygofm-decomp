@@ -57,13 +57,24 @@ extern u8 D_8009AFA4[];
 #else
 extern u8 D_8009AFA4;
 #endif
+#ifdef D_8009AFA2_SIZED8
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare store
+ * goes through $at while the one-byte gp-relative flags beside it keep
+ * %gp_rel (func_80012E5C). */
+extern u8 D_8009AFA2[8];
+#else
 extern u8 D_8009AFA2;
+#endif
 extern u8 D_8009AFA6;
 extern u8 D_8009B060;
 extern u8 D_8009B065;
 extern u8 D_8009B066;
 extern u8 D_8009B067;
 extern u8 *D_8009B498;
+extern u8 D_8009B49C;
+extern u32 D_8009B068;
+extern u32 D_8009B06C;
+extern u32 D_8009B070;
 extern u8 D_8009B063;
 extern u8 D_8009B064;
 extern u8 D_8009B078;
@@ -71,7 +82,17 @@ extern u8 D_8009B07B;
 extern u8 D_8009B07C;
 extern u8 D_8009B079;
 extern s8 D_8009B07A;
+#ifdef D_8009B141_IS_AGGREGATE
+extern u8 D_8009B141[];
+#elif defined(D_8009B141_SIZED8)
+/* Eight bytes it does not have: at -G4 that is non-small, so cc1psx emits the
+ * bare symbol -- one instruction, so the two reads either side of a call in
+ * func_80012E5C cannot be CSEd into a callee-saved register the way the
+ * unsized array's own %hi/%lo pair is. */
+extern u8 D_8009B141[8];
+#else
 extern u8 D_8009B141;
+#endif
 #ifdef D_8009B145_SIZED8
 /* Eight bytes it does not have: func_8002E730 reaches it %hi/%lo while
  * four-byte gp-relative symbols in the same unit stay small, so it needs a
@@ -91,6 +112,10 @@ extern u8 D_8009B2EB;
  * keeps %gp_rel (func_80043BCC). The size is a codegen knob. */
 #ifdef D_8009B318_SIZED
 extern u8 D_8009B318[2];
+#elif defined(D_8009B318_IS_AGGREGATE)
+extern u8 D_8009B318[];
+#elif defined(D_8009B318_SIZED8)
+extern u8 D_8009B318[8];
 #else
 extern u8 D_8009B318;
 #endif
