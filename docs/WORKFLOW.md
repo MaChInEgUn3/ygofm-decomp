@@ -1014,6 +1014,17 @@ one is the trap**: a missing constant is as often gcc's giv as it is a real
 error. The sweep is worth running after any adapted candidate; the false-flag
 rate is high and each one takes a minute to clear.
 
+**The phase rule runs backwards too: a second loop's cursors may want the
+FIRST loop's names.** The rule above says two sequential loop nests want
+separate names. func_800339D0 is the counterexample that bounds it: retail
+carries `$a0` through both of its loops for one role and `$v1` for the other,
+so the second loop's record cursor wants the *same name* the first loop's
+destination cursor used -- 11 differences to 3 on that one substitution --
+while its other cursor needs a name of its own type. Reusing the first loop's
+*source* name instead is 30. So the question is the same one as always: read
+which registers the target carries across the boundary before choosing, and do
+not assume that "two phases" always means "two names".
+
 **A permuter win that depends on an UNINITIALISED read is a fourth class, and
 it is worth decomposing even though you cannot install it.** On func_80046768
 its two best outputs re-score at 5 and 7 against a base of 46, and both do the

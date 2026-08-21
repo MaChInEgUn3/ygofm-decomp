@@ -3954,3 +3954,58 @@ func_8005A98C -- re-examined; still 2, `mflo $v0` / `sll $v1,$t1,13` against
   fresh name for the sum with a copy back (4), a fresh name for the quotient
   (2 and 3), and the quotient accumulated then copied (6). Three-plus
   spellings at 2 says the axis is elsewhere.
+
+func_800339D0 -- 134/134, THREE differences, and all three are one value's
+  register: retail holds `&D_800EB0F8` in $s0 and copies it into $a0 for the
+  `func_80035B7C` call, filling that call's delay slot; we hold it in $a0
+  directly and leave the slot a `nop`. Same residue as func_8003BF00.
+  gp=2, at=1, and the two symbols are equal widths, so `D_8009B140_SIZED8`
+  (eight bytes) with `as -G4` is what gives retail's `lui $at` store while the
+  one-byte D_8009B2F8 keeps %gp_rel. `D_8009AF76_IS_AGGREGATE` and
+  `D_8009B34D_IS_AGGREGATE` for the two %hi/%lo byte reads.
+  What paid, in order: **naming the D_8009B2F8 read** before the 0x633E
+  read-modify-write, so the two chains interleave and both load-delay slots
+  fill -- 119 differences and +1 to 14 at the right length, the single biggest
+  step; a **separate cursor name** for the first copy loop's destination
+  rather than reusing the name that holds the func_80035C38 result (14 to 11,
+  the phase rule); and then **reusing the first loop's destination name for
+  the second loop's record cursor** (11 to 3). That last one is the phase rule
+  read backwards and it is the second time it has paid: retail carries `$a0`
+  through both loops for one role and `$v1` for the other, so the second
+  loop's two cursors want the *same two names* as the first loop's, not fresh
+  ones. A `u16 *` name for the second loop's other cursor is what makes the
+  pair work; using the first loop's `u8 *` source name for it instead is 30.
+  Measured and dead on the last three: borrowing the func_80035C38 result's
+  name for the address (14), two locals both assigned from the address (14),
+  a copy `e = r` at the call (3, unchanged), `&D_800EB0F8[0]` at both sites
+  (3), computing the address before the preceding call (-1 and 65), and three
+  declaration orders.
+  A permuter run produced two stored outputs; they re-score at 7 and 10.
+# ---
+
+func_8001F364 -- 126/126, 14 differences, and the residue is the dispatcher's
+  delay slots: retail fills `beq $v0,$zero,L3` from L3's own first instruction
+  (`addiu $v0,2`) and the next branch from the fall-through's `return 1`,
+  where we leave the first a `nop` and hoist the m0 arm's `addiu $a0,0x10`
+  into the second. Four instructions, plus m0's two constants landing in $v1
+  where retail uses $v0.
+  Three things paid. The **0x48000 split**: `D_8015C424 + idx * 0x1C + 0x48000`
+  written as one expression folds the constant into the symbol's %hi/%lo and
+  is two instructions short; a base local first -- `r = D_8015C424;` then
+  `g = r + idx * 0x1C + 0x48000;` -- keeps retail's separate `lui`/`ori` of
+  0x48000 and the 0x36B4 displacement on the load. Same shape as
+  func_8001B938. A **nested `if`** in the `mode == 1` arm rather than an early
+  `return 1`, which stops gcc cross-jumping that return into the function's
+  first exit block. And **`do { … } while (0)` wrapped round the arms**: the
+  permuter found it, and it is worth 82 differences to 14 on its own. The
+  block runs from the dispatcher's last `return 1` through the `mode == 2`
+  arm, with the `goto` labels inside it -- which is legal C and reads as the
+  macro WORKFLOW says to look for.
+  Also here: `D_800F284A` is a real linker symbol (it is in
+  config/undefined_syms_auto.txt) two bytes into D_800F2848; declaring it and
+  writing `D_800F284A[0]` removes two false differences that were only
+  try_func reading text rather than bytes.
+  Measured and dead on the dispatcher: a `switch` instead of the `if` chain,
+  inverting the `v == 0` test, testing `>= 2` first, naming the fourth or the
+  fifth argument at the top of the m0 arm, and a second `do`/`while (0)` round
+  the tail of the dispatcher.

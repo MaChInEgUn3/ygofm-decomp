@@ -96,7 +96,14 @@ extern u8 D_8009B318;
 #endif
 extern u8 D_8009B428;
 
+/* func_800339D0 stores it through `lui $at` while the one-byte D_8009B2F8
+ * beside it keeps %gp_rel; equal widths, so no real threshold exists and the
+ * SIZED8 arm declares eight bytes with the unit at `as -G4`. */
+#ifdef D_8009B140_SIZED8
+extern u8 D_8009B140[8];
+#else
 extern u8 D_8009B140;
+#endif
 /* Read as a byte through %hi/%lo by func_8003D518, and gp-relatively as a
  * halfword everywhere else. */
 #ifdef D_8009AF76_IS_AGGREGATE
@@ -868,7 +875,12 @@ extern volatile s32 D_8009B09C;
 extern u8 D_8009B0C3;
 /* Non-volatile in the aggregate form: func_8003D0F4 stores it once and
  * volatile blocks the bare-symbol form the assembler expands through $at. */
-#ifdef D_8009B0C4_IS_AGGREGATE
+#ifdef D_8009B0C4_SIZED
+/* Eight bytes so that an `as -G4` unit treats it as non-small and expands the
+ * bare reference through the destination register, while the four-byte
+ * D_8009B3B8 beside it keeps %gp_rel (func_8003D03C). */
+extern volatile s32 D_8009B0C4[2];
+#elif defined(D_8009B0C4_IS_AGGREGATE)
 extern s32 D_8009B0C4[];
 #else
 extern volatile s32 D_8009B0C4;
@@ -972,6 +984,9 @@ extern s8 Base3_8009B408[];
 extern s8 D_8009B408;
 #endif
 extern u8 D_800F2848[];
+/* The halfword two bytes into D_800F2848, under its own name: func_8001F364
+ * reaches it through %hi/%lo of this symbol, which is how splat lists it. */
+extern s16 D_800F284A[];
 extern u8 D_800F2878[];
 extern u8 D_801AC000[];
 extern u8 D_800EFE38[];

@@ -418,6 +418,7 @@ void func_80046990(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
  * func_8002DF2C, which is the only reference and is why splat saw no branch
  * to it. */
 void func_8002DDFC(u8 *arg0, s32 arg1);
+void func_80024954(u8 *arg0);
 void func_8004666C(void);
 void func_800466C8(void);
 void func_800478EC(void);
