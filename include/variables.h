@@ -737,6 +737,8 @@ extern s32 D_8009B0B4;
 extern u8 D_80178130[];
 extern u8 D_8017808C[];
 extern u8 D_8018C2D8[];
+extern u8 D_8018C7D8[];
+extern u8 D_80177EA4[];
 /* Data Crystal RAM map, UNVERIFIED: player's hand, 30 bytes */
 extern u8 D_801A7E20[];
 extern u8 D_8015C424[];

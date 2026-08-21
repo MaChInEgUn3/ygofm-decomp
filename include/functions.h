@@ -505,7 +505,15 @@ u8 *func_8005F1A4(s32 arg0);
 void func_8003134C(void);
 s32 func_800358FC(s32 arg0);
 void func_8003B378(u8 *arg0, s32 arg1);
-s32 *func_800249E0(void);
+/* Takes two arguments; func_80024D34 calls it with none and lets whatever is
+ * already in $a0/$a1 through, so that translation unit never saw the
+ * declaration in the original build. Guarded so only the file that defines it
+ * sees the real prototype -- same shape as FUNC_80017F04_FULL. */
+#ifdef FUNC_800249E0_FULL
+u8 *func_800249E0(s32 arg0, s32 arg1);
+#else
+s32 *func_800249E0();
+#endif
 u8 *func_80024C1C(s32 arg0, s32 arg1, s32 arg2);
 void func_80016778(u8 *arg0, s32 arg1);
 void func_80058FB0(s32 arg0, u8 *arg1);
