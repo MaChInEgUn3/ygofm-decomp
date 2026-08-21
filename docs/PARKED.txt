@@ -4422,3 +4422,42 @@ func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
   named -- and they are 11, 15, 18, 19, 21, 22, 23 or 30 -- the four placement
   probes were re-run against the 8 base after the `s16` landed, in case the
   levers were coupled, and they are not. Permuter rerunning from the 8 base.
+
+func_8004BE88 -- 2 differences, first written 2026-08-21. 137 instructions,
+  gp=0 at=0. A MIDI meta-event dispatcher: cases 0x2F (end of track), 0x51
+  (tempo), 0x54, 0x58, 0x59, default. The tempo arm reads a 24-bit big-endian
+  value a byte at a time, divides 60000000 by it, scales, clamps to 0xFF,
+  halves or quarters it by the current division, and writes it into every
+  channel of a 0x2C-byte record array.
+  **The switch compiles to a comparison tree in retail and to a jump table for
+  us, and the fix is a case RANGE that shares the default label.** gcc 2.8
+  builds a table when `count >= 4` and `range <= 10 * count`; five cases over
+  0x2F..0x59 is range 42 against 50, so it takes the table. Retail's tree, and
+  its `bltz $a1` / `slti $a1,0x10` pair, say the switch's minimum case is 0
+  and its range is 89 -- i.e. the source has `case 0 ... 0xF:` written
+  immediately above `default:`. That is semantically a no-op (those values
+  reach default either way) and it is the whole difference: with it the
+  dispatcher is byte-for-byte right, 127 differences to 86.
+  It is a MIDI meta parser, so `case 0 ... 0xF:` is exactly the text-event
+  range -- the original almost certainly wrote it to document that.
+  Everything else was existing rules:
+  * splitting `v = 0x3938700 / v * 100 / 115;` into two statements against the
+    same name (86 -> 57) -- the scaled-dividend rule. Written whole, gcc sinks
+    the D_8009B458 load and the `sw` past the `divu`; split, they stay in
+    front of it where retail has them.
+  * the SCALAR arm of D_8009B458 plus `as -G0` (57 -> 48), which is the
+    func_8002CEE8 lever: as an unsized array the reference is a %hi/%lo pair
+    and the filler hoists two `lui`s into switch-arm delay slots retail
+    leaves as `nop`s.
+  * two names for the two reads of D_8009B458 (48 -> 44) -- retail keeps them
+    in $a0 and $a1.
+  * an explicit guard plus `do`/`while` with `off += 0x2C;` **before** `i++`
+    (44 -> 6). The plain `for` puts the increment at the top of the body and a
+    `for` with an explicit guard round it is +1; four loop spellings and three
+    index forms were measured.
+  * `off = 0; i = 0;` in that order (6 -> 2). The opposite order, `i = 0;
+    off = i;`, `off = i = 0;`, a declaration-order swap, a `u32 off`, three
+    `do { } while (0);` groupings and an integer-typed base are all 2 or 6.
+  The residue is 2: retail zeroes `i`'s register and copies it into `off`'s,
+  we zero `off`'s and copy into `i`'s. Same two instructions, same registers
+  in the loop body, opposite direction in the preheader. Permuter running.

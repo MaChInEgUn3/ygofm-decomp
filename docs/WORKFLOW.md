@@ -693,6 +693,20 @@ meaningful, and skipping to the last one wastes hours:
    is a guard comparing zero against the *byte field* just written, not
    against the word the call returned. Count the branches in front of the
    loop before inventing a guard for it.
+   **A switch that retail compiles to a comparison tree and you compile to a
+   jump table wants a CASE RANGE that shares the default label.** gcc 2.8
+   takes the table when `count >= 4` and `range <= 10 * count`, so the way to
+   push it back to a tree is to widen `range` -- and the way to widen it
+   without changing behaviour is `case LO ... HI:` written immediately above
+   `default:`, for values that already reach default. Read the bounds off the
+   listing: retail's tree for func_8004BE88 opens with `bltz $a1` and
+   `slti $a1,0x10`, which are the lower-bound tests for a case node at 0
+   spanning to 0xF, so the source is `case 0 ... 0xF:` and the switch's range
+   is 89 rather than 42. That one line took the dispatcher from
+   instruction-for-instruction wrong to byte-for-byte right (127 differences
+   to 86). The GNU case-range syntax is gcc 2.8's own, and in that function it
+   is also what the code means -- it is a MIDI meta-event dispatcher and
+   0x00..0x0F is the text-event range.
    **The case order also decides the arm ORDER IN MEMORY, and the target's
    order is worth reading off the listing rather than guessed.**
    func_8005FC1C dispatches on twelve values and retail's arms are laid out
