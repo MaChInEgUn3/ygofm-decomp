@@ -618,6 +618,16 @@ meaningful, and skipping to the last one wastes hours:
    that worked the index is a loop giv and the base is reloaded per
    iteration, and in func_80047CC4 it is `(u8)i * 2` computed inside a
    conditional.
+   **The `(s32)` cast route works on THREE sites in one function, and one of
+   them needs the index named as well.** func_8002538C indexes a byte table
+   by a loop counter, a second table by a computed index, and a record array
+   by the byte it just read, and retail puts the *index* first in all three
+   `addu`s. `*(u8 *)(i + (s32)cb)` fixes the first and
+   `(u8 *)(… * 0x1C + (s32)rb)` the third, but the middle one --
+   `tb[D_8009B1AE + D_8009B1D5 * 0x14]` -- still comes out base-first inside
+   the cast until the index is a named local of its own:
+   `ix = D_8009B1AE + D_8009B1D5 * 0x14;` then
+   `*(u8 *)(ix + (s32)tb)`. 5 differences to 3 to a MATCH.
    **The opposite direction has its own route: cast the sum to integer
    arithmetic.** When retail wants the *index* first and every pointer `+`
    spelling gives `addu base,index` — `(i + o) + base` and `&base[i + o]`
@@ -809,6 +819,18 @@ meaningful, and skipping to the last one wastes hours:
    differences to 27). Writing it *first* instead is 36, as is putting `+0x16`
    first — so it is the last position that decides, not the first. **Observed
    once.**
+   **A block the target places between an early `return` and the rest of the
+   function is a `goto` target written INSIDE the returning branch.**
+   func_8002538C's `D_8009B220 = 0; return;` is the exit of a loop forty
+   instructions later, and retail emits it immediately after the *other*
+   arm's `return` -- before the second half even begins. Written where it
+   runs, gcc puts it at the end of the loop and everything between shifts by
+   three instructions. Written as `goto done;` with `done:` labelled inside
+   the first branch, after that branch's own `return`, gcc emits it exactly
+   where retail does: 33 differences to 9. A label inside a block reached by
+   a `goto` from outside it is legal C and is the only spelling that moves
+   the block. Same family as the out-of-line-arm rules below, but the block
+   belongs to a *different* branch of the function entirely.
    **A three-way dispatcher with out-of-line arms is `goto`, and the
    instruction count says so before you guess.** func_8003C328 tests one
    parameter against 1, then <2, then 0, then 2, and the arms sit after the

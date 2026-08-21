@@ -184,6 +184,9 @@ extern s16 D_8009B20C[4];
 #endif
 extern u16 D_8009B1D0;
 extern s16 D_8009B1D2;
+extern s16 D_8009B1AC;
+extern s16 D_8009B1AE;
+extern u8 D_80090A4C[];
 extern s16 D_8009B33C;
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
