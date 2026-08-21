@@ -4105,6 +4105,15 @@ func_80013154 -- 131/131 with `-fno-strength-reduce` (recorded in build.py;
   func_80071700, func_80021598 are the others): gcc hoists small loop
   invariants where retail does not, and the permuter only reaches it through
   shapes that cannot be written.
+  Probed directly on this one, since the length is right and the mechanism is
+  visible. Three things that do NOT change it: adding named temps inside the
+  loop (more pseudos), naming the `2` as a local, and `(s32)`/`(u32)` casts on
+  the bound comparison -- all 117, unchanged. One thing that does: writing the
+  bound as `p - arg0 < 0xA2C0` stops the *bound* being hoisted and takes the
+  count to 79, but costs an instruction (+1) and leaves the `2` hoisted, so it
+  is a measurement rather than a candidate. So the bound and the constant are
+  hoisted by the same pass but respond to different things, and neither
+  responds to pseudo pressure.
   The addressing is right and was the interesting part: SIX one-byte symbols
   (D_8009B142/3/4 and D_8009B14A/B/C) need the bare `lui $at` store while
   SEVEN one-byte symbols beside them (D_8009B0A0..D_8009B0D0) keep %gp_rel.
@@ -4115,3 +4124,35 @@ func_80013154 -- 131/131 with `-fno-strength-reduce` (recorded in build.py;
   Also right: `six = 6;` as a local (retail's $s3 serves the D_8009B0A1 store
   and both +0x5124 / +0x514C stores), and the 20-byte unaligned copy at the
   end as a `struct { u8 b[20]; }` assignment.
+
+func_80040DD8 -- 170 built against 164. Two residues, both about what gcc is
+  allowed to reorder around a store through a pointer.
+  * Retail batches FIVE loads from the record and then four stores to the
+    scratchpad packet (`lw 40 / lw 4 / lw 48 / lw 56 / lw 64` then
+    `sw 8 / sw 16 / sw 24 / sw 32`), and then falls back to load/`nop`/store
+    pairs for the rest. We emit pairs throughout. gcc cannot hoist a load from
+    `e` above a store through `g` -- both are `u8 *` -- so the batch must come
+    from the source reading those four into locals first, and the fall-back to
+    pairs afterwards is gcc correctly refusing to move any *later* load above
+    the first store. The plausible spelling for that (four named temps for one
+    group of four and inline pairs for the next three) has not been tried
+    because it does not read as anything anyone would write; it is the obvious
+    next probe.
+  * The eight `- D_8009B146` / `- D_8009B148` subtractions come out with `lhu`
+    for the symbol where retail has `lh`. Retail computes in SImode and
+    narrows only at the store; ours stays in HImode, where the sign of the
+    subtrahend cannot matter. Forcing SImode with an `s32 n` intermediate and
+    an `(s16 *)` store changes **nothing** -- 121 either way -- so the axis is
+    not the intermediate's width.
+  What is right: `g = (u8 *)0x1F800344;` and `h = (u8 *)0x1F800398;` as locals
+  assigned before the guard (retail materialises both in the prologue, outside
+  the `if`), the four loop-invariant constants 8 / 0x38 / D_800E9D90 /
+  0x40000 as locals in the preheader, `e = D_800EFE48 + i * 0x70` written
+  plainly (gcc's own `sll 3` / `subu` / `sll 4` expansion splits across the
+  loop back edge exactly as retail has it), and `(s16)*(u16 *)(g + 8)` rather
+  than `*(s16 *)(g + 8)` for the two func_80041E7C arguments -- retail loads
+  `lhu` and sign-extends with `sll`/`sra`, which is what the cast of a u16
+  read gives and what a plain `lh` does not.
+  Note for the reader: `li $fp,8` in our build against retail's
+  `addiu $fp,$zero,8` is objdump printing the same word two ways, not a real
+  difference.

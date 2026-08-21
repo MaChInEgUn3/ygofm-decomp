@@ -805,6 +805,7 @@ extern Rec12 D_801AB000[];
 extern s16 D_800EFE3C[];
 extern s16 D_800EFE44[];
 extern s16 D_800EFE3E[];
+extern s16 D_800EFE40[];
 extern u8 D_8009AF40[];
 extern u8 D_800907D8[];
 /* The debug format string "             MAP = %02X\n". */
