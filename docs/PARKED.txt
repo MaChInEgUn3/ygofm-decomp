@@ -4009,3 +4009,53 @@ func_8001F364 -- 126/126, 14 differences, and the residue is the dispatcher's
   inverting the `v == 0` test, testing `>= 2` first, naming the fourth or the
   fifth argument at the top of the m0 arm, and a second `do`/`while (0)` round
   the tail of the dispatcher.
+
+func_80071CB0 -- 130/130, THREE differences, and all three are the order of
+  three instructions in the main loop's preheader: retail emits the stack
+  array's address, then `best = 0` from `$zero`, then `i = 0` CSE'd *from
+  best*; we emit `best = 0` CSE'd from the loop counter, then the array
+  address, then `i = 0` from `$zero`. Same instructions, three positions.
+  What paid, in order:
+  * **A base local plus the index form for the second scan's table.** The
+    loop reads two fields of the same record, `+6` and `+2`. Written against
+    the symbol, gcc hoists `D_801AB2A0 + 6` out as an invariant and the
+    function is +4; written as an explicit cursor stepping 0xC, gcc gives the
+    cursor a *bias* of +2 and it is +1; written as `e = D_801AB2A0;` before
+    the loop and `e + i * 0xC + 6` / `+ 2` inside, it is exactly retail's one
+    cursor with two displacements. 83 differences to 26.
+  * **Flipping which side of each comparison the candidate sits on**, so the
+    candidate's field is loaded before the incumbent's (26 to 20, and again on
+    the final comparison).
+  * **Merging the zeroing loop's counter with the main loop's counter** --
+    one variable, not two. Retail carries both in `$t1`, resetting it to 0
+    between them. 20 differences to 6, the largest single step, and a third
+    instance of the phase rule running backwards.
+  * Writing `best = 0;` immediately after `k = 0;` rather than after the two
+    table-base locals: 6 to 3.
+  Measured and dead: `-fno-strength-reduce` (+5); a named pointer for the
+  stack array used at all four access sites (-3); `i = best` in the `for`
+  init, which is semantically equivalent because `best` is always 0 there but
+  gcc cannot prove it (+6); three other preheader orders.
+  A permuter run produced eleven stored outputs; the best re-scores at 4.
+# ---
+
+func_80071700 -- 146 built against 137, and the whole +9 is loop-invariant
+  motion that retail does not do: gcc hoists the constants 4 and 5 into
+  callee-saved registers and the `(u32)(mode - 3) < 3` range test into a
+  *stack slot*, and the spill then pushes two more values out of registers.
+  Retail materialises 4 and 5 inline in branch delay slots and recomputes the
+  `addiu -3` / `sltiu 3` pair inside the loop every iteration.
+  `-fno-strength-reduce` is recorded in build.py and is worth 4: without it
+  the record cursor picks up a second, biased register (`$s0 = $s3 + 4`,
+  reading `2($s0)` where retail reads `6($s3)`), which is the third user of
+  that flag for exactly that shape.
+  What is right: `one = 1;` as a real local -- retail uses `$s5` for the
+  `mode == 1`, `fp == 1` and `sel == 1` tests *and* as the shift amount in
+  `sllv $v0,$s1,$s5` for the `* 0xC`; the `(u32)(mode - 3) < 3` spelling,
+  which is gcc's own fold of `mode == 3 || mode == 4 || mode == 5`; and the
+  cursor form for the record.
+  Measured and dead: writing the whole guard as one `&&` chain rather than
+  nested `if`s with `goto next` -- byte-identical output either way, so the
+  condition's spelling is not the axis. The axis is register pressure, and
+  the same class as func_8004A518's hoisted 0x63: retail's build had one more
+  pseudo in play and therefore hoisted less.

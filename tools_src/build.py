@@ -265,6 +265,10 @@ PER_FUNC_FLAGS = {
     # func_800722CC: the two reads at +6 inside the search loop get their own
     # biased giv, which costs a callee-saved register and five instructions.
     "func_800722CC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # PARKED at +9. Without it gcc gives the record cursor a second, biased
+    # register ($s0 = $s3 + 4, reading 2($s0) where retail reads 6($s3)),
+    # which is +13 and four differences worse.
+    "func_80071700": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at 60 differences.  Without this the last nested loop is reversed
     # (countdown + bgez) where retail counts up against slti 32, and the outer
     # `sll i,6` becomes a giv -- one instruction short and much further out.

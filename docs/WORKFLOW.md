@@ -897,6 +897,15 @@ meaningful, and skipping to the last one wastes hours:
    exactly the instructions a missing name would have bought is a warning to
    look for the name first.
 
+   **Two reads of one record at different offsets want a base local and the
+   index form, not a cursor.** func_80071CB0's second scan reads `+6` and
+   `+2` of the same 0xC-byte record. Against the symbol, gcc hoists
+   `sym + 6` out of the loop as an invariant (+4 instructions); as an
+   explicit cursor stepping 0xC it gives the cursor a *bias* of +2 (+1); as
+   `e = sym;` before the loop with `e + i * 0xC + 6` and `+ 2` inside, it is
+   retail's single cursor with two plain displacements. All three spellings
+   are the same C; only the third reproduces the target.
+
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
    the other way**: gcc reverses a counted loop whose counter is dead after it,
@@ -1024,6 +1033,13 @@ while its other cursor needs a name of its own type. Reusing the first loop's
 *source* name instead is 30. So the question is the same one as always: read
 which registers the target carries across the boundary before choosing, and do
 not assume that "two phases" always means "two names".
+   Third instance, and the plainest: func_80071CB0 zeroes a stack array in a
+   nested loop and then runs a search loop, and retail carries the zeroing
+   loop's outer counter and the search loop's counter in the *same* register,
+   resetting it to 0 between them. One variable for both is 20 differences to
+   6 -- the largest single step in that function -- where two is the obvious
+   spelling. Count the registers the target reuses across the boundary before
+   deciding.
 
 **A permuter win that depends on an UNINITIALISED read is a fourth class, and
 it is worth decomposing even though you cannot install it.** On func_80046768

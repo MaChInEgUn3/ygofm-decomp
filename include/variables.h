@@ -441,6 +441,7 @@ typedef struct {
 /* Data Crystal RAM map, UNVERIFIED: table of score change to rank, 200 bytes */
 extern Threshold D_801798A8[][5];
 extern u8 D_801AB00C[];
+extern u8 D_801AB2A0[];  /* &D_801AB00C[0x37] under its own name */
 /* Scalar by default -- three functions reach it gp-relatively. func_8007154C
  * needs %hi/%lo and defines D_8009B1D5_IS_AGGREGATE. */
 #ifdef D_8009B1D5_IS_AGGREGATE
