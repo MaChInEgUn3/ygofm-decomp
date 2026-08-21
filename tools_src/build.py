@@ -322,6 +322,7 @@ SMALL_DATA_NOP_FUNCS = {
     # expects the store to expand through $at and fill the slot.
     "func_80015310",
     "func_8002CEE8",
+    "func_8002D7CC",
     "func_8002E5AC",
     "func_8002DC38",
     "func_8002D180",
@@ -405,6 +406,7 @@ PER_FUNC_AS_FLAGS["func_800408D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
+PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
 PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"

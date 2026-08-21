@@ -4479,3 +4479,34 @@ func_8002DA1C -- 6 differences, first written 2026-08-21. 135 instructions,
   two positions, the D_8009B26E store moved and wrapped in `do { } while (0);`,
   the base local moved -- and every one is 6, 13 or 23. `-fno-schedule-insns`
   is +1 and `-fno-schedule-insns2` is 35. Permuter running.
+
+func_80071924 -- +12 instructions and 125 differences, first written
+  2026-08-21. 144 instructions, gp=0 at=0, default flags. Parked on a single
+  mechanism and recorded mainly for that.
+  The whole gap is **gcc's loop-invariant motion hoisting three comparison
+  constants that retail recomputes inside the loop**. The body tests a
+  loop-invariant `b` against 1, 4, 5 and against the range [3,5]; retail
+  materialises `addiu $v0,$zero,4` and `addiu $v0,$zero,5` twice each, in
+  branch delay slots, and computes `addiu $v0,$s3,-3` / `sltiu $v0,$v0,3`
+  inside the loop. We hoist 4 and 5 into `$a2` and `$fp` and the range check
+  into a stack slot -- five preheader instructions -- and the two callee-saved
+  registers they take then spill two other values, which is the other half of
+  the +12.
+  Nine source spellings and eight flag rows were measured against it and
+  **every one is +12 or worse**: the `&&` chain as nested `if`s, the `||`
+  chain as separate `if`s with a shared label, the range check as
+  `(u32)(b-3) < 3` / `b >= 3 && b <= 5` / `b == 3 || b == 4 || b == 5` / a
+  named intermediate, one name for the table base and the record cursor,
+  `-fno-cse-follow-jumps`, `-fno-cse-skip-blocks`, `-fno-rerun-cse-after-loop`
+  and `-fno-expensive-optimizations` (all four exactly +12/125, which is the
+  usual tell that CSE is not the mechanism). `-fno-strength-reduce` is the
+  only row that moves it, to +8, and a `switch (b) { case 1: case 4: case 5:
+  }` for the first test is also +8 but builds a different comparison tree.
+  What IS right and worth keeping: `sllv $v0,$s1,$s6` in the preheader is
+  **gcc's own** constant-1 register for the `* 12` index scaling, not a source
+  local -- writing `one = 1;` and using it for the three `== 1` comparisons
+  scores identically to using literal 1s everywhere, so the `one` reading is
+  unnecessary. The three-way tail (`a == 0` / `a == 1` / else compare the two
+  fields) is instruction-for-instruction right, and so is the loop's
+  `do`/`while` with the address-taken `sp14` re-read from the stack each
+  iteration.
