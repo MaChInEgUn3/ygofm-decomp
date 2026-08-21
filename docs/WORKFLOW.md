@@ -761,6 +761,16 @@ meaningful, and skipping to the last one wastes hours:
    labels instead of one. Written inline in each arm it is a first-try
    MATCH. So when a switch's arms look repetitive, count the target's copies
    before factoring them out.
+   **And a constant argument held in a callee-saved register is the same
+   question read backwards.** func_80052694 keeps 0 in `$s3` across two calls
+   and passes a literal 0 to two others. Written as `z = 0;` with one textual
+   call site the local is constant-propagated away, all four sites become
+   identical, gcc cross-jumps them into one and the function is *eleven*
+   instructions short. Writing the call out in both arms of the inner `if`
+   gives the two sites their own argument setup, `z` then has somewhere to
+   live, and the length comes right -- 124 differences and -11 to 13 and 0.
+   So when a local holding a constant vanishes, the question is not how to
+   make gcc keep it; it is which call site was supposed to be a second copy.
    **The same pass from the other side: do not block a cross-jump.** gcc merges
    two arms only when their instruction sequences are *identical*, and two arms
    computing the same value from different expressions — one from a global, one

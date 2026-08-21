@@ -660,6 +660,7 @@ extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];
 extern u8 D_800EB15C[];
 extern u8 D_800F2B20[];
+extern s16 D_800F2B4A[];
 #ifdef D_8009B142_SIZED
 extern u8 D_8009B142[2];
 #elif defined(D_8009B142_IS_AGGREGATE)
