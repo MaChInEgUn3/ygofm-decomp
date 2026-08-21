@@ -4511,8 +4511,12 @@ func_80071924 -- +12 instructions and 125 differences, first written
   `do`/`while` with the address-taken `sp14` re-read from the stack each
   iteration.
 
-func_80048A28 -- 103 differences at the right length (121/121), first written
-  2026-08-21. Every instruction is in the right place; the whole residue is
+func_80048A28 -- 65 differences at the right length (121/121), first written
+  2026-08-21. The permuter took it 103 -> 65 and it decomposes to ONE line:
+  `w2 = (u16)(arg2 + 0x80);` hoisted to the top of the `if (t != 0)` block
+  with the second range check written `if (w2 < 0x80)`. Naming the *first*
+  range check the same way as well is -2 and much worse, so it is that one
+  test and not the pair. Every instruction is in the right place; the whole residue is
   one register rotation across the function, which is why the count is so
   high against so little wrong.
   What is right: `D_8009B45C` as the **scalar** arm plus `as -G0` (gp=0, so
@@ -4532,3 +4536,34 @@ func_80048A28 -- 103 differences at the right length (121/121), first written
   reusing `arg0` for the re-read halfword (which IS right -- retail keeps both
   in $s2 -- but worth nothing on its own), and `s8`/`u16` parameter types.
   `s32 arg0` is worth 1. Permuter running from this base.
+
+func_8005D994 -- 17 differences at the right length (132/132), first written
+  2026-08-21. gp=5 at=0, all one-byte flags, default flags, no addressing work.
+  A sound-position setup: it builds two eight-byte packets on the stack, wraps
+  two angles into (-0x800, 0x800] and hands both to func_8005F91C, which is
+  the function this project matched earlier the same day -- so its two `u16
+  a[4]` / `u16 b[4]` stack objects are the two lwl/lwr records that function
+  copies, and declaring them as two separate arrays rather than one `u16 v[8]`
+  is the honest reading (it scores the same, 17 either way).
+  Three levers took it from 71 to 17:
+  * **branch polarity, twice.** `m = -1; if (arg0 <= 0) m = 1;` where the
+    obvious `if (arg0 > 0) m = 1; else m = -1;` inverts the branch; and
+    `if (arg0 <= 0) x -= 0xC00; else x -= 0x400;` for the same reason. Retail
+    falls through into the `-1` and the `-0xC00`, which is step 3's rule read
+    off the delay slots.
+  * `t = arg2 + 0x1000;` as its own statement before the `if`, then `t = t -
+    x;` after it. Written as one expression `(arg2 + 0x1000) - x` gcc
+    reassociates to `arg2 - (x - 0x1000)` and folds the constant into the
+    other arm's `addiu`; the two statements against one name keep retail's
+    `addiu $a2,$s5,0x1000` in the branch's delay slot. 70 differences to 17.
+  The residue is two clusters. The larger: retail stores the first wrapped
+  angle to the stack slot and then **reloads it twice** (`lh` for the compare,
+  `lhu` for the subtraction), where we keep it in a register and store it in
+  the branch's delay slot -- and the *second* angle, twenty instructions
+  later, retail does keep in a register, so the two blocks genuinely differ in
+  the source. Eight spellings were measured against it (an lvalue-cast store,
+  a named intermediate with a fresh name and with `t`, a value cast instead of
+  the lvalue cast, an `s16` array, an intervening statement, and splitting the
+  divide from the multiply) and every one is 17 or worse. The smaller cluster
+  is `$s4`/`$s5` exchanged between arg1 and arg2, both used once and
+  adjacently. Full flag sweep is 17 at the default row. Permuter next.
