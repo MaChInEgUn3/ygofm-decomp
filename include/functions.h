@@ -250,7 +250,7 @@ s32 func_80026C6C(u8 **out, s32 arg1, s32 arg2);
 void func_80030CB0(void);
 s32 func_80035D10(void);
 void func_80043328(u8 *arg0, s32 arg1);
-void func_800434F4(void);
+void func_800434F4(u8 *p, s32 mode);
 void func_800438B8(s32 arg0);
 s32 func_80024E24(void);
 void func_80029164(s32 arg0, s32 arg1);
@@ -480,7 +480,8 @@ void func_8001352C(void);
 s32 func_8003FCD8(void);
 void func_8005B85C(void);
 void func_8005922C(u8 *arg0, s32 arg1);
-void func_8005F91C(s32 arg0, void *arg1, void *arg2, s32 arg3);
+void func_8005E808(u8 *arg0);
+void func_8005F91C(s32 arg0, u8 *arg1, u8 *arg2, s32 arg3);
 /* Three parameters -- it stores arg1/arg2 into the sprite's +0x30/+0x32 --
  * but func_80018004 calls it with one and retail sets neither $a1 nor $a2
  * there, so that translation unit cannot have seen this declaration. The

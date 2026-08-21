@@ -3,6 +3,7 @@
 void func_8003B808(u8 *p, s32 mode) {
     s32 v;
     s32 w;
+    s32 d;
 
     switch (mode) {
     case 0:
@@ -17,9 +18,10 @@ void func_8003B808(u8 *p, s32 mode) {
         w |= 0x10000;
         D_8009B0F4 = w;
         p[0x46] = 2;
+        d = D_8009B118;
         *(s16 *)(p + 6) = 0x10;
-        *(s32 *)(p + 8) = D_8009B118;
-        *(s32 *)(p + 0xC) = D_8009B118 + 0x800;
+        *(s32 *)(p + 8) = d;
+        *(s32 *)(p + 0xC) = d + 0x800;
         break;
 
     case 1:

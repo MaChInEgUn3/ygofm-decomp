@@ -1065,7 +1065,15 @@ func_800533D8 -- 7 differences, all of them which caller-saved register the
   the exit test (56, much worse), and both declaration orders. Full flag
   sweep: 7 is the floor, at plain -O2 -G8.
 
-func_8003B808 -- 82 differences, **and the diagnosis this entry used to carry
+func_8003B808 -- 77 differences (was 82), on `d = D_8009B118;` named
+  before the `*(s16 *)(p + 6) = 0x10;` store in case 0 -- the same lever
+  that took func_800434F4 from 62 to 42, and here it also takes the
+  length error from +2 to +1. Two negatives worth keeping: a *shared* `d`
+  across cases 0 and 1 is +6 and 85 (the two-names rule), and the
+  statement reorder that is worth 4 on func_80020BE4 is worth nothing
+  here -- this one dispatches through a real jump table rather than a
+  comparison tree, so its arms are allocated differently.
+  Was: 82 differences, **and the diagnosis this entry used to carry
   is now fixed**. It said retail "hoists the D_8009B0F4 load above the two
   halfword stores that follow it" and we did not. Reading the global into a
   local before those stores and writing it back after -- `v = D_8009B0F4;
@@ -1183,7 +1191,18 @@ func_8005B4D8 -- 42 differences, right instruction count, and the same class as
   func_8005B260 is its sibling -- same body one word shorter -- and will have
   the same problem. Do not spend on it separately.
 
-func_80020BE4 -- 62 differences, the same three-cycle register permutation as
+func_80020BE4 -- 30 differences (was 62). Same three levers as
+  func_800434F4, applied in this order and each measured alone: goto
+  dispatcher (62 -> 37), two names for the two D_8009B0F4 reads
+  (37 -> 34), and moving `*(s16 *)(p + 0x30) = 0;` above the first read
+  (34 -> 30). The last two are a *coupled pair* with the statement order:
+  x1's order emits the instructions in retail's sequence with the
+  registers rotated, y2's order gets the registers right and moves the
+  `sh $zero,0x30` one slot early, and neither reaches the other. Four
+  further shapes were measured against that residue -- a named 0x40 at
+  two positions, the 0x40 store swapped with the zero store, and three
+  `do { } while (0)` groupings -- and all are 33-37, i.e. worse.
+  Was: 62 differences, the same three-cycle register permutation as
   func_8003B808 and nothing else. A three-case `switch` that gcc compiles to a
   comparison tree rather than a table; the dispatch matches exactly, including
   the `lui` of case 0's mask hoisted into a branch delay slot and the 0xF8
@@ -1196,7 +1215,19 @@ func_80020BE4 -- 62 differences, the same three-cycle register permutation as
   is the plain form. That asymmetry is unexplained and is the one loose thread.
   Whatever unparks func_8003B808 or func_800135FC unparks this.
 
-func_800434F4 -- 62 differences, the third clone of the same body and the same
+func_800434F4 -- 35 differences (was 62, and before that it did not compile
+  at all: functions.h carried `void func_800434F4(void);`, added when
+  func_80043960 passed it as a callback, and check_try_func's parked
+  direction was reporting `did not compile` rather than a count. The real
+  `(u8 *, s32)` prototype is in now and func_80043960 still MATCHes.)
+  Three levers off the old 62, all of which transfer to the siblings:
+  the goto-dispatcher layout in retail's own arm order, `d = D_8009B118;`
+  named before the `*(s16 *)(p + 6) = 0x10;` store (62 -> 42, and it is
+  what fixes the +1 length -- the load then covers its own delay slot
+  instead of getting a `nop`), two names `v`/`w` for the two D_8009B0F4
+  reads in case 0, and `*(s16 *)(p + 0x30) = 0;` written *above* the first
+  read rather than below it (42 -> 35). Historic text follows.
+  Was: 62 differences, the third clone of the same body and the same
   three-cycle register permutation. Written straight from parked/func_80020BE4.c
   with two constants changed and it lands on the identical count, which is the
   useful fact: the class is reproducible, not a property of one function.
@@ -4125,25 +4156,48 @@ func_80013154 -- 131/131 with `-fno-strength-reduce` (recorded in build.py;
   and both +0x5124 / +0x514C stores), and the 20-byte unaligned copy at the
   end as a `struct { u8 b[20]; }` assignment.
 
-func_80040DD8 -- 170 built against 164. Two residues, both about what gcc is
-  allowed to reorder around a store through a pointer.
-  * Retail batches FIVE loads from the record and then four stores to the
-    scratchpad packet (`lw 40 / lw 4 / lw 48 / lw 56 / lw 64` then
-    `sw 8 / sw 16 / sw 24 / sw 32`), and then falls back to load/`nop`/store
-    pairs for the rest. We emit pairs throughout. gcc cannot hoist a load from
-    `e` above a store through `g` -- both are `u8 *` -- so the batch must come
-    from the source reading those four into locals first, and the fall-back to
-    pairs afterwards is gcc correctly refusing to move any *later* load above
-    the first store. The plausible spelling for that (four named temps for one
-    group of four and inline pairs for the next three) has not been tried
-    because it does not read as anything anyone would write; it is the obvious
-    next probe.
-  * The eight `- D_8009B146` / `- D_8009B148` subtractions come out with `lhu`
-    for the symbol where retail has `lh`. Retail computes in SImode and
-    narrows only at the store; ours stays in HImode, where the sign of the
-    subtrahend cannot matter. Forcing SImode with an `s32 n` intermediate and
-    an `(s16 *)` store changes **nothing** -- 121 either way -- so the axis is
-    not the intermediate's width.
+func_80040DD8 -- 164/164, 22 differences, all inside ONE block. Was 170/164
+  with 121 differences; three levers closed the rest, and the two that were
+  written up here as "not tried" and "not the axis" are now measured.
+  * The batch-load probe WORKS and is the general lever, not a one-off.
+    Reading a group of values into named locals before the group of stores
+    that consumes them is the only way to get gcc to batch loads across a
+    store through a different pointer: it cannot hoist a load from `e` above
+    a store through `g` (both `u8 *`), so the batch has to exist in the
+    source. Two groups in this function: `w0..w3` before the four-store
+    group (170 -> 165, 121 -> 109), and `x0`/`x1` in the `e[0x5A]` arm
+    (166 -> 164, two load-delay `nop`s gone). Where the *fifth* value is
+    named also matters -- `w4 = *(s32 *)(e + 0x44);` written above the two
+    `sb`s with its store after them is retail's `lw` / `sb` / `sb` / `sw`,
+    and it is what lets the `sw` sink into the following branch's delay slot.
+  * A named flag read is the partner: `fl = *(u16 *)(e + 8);` written before
+    the `*(s32 *)(g + 0x1C) = w4;` store, with the test then `if ((fl & 8)
+    == 0)`. Written inline the load cannot move above the store, the slot
+    gets a `nop`, and the store stays put. 167 -> 166, 104 -> 56, one line.
+  * `PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"` is right and is in
+    build.py: retail reaches D_8009B146/D_8009B148 with `lui %hi` / `lh %lo`
+    pairs, not `%gp_rel`. The full sweep confirms it (`O2 G8 / as G0` is the
+    best row at 22; as -G2 and -G4 are 97).
+  The residue is the eight `- D_8009B146` / `- D_8009B148` subtractions.
+  Retail loads the symbol once with `lh` (SImode, sign-extended), issues all
+  four field `lhu`s, then all four `subu`s, then the second constant, then
+  the stores. We load the constant with `lhu` and emit load/sub/store triples
+  interleaved. Ten spellings score **identically at 22**: four named field
+  values before the stores, four named *differences*, named constants `dx`/
+  `dy`, `(s16 *)` stores, and the store order permuted -- which is the
+  standing tell that the axis is wrong. `(s16 *)` *reads* are much worse
+  (+8) because they add sll/sra. -fno-schedule-insns is also 22, so it is
+  not the pre-RA scheduler.
+  **This block is shared with two other functions and is almost certainly one
+  macro in the original.** func_80041068 has it byte-for-byte with a 12-byte
+  stride instead of 8 (offsets 8/0x14/0x20/0x2C, then 0xA/0x16/0x22/0x2E),
+  and func_8004158C has the same `lh` pair for both symbols. func_80040588
+  is the counterexample that bounds the claim: two fields instead of four,
+  and there retail itself uses `lhu` for the constant. So the `lh` is not a
+  property of the symbol -- it appears when there are four subtractions and
+  not when there are two. Whatever source shape produces it will close all
+  three functions at once; try it against func_80041068 as well, whose block
+  is otherwise identical.
   What is right: `g = (u8 *)0x1F800344;` and `h = (u8 *)0x1F800398;` as locals
   assigned before the guard (retail materialises both in the prologue, outside
   the `if`), the four loop-invariant constants 8 / 0x38 / D_800E9D90 /
@@ -4153,6 +4207,8 @@ func_80040DD8 -- 170 built against 164. Two residues, both about what gcc is
   than `*(s16 *)(g + 8)` for the two func_80041E7C arguments -- retail loads
   `lhu` and sign-extends with `sll`/`sra`, which is what the cast of a u16
   read gives and what a plain `lh` does not.
-  Note for the reader: `li $fp,8` in our build against retail's
-  `addiu $fp,$zero,8` is objdump printing the same word two ways, not a real
-  difference.
+  The permuter was run from the 164/164 base for 1500 iterations: best stored
+  output re-scores at 28, i.e. worse than the hand candidate. Nothing to
+  decompose.
+  (The `li $fp,8` phantom this entry used to warn about is **fixed** -- see
+  the `s8` note in try_func.py's _OBJ_REG.)

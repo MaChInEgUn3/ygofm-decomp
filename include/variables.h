@@ -321,6 +321,7 @@ extern s32 D_8009B404;
 extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
 extern u8 D_800F5750[];
+extern u8 D_800F5788[];
 extern s32 D_80090E0C[];
 extern s32 D_800F5B98[];
 /* Four handles func_800440F0 hands to func_80043D48 in one go. */

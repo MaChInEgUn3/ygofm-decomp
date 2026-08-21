@@ -745,6 +745,40 @@ meaningful, and skipping to the last one wastes hours:
    This is the missing-prototype tell read backwards: there a caller passes
    too few arguments because it never saw the declaration, here it passes all
    of them and the listing hides one.
+   **A GROUP of loads batched before a group of stores has to come from the
+   source, and it is the general form of the rule below.** gcc cannot hoist a
+   load through one `u8 *` above a store through another, so where retail
+   issues four or five `lw` and *then* the stores that consume them, the
+   source read them into named locals first. func_80040DD8 has two instances
+   in one function: `w0..w3` before a four-store group took it 170/164 and 121
+   differences to 165/164 and 109, and `x0`/`x1` in a later arm took it to
+   164/164 by removing two load-delay `nop`s. The partner rule is that where
+   the group is *followed* by a test, the tested value wants naming too --
+   `fl = *(u16 *)(e + 8);` written before the last store lets that store sink
+   into the test's branch delay slot, which is another 104 differences to 56.
+   The tell for both is a `nop` in a load delay slot next to a store that
+   retail has in a branch delay slot. Same mechanism as func_800400AC below,
+   one level up: there it is one read that has to exist as a statement, here
+   it is a whole group.
+   **A single named read fixes the mirror case, and it transfers across
+   siblings.** Where retail loads a global *before* a store that the source
+   writes first -- `lui`/`lw D_8009B118` ahead of `sh 0x10,6($s0)`, so the
+   load covers its own delay slot -- writing `d = D_8009B118;` above that
+   store is the whole fix. func_800434F4 went 91/90 and 62 differences to
+   90/90 and 42 on that one line, and the same line is worth 62 -> 37 on
+   func_80020BE4 and 82 -> 77 on func_8003B808, which are the same body
+   compiled into three functions. **Do not share the name across two switch
+   arms**: one `d` for cases 0 and 1 of func_8003B808 is +6 and 85.
+   **A cursor copy written as the loop body's FIRST statement is rotated into
+   both the preheader and the back edge's delay slot.** Retail's
+   `addu $a0,$s1,$zero` appears twice -- once before the loop and once in the
+   `bnez`'s own delay slot -- which reads like two source statements and is
+   one: `for (i = 0; i < n; i++) { p = q; q += 0x28; f(p); }`. Writing the
+   copy before the loop *and* at the end of the body instead gives the
+   preheader copy in the wrong place (func_8005F91C, 5 differences to a
+   MATCH); the explicit-guard `do`/`while` spelling of the same loop is 7.
+   So when a copy appears both in a preheader and in a delay slot, write it
+   once, at the top of the body, and let gcc's rotation make the two.
    **Two independent chains interleave only if the source order lets them,
    and a name is how you give the scheduler both.** A counter's read-add-write
    on a global and a load from a record address just computed are independent,

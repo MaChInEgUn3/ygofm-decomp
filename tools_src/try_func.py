@@ -273,7 +273,11 @@ def target_lines(func):
     return out
 
 
-_OBJ_REG = re.compile(r"\b(zero|at|v[01]|a[0-3]|t[0-9]|s[0-7]|t[89]|k[01]|gp|sp|fp|ra)\b")
+# `s8` is objdump\'s name for $30; without it here the `li` rewrite below
+# never fires on that register (it wants a leading `$`), and the
+# `$s8` -> `$fp` pass runs too late to help. func_80040DD8 showed one
+# phantom `li $fp,8` against `addiu $fp,$zero,8` because of it.
+_OBJ_REG = re.compile(r"\b(zero|at|v[01]|a[0-3]|t[0-9]|s[0-8]|t[89]|k[01]|gp|sp|fp|ra)\b")
 _OBJ_INSN = re.compile(r"^\s*[0-9a-f]+:\s+(\S+)\s*(.*)$")
 _OBJ_RELOC = re.compile(r"^\s+[0-9a-f]+:\s+(R_MIPS_\S+)\s+(\S+)")
 
