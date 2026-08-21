@@ -3696,3 +3696,35 @@ func_8002A9C0 -- 6 differences at equal length (125/125): three scratchpad
     Measured and dead on the last six: all 24 orders of the four base-local
     assignments (best 6, then 8, 8, 10) and all 24 orders of their
     declarations (all 6).
+
+func_80048D08 -- one register-to-register copy, everything else exact.
+  131/131 instructions, 59 differences, and the whole residue is two things:
+  retail's `addu $a0,$a1,$zero` -- a second register for the D_8009B45C
+  pointer across the unaligned struct copy -- and the $t3/$t4 pair (outer
+  counter vs the 0x44C giv) exchanged, which is almost certainly downstream of
+  the missing copy.
+  What paid, in order: the symbol is the BARE form, not the aggregate --
+  gp=0 in this listing, so recipe branch 1 applies and `as -G0` with the real
+  scalar declaration gives retail's per-reference `lui $r,%hi / lw $r,%lo($r)`
+  through one register, where `_IS_AGGREGATE` lets gcc hoist the %hi out of
+  the loop as an invariant and every reference collapses to a single `lw`.
+  A local `p = D_8009B45C;` for the first group of field reads (0x43C, 0x440,
+  0x444) with the last two reads left inline is what reproduces retail's mix
+  of one load and two reloads.  The tpage arithmetic
+  `((a % 2) * 0x19000 + 0xD810) >> 4` must be written **inline in each arm**
+  of the k-test rather than shifted into a variable before the loop: as a
+  statement it emits the srl where the products are, inline it is a loop
+  invariant and gcc hoists it into the preheader, which is where retail has
+  it (one of the two lands in the second `jal`'s delay slot).  That single
+  change was 84 differences to 59 and fixed the whole prologue.
+  `(u32)(...) >> 4` for the srl (a signed `>>` is `sra`), `u16` locals for the
+  two halfword values so the redundant-looking `andi 0xFFFF` appears, and
+  `(s32)` on the sum so the `addu` comes out index-first.
+  Measured and dead, for the copy: `p2 = p`, `c = p` reusing the name of the
+  0x43C pointer, `p2 = D_8009B45C` re-read before *and* after the struct copy
+  (both +2, because a bare symbol re-read is two instructions and the copy is
+  one), the second group written inline, a named scaled offset, and a named
+  local for the 0x43C pointer.  gcc coalesces every source-level copy here;
+  the copy is an allocation decision, which is the permuter's class.
+  sweep_try: 59 is the best of the table, and `-G0`/`-G2` on the assembler
+  tie -- the function has no `%gp_rel` at all, so the threshold is free.
