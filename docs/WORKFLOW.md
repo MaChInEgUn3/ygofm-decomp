@@ -825,6 +825,41 @@ meaningful, and skipping to the last one wastes hours:
    branch moved to target+4). The confirming tell is a constant the join
    consumes but each predecessor materialises for itself — func_800402A0.
    Writing that store once per arm instead costs 18 differences.
+   **A large constant a loop compares against is not hoisted by gcc's loop
+   pass, and where you assign it decides where the `lui`/`ori` land.**
+   func_80060220 compares a field against `0x2000001` inside a `do`/`while`;
+   retail materialises the pair into `$t6` in the *prologue*, ahead of even
+   the `i = 0`, and gcc emits it inside the loop head from every inline
+   spelling. A local for the constant is not enough on its own -- assigned
+   just before the loop it is still emitted in the loop head -- but assigned
+   as the function's **first statement** it comes out exactly where retail
+   has it. 113 differences to 4 on moving one line up two statements. The
+   tell is a `lui`/`ori` pair in your loop where the target has the constant
+   already live in a callee-clobbered register on entry.
+   **And a constant term must not be allowed to fold into a loop-invariant
+   sum.** `*(u16 *)p - 0x280 + sh`, with `sh` invariant, is reassociated to
+   `x + (sh - 0x280)` and gcc hoists that sum into the preheader; retail
+   recomputes `addiu -0x280` / `addu sh` at each of the two sites. Naming the
+   loaded value first and grouping the subtraction with it -- `w = *(u16 *)p;`
+   then `(w - 0x280) + sh` -- blocks it, and the *two sites want two different
+   names*: one `v` shared between them was the last two differences
+   (func_80060220). Same family as the `(x & 0x100) != 0` fold and the scaled
+   dividend: one name across two statements is the knob, and two unrelated
+   values must not share one.
+   **An explicit guard plus `do`/`while` is how you give the loop body its own
+   copy of a pointer.** Where retail reads the loop bound through one register
+   before the guard and through *another* inside the body -- with an
+   `addu $a2,$t0,$zero` sitting in the guard's own delay slot -- a plain
+   `for` cannot reproduce it, because gcc's rotation emits one expression for
+   both tests. Writing `if (*(s16 *)(q + 6) > 0) { rec = q; do { … } while (j
+   < *(s16 *)(rec + 6)); }` gives retail's copy and its delay-slot position.
+   On func_80060220 that also made `-fno-schedule-insns` **unnecessary**: the
+   flag had reproduced the same three instructions (two load-delay `nop`s the
+   default scheduler was filling from the other load), and once the source
+   shape was right the default flags gave them too. A flag that buys back
+   exactly the instructions a missing name would have bought is a warning to
+   look for the name first.
+
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
    the other way**: gcc reverses a counted loop whose counter is dead after it,
