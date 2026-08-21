@@ -4,6 +4,7 @@ void func_8002E128(u8 *p, s32 arg1) {
     u8 *o;
     u8 *b;
     s32 q;
+    s16 k;
     s32 n;
     s32 m;
 
@@ -42,9 +43,9 @@ void func_8002E128(u8 *p, s32 arg1) {
     } else {
         func_8002E060(p, 0x10, 0);
         if (n >= 0x100) {
-            q = (((n >> 4) & 0xF) * 10 + (n & 0xF)) * 2;
+            k = (((n >> 4) & 0xF) * 10 + (n & 0xF)) * 2;
             b = D_80090BA8;
-            o = &b[q];
+            o = &b[k];
             m = o[0];
             if ((m & 1) != 0) {
                 func_8002E060(p + 0x14, 0x12, 1);

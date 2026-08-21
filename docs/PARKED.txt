@@ -4370,7 +4370,7 @@ func_800408D0 -- 13 differences, first written 2026-08-21. 202 instructions,
   measured against the last two and every one is 13, 14 or -1; the permuter
   ran 4900 iterations from the 13 base and stored nothing.
 
-func_8002E128 -- 12 differences, first written 2026-08-21. 146 instructions,
+func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
   gp=0 at=0, default flags, no addressing work at all.
   A card-artwork setup routine: decodes a BCD card id
   (`((n >> 4) & 0xF) * 10 + (n & 0xF)`) into an index, then reads a per-card
@@ -4391,18 +4391,26 @@ func_8002E128 -- 12 differences, first written 2026-08-21. 146 instructions,
   * `p[0x10] = 1;` written *above* the two read-modify-writes on the object
     rather than below them (22 -> 19), and a base local for D_80090BA8 in the
     else branch (19 -> 18).
-  * **the else branch's index wants the OTHER branch's local**, not a fresh
-    name. `q` holds `*(s32 *)(p + 0x28)` in the `>= 0x200` arm and is dead in
-    this one; `q = (((n >> 4) & 0xF) * 10 + (n & 0xF)) * 2; o = &b[q];` is
-    18 -> 12, where the identical line with a fresh `k` is 19. The permuter
-    found it and it decomposes to that one substitution -- the `u16 *` pointer
-    local it came bundled with is worth nothing. Fifth instance of the
-    borrowed-name-from-a-mutually-exclusive-arm rule, and the first where the
-    fresh-name control was measured alongside it.
+  * **the else branch's index wants its own name AND an `s16` declaration**,
+    and the second half is the real lever. The sequence is worth writing out,
+    because the first reading of it was wrong:
+      - inline in the address expression: 18
+      - a fresh `s32 k`: 19 (worse)
+      - borrowing `q`, the mutually exclusive arm's `s32` local: 12
+      - a fresh **`s16 k`**: 8
+    So the borrow was a partial proxy for the narrowing, not the mechanism.
+    The permuter reached 9 by declaring the borrowed `q` itself `short`, which
+    is **not installable** -- `q` also holds `*(s32 *)(p + 0x28)` in the other
+    arm and a 16-bit truncation of that is a wrong address -- and the two
+    plausible spellings that reproduce it, a fresh `s16 k` or `s16 q` with a
+    separate `s32 r` for the pointer, are both 8, i.e. better than what it
+    found. Read a permuter win for its *mechanism*: here the semantically
+    illegal candidate pointed straight at a legal one that is better.
+    The `u16 *` pointer local and the `&=` it also carried are worth nothing.
     Where the `* 2` sits also matters: inside `q` is 12, moved to the
     indexing (`&b[q * 2]`) is 19, because retail materialises the table base
     *before* the scaling.
-  The residue is 12 in one cluster, and it is two instructions' *placement*
+  The residue is 8 in one cluster, and it is two instructions' *placement*
   rather than any instruction being wrong: the RMW block itself is
   instruction-for-instruction right, but retail materialises the `1` for
   `p[0x10]` between the `sw 4` and the `sh 8` and does not store it until four
@@ -4411,5 +4419,6 @@ func_8002E128 -- 12 differences, first written 2026-08-21. 146 instructions,
   placements and spellings were measured -- the statement at five positions
   among its neighbours, `one` as a local at three positions, the RMWs as
   compound assignments, a `do { } while (0);` round the pair, and both reads
-  named -- and they are 15, 19, 21, 22, 23 or 30. Permuter rerunning from the
-  12 base.
+  named -- and they are 11, 15, 18, 19, 21, 22, 23 or 30 -- the four placement
+  probes were re-run against the 8 base after the `s16` landed, in case the
+  levers were coupled, and they are not. Permuter rerunning from the 8 base.

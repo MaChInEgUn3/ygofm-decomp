@@ -1026,6 +1026,14 @@ is where the permuter first found it) the copy is emitted after all the
 stores instead. func_80031574, 24 differences to 14. This is the sharpest
 form of the rule below.
 
+**But check the borrowed name's TYPE before crediting the borrow.** On
+func_8002E128 an index written inline is 18 differences, with a fresh `s32`
+name 19, borrowing the mutually exclusive arm's `s32` local 12 -- and with a
+fresh **`s16`** name 8. The borrow was a partial proxy for a narrowing, not
+the mechanism; the permuter then found the borrowed local declared `short`,
+which is not installable there because the same name holds a pointer in the
+other arm. When a borrow helps, try the same name narrowed, and try a fresh
+name narrowed, before writing down which lever it was.
 **Assigning to a local that is not yet live is the same hint, and a fresh
 name is not.** func_8002A4A8 sat at 14 through nine hand shapes. The
 permuter's fix was to write `y = a;` in one arm of an `if` and take the
