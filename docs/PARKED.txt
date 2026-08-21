@@ -3728,3 +3728,39 @@ func_80048D08 -- one register-to-register copy, everything else exact.
   the copy is an allocation decision, which is the permuter's class.
   sweep_try: 59 is the best of the table, and `-G0`/`-G2` on the assembler
   tie -- the function has no `%gp_rel` at all, so the threshold is free.
+
+func_80047480 -- one register, thirty sites: the system-block pointer is $a1
+  where retail has $a2, and every store in the twenty-store initialiser block
+  is off by that one register.  111/111 instructions, 60 differences, and the
+  whole residue is that rotation plus two scheduling positions.
+  Needs `-fno-strength-reduce` (recorded in build.py) and `as -G0`.  Without
+  the flag the last nested loop is *reversed* -- `addiu $v1,$zero,31` /
+  `addiu $v1,$v1,-1` / `bgez` where retail counts up against `slti 32` -- and
+  the outer `sll $a3,6` becomes a `addiu $a0,$a0,64` giv; that is one
+  instruction short and 7 differences worse.  gp=0, so the assembler
+  threshold is free and the bare form gives retail's per-reference
+  `lui $r,%hi / lw $r,%lo($r)`; the first loop reloads the symbol five times
+  per iteration and that is what the bare form reproduces.
+  What paid: `(D_8009B45C + i)[0x40C]` rather than `D_8009B45C[i + 0x40C]`
+  for `addu base,index` on the byte stores, and `(i + i)` rather than `i * 2`
+  for the same on the halfword ones -- a named scaled index does it too, the
+  two are identical.  `u16` for every 0xFFFF store, because `s16` folds it
+  into an `addiu -1` and retail shares one `ori $zero,0xFFFF`.  A local `p`
+  for the initialiser block (one load for twenty stores, where the first
+  loop's inline symbol reloads).  A second name `r = p` for the fill loop
+  plus an explicit `if (n != 0) { do … while }` -- the guard reads through
+  `p` and the body through `r`, which no `for` can express, and that is
+  retail's `addu $a0,$a2,$zero` in the preheader.  An explicit byte offset
+  `k` in the last loop for retail's `addiu $v1,$v1,2`.
+  Measured and dead: base locals for 0x801E2800 and 0x801E4000 (much worse,
+  -2 and 108 -- keep them as literals), four positions for the `i = 0`,
+  four declaration orders, dropping `q` or `r`, `-fno-schedule-insns` with
+  and without the strength-reduce flag, `-O1`, `-fno-function-cse`.  A
+  permuter run of 125 iterations from this base found nothing.
+  The two scheduling positions that are not the rotation: retail materialises
+  0x801E4000 whole (`lui`/`ori` adjacent) before loading the pointer, where we
+  leave the `ori` twenty instructions later filling an `lhu`'s delay slot; and
+  retail keeps the 0x442 store where it is written, where we hoist it next to
+  the 0x388 store because both consume the same 0xFFFF.  Retail's 0xFFFF
+  therefore lives in `$a0` across the block, which is the extra long-lived
+  value that pushes `p` to `$a2` -- so the two are the same problem.

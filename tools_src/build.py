@@ -265,6 +265,10 @@ PER_FUNC_FLAGS = {
     # func_800722CC: the two reads at +6 inside the search loop get their own
     # biased giv, which costs a callee-saved register and five instructions.
     "func_800722CC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # PARKED at 60 differences.  Without this the last nested loop is reversed
+    # (countdown + bgez) where retail counts up against slti 32, and the outer
+    # `sll i,6` becomes a giv -- one instruction short and much further out.
+    "func_80047480": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # func_80058938: the found-record arm's two Word4 block copies force their
     # destination addresses into registers, and strength reduction turns the
     # r+0x14 one into a giv that every neighbouring store is then rebased on
@@ -374,6 +378,7 @@ PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800610E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80024734"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048D08"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80047480"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
 PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"
