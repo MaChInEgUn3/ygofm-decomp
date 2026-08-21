@@ -4510,3 +4510,25 @@ func_80071924 -- +12 instructions and 125 differences, first written
   fields) is instruction-for-instruction right, and so is the loop's
   `do`/`while` with the address-taken `sp14` re-read from the stack each
   iteration.
+
+func_80048A28 -- 103 differences at the right length (121/121), first written
+  2026-08-21. Every instruction is in the right place; the whole residue is
+  one register rotation across the function, which is why the count is so
+  high against so little wrong.
+  What is right: `D_8009B45C` as the **scalar** arm plus `as -G0` (gp=0, so
+  any -G is free). Under the aggregate arm cc1psx emits a `%hi`/`%lo` pair,
+  gcc hoists the `%hi` out of the loop into a callee-saved register and every
+  one of the five reads becomes a `lw` off it; the bare form is one
+  pseudo-instruction, nothing to hoist, and retail's `lui`/`lw` per use comes
+  back. 111 differences to 104 and the length from +1 to 0. Same lever as
+  func_8003CCD8 and func_8002CEE8, third user.
+  Also right: `f = arg0 & 0x100; f = f != 0;` against one name for the
+  `((arg0 & 0x100) != 0) << 6` index term -- written as one expression gcc
+  emits a *branch* instead of retail's `sltu $zero`/`sll 6`. That is
+  func_80048920's rule and this is its neighbour in the binary.
+  Measured and NOT the axis: naming `i * 2` (-4), naming `0x80 - t` and
+  `t + 0x80` (+3 each), `-fno-strength-reduce` (-3), `-fno-schedule-insns`
+  (102 at the right length, i.e. no better), four index-ordering spellings,
+  reusing `arg0` for the re-read halfword (which IS right -- retail keeps both
+  in $s2 -- but worth nothing on its own), and `s8`/`u16` parameter types.
+  `s32 arg0` is worth 1. Permuter running from this base.
