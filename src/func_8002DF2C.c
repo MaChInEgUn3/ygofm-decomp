@@ -29,7 +29,7 @@ void func_8002DF2C(u8 *arg0, s32 arg1) {
     default:
         return;
     }
-    p = func_80014EEC(0, (u8 *)0, base + idx * n + 0x21D5, n, D_8002DDFC, 0, 0);
+    p = func_80014EEC(0, (u8 *)0, base + idx * n + 0x21D5, n, func_8002DDFC, 0, 0);
     *(s32 *)(p + 0x38) = n - 1;
     D_8009B0F4[0] = *(s32 *)(p + 0x2C) | 0x10;
 }

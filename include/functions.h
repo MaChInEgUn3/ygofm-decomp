@@ -414,7 +414,11 @@ void func_8003CF14(u8 *arg0);
 void func_80052D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);  /* PROVISIONAL */
 s32 func_80037C74(u8 *arg0);  /* PROVISIONAL */
 void func_80046990(s32 arg0, s32 arg1, s32 arg2);  /* PROVISIONAL */
-void func_8003BF00(void);  /* PROVISIONAL */
+/* The tail of what splat merged into func_8002DD74; passed as a callback by
+ * func_8002DF2C, which is the only reference and is why splat saw no branch
+ * to it. */
+void func_8002DDFC(u8 *arg0, s32 arg1);
+void func_8003BF00(u8 *arg0, s32 arg1);
 void func_80045F3C(void);  /* PROVISIONAL */
 void func_80046A08(void);  /* PROVISIONAL */
 /* arg4 is a u8: func_8005ABA0 loads its stack slot with `lbu`. */

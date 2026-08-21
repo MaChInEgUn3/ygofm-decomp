@@ -970,7 +970,6 @@ extern u8 D_800E9E18[];
 /* The second function inside the func_8002DD74 listing; splat has not split
  * it yet, so it is only reachable by address. func_8002DF2C passes it as a
  * callback. */
-extern u8 D_8002DDFC[];
 extern u8 D_800EA1E8[];
 extern u8 D_800E9E60[];
 extern s32 D_8009B440;

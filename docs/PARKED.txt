@@ -3805,3 +3805,78 @@ func_8004A518 -- 113 built against 112, and the single extra instruction is a
   also the thing that would prevent its own hoist -- which is why no
   source-level spelling of the constant reaches it.  The instruction retail
   has and we do not is more likely to be somewhere else in the body.
+
+func_8003BF00 -- 111 built against 112, 42 differences, and the single missing
+  instruction is `addu $a0,$a2,$zero`: retail holds the record pointer in $a2
+  and copies it into $a0 for the one call, where we hold it in $a0 and need no
+  copy.  Everything else is the two standalone arms' scheduling.
+  A `jr $v0` jump-table switch on 0..5 with cases 0, 1 and 4 sharing a tail and
+  cases 2, 3 written out; gp=0 and at=1, so `as -G0` with the default
+  `volatile s32 D_8009B0F4` gives retail's `lui $at` store and its per-arm
+  reload.  **The full build is what proves the table landed** -- try_func
+  normalises the symbol.
+  What paid, in order: a named local for the mask -- `m = 0xFFDCFFFF;` then
+  `v = D_8009B0F4; v &= m;` rather than `v = D_8009B0F4 & 0xFFDCFFFF` -- 95 to
+  90, and it is the same lever that was worth 20 on the sibling func_80043328;
+  a second name for the record pointer, `e = p;` at the top with every store
+  through `e` and the *call* through `p`, which is what makes the parameter
+  copy survive at all (90 to 62); the mask assignment written before the arm's
+  first store (62 to 58); and naming the call's second argument at the top of
+  its arm so the argument setup precedes the last store and reorg can fill the
+  `jal`'s delay slot (58 to 53, then 42 with case 3's read named and its
+  `+ 0x800` written in place).
+  Measured and dead: routing the call through `e` as well (the copy then
+  coalesces and it is 90 again); borrowing `p` as the name for a global read in
+  case 3 or case 5 (-2, 107); `v`/`q` as the borrowed name for case 3's read;
+  five separate mask names rather than one (92); `0xFFDCFFFF & D_8009B0F4`;
+  `u32` for the mask.
+  A permuter run of 54 stored outputs re-scored: the best correct-length one is
+  86 against the then-base of 90, and its mechanism was an *unreachable*
+  `new_var = p;` between two cases -- semantically an uninitialised read, but
+  it is what pointed at the two-names-for-the-pointer lever above.
+# ---
+
+func_80043328 -- 115/115, 12 differences, all of them in the `mode == 0` arm:
+  the 0x18000 constant's `lui`/`ori` pair is split (the `ori` scheduled into a
+  load's shadow) where retail keeps it adjacent, and two stores sit before
+  their load rather than in its shadow.
+  A three-way comparison-tree dispatcher with `goto` arms in retail's address
+  order and a tail shared by cases 1, 2 and 3.  `one = 1;` as a real local is
+  required: retail materialises it into $s1 for *both* the `mode == 1` test and
+  the shared tail's `sb $s1,0x46`.  gp=0, at=3, `as -G0`.
+  What paid: naming the D_8009B118 read in each arm that uses it -- 90 to 38,
+  because retail evaluates the call arguments at the top of the arm and the
+  store into the load's shadow; a named mask local per the func_8003BF00 entry
+  -- 38 to 18; **borrowing `q`**, the shared tail's pointer variable, as the
+  name for m0's D_8009B118 read -- 18 to 13, m0 being mutually exclusive with
+  every arm that reaches the tail; and **borrowing `b`**, the name used for the
+  reads in m2 and m3, for m0's 0x18000 -- 13 to 12.  Both are the
+  func_8002596C lever: a name whose live range is only in an arm that can
+  never run at the same time.
+  Measured and dead: separate `b` names per arm (40, much worse -- the
+  borrowing is the point); `c` as a fresh name for the 0x18000 at either
+  position; `one` or `m` as the borrowed name; four statement orders in m0 and
+  three more targeted ones; `v` as the borrowed name (21, 22).
+  A permuter run from this base produced four stored outputs; the best
+  re-scores at 15.
+# ---
+
+func_8002DDFC -- 76/76, 56 differences, and every one of them is that retail
+  holds the record pointer in $a2 while we hold it in $a0, with retail's
+  `addu $a2,$a0,$zero` in the first branch's delay slot where we put the
+  `sw $ra`.  Identical residue to func_8003BF00 before the two-names fix.
+  This function did not exist until this block: splat had merged it into
+  func_8002DD74 because nothing in .text branches to it -- its only reference
+  is as a *callback argument* from func_8002DF2C, which is why it was declared
+  `extern u8 D_8002DDFC[];` in variables.h.  Splitting it meant truncating the
+  listing at splat's own `alabel`, writing the tail out with its own
+  glabel/endlabel and size, adding the INCLUDE_ASM line, moving the symbol
+  from variables.h to a prototype in functions.h, and updating the one caller.
+  The build stayed byte-identical through all of that, which is the proof the
+  split is right.
+  A three-way if-chain dispatcher with no shared tail.  gp=0, at=3, `as -G0`.
+  The named-mask lever pays here too (58/+1 to 56/equal).  The `e = p;`
+  two-names lever does **not**: copy propagation folds it away because `mode`
+  stays live in $a1 across the whole if-chain, where func_8003BF00's jump table
+  frees $a1 early.  That is the discriminator between the two, and it is the
+  reason the same residue needs different source there and here.

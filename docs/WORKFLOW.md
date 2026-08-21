@@ -172,7 +172,14 @@ needed.
 functions**, and candidates.py tags it `[MERGED]`: splat missed the boundary
 because nothing in `.text` references the second entry — look for its address as
 a `.word` in `asm/data/` and you will usually find the pointer table that calls
-it. Splitting is just editing `asm/nonmatchings/31D8/`: truncate the first `.s`
+it.
+**It is not always a pointer table: it can be a callback argument, and then
+the address is already declared as a data symbol.** func_8002DDFC was
+`extern u8 D_8002DDFC[];` in variables.h, passed as the fifth argument of a
+`func_80014EEC` call by a function that already MATCHES. Splitting it meant
+renaming the symbol to a prototype in functions.h and editing that caller —
+and the build staying byte-identical through the rename is the proof the
+split was right, because the address is emitted the same way either way. Splitting is just editing `asm/nonmatchings/31D8/`: truncate the first `.s`
 at the boundary and write the tail into `func_<addr>.s` with its own
 `glabel`/`endlabel`. build.py globs that directory and orders by address, so
 nothing else has to change; add the `INCLUDE_ASM` line to `src/31D8.c` to keep
@@ -799,6 +806,36 @@ meaningful, and skipping to the last one wastes hours:
    values that cross the call — naming the field reads as well made it 36 —
    except where the target issues one read before the base pointer's own load,
    which needs its own local to get there (the last 13).
+   **A constant mask used in several switch arms wants a NAME, and that is an
+   allocation lever rather than a CSE one.** Three sibling dispatchers all
+   `and` a global against `0xFFDCFFFF`; written inline the constant lands in a
+   temp register and every store around it rotates, and a local -- `m =
+   0xFFDCFFFF;` then `v = D_8009B0F4; v &= m;` -- puts it in the argument
+   register retail uses. func_80043328 went 38 differences to 18 on that one
+   line, func_8003BF00 95 to 90. One name for all the arms, not one per arm:
+   five separate names is *worse* (92 against 90), because the point is a
+   single long-lived pseudo, not five short ones.
+   **And the borrowed-name lever scales to whole switch arms.** In an arm that
+   can never run at the same time as the arms feeding a shared tail, borrow the
+   tail's own variables rather than inventing new ones: func_80043328's
+   `mode == 0` arm reads D_8009B118 into `q` (the tail's pointer, 18 to 13)
+   and materialises 0x18000 into `b` (the name the other two arms use for
+   their reads, 13 to 12). Fresh names at the same positions are worth
+   nothing, and *separate* names per arm are worse (40) -- the mutual
+   exclusion is the whole mechanism, and it is the func_8002596C rule read one
+   level up.
+   **A second name for the record pointer is what makes a parameter copy
+   survive -- when the dispatch frees the argument registers.** Where retail
+   holds the pointer in `$a2` and copies it into `$a0` for a call, while gcc
+   keeps it in `$a0` and needs no copy, write `e = p;` at the top, every store
+   through `e`, and the *call* through `p`: func_8003BF00, 90 differences to
+   62. Routing the call through `e` as well coalesces the copy away and it is
+   90 again, so the split use is the lever. **It does not always fire**:
+   func_8002DDFC has the same residue and the same shape but an `if`-chain
+   dispatch rather than a jump table, so `mode` stays live in `$a1` throughout
+   and copy propagation folds `e` back into `p`. The discriminator is whether
+   the dispatch frees an argument register early.
+
 6. **Count materialisations** of each value: one per write in the source.
    **A return constant in a branch's delay slot *and* again at the join can be
    one `return`, not two.** On func_8004B734 two explicit `return 0;`
