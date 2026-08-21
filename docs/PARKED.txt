@@ -1065,7 +1065,15 @@ func_800533D8 -- 7 differences, all of them which caller-saved register the
   the exit test (56, much worse), and both declaration orders. Full flag
   sweep: 7 is the floor, at plain -O2 -G8.
 
-func_8003B808 -- 15 differences (was 82). The fifth member of the family and
+func_8003B808 -- 8 differences (was 82). Same levers, including
+  func_80020BE4's lever 9. The residue is the shared 4 in case 0 plus 4 in
+  case 3, where retail materialises the 0xFFDCFFFF mask before the
+  two-instruction 0x18000 and we do it the other way round. A `do { … } while
+  (0);` round that pair is **+6 and much worse** -- it breaks the cross-jump
+  that merges cases 1, 3 and 4 -- and a named 0x18000 changes nothing. Cases 1
+  and 4 have the identical shape and match, so it is specifically the
+  two-instruction constant.
+  Was: 15 differences (was 82). The fifth member of the family and
   the only one with a real jump table rather than a comparison tree, which is
   why the arm-order levers do not apply but every naming lever does.
   What moved it, in order: `d = D_8009B118;` before the 0x10 store in case 0
@@ -1211,7 +1219,20 @@ func_8005B4D8 -- 42 differences, right instruction count, and the same class as
   func_8005B260 is its sibling -- same body one word shorter -- and will have
   the same problem. Do not spend on it separately.
 
-func_80020BE4 -- 11 differences (was 62 at the start of the day). This is now
+func_80020BE4 -- 4 differences (was 62 at the start of the day). Lever 9, found
+  by the permuter from the 11 base and DECOMPOSED before installing: a
+  `do { … } while (0);` around the five statements from `*(p + 0x1C) = m;` to
+  `*(s16 *)(p + 6) = 0x10;` is 11 -> 4 on its own. The permuter's candidate also
+  declared `v` as `unsigned int`; that half is worth **nothing** (11 either way),
+  which is exactly why the decompose step matters. This is the fourth use of the
+  do/while(0) idiom in this project and the first on a run of five statements
+  rather than two; transferred unchanged it is worth 18 -> 11 on func_800434F4
+  and 15 -> 8 on func_8003B808.
+  The residue is 4: retail emits `sh $zero,0x30` after the D_8009B0F4 load and
+  the `addiu 64`, we emit it before. Four more shapes were measured against that
+  alone (the load moved above the zero store, and three do/while(0) groupings of
+  the surrounding statements) and they are 8, 10, 11 and 11.
+  Was: 11 differences (was 62 at the start of the day). This is now
   the closest member of the five-function D_8009B0F4 dispatcher family and the
   one to work; every lever below transferred to func_800434F4 (-> 18) and
   func_8003B808 (-> 15) without modification.
@@ -1270,7 +1291,10 @@ func_80020BE4 -- 11 differences (was 62 at the start of the day). This is now
   is the plain form. That asymmetry is unexplained and is the one loose thread.
   Whatever unparks func_8003B808 or func_800135FC unparks this.
 
-func_800434F4 -- 18 differences (was 62, and before that it did not compile
+func_800434F4 -- 11 differences (was 62, and before that it did not compile
+  at all). Same seven levers as func_80020BE4 plus its lever 9. The residue is
+  the shared 4 in case 0 plus 7 in case 2.
+  Was: 18 differences (was 62, and before that it did not compile
   at all). Same body as func_80020BE4, same seven levers, and the residue is
   the identical 11 in case 0 plus 7 more in case 2: retail hoists the shared
   0x100 into the dispatcher's branch delay slot and holds it in `$v1` across
@@ -4276,3 +4300,38 @@ real one-line lever, and two open.
     above as the uninitialised-read and address-taken-local classes.
   * func_8003B744 18 -> 8 -- already recorded as semantically wrong (it casts
     an index the target does not mask).
+
+func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
+  fourth member of the func_80040DD8 sprite-list family (same D_800EFE48 record
+  array, same 0x70 stride, same `bltz`/`do`-`while` outer loop) but a different
+  packet layout and a three-way tail.
+  What is right, and most of it came straight from func_80040DD8: `g`, `q`, `h`
+  and `tb` as locals assigned inside the guard; a `goto again;` back into the
+  middle of the loop body for the `D_8009B424 != 0` retry (retail's
+  `bnez $v0, .L800405F4` jumps past the record-address computation, so it is a
+  label, not a loop); `idx = e[0x17];` named as the loop body's *first*
+  statement, which spreads the table read's `lbu`/`sll`/`addu` into the three
+  load-delay slots of the store group (+2 and 109 differences to -1 and 105);
+  and `c66`/`n` named for `e[0x66]` and `*(u16 *)(e + 0x14)` so the `a3`
+  constant is materialised late rather than in the entry branch's delay slot
+  (105 -> 9).
+  Two declarations carry the rest:
+  * `D_8009B424_IS_SCALAR` -- a new guard arm. As the default unsized array
+    cc1psx emits a %hi/%lo pair, gcc hoists the %hi out of the loop into a
+    callee-saved register, and the function is five instructions long with one
+    saved register too many. Retail reaches it `%gp_rel`, which only the scalar
+    gives. (A `_IS_VOLATILE` arm was added at the same time and measured: it is
+    worth nothing here, 3 either way.)
+  * `D_8009B146_SIZED` plus `as -G4`. Retail keeps each of the two `%hi`/`%lo`
+    pairs adjacent; under the unsized-array arm cc1psx hoists both `lui`s to
+    the front of the block. Eight bytes at -G4 makes each reference a single
+    indivisible pseudo, and the 4-byte D_8009B424 beside it stays gp-relative.
+    9 -> 4 on that one line. This is func_8002E470's rule, second user.
+  The residue is 3, all one instruction: retail emits `lhu $a2,6($s1)` before
+  `sw $zero,D_8009B424` and we emit it after. Eleven shapes were measured and
+  every one is 3 or worse -- naming all three argument loads (which is what
+  took it from 4 to 3), the three loads in two other orders, the store moved
+  above and below the group, both sums named, `(s16)` casts moved onto the
+  named reads, two `do { … } while (0);` groupings, and `volatile` on the
+  global. The full flag sweep is 3 at the installed row and 81+ everywhere
+  else. Permuter running.

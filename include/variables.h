@@ -803,6 +803,7 @@ typedef struct {
  * (8a, 9a, 72a, 73a, 292a, 365a, 1460a), not assumed. */
 extern u8 D_801781D8[];
 extern Rec12 D_801AB000[];
+extern s16 D_800EFE3A[];
 extern s16 D_800EFE3C[];
 extern s16 D_800EFE44[];
 extern s16 D_800EFE3E[];
@@ -890,7 +891,17 @@ extern u8 D_8009B369;
 #else
 extern u8 D_8009B369[];
 #endif
+/* func_80040588 reaches it `%gp_rel`, which needs the scalar form: as an
+ * unsized array cc1psx emits a %hi/%lo pair, gcc hoists the %hi out of the
+ * loop into a callee-saved register, and the function is five instructions
+ * long and one saved register too many. */
+#ifdef D_8009B424_IS_VOLATILE
+extern volatile s32 D_8009B424;
+#elif defined(D_8009B424_IS_SCALAR)
+extern s32 D_8009B424;
+#else
 extern s32 D_8009B424[];
+#endif
 extern u8 D_8009AF0C;
 /* Scalar by default; func_80037110 reaches it %hi/%lo and defines
  * D_8009B09C_IS_AGGREGATE. */

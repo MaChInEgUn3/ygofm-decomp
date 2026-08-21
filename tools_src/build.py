@@ -399,6 +399,7 @@ PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"
 # D_8009B146/D_8009B148 and D_800EFE42 with bare %hi/%lo pairs, and the
 # function has no %gp_rel at all, so any -G is free.
 PER_FUNC_AS_FLAGS["func_80041068"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80040588"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
 PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"

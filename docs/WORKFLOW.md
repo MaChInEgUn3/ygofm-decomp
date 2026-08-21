@@ -1137,6 +1137,16 @@ them the same wrong way round, and wrapping just the two assignments in
 statements comes out in the wrong order and no permutation of them moves it
 — and read it as a **macro** in the original, which is what that idiom is
 for.
+**Fourth use, and the first on a run of FIVE statements.** func_80020BE4's
+last 11 differences closed to 4 on a `do { … } while (0);` wrapped round the
+five statements between a constant store and a named global read -- no
+statement moved, no name changed. The permuter found it paired with a
+`unsigned int` declaration that is worth **nothing** on its own, which is the
+decompose rule paying for itself again. It then transferred unchanged to two
+siblings (func_800434F4 18 -> 11, func_8003B808 15 -> 8). It is **not**
+universal inside one function: round a two-statement pair in another arm of
+func_8003B808 the same idiom is +6, because it breaks a cross-jump that merges
+three arms.
 **Third use, and this one is register allocation, not scheduling.**
 func_8005F3B8 held the fifth parameter and a call result in $s1 and $s2
 exchanged, ten sites wrong, through declaration order, a local copy of the
@@ -1345,6 +1355,25 @@ on a combination that had been in the table for weeks.
   `-mno-split-addresses` gives both. The mechanism is that an unsized extern
   carries no `.extern` size, so the assembler will not treat it as small data
   even at -G8, while the scalars around it stay gp-relative.
+- **A symbol read `lh` where you get `lhu` wants a NAMED LOCAL, not a cast.**
+  `*(u16 *)(g + 8) = *(u16 *)(g + 8) - D_8009B146;` with `D_8009B146` declared
+  `s16` still emits `lhu` for the symbol: C promotes both to `int`, and combine
+  then narrows the whole subtraction to HImode, where the extend is dead and
+  the sign of the subtrahend cannot matter. `(s32)D_8009B146` does not stop it
+  and neither does storing through `(s16 *)`. `d = D_8009B146;` into an `s32`
+  local **does** -- the extend now has a pseudo of its own with several uses,
+  so combine cannot substitute it away, and the load stays `lh`. A four-line
+  control probe through cc1psx settles this in one command, and it is worth
+  running: the same probe **falsified** the entry that had stood here, which
+  guessed the discriminator was four subtractions versus two (it is not -- a
+  bare symbol gives `lhu` at any count). func_80040DD8 and func_80041068.
+- **splat's interior symbol is a different name for the same address, and the
+  relocation shows it.** `D_800EFE42` is the second halfword of `D_800EFE40`;
+  written `D_800EFE40[1]` the relocation comes out `%lo(D_800EFE40+2)`, which
+  assembles to the identical word and reads as two differences against the
+  listing's `%lo(D_800EFE42)`. Declare the interior symbol in variables.h and
+  use it. The tell is a diff where only the symbol *name* differs and the
+  offset makes up the gap.
 - **A symbol read `lb` in one place and `lbu` in another** needs an lvalue
   cast, not a value cast: `*(s8 *)&D_8009B32C == 0` gives `lb` where
   `(s8)D_8009B32C == 0` still gives `lbu` (gcc has no reason to sign-extend
