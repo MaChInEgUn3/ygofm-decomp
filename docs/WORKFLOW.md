@@ -1014,6 +1014,21 @@ one is the trap**: a missing constant is as often gcc's giv as it is a real
 error. The sweep is worth running after any adapted candidate; the false-flag
 rate is high and each one takes a minute to clear.
 
+**A permuter win that depends on an UNINITIALISED read is a fourth class, and
+it is worth decomposing even though you cannot install it.** On func_80046768
+its two best outputs re-score at 5 and 7 against a base of 46, and both do the
+same thing: read a local before it is assigned -- once as
+`if (D_8009B45C || new_var)` wrapped round a loop body with identical arms,
+once as a store through `new_var` one line before `new_var` is set. Neither is
+installable. What they are worth is the *diagnosis*: the gain is entirely that
+gcc then has one pseudo live at function entry, which is what shifts the whole
+block-copy register assignment. Decomposing the plausible halves of the same
+candidate -- hoisting a `(arg0 & 0xFF) != 0` into a local, narrowing another
+local to `u16` -- was worth **exactly nothing**, alone or together, which is
+what proves the uninitialised read is the whole lever rather than a passenger.
+So: decompose these too, and write down the mechanism even when no legitimate
+spelling of it has been found.
+
 **Read what the permuter actually changed before believing its score.**
 One genuine instance: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
 out of a copy loop and read `*new_var` inside, so every iteration copies the

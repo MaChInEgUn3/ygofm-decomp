@@ -3880,3 +3880,77 @@ func_8002DDFC -- 76/76, 56 differences, and every one of them is that retail
   stays live in $a1 across the whole if-chain, where func_8003BF00's jump table
   frees $a1 early.  That is the discriminator between the two, and it is the
   reason the same residue needs different source there and here.
+
+func_80046768 -- 125/125, 46 differences, and all but a handful are a register
+  shift through the three unaligned struct copies: retail uses $t0-$t3 where
+  we use $a3,$t0-$t2, so retail has one more register occupied there and we
+  have not found what occupies it.
+  Two things paid and are worth keeping:
+  * **The clear loop's base is a literal, not the symbol splat prints.**
+    Retail is `lui $a1,0x801E` / `addu $a2,$a1,$zero` / `ori $a2,$a2,0xA7FF`:
+    gcc materialises a constant whose low half is zero with a *single* `lui`,
+    and then CSEs that `lui` into the `ori` that builds 0x801EA7FF. Written
+    against `D_801E0000` it is `lui`/`addiu` plus a separate pair for the
+    limit -- 122 differences to 60 on that one change. splat symbolises
+    `lui $a1,%hi(D_801E0000)` and `sw $zero,%lo(D_801E0000)($a1)`, and both
+    assemble to the same bytes as our `lui $a1,32798` / `sw $zero,0($a1)`, so
+    three of the remaining "differences" are try_func reading text rather than
+    bytes.
+  * **D_8009B0F0 and D_8009B120 need `lui $at` while the four-byte pointers
+    beside them keep %gp_rel, and the widths are equal.** No real threshold
+    exists, so the SIZED arms declare eight bytes -- still inside cc1psx's own
+    -G8, so the bare symbol survives -- with `as -G4`. Same inflate-to-eight
+    recipe as func_8002FD10 and func_800175A0.
+  Also: naming the last `D_8009B45C` read before the 0x50C store (so it
+  schedules into the `addiu %lo` slot rather than needing a `nop`) closed the
+  length error, and naming the D_8009B458 read beside it was two more.
+  The call `func_800494F4(0x801E1670)` takes ONE argument even though the call
+  site sets $a0-$a3: $a1 is the 0xFF constant used by four `sb`s, $a2 is a
+  field read used by a `sh`, and $a3 is a reload of D_8009B45C used by the
+  store in the delay slot. The existing prototype is right; this is the
+  "look a few instructions back" tell.
+  **The permuter's best two outputs re-score at 5 and 7 and are both
+  semantically wrong in the same way: they read an UNINITIALISED local.**
+  output-25-1 puts `if (D_8009B45C || new_var)` round the clear loop's body
+  with identical arms; output-220-1 stores through `new_var` one line before
+  assigning it. Decomposed, the plausible halves of output-220-1 -- hoisting
+  `(arg0 & 0xFF) != 0` into a local before the 0x4A store, and `u16 c` instead
+  of `s32 c` -- are worth **exactly nothing**, alone or together. So the whole
+  gain is the uninitialised read, and what it does is give the function one
+  pseudo that is live at entry. That is the mechanism the register shift
+  needs; no plausible source shape for it has been found, and the function has
+  one caller passing one argument, so a second parameter is not it.
+# ---
+
+func_8005A6A8 -- re-examined; still 1 difference, `subu $v1,$zero,$v1` where we
+  emit `subu $v1,$zero,$v0`. Retail negates the *copy* in place; every
+  spelling we have tried lets gcc's copy propagation rewrite `-v` as `-w`,
+  because `v = w` dominates the negation and the two are provably equal.
+  New negatives this pass: `if (w < 0)` rather than `if (v < 0)` as the guard
+  (unchanged at 1), swapping which of the two names carries the value through
+  the clamp (9), and `v = 0 - v` (1). The permuter has now been run on it and
+  produced no stored output at all.
+# ---
+
+func_80024E58 -- re-examined; still 2, and the residue is which of
+  `andi $s0,$v0,255` and `addiu $s0,$s0,-1` lands in the `jal func_8002C604`
+  delay slot. Retail has both before the call and reorg takes the second;
+  we compute the decrement after the call, so reorg takes the mask.
+  Writing the decrement before the call **does** fix the delay slot and costs
+  something else every way it was tried: `n = (v & 0xFF) - 1;` merges `v` and
+  `n` into one register where retail keeps `v` in $v0 and `n` in $s0 (4);
+  `n = v & 0xFF; n = n - 1;`, `n--` and `n -= 1` all hoist the `andi` above
+  the `sb` to D_8009B364 that retail emits first (3); an intermediate name for
+  the masked value is 4; putting the mask before the store is 3. Five
+  spellings, three distinct scores, none better than leaving it at 2.
+# ---
+
+func_8005A98C -- re-examined; still 2, `mflo $v0` / `sll $v1,$t1,13` against
+  our `mflo $v1` / `sll $v0,$t1,13`. The `addu $v0,$v1,$v0` that consumes them
+  is identical, so it is purely which pseudo gets $v0.
+  Eight spellings of `n = n / df + (hi << 13)` measured this pass: operands
+  swapped (3), split into two statements against `n` (2), a named shift
+  hoisted out (29 both ways -- much worse, the shift must stay inline), a
+  fresh name for the sum with a copy back (4), a fresh name for the quotient
+  (2 and 3), and the quotient accumulated then copied (6). Three-plus
+  spellings at 2 says the axis is elsewhere.
