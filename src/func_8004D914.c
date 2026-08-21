@@ -23,7 +23,8 @@ void func_8004D914(s32 arg0) {
     s32 bit;
 
     b = D_800F2C40 + arg0 * 0xE20;
-    if (*(s32 *)(b + 0xDD8) == 0) {
+    o = 0;
+    if (*(volatile s32 *)(b + 0xDD8) == 0) {
         return;
     }
     i = 0;
@@ -41,11 +42,11 @@ void func_8004D914(s32 arg0) {
     do {
         j = 1;
         k = o + 0x74;
-        g = (s32 *)(*(s32 *)(b + 0xDD8) + *(u16 *)(e + 0x33C) * 4);
+        g = (s32 *)(*(volatile s32 *)(b + 0xDD8) + *(u16 *)(e + 0x33C) * 4);
 
         do {
             w = *(u16 *)(b + k + 0x2C8);
-            a = (s32 *)(*(s32 *)(b + 0xDD8) + w * 4);
+            a = (s32 *)(*(volatile s32 *)(b + 0xDD8) + w * 4);
             if (w != ff) {
                 t = a - 1;
                 while (1) {
@@ -55,7 +56,7 @@ void func_8004D914(s32 arg0) {
                         hi = hi & 0x7F;
                         yp = (u16 *)(b + (o + hi * 0x74) + 0x2C8);
                         y = *yp;
-                        c = (s32 *)(*(s32 *)(b + 0xDD8) + y * 4);
+                        c = (s32 *)(*(volatile s32 *)(b + 0xDD8) + y * 4);
                         if (hi == 0) {
                             goto zero;
                         }
@@ -83,12 +84,12 @@ cont:
                     a++;
                 }
 hit:
-                *(s16 *)c = g - (s32 *)*(s32 *)(b + 0xDD8);
-                *(s16 *)a = c - (s32 *)*(s32 *)(b + 0xDD8);
+                *(s16 *)c = g - (s32 *)*(volatile s32 *)(b + 0xDD8);
+                *(s16 *)a = c - (s32 *)*(volatile s32 *)(b + 0xDD8);
                 goto cont;
 zero:
                 *(s16 *)t = (a - (s32 *)*(volatile s32 *)(b + 0xDD8)) - 1;
-                *(s16 *)a = (t - (s32 *)*(s32 *)(b + 0xDD8)) + 1;
+                *(s16 *)a = (t - (s32 *)*(volatile s32 *)(b + 0xDD8)) + 1;
             }
             j++;
             k += 0x74;

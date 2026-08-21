@@ -1163,6 +1163,19 @@ matched. The two live ranges do not overlap, so nothing forces them apart --
 but they are one pseudo, and the pseudo is numbered before the branch, which
 is the same mechanism as the two-arms-are-two-values rule read backwards.
 
+**And the mirror: assigning a loop variable its initial value BEFORE the
+function's early-return guards fixes which callee-clobbered register it
+gets.** func_8004D914 carries an outer counter and a record cursor that
+retail keeps in `$t6` and `$t7`; every declaration order, both assignment
+orders, and dropping either of the two parallel induction variables leave
+them exchanged. Writing `o = 0;` -- a *third* variable, the byte offset --
+as a statement above the first `if (… == 0) return;` is a MATCH, because it
+numbers that pseudo before the guards and shifts the whole `$t` allocation
+by one. The permuter found it as `if (… == (o = 0))`, which is the same
+thing spelled where nobody would write it; the plain statement one line
+earlier scores identically. Reach for it when a whole register *class* is
+rotated and no ordering inside the loop moves it.
+
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two
 statements earlier computes nothing and matched func_800135FC, which had been

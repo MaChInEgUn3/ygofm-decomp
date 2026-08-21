@@ -561,6 +561,10 @@ typedef struct {
 
 extern Slot70 D_800F0548[];
 extern Slot70 D_800EFE48[];
+/* Not a real object: a linker-defined length that resolves to zero. See
+ * config/symbol_aliases.txt and func_80012AE8. */
+extern s32 D_800906E0;
+extern u8 CtorCount_0[];
 #ifdef D_80010000_SIZED
 /* Eight bytes it does not have, for the same reason as D_800EAE98: at -G4 the
  * symbol is non-small, so the `lui`/`lw` pair the assembler expands stays in

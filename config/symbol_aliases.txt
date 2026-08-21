@@ -100,3 +100,11 @@ Base3_8009B408 = 0x8009B408;
 # grows the frame. One name per reference beyond the first.
 Base3_8009B45C = 0x8009B45C;
 Base4_8009B45C = 0x8009B45C;
+
+# func_80012AE8 walks a table of function pointers at D_80010000 and takes its
+# length from a symbol that the LINKER resolves to zero -- the table is empty
+# in this build, so retail's `lui $s1,0` / `addiu $s1,$s1,0` is a %hi/%lo pair
+# with nothing in it. gcc materialises a plain 0 as `addu $s1,$zero,$zero`, so
+# the two-instruction form is only reachable through a symbol. The name is
+# ours; only the value (0) is evidence.
+CtorCount_0 = 0x0;

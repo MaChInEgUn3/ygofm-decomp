@@ -612,10 +612,25 @@ func_8002C604
 # reads of D_8009B146 differ in signedness -- lh for the subtraction, lhu for
 # the sum -- which the `(u16)` cast reproduces.
 func_800338E4
-# func_80012AE8 is not a C-shape problem: it is a constructor-list walker whose
-# count is `lui $s1,(0x0>>16); addiu $s1,$s1,0x0` -- a link-time constant that
-# resolves to zero, i.e. symbol arithmetic over an empty array. Reproducing it
-# needs linker-defined symbols we do not have, not a different loop.
+# func_80012AE8 -- 26/24, 26 differences, and the diagnosis is now settled: it
+# is NOT cc1psx output at all. Re-tried 2026-08-21 and the C is entirely
+# reachable. The count `lui $s1,(0x0>>16); addiu $s1,$s1,0x0` is a %hi/%lo
+# pair on a symbol the linker resolves to zero, and `config/symbol_aliases.txt`
+# is exactly the mechanism for that: `CtorCount_0 = 0x0;` plus
+# `extern u8 CtorCount_0[];` and `n = (s32)CtorCount_0;` emits the pair (gcc
+# materialises a plain 0 as `addu $s1,$zero,$zero`, so no literal reaches it).
+# With that, `as -G0` for D_800906E0 and D_80010000_IS_AGGREGATE, every
+# instruction of the body matches in order.
+# What does not is the FRAME. Retail's is 0x10 with $s0/$s1/$ra at 4/8/0xC and
+# **no outgoing-argument area at all**, and its epilogue puts `addiu $sp,$sp,16`
+# *before* `jr $ra` with a `nop` in the delay slot. A two-line control probe
+# settles it: cc1psx compiling `void f(void) { func_8004A2F8(); }` -- one call,
+# no arguments -- reserves 16 bytes anyway and comes out at 24, and it always
+# sinks the stack adjust into the `jr`'s delay slot. No row of sweep_try
+# changes either (best 23, at -O1 with the delay-slot macro). So this is
+# hand-written assembly or a different toolchain's object, most likely the
+# PsyQ startup's constructor walker, and it should be left as assembly.
+# The candidate is kept in parked/ as the record of how far C gets.
 func_80012AE8
 # func_8004C560: retail copies p[0] into a third register and adds there,
 # keeping p[0] live until after the sum so it can store it to p[4]. Re-tried
@@ -4817,40 +4832,6 @@ func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
   `a` 3, `b` 3, `c` 16, `ex` 7) -- none is better than the plain name.
   This is a permuter case: one instruction, one operand.
 
-func_8004D914 -- 128/128, 7 differences, first written 2026-08-21. A display-
-  list relinker: for each of `b[0xE1B]` players and each of nine sub-lists it
-  walks a packet array, rewrites the tag field of every negative-tagged word,
-  and splices two entries together. gp=0, at=0, so no addressing work at all
-  and sweep_try finds nothing better than default flags.
-  What decided it, in order:
-  * **The two out-of-line arms are `goto` targets, not `else` branches.**
-    Retail places the `hi == 0` handler (.L8004DAA8) and the inner-loop hit
-    handler (.L8004DA7C) *after* the whole scan loop, and each falls into or
-    jumps back to a shared continue block. Written inline as `if`/`break` it
-    is 71 differences; written as `goto zero;` / `goto hit;` with the blocks
-    after the `while (1)` and an explicit `goto cont;` where `cont:` labels
-    the loop body's `a++`, it is 32. Same lever as func_8003C328, one level
-    deeper.
-  * `hi = (u32)x >> 16; hi = hi & 0x7F;` as two statements against one name --
-    retail's `srl $a2,$a3,16` / `andi $a2,$a2,0x7F` writes one register twice
-    where the single expression gives a fresh temp (81 -> 72).
-  * `i = 0;` written *above* the second guard so it lands in that branch's
-    delay slot.
-  * `i++` written **after** `e += 2` in the outer loop's tail, which lets the
-    count load for the loop test cover its own delay slot (16 -> 8).
-  * A `u16 *` local for the `y` address -- the permuter's find, and it is the
-    last `addu` operand order (8 -> 7).
-  * **The one spelling that is not plausible source and has no substitute
-    found:** the `hi == 0` handler reloads `*(s32 *)(b + 0xDD8)` for BOTH of
-    its pointer differences, and gcc gives us only the second because the
-    value is still live in a register from the `c = ...` computation before
-    the branch. `*(volatile s32 *)(b + 0xDD8)` on the first read restores it
-    and is worth -1/32 to 128/128 and 16. Measured and worthless: moving `c`
-    or `y` after the test (+1/56 and -1/119), a named base local in the
-    handler, and a `(u8 *)` byte-difference spelling of both subtractions.
-  Residue: retail carries the outer counter in $t6 and the record cursor in
-  $t7, we have them the other way round -- seven differences, every one that
-  pair. Five declaration and assignment orders were measured, plus dropping
-  either of the two parallel induction variables (`e == b + o` always), and
-  none moves it. A permuter run from the 8-difference base found the `u16 *`
-  local; rerun it from 7.
+# func_8004D914 MATCHED 2026-08-21, same day it was written. See the commit
+# message; the last lever was `o = 0;` written as a statement before the
+# function's first guard.
