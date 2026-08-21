@@ -774,6 +774,22 @@ meaningful, and skipping to the last one wastes hours:
    labels in address order and write the cases that way. 30 differences to
    27, and every label then lands where retail's does.
 
+   **A comparison TREE whose pivot sits one node too low means the source
+   has a case you have not written -- and that case's VALUE is
+   unrecoverable.** gcc builds a binary search tree for a sparse `switch` and
+   `balance_case_nodes` picks the pivot from the number of nodes in the
+   sub-list, so a missing case shifts the pivot and every comparison after
+   it. func_8004B49C dispatches on nine values and retail pivots its upper
+   group at 0x62 where we pivoted at 0x5B; the instruction *count* is the
+   same either way, which is why it does not read as a missing case. Adding a
+   tenth empty case is a MATCH -- and **every value from 0x7F up gives
+   byte-identical code**, because gcc emits no test at all for the largest
+   leaf once both bounds are established by its ancestors, and an empty arm
+   is the default's code anyway. (0x64 is not free: the range then fits gcc's
+   `count >= 4 && range <= 10*count` jump-table rule and the whole switch
+   changes shape.) So read the *pivot*, not the count: if the target tests a
+   different case value at the same position, add a case rather than
+   re-reading the arms, and write down that its value is a guess.
    **And the case order decides *which* of several identical arms gets
    merged.** func_80024C1C's `case 0x14` and `case 0x17` both store 1; retail
    merges 0x14 into the shared block with 0x15 and 0x16 and leaves 0x17
