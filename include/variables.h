@@ -849,6 +849,10 @@ extern s32 D_8009B118;
 extern u8 *D_800101D8;
 extern u8 D_801AF000[];
 extern u8 D_801AF800[];
+extern u8 D_801DD000[];
+extern u8 *D_8001002C;
+/* An eight-byte record func_8005B64C copies onto its stack by value. */
+extern u8 D_8009B058[];
 extern u8 D_8009B110;
 extern volatile u16 D_8009B100;
 extern s32 D_8009B104;

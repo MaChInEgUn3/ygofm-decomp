@@ -1236,6 +1236,20 @@ them the same wrong way round, and wrapping just the two assignments in
 statements comes out in the wrong order and no permutation of them moves it
 — and read it as a **macro** in the original, which is what that idiom is
 for.
+**Nine uses in ONE function, five of them round a SINGLE statement.**
+func_8005B64C is the seventh member of the D_8009B0F4 dispatcher family and
+went from 104 differences and -7 to 2 almost entirely on this idiom. What each
+one does is worth knowing separately:
+  * round a single constant assignment (`do { n = 0x800; } while (0);`) it
+    stops that arm's stores being cross-jumped with an identical arm's;
+  * round a single `lui`/`ori` constant it stops the scheduler splitting the
+    pair and moving the `lui` back, which otherwise shortens the value's live
+    range and flips its register;
+  * round a single global *load* it puts the load in the register retail uses
+    and pushes the neighbouring constant into the other one.
+A function that needs nine of them is a function whose arms were **macros** in
+the original, which is what the idiom is for -- so when a dispatcher's arms
+all rhyme, reach for it early rather than after every naming lever.
 **Fourth use, and the first on a run of FIVE statements.** func_80020BE4's
 last 11 differences closed to 4 on a `do { … } while (0);` wrapped round the
 five statements between a constant store and a named global read -- no

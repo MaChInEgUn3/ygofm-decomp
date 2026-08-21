@@ -4587,7 +4587,7 @@ func_8005D994 -- 5 differences at the right length (132/132), first written
   is `$s4`/`$s5` exchanged between arg1 and arg2, both used once and
   adjacently. Full flag sweep is 17 at the default row. Permuter next.
 
-func_8003BA14 -- 29 differences at the right length (121/121), first written
+func_8003BA14 -- 17 differences at the right length (121/121), first written
   2026-08-21. The SIXTH member of the D_8009B0F4 dispatcher family
   (func_8003B808, func_80020BE4, func_800434F4, func_80032184, func_8003C328,
   func_8003C120 are the others) and the first with four modes. gp=0 at=5, so
@@ -4614,9 +4614,47 @@ func_8003BA14 -- 29 differences at the right length (121/121), first written
     v/w/d result above, and worth knowing: retail keeps all three masks in the
     same register, so they are one pseudo, while the three D_8009B0F4 reads
     are three.
-  The residue is 29: every mask is in `$a1` where retail has `$a0` (and mode
+  A fifth lever came from the permuter and decomposes to one line: `k =
+  D_8009B118;` named before `*(s16 *)(p + 6) = 4;` in mode 3, **borrowing the
+  local that holds 0x18000 in mode 0** and is dead in this arm. 29 -> 17. A
+  fresh name in the same position is 28, so the borrow is worth eleven of the
+  twelve. The permuter shipped it alongside a dead `*(s32 *)(z = p + 0xC) =`
+  assignment which is worth nothing here.
+  The residue is 17: every mask is in `$a1` where retail has `$a0` (and mode
   0's `k` is the mirror), plus mode 3's `0x100` where retail hoists it into
   the dispatcher's branch delay slot and we hoist mode 3's `0xF0` instead --
   which is exactly func_800434F4's standing residue. Nine further spellings
   measured (the constant inline, three orderings of `m` and `k`, a `u32` k,
   three do/while(0) groupings) and all are 29, 30, 38 or 39.
+
+func_8005B64C -- 2 differences at the right length (132/132), first written
+  2026-08-21. The SEVENTH member of the D_8009B0F4 dispatcher family and by
+  some distance the closest, which makes its levers the ones to try on the
+  other six. 132 instructions, gp=0 at=6, five cases through a real jump
+  table, `as -G0` and default declarations.
+  The whole run from 104 differences and -7 was cross-jumping and one
+  scheduling idiom:
+  * separate `m1`/`v1`/`w1`/`d1` names for case 1 (104 -> 92);
+  * `do { … } while (0);` round four statements in case 1 (-7 -> -4, 64);
+  * `do { n = 0x800; } while (0);` -- a **single statement** -- in case 4,
+    which is what stops its `*(p+0xC)`/`*(p+8)`/`D_8009B0F4` group being
+    cross-jumped with case 2's identical one (-4 -> 0, 51);
+  * `do { n = 0x1000; } while (0);` for case 2's half of the same pair
+    (51 -> 30, at -1);
+  * case 3 writing its own `p[0x46] = 1; break;` instead of `goto tail3;`
+    (-1 -> 0, 17) -- the two-materialisations rule, since retail has the `1`
+    twice;
+  * `do { m1 = 0xFFDDFFFF; } while (0);` and the same for case 4's mask
+    (17 -> 8), because without it the scheduler splits each mask's `lui` from
+    its `ori`;
+  * `do { v1 = D_8009B0F4; } while (0);` round the single load in case 1
+    (8 -> 4), which is what puts the load in `$v0` and the 0x40 in `$v1`;
+  * `do { *(s32 *)(p + 0x1C) = n; } while (0);` in the shared tail (8 -> 6);
+  * and the last two, `*(s16 *)(p + 4) = 0x40;` written *before*
+    `*(s16 *)(p + 0x32) = 0;` with the 0x40 named (4 -> 2).
+  Nine uses of `do { } while (0);` in one function, five of them round a
+  single statement. That is far more than any other function here and it is
+  the strongest evidence yet that the original used a **macro** for these
+  arms -- which is exactly what the idiom is for.
+  The residue is 2: retail emits `sh $zero,0x32(p)` between the `addiu 64` and
+  the `sh 4`, we emit it after the `and`. Five spellings measured.
