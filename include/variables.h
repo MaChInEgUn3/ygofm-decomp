@@ -807,6 +807,11 @@ extern s16 D_800EFE3C[];
 extern s16 D_800EFE44[];
 extern s16 D_800EFE3E[];
 extern s16 D_800EFE40[];
+/* The second halfword of the same object, and splat gives it its own symbol
+ * because func_80041068 reaches it directly. Written as D_800EFE40[1] the
+ * relocation comes out `%lo(D_800EFE40+2)`, which is the same address and a
+ * different symbol -- two phantom differences. */
+extern s16 D_800EFE42[];
 extern u8 D_8009AF40[];
 extern u8 D_800907D8[];
 /* The debug format string "             MAP = %02X\n". */

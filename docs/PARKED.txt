@@ -4220,62 +4220,29 @@ func_80013154 -- 131/131 with `-fno-strength-reduce` (recorded in build.py;
   and both +0x5124 / +0x514C stores), and the 20-byte unaligned copy at the
   end as a `struct { u8 b[20]; }` assignment.
 
-func_80040DD8 -- 164/164, 22 differences, all inside ONE block. Was 170/164
-  with 121 differences; three levers closed the rest, and the two that were
-  written up here as "not tried" and "not the axis" are now measured.
-  * The batch-load probe WORKS and is the general lever, not a one-off.
-    Reading a group of values into named locals before the group of stores
-    that consumes them is the only way to get gcc to batch loads across a
-    store through a different pointer: it cannot hoist a load from `e` above
-    a store through `g` (both `u8 *`), so the batch has to exist in the
-    source. Two groups in this function: `w0..w3` before the four-store
-    group (170 -> 165, 121 -> 109), and `x0`/`x1` in the `e[0x5A]` arm
-    (166 -> 164, two load-delay `nop`s gone). Where the *fifth* value is
-    named also matters -- `w4 = *(s32 *)(e + 0x44);` written above the two
-    `sb`s with its store after them is retail's `lw` / `sb` / `sb` / `sw`,
-    and it is what lets the `sw` sink into the following branch's delay slot.
-  * A named flag read is the partner: `fl = *(u16 *)(e + 8);` written before
-    the `*(s32 *)(g + 0x1C) = w4;` store, with the test then `if ((fl & 8)
-    == 0)`. Written inline the load cannot move above the store, the slot
-    gets a `nop`, and the store stays put. 167 -> 166, 104 -> 56, one line.
-  * `PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"` is right and is in
-    build.py: retail reaches D_8009B146/D_8009B148 with `lui %hi` / `lh %lo`
-    pairs, not `%gp_rel`. The full sweep confirms it (`O2 G8 / as G0` is the
-    best row at 22; as -G2 and -G4 are 97).
-  The residue is the eight `- D_8009B146` / `- D_8009B148` subtractions.
-  Retail loads the symbol once with `lh` (SImode, sign-extended), issues all
-  four field `lhu`s, then all four `subu`s, then the second constant, then
-  the stores. We load the constant with `lhu` and emit load/sub/store triples
-  interleaved. Ten spellings score **identically at 22**: four named field
-  values before the stores, four named *differences*, named constants `dx`/
-  `dy`, `(s16 *)` stores, and the store order permuted -- which is the
-  standing tell that the axis is wrong. `(s16 *)` *reads* are much worse
-  (+8) because they add sll/sra. -fno-schedule-insns is also 22, so it is
-  not the pre-RA scheduler.
-  **This block is shared with two other functions and is almost certainly one
-  macro in the original.** func_80041068 has it byte-for-byte with a 12-byte
-  stride instead of 8 (offsets 8/0x14/0x20/0x2C, then 0xA/0x16/0x22/0x2E),
-  and func_8004158C has the same `lh` pair for both symbols. func_80040588
-  is the counterexample that bounds the claim: two fields instead of four,
-  and there retail itself uses `lhu` for the constant. So the `lh` is not a
-  property of the symbol -- it appears when there are four subtractions and
-  not when there are two. Whatever source shape produces it will close all
-  three functions at once; try it against func_80041068 as well, whose block
-  is otherwise identical.
-  What is right: `g = (u8 *)0x1F800344;` and `h = (u8 *)0x1F800398;` as locals
-  assigned before the guard (retail materialises both in the prologue, outside
-  the `if`), the four loop-invariant constants 8 / 0x38 / D_800E9D90 /
-  0x40000 as locals in the preheader, `e = D_800EFE48 + i * 0x70` written
-  plainly (gcc's own `sll 3` / `subu` / `sll 4` expansion splits across the
-  loop back edge exactly as retail has it), and `(s16)*(u16 *)(g + 8)` rather
-  than `*(s16 *)(g + 8)` for the two func_80041E7C arguments -- retail loads
-  `lhu` and sign-extends with `sll`/`sra`, which is what the cast of a u16
-  read gives and what a plain `lh` does not.
-  The permuter was run from the 164/164 base for 1500 iterations: best stored
-  output re-scores at 28, i.e. worse than the hand candidate. Nothing to
-  decompose.
-  (The `li $fp,8` phantom this entry used to warn about is **fixed** -- see
-  the `s8` note in try_func.py's _OBJ_REG.)
+func_80040DD8 -- MATCHED 2026-08-21. Kept here only for the two levers it
+  established, both of which apply elsewhere:
+  * Name a GROUP of loads before the group of stores that consumes them. gcc
+    cannot hoist a load through one `u8 *` above a store through another, so
+    retail's batched loads have to exist in the source. Two sites here took it
+    from 170/164 and 121 differences to 164/164 and 22.
+  * **One name for two sequential constants.** The last 22 were the eight
+    `- D_8009B146` / `- D_8009B148` subtractions: retail loads each offset with
+    `lh` into the SAME register `$a2`, one after the other. Two named locals
+    `dx`/`dy` gets the `lh` (that alone is invisible in the count -- still 22 --
+    and is the reason ten earlier spellings all read as "wrong axis"); ONE name
+    reused for both, assigned again between the two groups, is 22 -> 8. The
+    residue was then the four X statements written in the target's *store*
+    order rather than its *load* order; writing them 8 / 0x10 / 0x18 / 0x20 is
+    a MATCH.
+  Its sibling func_80041068 (12-byte stride, 182 instructions) MATCHED the
+  same afternoon by adapting this source field-for-field -- the two levers
+  above, `as -G0` (it has no `%gp_rel` at all), and one declaration:
+  `D_800EFE42` needs to be its own symbol, because `D_800EFE40[1]` relocates
+  as `%lo(D_800EFE40+2)`, which is the same address under a different name and
+  reads as two differences. That was the whole residue.
+  The third sibling, func_8004158C, carries the same block at 472 instructions
+  and is still open.
 
 Permuter re-score sweep, 2026-08-21 (score_permuter_outputs.py over the whole
 park). Six stored outputs beat what was installed; every one was read before
