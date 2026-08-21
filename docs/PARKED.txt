@@ -4369,3 +4369,35 @@ func_800408D0 -- 13 differences, first written 2026-08-21. 202 instructions,
   `lbu 0xE` / `lhu 8` pair at the bottom of the loop. Eleven shapes were
   measured against the last two and every one is 13, 14 or -1; the permuter
   ran 4900 iterations from the 13 base and stored nothing.
+
+func_8002E128 -- 18 differences, first written 2026-08-21. 146 instructions,
+  gp=0 at=0, default flags, no addressing work at all.
+  A card-artwork setup routine: decodes a BCD card id
+  (`((n >> 4) & 0xF) * 10 + (n & 0xF)`) into an index, then reads a per-card
+  flag byte from one of two tables -- D_80090C00 with six-byte entries for ids
+  >= 0x200 and D_80090BA8 with two-byte entries below -- and calls
+  func_8002E060 for each bit set. Both symbols were added to variables.h.
+  Three things were needed and all three are existing rules:
+  * `s32 arg1`, not `s16`. Retail has `addu $s1,$a1,$zero` with no sign
+    extension, so the `< 0` test is on the raw word; the narrow declaration
+    adds `sll`/`sra` and is +1 and 144 differences.
+  * **the else branch's flag byte needs its own name.** Reusing `n` for
+    `o[0]` there -- which looks right, because retail reuses `$s1` for it --
+    is 49 differences, and a separate `m` is 22. Every one of those 49 is a
+    register, and the split fixes the *whole function's* allocation, not just
+    that block. Note this is the opposite of what the listing's register reuse
+    suggests, which is the standing warning about reading register reuse as
+    name reuse.
+  * `p[0x10] = 1;` written *above* the two read-modify-writes on the object
+    rather than below them (22 -> 19), and a base local for D_80090BA8 in the
+    else branch (19 -> 18).
+  The residue is 18 in two clusters. Retail materialises the `1` for
+  `p[0x10]` between the `sw 4` and the `sh 8` of the two RMWs and stores it
+  much later, after the *6 index scaling; we materialise and store it
+  together, at whichever end the source puts it. Nine placements and
+  spellings were measured (`one` as a local at three positions, the RMWs as
+  compound assignments, a `do { } while (0);` round the pair, the store
+  between them) and they are 19, 21, 22 or 30. The second cluster is the
+  position of the D_80090BA8 base materialisation: retail emits it *after*
+  the index computation and we emit it before, and the four index spellings
+  tried are all 18 or 19. Permuter running.

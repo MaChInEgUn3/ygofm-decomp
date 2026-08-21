@@ -815,6 +815,11 @@ extern s16 D_800EFE40[];
 extern s16 D_800EFE42[];
 extern u8 D_8009AF40[];
 extern u8 D_800907D8[];
+/* Two tables of per-card display flags, indexed by the BCD card id decoded
+ * as `((n >> 4) & 0xF) * 10 + (n & 0xF)`: six bytes per entry at 0xC00 and
+ * two at 0xBA8 (func_8002E128). */
+extern u8 D_80090C00[];
+extern u8 D_80090BA8[];
 /* The debug format string "             MAP = %02X\n". */
 extern u8 D_80090D0C[];
 extern u8 D_801D0200[];
