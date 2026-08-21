@@ -804,8 +804,20 @@ extern volatile u16 D_8009B100;
 extern s32 D_8009B104;
 extern u8 D_8009B108;
 extern s32 D_8009B11C;
+/* func_80046768 stores both through `lui $at` while the four-byte pointers
+ * beside them keep %gp_rel, and the widths are equal, so no real threshold
+ * separates them: the SIZED arms declare eight bytes, which still clears
+ * cc1psx's own -G8 (so the bare symbol survives) but not an `as -G4`. */
+#ifdef D_8009B120_SIZED
+extern s32 D_8009B120[2];
+#else
 extern s32 D_8009B120;
+#endif
+#ifdef D_8009B0F0_SIZED
+extern s32 D_8009B0F0[2];
+#else
 extern s32 D_8009B0F0;
+#endif
 extern s32 D_8009B138;
 /* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
 #ifdef D_8009B134_SIZED
@@ -937,6 +949,12 @@ extern s8 D_800909D4[][6];
 extern VoidFn D_80090A5C[];
 extern u8 D_80090AD4[];
 extern VoidFn D_80090B3C[];
+extern VoidFn D_80090B64[];
+extern u8 D_801E0000[];
+extern s32 D_8009B460;
+extern u8 D_80010784[];  /* "SD_bgm.dat" */
+extern u8 D_80010790[];  /* "SD_se.dat" */
+extern u8 D_8001079C[];  /* "MASTER.XA" */
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
 #ifdef D_8009B408_SIZED
