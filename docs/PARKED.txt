@@ -3764,3 +3764,44 @@ func_80047480 -- one register, thirty sites: the system-block pointer is $a1
   the 0x388 store because both consume the same 0xFFFF.  Retail's 0xFFFF
   therefore lives in `$a0` across the block, which is the extra long-lived
   value that pushes `p` to `$a2` -- so the two are the same problem.
+
+func_8004A518 -- 113 built against 112, and the single extra instruction is a
+  callee-saved register: gcc hoists the loop-invariant `0x63` out of the
+  middle loop into $s6, where retail materialises `addiu $v0,$zero,0x63`
+  inside the body and reuses that register for the 0x40 two instructions
+  later.  That costs a `sw`/`lw` pair in the prologue and epilogue and shifts
+  every following instruction by one, which is the whole of the 73-difference
+  count -- loops 1 and 3 and the tail align instruction-for-instruction
+  either side of it.
+  Needs `as -G0` (recorded in build.py): gp=0, and retail reloads D_8009B458
+  through `lui $r,%hi / lw $r,%lo($r)` once per iteration of loop 1, which is
+  the bare form.
+  What paid: three separate offset variables, one per loop -- one shared `o`
+  makes the pseudo live across the middle loop's two calls, so it goes
+  callee-saved in *all three* loops where retail uses $a0, $s2 and $v1
+  (105 -> 105 with the count still wrong, but it is a prerequisite); three
+  separate record pointers `e1`/`e2`/`e3` for the same reason (78 -> 73);
+  and a *rotated* `for (; i < *(s16 *)(p + 0x510); )` for the middle loop
+  rather than an explicit `if` plus `do`/`while` (116/+4 -> 113/+1, 105 ->
+  78) -- the explicit guard loads the count into a register that dies, and
+  the rotated form lets the bottom test's load carry round the back edge into
+  the next iteration's `addu $v1,$v1,$s2`, which is what retail does.
+  Measured and dead on the 0x63: a shared name for the two QImode constants
+  (`c = 0x63; … c = 0x40;`, which is exactly retail's one-register-two-values
+  shape) is -4 and 108, because gcc constant-propagates `c` before the loop
+  pass ever sees two sets; borrowing `o1`, `o3` or `m` as the name; moving the
+  store to the end of the byte group; `acc = acc | m`; a pre-loop local for
+  the 0x40 halfword constant; indexing the table instead of a cursor;
+  `do { … } while (0)` round the store group and round the two calls; and
+  `-fno-schedule-insns`, `-fno-schedule-insns2`, `-fno-strength-reduce`.
+  The permuter's best output (score 740 against a base of 1050) re-scores at
+  **73**, and its *fourth*-best (score 875) re-scores at **27** -- another
+  instance of the ranking inverting.  Reading what it changed: it declared
+  `o2` as `unsigned char`.  That is semantically wrong (0x180 does not fit,
+  and the built code has `addiu $s2,$zero,128` and an `andi $v1,$s2,255`
+  retail does not have), but it is a pointer at the mechanism: **one more
+  instruction in the loop body is enough to stop the hoist**.  Retail's body
+  is 27 instructions and ours is 26, so the missing `addiu $v0,$zero,0x63` is
+  also the thing that would prevent its own hoist -- which is why no
+  source-level spelling of the constant reaches it.  The instruction retail
+  has and we do not is more likely to be somewhere else in the body.
