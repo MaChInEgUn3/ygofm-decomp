@@ -695,6 +695,9 @@ extern u8 D_801B1238[];
 extern u8 D_801D1200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
+extern u32 D_801D0534;
+/* Five pairs of halfwords, indexed by `D_801D0534 % 5` (func_8002DA1C). */
+extern u16 D_80090B50[];
 /* Data Crystal RAM map, UNVERIFIED: selected card ID */
 extern s16 D_8009B338;
 extern u8 D_8009B320;

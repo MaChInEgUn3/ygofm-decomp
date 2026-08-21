@@ -4448,3 +4448,34 @@ func_8004BE88 -- MATCHED 2026-08-21. Kept for the one lever that is new and
   had been measured against that residue first, so this is the shape to reach
   for when two initialisations to the same constant come out as two
   materialisations and the target has one.
+
+func_8002DA1C -- 6 differences, first written 2026-08-21. 135 instructions,
+  gp=9 at=1. A sibling of func_8002CEE8: the same D_8009B26C / D_8009B26E
+  state pair, the same `x & 0xF` goto dispatcher, the same addressing recipe
+  (`as -G1` with `D_8009B26C_IS_SCALAR` so the two one-byte flags stay
+  gp-relative, plus `D_8009B0C0_SIZED` -- the existing `[2]` arm -- so its
+  bare store goes through `$at`).
+  Its own shape: the mode-0 arm can jump *backwards into the middle of the
+  init block* (`beq $a2,2, .L8002DA64`), so the init block carries a label and
+  the arm ends `goto init;`.
+  Four levers, in order:
+  * `r = (u8 *)D_800EB0F8;` as a base local (48 -> 13). Written inline, gcc
+    folds the +0x34 into the `%lo` and then has to *subtract* it back to pass
+    the base to func_80035B7C.
+  * `f = func_8003F70C();` -- borrowing the local that held the D_8009B26E
+    read, which is dead by then (13 -> 10). Retail copies the call result into
+    `$a2`, which is exactly where `f` lives.
+  * `f = D_801D0534 % 5;` -- the same borrow again, one arm over (10 -> 9).
+    A fresh name is 9 as well and `v` is 12, so here the borrow and a fresh
+    name tie and only `v` is wrong.
+  * `t = D_80090B50;` as a base local assigned after the remainder (9 -> 6),
+    which is what emits the table's address *before* the `sll` that scales the
+    index. Writing the symbol inline, `(u8 *)`-casting it, or adding it as the
+    last term are all 9.
+  The residue is one instruction's position: retail materialises the `0` that
+  is func_80035C38's first argument *after* the `multu` of the reciprocal
+  divide, and we materialise it before the whole block. Eight shapes were
+  measured -- a named `z = 0;` for the argument, a named read of D_801D0534 at
+  two positions, the D_8009B26E store moved and wrapped in `do { } while (0);`,
+  the base local moved -- and every one is 6, 13 or 23. `-fno-schedule-insns`
+  is +1 and `-fno-schedule-insns2` is 35. Permuter running.
