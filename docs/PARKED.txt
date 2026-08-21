@@ -4335,3 +4335,37 @@ func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
   named reads, two `do { … } while (0);` groupings, and `volatile` on the
   global. The full flag sweep is 3 at the installed row and 81+ everywhere
   else. Permuter running.
+
+func_800408D0 -- 13 differences, first written 2026-08-21. 202 instructions,
+  the fifth member of the func_80040DD8 sprite-list family: same 0x1F800320 /
+  0x1F800344 / 0x1F800378 scratchpad packets, same D_8009B146 / D_8009B148
+  offsets, same func_80041F90 / func_80042188 / func_80082840 tail, but it
+  draws one sprite in horizontal slices with a `do`/`while` over a remaining
+  count rather than walking the object list.
+  Declarations: `D_8009B146_SIZED` plus `as -G4` (as func_80040588) and
+  `D_8009B424_IS_SCALAR`. The three-way tail is one loop with two entry
+  points in the listing (`.L80040AE8` loads 0x40, `.L80040AEC` stores it) and
+  both entries carry the same 0x40, so it is one `do { *(u16 *)(q + 8) = 0x40;
+  … } while (rem != 0);` and the second label is only the delay slot of the
+  test above it.
+  Three levers took it from 156 to 13, all already in WORKFLOW:
+  * `fl = *(u16 *)(e + 8);` named above the `*(u16 *)(q + 0xE)` store, so
+    retail's two loads are adjacent and the store sinks into the branch's
+    delay slot (156 -> 119).
+  * the three func_80041F90 argument loads named (119 -> 118).
+  * `v = 9;` -- borrowing the *dead* local that held `*(s32 *)(e + 4)` for the
+    `g[3] = 9` constant. Without it the delay-slot filler takes the `addiu 9`
+    and the function is an instruction short; a fresh name does not do it, and
+    neither does naming the `q + 0x14` load at three positions. 118 and -1
+    became 18 and the right length. `v = 9; … v = 0x2C;` for both constants is
+    19, so here it is the borrow and *not* the one-name-for-two-constants
+    rule -- the two levers are separable and this function wants only one.
+  * declaring `a3` before `base` (18 -> 13): retail holds `base` in $s4 and
+    `a3` in $s3, we had them swapped, and declaration order is what decides it.
+  The residue is 13 in three clusters, all allocation or scheduling:
+  the `lhu $a2,6($s0)` / `sw $zero,D_8009B424` order (the same three
+  differences func_80040588 is parked on -- solve one and both close), a
+  $v0/$v1 exchange around `lw 20($s0)` / `addiu 9`, and the order of the
+  `lbu 0xE` / `lhu 8` pair at the bottom of the loop. Eleven shapes were
+  measured against the last two and every one is 13, 14 or -1; the permuter
+  ran 4900 iterations from the 13 base and stored nothing.

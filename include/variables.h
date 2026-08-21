@@ -876,7 +876,12 @@ extern u16 D_8009B374;
 #else
 extern u16 D_8009B374[];
 #endif
-#ifdef D_8009B370_IS_SCALAR
+#ifdef D_8009B370_SIZED8
+/* Eight bytes it does not have, so the reference is a single bare pseudo:
+ * cc1psx will not hoist a bare symbol's memory access into a delay slot the
+ * way it hoists half of its own %hi/%lo pair (func_8002CEE8). */
+extern u16 D_8009B370[4];
+#elif defined(D_8009B370_IS_SCALAR)
 extern u16 D_8009B370;
 #else
 extern u16 D_8009B370[];
@@ -886,7 +891,12 @@ extern u16 D_8009B372;
 #else
 extern u16 D_8009B372[];
 #endif
-#ifdef D_8009B369_IS_SCALAR
+#ifdef D_8009B369_SIZED8
+/* Eight bytes it does not have: cc1psx keeps the bare symbol and an assembler
+ * below -G8 expands it, so the reference is one instruction to the scheduler
+ * (func_8002CEE8). */
+extern u8 D_8009B369[8];
+#elif defined(D_8009B369_IS_SCALAR)
 extern u8 D_8009B369;
 #else
 extern u8 D_8009B369[];
@@ -930,7 +940,13 @@ extern volatile s32 D_8009B0C8;
 #endif
 /* func_80013154 reaches it gp-relatively; the array arm is for the units that
  * take its address. */
-#ifdef D_8009B0A3_IS_SCALAR
+#ifdef D_8009B0A3_SIZED8
+/* Eight bytes it does not have. cc1psx at -G8 still sees 8 <= 8 and emits the
+ * bare symbol; an assembler at -G1 sees 8 > 1 and expands the store through
+ * $at, which is what func_8002CEE8 has while the one-byte D_8009B26C and
+ * D_8009B26E beside it keep %gp_rel. */
+extern u8 D_8009B0A3[8];
+#elif defined(D_8009B0A3_IS_SCALAR)
 extern u8 D_8009B0A3;
 #else
 extern u8 D_8009B0A3[];
@@ -1086,6 +1102,15 @@ extern u8 D_800F39B0[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
+#ifdef D_8009B362_SIZED8
+/* Eight bytes it does not have, so cc1psx keeps the bare symbol (8 <= its own
+ * -G8) and an assembler at -G1 expands it -- one instruction to the
+ * delay-slot filler either way, which is what stops func_8002CEE8 hoisting a
+ * `lui %hi` into a branch slot retail leaves as a `nop`. */
+extern u8 D_8009B362[8];
+#else
+extern u8 D_8009B362[];
+#endif
 /* Data Crystal RAM map, UNVERIFIED: opponent ID */
 #ifdef D_8009B361_IS_SCALAR
 extern s8 D_8009B361;
@@ -1234,7 +1259,10 @@ extern u16 D_8009B3FA;
 extern u16 Base2_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
-#ifdef D_8009B2F8_IS_AGGREGATE
+#ifdef D_8009B2F8_SIZED8
+/* Same knob as D_8009B0A3 above, for the same unit. */
+extern u8 D_8009B2F8[8];
+#elif defined(D_8009B2F8_IS_AGGREGATE)
 extern u8 D_8009B2F8[];
 #else
 extern u8 D_8009B2F8;
@@ -1505,6 +1533,7 @@ extern u8 D_8009B26C;
 #else
 extern u8 D_8009B26C[];
 #endif
+extern u8 D_8009B26E;
 #ifdef D_8009B26D_IS_SCALAR
 extern u8 D_8009B26D;
 #else

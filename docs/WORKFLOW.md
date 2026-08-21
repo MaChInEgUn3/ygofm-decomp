@@ -1467,6 +1467,21 @@ on a combination that had been in the table for weeks.
   one of them first-try, because counting `%gp_rel` and `lui  *\$at, %hi(` in the
   listing and reading the widths out of variables.h settles the question in a
   minute.
+  **cc1psx will not hoist a BARE symbol's memory reference into a delay slot,
+  and that is how you get an empty one back.** It will happily hoist the `lui`
+  half of its own `%hi`/`%lo` pair, because that half is an ordinary
+  instruction; a bare reference is one pseudo-instruction the assembler
+  expands, and the filler leaves it alone. So when retail leaves a branch's
+  delay slot empty in front of a block whose first instructions are global
+  references, size **every** such symbol out of small data -- **one at a time
+  is not enough**, because the filler simply takes the next candidate's `lui`.
+  func_8002CEE8's last difference was exactly this: `D_8009B362` sized alone is
+  15 differences (the filler switches to `%hi(D_8009B370)`), `D_8009B370`
+  sized alone is 15 (it switches back), and the two together are a MATCH. The
+  same function needed five other symbols sized or scalared; the recipe that
+  decided all of them is below, and the gp side here is two one-byte flags, so
+  `as -G1` with `[8]` inflations on the byte-wide symbols is the whole
+  addressing story.
   **`gp == 0` is a first-line check, not a last resort.** When the listing has
   *no* `%gp_rel` at all, recipe branch 1 says any `-G` is free — and in one
   session that single fact decided four functions, three of them from the
