@@ -1159,6 +1159,24 @@ is where the permuter first found it) the copy is emitted after all the
 stores instead. func_80031574, 24 differences to 14. This is the sharpest
 form of the rule below.
 
+**A comparison shared across a CALL takes a callee-saved register, and no
+spelling of the same comparison breaks the sharing -- an ARITHMETIC on the
+operand does.** func_80038EB0 tests `cmd >= 0x41` before and after a call;
+gcc computes it once, keeps the result live across the call in a sixth
+callee-saved register that retail does not have, and the extra `sw`/`lw` pair
+shifts the whole prologue -- 147 differences, of which almost all were the
+shift. Retail recomputes `slti $v0,$s3,0x41` after the call. `cmd > 0x40`,
+`!(cmd < 0x41)` and `0x40 < cmd` are all canonicalised back to the same RTL
+and score identically, which is the usual sign of a wrong axis and is
+misleading here: the axis is right and the spelling is too weak.
+`cmd + 1 >= 0x42`, `(cmd + 1) > 0x41` and `cmd - 1 >= 0x40` are 147 -> 37,
+because the compared value is then a different expression and there is
+nothing to share. All three are contrived and equally correct, so which one
+goes in is a judgement call; the mechanism is the thing. **The tell is a
+prologue that saves one more register than the target's, where the extra one
+holds a comparison result rather than an address** -- the address version of
+the same tell is the `%hi`-in-$s0 case above.
+
 **gcc 2.8 lays stack locals out in DECLARATION order, so the frame is free.**
 Locals go at increasing offsets starting just above the 16-byte outgoing-args
 area, in the order they are declared. Read the `sp+NN` constants out of the

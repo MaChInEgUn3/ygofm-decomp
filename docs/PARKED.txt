@@ -4850,7 +4850,8 @@ func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
 # function's first guard.
 
 
-func_80038EB0 -- 164/164, 147 differences, first written 2026-08-21. 164
+func_80038EB0 -- 164/164, **36** differences (147 when first written; the
+  permuter found the lever the next day). First written 2026-08-21. 164
   instructions, a byte-stream command dispatcher: it reads two bytes from a
   cursor selected by `p[0x58]`, looks the command up in the three-entry
   D_800EB010 table (Rec4C, 0x4C bytes each) and either updates a slot or
@@ -4880,10 +4881,24 @@ func_80038EB0 -- 164/164, 147 differences, first written 2026-08-21. 164
   * The `>= 0x41` / `< 0x41` split, the `goto have;` join after the three-way
     table lookup, and `goto create;` out of the `fl & 0x20` arm are all
     retail's own layout.
-  The residue: gcc hoists `cmd >= 0x41` out of the `create` block and parks it
-  in **$s5**, where retail recomputes `slti $v0,$s3,0x41` in the delay slot of
-  each of the two branches that reach `create`. That extra live value is the
-  sixth saved register. Measured and worthless: `cmd > 0x40` and
+  **The sixth saved register is gone, and the lever is worth knowing.** gcc
+  was sharing `cmd >= 0x41` between the `create` block and the test AFTER
+  `func_80039F44`, so the comparison result lived across the call and took a
+  callee-saved register -- the sixth, which shifted every `sw`/`lw` in the
+  prologue and inflated the count to 147. Retail recomputes `slti $v0,$s3,0x41`
+  fresh after the call. **No spelling of the same comparison breaks that:**
+  `cmd > 0x40`, `!(cmd < 0x41)` and `0x40 < cmd` are all canonicalised back and
+  score identically. What breaks it is an ARITHMETIC on `cmd` before the
+  compare -- `cmd + 1 >= 0x42`, `(cmd + 1) > 0x41` and `cmd - 1 >= 0x40` all
+  give 147 -> 37, because the compared value is then a different expression and
+  there is nothing to share. The permuter found `(cmd + 1) > 0x41`; all three
+  spellings are equally contrived and equally correct, so the installed one is
+  a judgement call and the MECHANISM is what to remember: when a comparison is
+  shared across a call and the target recomputes it, add and subtract one.
+  Splitting the second byte into two names is then worth one more (37 -> 36);
+  on the 147 base it was worth nothing, which is the "arms that score worse in
+  isolation" rule again.
+  The old residue, for the record: Measured and worthless: `cmd > 0x40` and
   `!(cmd < 0x41)` at either site or both, an `if`/`else` for `k` (148), five
   placements of `q = (u8 *)D_800EB010;`, three names for the reused `v`
   (147 -- the func_800154E4 rule fires but only just), and four compiler flag
@@ -4931,3 +4946,27 @@ func_800580D4 -- the blocker retraction that preceded the draft above: the stand
   offsets (sp10/sp14/sp28..sp5C), i.e. arrays it could not size, plus a
   pointer to a stack local stored into the out-parameter at the end. It is the
   smallest open candidate (123) and it is open, not blocked.
+
+
+func_8002BD0C -- 140 target, 139 built (-1), 113 differences, written
+  2026-08-21. The seventh member of the D_8009B0F4 dispatcher family and the
+  first with a real jump table. gp=0, at=5, `as -G0`, and the default
+  (volatile scalar) arm of D_8009B0F4 for the back-to-back read-modify-writes
+  in arms 0 and 2.
+  **The dispatch and the jump table came out exact on the first draft**, which
+  is the hard part for this class: seven cases whose arms sit in memory in the
+  order 0, 1, 2, 4, {3,5}, 6 -- read straight off `jtbl_80010208` in
+  `asm/data/800.rodata.s`, since the table's `.word`s give the case-to-arm map
+  and the arm addresses give the layout. Written in that order with
+  `case 3: case 5:` sharing, plus two `goto` join labels (arm 0 jumps to the
+  one arm 4 falls into; arm 1 jumps to the one arms 3/5 fall into), it
+  reproduces retail's block layout exactly.
+  The residue is one delay slot and the register assignment inside the arms.
+  Retail ends arm 0 with `j` and `lui $v1,2` in the slot -- 0x20000 is a single
+  `lui`, and it is the last thing computed. We keep finding something else to
+  put there: with the join written `*(s32 *)(p + 0xC) = d + 0x800;` gcc hoists
+  that `addiu` into the slot (-1), and with the compound `d += 0x800;` that
+  stops but gcc hoists the `sw $a0,8($s2)` store instead (+1). Neither lands.
+  Also measured and worthless: a named read of D_8009B0F4 above the `+6` store
+  (+6 worse), `n = 0x20000` moved after `d = D_8009B118`, and swapping the
+  declaration order of the two constants held across the call in arm 2.
