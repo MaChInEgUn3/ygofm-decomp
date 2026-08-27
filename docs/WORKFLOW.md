@@ -1159,6 +1159,16 @@ is where the permuter first found it) the copy is emitted after all the
 stores instead. func_80031574, 24 differences to 14. This is the sharpest
 form of the rule below.
 
+**gcc 2.8 lays stack locals out in DECLARATION order, so the frame is free.**
+Locals go at increasing offsets starting just above the 16-byte outgoing-args
+area, in the order they are declared. Read the `sp+NN` constants out of the
+listing, declare the locals in that order with sizes that fit the gaps, and
+the whole frame comes out right with no iteration -- func_800580D4 has seven
+stack objects between `sp+0x10` and `sp+0xB8` and every one landed on the
+first draft. Do this before anything else on a function with a big frame: it
+is free, and getting it wrong makes every stack reference in the diff wrong at
+once, which reads like a much larger problem.
+
 **But check the borrowed name's TYPE before crediting the borrow.** On
 func_8002E128 an index written inline is 18 differences, with a fresh `s32`
 name 19, borrowing the mutually exclusive arm's `s32` local 12 -- and with a

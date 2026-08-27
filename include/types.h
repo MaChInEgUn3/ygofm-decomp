@@ -35,6 +35,16 @@ typedef struct {
     s16 pad;
 } SVector;
 
+/* PsyQ's MATRIX: a 3x3 fixed-point rotation, two bytes of pad, and a
+ * three-word translation -- 32 bytes at alignment 4, which is what makes
+ * `*dst = *src;` expand as eight aligned lw/sw rather than an lwl/lwr pair
+ * per word. func_800580D4 copies one whole and the expansion is the tell. */
+typedef struct {
+    s16 m[3][3];
+    s16 pad;
+    s32 t[3];
+} Matrix;
+
 /* Seven words passed by value: the o32 ABI copies anything over 16 bytes
  * into the caller's outgoing area and passes its address. */
 typedef struct {

@@ -4762,7 +4762,16 @@ func_80012E5C -- 132/132, 24 differences (31 by hand; 26 and then 24 off two
   of `n = 0x514C`.  sweep_try confirms default compiler flags with `as -G4`
   (31; the next best row is `as -G2` at 95).
 
-func_8005BFC8 -- 139/139, 22 differences, and the first half is exact.
+func_8005BFC8 -- 139/139, **17** differences (22 by hand; two separate
+  permuter reads took it to 18 and then 17, both of them borrowings the hand
+  sweep had no reason to try). The first, worth 4: `t2 = 0x1B000;` -- the
+  0x1B000 constant held in the SECOND timestamp's name, which is dead by then.
+  A fresh local for the same constant is worth NOTHING (22), and borrowing
+  `t`, `cnt`, `lim` or `cap` instead is 26, 26, +1 and 24 -- so it is that one
+  name's allocation and not the naming. The second, worth 1: a `u16 *` local
+  for the address `sp14 + 0x12`, assigned before the `e = D_8009B498 +
+  0x40000;` line, with both halfword reads going through it.
+  The original 22-difference notes follow, and the first half is exact.
   gp=19, at=0, no addressing work at all: default flags.
   Decoded shapes worth keeping: `one = 1;` is a real local -- retail holds 1
   in $s3 across three calls for the three `sb $s3` stores of D_8009B063 and
@@ -4881,8 +4890,39 @@ func_80038EB0 -- 164/164, 147 differences, first written 2026-08-21. 164
   rows including `-fno-schedule-insns`. This is the register-allocation class:
   run the permuter on it.
 
-func_800580D4 -- NOT parked, no candidate written. Recorded only to retract a
-  blocker: the standing notes said it "needs PsyQ MATRIX/SVECTOR types". It
+func_800580D4 -- 123 target, 120 built (-3), 44 differences, written
+  2026-08-21. A light/matrix packet builder: it picks a 0x50-byte record,
+  builds two MATRIXes on the stack, copies one to the other, and fills the
+  caller's out-parameter with three `0x1000 - x` angles.
+  **The stack layout came out exact on the first draft**, which is the part
+  worth keeping: gcc 2.8 allocates locals at increasing offsets in
+  DECLARATION order starting after the 16-byte outgoing-args area, so writing
+  them in the order the listing's `sp+NN` constants appear reproduces the
+  frame with no iteration at all. Here that is pkt(0x10) sv60(0x60) m68(0x68)
+  sv88(0x88) sv90(0x90) m98(0x98) svB8(0xB8), and every offset in the built
+  code matched immediately.
+  It also needed a new type. `include/types.h` now has `Matrix` -- 3x3 `s16`,
+  two bytes of pad, three `s32` -- because the 32-byte by-value copy expands
+  as eight aligned `lw`/`sw` only at alignment 4, and that expansion is the
+  tell (WORKFLOW's Rec1C rule read forwards). The 8-byte copy at the end is
+  `SVector` and expands `lwl`/`lwr`, which is alignment 2 and confirms the
+  pair of types rather than one.
+  What else is right: `y = sv60.vy;` named once and used for both the
+  `pkt.m0.t[1]` store and func_8008E3D0's fourth argument -- retail reads that
+  halfword ONCE and we read it twice, 93 differences to 50 on that line -- and
+  writing D_800F2C40 inline rather than through a base local (50 to 44).
+  Residue, and the two halves look coupled: retail carries arg2 in $s3,
+  D_800F2C40 in $s2 and arg3 in $s1 -- which is exactly usage-frequency order,
+  most-used in the lowest register -- and we have that rotation inverted. And
+  retail RELOADS `*(s32 *)(D_800F2C40 + 0xD18)` three times where we load it
+  once and keep it in $v1, which is the -3. The reloads are most likely
+  register pressure rather than aliasing: get the rotation right and they may
+  follow. Measured and worthless: `volatile` on any subset of the three reads
+  (it moves in steps of TWO, a load plus a `nop`, and never lands on the +3
+  needed), the byte-address cast, a local copy of arg2, a base local used only
+  for the 0xD18 reads, and `*(s32 *)arg3 = 0;` hoisted to the top (-4).
+
+func_800580D4 -- the blocker retraction that preceded the draft above: the standing notes said it "needs PsyQ MATRIX/SVECTOR types". It
   does not. The listing has **zero** GTE/COP2 instructions (`wc2|rtps|mfc2|
   mtc2|cop2|lwc2|swc2` all match nothing), gp=2, at=0, and all seven calls go
   above 0x80073840 into the PsyQ library, where an implicit declaration is
