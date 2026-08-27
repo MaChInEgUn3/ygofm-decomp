@@ -4368,7 +4368,10 @@ func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
   global. The full flag sweep is 3 at the installed row and 81+ everywhere
   else. Permuter running.
 
-func_800408D0 -- 3 differences (13 when first written, 2026-08-21; taken to 3
+func_800408D0 -- 3 differences. A permuter run from the 3-difference base
+  saturated at 4921 iterations with ZERO outputs, so that base is a local
+  optimum for the permuter and the residue needs a source-shape idea, not more
+  search. (13 when first written, 2026-08-21; taken to 3
   the same day by decomposing a permuter output -- see the coupled pair
   below). 202 instructions,
   the fifth member of the func_80040DD8 sprite-list family: same 0x1F800320 /
@@ -4712,7 +4715,8 @@ func_8005B64C -- 2 differences at the right length (132/132), first written
   The residue is 2: retail emits `sh $zero,0x32(p)` between the `addiu 64` and
   the `sh 4`, we emit it after the `and`. Five spellings measured.
 
-func_80012E5C -- 132/132, 26 differences (31 by hand; the permuter's only
+func_80012E5C -- 132/132, 24 differences (31 by hand; 26 and then 24 off two
+  separate permuter reads -- see the second one below)
   change was moving `i--` to after the call in the loop body). Scheduling and one load order, after
   a long chain of levers that each paid.
   Addressing: gp=12, at=1, and the whole function is decided by one assembler
@@ -4835,3 +4839,55 @@ func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
 # func_8004D914 MATCHED 2026-08-21, same day it was written. See the commit
 # message; the last lever was `o = 0;` written as a statement before the
 # function's first guard.
+
+
+func_80038EB0 -- 164/164, 147 differences, first written 2026-08-21. 164
+  instructions, a byte-stream command dispatcher: it reads two bytes from a
+  cursor selected by `p[0x58]`, looks the command up in the three-entry
+  D_800EB010 table (Rec4C, 0x4C bytes each) and either updates a slot or
+  creates one. gp=4, at=0, one `%hi`, so no addressing work.
+  **The count is inflated and says almost nothing** -- the FIRST difference is
+  the prologue, because we save a sixth callee-saved register that retail does
+  not, and every instruction after it is shifted by one. Read the first
+  difference here, not the 147.
+  What is right, and was worth finding:
+  * **The two byte reads are `p[0x58]` read twice, not a cached cursor.** The
+    `*c = e + 1` store may alias `p[0x58]`, so gcc reloads -- writing it twice
+    is what the target does and it comes for free.
+  * **The first byte needs two names.** Retail has `lbu $a1,0($v0)` … later
+    `addu $s3,$a1,$zero` -- the caller-saved-to-callee-saved copy at the
+    definition, func_800386B8's tell. `a = e[0]; … cmd = a;` produces it; a
+    single name does not. Worth 15 differences. The *second* byte's copy comes
+    for free and splitting it explicitly changes nothing.
+  * **The second read must NOT have a `u8 **c` local.** With `c` the pair
+    `lui`/`addiu %lo(D_800EB010)` is emitted after the address computation and
+    the `lb`'s load-delay slot takes a `nop`; written inline
+    (`e = *(u8 **)(p + p[0x58] * 4); … *(u8 **)(p + p[0x58] * 4) = e + 1;`)
+    the scheduler straddles the pair across the `lb` exactly as retail does.
+    That was +1 to 0 on the length -- and it is the whole reason the earlier
+    134-at-+1 reading looked better than the correct 149-at-0. **Do not
+    compare counts across length errors**; this function is the cleanest
+    instance of that trap in the file.
+  * The `>= 0x41` / `< 0x41` split, the `goto have;` join after the three-way
+    table lookup, and `goto create;` out of the `fl & 0x20` arm are all
+    retail's own layout.
+  The residue: gcc hoists `cmd >= 0x41` out of the `create` block and parks it
+  in **$s5**, where retail recomputes `slti $v0,$s3,0x41` in the delay slot of
+  each of the two branches that reach `create`. That extra live value is the
+  sixth saved register. Measured and worthless: `cmd > 0x40` and
+  `!(cmd < 0x41)` at either site or both, an `if`/`else` for `k` (148), five
+  placements of `q = (u8 *)D_800EB010;`, three names for the reused `v`
+  (147 -- the func_800154E4 rule fires but only just), and four compiler flag
+  rows including `-fno-schedule-insns`. This is the register-allocation class:
+  run the permuter on it.
+
+func_800580D4 -- NOT parked, no candidate written. Recorded only to retract a
+  blocker: the standing notes said it "needs PsyQ MATRIX/SVECTOR types". It
+  does not. The listing has **zero** GTE/COP2 instructions (`wc2|rtps|mfc2|
+  mtc2|cop2|lwc2|swc2` all match nothing), gp=2, at=0, and all seven calls go
+  above 0x80073840 into the PsyQ library, where an implicit declaration is
+  enough. `SVector` already exists in include/types.h. The real difficulty is
+  the stack frame: ~0xB8 bytes of locals that m2c renders with overlapping
+  offsets (sp10/sp14/sp28..sp5C), i.e. arrays it could not size, plus a
+  pointer to a stack local stored into the out-parameter at the end. It is the
+  smallest open candidate (123) and it is open, not blocked.

@@ -734,6 +734,19 @@ meaningful, and skipping to the last one wastes hours:
    because retail materialises the same address twice when the source names
    it once and passes it once.
 
+   **A local holding an address expression can cost a delay-slot fill, by
+   making a `%hi`/`%lo` pair indivisible in practice.** func_80038EB0 reads a
+   byte twice through `p + p[0x58] * 4`; with a `u8 **c` local for that
+   address, cc1psx emits `lui`/`addiu %lo(D_800EB010)` *after* the address
+   computation and the `lb`'s own load-delay slot takes a `nop`. Written
+   inline at both sites -- `e = *(u8 **)(p + p[0x58] * 4);` and
+   `*(u8 **)(p + p[0x58] * 4) = e + 1;` -- the scheduler straddles the pair
+   across the `lb`, `addiu %lo` fills the slot, and the `nop` is gone. Same
+   two instructions either way; only the freedom to separate them changes.
+   **Observed once.** The reason it matters more than one instruction: it took
+   the function from +1 to exact length, and the +1 reading had *fewer*
+   differences (134) than the correct one (149), which is the
+   never-compare-across-length-errors trap in its purest form.
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression

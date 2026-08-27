@@ -63,10 +63,9 @@ out:
     D_8009B0AC = v;
     D_8009AFA2[0] = v;
     ab = D_800A5768;
-    e = ab + (v & 0xFF) * 0x222E0;
     D_8009B0B4 = (s32)(D_8009B4A8 + (v & 0xFF) * 0x5160);
     n = 0x514C;
-    func_800862C0(e);
+    func_800862C0(ab + (v & 0xFF) * 0x222E0);
     qb = D_800E9D90;
     q = qb + 0xC;
 
