@@ -4850,8 +4850,9 @@ func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
 # function's first guard.
 
 
-func_80038EB0 -- 164/164, **36** differences (147 when first written; the
-  permuter found the lever the next day). First written 2026-08-21. 164
+func_80038EB0 -- 164/164, **29** differences (147 when first written; three
+  permuter reads and one hand lever took it to 37, 36, 34 and 29 over two
+  days). First written 2026-08-21. 164
   instructions, a byte-stream command dispatcher: it reads two bytes from a
   cursor selected by `p[0x58]`, looks the command up in the three-entry
   D_800EB010 table (Rec4C, 0x4C bytes each) and either updates a slot or
@@ -4898,6 +4899,24 @@ func_80038EB0 -- 164/164, **36** differences (147 when first written; the
   Splitting the second byte into two names is then worth one more (37 -> 36);
   on the 147 base it was worth nothing, which is the "arms that score worse in
   isolation" rule again.
+  Two more after that, both small and both worth recording for their kind:
+  * **`b = cmd + 1;` as a NAMED local, borrowing the second byte's dead
+    name** -- 36 -> 34. A FRESH name for the same expression is worth nothing
+    (36). Third instance in three days of the same shape: the permuter's win
+    is a borrow, and the fresh-name control proves it is the allocation and
+    not the naming (func_8005BFC8's `t2` and its `u16 *`, now this).
+  * **`do { } while (0);` round the single `*(s16 *)(q + 0x40) = v;` store**
+    -- 34 -> 29. gcc sinks that store below the two constant stores that
+    follow it and retail emits it first; the loop node pins it. Round the
+    whole `v = 0x178; if …; store` block scores the same, so it is the store
+    that needs pinning.
+  Residue at 29: register naming in the two byte-read blocks, one `addu`
+  operand order on read 2 (base-first in retail, index-first in ours -- and
+  read ONE comes out base-first from the same spelling, which is the puzzle),
+  and the `create` block now sharing the `cmd + 1` form. Measured and
+  worthless on the 29 base: `&p[...]`, the negation trick and a named scaled
+  index for read 2's address; `cmd - 1`, `cmd + cmd` and `-cmd` for the
+  post-call test (34, 34, 45); `cmd | 0` folds straight back to 147.
   The old residue, for the record: Measured and worthless: `cmd > 0x40` and
   `!(cmd < 0x41)` at either site or both, an `if`/`else` for `k` (148), five
   placements of `q = (u8 *)D_800EB010;`, three names for the reused `v`
