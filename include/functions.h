@@ -260,7 +260,14 @@ void func_80040510(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 u8 *func_80019564(u8 *arg0);
 void func_80070BB8(void);
 u8 *func_80035BE4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-s32 func_8002A6B8(void);  /* PROVISIONAL */
+/* func_8002A2F4 calls it with no arguments and MATCHES; func_8002A788 sets
+ * $a0 to its own parameter at the call. Two units, two declarations -- the
+ * original build's missing prototype, not a bug to reconcile. */
+#ifdef FUNC_8002A6B8_ARG
+s32 func_8002A6B8(u8 *arg0);
+#else
+s32 func_8002A6B8(void);
+#endif
 s32 func_80029EB0(u8 *arg0, s32 arg1);  /* PROVISIONAL */
 void func_80039A60(u8 *arg0);  /* PROVISIONAL */
 void func_8003C4E0(s32 arg0);

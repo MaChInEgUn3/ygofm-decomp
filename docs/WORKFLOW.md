@@ -1698,6 +1698,17 @@ on a combination that had been in the table for weeks.
   one of them first-try, because counting `%gp_rel` and `lui  *\$at, %hi(` in the
   listing and reading the widths out of variables.h settles the question in a
   minute.
+  **The `dup-%hi` pool is productive, and its own tag points the wrong way
+  when `gp > 0`.** candidates.py tags those candidates "try
+  -mno-split-addresses", which is right for the `gp == 0` branch and wrong
+  here: the flag is per *file* and cannot separate two symbols of the same
+  width. func_8002A788 is the first match out of that pool (25 candidates
+  that had been skipped for weeks) and it wanted the per-symbol route
+  instead -- `as -G1`, `D_8009B26C_SIZED` and `D_8009B269_SIZED` to push two
+  one-byte symbols out of small data while the one-byte D_8009B258/D_8009B259
+  beside them keep `%gp_rel`, plus `D_8009B3A4_IS_VOLATILE` for eight reloads
+  of one halfword. Run `grep -c '%gp_rel'` and the widths BEFORE reading the
+  tag.
   **cc1psx will not hoist a BARE symbol's memory reference into a delay slot,
   and that is how you get an empty one back.** It will happily hoist the `lui`
   half of its own `%hi`/`%lo` pair, because that half is an ordinary
