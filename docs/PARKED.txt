@@ -4967,11 +4967,11 @@ func_800580D4 -- the blocker retraction that preceded the draft above: the stand
   smallest open candidate (123) and it is open, not blocked.
 
 
-func_8002BD0C -- 140 target, 139 built (-1), 113 differences, written
-  2026-08-21. The seventh member of the D_8009B0F4 dispatcher family and the
-  first with a real jump table. gp=0, at=5, `as -G0`, and the default
-  (volatile scalar) arm of D_8009B0F4 for the back-to-back read-modify-writes
-  in arms 0 and 2.
+func_8002BD0C -- 140 target, 140 built, 51 differences, written 2026-08-21,
+  reworked 2026-08-28 from -1/113.  The seventh member of the D_8009B0F4
+  dispatcher family and the first with a real jump table. gp=0, at=5,
+  `as -G0`, and the default (volatile scalar) arm of D_8009B0F4 for the
+  back-to-back read-modify-writes in arms 0 and 2.
   **The dispatch and the jump table came out exact on the first draft**, which
   is the hard part for this class: seven cases whose arms sit in memory in the
   order 0, 1, 2, 4, {3,5}, 6 -- read straight off `jtbl_80010208` in
@@ -4980,15 +4980,36 @@ func_8002BD0C -- 140 target, 139 built (-1), 113 differences, written
   `case 3: case 5:` sharing, plus two `goto` join labels (arm 0 jumps to the
   one arm 4 falls into; arm 1 jumps to the one arms 3/5 fall into), it
   reproduces retail's block layout exactly.
-  The residue is one delay slot and the register assignment inside the arms.
-  Retail ends arm 0 with `j` and `lui $v1,2` in the slot -- 0x20000 is a single
-  `lui`, and it is the last thing computed. We keep finding something else to
-  put there: with the join written `*(s32 *)(p + 0xC) = d + 0x800;` gcc hoists
-  that `addiu` into the slot (-1), and with the compound `d += 0x800;` that
-  stops but gcc hoists the `sw $a0,8($s2)` store instead (+1). Neither lands.
-  Also measured and worthless: a named read of D_8009B0F4 above the `+6` store
-  (+6 worse), `n = 0x20000` moved after `d = D_8009B118`, and swapping the
-  declaration order of the two constants held across the call in arm 2.
+  Three levers closed the -1 and took 113 to 51, and **all three were already
+  in the file as measured negatives**, because each is worth nothing until the
+  other two are in:
+  - **arm 2's `d` had to be a second name.**  Arm 2 and the join1 arm both end
+    `sw 8; addiu 0x800; sw 0xC`, so with one name they get one pseudo, one
+    register, and the final jump pass cross-jumps arm 2's tail into join1 --
+    two instructions short.  Retail keeps arm 2's pointer in `$v1` and
+    join1's in `$v0`, and that register difference is the ONLY thing blocking
+    the merge.  A second name is +2 and restores the length.
+  - **`do { n = 0x20000; } while (0);` in arm 0.**  Without it gcc fills arm
+    0's `j` delay slot by duplicating join1's `addiu $v0,0x800` and hoists the
+    `lui` for 0x20000 up into the middle of the arm; retail has the `lui` in
+    the slot.  -1 to 0, and 117 to 66.
+  - **a named read of D_8009B0F4 above the `+6` store in arm 0** (66 -> 56)
+    **and a SECOND, differently named one in arm 2** (56 -> 51).  The old
+    entry recorded the arm-0 read alone as "+6 worse", which it is; it only
+    pays once the length is right.  One name shared by both arms is 56, so
+    this is the func_8003B808 rule ("do not share the name across two switch
+    arms") a second time.
+  What is left is 51 register differences with the instructions
+  instruction-for-instruction right: retail holds the mask `m` in `$a0` and
+  the read `t` in `$v0`, and we have them one register up.  All six
+  declaration orders of m/n/d score exactly 51, which is the usual tell that
+  the axis is elsewhere -- see func_80057544, the sibling, where the same
+  residue turned out to be **one name per arm for the D_8009B0F4 read** (53
+  -> 29).  Try that here before anything else: `t3` for the join2 arm alone
+  is worth nothing, so the split has to be finer.
+  The permuter reaches 47 by writing join2's two stores as
+  `d = (*(s32 *)(p + 8) = D_8009B118);`, which emits them in the opposite
+  order to retail's; not installed.
 
 func_80020988 -- 151 target, 150 built (-1), 72 differences, written
   2026-08-28. A menu appear/animate/dismiss handler returning a status code
@@ -5033,10 +5054,11 @@ func_80020988 -- 151 target, 150 built (-1), 72 differences, written
   accident of the volatile's own store-and-reload.
 
 
-func_8004803C -- 157 target, 153 built (-4), 151 differences, first draft
-  2026-08-28. Fourth out of the dup-%hi pool. A sound-voice setup: it looks a
-  16-bit id up in one table, derives two volumes, applies an optional pan, and
-  writes eleven fields of the D_8009B45C block before two library calls.
+func_8004803C -- 157 target, 157 built, 140 differences, written 2026-08-28
+  (-4/151 on the first draft the same day).  Fourth out of the dup-%hi pool.
+  A sound-voice setup: it looks a 16-bit id up in one table, derives two
+  volumes, applies an optional pan, and writes eleven fields of the
+  D_8009B45C block before two library calls.
   gp=0, at=0, `as -G0`, and D_8009B45C is re-materialised in nearly every
   block -- gcc has no global CSE, so writing the symbol inline is right and a
   base local would be wrong everywhere except the first block, which does
@@ -5048,9 +5070,61 @@ func_8004803C -- 157 target, 153 built (-4), 151 differences, first draft
   shape as `and` versus `andi` for a mask.
   arg5 and arg6 are `u8` on the callee's own evidence -- their stack slots are
   read with `lbu`.
-  Not yet diagnosed: -4, and the parameter-to-callee-saved assignment is
-  rotated (retail has arg0/arg1/arg5/arg6 in $s3/$s0/$s5/$s4 and the id in
-  $s2). One concrete lead: retail masks arg3 with `andi $a1,$a3,0xFF` and
-  feeds the mask to both multiplies, and our build multiplies `$a3` raw even
-  though the source says `v = arg3 & 0xFF;` -- worth understanding before
-  anything else.
+  **The -4 was three things and none of them was the `andi` lead the first
+  entry named.**  Retail's `andi $a1,$a3,0xFF` is reproduced by the obvious
+  `v = arg3 & 0xFF;` as soon as `v` stops being reused for the pan block's
+  products -- that reuse was the whole of it, and the "we multiply $a3 raw"
+  reading was wrong.  The other two: every index sum is written **index
+  first** (`n + *(s32 *)(b + 0x444)`, not the reverse), and `idx` is a
+  **`s16`**, not an `s32` -- with `s32` gcc knows the `lhu` already bounds the
+  value and folds the second `& 0xFFFF` away, so the `andi` retail re-emits
+  at the tail block has nowhere to come from.  Declared `s16`, gcc keeps the
+  raw halfword and re-masks.  157/157 with that.
+  What is left is 140 differences of pure allocation: retail has arg0/arg1/
+  arg5/arg6 in $s3/$s0/$s5/$s4, the id in $s2 and D_8009B45C in $a2 (with
+  `addu $t2,$a2,$zero` saving arg2 out of the way), and we hold D_8009B45C in
+  $t0 and need no such copy.  The count is inflated: the diff is positional
+  and the prologue's store order differs, so almost every later line is
+  marked.
+  Measured and worse: splitting the base local per block (-1/153, and the
+  three-name split is what *causes* the duplicate `lhu` to disappear, so the
+  two interact), splitting `n` into two names (-1/157), naming arg2 (141), and
+  a `w = arg4;` copy for the second pan test (worth exactly 1).
+  1431 permuter iterations from the 140 base found nothing better than 139.
+
+
+func_80057544 -- 155 target, 155 built, 29 differences, written 2026-08-28.
+  The EIGHTH member of the D_8009B0F4 dispatcher family and a near-clone of
+  func_8002BD0C: same `$s2` parameter block, same jump table shape, same
+  `and`/`or` pairs on D_8009B0F4, six cases instead of seven and every arm
+  ending in its own `j` rather than sharing a join.  gp=0, at=7, `as -G0`,
+  default declarations.  D_80010008, D_801DD800 and D_800F5694 are new
+  symbols; D_80010008 is the word 0x80180000, which is the overlay address
+  docs/DISC.txt is about.
+  **The lever that matters here is one name per arm for the D_8009B0F4
+  read, and it is worth 53 -> 29.**  A single `t` used in five arms is one
+  pseudo with a live range spanning the whole switch, so the global allocator
+  gives it `$a0` and pushes the mask `m` -- which really IS one global pseudo,
+  `$a0` in every arm of retail -- up to `$a1`, and every arm's registers
+  rotate behind it.  Five names are five short live ranges, each local to its
+  block, each landing in retail's `$v0`.  The mirror was measured the same
+  minute and is what makes the claim sharp: splitting `d` per arm is 29 -> 34
+  and splitting `m` per arm is 29 -> 42, because retail really does carry
+  those in one register across the whole function.  So the question is never
+  "one name or many" -- it is which values the target keeps in one register
+  across the arms, and the answer here differs per variable within one
+  function.
+  Two more that were needed to get to exact length:
+  - arm 4 re-reads D_8009B0F4 for the `|` after storing the `&` result, and
+    retail hoists that reload ABOVE the `p+0x1C` store to fill its own delay
+    slot.  A named read (`t4 = D_8009B0F4;` written before the constant) is
+    +1 to 0 and 68 -> 54.
+  - `do { m = 0xFFDDFFFF; } while (0);` in arm 4, which stops the scheduler
+    splitting the `lui`/`ori` pair (54 -> 53).
+  Measured and worthless: naming the `p+0x1C` constants (shared is -3, because
+  arms 2 and 3 then cross-jump; per-arm is also -3), a `do`/`while` round arm
+  5's single store, and hoisting arm 3's `&a` into a pointer local (+4).
+  The residue is 29 differences, all of them `$v0`/`$v1` exchanged around the
+  named read and the constant beside it -- the same residue func_8002BD0C
+  has, in the same family, which by the two-independent-functions rule means
+  it is systematic and not local pressure.

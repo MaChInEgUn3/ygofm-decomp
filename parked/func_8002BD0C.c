@@ -5,6 +5,9 @@ void func_8002BD0C(u8 *p, s32 mode) {
     s32 m;
     s32 n;
     s32 d;
+    s32 t;
+    s32 t2;
+    s32 d2;
     s32 hun;
     s32 ten;
 
@@ -14,12 +17,15 @@ void func_8002BD0C(u8 *p, s32 mode) {
         *(s16 *)(p + 0x30) = 0x300;
         *(s16 *)(p + 0x32) = 0x100;
         *(s16 *)(p + 4) = 0x40;
+        t = D_8009B0F4;
         *(s16 *)(p + 6) = 0x10;
-        D_8009B0F4 = D_8009B0F4 & m;
+        D_8009B0F4 = t & m;
         D_8009B0F4 = D_8009B0F4 | 0x10000;
         p[0x46] = 2;
         d = D_8009B118;
-        n = 0x20000;
+        do {
+            n = 0x20000;
+        } while (0);
         goto join1;
 
     case 1:
@@ -38,17 +44,18 @@ void func_8002BD0C(u8 *p, s32 mode) {
         func_80081DE8(g, D_8009B118);
         m = 0xFFDDFFFF;
         n = 0x18000;
+        t2 = D_8009B0F4;
         *(s16 *)(p + 0x30) = 0x240;
         *(s16 *)(p + 0x32) = hun;
         *(s16 *)(p + 6) = ten;
         *(s32 *)(p + 0x1C) = n;
-        D_8009B0F4 = D_8009B0F4 & m;
+        D_8009B0F4 = t2 & m;
         D_8009B0F4 = D_8009B0F4 | 0x10000;
         p[0x46] = 2;
-        d = D_8009B118;
+        d2 = D_8009B118;
         *(s16 *)(p + 4) = 0x40;
-        *(s32 *)(p + 8) = d;
-        *(s32 *)(p + 0xC) = d + 0x800;
+        *(s32 *)(p + 8) = d2;
+        *(s32 *)(p + 0xC) = d2 + 0x800;
         break;
 
     case 4:

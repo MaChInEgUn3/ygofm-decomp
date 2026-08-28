@@ -415,6 +415,10 @@ PER_FUNC_AS_FLAGS["func_8004B49C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80050584"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80012AE8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002BD0C"] = "-G0"
+# func_80057544: gp == 0, so any -G is free; -G0 gives the seven `lui $at`
+# stores of D_8009B0F4 and the bare form for D_8009B118.  Sibling of
+# func_8002BD0C, same recipe.
+PER_FUNC_AS_FLAGS["func_80057544"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020988"] = "-G4"

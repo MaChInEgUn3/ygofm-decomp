@@ -882,6 +882,11 @@ extern u8 *D_800101D8;
 extern u8 D_801AF000[];
 extern u8 D_801AF800[];
 extern u8 D_801DD000[];
+extern u8 D_801DD800[];
+/* 0x80180000 -- the address of the overlay region func_80057544 hands to
+ * the display list; see docs/DISC.txt.  Read with `lw`, so a word. */
+extern s32 D_80010008;
+extern u8 D_800F5694;
 extern u8 *D_8001002C;
 /* An eight-byte record func_8005B64C copies onto its stack by value. */
 extern u8 D_8009B058[];
