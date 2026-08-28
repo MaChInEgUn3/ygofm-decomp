@@ -3,6 +3,7 @@
 void func_8002BD0C(u8 *p, s32 mode) {
     s16 *g;
     s32 m;
+    s32 m2;
     s32 n;
     s32 n2;
     s32 d3;
@@ -32,7 +33,7 @@ void func_8002BD0C(u8 *p, s32 mode) {
         goto join1;
 
     case 1:
-        m = 0xFFDCFFFF;
+        m2 = 0xFFDCFFFF;
         n2 = 0x2000;
         goto join2;
 
@@ -81,11 +82,11 @@ join1:
 
     case 3:
     case 5:
-        m = 0xFFDCFFFF;
+        m2 = 0xFFDCFFFF;
         n2 = 0x800;
 join2:
         *(s32 *)(p + 0x1C) = n2;
-        D_8009B0F4 = D_8009B0F4 & m;
+        D_8009B0F4 = D_8009B0F4 & m2;
         d3 = D_8009B118;
         *(s32 *)(p + 0xC) = d3;
         *(s32 *)(p + 8) = d3;

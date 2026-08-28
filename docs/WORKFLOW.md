@@ -336,6 +336,17 @@ meaningful, and skipping to the last one wastes hours:
    arms that `goto` one join label (func_8002BD0C's `n` wants one name for
    the join1 group and another for the join2 group, 41 to 35); do that by
    hand.
+   **And the unit is the distinct VALUE, not the arm.** The line above says
+   the mask wants one shared name; that is a step on the way and not the end
+   of it. func_8003A01C's arms use 0xFFDDFFFF once and 0xFFDCFFFF twice, and
+   retail holds them in two different registers -- so the source has two
+   names, one per constant, each shared by the arms that use it. One name for
+   all three arms is 13 differences and two names is 7. It carried to
+   func_8002F4C0 (35 to 24) and func_8002BD0C (32 to 27), and was worth
+   nothing on func_8002FB78 or func_80057544, so check rather than assume.
+   The reading that makes it obvious in hindsight: a mask constant in the
+   original was almost certainly a `#define`, and two different `#define`s
+   are two different values however many arms use each.
    **And the rule runs in both directions -- read which register retail
    uses before splitting anything.** func_8003DA40 has two pointers that
    never coexist, one per half of the function, and retail keeps both in
@@ -1204,6 +1215,19 @@ stack objects between `sp+0x10` and `sp+0xB8` and every one landed on the
 first draft. Do this before anything else on a function with a big frame: it
 is free, and getting it wrong makes every stack reference in the diff wrong at
 once, which reads like a much larger problem.
+
+**A call argument or a field read that the target loads EARLY wants a fresh
+named local, and here the borrow rule runs backwards.** func_8003A01C's last
+six differences were retail loading D_8009B118 and copying `p` into `$a0`
+*between* two of the four stores that precede the call, where every inline
+spelling emits them after all four. A local for the argument, written at that
+point in the source, moves them -- and a **fresh** name is 6 while
+**borrowing** the arm's own dead `t` is 17. The same again one line later for
+the `p + 0x3C` read the arm's arithmetic consumes: a fresh `k` is the MATCH
+and borrowing `n` (the name case 0 uses for the same field) is 17. Two
+instances in one function, both in the same direction, against a rule that
+usually says the opposite -- so when a borrow makes things much *worse*, try
+the fresh name at the same position before concluding the axis is wrong.
 
 **SWEEP the borrow candidates rather than guessing which one.** Which dead
 name a value borrows is the whole lever, and the difference between two

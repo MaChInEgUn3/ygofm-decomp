@@ -1369,34 +1369,6 @@ func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
   read sits between the two updates the way retail's does (18, much worse).
   Full flag sweep: 10 at plain -O2 -G8.
 
-func_8003A01C -- 17 differences (was 33), the same *kind* of difference as the
-  three-cycle permutation class but **not** the documented rotation, so it is
-  not counted as a member. That class is mask=$a0 / value=$v0 / constant=$v1
-  against our $v1/$a0/$v0. Here retail is mask=$a1 / 0x18000=$a0 / value=$v1
-  and we get $v1/$v0/$a1 -- four registers, because this body keeps one more
-  value live (the 0x18000 and the `p + 0x3C` read). Checked rather than
-  assumed; adding members to that class on resemblance would weaken it.
-  A variant of that body: no D_801AF000, case 0 computes `0x340 - n * 192` into
-  a field the family does not touch, case 2 reads `*(s32 *)(p + 0x38)` where the
-  family uses a global.
-  Three levers took it from 83 to 33 and the last is new:
-  - read D_8009B0F4 into a local before the field stores (the class lever);
-  - read `*(s32 *)(p + 0x3C)` and D_8009B118 into locals early, where retail
-    issues their loads (83 to 65 to 54);
-  - **give the two arms that share a tail the same local.** Cases 1 and 2 end
-    with the same three stores, but case 1's value is D_8009B118 and case 2's
-    is `*(s32 *)(p + 0x38)`. Written as different expressions gcc emits the
-    tail twice; assigned to one local `t` first, it cross-jumps to retail's
-    shared `.L8003A170`. 54 to 33.
-  What is left is the permutation and nothing else.
-
-  **2026-08-28, `tools_src/sweep_arm_split.py`: 33 -> 24 -> 17.**
-  One name per arm for the D_8009B0F4 read is 33 -> 24 (the sweep found it),
-  and then ONE SHARED name for the mask -- `m = 0xFFDDFFFF;` at the top of
-  each arm, one declaration -- is 24 -> 17.  Per-arm masks are 22, so the
-  two variables want opposite treatments in the same function, which is the
-  whole point of sweeping rather than reasoning.
-
 func_8002FB78 -- 22 differences (was 52), and **a measured member** of the three-cycle
   permutation class, not a resemblance: retail is mask=$a0 / value=$v0 /
   constant=$v1 and we get $v1 / $a0 / $v0, which is the documented rotation
@@ -1413,8 +1385,15 @@ func_8002FB78 -- 22 differences (was 52), and **a measured member** of the three
   Five functions on this rotation now. See the class section in DECISIONS.
 
   **2026-08-28, `tools_src/sweep_arm_split.py`: 52 -> 36 -> 22.**
-  The same two-step as func_8003A01C: four names for the D_8009B0F4 read
-  (52 -> 36) and one shared name for the mask (36 -> 22).
+  The same two-step as func_8003A01C (which has since MATCHED): four names
+  for the D_8009B0F4 read (52 -> 36) and one shared name for the mask
+  (36 -> 22).  The refinement that finished func_8003A01C -- one name per
+  distinct mask VALUE, so 0xFFDDFFFF and 0xFFDCFFFF get a name each -- was
+  tried here and is worth exactly nothing (22 either way).  The other three
+  levers off that function are still untried here: a fresh named local for
+  the call's D_8009B118 argument placed where retail loads it, a fresh named
+  local for the field read at the same, and `do { } while (0);` round the
+  single mask assignment.
 
 func_80060E70 -- 7 differences: one hoist we cannot place and one register.
   A seven-iteration loop that builds sprite entries from a pair of parallel
@@ -1933,44 +1912,6 @@ func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
     first, both stores through the local (gcc folds `p[0]` back to the
     symbol form anyway), and the gp-relative `|=` moved to first and to
     second. Discriminator not established.
-
-func_8002F4C0 -- 35 differences with equal lengths (92/92) (was 45), and
-    they are one register choice cascading through a 92-instruction body.
-    Eleven bare accesses across D_8009B0F4 (stored through `$at`, so the
-    bare form for a store) and D_8009B118, no %gp_rel, scalar arms plus
-    `as -G0`. A three-way `switch` on the second parameter, written as a
-    switch because retail's dispatch is gcc's binary search on 0/1/2.
-    64 -> 45 on one shape: `v = D_8009B118;` belongs *before* the
-    `*(s16 *)(p + 6) = 0x10;` store, not after. Read last it takes a
-    load-delay `nop`; read first the two constant stores fill the delay,
-    which is what retail does and is worth one instruction.
-    What is left: retail materialises the two masks into `$a0` and `$a1` --
-    the parameter registers, both dead by then -- and we get `$v1` and
-    `$a0`, which rotates every register in the arm. The `lui` of the first
-    mask is in the dispatch branch's delay slot in both, so the placement is
-    already right; only the register differs. Two further orderings of the
-    `p + 4` store measured (after the mask, and after the 0x1C store), both
-    47. Discriminator not established.
-
-# Permuter batch, 2026-08-03: seven parked candidates at <= 12 differences
-# that had never been run under `--run`, 200 seconds each, strictly one at a
-# time so the build was not starved. Two improved -- func_8004A6F8 9 -> 6 and
-# func_80047788 12 -> 11, both folded in above. Five did not: func_80071424
-# (best 6 against the park's 2), func_8004A764 (10 vs 6), func_80017F04 (46 vs
-# 12), and func_80030D5C and func_8003CCD8 saved nothing at all. Every saved
-# output was re-run through try_func rather than read off the score, and three
-# of the five were *worse* by that measure -- the fifth and sixth instances of
-# the score disagreeing with the count in direction.
-
-  **2026-08-28, `tools_src/sweep_arm_split.py`: 45 -> 40, then a rewrite to 35.**
-  Two names for the D_8009B118 read is 45 -> 40.  Rewriting the arms with the
-  rest of the family's levers -- shared `m` and `n` names, a named read
-  before the `+4` store in arm 0, a second named read for the `|` reload,
-  and `one = 1;` assigned BEFORE the switch (retail keeps it in `$s1` and
-  uses it both as the `case 1` comparison operand and as the value arms 1
-  and 2 store into `p[0x46]` through a shared `goto` tail) -- is 40 -> 35.
-  The residue is `m` and `n` exchanged, and all three orderings of their
-  declarations and assignments score exactly 35.
 
 func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
     record compactor: walk D_8009B45C's 0x30-byte slots from +0x80, and when a
