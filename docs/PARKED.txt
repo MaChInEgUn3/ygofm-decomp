@@ -1369,32 +1369,6 @@ func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
   read sits between the two updates the way retail's does (18, much worse).
   Full flag sweep: 10 at plain -O2 -G8.
 
-func_8002FB78 -- 22 differences (was 52), and **a measured member** of the three-cycle
-  permutation class, not a resemblance: retail is mask=$a0 / value=$v0 /
-  constant=$v1 and we get $v1 / $a0 / $v0, which is the documented rotation
-  exactly. Checked before claiming it.
-  A four-case variant of the clone body, with cases 1 and 3 sharing a tail. It
-  was written straight from the accumulated levers -- read D_8009B0F4 into a
-  local with a compound assignment and write-back, one named local for the
-  shared tail so gcc cross-jumps, the `ori` form for 0x8000 -- and came out at
-  52 on the first attempt with no structural differences at all. Full flag
-  sweep: 52 at plain -O2 -G8.
-  One thing tried and rejected: `t += 0x800;` before the second store, which
-  is what retail's `sw; addiu; sw` on one register looks like. It gives 53.
-  The `+ 0x800` version is the one kept.
-  Five functions on this rotation now. See the class section in DECISIONS.
-
-  **2026-08-28, `tools_src/sweep_arm_split.py`: 52 -> 36 -> 22.**
-  The same two-step as func_8003A01C (which has since MATCHED): four names
-  for the D_8009B0F4 read (52 -> 36) and one shared name for the mask
-  (36 -> 22).  The refinement that finished func_8003A01C -- one name per
-  distinct mask VALUE, so 0xFFDDFFFF and 0xFFDCFFFF get a name each -- was
-  tried here and is worth exactly nothing (22 either way).  The other three
-  levers off that function are still untried here: a fresh named local for
-  the call's D_8009B118 argument placed where retail loads it, a fresh named
-  local for the field read at the same, and `do { } while (0);` round the
-  single mask assignment.
-
 func_80060E70 -- 7 differences: one hoist we cannot place and one register.
   A seven-iteration loop that builds sprite entries from a pair of parallel
   arrays. Three levers took it from 58 to 7, and the second is new:
@@ -2649,41 +2623,6 @@ func_80031574 -- 24 differences and ONE missing instruction, all of them in
     is what settled it.
     What is left at 14: retail does the +4 word's read-modify-write before
     the +8 halfword's and we do them the other way round.
-
-func_8004E9A0 -- 21 differences, equal lengths (88/88) (was 63 at +1); parked as a decode with the
-    structure settled rather than as a near miss. The arithmetic reads back
-    cleanly and is worth having written down:
-        if (D_800F569F[0] == 0) return;
-        switch (D_8009AF88[0xA0]) {
-        case 1: u = func_80074170(-1) / 8;   r = u % 3;
-                D_8009B46A = 0x1C0; D_8009B46C = 0x10; D_8009B46E = 0x40;
-                D_8009B468 = r * 16 + 0x2D0;
-                func_8007FA38(&D_8009B468, 0x2C0, 0x1C0, r);   break;
-        case 4: u = func_80074170(-1) / 10;  n = 8; r = u % n;
-                D_8009B468 = 0x260; D_8009B46C = 0x20; D_8009B46E = 0x18;
-                D_8009B46A = D_80091508[r] * 3 * 8 + 0x180;
-                func_8007FA38(&D_8009B468, 0x220, 0x168, r);   break;
-        }
-    Three readings settled and are in the candidate: the dispatch is a
-    `switch` (an if/else-if chain emits bne chains where retail has
-    beq/beq/j); D_800F569F is an unsized array, because retail reaches it
-    %hi/%lo and a scalar would be gp-relative at -G8; and the four
-    D_8009B46x are separate small-data scalars, so `&D_8009B468` gives
-    retail's `addiu $a0,$gp,%gp_rel(...)`.
-    Note the two different divides in one function, which is the divisor
-    rule from both sides: `/ 8` and `/ 10` are reciprocal/shift expansions
-    because the divisors are literals, while `% 8` is a REAL div wrapped in
-    break 7 / break 6 -- so that 8 was a variable in the source and is a
-    local here.
-    What is open: gcc copies the `/ 8`'s `sra` into the preceding branch's
-    delay slot where retail fills it with the `lui` of the `% 3` reciprocal,
-    which is +2, and something in the case-4 block is one short. Moving the
-    modulo computations up in either arm does not change it (63 and 65).
-
-  **2026-08-28, `tools_src/sweep_arm_split.py`: 63 at +1 -> 21 at equal length.**
-  Two names for the `func_80074170(-1) / K` result, one per arm.  It fixed
-  the length error as well as the count, which is worth noting: a shared
-  name there was letting gcc cross-jump something.
 
 func_8003C628 -- 45 positional differences at +1 length, and the count is
     inflated: the real edits are about six instructions misplaced inside two
@@ -4938,7 +4877,7 @@ func_800580D4 -- the blocker retraction that preceded the draft above: the stand
   smallest open candidate (123) and it is open, not blocked.
 
 
-func_8002BD0C -- 140 target, 140 built, 32 differences, written 2026-08-21,
+func_8002BD0C -- 140 target, 140 built, 19 differences, written 2026-08-21,
   reworked 2026-08-28 from -1/113.  The seventh member of the D_8009B0F4
   dispatcher family and the first with a real jump table. gp=0, at=5,
   `as -G0`, and the default (volatile scalar) arm of D_8009B0F4 for the
@@ -4993,6 +4932,27 @@ func_8002BD0C -- 140 target, 140 built, 32 differences, written 2026-08-21,
   nothing better than 32.  From the earlier 51 base it reached 47 by writing
   join2's two stores as `d = (*(s32 *)(p + 8) = D_8009B118);`, which emits
   them in the opposite order to retail's; not installed.
+
+  **2026-08-28 evening, 32 -> 19**, on three edits from the two siblings that
+  matched the same hour:
+  - **one name per distinct mask VALUE** (the sibling rule): 32 -> 27.
+  - **arm 4's two constants are ONE name.** Retail holds 0x26810 in `$v1`,
+    stores it to `p+0x30`, then puts 0xA000 in the same `$v1`.  Written as a
+    literal store plus a separate `n = 0xA000;` the two get different
+    registers; `n = 0x26810; *(s32 *)(p + 0x30) = n; n = 0xA000;` is 27 -> 24.
+    This is func_80020BE4's one-name-for-two-sequential-constants rule, third
+    instance.
+  - **arm 2's `n` is not the join groups' `n`.** It is the only 0x1C value
+    that reaches no join label, and a third name for it is 24 -> 19.  Measured
+    as +3 (worse) earlier in the same function's life, which is the coupled-
+    levers trap again.
+  The residue is 19, all of it `m` in `$a1` where retail has `$a0` because `n`
+  took `$a0` first, plus arm 2's pointer/constant pair exchanged.  The
+  permuter reaches 14 by wrapping join1's two stores in `if (d2) { A } else
+  { A }` on an UNINITIALISED `d2` -- the func_8005F3B8 class -- and none of
+  the three plausible `do { } while (0);` shapes with the same effect
+  reproduces it (two of them are -3, because the do/while lets gcc cross-jump
+  join1's tail into arm 2's).
 
 func_80020988 -- 151 target, 150 built (-1), 72 differences, written
   2026-08-28. A menu appear/animate/dismiss handler returning a status code
@@ -5076,7 +5036,7 @@ func_8004803C -- 157 target, 157 built, 140 differences, written 2026-08-28
   1431 permuter iterations from the 140 base found nothing better than 139.
 
 
-func_80057544 -- 155 target, 155 built, 29 differences, written 2026-08-28.
+func_80057544 -- 155 target, 155 built, 26 differences, written 2026-08-28.
   The EIGHTH member of the D_8009B0F4 dispatcher family and a near-clone of
   func_8002BD0C: same `$s2` parameter block, same jump table shape, same
   `and`/`or` pairs on D_8009B0F4, six cases instead of seven and every arm
@@ -5111,3 +5071,15 @@ func_80057544 -- 155 target, 155 built, 29 differences, written 2026-08-28.
   named read and the constant beside it -- the same residue func_8002BD0C
   has, in the same family, which by the two-independent-functions rule means
   it is systematic and not local pressure.
+
+  **2026-08-28 evening, 29 -> 26 on one declaration.**  Arm 5's only statement
+  stores 1 into D_800F5694, and retail does it as `lui $v1,%hi` /
+  `sb $v0,%lo(D_800F5694)($v1)` -- through an ORDINARY register, which under
+  this function's `as -G0` is the unsized-array form and not the scalar one
+  (a scalar at -G0 stores through `$at`).  `extern u8 D_800F5694[];` and
+  `D_800F5694[0] = 1;`.  The tell is the register in the store's address:
+  `$at` means scalar, anything else means cc1psx's own pair.
+  Also tried and worth nothing: the chained-assignment spelling of the two
+  D_8009B118 stores that closed func_8002FB78, and one name per distinct mask
+  value (29 either way).
+

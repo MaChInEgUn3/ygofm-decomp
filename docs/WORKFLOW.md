@@ -1216,6 +1216,24 @@ first draft. Do this before anything else on a function with a big frame: it
 is free, and getting it wrong makes every stack reference in the diff wrong at
 once, which reads like a much larger problem.
 
+**And when the target sets up a call's arguments BEFORE the stores that
+precede it, the name goes at the TOP of the arm, not next to the call.**
+func_8002FB78's case 2 materialises `D_8009B118` and copies `p` into `$a0`
+ahead of all four halfword stores; `c = D_8009B118;` written after those
+stores is worth nothing and written as the arm's FIRST statement is 22
+differences to 15. Same lever in func_8003A01C, where the right position is
+between two of the stores -- so read which store the load sits above and put
+the assignment there.
+
+**A store whose value the next statement also uses can be a chained
+assignment.** Retail keeps `sw 8` and the `addiu 0x800` that feeds `sw 0xC`
+adjacent, and every ordering of `t = D_8009B118; *(s32 *)(p + 8) = t;
+*(s32 *)(p + 0xC) = t + 0x800;` -- all three permutations of the three
+statements -- puts the `addiu` first. `t = (*(s32 *)(p + 8) = D_8009B118);`
+does not: the store's own value becomes `t`, and the pair comes out in
+retail's order. func_8002FB78, 15 differences to 9. The permuter found it;
+it is ordinary C and reads as source.
+
 **A call argument or a field read that the target loads EARLY wants a fresh
 named local, and here the borrow rule runs backwards.** func_8003A01C's last
 six differences were retail loading D_8009B118 and copying `p` into `$a0`
@@ -1558,6 +1576,14 @@ on a combination that had been in the table for weeks.
   fewer arguments than the callee reads, that is not a bug to fix: it is the
   original build's missing prototype, and forcing one signature on both breaks
   whichever side you did not measure.
+- **Count the callee's arguments against a caller that already MATCHES.**
+  func_8004E9A0 passed four arguments to `func_8007FA38` and the matched
+  `src/func_800582C0.c` passes three -- so the fourth was invented, and it
+  pinned `$a3` where retail lets the allocator reuse it. The instruction
+  count does not move when you drop it (the extra argument was free), so
+  nothing flags it; `grep -rn <callee> src/` does, in one command, and it is
+  worth running on every call in a draft rather than only when adding a
+  prototype.
 - **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`

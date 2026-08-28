@@ -6,6 +6,7 @@ void func_8002BD0C(u8 *p, s32 mode) {
     s32 m2;
     s32 n;
     s32 n2;
+    s32 n3;
     s32 d3;
     s32 d;
     s32 t;
@@ -47,12 +48,12 @@ void func_8002BD0C(u8 *p, s32 mode) {
         g[3] = ten;
         func_80081DE8(g, D_8009B118);
         m = 0xFFDDFFFF;
-        n = 0x18000;
+        n3 = 0x18000;
         t2 = D_8009B0F4;
         *(s16 *)(p + 0x30) = 0x240;
         *(s16 *)(p + 0x32) = hun;
         *(s16 *)(p + 6) = ten;
-        *(s32 *)(p + 0x1C) = n;
+        *(s32 *)(p + 0x1C) = n3;
         D_8009B0F4 = t2 & m;
         D_8009B0F4 = D_8009B0F4 | 0x10000;
         p[0x46] = 2;
@@ -72,7 +73,8 @@ void func_8002BD0C(u8 *p, s32 mode) {
         func_80081DE8(g, D_8009B118);
         p[0x46] = 3;
         d = D_8009B118;
-        *(s32 *)(p + 0x30) = 0x26810;
+        n = 0x26810;
+        *(s32 *)(p + 0x30) = n;
         n = 0xA000;
 join1:
         *(s32 *)(p + 0x1C) = n;

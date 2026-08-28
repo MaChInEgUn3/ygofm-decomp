@@ -99,7 +99,7 @@ void func_80057544(u8 *p, s32 mode) {
         break;
 
     case 5:
-        D_800F5694 = 1;
+        D_800F5694[0] = 1;
         break;
     }
 }
