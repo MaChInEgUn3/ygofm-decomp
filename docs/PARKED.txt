@@ -4908,3 +4908,43 @@ func_80057544 -- 155 target, 155 built, 26 differences, written 2026-08-28.
   D_8009B118 stores that closed func_8002FB78, and one name per distinct mask
   value (29 either way).
 
+
+func_80046294 -- 151/151, 5 differences, written 2026-08-28.  A queue
+  compaction pass over the D_8009B45C block: it walks 0x30-byte records from
+  +0x80, removes the ones whose command byte is in a set, decrements the count
+  at +0x4C, and then does a small amount of flag work on +0x7C and +0x40.
+  gp=0, at=0, `as -G0` -- retail reads D_8009B45C through a `%hi`/`%lo` pair
+  at every one of its eleven sites and the default -G8 makes it gp-relative,
+  which is -10 instructions on its own and was the whole of the first draft's
+  length error.
+  **Both jump tables were recovered from `asm/data/800.rodata.s` before a line
+  of C was written**, which is the cheap part of this class:
+  jtbl_800106C0 is base 0x20 with 41 entries -- index 0 to the `case 0x20`
+  arm, 34/35/37/38/40 (0x42 0x43 0x45 0x46 0x48) to the copy arm, the rest to
+  default -- and jtbl_80010768 is base 0x42 with 7.  Six written cases over a
+  range of 41 clears gcc's `count >= 4 && range <= 10 * count`, so the first
+  switch really is a table and not a tree.
+  Three levers, in the order they paid:
+  - **the loop is `while (1)` with an `if (…) goto after;` head test and two
+    `break`s at the bottom.**  A `do { … } while (i < n && i >= 0);` with the
+    same head test inside is -10 and then +2: gcc rotates the head test to the
+    bottom and merges it with the loop-back, so the head's `lh`/`beq` pair
+    disappears.  Writing the head test with a `goto` label instead keeps it
+    but loses the loop entirely -- the jump-table base stops being hoisted
+    into the preheader (+1).  `while (1)` keeps both: 151/151 and 13.
+  - **`(bp + off)[0x80]` rather than `bp[off + 0x80]`** for the command byte,
+    which is the documented `addu base,index` versus `addu index,base` (13 to
+    12).
+  - **`do { i = 0; } while (0);` written ABOVE the entry guard** -- 12 to 6 for
+    the pin (it moves `i` from `$t0` to retail's `$a3` and `boff` the other
+    way) and 6 to 5 for hoisting it above the `if`.  All six declaration
+    orders of i/off/boff score identically, which is the usual tell that the
+    axis is the assignment and not the declaration.
+  What is left is 4 instructions of preheader order -- retail emits the
+  hoisted jump-table base BEFORE `boff = 0x30; off = i;` and gcc emits it
+  after -- plus one `%lo(.rodata+168)` against `%lo(.rodata)`, which is the
+  SECOND jump table's offset inside splat's single rodata blob and may well
+  be a try_func artefact: only the full build can prove a jump table landed.
+  Measured and worthless on the preheader: a `do`/`while` round both
+  statements (12), round `boff` alone (12), and swapping their order (5, no
+  change).

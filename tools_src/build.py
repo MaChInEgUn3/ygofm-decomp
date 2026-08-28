@@ -419,6 +419,9 @@ PER_FUNC_AS_FLAGS["func_8002BD0C"] = "-G0"
 # stores of D_8009B0F4 and the bare form for D_8009B118.  Sibling of
 # func_8002BD0C, same recipe.
 PER_FUNC_AS_FLAGS["func_80057544"] = "-G0"
+# func_80046294: gp == 0, so any -G is free, and retail reads D_8009B45C
+# through a %hi/%lo pair at every site rather than gp-relatively.
+PER_FUNC_AS_FLAGS["func_80046294"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020988"] = "-G4"

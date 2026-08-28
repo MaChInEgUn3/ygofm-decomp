@@ -455,6 +455,17 @@ meaningful, and skipping to the last one wastes hours:
      the test block; put a statement *after* that load in the advance block
      (`e++; v = *e; idx++;`, not `e++; idx++; v = *e;`) and the merge cannot
      fire. That was 42 differences to 28;
+   - a loop whose FIRST instruction is an exit test that the target keeps,
+     and whose back edge is still conditional, is **`while (1)` with an
+     `if (…) goto after;` at the top and `break`s at the bottom** -- a third
+     form, and neither of the two above. `do { if (c == 0) break; … }
+     while (a && b);` is not it: gcc rotates that head test to the bottom and
+     merges it into the loop-back, so the head's own load and branch vanish.
+     Writing the head test with a `goto` label instead keeps it and destroys
+     the loop -- the loop pass stops recognising a natural loop, so a
+     jump-table base or any other invariant is no longer hoisted into the
+     preheader. `while (1)` is the only spelling that keeps the head test AND
+     the hoist (func_80046294, -10 then +2 then +1 then 151/151).
    - an out-of-line arm the target places **before** the loop body is a label
      the source reached with a `goto`, not an `else` — no polarity edit moves
      a block across the loop head;
@@ -1300,6 +1311,14 @@ pointer and can never be live at the same time, gives retail's copy and
 matched. The two live ranges do not overlap, so nothing forces them apart --
 but they are one pseudo, and the pseudo is numbered before the branch, which
 is the same mechanism as the two-arms-are-two-values rule read backwards.
+
+**That lever and the `do { } while (0);` pin COMPOSE, and each is worth
+about half.** func_80046294 carries `i` in `$t0` and `boff` in `$a3` where
+retail has them the other way round; all six declaration orders of the three
+loop variables score identically, which is the usual tell. `do { i = 0; }
+while (0);` swaps the pair (12 differences to 6) and hoisting that same
+pinned assignment ABOVE the function's entry guard is another one (6 to 5).
+Neither alone reaches the other's result.
 
 **And the mirror: assigning a loop variable its initial value BEFORE the
 function's early-return guards fixes which callee-clobbered register it
