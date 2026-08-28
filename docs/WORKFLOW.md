@@ -1409,6 +1409,36 @@ them the same wrong way round, and wrapping just the two assignments in
 statements comes out in the wrong order and no permutation of them moves it
 — and read it as a **macro** in the original, which is what that idiom is
 for.
+**Four matches in one hour on the same two `do { } while (0);` placements,
+and they are worth naming separately.** The D_8009B0F4 dispatcher family
+writes the same block over and over, and its last two residues are always
+one of these:
+  * **round a lone `*(s16 *)(p + 0x30) = 0;` between a named constant and the
+    store that consumes it.** Retail emits `lw D_8009B0F4` / `addiu 0x40` /
+    `sh $zero,0x30` / `sh $v1,4`; every ordering of the three source
+    statements puts the zero store first or last, and `f = 0x40;` plus
+    `do { *(s16 *)(p + 0x30) = 0; } while (0);` plus `*(s16 *)(p + 4) = f;`
+    reproduces it. func_80020BE4 (4 -> MATCH), func_800434F4, func_8005B64C
+    (2 -> MATCH). **The mask assignment has to be the arm's FIRST statement
+    for it to fire**: the identical shape with `m = 0xFFDDFFFF;` written last
+    is 13.
+  * **round a lone constant that must be materialised into the branch delay
+    slot ahead of the arm.** gcc's filler takes the arm's first instruction,
+    so the constant has to be first *and* survive the block; a plain
+    `hun = 0x100;` is constant-propagated and re-materialised late, and
+    `do { hun = 0x100; } while (0);` is not. func_800434F4's `m2` went 7 to
+    MATCH on that one line, and func_8003BA14's identical arm 17 to 8.
+And the partner rule, same family: **a constant the arm ORs in wants its own
+name assigned immediately BEFORE the `do`/`while`, not inside it.**
+func_8003BA14's `n = 0x10000;` written inside the block that stores
+`p + 0x1C` is 8 and written on the line above it is a MATCH, because retail
+materialises the `lui` before the store rather than after.
+
+**And the recipe is not a recipe.** func_80043328 is the same body with the
+same globals, and the family's named-read shape is 12 -> 22 there while the
+compound `D_8009B0F4 &= m;` it already had is right. Read the arm's own
+listing before transferring anything.
+
 **Nine uses in ONE function, five of them round a SINGLE statement.**
 func_8005B64C is the seventh member of the D_8009B0F4 dispatcher family and
 went from 104 differences and -7 to 2 almost entirely on this idiom. What each

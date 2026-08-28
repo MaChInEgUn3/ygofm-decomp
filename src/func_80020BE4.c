@@ -8,6 +8,7 @@ void func_80020BE4(u8 *p, s32 mode) {
     s32 x;
     s32 m;
     s32 d;
+    s32 f;
 
     one = 1;
 
@@ -26,11 +27,14 @@ void func_80020BE4(u8 *p, s32 mode) {
     return;
 
 m0:
-    *(s16 *)(p + 0x32) = 0x100;
-    *(s16 *)(p + 0x30) = 0;
-    v = D_8009B0F4;
-    *(s16 *)(p + 4) = 0x40;
     m = 0xFFDDFFFF;
+    *(s16 *)(p + 0x32) = 0x100;
+    v = D_8009B0F4;
+    f = 0x40;
+    do {
+        *(s16 *)(p + 0x30) = 0;
+    } while (0);
+    *(s16 *)(p + 4) = f;
     D_8009B0F4 = v & m;
     w = D_8009B0F4;
     m = 0x10000;
