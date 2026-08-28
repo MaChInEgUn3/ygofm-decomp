@@ -186,6 +186,7 @@ If a claim is about the whole binary, scan the whole binary.
 | `status.py` | recomputes the Status tables above from the tree; `--write` rewrites README.md |
 | `disc.py` | reads the retail CD image and measures MIPS density per file; answers "is there code outside the executable?" |
 | `sweep_guards.py` | tries every per-file declaration guard against each parked candidate |
+| `sweep_borrow.py` | tries every same-type local-name substitution, block by block; mechanises the borrow lever |
 | `score_permuter_outputs.py` | re-scores every stored permuter output through try_func |
 
 ## Layout
