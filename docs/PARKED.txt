@@ -1369,7 +1369,7 @@ func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
   read sits between the two updates the way retail's does (18, much worse).
   Full flag sweep: 10 at plain -O2 -G8.
 
-func_8003A01C -- 33 differences, the same *kind* of difference as the
+func_8003A01C -- 17 differences (was 33), the same *kind* of difference as the
   three-cycle permutation class but **not** the documented rotation, so it is
   not counted as a member. That class is mask=$a0 / value=$v0 / constant=$v1
   against our $v1/$a0/$v0. Here retail is mask=$a1 / 0x18000=$a0 / value=$v1
@@ -1390,7 +1390,14 @@ func_8003A01C -- 33 differences, the same *kind* of difference as the
     shared `.L8003A170`. 54 to 33.
   What is left is the permutation and nothing else.
 
-func_8002FB78 -- 52 differences, and **a measured member** of the three-cycle
+  **2026-08-28, `tools_src/sweep_arm_split.py`: 33 -> 24 -> 17.**
+  One name per arm for the D_8009B0F4 read is 33 -> 24 (the sweep found it),
+  and then ONE SHARED name for the mask -- `m = 0xFFDDFFFF;` at the top of
+  each arm, one declaration -- is 24 -> 17.  Per-arm masks are 22, so the
+  two variables want opposite treatments in the same function, which is the
+  whole point of sweeping rather than reasoning.
+
+func_8002FB78 -- 22 differences (was 52), and **a measured member** of the three-cycle
   permutation class, not a resemblance: retail is mask=$a0 / value=$v0 /
   constant=$v1 and we get $v1 / $a0 / $v0, which is the documented rotation
   exactly. Checked before claiming it.
@@ -1404,6 +1411,10 @@ func_8002FB78 -- 52 differences, and **a measured member** of the three-cycle
   is what retail's `sw; addiu; sw` on one register looks like. It gives 53.
   The `+ 0x800` version is the one kept.
   Five functions on this rotation now. See the class section in DECISIONS.
+
+  **2026-08-28, `tools_src/sweep_arm_split.py`: 52 -> 36 -> 22.**
+  The same two-step as func_8003A01C: four names for the D_8009B0F4 read
+  (52 -> 36) and one shared name for the mask (36 -> 22).
 
 func_80060E70 -- 7 differences: one hoist we cannot place and one register.
   A seven-iteration loop that builds sprite entries from a pair of parallel
@@ -1923,7 +1934,7 @@ func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
     symbol form anyway), and the gp-relative `|=` moved to first and to
     second. Discriminator not established.
 
-func_8002F4C0 -- unfinished, 45 differences with equal lengths (92/92), and
+func_8002F4C0 -- 35 differences with equal lengths (92/92) (was 45), and
     they are one register choice cascading through a 92-instruction body.
     Eleven bare accesses across D_8009B0F4 (stored through `$at`, so the
     bare form for a store) and D_8009B118, no %gp_rel, scalar arms plus
@@ -1950,6 +1961,16 @@ func_8002F4C0 -- unfinished, 45 differences with equal lengths (92/92), and
 # output was re-run through try_func rather than read off the score, and three
 # of the five were *worse* by that measure -- the fifth and sixth instances of
 # the score disagreeing with the count in direction.
+
+  **2026-08-28, `tools_src/sweep_arm_split.py`: 45 -> 40, then a rewrite to 35.**
+  Two names for the D_8009B118 read is 45 -> 40.  Rewriting the arms with the
+  rest of the family's levers -- shared `m` and `n` names, a named read
+  before the `+4` store in arm 0, a second named read for the `|` reload,
+  and `one = 1;` assigned BEFORE the switch (retail keeps it in `$s1` and
+  uses it both as the `case 1` comparison operand and as the value arms 1
+  and 2 store into `p[0x46]` through a shared `goto` tail) -- is 40 -> 35.
+  The residue is `m` and `n` exchanged, and all three orderings of their
+  declarations and assignments score exactly 35.
 
 func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
     record compactor: walk D_8009B45C's 0x30-byte slots from +0x80, and when a
@@ -2688,7 +2709,7 @@ func_80031574 -- 24 differences and ONE missing instruction, all of them in
     What is left at 14: retail does the +4 word's read-modify-write before
     the +8 halfword's and we do them the other way round.
 
-func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
+func_8004E9A0 -- 21 differences, equal lengths (88/88) (was 63 at +1); parked as a decode with the
     structure settled rather than as a near miss. The arithmetic reads back
     cleanly and is worth having written down:
         if (D_800F569F[0] == 0) return;
@@ -2717,6 +2738,11 @@ func_8004E9A0 -- 63 differences at +1 length; parked as a decode with the
     delay slot where retail fills it with the `lui` of the `% 3` reciprocal,
     which is +2, and something in the case-4 block is one short. Moving the
     modulo computations up in either arm does not change it (63 and 65).
+
+  **2026-08-28, `tools_src/sweep_arm_split.py`: 63 at +1 -> 21 at equal length.**
+  Two names for the `func_80074170(-1) / K` result, one per arm.  It fixed
+  the length error as well as the count, which is worth noting: a shared
+  name there was letting gcc cross-jump something.
 
 func_8003C628 -- 45 positional differences at +1 length, and the count is
     inflated: the real edits are about six instructions misplaced inside two
@@ -3957,7 +3983,7 @@ func_8004A518 -- 113 built against 112, and the single extra instruction is a
   source-level spelling of the constant reaches it.  The instruction retail
   has and we do not is more likely to be somewhere else in the body.
 
-func_8003BF00 -- 111 built against 112, 42 differences, and the single missing
+func_8003BF00 -- 111 built against 112, 35 differences (was 42), and the single missing
   instruction is `addu $a0,$a2,$zero`: retail holds the record pointer in $a2
   and copies it into $a0 for the one call, where we hold it in $a0 and need no
   copy.  Everything else is the two standalone arms' scheduling.
@@ -3986,6 +4012,10 @@ func_8003BF00 -- 111 built against 112, 42 differences, and the single missing
   `new_var = p;` between two cases -- semantically an uninitialised read, but
   it is what pointed at the two-names-for-the-pointer lever above.
 # ---
+
+  **2026-08-28, `tools_src/sweep_arm_split.py`: 42 -> 35, length error unchanged.**
+  Two names for the D_8009B118 read, one in arm 3 and one in arm 5.  The -1
+  is untouched.
 
 func_80043328 -- 115/115, 12 differences, all of them in the `mode == 0` arm:
   the 0x18000 constant's `lui`/`ori` pair is split (the `ori` scheduled into a
@@ -4967,7 +4997,7 @@ func_800580D4 -- the blocker retraction that preceded the draft above: the stand
   smallest open candidate (123) and it is open, not blocked.
 
 
-func_8002BD0C -- 140 target, 140 built, 51 differences, written 2026-08-21,
+func_8002BD0C -- 140 target, 140 built, 32 differences, written 2026-08-21,
   reworked 2026-08-28 from -1/113.  The seventh member of the D_8009B0F4
   dispatcher family and the first with a real jump table. gp=0, at=5,
   `as -G0`, and the default (volatile scalar) arm of D_8009B0F4 for the
@@ -4999,17 +5029,29 @@ func_8002BD0C -- 140 target, 140 built, 51 differences, written 2026-08-21,
     pays once the length is right.  One name shared by both arms is 56, so
     this is the func_8003B808 rule ("do not share the name across two switch
     arms") a second time.
-  What is left is 51 register differences with the instructions
+  Then the one-name-per-arm lever from the sibling func_80057544 took 51 to
+  32, in three steps and with one surprise in each:
+  - **arm 4's `0x100` is not arm 2's.**  Both arms build the same four-
+    halfword packet, so one `hun` reads as obvious; retail holds arm 2's in
+    `$s0` (it survives the call and is stored again afterwards) and arm 4's in
+    `$v1` (dead at the call).  One name forces the callee-saved register on
+    both.  51 -> 41, and giving arm 4 its own `g` as well is worth nothing.
+  - **`n` wants one name per JOIN GROUP, not per arm.**  Arms 0 and 4 reach
+    join1 and arms 1, 3, 5 reach join2, so the value really does cross arms --
+    `n2` for the join2 group is 41 -> 35 and a third name for arm 2's own
+    `n` is 41 -> 38, but the two together are 38, not 32.  They interfere.
+  - **`d` wants splitting at the same boundary** (a third name for the join2
+    group): 35 -> 32 with the join-group split, and 32 either way, so the
+    installed candidate carries the two-name `n` and the two-name `d` and
+    leaves arm 2 alone.
+  What is left is 32 register differences with the instructions
   instruction-for-instruction right: retail holds the mask `m` in `$a0` and
-  the read `t` in `$v0`, and we have them one register up.  All six
-  declaration orders of m/n/d score exactly 51, which is the usual tell that
-  the axis is elsewhere -- see func_80057544, the sibling, where the same
-  residue turned out to be **one name per arm for the D_8009B0F4 read** (53
-  -> 29).  Try that here before anything else: `t3` for the join2 arm alone
-  is worth nothing, so the split has to be finer.
-  The permuter reaches 47 by writing join2's two stores as
-  `d = (*(s32 *)(p + 8) = D_8009B118);`, which emits them in the opposite
-  order to retail's; not installed.
+  `n` in `$v1`, and we have `n` in `$a0` pushing `m` to `$a1`.  All six
+  declaration orders of m/n/d score identically, which is the usual tell that
+  the axis is elsewhere.  745 permuter iterations from the 32 base found
+  nothing better than 32.  From the earlier 51 base it reached 47 by writing
+  join2's two stores as `d = (*(s32 *)(p + 8) = D_8009B118);`, which emits
+  them in the opposite order to retail's; not installed.
 
 func_80020988 -- 151 target, 150 built (-1), 72 differences, written
   2026-08-28. A menu appear/animate/dismiss handler returning a status code

@@ -318,6 +318,24 @@ meaningful, and skipping to the last one wastes hours:
    needs `v = D_8009B0F4; v &= mask; D_8009B0F4 = v;` and its cases 1, 3 and 4
    need the plain `D_8009B0F4 = D_8009B0F4 & mask;`; writing all four the same
    way is 45 differences and splitting them is 15.
+   **And a local shared by several arms usually wants ONE NAME PER ARM, which
+   is a bigger lever than any single arm's spelling.** One name is one pseudo
+   whose live range spans the whole `switch`, so the global allocator gives it
+   a register of its own and every arm's allocation rotates behind it; one
+   name per arm is several short block-local ranges that land where retail's
+   do. func_80057544 reads D_8009B0F4 in five arms and went 53 differences to
+   29 on five names, and func_8002BD0C 51 to 41 on splitting one shared
+   constant out of one arm. **The mirror was measured in the same minute and
+   is what makes it a sweep rather than a rule**: splitting the *mask* the
+   same way is 29 to 42 and splitting the *record pointer* is 29 to 34,
+   because retail really does carry those two in one register across every
+   arm. So which variables want it differs *within one function*, and the
+   only way to know is to try each -- `tools_src/sweep_arm_split.py` does
+   exactly that, one variable at a time and then all its arms together. It
+   deliberately cannot find the other shape, a name shared by a *group* of
+   arms that `goto` one join label (func_8002BD0C's `n` wants one name for
+   the join1 group and another for the join2 group, 41 to 35); do that by
+   hand.
    **And the rule runs in both directions -- read which register retail
    uses before splitting anything.** func_8003DA40 has two pointers that
    never coexist, one per half of the function, and retail keeps both in

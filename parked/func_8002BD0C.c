@@ -4,11 +4,14 @@ void func_8002BD0C(u8 *p, s32 mode) {
     s16 *g;
     s32 m;
     s32 n;
+    s32 n2;
+    s32 d3;
     s32 d;
     s32 t;
     s32 t2;
     s32 d2;
     s32 hun;
+    s32 hun2;
     s32 ten;
 
     switch (mode) {
@@ -30,7 +33,7 @@ void func_8002BD0C(u8 *p, s32 mode) {
 
     case 1:
         m = 0xFFDCFFFF;
-        n = 0x2000;
+        n2 = 0x2000;
         goto join2;
 
     case 2:
@@ -60,10 +63,10 @@ void func_8002BD0C(u8 *p, s32 mode) {
 
     case 4:
         g = D_800E9D70;
-        hun = 0x100;
-        g[0] = hun;
+        hun2 = 0x100;
+        g[0] = hun2;
         g[1] = 0xF6;
-        g[2] = hun;
+        g[2] = hun2;
         g[3] = 2;
         func_80081DE8(g, D_8009B118);
         p[0x46] = 3;
@@ -79,13 +82,13 @@ join1:
     case 3:
     case 5:
         m = 0xFFDCFFFF;
-        n = 0x800;
+        n2 = 0x800;
 join2:
-        *(s32 *)(p + 0x1C) = n;
+        *(s32 *)(p + 0x1C) = n2;
         D_8009B0F4 = D_8009B0F4 & m;
-        d = D_8009B118;
-        *(s32 *)(p + 0xC) = d;
-        *(s32 *)(p + 8) = d;
+        d3 = D_8009B118;
+        *(s32 *)(p + 0xC) = d3;
+        *(s32 *)(p + 8) = d3;
         p[0x46] = 1;
         break;
 
