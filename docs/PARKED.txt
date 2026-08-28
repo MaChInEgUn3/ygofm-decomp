@@ -4989,3 +4989,31 @@ func_8002BD0C -- 140 target, 139 built (-1), 113 differences, written
   Also measured and worthless: a named read of D_8009B0F4 above the `+6` store
   (+6 worse), `n = 0x20000` moved after `d = D_8009B118`, and swapping the
   declaration order of the two constants held across the call in arm 2.
+
+func_80020988 -- 151 target, 150 built (-1), 72 differences, written
+  2026-08-28. A menu appear/animate/dismiss handler returning a status code
+  (0, -1, 1, 2). Third out of the dup-%hi pool. **The whole first half -- the
+  block that creates the two widgets, 75 instructions with two calls each
+  taking eight arguments -- is exact on the first draft**, so what follows is
+  a small residue in a small tail.
+  Addressing: the gp side is D_8009B152 (1 byte) and D_8009B188/D_8009B18C/
+  D_8009B1CC (4 bytes each), and the two bare-wanting symbols are D_8009B394
+  and D_8009B398, both `u16`. The bare ones are NARROWER than the widest gp
+  one, so no threshold exists and this is WORKFLOW's third dup-%hi branch:
+  inflate. D_8009B398_SIZED_VOLATILE already existed for exactly this; a
+  matching D_8009B394_SIZED_VOLATILE arm was added, and the unit assembles at
+  `as -G4`. Both need the volatile as well -- D_8009B394 is read twice in one
+  block and D_8009B398 twice across calls, and retail reloads every time.
+  Four globals had no declaration at all and are new in variables.h.
+  What is measured so far: `e` borrowing `q`'s name is worth 2 (74 -> 72), the
+  two being in mutually exclusive branches and retail carrying both in $s3.
+  Residue, and the -1 is part of it: retail leaves the `(D_8009B398 & 0xE0)`
+  test as `beq` falling into the body with the zero return value in its delay
+  slot, and we emit the inverted `bne` plus a `j`, which is +2 there and means
+  something else is -3. Three tail shapes measured (the body inside the `if`,
+  a `goto zero;` label, the plain early return) and all are -1 at 72/73.
+  Two more things retail has that we do not: it copies the `e[0x21] + e[0x60]`
+  sum into a second register before masking it 0x7F and 0xFF -- the two-names
+  tell -- and a `w = v;` second name for that is worth NOTHING here, which is
+  the first time that shape has failed. And it reads the flags halfword at
+  `+8` BEFORE the two bytes it sums, where we read the bytes first.

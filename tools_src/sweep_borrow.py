@@ -35,6 +35,16 @@ almost nothing. That is this repo's oldest recurring bug (see WORKFLOW: "when
 a tool says no, ask whether it could have said yes"), and the failure counter
 is here so it cannot happen quietly again. A run where `failed` is large is a
 run that measured nothing.
+
+KNOWN LIMITATION, unfixed: on the outermost block -- which spans the
+declarations -- renaming `a` to `b` leaves two declarations of `b` and the
+substitution does not compile. That is most of the `failed` count, and on
+func_80012E5C it was 72 of 128. One attempt to drop the duplicate made things
+worse (47 failures AND the control stopped finding its known win), so it is
+reverted and left alone. The tool is still useful because the borrows it finds
+live in INNER blocks, which is where every one found by hand has been; but
+read a high `failed` on a small function as "the outer block was not searched"
+rather than as noise.
 """
 import os
 import re

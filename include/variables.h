@@ -1276,9 +1276,21 @@ extern s8 D_8009B384;
 extern s32 D_8009B390;
 extern s32 D_8009B3A8;
 extern u8 D_800EF668[];
+/* Menu state for func_80020988: a flag byte, the record it animates, and the
+ * two widgets it creates. */
+extern u8 D_8009B152;
+extern u8 *D_8009B188;
+extern u8 *D_8009B18C;
+extern u8 *D_8009B1CC;
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
-#ifdef D_8009B394_IS_VOLATILE
+#ifdef D_8009B394_SIZED_VOLATILE
+/* Eight bytes it does not have. func_80020988 reads it twice in one block --
+ * so volatile -- and needs the non-small form while FOUR-byte gp scalars in
+ * the same unit stay %gp_rel, which is the window `4 < N <= 8` at `as -G4`.
+ * Same shape as D_8009B398_SIZED_VOLATILE just below. */
+extern volatile u16 D_8009B394[4];
+#elif defined(D_8009B394_IS_VOLATILE)
 /* func_8003700C reads it three times on one path and gcc CSEs a plain read;
    retail re-loads for each test. */
 extern volatile u16 D_8009B394;
