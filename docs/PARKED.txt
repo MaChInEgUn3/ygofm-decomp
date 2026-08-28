@@ -1871,6 +1871,18 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     sweep_try.py run 2026-08-10: best is 1 at -O2 -G0, the same as the current
     base. No flag combination helps.
 
+    **2026-08-28: the candidate file was a permuter dump** -- 700 lines of
+    regenerated typedefs and externs around a twenty-line function -- and is
+    now the plain C it should have been.  Byte-identical output, and it is the
+    reason nobody re-read it.  Check `head -1 parked/<f>.c` for
+    `asm(".include ...` before believing a park has been looked at;
+    func_80058938 is the other one.
+    A second permuter run from the 1 base, 799 iterations, found nothing.
+    Four more shapes measured and still 1: the comma-operator init
+    (`for (crc = 0, i = 0; ...)`), `do { i = 0; } while (0);` with an empty
+    for-init, `crc` as `u32`, and the explicit-guard `if (arg1 > 0) { i = 0;
+    do { … } while (i < arg1); }` (3, worse).  `s16 i` is +6.
+
 func_8004A8E4 -- 17 differences at equal length (23/23), down from 21 at -2.
     Reads a byte at +3 of a 40-byte record, and if it is not 0x63 uses it to
     index 24-byte records and decrements a nibble at +6.
@@ -3117,55 +3129,6 @@ func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
     registers before computing the two record addresses (`addu $v0,$v1,$zero`
     / `addu $v1,$a2,$zero`), which is two more names than the source has, and
     the constants land in exchanged registers.
-
-
-func_80032184 -- 27 differences at equal length, and everything left is
-    register rotation. Fourth member of the dispatcher family (func_8003C328,
-    func_8003C120, func_8004BCE8), same `goto` layout with the arms in
-    retail's address order, four modes and a shared tail for modes 0 and 1.
-    Signature was PROVISIONAL `(void)` and is `(u8 *, s32)`; it is a callback
-    passed by pointer from func_80032328, which still MATCHes.
-    Three things took it from 81/-10 to 33/+1, in order of size:
-      - **VOLATILE, and it is not the usual reason.** Modes 0 and 1 each do
-        two D_8009B0F4 read-modify-writes back to back with nothing between,
-        and gcc folds the second read into the value it just stored, losing a
-        whole RMW. The volatile scalar arm blocks the fold: 81 -> 33. It also
-        narrows a note in variables.h that said volatile blocks the
-        bare-symbol form -- at -G0 it does not, and this function gets its
-        `lui $at` stores with volatile on.
-      - **the shared tail written out per arm.** Modes 0 and 1 end with seven
-        identical instructions and gcc cross-jumps them where retail does
-        not; writing the tail into both arms is -10 to -3. Same lever as
-        func_8004C5C8, and note the failed alternative: a separate name for
-        the B118 load in one arm does not break the identity (still -10).
-      - the named D_8009B0F4 read placed between the `+0x4` and `+0x6`
-        stores, which is the delay-slot lever from func_8003C328.
-    What is left: the 0xFFDDFFFF mask lives in $a0 in retail and $v1 in ours,
-    and the read that consumes it is correspondingly exchanged. $a0 is free
-    from the moment the parameter is copied into $a2, and retail reuses it.
-    UPDATE: 33 -> 29 and the length error closed, on a permuter find that a
-    plausible shape does not reach. Mode 3 stores 0x100 twice and retail
-    shares one materialisation; a straightforward `c = 0x100;` local in mode
-    3 is 35 at +1, while assigning `one = 0x100;` at the END of mode 2 --
-    dead, since mode 2 returns on the next line -- ties mode 3's constant to
-    `one`'s pseudo and is 29 at exact length. Same borrowed-local class as
-    func_8002A4A8, here with the borrow in a different arm from the use.
-    29 -> 27 by borrowing the DEAD second parameter for the mask constant --
-    `mode = 0xFFDDFFFF;` at the top of each arm that uses it, `mode` being
-    finished the moment the dispatcher branches. That moves the mask from
-    $v1 to $a1, which is the register `mode` arrives in; retail has it in
-    $a0, the register the FIRST parameter arrives in. Borrowing that one too
-    -- a separate cursor local so the parameter itself is dead, then
-    `arg0 = (u8 *)0xFFDDFFFF;` -- is 37 and much worse.
-    The borrow does NOT transfer to func_8003BD14: the same edit there is +4
-    and 108 against a base of 42, whether applied to the three 0xFFDCFFFF
-    arms or to all four. Third lever in this family that works on one member
-    and not its siblings.
-    The volatile lever does NOT transfer to the siblings, measured: 21 either
-    way on func_8003C328 (its arms already have a store between the two
-    read-modify-writes, so nothing to fold), -7 on func_8003C120 (it is at
-    -G4, where volatile does cost the bare form), and func_8004BCE8 never
-    reads the symbol.
 
 
 func_8003BD14 -- 42 differences at equal length, and every one is the same

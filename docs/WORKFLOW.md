@@ -332,6 +332,11 @@ meaningful, and skipping to the last one wastes hours:
    arm. So which variables want it differs *within one function*, and the
    only way to know is to try each -- `tools_src/sweep_arm_split.py` does
    exactly that, one variable at a time and then all its arms together. It
+   reads `goto`-labelled arms as well as `switch` arms, which matters because
+   most of the D_8009B0F4 family is an `if`/`else` chain with `goto m0;` and
+   the arms are the same thing one level down; it offers a split on a
+   label-delimited arm only when the arm ends in `return`/`break` with no
+   `goto`, or when the name appears nowhere after it. It
    deliberately cannot find the other shape, a name shared by a *group* of
    arms that `goto` one join label (func_8002BD0C's `n` wants one name for
    the join1 group and another for the join2 group, 41 to 35); do that by
@@ -1613,7 +1618,15 @@ on a combination that had been in the table for weeks.
   count does not move when you drop it (the extra argument was free), so
   nothing flags it; `grep -rn <callee> src/` does, in one command, and it is
   worth running on every call in a draft rather than only when adding a
-  prototype.
+  prototype. **Second instance the same day**: func_80032184 passed FOUR
+  arguments to `func_80081DE8`, which every one of its eight matched callers
+  calls with two. There it was not free -- dropping the two took the function
+  from 19 differences to 12 once the invented `p` and `1` stopped pinning
+  `$a2` and `$a3`, and the candidate had been carrying a permuter hint
+  (`one = 0x100;` written dead in the *previous* arm) that existed only to
+  compensate for them. **A permuter hint that has to be explained in a
+  comment is a sign the source around it is wrong**; delete it and re-measure
+  before writing it down as load-bearing.
 - **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`

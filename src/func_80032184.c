@@ -4,7 +4,14 @@ void func_80032184(u8 *p, s32 mode) {
     s32 one;
     s32 w;
     s32 v;
-    s32 t;
+    s32 t0;
+    s32 t1;
+    s32 c;
+    s32 n;
+    s32 u;
+    s16 *g;
+    s32 m;
+    s32 m2v;
 
     one = 1;
 
@@ -26,13 +33,13 @@ void func_80032184(u8 *p, s32 mode) {
     return;
 
 m0:
-    mode = 0xFFDDFFFF;
+    m = 0xFFDDFFFF;
     *(s16 *)(p + 0x30) = 0x300;
     *(s16 *)(p + 0x32) = 0x100;
     *(s16 *)(p + 4) = 0x40;
-    t = D_8009B0F4;
+    t0 = D_8009B0F4;
     *(s16 *)(p + 6) = 0x10;
-    D_8009B0F4 = t & 0xFFDDFFFF;
+    D_8009B0F4 = t0 & m;
     D_8009B0F4 = D_8009B0F4 | 0x10000;
     p[0x46] = 2;
     v = D_8009B118;
@@ -44,14 +51,16 @@ m0:
     return;
 
 m1:
-    mode = 0xFFDDFFFF;
+    m = 0xFFDDFFFF;
     *(s16 *)(p + 0x30) = 0x340;
     *(s16 *)(p + 4) = 0x40;
-    t = D_8009B0F4;
+    t1 = D_8009B0F4;
     *(s16 *)(p + 6) = 0x10;
-    D_8009B0F4 = t & 0xFFDDFFFF;
+    D_8009B0F4 = t1 & m;
+    u = D_8009B0F4;
+    n = 0x10000;
     *(s16 *)(p + 0x32) = 0;
-    D_8009B0F4 = D_8009B0F4 | 0x10000;
+    D_8009B0F4 = u | n;
     p[0x46] = 2;
     v = D_8009B118;
     w = 0x4000;
@@ -62,22 +71,20 @@ m1:
     return;
 
 m2:
+    m2v = 0xFFDCFFFF;
     *(s32 *)(p + 0x1C) = 0x2000;
-    D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
+    D_8009B0F4 = D_8009B0F4 & m2v;
     *(s32 *)(p + 0xC) = D_8009B118;
     *(s32 *)(p + 8) = D_8009B118;
     p[0x46] = 1;
-    /* Dead here -- mode 2 returns on the next line -- and load-bearing: it
-     * ties mode 3's 0x100 to `one`'s pseudo, which is 29 differences against
-     * 35 for an honest `c = 0x100;` local in mode 3. The permuter found it;
-     * the plausible shape does not reach it. */
-    one = 0x100;
     return;
 
 m3:
-    D_800E9D70[0] = one;
-    D_800E9D70[1] = 0xF0;
-    D_800E9D70[2] = one;
-    D_800E9D70[3] = 0x10;
-    func_80081DE8(D_800E9D70, D_8009B118, p, 1);
+    g = D_800E9D70;
+    c = 0x100;
+    g[0] = c;
+    g[1] = 0xF0;
+    g[2] = c;
+    g[3] = 0x10;
+    func_80081DE8(g, D_8009B118);
 }
