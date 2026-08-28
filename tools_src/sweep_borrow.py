@@ -143,7 +143,7 @@ def main():
 
     if "--list" in sys.argv:
         for name, ty in decls:
-            print(f"  {name:<12} {' '.join(ty)}")
+            print(f"  {name:<12} {' '.join(ty)}", flush=True)
         return 0
 
     base = measure(func, src)
@@ -162,7 +162,7 @@ def main():
     # are where every one found so far has lived. The outermost block is a
     # whole-function rename, which the control run proves cannot find one.
     blocks = sorted(brace_blocks(base_text), key=lambda t: t[1] - t[0])
-    print(f"{len(blocks)} brace blocks, smallest first, cap {cap} runs")
+    print(f"{len(blocks)} brace blocks, smallest first, cap {cap} runs", flush=True)
 
     tried = failed = hits = skipped = 0
     seen = set()

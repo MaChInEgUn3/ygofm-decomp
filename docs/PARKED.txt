@@ -3058,7 +3058,7 @@ func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the
     that is not the axis.
 
 
-func_8003C120 -- 80 differences at +1, inflated by the shift; the real
+func_8003C120 -- 101/101, 75 differences (was 102/101, +1 and 80)
     residue is where two mask constants are materialised. Direct sibling of
     func_8003C328: the same three-way-plus-one dispatcher on the second
     parameter, and the same `goto` layout applies with the arms in retail's
@@ -3098,7 +3098,26 @@ func_8003C120 -- 80 differences at +1, inflated by the shift; the real
     references are pairs and it needs them all. The per-unit rule stands, the
     reason given for it did not.
 
-
+  **2026-08-28: the +1 was a `nop` in a load-delay slot, and the fix is a new
+  declaration arm.**  Retail hoists the D_8009B0F4 reload ABOVE the
+  `p + 0x1C` store and fills the reload's own delay slot with the `lui` for
+  0x10000; gcc will not hoist a load of a non-volatile global past a store
+  through `p`, so it emits the store first and the slot gets a `nop`.  A
+  named read folds under the `_SIZED` (plain array) arm.  `D_8009B0F4_SIZED_
+  VOLATILE` -- the sized arm plus `volatile`, new in variables.h -- keeps the
+  named read AND lets gcc move it, because gcc 2.8 moves a volatile load
+  across a non-volatile store.  101/101.
+  **And it does NOT break the bare form at -G4**, which the note above
+  `D_8009B0F4` in variables.h predicted it would: the addressing comes out
+  `lui %hi` / `lw %lo` / `lui $at` / `sw %lo`, the same as retail.  That note
+  was narrowed once before (2026-08-20, for -G0) and this narrows it again --
+  it is about the *aggregate* arm, not about volatile as such.
+  The residue is 75, and the first difference is the dispatcher: retail puts
+  m0's mask in `$a0` and the `lui` for m3's 0xFFDCFFFF in the `beq ... L6`
+  delay slot, where we put `w = 0x8000` there.  Measured and worse: naming
+  the shared 0xFFDCFFFF in m1 and the join (+1), naming it in m2 and m3 as
+  well (+4), a `do { w = 0x8000; } while (0);` in m3 (+2), and a named local
+  for m3's two 0x80140000 stores (75, no change).
 func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
     unclaimed function in the tree. It flushes a pending job if D_8009B060 and
     D_800F5D44 are both set, copies an EIGHT-BYTE UNALIGNED record from
@@ -4199,6 +4218,11 @@ func_800408D0 -- 3 differences. A permuter run from the 3-difference base
   measured against the last two and every one is 13, 14 or -1; the permuter
   ran 4900 iterations from the 13 base and stored nothing.
 
+  **2026-08-28, still 3.**  Retail emits the `u6` halfword read BEFORE the
+  `h + 0x20` address and the `D_8009B424 = 0` store; gcc sinks it past both.
+  Six shapes measured: `do`/`while` round the read (9), round the store (9),
+  round both together (9), a named `hh = h + 0x20` (3), the store moved above
+  all three reads (4), and the `u6` read moved above `k18` (3).
 func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
   gp=0 at=0, default flags, no addressing work at all.
   A card-artwork setup routine: decodes a BCD card id
@@ -4550,7 +4574,17 @@ func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
 # message; the last lever was `o = 0;` written as a statement before the
 # function's first guard.
 
-
+  **2026-08-28, still 1.**  The one difference is the abs expansion:
+  retail's `subu $v1,$zero,$v1` negates the COPY and ours negates the
+  original (`subu $v1,$zero,$v0`), because gcc propagates `w` back into
+  `v = -v;` when it knows the two are equal.  Seven more shapes measured and
+  every one is 1: `do { v = w; } while (0);`, the test written on `v` instead
+  of `w`, a `do`/`while` round the negation, `v = 0 - v;`, both ternary
+  spellings of the abs, and `v = w = r / 16;`.  411 permuter iterations from
+  the current base found nothing either.  The mirror block twenty
+  instructions later has the same shape and matches, and its test is on `r`
+  rather than on the copy's source -- which is the difference, and no
+  spelling reproduces it.
 func_80038EB0 -- 164/164, **29** differences (147 when first written; three
   permuter reads and one hand lever took it to 37, 36, 34 and 29 over two
   days). First written 2026-08-21. 164

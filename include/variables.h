@@ -450,8 +450,23 @@ extern u8 D_800F5C83[];
  * between them, where gcc otherwise folds the second read into the value it
  * just wrote and one whole RMW disappears. 81 differences to 33 on that
  * declaration alone. So: volatile and the bare form are compatible at -G0,
- * and the note above should be read as being about -G4. */
-#ifdef D_8009B0F4_SIZED
+ * and the note above should be read as being about -G4.
+ * NARROWED AGAIN 2026-08-28: nor is it about -G4. func_8003C120 assembles at
+ * -G4 with the SIZED_VOLATILE arm below and still gets the bare form --
+ * `lui %hi` / `lw %lo` for the loads and `lui $at` / `sw %lo` for the stores,
+ * which is exactly what retail has. So the original note is about the
+ * AGGREGATE arm specifically, not about `volatile` as such, and the sized arm
+ * takes volatile at either threshold. What volatile buys there is the
+ * opposite of a fold: gcc 2.8 moves a volatile load across a non-volatile
+ * store, so a named reload written before a store through a pointer can be
+ * hoisted above it the way retail's is -- which was that function's whole
+ * length error. */
+#ifdef D_8009B0F4_SIZED_VOLATILE
+/* The sized arm plus volatile, for a function that needs BOTH the non-small
+ * addressing and a reload gcc would otherwise fold into the value it just
+ * wrote. */
+extern volatile s32 D_8009B0F4[2];
+#elif defined(D_8009B0F4_SIZED)
 /* Eight bytes: at -G4 that is not small data, so the reference stays a single
  * bare pseudo-instruction and the assembler expands it -- which is what stops
  * the scheduler interleaving its %hi with a neighbour's (func_8002E470). */

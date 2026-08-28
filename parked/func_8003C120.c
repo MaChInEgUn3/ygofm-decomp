@@ -1,10 +1,13 @@
-#define D_8009B0F4_SIZED
+#define D_8009B0F4_SIZED_VOLATILE
 #define D_8009B118_SIZED
 #include "common.h"
 
 void func_8003C120(u8 *p, s32 mode) {
     s32 one;
     s32 w;
+    s32 m;
+    s32 t;
+    s32 u;
 
     one = 1;
 
@@ -26,12 +29,16 @@ void func_8003C120(u8 *p, s32 mode) {
     return;
 
 m0:
+    m = 0xFFDDFFFF;
     *(s16 *)(p + 0x32) = 0x100;
     *(s16 *)(p + 0x30) = 0;
     *(s16 *)(p + 4) = 0x40;
-    D_8009B0F4[0] = D_8009B0F4[0] & 0xFFDDFFFF;
-    *(s32 *)(p + 0x1C) = 0x10000;
-    D_8009B0F4[0] = D_8009B0F4[0] | 0x10000;
+    t = D_8009B0F4[0];
+    D_8009B0F4[0] = t & m;
+    u = D_8009B0F4[0];
+    m = 0x10000;
+    *(s32 *)(p + 0x1C) = m;
+    D_8009B0F4[0] = u | m;
     p[0x46] = 2;
     *(s16 *)(p + 6) = 0x10;
     *(s32 *)(p + 8) = D_8009B118[0];

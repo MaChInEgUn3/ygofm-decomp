@@ -182,10 +182,10 @@ def main():
         sys.exit(f"{func} has no switch arms; this tool has nothing to do")
 
     if "--list" in sys.argv:
-        print(f"{len(blocks)} arms, {len(decls)} locals")
+        print(f"{len(blocks)} arms, {len(decls)} locals", flush=True)
         for lab, lo, hi in blocks:
             names = [n for n, _ in decls if splittable(text[lo:hi], n, text[hi:])]
-            print(f"  {lab:<28} splittable: {' '.join(names) or '-'}")
+            print(f"  {lab:<28} splittable: {' '.join(names) or '-'}", flush=True)
         return 0
 
     base = measure(func, src)
@@ -234,7 +234,7 @@ def main():
         print("WARNING: most splits did not compile. This run measured almost\n"
               "nothing -- do not read the result as a negative.")
     elif not hits:
-        print("Clean negative: nothing to install.")
+        print("Clean negative: nothing to install.", flush=True)
     else:
         print("Check each winner by hand: a split is only legal where the arm\n"
               "writes the name before reading it and hands it to nobody else.")

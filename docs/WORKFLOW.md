@@ -1928,6 +1928,16 @@ on a combination that had been in the table for weeks.
   where volatile really does cost the bare form; func_8004BCE8 never touches
   the symbol. The lever is for the back-to-back shape specifically, not for
   the family.
+- **`volatile` is also how you let a reload be HOISTED, which is the opposite
+  of every other use of it here.** gcc 2.8 will not move a load of an ordinary
+  global above a store through a pointer, but it will move a *volatile* one --
+  so where retail reads a global back after a store and puts the read's own
+  delay-slot filler before that store, a non-volatile declaration leaves a
+  `nop` and a length error. func_8003C120 was +1 on exactly that, and the
+  sized-plus-volatile arm (new: `D_8009B0F4_SIZED_VOLATILE`) fixed the length.
+  It also **narrowed the standing claim that volatile blocks the bare-symbol
+  form at -G4** for the second time: it does not, at either threshold, on the
+  *sized* arm -- the original note was about the aggregate arm.
 - **`volatile` when the function's point is re-reading.** gcc commons a repeated
   read with the one in the entry guard and then propagates the value, which
   deletes the test: func_8005C5D4's spin loop needs it, and func_80058E1C needs
@@ -2086,6 +2096,13 @@ turned "gcc scheduled differently" into "the assembler did not insert a nop".
 **The general move: when your build contains an instruction pair, ask whether
 the target contains that pair anywhere.** It costs one command and it
 distinguishes "wrong source" from "wrong tool", which nothing else does.
+
+**And a long sweep must FLUSH, or a run that is killed reports nothing.**
+`sweep_borrow.py` ran twenty minutes on func_800408D0, was stopped, and left
+a zero-byte log: Python buffers stdout when it is redirected, so every hit it
+had printed died with the process. Both sweeps now pass `flush=True`. This is
+the same failure as the others in this paragraph wearing different clothes --
+the run happened, the answer did not survive, and nothing said so.
 
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
