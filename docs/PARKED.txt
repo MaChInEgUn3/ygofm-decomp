@@ -5012,8 +5012,45 @@ func_80020988 -- 151 target, 150 built (-1), 72 differences, written
   slot, and we emit the inverted `bne` plus a `j`, which is +2 there and means
   something else is -3. Three tail shapes measured (the body inside the `if`,
   a `goto zero;` label, the plain early return) and all are -1 at 72/73.
-  Two more things retail has that we do not: it copies the `e[0x21] + e[0x60]`
-  sum into a second register before masking it 0x7F and 0xFF -- the two-names
-  tell -- and a `w = v;` second name for that is worth NOTHING here, which is
-  the first time that shape has failed. And it reads the flags halfword at
-  `+8` BEFORE the two bytes it sums, where we read the bytes first.
+  **The -1 is now located exactly**: retail's `addu $v0,$v1,$zero` copy of the
+  `e[0x21] + e[0x60]` sum, and the tail is otherwise instruction-for-
+  instruction. But it is NOT the two-names tell, and this is the first time
+  that reading has failed. Retail masks the copy 0x7F for the branch and the
+  original 0xFF **in that branch's delay slot**; we compute the 0x7F mask,
+  branch with the STORE in the delay slot, and mask 0xFF after -- one
+  instruction fewer because one register serves both masks. So the real
+  question is what fills the delay slot, not how many names the sum has.
+  Measured and worthless, all at -1: a second name `w` for the sum at five
+  declared types (s32/s16/u16/u8/s8), the same copy borrowed into `one`, `b`
+  and `c` (92/95/98 -- much worse), `u8` for the sum itself,
+  `do { } while (0);` round the store and round the sum-plus-store, and the
+  store moved above the `|= 4`.
+  Retail also reads the flags halfword at `+8` BEFORE the two bytes it sums,
+  where we read the bytes first.
+  The permuter's only exact-length output is semantically wrong -- it holds
+  the pre-write flags value in a `volatile` local and reuses it for the
+  `& 0xFFFB`, where retail re-reads after the write. Its correct length is an
+  accident of the volatile's own store-and-reload.
+
+
+func_8004803C -- 157 target, 153 built (-4), 151 differences, first draft
+  2026-08-28. Fourth out of the dup-%hi pool. A sound-voice setup: it looks a
+  16-bit id up in one table, derives two volumes, applies an optional pan, and
+  writes eleven fields of the D_8009B45C block before two library calls.
+  gp=0, at=0, `as -G0`, and D_8009B45C is re-materialised in nearly every
+  block -- gcc has no global CSE, so writing the symbol inline is right and a
+  base local would be wrong everywhere except the first block, which does
+  share one load across several accesses.
+  Two decode notes worth keeping: the `sra $v0,$t3,1` has no bias, so it is a
+  SHIFT and not a divide (the `/ 128` further down does have the `bgez`/
+  `addiu 0x7F` bias and is a real divide); and `sllv $v0,$s1,$v0` with `$s1`
+  holding 1 across two shifts is the `one = 1;` named-constant tell, the same
+  shape as `and` versus `andi` for a mask.
+  arg5 and arg6 are `u8` on the callee's own evidence -- their stack slots are
+  read with `lbu`.
+  Not yet diagnosed: -4, and the parameter-to-callee-saved assignment is
+  rotated (retail has arg0/arg1/arg5/arg6 in $s3/$s0/$s5/$s4 and the id in
+  $s2). One concrete lead: retail masks arg3 with `andi $a1,$a3,0xFF` and
+  feeds the mask to both multiplies, and our build multiplies `$a3` raw even
+  though the source says `v = arg3 & 0xFF;` -- worth understanding before
+  anything else.
