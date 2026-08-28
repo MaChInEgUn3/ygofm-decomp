@@ -1187,6 +1187,16 @@ first draft. Do this before anything else on a function with a big frame: it
 is free, and getting it wrong makes every stack reference in the diff wrong at
 once, which reads like a much larger problem.
 
+**SWEEP the borrow candidates rather than guessing which one.** Which dead
+name a value borrows is the whole lever, and the difference between two
+candidates is not reasoned about -- it is measured. func_800220B8's step
+constant borrowed `a` (the other arm's step) for 11 -> 9 and `v` (the first
+block's value) for 9 -> **MATCH**; `y` is -7 and much worse. Three
+substitutions in one command, using a word-boundary regex over the block's
+text so the rename cannot leak. Do the same on func_8005BFC8-style residues:
+five candidates were swept there too (`t` 26, `cnt` 26, `lim` +1, `cap` 24,
+`t2` 18). Guessing one name and moving on is how these sat parked.
+
 **But check the borrowed name's TYPE before crediting the borrow.** On
 func_8002E128 an index written inline is 18 differences, with a fresh `s32`
 name 19, borrowing the mutually exclusive arm's `s32` local 12 -- and with a
