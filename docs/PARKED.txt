@@ -5264,3 +5264,76 @@ func_80023D08 -- 173/173, 69 differences, written
   `t = arg1 & 2` (declared first, declared last, `s16`, plus a second name
   for `arg1 & 1`) are ALL 69.  One name for the two arms' `i` is 102 -> 97
   and is installed.  Next move is the permuter.
+
+  **2026-08-29, 4 -> 2, from the permuter and it is the SAME edit twice.**
+  The second scaling wants its mask and its shift split exactly the way the
+  first one does, but against `a` rather than `b`:
+  `a = (u32)((a * h) & 0xFFFF); b = a >> 8;`.  So both scalings are
+  `x = mask(...); y = x >> 8;` and the intermediate is the value being
+  scaled, reused as its own destination -- which is what puts the `mflo` in
+  `$v0` instead of `$a2`.  The two remaining differences are `h`'s register:
+  retail has `addiu $v0,$v0,1` / `mult $a0,$v0` and we get `$v1`.
+  Measured and worse at that site: `h = load; h = h + 1;` and `h += 1;` as
+  two statements (3), a fresh name for the `+ 1` (3), `s16 h` (+2 and 60),
+  borrowing `b` for the `+ 1` (+2 and 59).  Measured and identical: `u32 h`,
+  and writing the multiply as `h * a` rather than `a * h`.
+
+# ---
+func_80056250 -- 170/173 (-3), 147 differences, written
+  2026-08-29.  The duel-screen rebuild: it calls three setup routines, walks
+  the 0xE1B-entry hand summing 0x14 or 0xC per card depending on a bit in the
+  0xBEC bitmap, writes the two totals to +0xDF0/+0xDF4, re-initialises every
+  sprite in the 0x1E0 pointer table, then dispatches on the byte at +0xE16 to
+  one of three func_8005A468 calls and finally recolours the two VRAM bands.
+  `arg0 * 0xE20 + D_800F2C40` is written inline FOUR times -- retail
+  re-materialises the `%hi`/`%lo` pair and the whole 0xE20 multiply at each
+  of the four phases, and only the third phase (across the func_800590DC
+  call) keeps it in a callee-saved register, so that one is a local and the
+  other three are not.  gp=0, at=0, default flags.
+  Three things that are already right: `func_8004CB0C`, `func_8005A4C4`,
+  `func_800590DC` and `func_800582C0` have no prototypes in functions.h and
+  must not get one (`func_800590DC` is called with `$a1`/`$a2` still holding
+  the previous loop's leftovers, which is what a one-argument implicit
+  declaration gives); the second loop reloads `*c` for every one of its six
+  statements, which is just the source writing `*c` inline; and
+  `*(s32 *)(p + 0xDF0) = v; v += …; *(s32 *)(p + 0xDF4) = v;` against ONE
+  name is retail's `addu $v0,$v0,$v1` where a fresh name is a second
+  register.
+  The -3 is three separate missing instructions, all identified:
+  * the first loop's entry guard.  Retail reads the count, then
+    `slt $v0,$a2,$v1` against the ACCUMULATOR's register (which holds the
+    zero) and copies it into the counter -- three instructions where our
+    `for (i = 0; i < p[0xE1B]; i++)` folds the constant and emits
+    `beq $v0,$zero` plus the copy.  `for (i = sum; …)`, an explicit `z = 0;
+    sum = z;` third name, and a hand-rotated `while` are all identical, so
+    the shared-zero spelling is not it.
+  * the arm ORDER of the switch.  Retail lays the arms out 0x23, 0x3E, 0x3C
+    with 0x3C falling into the shared `jal`, so 0x3E needs its own
+    `addu $a1,$a2,$zero` and ours does not.  Writing the cases in that order
+    is 149 -> 147 and does NOT restore the instruction: gcc puts `v` straight
+    into `$a1` where retail keeps it in `$a2` and copies.
+  * the copy itself, `addu $a1,$a2,$zero`, which retail executes
+    unconditionally in the first `beq`'s delay slot.  Measured and worthless:
+    `w = v;` before the switch with `-w` in the 0x3C arm, `w = -v;` inside
+    it, `w = v; w = -w;` inside it, and `v = -v;` in place.  A `goto`-join
+    rewrite of the whole switch is -7 and much worse.
+  Next move is the permuter; the shape is otherwise instruction-for-
+  instruction right.
+
+# ---
+2026-08-29, guard sweep, and BOTH hits are worth writing down as method.
+  `sweep_guards.py` over 205 parked candidates and 84 guarded symbols
+  returned two rows, and one of them is a **false positive of exactly the
+  kind the score-ranking caution describes**.  func_8003BF00 goes from
+  111/112 and 35 to 112/112 and 55 under `D_8009B118_SIZED` -- the LENGTH
+  comes right, which by the usual ordering makes it the better base.  It is
+  not: the guard changes `extern s32 D_8009B118` into `extern s32
+  D_8009B118[2]`, so every `b = D_8009B118;` in that file silently becomes
+  the symbol's ADDRESS rather than its value, and the listing plainly has
+  `lw $v0,%lo(D_8009B118)($v0)`.  The instruction that "came back" is the
+  `addiu %lo` of an address computation the function is not supposed to do.
+  So: **a `_SIZED` or `_IS_AGGREGATE` hit on a symbol the candidate reads as
+  a bare scalar is an array-decay bug, not a lever** -- check every
+  unsubscripted use before believing the count.  func_80030D5C's hit is
+  genuine (it already writes `D_8009B0F4[0]`), and is 29 -> 28 at -1 on
+  `D_8009B0F4_SIZED_VOLATILE`; installed.

@@ -1,3 +1,4 @@
+#define D_8009B0F4_SIZED_VOLATILE
 #define D_8009B0F4_IS_AGGREGATE
 #include "common.h"
 

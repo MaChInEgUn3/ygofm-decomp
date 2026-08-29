@@ -53,7 +53,8 @@ void func_80045C98(void) {
         }
         if (a != 0) {
             h = *(s16 *)(D_8009B45C + 0x1586) + 1;
-            b = (u32)((a * h) & 0xFFFF) >> 8;
+            a = (u32)((a * h) & 0xFFFF);
+            b = a >> 8;
         } else {
             b = 0;
         }
