@@ -5461,13 +5461,16 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
 
 # ---
 2026-08-29, negatives worth not repeating.
-  func_8003CEB8 (1 difference): retail zeroes the loop counter from `$zero`
-  in the guard's own delay slot and we copy it out of the accumulator's
-  register (`addu $a3,$v1,$zero`).  Four shapes of the two zero
-  initialisations -- `i = 0;` before `crc = 0;`, after it, `crc = i;` after
-  `i = 0;`, and the declaration order swapped -- are ALL 1, so the
-  func_8004BE88 shared-zero axis is the wrong one here.  A permuter run is
-  open on it.
+  func_8003CEB8 MATCHED 2026-08-29 on ONE declaration: `s16 crc`, not
+  `s32`.  It is a CRC-16, so the narrow type is what the source obviously
+  had; the extra `andi 0xFFFF` at the return and the whole shift chain come
+  out right once each iteration truncates.  The permuter found it in 699
+  iterations paired with a named `0xFFFF` mask that is worth NOTHING on its
+  own -- decompose before installing, as always.  The four zero-init shapes
+  recorded here an hour earlier were the wrong axis, and the reason is worth
+  keeping: the residue was `addu $a3,$v1,$zero` against retail's
+  `addu $a3,$zero,$zero`, which reads as a shared-zero question and was a
+  TYPE question.
   func_8002E730 (2 differences): retail sets up func_8002E00C's argument
   (`addu $a0,$s1,$zero`) BEFORE the `sw $s0,D_8009B280` store and we set it
   after.  Measured: a fresh name for the argument assigned right after

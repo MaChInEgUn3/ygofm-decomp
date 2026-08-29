@@ -1,7 +1,7 @@
 #include "common.h"
 
 s32 func_8003CEB8(u8 *arg0, s32 arg1) {
-    s32 crc;
+    s16 crc;
     s32 i;
     s32 j;
 
