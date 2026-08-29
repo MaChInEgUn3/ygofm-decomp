@@ -26,21 +26,21 @@ void func_80056250(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
     p = arg0 * 0xE20 + D_800F2C40;
     sum = 0;
     if (arg0 < 2) {
-        if (sum < p[0xE1B]) {
         i = sum;
-        m = 0xFFFF;
-        n = p[0xE1B];
-        do {
-            if (*(u16 *)(p + i * 2 + 0x33C) != m) {
-                k = i / 8;
-                if (((p + k)[0xBEC] >> (i - k * 8)) & 1) {
-                    sum += 0x14;
-                } else {
-                    sum += 0xC;
+        if (sum < p[0xE1B]) {
+            m = 0xFFFF;
+            n = p[0xE1B];
+            do {
+                if (*(u16 *)(p + i * 2 + 0x33C) != m) {
+                    k = i / 8;
+                    if (((p + k)[0xBEC] >> (i - k * 8)) & 1) {
+                        sum += 0x14;
+                    } else {
+                        sum += 0xC;
+                    }
                 }
-            }
-            i++;
-        } while (i < n);
+                i++;
+            } while (i < n);
         }
     }
     v = (*(s32 *)(p + 0xDF0) = *(s32 *)(p + 0xDE0) + sum);

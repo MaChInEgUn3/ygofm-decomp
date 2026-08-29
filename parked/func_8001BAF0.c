@@ -71,7 +71,7 @@ void func_8001BAF0(void) {
             }
         }
         e++;
-        if ((s32)e >= (s32)(D_800EAE88 + 5)) {
+        if ((s32)e - (s32)D_800EAE88 >= 5) {
             break;
         }
     }

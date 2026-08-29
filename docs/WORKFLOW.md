@@ -771,6 +771,13 @@ meaningful, and skipping to the last one wastes hours:
    difference was 24 against 20. So when two loads feeding one comparison
    come out in the wrong order, flip the comparison rather than reordering
    anything.
+   **And when one side is a CALL, the same flip decides whether the other
+   side's load is hoisted ACROSS it.** `*(u16 *)(p + 0xA0) < f(n, 0)` makes
+   gcc issue the load first, which means keeping it live over the call in a
+   callee-saved register; `f(n, 0) > *(u16 *)(p + 0xA0)` calls first and
+   loads after, which is what retail does. Two sites in func_800727C0, 104
+   differences to 41 on that one flip, and it is the same rule as the two
+   loads above read for a much larger effect.
    **And a hardware address written inline gets its field offset folded into
    the constant.** `((u8 *)0x1F8002A0)[3]` becomes a `lui`/`ori` of
    0x1F8002A3, and a block with six fields becomes six constants -- nine
@@ -1197,6 +1204,18 @@ permuter found the first; the second is the same idea applied by hand.
    exactly the instructions a missing name would have bought is a warning to
    look for the name first.
 
+
+   **An explicit byte-offset cursor is usually gcc's giv, not a source
+   variable, and writing it by hand is expensive.** func_800727C0's listing
+   keeps `$fp` = D_801AB000 and `$s6` starting at 0x84 and stepping 0xC,
+   added together at each use -- which reads as two source variables and is
+   one index expression: `D_801AB000[i + 0xB].unk0`, where the record is 12
+   bytes and 0x84 is 11 * 12. Writing the cursor and the base as locals is
+   104 differences; writing the index form is 16, and the whole difference is
+   that gcc's strength reduction places the giv's initialisation AFTER the
+   source's own preheader statements while a hand-written cursor lands among
+   them. The tell is a base-plus-offset pair whose offset's initial value is
+   a multiple of the record size.
    **Two reads of one record at different offsets want a base local and the
    index form, not a cursor.** func_80071CB0's second scan reads `+6` and
    `+2` of the same 0xC-byte record. Against the symbol, gcc hoists
@@ -1400,6 +1419,15 @@ by one. The permuter found it as `if (… == (o = 0))`, which is the same
 thing spelled where nobody would write it; the plain statement one line
 earlier scores identically. Reach for it when a whole register *class* is
 rotated and no ordering inside the loop moves it.
+**Two more instances the same hour, and it is now the first thing to try
+when a residue is nothing but register names.** func_800727C0 sat at 16
+differences that were entirely the prologue -- retail copies the parameter
+into `$s7` before the symbol pair and puts `i = 0` in the guard's own delay
+slot -- and moving `i = 0;` above `if (a[0x9C] == 0) return;` is a MATCH.
+func_80056250 sat at 2 and matched on `i = sum;` moved above
+`if (sum < p[0xE1B])`, which the permuter found in 1524 iterations. Both are
+one line moved up one line, and in both cases every ordering INSIDE the loop
+had already been measured and was worthless.
 
 **Assigning to an already-dead local before a call is a register-allocation
 hint.** `x = w; func_800134E0(p, x, y, z);` where `x`'s live range ended two

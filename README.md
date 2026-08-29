@@ -13,8 +13,8 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **817** (72.8%) | **28,175** (34.4%) |
-| remaining | 305 (27.2%) | 53,703 (65.6%) |
+| decompiled and matching | **819** (73.0%) | **28,510** (34.8%) |
+| remaining | 303 (27.0%) | 53,368 (65.2%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 869 files; 817 of them are in scope and the rest are library or
+`src/` holds 871 files; 819 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -38,14 +38,14 @@ above-scope functions matched along the way.
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
 | 51–100 | 64 | 64 | **0** |
-| 101–200 | 77 | 63 | 14 |
+| 101–200 | 75 | 62 | 13 |
 | 201–400 | 58 | 1 | 57 |
 | > 400 | 27 | 0 | 27 |
 
 **The short bands are exhausted.** Every remaining function up to 50
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
-broken. As of this revision the lowest unclaimed function is **162**
+broken. As of this revision the lowest unclaimed function is **165**
 instructions: everything shorter is either matched or parked, and the bulk of
 what is left is the 101–200 band.
 
