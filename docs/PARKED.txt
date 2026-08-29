@@ -4995,3 +4995,38 @@ func_80044608 -- 140/140, 38 differences, written 2026-08-29.  A small
   into its delay slot and an explicit `goto` cannot.  Also measured: case 1's
   zero path written as an out-of-line `goto` arm at the end of the case
   (-1/65).
+
+  **Permuter, 1229 iterations: 38 -> 33, and the shape is the implausible
+  one.**  It wrapped one arm's decrement in `if (D_8009AF7C) { A } else
+  { A }` -- both arms identical, so it is a legal no-op, the func_8005F3B8
+  class.  The plausible `do { } while (0);` at either decrement site is 38,
+  and the other half of its output (a named local for the `D_800F2888`
+  argument, which is also what `D_8009B444` is assigned) is worth nothing at
+  either placement.  Not installed.
+
+func_80037DA4 -- 160/160, 75 differences, written 2026-08-29.  A sequence
+  opcode reader: it pulls a byte off a per-depth cursor at `p + p[0x58] * 4`,
+  dispatches on its low nibble and three flag bits, decodes a field out of
+  `D_801D4244[D_8009B338 - 1]`, and either pushes a new cursor from one of
+  three offset tables or calls func_80036C14.
+  gp=6, at=0 -- **default flags**; the two gp-relative symbols are one byte
+  and one halfword and the three tables are all far larger than eight bytes,
+  so nothing needs a threshold.  m2c drafted the whole control flow correctly
+  including the `goto` into the push block.
+  One lever took it from -2 to exact length, and it is the fold rule twice in
+  one function: **`+ 0x17` must be its own statement against the same name.**
+  `a1 = ((t >> 22) & 0xF) + 0x17;` written whole puts the `addiu` before the
+  range test where retail has it in the test's delay slot; and in the arm
+  below, `a1 = ((t >> 18) & 0xF) + 0x17; if (a1 == 0x17)` lets gcc prove the
+  comparison is `(t >> 18) & 0xF == 0` and fold the constant away entirely --
+  retail materialises 0x17 twice, once as the addend and once as the
+  comparison operand.  Split against one name both times, -2/103 to 160/160
+  and 75.
+  What is left is a whole-function register rotation: retail holds the opcode
+  byte in `$a0` and the flag in `$a2`, we have `$a2` and `$a3`, and the two
+  cursor registers are exchanged with it.  Measured and worthless: declaring
+  the opcode first, moving `a2 = 0;` before the cursor store, and a
+  `do { a2 = 0; } while (0);` pin.  Also measured and WORSE: the `+ 0x17`
+  moved above the range test (-1), and a named `m = 0xFFFF0000;` for the mask
+  retail materialises in both arms of the table lookup (+1).
+  The permuter has not been run on it.
