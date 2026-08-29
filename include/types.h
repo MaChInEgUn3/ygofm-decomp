@@ -51,6 +51,12 @@ typedef struct {
     s32 w[7];
 } Words7;
 
+/* Eight words: the register block func_8002BAB4 copies out of D_800F2848 by
+ * value into the buffer func_800591FC hands it. */
+typedef struct {
+    s32 w[8];
+} Words8;
+
 /* Script opcode handler: dispatched from a table by a byte from the stream. */
 typedef void (*ObjFn)(u8 *);
 typedef void (*TickFn)(u8 *, s32);

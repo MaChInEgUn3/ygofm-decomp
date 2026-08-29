@@ -797,7 +797,23 @@ meaningful, and skipping to the last one wastes hours:
    the exit test, so the address giv keeps going forward: no index expression
    reproduces it in either direction, and an explicit cursor does
    (func_800533D8, 55 differences to 10).
-   **Where an independent store lands is decided by what precedes it.** A store
+   **A named read is how you let two independent DIVIDE chains interleave, and
+the second name's POSITION is the lever rather than the naming.**
+func_80026DC8's hit blocks each do two or three signed `% 5` reciprocal
+expansions on bytes read from different records. Written inline, gcc finishes
+one chain before starting the next and leaves a `nop` in the second `lbu`'s
+delay slot. `u = *(s8 *)(f + 0x18);` at the top of the block and
+`w = *(s8 *)(e + 0x18);` **after the store that consumes `u`** is +1 and 114
+differences to exact length and 25; both names at the top is 67. And the
+identical edit on the sibling block in the same function is worse (42 and
+57), because retail really does leave the `nop` there -- the third instance
+of one idiom wanting opposite spellings in one function.
+**Then the store ORDER inside such a block is worth permuting**: the last 25
+were two moves, `[0]` written before `[1]` in one block and `[6]` written
+before `[7]`/`[8]` in the other, and the second was a first-try MATCH. The
+permuter found the first; the second is the same idea applied by hand.
+
+**Where an independent store lands is decided by what precedes it.** A store
    written *after* a multiply gets scheduled into the `mult`→`mflo` latency;
    written before, it stays before. That is the whole of func_80044DC0's last
    three differences: `sp10[3] = 0;` after `sp10[0] = …` rather than before, and

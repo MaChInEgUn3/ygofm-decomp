@@ -427,6 +427,9 @@ PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 # func_80030998: the gp side is one- and two-byte scalars, and D_8009B2A0
 # (4 bytes), D_8009B26C and D_8009B27A (sized [4]) all want the bare form.
 PER_FUNC_AS_FLAGS["func_80030998"] = "-G2"
+# func_8002BAB4: gp == 0, and the two overlay halfwords D_80181002/D_80181012
+# are reached %hi/%lo.
+PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020988"] = "-G4"

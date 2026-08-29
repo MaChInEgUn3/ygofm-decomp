@@ -1152,6 +1152,9 @@ extern u8 D_800E9E18[];
  * it yet, so it is only reachable by address. func_8002DF2C passes it as a
  * callback. */
 extern u8 D_800EA1E8[];
+/* Overlay-region halfwords, defined by config/undefined_syms_auto.txt. */
+extern s16 D_80181002;
+extern s16 D_80181012;
 extern u8 D_800E9E60[];
 extern s32 D_8009B440;
 extern s32 D_8009B444;

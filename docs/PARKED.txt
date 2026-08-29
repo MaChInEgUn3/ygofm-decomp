@@ -5040,30 +5040,24 @@ func_80037DA4 -- 160/160, 61 differences, written 2026-08-29.  A sequence
   whole `if` (both -1).
 
 
-func_80026DC8 -- 166/166, 25 differences, written 2026-08-29.  A duel-AI
-  pairing search: it fills two NULL-terminated pointer arrays on the stack
-  from func_80026D18, walks every pair, and on the first pair func_80019A08
-  accepts it writes five or six bytes of a command record at D_800EAE88 and
-  returns 0.  Two nested loop pairs with the same shape, the second guarded by
-  a func_80026C0C result.
-  gp=0, at=0 -- default flags, nothing to do.  m2c drafted the control flow
-  correctly; its `var_s0 += 4` on a `u8 **` is its own display of `q++` and
-  should be read as one element, not four.
-  Stack: `sp - 0x58` with the saves at 0x40..0x54, so the two six-pointer
-  arrays sit at 0x10 and 0x28 and go in that declaration order.
-  **The one lever that has paid here is a NAMED READ splitting two `% 5`
-  chains so the scheduler can interleave them.**  Each hit block does two or
-  three signed `% 5` reciprocal expansions on bytes read from different
-  records; written inline, gcc finishes one chain before starting the next and
-  leaves a `nop` in the second `lbu`'s delay slot -- which was the whole +1.
-  In the SECOND hit block, `u = *(s8 *)(f + 0x18);` at the top and
-  `w = *(s8 *)(e + 0x18);` **after the `[0]` store** is +1/114 to 166/166 and
-  25.  Both names at the top is 67, so the position of the second one is the
-  lever, not the naming.
-  The same edit on the FIRST hit block is worse (42 for one name, 57 for two),
-  and retail really does leave a `nop` in that block's second `lbu` slot -- so
-  the two blocks want opposite spellings of the same idiom, which is the
-  func_80058434/func_8005D994 pattern again.
-  What is left is 25, mostly the order of the `sb $zero,7`/`sb $zero,8` pair
-  and the D_800EAE88 base against the first `% 5` expansion.  The permuter has
-  not been run.
+func_8002BAB4 -- 150 target, 151 built (+1), 106 differences, written
+  2026-08-29.  A four-way dispatcher on `D_800EA1E8[0] & 0xF`; three arms are
+  a single call each and the fourth steers a camera value at
+  `D_800F2848 + 0x20` toward the overlay's D_80181002/D_80181012, ticks a
+  counter, and copies eight words out of D_800F2848 into the buffer
+  func_800591FC returns.
+  gp=0, at=0, `as -G0` -- **the two overlay halfwords are the reason**: they
+  are `s16` scalars defined by `config/undefined_syms_auto.txt` and at the
+  default -G8 they come out gp-relative where retail reaches them `%hi`/`%lo`.
+  New: `Words8` in types.h for the 32-byte copy, and `extern s16 D_80181002;`
+  / `D_80181012` in variables.h -- the first declarations this project has
+  taken in the overlay address range, and they are ordinary externs because
+  the linker defines them as absolute addresses.
+  The residue is +1 and it is a single `nop`: retail materialises the `lui`
+  half of the `/ 24` reciprocal constant BEFORE the two `lh` loads and fills
+  the second load's delay slot with the `ori` half, where we emit the whole
+  pair after the subtraction and get a `nop`.  Measured and worthless: a
+  named local for the first halfword read, and splitting `v / 24 + 1` into
+  two statements (+2).
+  The other visible difference is the prologue: retail reads
+  `D_800EA1E8[0]` before the frame setup and we read it after.
