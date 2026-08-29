@@ -430,6 +430,8 @@ PER_FUNC_AS_FLAGS["func_80030998"] = "-G2"
 # func_8002BAB4: gp == 0, and the two overlay halfwords D_80181002/D_80181012
 # are reached %hi/%lo.
 PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
+# func_80045C98: gp == 0 and thirteen %hi/%lo reads of D_8009B45C.
+PER_FUNC_AS_FLAGS["func_80045C98"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020988"] = "-G4"

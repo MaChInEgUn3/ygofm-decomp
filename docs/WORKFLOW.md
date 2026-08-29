@@ -2188,6 +2188,13 @@ had printed died with the process. Both sweeps now pass `flush=True`. This is
 the same failure as the others in this paragraph wearing different clothes --
 the run happened, the answer did not survive, and nothing said so.
 
+**Killing a permuter mid-compile can leave the wine prefix in
+`wineboot --init`, and the try_func that was running blocks behind it
+forever.** The tell is that ONE try_func hangs while another, started
+afterwards, completes normally -- so the toolchain is fine and it is that
+process. `ps | grep wineboot` and kill both. Twenty minutes went into this
+before the second try_func proved the toolchain was up.
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a
