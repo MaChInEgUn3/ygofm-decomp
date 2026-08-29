@@ -1146,6 +1146,10 @@ extern u16 D_8009B412;
 extern u8 D_8009151C[];
 extern u8 *D_800E9EB4[];
 extern u8 D_80090800[];
+extern u8 D_800907AC[];
+/* Two halfwords indexed by D_8009B1D5; small enough to stay gp-relative, and
+ * func_80023D08 takes its address that way (addiu $gp,%gp_rel). */
+extern u16 D_8009AF20[4];
 extern u8 D_801D4200[];
 extern u8 D_800E9E18[];
 /* The second function inside the func_8002DD74 listing; splat has not split

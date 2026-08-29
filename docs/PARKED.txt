@@ -5191,3 +5191,76 @@ func_80045C98 -- 169/169, 9 differences, written
   the masked value in `$a0` and the multiply result in `$v0`, we have `$v1`
   and `$a2`.  Declaration order (three permutations) and a redundant re-read
   of `D_8009B45C + 0x44` inside the test are all 9.
+
+  **2026-08-29, 9 -> 4, three edits, two of them from the permuter.**
+  `u16 a`, not `s32 a`, for the first scaling's result -- the value only ever
+  feeds a mask, a test and a multiply, and the narrow declaration puts it in
+  the register retail uses (9 -> 7).  It also makes the `a = a & 0xFFFF;`
+  line that followed it dead, and dropping that line changes nothing, so it
+  is gone.  Then the two shifts want to be their own statements against the
+  same name -- `a = (u32)((h * (…)) & 0xFFFF); a = a >> 8;` is 7 -> 5, and
+  the second scaling's `+ 1` wants the name `h` borrowed from the first
+  scaling's dead load, `h = *(s16 *)(D_8009B45C + 0x1586) + 1; b = (u32)((a *
+  h) & 0xFFFF) >> 8;`, which is 5 -> 4 on top.  Each alone is 5 and 6, so
+  they compose.
+  Measured and worse at the second scaling: carrying `h` through the mask as
+  well (7), through the mask into `b` (5), one name `b` for all three steps
+  (+2 and 59), and splitting the `+ 1` into its own statement (8).  `u16 b`
+  is -1 and 63, and `u16 h` and `s16 h` are 7 and 8.
+  The last 4 are one register pair in the second scaling only: retail has
+  `addiu $v0,$v0,1` / `mult $a0,$v0` / `mflo $v0` / `andi $v0,$v0,0xFFFF`,
+  one register throughout, and we get `$v1` for the `+ 1` and `$a2` for the
+  `mflo`.  The first scaling has the identical shape and matches.
+  Also measured and worth nothing: the assign-inside-the-condition idiom at
+  the OTHER two upper clamp tests (+0x1586/+0x158A and +0x510/+0x49) -- both
+  are 9 against a 9 base, i.e. no change at all.  The lever is specific to
+  the one site whose loaded value is the call argument.
+
+# ---
+func_80023D08 -- 173/173, 69 differences, written
+  2026-08-29.  A card-cursor mover: `arg1` is a direction bitmask (bit 0
+  picks the column axis, bit 1 the negative direction), the record at
+  `arg0 + 4` is the cursor sprite, and each arm sets up a slide by writing a
+  target coordinate and a per-frame delta into it, then arms the countdown
+  D_8009B162.  gp=7, at=0, default flags -- `tools_src/sweep_try.py` says the
+  default row is the best of all 24.
+  Three things the first draft got right and are worth reusing:
+  * `func_8002348C()` is called with NO argument register set at all, and
+    `src/func_8002348C.c` takes `u8 *arg0`.  That is the original's missing
+    prototype: `$a0` still holds this function's own `arg0` at that point, so
+    an implicit declaration emits nothing.  Do not add a prototype.
+  * both `div`s are by the variable `n` (`break 7` in the listing), and the
+    second arm's SHIFT is `sllv` by the same `n` -- so that arm is
+    `(x << n) / n` with `n` a variable, while the first arm is `(x << 8) / n`
+    with a literal.  gcc 2.8 has no global constant propagation, so `n = 8`
+    assigned before the call does not reach the use after it.
+  * `*(u16 *)(m * 4 + D_8009B1D5 * 0x50 + D_80090800 + 2)` folds the `+ 2`
+    into `%lo(D_80090800+2)`; a base local (`tb = D_80090800;` assigned right
+    after the call) is what keeps retail's `%lo(D_80090800)` with `2($v1)` on
+    the load.  func_800300C8's rule, second instance.
+  **The open question is the store-then-reload in the second arm.**  Retail
+  has `sh $v0,0x2C($s1)` / `lh $v0,0x2C($s1)` / `nop` -- it stores the table
+  value into the record and immediately reads it back signed.  gcc forwards
+  the store and emits `sll 16`/`sra 16` on the register instead, which is one
+  instruction fewer and cascades.  `*(volatile u16 *)(p + 0x2C) = …` for that
+  one store reproduces retail exactly (-1/97 -> 173/173 and 69) and is the
+  only thing that does.  Measured and worthless: a volatile READ (+2), a
+  named local for the read-back, `&p[0x2C]`, a struct-view type on the read,
+  a struct-view type on the store, and the whole 24-row flag sweep.  A
+  genuinely aliasing store between the two -- `D_8009B162 = 0x40;` moved up,
+  or a dummy byte store -- also brings the reload back, which is what
+  identifies the mechanism as cse's memory invalidation; but both put the
+  global store in the wrong place.  The volatile is installed as a
+  placeholder and the plausible spelling is still open.
+  What is left is 69 register differences in two clusters, both in the first
+  arm: the five-argument `func_80022D94` setup (retail computes
+  `((i * 2 + arg0[0x18] * 8) + D_8009B1D5 * 0x10) + D_800907AC` with the sum
+  in `$v0` and we get the same tree with `$a0` as the destination, so
+  expand_binop swaps the last two `addu`s), and the position of
+  `D_8009B162 = 0x50` relative to the division's basic-block split.
+  Wrong axes, each measured as a set of identical scores: six spellings of
+  the fifth argument (a named index, an `(s32)` cast on the base, the base
+  written first, three regroupings) are ALL 69, and four spellings of
+  `t = arg1 & 2` (declared first, declared last, `s16`, plus a second name
+  for `arg1 & 1`) are ALL 69.  One name for the two arms' `i` is 102 -> 97
+  and is installed.  Next move is the permuter.
