@@ -5458,3 +5458,20 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
   to it, re-materialised in the latch every iteration -- three instructions
   where every spelling above gives two.  A source local for the base would
   be hoisted, so it is not that either; the mechanism is not established.
+
+# ---
+2026-08-29, negatives worth not repeating.
+  func_8003CEB8 (1 difference): retail zeroes the loop counter from `$zero`
+  in the guard's own delay slot and we copy it out of the accumulator's
+  register (`addu $a3,$v1,$zero`).  Four shapes of the two zero
+  initialisations -- `i = 0;` before `crc = 0;`, after it, `crc = i;` after
+  `i = 0;`, and the declaration order swapped -- are ALL 1, so the
+  func_8004BE88 shared-zero axis is the wrong one here.  A permuter run is
+  open on it.
+  func_8002E730 (2 differences): retail sets up func_8002E00C's argument
+  (`addu $a0,$s1,$zero`) BEFORE the `sw $s0,D_8009B280` store and we set it
+  after.  Measured: a fresh name for the argument assigned right after
+  `t = D_800EAE98;` is 2 (no change), borrowing the function's own dead `u`
+  is 2, moving the D_8009B280 store below the `*(s32 *)(e + 4)` update is 8,
+  and folding that update into the same `do { } while (0);` is 4.  So the
+  argument-hoist lever does not reach it and the axis is still unknown.
