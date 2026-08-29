@@ -4,14 +4,12 @@ void func_8002BAB4(void) {
     u8 *p;
     u8 *q;
     u8 *o;
-    s32 one;
     s32 r;
     s32 d;
     s32 v;
     s32 t;
 
     p = D_800EA1E8;
-    one = 1;
     switch (p[0] & 0xF) {
     case 0:
         func_8002BAA0(p);
@@ -25,15 +23,11 @@ void func_8002BAB4(void) {
         func_8002ACA4(p);
         q = D_800F2848;
         r = func_80058DD8(0);
-        if (r == one) {
+        if (r == 1) {
             if (func_80058E68(0) != r) {
                 func_80058FB0(0, (u8 *)0x80181010);
                 d = D_80181012 - D_80181002;
-                v = d;
-                if (d < 0) {
-                    v = -v;
-                }
-                v = v / 24 + 1;
+                v = (d < 0 ? -d : d) / 24 + 1;
                 if (D_80181012 < *(s32 *)(q + 0x20)) {
                     *(s32 *)(q + 0x20) = *(s32 *)(q + 0x20) - v;
                 }

@@ -5040,7 +5040,7 @@ func_80037DA4 -- 160/160, 61 differences, written 2026-08-29.  A sequence
   whole `if` (both -1).
 
 
-func_8002BAB4 -- 150 target, 151 built (+1), 106 differences, written
+func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   2026-08-29.  A four-way dispatcher on `D_800EA1E8[0] & 0xF`; three arms are
   a single call each and the fourth steers a camera value at
   `D_800F2848 + 0x20` toward the overlay's D_80181002/D_80181012, ticks a
@@ -5061,3 +5061,48 @@ func_8002BAB4 -- 150 target, 151 built (+1), 106 differences, written
   two statements (+2).
   The other visible difference is the prologue: retail reads
   `D_800EA1E8[0]` before the frame setup and we read it after.
+
+  **2026-08-29, +1/106 -> 150/150 and 25**, on three edits:
+  - **the abs written as a TERNARY inside the division**: `v = (d < 0 ? -d :
+    d) / 24 + 1;` rather than `v = d; if (d < 0) v = -v; v = v / 24 + 1;`.
+    That is the whole length error -- with the `if` spelling gcc emits the
+    reciprocal constant's `lui`/`ori` pair after the subtraction and leaves a
+    `nop` in the second `lh`'s delay slot; with the ternary it straddles the
+    two loads the way retail does.  Also measured: two named halfword reads
+    (+3) and `v = -d;` in the `if` (+1, no change).
+  - **`one = 1;` assigned before the switch is WRONG here**, which is the
+    opposite of func_8002F4C0 where the same shape was the lever.  Retail
+    does hold 1 in `$s3` across the whole function, but it gets there from
+    the switch tree's own comparison; writing the local costs 4.  The
+    permuter found it.
+  - the declaration order of `p` and `one` (29 against 31), now moot.
+  What is left is 25: the `D_80181002` read lands in `$a0` where retail has
+  `$v1`, the counter decrement in `$v1` against `$v0`, and retail puts
+  `d = 2;` in the func_8008E590 call's delay slot where we put the argument.
+  Measured and worthless: naming the call's result, and both orders of the
+  `p`/`one` assignments.
+
+
+func_80027508 -- 161 target, 162 built (+1), 92 differences, written
+  2026-08-29.  A duel-AI move chooser: four guarded calls, each of the form
+  `if ((rand() & K) == 0) { if (f() == 0) return 0; }`, then it picks a card
+  record out of D_801A7AD8, reads a field out of D_801D4244 and fills the
+  command block at D_800EAE88 one way or the other.
+  gp=1, at=0 -- default flags.  `func_8008E590` is `rand()` and takes no
+  arguments; m2c renders some of its call sites with four, which is register
+  noise, and the listing settles it.
+  **The one lever so far: the `% 5 + 0xB` must be written INLINE in the byte
+  store, not through an `s32` local.**  With `c = *(s8 *)(e + 0x18) % 5 +
+  0xB; D_800EAE88[0] = c;` gcc computes the modulo in QImode -- because the
+  local's only use is a byte store -- and re-narrows with a second
+  `sll 24`/`sra 24` pair after the `subu`, twice.  Written inline it stays
+  SImode and matches retail.  +5/115 to +1/92.
+  The residue is +1 and it is `t[idx - 1]`: gcc folds the `- 1` into the
+  load's displacement (`lw -4`) where retail computes `addiu -1` then
+  `sll 2`.  Five spellings measured -- a named index (+8), an `(s32)` cast on
+  the halfword, the pointer form `(t + i)[0]`, the explicit
+  `*(s32 *)((s32)t + i * 4)`, and dropping the base local for the symbol
+  (+3) -- and none of them stops the fold.
+  Also open: the `lbu 0x18` read is emitted after the `[6]` store where
+  retail has it before the `[1]` store, which is the func_80026DC8
+  interleave shape; the obvious named read is +2 from here.

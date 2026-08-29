@@ -797,7 +797,24 @@ meaningful, and skipping to the last one wastes hours:
    the exit test, so the address giv keeps going forward: no index expression
    reproduces it in either direction, and an explicit cursor does
    (func_800533D8, 55 differences to 10).
-   **A named read is how you let two independent DIVIDE chains interleave, and
+   **A modulo whose only use is a byte store must be written INLINE, not
+through a local.** `c = *(s8 *)(e + 0x18) % 5 + 0xB; D_800EAE88[0] = c;`
+makes gcc compute the modulo in QImode -- the local's only use is the byte
+store, so it narrows -- and re-narrow with a second `sll 24`/`sra 24` pair
+after the `subu`. Written inline in the store it stays SImode and matches.
+Two instances in func_80027508, +5 to +1. This is the func_80027060 rule
+about a narrow local read from the other end: there a redundant cast was a
+pseudo that should not exist, here a redundant LOCAL is.
+
+**And the abs inside a division wants the TERNARY, not the `if`.**
+`v = (d < 0 ? -d : d) / 24 + 1;` and `v = d; if (d < 0) v = -v; v = v / 24 +
+1;` compute the same thing, and gcc schedules the reciprocal constant
+differently: with the `if` it emits the `lui`/`ori` pair after the
+subtraction and leaves a `nop` in the preceding load's delay slot, with the
+ternary it straddles the two loads the way retail does. func_8002BAB4, +1
+and 106 differences to exact length and 31.
+
+**A named read is how you let two independent DIVIDE chains interleave, and
 the second name's POSITION is the lever rather than the naming.**
 func_80026DC8's hit blocks each do two or three signed `% 5` reciprocal
 expansions on bytes read from different records. Written inline, gcc finishes
