@@ -1348,6 +1348,16 @@ groupings -- twelve spellings, all 2 or 6 differences. `z = 0;` at the top of
 the block with `off = z; i = z;` is a MATCH (func_8004BE88). Same family as
 the one-name-for-two-sequential-constants rule in step 2, read for a constant
 that is used twice at once rather than twice in sequence.
+**And that hint has a PLAUSIBLE spelling: assign the load inside the
+condition that tests it.** func_80045C98's second clamp is
+`if ((b = *(s16 *)(D_8009B45C + 0x1580)) >= D_8009B45C[0x1584])`, where `b`
+is a call argument three blocks later and dead at that point. It is -1 and
+63 differences to 169/169 and 9. **The exact parenthesisation is the
+finding**: assigning the COMPARISON instead -- `b = (x >= y);` or
+`if ((b = x >= y) != 0)` -- is 45. So when a permuter output contains an
+embedded assignment, read which subexpression it wraps, and do not run its
+diff through a paren-stripping normaliser.
+
 **Assigning to a local that is not yet live is the same hint, and a fresh
 name is not.** func_8002A4A8 sat at 14 through nine hand shapes. The
 permuter's fix was to write `y = a;` in one arm of an `if` and take the
