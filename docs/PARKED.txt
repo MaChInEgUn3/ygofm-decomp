@@ -5320,6 +5320,41 @@ func_80056250 -- 170/173 (-3), 147 differences, written
   Next move is the permuter; the shape is otherwise instruction-for-
   instruction right.
 
+  **2026-08-29, -3/147 -> 173/173 and 17, six edits and every one of them
+  named in the entry above as an open question.**  In order:
+  * **the first loop is an explicit guard plus `do`/`while`, with the bound
+    read INLINE in the guard and NAMED inside it.**
+    `if (sum < p[0xE1B]) { n = p[0xE1B]; i = sum; do { … } while (i < n); }`
+    -- the guard's inline read is what stops gcc folding `0 < n` to `beqz`
+    (a named bound in the guard is -4), and the second read inside is CSEd
+    to a plain `addu $t0,$v1,$zero`, which is retail's invariant copy.  Both
+    halves are needed: named in both places is -3, inline in both is -2.
+    -3/147 -> -2/90 -> 173/173.
+  * **the switch's argument is a variable assigned BEFORE the switch, and
+    each arm keeps its own call.**  `w = v;` then `case 0x23: w = 0;
+    func_…; case 0x3E: w = v; func_…; case 0x3C: w = -w; func_…;` is
+    -2/90 -> 173/173 and 55.  Writing ONE call after the switch cross-jumps
+    the three arms' `addu $a0` together and is -6; passing `v` directly is
+    -1, because gcc then gives `v` the argument register and the 0x3E arm
+    needs no copy.  The case ORDER is 0x23, 0x3E, 0x3C -- read off the arm
+    addresses in the listing, not sorted.
+  * **a base local for the symbol in phases 3 and 4** (`b = D_800F2C40;`
+    then `arg0 * 0xE20 + b`), which moves the `%hi`/`%lo` pair ahead of the
+    0xE20 multiply.  Phases 1 and 2 keep the symbol inline.  55 -> 47.
+  * **the 0xFFFF the loop compares against is a NAME**, assigned between
+    `i = sum;` and `n = p[0xE1B];`.  32 -> 31.
+  * **the second loop's counter is its own name** -- the two loops are two
+    phases and one `i` for both costs a register class.  31 -> 23.
+  * **and so is the second base local**: `b` in phase 3 and `b2` in phase 4,
+    23 -> 17, even though the two never coexist.
+  What is left is 17: `sum` and `i` are in `$a1`/`$a2` where retail has them
+  the other way round, and the `*(s32 *)(p + 0xDF4) = v;` store is sunk into
+  the `bne`'s delay slot where retail materialises the ternary's 0x800
+  there instead.  Wrong axes, all four identical at 17: the operand order of
+  `v = sum + *(s32 *)(p + 0xDE0)`, `i = 0` instead of `i = sum`, the
+  declaration order of `i` and `sum`, and `do { i = sum; } while (0);`.
+  Next move is the permuter.
+
 # ---
 2026-08-29, guard sweep, and BOTH hits are worth writing down as method.
   `sweep_guards.py` over 205 parked candidates and 84 guarded symbols
