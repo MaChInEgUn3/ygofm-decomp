@@ -1163,6 +1163,10 @@ extern u8 D_8009B43C;
 extern u8 D_8009B43D;
 extern s8 D_8009B43E;
 extern s8 D_8009B44E;
+extern s32 D_8009B438;
+/* The two tables func_80044608 hands to func_80044470. */
+extern u8 D_8009AF7C[];
+extern u8 D_800F2888[];
 extern u8 D_8009B44F;
 extern u8 D_800F39B0[];
 

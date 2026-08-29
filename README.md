@@ -13,8 +13,8 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **814** (72.5%) | **27,692** (33.8%) |
-| remaining | 308 (27.5%) | 54,186 (66.2%) |
+| decompiled and matching | **815** (72.6%) | **27,851** (34.0%) |
+| remaining | 307 (27.4%) | 54,027 (66.0%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
@@ -28,7 +28,7 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-`src/` holds 866 files; 814 of them are in scope and the rest are library or
+`src/` holds 867 files; 815 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
@@ -38,7 +38,7 @@ above-scope functions matched along the way.
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
 | 51–100 | 64 | 64 | **0** |
-| 101–200 | 80 | 54 | 26 |
+| 101–200 | 79 | 55 | 24 |
 | 201–400 | 58 | 1 | 57 |
 | > 400 | 27 | 0 | 27 |
 

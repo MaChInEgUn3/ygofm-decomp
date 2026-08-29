@@ -915,6 +915,17 @@ meaningful, and skipping to the last one wastes hours:
    labels instead of one. Written inline in each arm it is a first-try
    MATCH. So when a switch's arms look repetitive, count the target's copies
    before factoring them out.
+   **And when two arms genuinely DO share one copy, which arm holds it is
+   decided by a `goto` into the other's block.** func_80044608 has two such
+   pairs. Written out in both arms, gcc keeps the LATER copy and jumps to it
+   from the earlier arm; retail keeps the EARLIER one. Labelling the earlier
+   block and writing `goto shared;` in the later arm puts it where retail
+   has it -- +3 and 74 differences to 140/140 and 38. **It does not always
+   work**: the same edit on that function's other pair is -1, because retail
+   reaches that copy with a `bgtz` whose delay slot holds a duplicated `lui`
+   of the call's argument, and an explicit `goto` gives a plain branch with
+   nothing to duplicate. So the lever is for a shared tail whose entry does
+   not need the target's first instruction copied into a delay slot.
    **And a constant argument held in a callee-saved register is the same
    question read backwards.** func_80052694 keeps 0 in `$s3` across two calls
    and passes a literal 0 to two others. Written as `z = 0;` with one textual
@@ -1662,6 +1673,13 @@ on a combination that had been in the table for weeks.
   other user of the type is unaffected — but **re-run try_func over them**,
   because alignment is a codegen input everywhere the type appears, not only
   in the copy (func_80039D64; four users rechecked, all still MATCH).
+- **`sll 24` instead of `andi 0xFF` on a byte global's read-modify-write
+  means the value was NAMED.** `D_8009B43C = D_8009B43C - 1; if (…)` reads
+  the byte back and gives `andi 0xFF` -- that is the func_8005BFC8 rule. When
+  the target has `sll $v0,$v0,24` there instead, the source kept the SImode
+  result in a local: `c = D_8009B43C - 1; D_8009B43C = c; if ((s8)c != 0)`.
+  A `(s8)` cast on the global itself does not do it, because the read-back is
+  still a `u8` load. Same shape with `bgtz` for `> 0` (func_80044608).
 - **Hold values in the widest natural type; cast at the point of use.** A narrow
   type inside a computation costs an `andi` or a sign-extend — this has bitten
   parameters, return values, locals and loop counters. It also changes

@@ -4959,36 +4959,39 @@ func_80046294 -- 151/151, 5 differences, written 2026-08-28.  A queue
   change).
 
 
-func_800164FC -- 159/159, 34 differences, written 2026-08-29.  A per-frame
-  sprite pass: it sets up the display environment, ticks a fade counter, fills
-  two scratchpad primitive templates at 0x1F800140 and 0x1F800180, and then
-  walks two runs of ten 0x1C-byte records at D_801A7B64 and D_801A7B64+0x1A4
-  drawing each.
-  gp=0, at=3 (three `lui $at` stores to the D_8009B30C group), so `as -G0` --
-  worth -10 to -3 on its own.
-  m2c drafted the whole control flow correctly in one run, including the
-  `goto` that lets the `& 0x400` arm skip the shared counter increment; the
-  work after that was four readings of the listing:
-  - **the two `*(s16 *)(D_800F2848 + 0xE)` reads want a base local.**  Written
-    against the symbol gcc folds the offset into `%lo(D_800F2848+14)` and
-    materialises the address twice; retail computes the base once and reads
-    `14($v0)` from it.
-  - **the fade test is UNSIGNED and the polarity is inverted from the obvious
-    reading**: retail's `sltu`/`bnez` is `if ((u32)D_8009B314 >= (u32)
-    D_8009B308)`, where the plain signed `<` gives `slt`/`beq`.  Those two
-    together are -3/149 to -1/77.
-  - **one name for 0x80 and inline literals for everything else.**  The
-    template block stores 0xFF three times, 0xAF and 0x37 twice each, 0xBC
-    twice and 0x80 four times across BOTH templates.  Reusing one `f` for all
-    of them lets gcc reorder the whole block (77); inlining every literal and
-    keeping a single name for the 0x80 -- the only value retail carries in a
-    register of its own, `$v1`, across both templates -- is 66.
-  - **`e = D_801A7B64; e = e + 0x1A4;` for the second run.**  As one
-    expression it folds to `%lo(D_801A7B64+420)`; split in two it is retail's
-    `addiu %lo` then `addiu 420`, and that was the last length error.  -1/66
-    to 159/159 and 34.
-  What is left is one register pair: retail has the 0x1F800140 template in
-  `$s1` and the loop counter in `$s2`, and we have them the other way round,
-  which accounts for 32 of the 34.  Measured and worthless: a
-  `do { n = 0; } while (0);` pin, moving `n = 0;` to the top of the block
-  (43, worse), and putting `n` first in the declarations.
+func_80044608 -- 140/140, 38 differences, written 2026-08-29.  A small
+  state machine: two nested comparison trees on D_8009B43D and D_8009B450,
+  each arm ticking a byte counter and calling one of three `func_8008B3xx`
+  routines through func_80043D48 before returning -1.
+  gp=35, at=0 -- **default flags and no addressing work**, which is what the
+  step-0 survey is for.
+  Three readings, and two of them are about which copy of a shared tail is
+  canonical:
+  - **`#define D_8009B450_IS_SCALAR`.**  The default unsized-array
+    declaration is non-small, so every reference is a `%hi`/`%lo` pair where
+    retail has one `%gp_rel` load.  This is the FIRST time this session that
+    the addressing went the other way -- the last two functions needed the
+    symbol pushed OUT of small data and this one needs it in.  With the empty
+    `case 2:` below, +6 to +3 and 114 to 74.
+  - **`case 2:` written with an empty body.**  Retail's inner tree tests
+    0, 1, 2 and 3 with 2 falling to the same place as `default`, so the case
+    is spelled out in the source -- the documented "the case range follows
+    what is written, not what is reachable".
+  - **`sll 24` rather than `andi 255` needs the decrement NAMED**: `c =
+    D_8009B43C - 1; D_8009B43C = c; if ((s8)c != 0)`.  A `(s8)` cast on the
+    global's read-back still gives `andi 0xFF`, because the read-back is a
+    `u8` load; only a local carrying the SImode value gets the shift.
+  - **A `goto` into another arm's block is what puts the canonical copy where
+    retail has it.**  Case 2's tail and case 1's zero-path tail are the same
+    three statements; written out in both, gcc keeps case 2's copy (the
+    later) and jumps to it from case 1, where retail keeps case 1's and jumps
+    forward from case 2.  Labelling case 1's block and writing `goto
+    shared340;` in case 2 is +3/74 to 140/140 and 38.
+  What is left is 38, and it is the SAME question one level up: arm 3 of the
+  inner tree and case 1's `== 2` path share the D_800F2AF0 tail, gcc keeps
+  case 1's and retail keeps arm 3's.  The mirror fix does NOT work there --
+  labelling arm 3 and writing `goto shared3A0;` in case 1 is -1 and 64,
+  because retail reaches that copy with a `bgtz` that duplicates the `lui`
+  into its delay slot and an explicit `goto` cannot.  Also measured: case 1's
+  zero path written as an out-of-line `goto` arm at the end of the case
+  (-1/65).
