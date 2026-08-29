@@ -68,8 +68,11 @@ void func_80037DA4(u8 *p) {
         if (a1 > 0x7FFF) {
             base = D_801D5800;
             off = -0x8000;
-        lookup:
-            r = ((s32)base & 0xFFFF0000) + *(u16 *)(base + (a1 + off) * 2);
+            do {
+            lookup:
+                r = ((s32)base & 0xFFFF0000) +
+                    *(u16 *)(base + (a1 + off) * 2);
+            } while (0);
         } else {
             if (a1 >= 0x500) {
                 a2 = a1 - 0x100;

@@ -5004,7 +5004,7 @@ func_80044608 -- 140/140, 38 differences, written 2026-08-29.  A small
   argument, which is also what `D_8009B444` is assigned) is worth nothing at
   either placement.  Not installed.
 
-func_80037DA4 -- 160/160, 75 differences, written 2026-08-29.  A sequence
+func_80037DA4 -- 160/160, 61 differences, written 2026-08-29.  A sequence
   opcode reader: it pulls a byte off a per-depth cursor at `p + p[0x58] * 4`,
   dispatches on its low nibble and three flag bits, decodes a field out of
   `D_801D4244[D_8009B338 - 1]`, and either pushes a new cursor from one of
@@ -5029,4 +5029,12 @@ func_80037DA4 -- 160/160, 75 differences, written 2026-08-29.  A sequence
   `do { a2 = 0; } while (0);` pin.  Also measured and WORSE: the `+ 0x17`
   moved above the range test (-1), and a named `m = 0xFFFF0000;` for the mask
   retail materialises in both arms of the table lookup (+1).
-  The permuter has not been run on it.
+  **Permuter, two runs: 75 -> 61 on a `do { } while (0);` round the labelled
+  `lookup:` statement** -- a label inside a do/while reached by a `goto` from
+  outside it, which is legal C and reads as source, so it is installed.  A
+  second run from the 61 base, 1544 iterations, found nothing better.
+  Still open after that: the prologue's two cursor registers are exchanged
+  ($v0/$v1), and case 1's `+ 0x17` sits in the `j`'s delay slot where retail
+  has it in the `beq`'s.  Measured and worthless there: swapping the `cp`/`c`
+  declaration order, and a `do`/`while` round either the `if` body or the
+  whole `if` (both -1).

@@ -107,6 +107,14 @@ extern u8 D_8009B248;
 extern u8 D_8009B24A;
 extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
+extern u8 D_8009B2BC;
+extern u16 D_8009AF44;
+extern u16 D_8009AF46;
+/* The two 0x12-entry tables func_80030998 alternates between, and the format
+ * string it hands to func_8008E870. */
+extern u8 D_80090CDC[];
+extern u8 D_80090CF4[];
+extern u8 D_80010288[];
 /* Two bytes under the guard so an assembler at -G1 expands the bare reference
  * through the destination register while the one-byte D_8009B428 beside it
  * keeps %gp_rel (func_80043BCC). The size is a codegen knob. */

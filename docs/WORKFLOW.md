@@ -926,7 +926,21 @@ meaningful, and skipping to the last one wastes hours:
    of the call's argument, and an explicit `goto` gives a plain branch with
    nothing to duplicate. So the lever is for a shared tail whose entry does
    not need the target's first instruction copied into a delay slot.
-   **And a constant argument held in a callee-saved register is the same
+      **A call whose ARGUMENT SETUP is duplicated into both arms of an `if`,
+   with only the tail shared, is a call written in BOTH arms.** func_80030998
+   picks one of two tables and calls func_80030250 with seven arguments;
+   retail sets `$a1`, `$a2`, `$a3` and the first stack slot separately in each
+   arm -- identical instructions, duplicated -- and shares only the last two
+   stack stores, one global store and the `jal`. Written once after the join
+   gcc emits the constant arguments once and the function is -4. Written in
+   both arms, gcc's cross-jump walks back from the `jal` and stops exactly
+   where the arms first differ (the second stack slot, 3 against 2), which
+   reproduces retail instruction for instruction. Same family as
+   func_80052694, read from the other side: there a vanishing constant local
+   said a call site should have been two copies, here the duplicated argument
+   setup says it.
+
+**And a constant argument held in a callee-saved register is the same
    question read backwards.** func_80052694 keeps 0 in `$s3` across two calls
    and passes a literal 0 to two others. Written as `z = 0;` with one textual
    call site the local is constant-propagated away, all four sites become
