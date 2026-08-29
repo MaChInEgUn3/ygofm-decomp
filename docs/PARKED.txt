@@ -5372,3 +5372,65 @@ func_80056250 -- 170/173 (-3), 147 differences, written
   unsubscripted use before believing the count.  func_80030D5C's hit is
   genuine (it already writes `D_8009B0F4[0]`), and is 29 -> 28 at -1 on
   `D_8009B0F4_SIZED_VOLATILE`; installed.
+
+  **2026-08-29, 17 -> 2, and the whole drop is ONE embedded assignment plus
+  one un-split store.**  The permuter's output was
+  `v = (*(s32 *)(p + 0xDF0) = *(s32 *)(p + 0xDE0) + sum);` -- the DF0 store's
+  own value becomes `v`, which is func_8002FB78's chained-assignment idiom
+  and is ordinary C.  17 -> 5.  Then the DF4 store wants the addition INLINE,
+  `*(s32 *)(p + 0xDF4) = v + *(u16 *)(p + 0xE02) * 4;`, not `v += …;` on a
+  line of its own: with the chained assignment above it, `v +=` allocates the
+  sum a second register and lets the store sink into the `bne`'s delay slot.
+  5 -> 2.  Measured and worth 5 (i.e. nothing): a name for the multiply,
+  `v = v + …`, naming only the halfword, and a `do { } while (0);` round the
+  store.  Measured and worth 9 from the 17 base but subsumed:
+  `v = *(s32 *)(p + 0xDE0); v = v + sum;` split against one name.
+  The last 2 are the preheader order: retail has `addu $a1,$a2,$zero`
+  (`i = sum`) before `ori $t1,0xFFFF` and we have them the other way round.
+  Nine spellings measured, all 2 or 3: every ordering of the three preheader
+  statements, the 0xFFFF written inline, and `do { } while (0);` round each
+  of `i = sum`, `m = 0xFFFF` and the pair.
+
+# ---
+func_8001BAF0 -- 149/150 (-1), 98 differences, written
+  2026-08-29.  A hand-reshuffle: it snapshots five byte slots out of
+  `D_8009B1C8[i + 0x1A]` into a stack array, clears the entries named by the
+  low bytes of D_800EAE88, and then for each remaining D_800EAE88 entry
+  >= 0x10 finds the first free slot, swaps a six-byte record with the one the
+  D_801AB000 entry points at, reloads the sprite through func_800249E0 /
+  func_80018004 / func_8004036C, and writes the slot back.
+  gp=3, at=0, default flags.  Things established and worth keeping:
+  * the six-byte records live at `(u8 *)D_801AB000 - 0x31E0` and the
+    subtraction must be its own `addiu`: written as one expression it folds
+    to `%lo(D_801AB000+-12768)`, which is one instruction short.  A base
+    local (`bb = (u8 *)D_801AB000; b = (Rec6 *)(bb - 0x31E0);`) is what
+    splits it -- func_800300C8's rule again.
+  * the record type is SIX BYTES WITH ALIGNMENT 2: retail copies it with
+    `lwl`/`lwr` for bytes 0..3 and `lh`/`sh` for 4..5, which is exactly
+    gcc's block move for size 6 at alignment 2.  Alignment 1 would be byte
+    moves and alignment 4 aligned words.
+  * the field at +2 is `s8`: the func_800249E0 call site sign-extends it
+    (`lb`) because it becomes an SImode argument, while the two byte-to-byte
+    copies of the same field come out `lbu`, which is what a QImode use of
+    an `s8` member gives.  One declaration covers all four sites.
+  * the function swaps field +2 individually and THEN swaps the whole
+    six-byte record, so byte 2 ends up where it started.  That is what the
+    listing does; do not "fix" it.
+  * **the outer loop's exit test is SIGNED (`slt`) on a pointer**, and no
+    pointer spelling gives that -- gcc compares pointers with `sltu`.
+    `(s32)e < (s32)(D_800EAE88 + 5)` does, and so does an `s32` cursor with
+    `*(u8 *)e` (identical scores).  Writing it as `for (i = 0; i < 5; i++)`
+    over `D_800EAE88[i]` also gives `slt`, via strength reduction -- but
+    then gcc puts the giv's final value in the PREHEADER, where retail
+    re-materialises the whole `%hi`/`%lo` pair plus `addiu 5` in the latch
+    every iteration.  So the index loop is -2 and the cast is the shape.
+  * `while (1)` with `e++` and an explicit `if ((s32)e >= …) break;` at the
+    bottom is what removes the folded-but-not-deleted entry guard
+    (`addiu $v0,$zero,1` / `beq $v0,$zero`) that the `for` spelling emits:
+    +1/106 -> -1/98.  A `do`/`while` peels the first `lbu` and is +2.
+  What is left, in three pieces: the `+ 5` folds into `%lo(D_800EAE88+5)`
+  where retail keeps `addiu $t2,%lo(D_800EAE88)` and `addiu $v0,$t2,5`
+  separate; D_800907CC is hoisted out of the OUTER loop by us and into the
+  inner loop's preheader by retail; and D_801A7AD8 is hoisted into that same
+  preheader by retail and left in the body by us (a base local for it is 111,
+  i.e. worse).  All three are placement, not shape.

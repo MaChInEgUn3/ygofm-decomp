@@ -38,14 +38,14 @@ above-scope functions matched along the way.
 | ≤ 25 | 20 | 20 | **0** |
 | 26–50 | 59 | 59 | **0** |
 | 51–100 | 64 | 64 | **0** |
-| 101–200 | 77 | 62 | 15 |
+| 101–200 | 77 | 63 | 14 |
 | 201–400 | 58 | 1 | 57 |
 | > 400 | 27 | 0 | 27 |
 
 **The short bands are exhausted.** Every remaining function up to 50
 instructions is already parked, which is why `tools_src/candidates.py` reports
 zero clean candidates in its default band — that is the tool being correct, not
-broken. As of this revision the lowest unclaimed function is **150**
+broken. As of this revision the lowest unclaimed function is **162**
 instructions: everything shorter is either matched or parked, and the bulk of
 what is left is the 101–200 band.
 

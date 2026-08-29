@@ -43,10 +43,8 @@ void func_80056250(s32 arg0, u8 *arg1, s32 arg2, s32 arg3) {
         } while (i < n);
         }
     }
-    v = *(s32 *)(p + 0xDE0) + sum;
-    *(s32 *)(p + 0xDF0) = v;
-    v += *(u16 *)(p + 0xE02) * 4;
-    *(s32 *)(p + 0xDF4) = v;
+    v = (*(s32 *)(p + 0xDF0) = *(s32 *)(p + 0xDE0) + sum);
+    *(s32 *)(p + 0xDF4) = v + *(u16 *)(p + 0xE02) * 4;
     func_8005A4C4(p, 0, 0, 0, arg0 == 1 ? 0x800 : 0);
 
     q = arg0 * 0xE20 + D_800F2C40;
