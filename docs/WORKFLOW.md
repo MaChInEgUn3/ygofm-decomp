@@ -2197,6 +2197,16 @@ the run it judged completed. The cheapest way to fall into this is a **filter**:
 `try_func.py ... | grep -E '<<|differing|MATCH'` prints nothing both for a clean
 match and for a compile error, because the error text matches none of the three
 patterns. Read try_func's last lines, not a grep of them.
+**The `(abs(length_error), differences)` order assumes the length error is
+ONE fault, and when it is two faults cancelling it inverts.** func_80027508
+reached 161/161 with 95 differences while two errors offset each other -- the
+`t[idx - 1]` fold is -2 and an un-interleaved pair of `% 5` chains is +2 --
+and the corrected source is +1 with 25. A permuter output found that false
+zero and the ordering rule would have installed it. So when a length error
+appears or disappears after an edit you can explain, check whether the
+*other* fault moved too: a zero that arrives without you fixing anything is
+worth one structural diff before you trust it.
+
 **And never rank candidates by the difference count alone.** The diff is
 positional — line *i* against line *i*, no alignment pass — so one missing
 instruction marks every line after it as differing. A candidate one `nop` short
