@@ -5135,7 +5135,7 @@ func_80027508 -- 161 target, 162 built (+1), 25 differences, written
   register -- a base local live across both blocks is +2 and 100.
 
 
-func_80045C98 -- 169 target, 165 built (-4), 64 differences, written
+func_80045C98 -- 169 target, 168 built (-1), 63 differences, written
   2026-08-29.  A pan/zoom updater on the D_8009B45C block: three near-
   identical clamp steps (a signed delta at +0x1588/+0x1582/+0x512 added to a
   position at +0x1586/+0x1580/+0x510 and clamped against a byte limit at
@@ -5161,3 +5161,17 @@ func_80045C98 -- 169 target, 165 built (-4), 64 differences, written
   `func_80049F10` has no prototype in functions.h and `src/func_80049F10.c`
   matches with `(s32, s32)`, so the sign-extension is the source's own cast
   rather than a conversion.
+
+  **2026-08-29, -4 to -1 on one declaration: `s16 b`, not `s32 b` with an
+  `(s16)` cast at the call.**  The cast folds -- after `andi 0xFFFF` and
+  `srl 8` gcc can prove the value is 0..255 -- and the narrow declaration
+  makes the truncation part of the assignment instead, which restores three
+  of the four missing instructions (the `j` to the join, the `else` arm's
+  `addu`, and one of the shifts).  Measured and worse: `u16 b` with the cast
+  (-1, same), an `s16`-parameter prototype for func_80049F10 (-4), and
+  `(s16)(b & 0xFFFF)` at the call (-4).
+  The last -1 is the sign-extension itself: retail does `sll $a0,$v0,16` /
+  `sra $a0,$a0,16` at the join and we copy the already-narrow `b` into `$a0`
+  with one `addu`.  So retail's `b` is an SImode value extended AT the call
+  and ours is a 16-bit value extended at the assignment; no spelling found so
+  far gives the first without folding the extension away.

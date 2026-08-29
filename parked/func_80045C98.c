@@ -3,7 +3,7 @@
 void func_80045C98(void) {
     u8 f;
     s32 a;
-    s32 b;
+    s16 b;
     s32 h;
 
     f = 0;
@@ -56,7 +56,7 @@ void func_80045C98(void) {
         } else {
             b = 0;
         }
-        func_80049F10((s16)b, (s16)b);
+        func_80049F10(b, b);
     }
 
     if (*(s16 *)(D_8009B45C + 0x512) != 0) {
