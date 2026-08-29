@@ -6,8 +6,10 @@ void func_80021598(void) {
     u8 *f;
     s32 *t;
     s32 k;
+    u8 **fp;
     s32 v;
 
+    fp = &f;
     e = (u8 *)D_800E9FF0;
     p = D_8009B1E8;
     p[0x34] = 0x44;

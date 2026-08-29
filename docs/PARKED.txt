@@ -5478,3 +5478,61 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
   is 2, moving the D_8009B280 store below the `*(s32 *)(e + 4)` update is 8,
   and folding that update into the same `do { } while (0);` is 4.  So the
   argument-hoist lever does not reach it and the axis is still unknown.
+
+# ---
+2026-08-29, `score_permuter_outputs.py` over ~150 directories, three finds.
+  This is the sweep the WORKFLOW says to run after any batch of permuter
+  work, and it paid again -- every one of these had been sitting unread.
+  * **func_80021598: +3 and 154 -> 158/158 and 27**, on ONE statement:
+    `fp = &f;` where `fp` is a `u8 **` that is never read again.  Taking the
+    address of the record cursor is what fixes the whole allocation, and it
+    fixes the LENGTH too.  Position does not matter (at the top of the
+    function and immediately before the `v = f[8];` the permuter found score
+    identically).  It is **not** that `f` goes to memory: `u8 *f[1]` with
+    `f[0]` everywhere is +15 and 163, and `u8 * volatile f` is +20 and 167 --
+    both put it in memory and both are much worse.  So the lever is the
+    address being TAKEN, not the storage class, and no plausible spelling has
+    been found.  What is left is one bias: retail keeps `$s0` = `p` and
+    writes `44($s0)`, we hoist `p + 0x2C` into `$s0` and write `0($s0)`.
+    Four spellings of that accumulator (`((s32 *)p)[0xB]`, an `(s32)` cast,
+    the constant written first, and the whole 24-row flag sweep) are all 27.
+  * **func_8002BD0C: 19 -> 14**, on `if (d2) { A } else { A }` round the
+    join1 arm's two stores -- semantically a no-op that gcc merges back, and
+    the gain is that `d2` (the OTHER arm's name for the same global) is READ
+    there, which extends its live range past the branch.  Plausible spellings
+    that do NOT reach it: `do { … } while (0);` round the same two stores
+    (-3 and 68), `d2 = d;` before them with the stores through `d2` (-1 and
+    65), the same with the stores through `d` (19), and `d2 = d;` after them
+    (19).  Installed as a placeholder; the spelling is open.
+  * **func_80020988: 72 -> 46**, and this one does NOT decompose.  Its output
+    is three edits at once -- a named `0x2000`, an `if (1)` round one store,
+    and `if (D_8009B152) { A } else { A }` round the tail.  The named
+    constant alone is 72, and the plausible reading of the third (writing
+    `D_8009B152 |= 0x40; return 0;` out in both arms of the `0x2000` test) is
+    -1 and 76.  Not installed.
+
+  **The full run: 65 candidates checked, 18 with a better stored output, and
+  one of them was a MATCH nobody had opened.**  func_8005D994 was parked at 5
+  and its `output-0-1` directory held a zero score.  Decomposed, only ONE of
+  its three edits is load-bearing:
+  `first = *(s8 *)&D_8009B07A; x = first;` -- borrowing the name of a local
+  whose own live range starts further down, which is the func_8002A4A8 class.
+  The other two (`0x80 | arg0` instead of `arg0 | 0x80`, and `a[2] +=`
+  instead of `a[2] = a[2] +`) are worth nothing alone and are NOT installed.
+  MATCHED 2026-08-29.
+  The remaining fifteen are unread and are the seam to work next; each is
+  `build/permuter/<f>/output-*-1/source.c` re-scored against the installed
+  park, and each still has to be decomposed before it goes in:
+    func_8002C6C8  58 -> 25      func_80047480  60 ->  9
+    func_80037DA4  61 -> 54      func_8004803C 140 -> 98
+    func_8003B744  18 ->  8      func_80048A28  65 -> 60
+    func_80044608  38 -> 33      func_80048D08  59 -> 19
+    func_80045208  25 -> 17      func_8004A518  73 -> 27
+    func_80046768  46 ->  5      func_8004C84C  25 -> 14
+    func_8004D58C  13 -> 12      func_8004D75C  40 -> 21
+  Two cautions that already apply to this list: func_8003B744's and
+  func_8004C84C's stored outputs are the two the WORKFLOW records as
+  SEMANTICALLY WRONG (one casts an index the target does not mask, the other
+  deletes a store the target has), so their numbers are not candidates.
+  func_80046768's 46 -> 5 is the uninitialised-read class and is not
+  installable either -- its entry above says so.

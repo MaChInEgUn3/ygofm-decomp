@@ -65,7 +65,8 @@ void func_8005D994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4,
         b[2] = b[2] + 0x1000;
     }
 
-    x = *(s8 *)&D_8009B07A;
+    first = *(s8 *)&D_8009B07A;
+    x = first;
     b[3] = 4;
     if (x < 0) {
         first = 0;

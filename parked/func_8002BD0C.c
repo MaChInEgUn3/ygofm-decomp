@@ -78,9 +78,15 @@ void func_8002BD0C(u8 *p, s32 mode) {
         n = 0xA000;
 join1:
         *(s32 *)(p + 0x1C) = n;
-        *(s32 *)(p + 8) = d;
-        *(s32 *)(p + 0xC) = d + 0x800;
-        break;
+        if (d2) {
+            *(s32 *)(p + 8) = d;
+            *(s32 *)(p + 0xC) = d + 0x800;
+            break;
+        } else {
+            *(s32 *)(p + 8) = d;
+            *(s32 *)(p + 0xC) = d + 0x800;
+            break;
+        }
 
     case 3:
     case 5:
