@@ -4223,6 +4223,15 @@ func_800408D0 -- 3 differences. A permuter run from the 3-difference base
   Six shapes measured: `do`/`while` round the read (9), round the store (9),
   round both together (9), a named `hh = h + 0x20` (3), the store moved above
   all three reads (4), and the `u6` read moved above `k18` (3).
+
+  **2026-08-29: the owed `sweep_borrow.py -n 400` run is a NON-ANSWER, not a
+  negative.**  270 substitutions tried, **96 failed to compile**, 0 better --
+  and the tool's own warning fired, which is what that failure counter is for.
+  The failures are its documented limitation: on the outermost block, which
+  spans the declarations, renaming `a` to `b` leaves two declarations of `b`.
+  With thirteen locals this function is almost all outer-block pairs.  Do not
+  read this as "the borrow lever does not apply here" -- it was not measured.
+
 func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
   gp=0 at=0, default flags, no addressing work at all.
   A card-artwork setup routine: decodes a BCD card id
@@ -4948,3 +4957,38 @@ func_80046294 -- 151/151, 5 differences, written 2026-08-28.  A queue
   Measured and worthless on the preheader: a `do`/`while` round both
   statements (12), round `boff` alone (12), and swapping their order (5, no
   change).
+
+
+func_800164FC -- 159/159, 34 differences, written 2026-08-29.  A per-frame
+  sprite pass: it sets up the display environment, ticks a fade counter, fills
+  two scratchpad primitive templates at 0x1F800140 and 0x1F800180, and then
+  walks two runs of ten 0x1C-byte records at D_801A7B64 and D_801A7B64+0x1A4
+  drawing each.
+  gp=0, at=3 (three `lui $at` stores to the D_8009B30C group), so `as -G0` --
+  worth -10 to -3 on its own.
+  m2c drafted the whole control flow correctly in one run, including the
+  `goto` that lets the `& 0x400` arm skip the shared counter increment; the
+  work after that was four readings of the listing:
+  - **the two `*(s16 *)(D_800F2848 + 0xE)` reads want a base local.**  Written
+    against the symbol gcc folds the offset into `%lo(D_800F2848+14)` and
+    materialises the address twice; retail computes the base once and reads
+    `14($v0)` from it.
+  - **the fade test is UNSIGNED and the polarity is inverted from the obvious
+    reading**: retail's `sltu`/`bnez` is `if ((u32)D_8009B314 >= (u32)
+    D_8009B308)`, where the plain signed `<` gives `slt`/`beq`.  Those two
+    together are -3/149 to -1/77.
+  - **one name for 0x80 and inline literals for everything else.**  The
+    template block stores 0xFF three times, 0xAF and 0x37 twice each, 0xBC
+    twice and 0x80 four times across BOTH templates.  Reusing one `f` for all
+    of them lets gcc reorder the whole block (77); inlining every literal and
+    keeping a single name for the 0x80 -- the only value retail carries in a
+    register of its own, `$v1`, across both templates -- is 66.
+  - **`e = D_801A7B64; e = e + 0x1A4;` for the second run.**  As one
+    expression it folds to `%lo(D_801A7B64+420)`; split in two it is retail's
+    `addiu %lo` then `addiu 420`, and that was the last length error.  -1/66
+    to 159/159 and 34.
+  What is left is one register pair: retail has the 0x1F800140 template in
+  `$s1` and the loop counter in `$s2`, and we have them the other way round,
+  which accounts for 32 of the 34.  Measured and worthless: a
+  `do { n = 0; } while (0);` pin, moving `n = 0;` to the top of the block
+  (43, worse), and putting `n` first in the declarations.

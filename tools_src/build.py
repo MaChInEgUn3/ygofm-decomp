@@ -422,6 +422,8 @@ PER_FUNC_AS_FLAGS["func_80057544"] = "-G0"
 # func_80046294: gp == 0, so any -G is free, and retail reads D_8009B45C
 # through a %hi/%lo pair at every site rather than gp-relatively.
 PER_FUNC_AS_FLAGS["func_80046294"] = "-G0"
+# func_800164FC: gp == 0 and three `lui $at` stores to the D_8009B30C group.
+PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020988"] = "-G4"
