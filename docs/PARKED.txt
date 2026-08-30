@@ -813,7 +813,9 @@ func_800300C8_WAS -- 7 differences, register allocation inside one basic block.
   `h`, hoisting `n % 10` above the stores (7) and above the `if` (51),
   `y = half; y = x + y;` (8). Flag sweep: best is plain -O2 -G8.
 
-func_800476B4 -- 44 positional differences, really three: a %hi hoisted out of
+func_800476B4 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800476B4_WAS -- 44 positional differences, really three: a %hi hoisted out of
   a loop, one missing copy, and two induction registers swapped behind them.
   Walks the u16 array at arg0+8 for *(s32 *)arg0 entries; for each entry that
   is not 0xFFFF it writes the display-list cursor into the index table at
@@ -855,7 +857,9 @@ func_8001EE44_WAS -- 22 positional differences, two registers and the scheduling
   looking symptom), `a = a & 0xF` versus `a &= 0xF`, u32 locals, and both
   declaration orders -- all 22. Full flag sweep: nothing below 22.
 
-func_800383DC -- 42 positional differences, one instruction short, and the
+func_800383DC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800383DC_WAS -- 42 positional differences, one instruction short, and the
   missing instruction is an optimisation retail did not take.
   Builds a far pointer as `(base & 0xFFFF0000) + table[index]` and appends it
   to the u32 array at arg0, indexed by the byte counter at arg0+0x58. Three
@@ -879,7 +883,9 @@ func_800383DC -- 42 positional differences, one instruction short, and the
   Flag sweep: -O2 -G0 reports 23 but only because it also drops the gp-relative
   load of D_8009B32E, which is two more faults, not fewer.
 
-func_8002A3CC -- 26 differences, register allocation driving the schedule.
+func_8002A3CC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8002A3CC_WAS -- 26 differences, register allocation driving the schedule.
   Advances a 16.16 fixed-point position held as two halfword pairs in
   D_800EA1E8 (+0x8/+0xC is x, +0xA/+0xE is y, deltas at +0x18/+0x1C), counts
   down the byte at +0x16, and on reaching zero snaps back to +0x12/+0x14,
@@ -897,7 +903,9 @@ func_8002A3CC -- 26 differences, register allocation driving the schedule.
   x += delta;` split (43). Flag sweep: nothing below 26; -mno-split-addresses
   is 34.
 
-func_8003F2B0 -- 8 differences, one register.
+func_8003F2B0 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8003F2B0_WAS -- 8 differences, one register.
   Nudges the s16 at arg0+0x60 toward zero by 0x40, clearing the byte at
   arg0+0x6C and snapping to zero when it crosses, then calls func_80043230 and
   (for a non-negative arg3) func_80039934 with D_800EB0F8[arg3]. Everything
@@ -954,7 +962,9 @@ func_8002ABB4_WAS -- 22 positional differences, all scheduling; the instruction
   pair (50), the 0xC store moved after the 0x44 copy (50). Flag sweep: 22 is
   the floor, and -fno-schedule-insns does not help -- retail's schedule is not
   simply the unscheduled one.
-func_8005C388 -- 11 differences, register assignment around the table base.
+func_8005C388 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8005C388_WAS -- 11 differences, register assignment around the table base.
   Reads a halfword pair out of D_8009151C at arg0*4, sums the first halfword of
   every earlier pair, and hands the result to func_8005B8A0 through a
   func_8007E600/func_8007E710 pair. Instruction-for-instruction right; retail
@@ -1008,7 +1018,9 @@ func_80017F04 -- 12 differences: two registers and the scheduling behind them.
   scoped to its own block. The fold is a symptom of the register choice the
   entry already names, not a separate lever.
 
-func_8005F1B8 -- 24 differences, and most of them hang off one thing this
+func_8005F1B8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8005F1B8_WAS -- 24 differences, and most of them hang off one thing this
   project has not seen before: **retail divides by a literal constant with a
   real `div`**, materialising 750 into $a0 first, where gcc turns `/ 750` into
   the magic multiply at every -O level (0, 1 and 2 all use it here).
@@ -1172,7 +1184,9 @@ func_8003D03C -- 10 differences, and the -G threshold gets the *addressing*
   neither route reproduces. Left on the old route (aggregate, default flags,
   10) rather than the new one.
 
-func_80048920 -- 20 differences, a $s1/$s2 swap and the two operand orders that
+func_80048920 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80048920_WAS -- 20 differences, a $s1/$s2 swap and the two operand orders that
   fall out of it. Worth reading for the lever that got it there.
   Retail builds `(arg0 & 0x100) != 0` into a register and shifts it:
   `andi $v1,$a0,256 / sltu $v1,$zero,$v1 / sll $v1,$v1,6`. Every one-expression
@@ -1362,7 +1376,9 @@ func_80071EB8 -- 47 differences with the candidate kept, 32 with a worse-shaped
   candidate, 32 on the other, neither at a plausible unit setting.
 
 
-func_80047DB0 -- unfinished, 67 differences. The func_80048920 family: a
+func_80047DB0 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80047DB0_WAS -- unfinished, 67 differences. The func_80048920 family: a
     0x8000 early exit, a 0x4000-keyed table lookup, then four iterations ORing
     bits into a mask. Needs the -G0 assembler (D_8009B45C is bare); the flag is
     in build.py's parked section so the count is reproducible.
@@ -1537,7 +1553,9 @@ func_8003CCD8 -- unfinished, 6 differences with equal lengths (72/72), and all
         rule alone.
       * -fno-schedule-insns (+3, 43), -fno-schedule-insns2 (15), both (+7).
 
-func_800497E0 -- unfinished, 18 differences and one instruction too many.
+func_800497E0 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800497E0_WAS -- unfinished, 18 differences and one instruction too many.
     A dup-%hi function from the reopened class: three bare reads of
     D_8009B458, no %gp_rel, so the plain scalar arm plus `as -G0` (in
     build.py's parked section). Everything up to the last block matches --
@@ -1569,7 +1587,9 @@ func_800497E0 -- unfinished, 18 differences and one instruction too many.
     tool answering about something it never measured, and the first where
     the tool was telling the truth and the reader supplied the fiction.
 
-func_80047788 -- unfinished, 12 differences with equal lengths (55/55).
+func_80047788 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80047788_WAS -- unfinished, 12 differences with equal lengths (55/55).
     Another from the reopened dup-%hi class: three bare reads of
     D_8009B45C, no %gp_rel, plain scalar arm plus `as -G0` (in build.py's
     parked section). 48 -> 18 -> 12 with two source levers, both worth
@@ -1639,7 +1659,9 @@ func_80047CC4 MATCHED 2026-08-03, and the last instruction came from the
     cannot be what this caller passes; the call site matches through an
     implicit declaration and no prototype was added.
 
-func_80049010 -- unfinished, 5 differences with equal lengths (56/56).
+func_80049010 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80049010_WAS -- unfinished, 5 differences with equal lengths (56/56).
     Seventh from the dup-%hi class: seven bare reads of D_8009B45C, no
     %gp_rel, scalar arm plus `as -G0`, and the obvious C. Every block is
     right; the five are one register rotation in the first block, where
@@ -1709,7 +1731,9 @@ func_8005B36C -- unfinished, **two instructions short**, and it is
     retail keeps `idx` raw in a register and masks it late. The parked
     candidate is the honest shape, not the lower number.
 
-func_80048F14 -- unfinished, 15 differences with equal lengths (63/63), all
+func_80048F14 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80048F14_WAS -- unfinished, 15 differences with equal lengths (63/63), all
     in one block. Tenth from the dup-%hi class: three bare reads of
     D_8009B45C, no %gp_rel, scalar arm plus `as -G0`. An init routine --
     three groups of stores through three separate reads of the base, then a
@@ -1815,7 +1839,9 @@ func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
     Its caller func_80047DB0 is parked on the `$a0` argument at the call to
     this function; matching it would settle that too.
 
-func_800601D0 -- unfinished, 14 differences, two instructions short. A linear
+func_800601D0 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800601D0_WAS -- unfinished, 14 differences, two instructions short. A linear
     search of D_800F5918's 0x50 eight-byte entries for a function pointer,
     returning the word at +4. Twenty instructions, no %gp_rel, default flags.
     Retail has **three** separate `jr $ra` exits -- an early `return -1` when
@@ -1836,7 +1862,9 @@ func_800601D0 -- unfinished, 14 differences, two instructions short. A linear
     to hold a constant is not a shape worth propagating without knowing why it
     pays. Discriminator not established.
 
-func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
+func_8004CABC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8004CABC_WAS -- unfinished, 15 differences with equal lengths (20/20).
     Walks 0x2C-byte records from D_8009B458 checking a byte at +0x53C, returns
     1 on the first mismatch and 3 otherwise. `as -G0` (in build.py's parked
     section) for the bare read.
@@ -1855,7 +1883,9 @@ func_8004CABC -- unfinished, 15 differences with equal lengths (20/20).
     with this note, because it looks exactly like a typo. Discriminator for
     the branch polarity still not established.
 
-func_8003A198 -- 3 differences, 21/21, instruction-for-instruction identical.
+func_8003A198 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8003A198_WAS -- 3 differences, 21/21, instruction-for-instruction identical.
     Register allocation in the second block only: retail keeps the intermediate
     base in $v0 and the final address in $a1, this coalesces both into $a1.
     Two levers are already in the candidate and both are load-bearing. Nested
@@ -1901,7 +1931,9 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     for-init, `crc` as `u32`, and the explicit-guard `if (arg1 > 0) { i = 0;
     do { … } while (i < arg1); }` (3, worse).  `s16 i` is +6.
 
-func_8004A8E4 -- 17 differences at equal length (23/23), down from 21 at -2.
+func_8004A8E4 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8004A8E4_WAS -- 17 differences at equal length (23/23), down from 21 at -2.
     Reads a byte at +3 of a 40-byte record, and if it is not 0x63 uses it to
     index 24-byte records and decrements a nibble at +6.
     What paid: D_8009B458_IS_AGGREGATE for retail's %hi/%lo pair, a named
@@ -1924,7 +1956,9 @@ func_8004A8E4 -- 17 differences at equal length (23/23), down from 21 at -2.
     The two wants are in tension: the single load needs a base local and the
     base local re-folds the 0x180.
 
-func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
+func_800466C8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800466C8_WAS -- 6 differences, 21/21. Three reads of the gp-relative pointer
     D_8009B45C: one at entry, one re-read at the end of the `if` body, one for
     the final read-modify-write of the halfword at +0x40. A local `p` reassigned
     inside the `if` reproduces the first two exactly, and the halfword store of
@@ -1959,7 +1993,9 @@ func_800466C8 -- 6 differences, 21/21. Three reads of the gp-relative pointer
     Permuter rerun from the new 2 base on 2026-08-10: best output measures 3,
     worse than the base.
 
-func_8004CA60 -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
+func_8004CA60 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8004CA60_WAS -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
     +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, with
     the base pointer D_8009B458 re-read every iteration. Four levers, all
     load-bearing, taking it 23 -> 12 -> 9 -> 1:
@@ -2002,7 +2038,9 @@ func_80015780_WAS -- 3 differences, 23/23, and they are three adjacent instructi
     sweep_try.py run 2026-08-10: best is 3 at -O2 -G8, the current defaults. No
     flag combination helps.
 
-func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
+func_80026C0C MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80026C0C_WAS -- 2 differences, 24/24, and the two candidate shapes that reach 2
     fail in opposite ways, which is what makes this a coupled pair that has not
     closed. Scans five 28-byte records from
     D_801A7AD8[(D_8009B1D5 * 15 + arg0) * 28] for one whose halfword at +0x16
@@ -2023,7 +2061,9 @@ func_80026C0C -- 2 differences, 24/24, and the two candidate shapes that reach 2
     sweep_try.py run 2026-08-10: best is 2 at -O2 -G8, the current defaults. No
     flag combination helps.
 
-func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
+func_80059134 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80059134_WAS -- 8 differences, 35/35. A straight-line block of eighteen stores
     into D_800F2C40[arg0 * 3616] at +0xD70..+0xD9E, no branches. The index math
     and the addressing match on the first attempt; everything since has been the
     order in which gcc materialises the constants.
@@ -2042,7 +2082,9 @@ func_80059134 -- 8 differences, 35/35. A straight-line block of eighteen stores
     sweep_try.py run 2026-08-10: best is 8 at -O2 -G0, no better than the base.
 
 
-func_80070710 / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
+func_80070710 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80070710_WAS / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     with the right length and instruction sequence.
     The two `D_800F5B98[func_8007058C()] = <global>` functions went 6 -> 3 via
     siblings.py, which pairs them at ratio 1.000 and 0.933 with func_80071688
@@ -2295,7 +2337,9 @@ func_80049FB4 -- 74 differences, and listed here as a *decode* rather than a
     against 74 and the right length, which is what is installed), an
     `s16 arg1` reassigned in place, and if/else against two returns.
 
-func_8002525C -- 32 differences, and the aligned diff says they are ONE
+func_8002525C MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8002525C_WAS -- 32 differences, and the aligned diff says they are ONE
     problem rather than several. The structure is settled and every piece of
     it was a documented shape:
       - the two tails are written out in full, not reached by a goto. The
@@ -2326,7 +2370,9 @@ func_8002525C -- 32 differences, and the aligned diff says they are ONE
     Measured and not it: all 120 declaration-order permutations of the five
     locals, every one exactly 32.
 
-func_80022D94 -- 8 differences, and they are a coupled pair in the strict
+func_80022D94 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80022D94_WAS -- 8 differences, and they are a coupled pair in the strict
     sense: each half is reachable alone and the two do not compose yet.
     The store order in the source already matches retail exactly (B204,
     B1EE, B192, B190, B166, B1C4, B15C, B158, B224, then the four deltas),
@@ -2479,7 +2525,9 @@ func_80049920 -- 21 differences, 81/81, and they are all the *order* of the
     initialisations sunk into the for-init, and all three written as copies
     of the counter (retail's `addu $s3,$s4,$zero` shape).
 
-func_8004A0FC -- 38 differences, and the candidate installed is deliberately
+func_8004A0FC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8004A0FC_WAS -- 38 differences, and the candidate installed is deliberately
     NOT the lowest-scoring one. Two shapes of the three-way volume test were
     measured at equal length:
       - `if (vol < 0x40) {...} else if (vol == 0x40) {...} else {...}` is 28,
@@ -2544,7 +2592,9 @@ func_80031574_WAS -- 24 differences and ONE missing instruction, all of them in
     What is left at 14: retail does the +4 word's read-modify-write before
     the +8 halfword's and we do them the other way round.
 
-func_8003C628 -- 45 positional differences at +1 length, and the count is
+func_8003C628 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8003C628_WAS -- 45 positional differences at +1 length, and the count is
     inflated: the real edits are about six instructions misplaced inside two
     otherwise-identical blocks. The function is otherwise settled -- three
     object allocations, a nine-argument call, an eight and a ten, and the
@@ -2610,7 +2660,9 @@ func_80046DE8 -- 17 differences at +2 length, and both extra instructions
     (18), the parenthesised base-plus-index spelling (18), and keeping the
     per-group base local (83).
 
-func_800478EC -- 16 differences, 95/95, and the real edits are about eight
+func_800478EC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_800478EC_WAS -- 16 differences, 95/95, and the real edits are about eight
     register renames in one block plus the loop counter's increment landing
     one slot early. Everything structural is settled and eight readings got
     it there from 80:
@@ -3003,7 +3055,9 @@ func_8004A940 -- 77 differences at -3, after m2c corrected the decode in
     same thing func_80071FC8's `hi` does, unsolved there too.
 
 
-func_8003C328 -- 21 differences at equal length, and the layout is solved. A three-way
+func_8003C328 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8003C328_WAS -- 21 differences at equal length, and the layout is solved. A three-way
     dispatcher on the second parameter: mode 1 sets the +0x1C word to 0x800,
     clears two bits of D_8009B0F4 and points +8/+0xC at D_8009B118; mode 0
     builds a 0x18000 window, clears a different bit pair, sets one, writes
@@ -3058,7 +3112,9 @@ func_8003C328 -- 21 differences at equal length, and the layout is solved. A thr
     knows the value it just stored.
 
 
-func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the
+func_8004BCE8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8004BCE8_WAS -- 82 differences at +1, and the count is badly inflated by the
     shift; the real residue is four instructions. Decode, settled: it resets
     a block at D_8009B458 (+0x801 byte, +0x7F0/+0x7F4 words, +0x518 = 8),
     takes func_8004BCA8's result into +0x7FC and func_8004BC2C's >> 8 into
@@ -3088,7 +3144,9 @@ func_8004BCE8 -- 82 differences at +1, and the count is badly inflated by the
     that is not the axis.
 
 
-func_8003C120 -- 101/101, 75 differences (was 102/101, +1 and 80)
+func_8003C120 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8003C120_WAS -- 101/101, 75 differences (was 102/101, +1 and 80)
     residue is where two mask constants are materialised. Direct sibling of
     func_8003C328: the same three-way-plus-one dispatcher on the second
     parameter, and the same `goto` layout applies with the arms in retail's
@@ -3204,7 +3262,9 @@ func_8003BD14 -- 42 differences at equal length, and every one is the same
     delay-slot placement is already correct.
 
 
-func_80048768 -- 100 differences at +3. Decode settled: a volume/pan update.
+func_80048768 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_80048768_WAS -- 100 differences at +3. Decode settled: a volume/pan update.
     If the selector has 0x8000 it forwards to func_80044E90 and returns;
     if the selector's top nibble is 0x4000 it indirects twice through
     D_8009B45C (a +0x44C table indexed by `(sel & 0x1F) * 2` plus 64 when
@@ -3563,7 +3623,9 @@ func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
     return, a different shape again. The full flag sweep says the default row
     is best.
 
-func_8005A98C -- 2 differences at equal length (133/133), all of them
+func_8005A98C MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+  the history below is what this tree had reached on its own.
+func_8005A98C_WAS -- 2 differences at equal length (133/133), all of them
     register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
     work at all.
     What paid:
