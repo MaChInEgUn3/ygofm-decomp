@@ -118,3 +118,46 @@ among the functions still in assembly. So the path to the overlays runs
 *through* the current scope, not around it. Nothing in the remaining in-scope
 work is blocked on any of this; it is additive scope for later, not an
 obstacle now.
+
+
+RESOLVED 2026-08-30: it is /DATA/WA_MRG.MRG, and it is not compressed
+--------------------------------------------------------------------
+A second decompilation of this executable (Unchiga's, shared as a zip on
+2026-08-30) had already found it, and the finding survived the only test that
+matters here: his extractor, run against OUR OWN `YUGIOH.img`, produces a
+90,112-byte image whose sha1 is
+`77b6430db58439e9577533d4f4fa2762996cf6fc` -- byte-identical to the copy he
+shipped. Two discs, one extractor, the same bytes. The tool is installed as
+`tools_src/extract_overlay.py` with its provenance in the docstring; the
+output is gitignored by the existing `*.bin` rule.
+
+    /DATA/WA_MRG.MRG, LBA 10102, 37,748,736 bytes
+    seven identical raw copies at LBA 16072 + n*235
+    resident image 0x80146000-0x8015C000, 0x16000 bytes
+    the loader is case 7 of func_800171A8 (still assembly here, and in
+    candidates.py's own dup-%hi list)
+
+Three of the four steps above are therefore closed, and the fourth -- "build
+something that reproduces them" -- has an oracle now, which was the whole
+objection. What is NOT closed is where overlay work belongs: it cannot be a
+segment of `config/slus01411.yaml`, because the EXE's own bytes at
+0x80146000 are zero (90,112 bytes, one stray non-zero byte). Attaching it to
+the main oracle would make a build emitting CORRECT overlay code go red and
+one emitting zeros stay green. It needs its own target, its own asm tree and
+its own hash check, exactly as `sha1 84747e64...` works for the main image.
+
+Two corrections to what stood above.
+
+The compression hypothesis was wrong. The image is raw. The reason
+`tools_src/disc.py` did not see it is not that it was packed: it is that
+disc.py measures instruction density over whole archives, and this is 90 KB
+of code inside a 36 MB file. The warning in the previous section -- "do not
+read a low density as 'no code here', read it as 'no code here in a form this
+measures'" -- was the right instinct pointed at the wrong mechanism. A
+per-sector scan would have found it; a per-archive average never could.
+
+And `0x801462B0`, listed above as the lone outlier among the 24 undefined
+call targets, is inside the overlay. It is not an outlier. It is the first
+piece of evidence for exactly this, and it was sitting in
+`config/undefined_funcs_auto.txt` the whole time -- func_8001BAF0, decompiled
+here on 2026-08-29, `jal`s straight into it.

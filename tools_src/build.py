@@ -303,6 +303,21 @@ PER_FUNC_FLAGS = {
 PER_FUNC_FLAGS.update({n: _O1_G0 for n in _G0_FUNCS})
 PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 
+# Flags for functions PORTED from Unchiga's decompilation (docs/MERGE_UNCHIGA.md).
+# These are HIS per-unit flags, translated from his config/unit_flags.txt --
+# carrying them is not optional. try_func measures a ported function with them
+# and build.py compiles src/ with these tables, so leaving a function out here
+# means the two disagree: func_800137E4 measured MATCH under `-G0
+# -mno-split-addresses` and came out six instructions short in the full build,
+# which then reported 847 unrelated functions as differing. Maintained by
+# tools_src/install_ported.py; do not hand-edit the block below.
+# >>> ported flags
+PORTED_FLAGS = {
+    "func_800137E4": ["-quiet", "-O2", "-G0", "-mno-split-addresses"],
+}
+# <<< ported flags
+PER_FUNC_FLAGS.update(PORTED_FLAGS)
+
 # Per-function assembler flags. Needed when the compiler emits a bare symbol
 # reference and the assembler's -G decides whether to make it gp-relative or
 # expand it into a lui/%lo pair through $at.

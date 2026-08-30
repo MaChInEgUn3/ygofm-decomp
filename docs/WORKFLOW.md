@@ -2172,8 +2172,14 @@ nothing.
 
 ## Two habits that cost real time when skipped
 
-**The GitHub repo is private again** (it was public for a few hours on
-2026-08-07). Two consequences worth knowing. Pushing over HTTPS needs a
+**The GitHub repo is private, since 2026-08-30.** This paragraph said "private
+again ... it was public for a few hours on 2026-08-07" for three weeks while
+`gh repo view` reported `"visibility":"PUBLIC"` the whole time -- it went back
+public and nobody updated the line. It surfaced only because a second decomper
+opened with "I'm surprised you're posting the converted C files publicly".
+**A fact about the outside world rots faster than anything else in this file;
+check it with the command, not with the paragraph.** Two consequences worth
+knowing. Pushing over HTTPS needs a
 credential helper now that anonymous access is gone -- `gh auth setup-git`
 configures it and the existing token already has `repo` scope; without it
 `git push` fails with a bare 403. And the traffic figures from the public

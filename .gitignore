@@ -9,6 +9,14 @@ YUGIOH.*
 *.sub
 /extracted/
 
+# Third-party decomp trees shared for comparison (Unchiga's ygofm-decomp.zip and
+# anything unpacked from it). Someone else's work and someone else's history --
+# never commit it here, and note that these archives carry their own copies of
+# the retail binary and extracted disc data.
+/ygofm-decomp.zip
+/*.zip
+/third_party/
+
 # Downloaded third-party binaries (Ghidra + plugin, PsyQ SDK) — not ours to redistribute.
 /tools/
 
