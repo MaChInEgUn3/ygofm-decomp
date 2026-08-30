@@ -85,7 +85,13 @@ def flags_for(tree_flags):
     out = ["-quiet", "-O2"]
     g = [f for f in tree_flags if f.startswith("-G")]
     out.append(g[-1] if g else "-G8")
-    out += [f for f in tree_flags if f.startswith("-mno-") or f.startswith("-fno-")]
+    # Keep EVERY -m/-f flag, not just the -no- ones. `-msplit-addresses` is
+    # cc1psx's default and looks redundant, so an earlier version dropped it and
+    # recorded no PORTED_FLAGS entry -- func_8002C6C8 then measured MATCH and
+    # built four instructions short. Passing a default explicitly is not always
+    # a no-op, and the rule that costs nothing is: build with exactly what you
+    # measured with.
+    out += [f for f in tree_flags if f.startswith(("-m", "-f"))]
     return out
 
 

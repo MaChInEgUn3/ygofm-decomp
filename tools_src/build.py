@@ -314,6 +314,12 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 # >>> ported flags
 PORTED_FLAGS = {
     "func_800137E4": ["-quiet", "-O2", "-G0", "-mno-split-addresses"],
+    "func_8002C6C8": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
+    "func_8002C7E8": ['-quiet', '-O2', '-G8', '-mno-split-addresses'],
+    "func_8002DDFC": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
+    "func_80030D5C": ['-quiet', '-O2', '-G8', '-mno-split-addresses'],
+    "func_80031CD4": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
+    "func_800338E4": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
 }
 # <<< ported flags
 PER_FUNC_FLAGS.update(PORTED_FLAGS)
