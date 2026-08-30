@@ -7,7 +7,7 @@ void func_8004A518(void) {
     s32 *t;
     s32 i;
     s32 o1;
-    s32 o2;
+    u16 o2;
     s32 o3;
     s32 m;
     s32 acc;

@@ -5536,3 +5536,44 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
   deletes a store the target has), so their numbers are not candidates.
   func_80046768's 46 -> 5 is the uninitialised-read class and is not
   installable either -- its entry above says so.
+
+# ---
+2026-08-29, working the score_permuter_outputs list.  Five taken, one MATCH.
+  * **func_80047480 MATCHED**, and the permuter's win decomposes to ONE
+    moved store: `*(s32 *)(p + 0x438) = 0x1010;` written after the
+    `p + 0x43C` store instead of before the `p + 0x388` one, which is 60
+    differences to 9.  The named zero it came paired with is worth nothing.
+    The last 9 were the counter-init lever twice over: `i = 0;` hoisted out
+    of the outer `for` clause AND `j = 0;` hoisted out of the inner one,
+    with `k = i << 6;` between them.  `i` alone is 6, `j` alone is 3, both
+    is the match -- so this is a coupled pair of the same lever, and doing
+    one and stopping would have read as a near-miss.
+  * **func_80048D08: -1 and 59 -> 131/131 and 19**, on `d = D_8009B45C;
+    p = d;` -- borrowing the name of a local whose own assignment is two
+    lines further down, the func_8002A4A8 class.  It fixes the length too.
+    The `do { } while (0);` it came paired with is worth nothing.  What is
+    left is `j` and `k` exchanged in `$t3`/`$t4` plus one copy's position;
+    measured and all 19: both counter-init hoists, the declaration order of
+    `j` and `k`, and reading `+0x444` through `d` rather than `p`.
+  * **func_8004D75C: 40 -> 21** on `if (r || t) { A } else { A }` round one
+    store -- the same implausible identical-arms hint as func_8002BD0C, and
+    again `do { … } while (0);` round the same store is worth NOTHING (40).
+    Reading `r` and `t` at that point is the mechanism.  Installed as a
+    placeholder.
+  * **func_8004A518: +1 and 73 -> 112/112 and 27 on `u16 o2`** -- and this
+    one is a FALSE ZERO worth spelling out.  The +1 in the `s32` version is
+    gcc hoisting `addiu $s6,$zero,99` (the `e2[3] = 0x63` store's constant)
+    out of the loop where retail materialises it per iteration.  The narrow
+    declaration does not fix that; it adds an `andi $v1,$s2,0xFFFF` retail
+    does NOT have and separately suppresses the hoist, and the two cancel.
+    `u8 o2` scores the same and is semantically WRONG (`o2` starts at 0x180).
+    Installed at `u16` because the equal length makes the diff readable, but
+    the `andi` is a known lie -- the honest problem is the 0x63 hoist, and a
+    named constant assigned inside the loop, `for (o2 = 0x180; …)`, and
+    moving `o2 = 0x180` above `i = 0` are all +1 and 73.
+  * **func_8002C6C8's 58 -> 25 is REJECTED**: its output moves
+    `q[0] = q[0] | 0x40;` to after the `return`, i.e. deletes a store the
+    target has.  Third instance of that class after func_8003B744 and
+    func_8004C84C.  The one plausible half, a base local for D_800F2848
+    hoisted out of the loop, is +2 and 46 against a base of -1 and 58 --
+    worse by the length rule.
