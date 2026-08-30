@@ -1,0 +1,1085 @@
+func_80012B50    func_80012B50                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80012CD4    D_80012CD4_fn                          MATCH  len   0 diff0     -G8 -msplit-addresses -fno-schedule-insns ours:MATCH 
+func_80012D4C    call_four_update_funcs                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80012D84    call_80012d4c_n_times                  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80012DB4    func_80012DB4                          ERROR  len     diff      -G8 -msplit-addresses      ours:MATCH D_8009AFA4
+func_80012E5C    gpu_disp_buff_swap_and_ot_sort_dispatch  STUB
+func_8001306C    func_8001306C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80013154    gs_ot_double_buffer_init                 STUB
+func_800134B4    zero_word_table_and_flag               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800134E0    func_800134E0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800136D4    func_800136D4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800136E4    func_800136E4                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_800137E4    func_800137E4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80013898    ds_init_and_wait_ready                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800138F4    retry_until_nonzero_then_finalize      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80013940    func_80013940                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80013998    func_80013998                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80013A94    init_800e9e18_once                     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80013B04    func_80013B04                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80013B68    func_80013B68                            STUB
+func_80013C28    func_80013C28                            STUB
+func_800140A0    ds_packet_dispatch_5_2                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014134    ds_packet_dispatch                     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800141A8    ds_command_dispatch_v2                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014220    ds_command_notify                      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014294    ds_command_dispatch                    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014308    ds_packet_dispatch_5_2_alt             MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014390    call_7e710_store_and_clear_bit         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800143DC    copy_9e18_to_9e60_and_flags              STUB
+func_800144B8    func_800144B8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001455C    func_8001455C                          OK     len   0 diff4     -G8 -msplit-addresses      ours:-     
+func_80014A5C    func_80014A5C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80014B30    func_80014B30                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80014C40    func_80014C40                            STUB
+func_80014E1C    func_80014E1C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80014EEC    reinit_d800e9e60_obj                   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80014FA4    check_duel_flags_call_15010            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015010    update_state_flags_2                   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015038    call_80015010_if_flags                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80015078    func_80015078                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001513C    func_8001513C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800151B0    reset_obj_fields_and_flag              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800151D8    func_800151D8                            STUB
+func_80015310    func_80015310                            STUB
+func_800154E4    func_800154E4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800156B8    fill_byte_range_10_to_39               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800156DC    func_800156DC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001572C    reset_field6_7_800e9ec8_flag_v2        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015780    reset_obj_poll_flag_and_call           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_800157DC    call_80015780_flags_and_8001572c       MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_8001581C    func_8001581C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015870    reset_9ec8_state_if_flag145            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800158B8    func_800158B8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015904    func_80015904                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015944    func_80015944                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015998    loop_call_four_update_funcs_while_flag MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800159D8    call_80015780_then_80015998            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015A00    func_80015A00                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015A28    func_80015A28                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015A50    func_80015A50                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015A94    func_80015A94                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015AD8    func_80015AD8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015B00    func_80015B00                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015B28    func_80015B28                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015B50    call_800158b8_flag_80015870_and_loop   MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80015B94    func_80015B94                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015BD8    set_obj_fields_5_6                     MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80015BF0    set_obj_fields_4_5_6                   MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80015C0C    call_80015780_flag_and_8001572c        MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80015C48    func_80015C48                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015C84    func_80015C84                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015CC0    func_80015CC0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015CFC    gp_flag_set_8009b141                   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015D18    func_80015D18                          OK     len   0 diff1     -G8 -msplit-addresses      ours:-     
+func_80015DB8    func_80015DB8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80015DFC    func_80015DFC                          OK     len   0 diff1     -G8 -msplit-addresses      ours:-     
+func_80015EF4    func_80015EF4                            STUB
+func_800164FC    func_800164FC                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:MATCH 
+func_80016778    func_80016778                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80016784    func_80016784                            STUB
+func_80016D04    forward_fields_30_32_to_80016784       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80016D2C    digit_sprite_draw                      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80016DDC    func_80016DDC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80016E70    draw_digit_widget_pair                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8001700C    card_flags                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80017034    card_pick                              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800170C8    stat_clamp                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80017130    init_geom_scratch_record               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800171A8    select_sound_preset                      STUB
+func_8001755C    call_530c4_533d8_56250                 MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800176D0    hand_slots                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80017708    func_80017708                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001778C    clear_entry_fields_801a7ad8            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800177C4    func_800177C4                          OK     len   0 diff1     -G8 -msplit-addresses      ours:-     
+func_800178BC    calibrate_screen_offset                OK     len   0 diff1     -G8 -msplit-addresses      ours:-     
+func_8001798C    register_handler_800171A8              MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80017DB4    set_marker_from_table801a7ad8_flags    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80017E3C    obj_apply_table801a7ad8_flags          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80017F04    func_80017F04                            STUB
+func_80018004    create_obj_set_flag_and_marker         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80018080    func_80018080                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80018150    func_80018150                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800181EC    func_800181EC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001825C    func_8001825C                            STUB
+func_80018608    func_80018608                          OK     len   0 diff42    -G8 -msplit-addresses      ours:-     
+func_80018C34    func_80018C34                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80018CF8    func_80018CF8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80018DB4    duel_field_slot_spawn_dispatch         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80018FEC    func_80018FEC                            STUB
+func_80019564    spawn_container_marker_obj             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80019608    func_80019608                            STUB
+func_80019A08    fusion                                 OK     len  51 diff53    -G8                        ours:MATCH 
+func_80019B2C    duel_tween                             OK     len  12 diff12    -G8                        ours:MATCH 
+func_80019BD0    func_80019BD0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80019CC8    call_ccce4_guarded_offset288           MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8001B0CC    project_slot_to_screen_x               OK     len   0 diff1     -G0 -msplit-addresses      ours:-     
+func_8001B170    func_8001B170                            STUB
+func_8001B780    slot_pos                               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001B7AC    func_8001B7AC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001B8B8    hand_dim                               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001B938    func_8001B938                            STUB
+func_8001BD48    pad_l2                                 MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8001D240    func_8001D240                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001D344    step_component_toward_target           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001D3C4    tick_lerp_position_toward_target       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001D518    get_or_create_cached_slot              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001D5B4    func_8001D5B4                          OK     len   0 diff8     -G8 -msplit-addresses      ours:-     
+func_8001EC70    func_8001EC70                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001ED20    func_8001ED20                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001EE44    func_8001EE44                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8001EF1C    func_8001EF1C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8001EF78    func_8001EF78                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001EFD4    func_8001EFD4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8001F364    duel_flags_state_and_field_spawn_dispatch STUB
+func_800208D4    func_800208D4                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:-     
+func_80020988    func_80020988                          OK     len   0 diff23    -G8 -mno-split-addresses   ours:-     
+func_80020BE4    func_80020BE4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80020D4C    update_orbiting_effect_obj             MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80020EE8    flag80_test_set_field8_decrement       MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80020F4C    func_80020F4C                            STUB
+func_80021480    func_80021480                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80021558    func_80021558                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80021598    func_80021598                            STUB
+func_80021810    weighted_random_pick                   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80021894    ring_buffer_insert_801d0200            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800220B8    func_800220B8                            STUB
+func_80022618    debug_effect_msg_selector              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80022674    obj_charge_meter_dispatch                STUB
+func_80022D94    func_80022D94                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80022EEC    apply_stat_template_or_delete          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80022F98    func_80022F98                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80022FF0    clear_entry_list_5                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80023090    func_80023090                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002348C    func_8002348C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800234E4    func_800234E4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800235C0    update_active_move_record                STUB
+func_80023FBC    decode_status_flags_call_80023d08      MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80024060    call_80023fbc_read_field25             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80024088    call_80023d08_read_field25             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800240B0    cursor_card_pick_tick                  OK     len   0 diff6     -G8                        ours:MATCH 
+func_80024200    func_80024200                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_80024388    pad_l2_check_call_dispatch             MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800245A0    func_800245A0                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800245EC    duel_seq                               OK     len  12 diff12    -G0 -mno-split-addresses   ours:-     
+func_80024734    func_80024734                          OK     len   0 diff2     -G0 -msplit-addresses      ours:MATCH 
+func_80024914    func_80024914                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80024954    call_80024914_clear_field22            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002497C    func_8002497C                          OK     len  -1 diff13    -G8                        ours:MATCH 
+func_800249E0    func_800249E0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80024C1C    spawn_card_type_icon_obj               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80024D34    func_80024D34                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80024DC8    init_800eb26c_fields_from_args         MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80024E24    flag80                                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80024E4C    func_80024E4C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80024E58    func_80024E58                            STUB
+func_80025028    find_table801a7ad8_entry_matching_id   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800250C8    func_800250C8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002525C    func_8002525C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002538C    func_8002538C                            STUB
+func_800255FC    arm_field_effect_marker                OK     len   0 diff5     -G8 -msplit-addresses      ours:MATCH 
+func_800257A0    func_800257A0                            STUB
+func_8002596C    func_8002596C                          OK     len   0 diff7     -G8                        ours:MATCH 
+func_80025B28    advance_obj_timer_and_check_thresholds MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80025BEC    spawn_or_rearm_field_effect_marker     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80025EE0    reset_or_configure_obj_call_48658      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80025F3C    func_80025F3C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800260D0    func_800260D0                          OK     len   0 diff4     -G8 -msplit-addresses      ours:-     
+func_8002622C    func_8002622C                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_800262D4    obj_lifecycle_state_dispatch             STUB
+func_80026A3C    func_80026A3C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80026B34    func_80026B34                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80026BA4    func_80026BA4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80026C0C    func_80026C0C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80026C6C    table801a7ad8_collect_below_threshold  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80026D18    table801a7ad8_row_search               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80027060    func_80027060                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002712C    func_8002712C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80027508    func_80027508                            STUB
+func_8002778C    func_8002778C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800278A0    func_800278A0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800279BC    func_800279BC                            STUB
+func_80027DF8    func_80027DF8                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:-     
+func_80028220    init_801ab00c_pair                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80028260    unpack_high_bit_value                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002827C    func_8002827C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800282E8    test_and_set_flag_8009b248             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80028310    func_80028310                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800283EC    func_800283EC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800283F4    func_800283F4                            STUB
+func_8002892C    func_8002892C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800289AC    func_800289AC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800289B4    func_800289B4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800289BC    func_800289BC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80028B08    func_80028B08                            STUB
+func_80029108    func_80029108                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_80029164    func_80029164                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_800291E0    init_container_entry_objs              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80029528    call_4036c_clear_entry_fields          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80029574    clear_entry_fields_800ea0e8            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80029590    func_80029590                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80029684    func_80029684                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800297DC    func_800297DC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80029934    func_80029934                            STUB
+func_80029EB0    list_entry                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80029EDC    func_80029EDC                            STUB
+func_8002A2F4    func_8002A2F4                            STUB
+func_8002A3CC    func_8002A3CC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002A4A8    func_8002A4A8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002A660    scroll_follow                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8002A6B8    func_8002A6B8                          MATCH  len   0 diff0     -G8                        ours:-     
+func_8002A788    card_list_cursor_move                  ERROR  len     diff      -G8 -mno-split-addresses   ours:MATCH D_8009B398
+func_8002A9C0    sprite_quad_gpu_prim                     STUB
+func_8002ABB4    func_8002ABB4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002BAA0    func_8002BAA0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002BAAC    func_8002BAAC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002BAB4    func_8002BAB4                            STUB
+func_8002BD0C    select_render_preset_800100a8          OK     len   0 diff8     -G0 -mno-split-addresses   ours:-     
+func_8002BF3C    notify_set_flags_801d0200_801d0250     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002BFCC    func_8002BFCC                            STUB
+func_8002C400    func_8002C400                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002C484    func_8002C484                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002C4DC    find_index_in_id_table                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002C518    test_byte_flag_591_else_find_id_index  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002C560    func_8002C560                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C568    func_8002C568                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C570    test_byte_flag_591                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C598    reset_pool_800ead88                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C5CC    find_free_slot_800ead88                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C604    alloc_init_pool_entry_800ead88         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002C68C    call_8002c604_set_flag80_if_nonzero    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002C6C8    func_8002C6C8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002C7E8    table801a7ad8_recipe_lookup            MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:-     
+func_8002C938    collect_high_bit_records               MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_8002C9B4    collect_field_slot_ptrs                MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_8002CB50    copy_5words_and_clear                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002CB80    calc_wrap_scroll_delta                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002CBF4    func_8002CBF4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002CCA8    func_8002CCA8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002CCE4    func_8002CCE4                          OK     len   0 diff2     -G8 -mno-split-addresses   ours:-     
+func_8002CD48    call_ccca8_then_cce4_if_zero           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002CD8C    reset_flags_four_calls                 MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8002CDE8    __builtin_vec_new                      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002CE08    mask_test_call_800eb26c_two_calls      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002CE64    mask_test_800eb26c_notify_and_recheck  OK     len   0 diff3     -G8 -mno-split-addresses   ours:MATCH 
+func_8002CEE8    func_8002CEE8                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002D0E0    func_8002D0E0                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002D180    func_8002D180                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_8002D2D8    func_8002D2D8                          OK     len   0 diff6     -G8                        ours:MATCH 
+func_8002D370    func_8002D370                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002D3F8    mask_test_800eb26c_dual_calls_conditio MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002D458    func_8002D458                          ERROR  len     diff      -G8 -msplit-addresses      ours:MATCH D_801D07DC
+func_8002D588    func_8002D588                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002D62C    func_8002D62C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002D684    mask_test_call_800eb26c                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002D6C8    func_8002D6C8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002D730    func_8002D730                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002D7C4    func_8002D7C4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002D7CC    func_8002D7CC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002DA1C    duel_setup_state_machine_dispatch        STUB
+func_8002DC38    mask_test_800eb26c_reinit_and_poll       STUB
+func_8002DD74    main_task_dispatch_loop                MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002DDFC    func_8002DDFC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8002DF2C    func_8002DF2C                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:MATCH 
+func_8002E00C    func_8002E00C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E060    create_slot_2_and_tag                  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002E128    func_8002E128                            STUB
+func_8002E370    set_flag2_from_entry_search            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E3B4    test_and_set_flag_8009b27c             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E3DC    call_8002e3b4_wrapper                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E3FC    create_obj_and_init_800404cc           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E470    stream_read_index_and_check_ready        STUB
+func_8002E6B8    parse_stream_header_and_opt_fields     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002E730    func_8002E730                            STUB
+func_8002E918    func_8002E918                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002E9A0    func_8002E9A0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002EA0C    func_8002EA0C                            STUB
+func_8002EB48    stream_read_dispatch_byte              MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002EB78    func_8002EB78                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002EDB0    advance_input_byte_and_dispatch        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002EE20    stream_relative_jump                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002EE5C    check_list_full                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002EE94    func_8002EE94                            STUB
+func_8002F430    func_8002F430                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002F438    func_8002F438                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002F440    func_8002F440                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002F4C0    func_8002F4C0                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8002F630    func_8002F630                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8002F930    set_state12_dual                       MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002F94C    set_state15_dual                       MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8002F968    stream_countdown_refill                MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002F9D4    read_stream_u16le_call_8002ee5c        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8002FA28    set_state_triple_1_5_8                 MATCH  len   0 diff0     -G8 -mno-split-addresses -fno-delayed-branch ours:MATCH 
+func_8002FA54    func_8002FA54                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002FB78    func_8002FB78                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8002FD10    func_8002FD10                            STUB
+func_8002FED0    func_8002FED0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002FED8    func_8002FED8                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8002FFD4    dispatch_active_records                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80030050    stream_read_byte                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003006C    stream_read_u16le                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80030090    set_obj_fields_12_13_14                MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800300AC    set_obj_fields_12_13_14_v128           MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800300C8    func_800300C8                          MATCH  len   0 diff0     -G8                        ours:-     
+func_80030198    init_duel_field_state                  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80030250    init_800eb2c0_fields_from_args         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80030294    func_80030294                            STUB
+func_800307B8    func_800307B8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80030998    func_80030998                            STUB
+func_80030C10    func_80030C10                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80030CB0    guarded_init_and_poll_result           MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80030D5C    func_80030D5C                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:-     
+func_80030E30    mask_test_call_800eb2eb_state3         MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80030E7C    mask_test_call_800eb2eb_state4         MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80030EC8    arm_state_call_8003fcd8_dispatch       MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80030F40    func_80030F40                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80030F80    call_80033c90_wrapper                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80030FA0    func_80030FA0                          OK     len   0 diff4     -G8 -msplit-addresses      ours:MATCH 
+func_80030FD0    func_80030FD0                          OK     len   4 diff4     -G8                        ours:MATCH 
+func_80031000    arm_state_call_8003fd14_dispatch       MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80031078    func_80031078                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003134C    func_8003134C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80031354    func_80031354                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800313E8    func_800313E8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031574    func_80031574                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_800316F0    func_800316F0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031784    gsortfastsprite_ring_draw              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031874    func_80031874                            STUB
+func_80031CD4    func_80031CD4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80031E04    call_31cd4_loop                        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031E5C    func_80031E5C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031EE4    func_80031EE4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80031F7C    release_last_id_entry                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003201C    build_id_histogram_and_leading_count   MATCH  len   0 diff0     -G8                        ours:-     
+func_800320BC    func_800320BC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80032184    func_80032184                          OK     len   0 diff3     -G0 -mno-split-addresses   ours:MATCH 
+func_80032328    call_14e1c_137e4                       MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80032370    dedupe_handle_slots                    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_800323F8    func_800323F8                            STUB
+func_80032B38    test_and_set_obj_flag8000              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80032B60    compare_rec_two_level                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80032BD4    compare_rec_two_level_std              MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80032C48    func_80032C48                            STUB
+func_800330BC    func_800330BC                          OK     len -18 diff221   -G0 -mno-split-addresses   ours:-     
+func_80033500    func_80033500                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003353C    func_8003353C                          OK     len  -3 diff63    -G0 -mno-split-addresses   ours:MATCH 
+func_800336F0    type_record_transition_dispatch        OK     len  -3 diff76    -G0 -mno-split-addresses   ours:MATCH 
+func_800338E4    func_800338E4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80033998    find_free_slot_gp3f4                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800339D0    obj_pending_build_or_cleanup             STUB
+func_80033BE8    flash_indicator_and_dispatch           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80033C90    reset_state_and_set_mode7              MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80033CA8    reset_state_and_set_mode7_v2           MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80033CC4    update_field11589_from_table           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80033CF8    func_80033CF8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80035598    compare_u32                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800355C8    relink_active_ptr_and_flag4            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035668    set_state_and_color                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035680    set_active_ptr_and_flag4               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800356A0    backward_word_copy_with_tail_dispatch    STUB
+func_80035700    copy_word_at_shifted_offset            ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_8003571C    func_8003571C                          ERROR  len     diff      -G8                        ours:-     
+func_800357B8    func_800357B8                          ERROR  len     diff      -G8                        ours:-     
+func_800357E8    digit_utils                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800358A0    clear_trailing_separator_bytes         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800358FC    call_8e590_mod                         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003594C    func_8003594C                          OK     len   0 diff8     -G8 -mno-split-addresses   ours:MATCH 
+func_800359B0    func_800359B0                          OK     len   0 diff8     -G8 -mno-split-addresses   ours:MATCH 
+func_80035A58    func_80035A58                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035A64    func_80035A64                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80035AB8    set_entry_fields_800eb0f8              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035AF0    func_80035AF0                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80035B7C    cleanup_entry_clear_three_call_delete  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80035BE4    forward_args_call_35ab8_35af0          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80035C38    forward_args_call_35ab8_35af0_or_flag  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80035CA8    clear_matching_byte_800eaf08           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035CE4    reset_free_slot_800eaf08               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035D10    find_free_slot_800eaf08                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035DB8    clear_matching_byte_800eb288           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035DF4    clear_two_fields_800eb288              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80035E20    func_80035E20                            STUB
+func_80036BCC    find_entry_by_be16_id                  OK     len  -1 diff16    -G8 -msplit-addresses      ours:MATCH 
+func_80036C14    func_80036C14                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80036D3C    read_stream_u16le_multi                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80036D70    read_stream_u32be                      MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80036F80    set_flags_from_battle_mode             MATCH  len   0 diff0     -G8                        ours:-     
+func_8003700C    func_8003700C                          OK     len  -2 diff58    -G8 -msplit-addresses      ours:-     
+func_80037110    func_80037110                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800371A8    func_800371A8                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8003735C    scan_flag80_entries_800eb288           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800373C8    set_flag80_entries_800eb288            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003741C    func_8003741C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800374A8    set_field81_call_373c8                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800374F4    func_800374F4                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_800375A4    func_800375A4                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8003767C    reset_and_advance_multi_stream         OK     len   3 diff41    -G8 -mno-split-addresses   ours:MATCH 
+func_8003771C    func_8003771C                          OK     len   2 diff35    -G8 -mno-split-addresses   ours:MATCH 
+func_800377AC    clear_field51_if_flag_zero             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800377C8    func_800377C8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003787C    set_field81_bit80_call_39fd4           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800378D8    set_field81_bit80_gated                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80037914    set_state6_and_field81_8               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80037950    set_state4_and_field81_8               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003798C    clear_field81_if_flags_zero            MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800379C4    clear_field81_unless_result1           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800379F8    set_field81_countdown_call_36d3c       MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80037A58    func_80037A58                          OK     len   0 diff15    -G8 -msplit-addresses      ours:MATCH 
+func_80037C74    func_80037C74                            STUB
+func_80037CE0    func_80037CE0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80037D2C    func_80037D2C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80037D6C    read_stream_byte_multi_to_field81      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038024    func_80038024                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038070    call_80038024_with_flag                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038094    read_stream_byte_then_call             MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800380D4    read_stream_signed_byte_multi_accumula MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038110    read_stream_byte_multi_accumulate      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038148    func_80038148                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800382A8    obj_stream_read_speed_opcode           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80038334    func_80038334                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038388    call_80036d3c_store_field56            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800383B0    clear_field96_call_store_field97       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800383DC    func_800383DC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80038498    func_80038498                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800384E4    read_stream_byte_set_bit12             MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038530    func_80038530                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80038690    call_80036d3c_into_8003ff08            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800386B8    func_800386B8                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80038798    func_80038798                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80038800    func_80038800                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80038888    func_80038888                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038890    func_80038890                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038898    read_stream_byte_set_state5            MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800388D8    func_800388D8                          OK     len   0 diff6     -G0 -msplit-addresses      ours:MATCH 
+func_800389C4    clear_flag_bit3                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800389D8    advance_slot_and_merge_stream_word     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038A44    advance_slot_and_merge_stream_word_v2  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038AB0    func_80038AB0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038B08    call_4036c_reset_field48_81_98         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038B4C    bytecode_stream_dispatch               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038BA8    func_80038BA8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038BF0    func_80038BF0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038D14    set_state4_and_flag                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038D2C    process_and_reflag_state               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80038DB8    append_stream_word_and_advance_field88 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038E1C    func_80038E1C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80038E7C    decrement_field88_and_check_wrap       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80039140    derive_layout_bounds_from_src          MATCH  len   0 diff0     -G8                        ours:-     
+func_800391E4    init_highlight_and_shadow_slots        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800393B0    func_800393B0                            STUB
+func_80039934    func_80039934                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80039A14    poll_call_393b0_until_bit13            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039A60    poll_call_393b0_until_bit13_v2         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039AAC    test_and_set_obj_flag19                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80039AD4    clear_table_entry_and_set_flag         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039AFC    func_80039AFC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80039BE0    func_80039BE0                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80039C94    func_80039C94                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80039D64    func_80039D64                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039E9C    reset_800eb010_records_and_8015c410    MATCH  len   0 diff0     -G0 -msplit-addresses      ours:-     
+func_80039F1C    test_and_set_obj_flag51                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80039F44    init_fields_call_8e590_field62         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039F90    call_4036c_clear_three_words           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80039FD4    reset_field48_and_call                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80039FF8    set_flag10_if_low_bits_clear           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003A01C    func_8003A01C                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8003A198    func_8003A198                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8003A1EC    func_8003A1EC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003A440    func_8003A440                          OK     len  -1 diff64    -G8 -msplit-addresses      ours:MATCH 
+func_8003A920    propagate_pos_to_slots                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003A95C    set_pos_propagate                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003A990    func_8003A990                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003AAE4    func_8003AAE4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8003AC48    func_8003AC48                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8003B054    func_8003B054                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8003B378    func_8003B378                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003B50C    func_8003B50C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003B6AC    set_range_D_800EB288_field24           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003B714    call_80035AF0_default_a2               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003B734    pad_down_left                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003B744    bank_table_lookup                      MATCH  len   0 diff0     -G8                        ours:-     
+func_8003B7E0    read_stream_byte_advance               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003B808    func_8003B808                          OK     len   0 diff4     -G0 -mno-split-addresses   ours:-     
+func_8003B9BC    func_8003B9BC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8003BA14    func_8003BA14                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:MATCH 
+func_8003BBF8    register_handler_8003BA14              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003BD14    func_8003BD14                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:-     
+func_8003BEB8    register_handler_8003BD14              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003BF00    func_8003BF00                          OK     len   0 diff4     -G0 -mno-split-addresses   ours:-     
+func_8003C0C0    func_8003C0C0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003C120    func_8003C120                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8003C2B4    register_two_handlers_8003c120         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003C328    func_8003C328                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8003C498    register_handler_8003C328              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003C4E0    init_state_bar_and_load                MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003C568    func_8003C568                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003C628    func_8003C628                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:-     
+func_8003C7A0    sync_duel_side_flag                    OK     len  -1 diff67    -G8 -msplit-addresses      ours:MATCH 
+func_8003C8CC    state_machine_dispatch_8009b37c        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003C950    func_8003C950                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CB7C    reset_history_ring_and_flags           OK     len   0 diff3     -G8                        ours:MATCH 
+func_8003CBE8    func_8003CBE8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CC38    func_8003CC38                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003CDF8    func_8003CDF8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CE48    restore_status_flags_from_backup       MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CE74    func_8003CE74                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CEB8    func_8003CEB8                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003CF14    func_8003CF14                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003CFC8    seed_rng_and_fill_scramble_array       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003D03C    func_8003D03C                          ERROR  len     diff      -G8 -mno-split-addresses   ours:-     D_8009B408
+func_8003D0F4    func_8003D0F4                          OK     len   0 diff6     -G8 -mno-split-addresses   ours:MATCH 
+func_8003D174    func_8003D174                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003D288    func_8003D288                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003D2B8    check_8003d288_and_state               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003D300    func_8003D300                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003D32C    func_8003D32C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003D334    draw_tiled_bg_sprites                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003D46C    func_8003D46C                          OK     len   0 diff2     -G0 -msplit-addresses      ours:MATCH 
+func_8003D518    func_8003D518                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8003D614    reload_timer_or_delete_and_age_slot    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003D74C    func_8003D74C                          OK     len  -1 diff104   -G8 -mno-split-addresses   ours:-     
+func_8003DA40    func_8003DA40                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8003E46C    set_flag_bits_mode                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003E490    func_8003E490                          OK     len-195 diff197   -G8                        ours:-     
+func_8003E7D4    arm_and_call_8003E490                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003E80C    arm_and_call_8003E490_full             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003E858    memcard_save_state_step                  STUB
+func_8003EE90    arm_and_call_8003E854                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003EEC8    func_8003EEC8                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003F2B0    func_8003F2B0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8003F388    func_8003F388                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003F70C    call_8003F454_or_default               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003F740    func_8003F740                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003F758    init_800efe18_and_setup_gpu            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003F7D4    func_8003F7D4                          OK     len   0 diff2     -G8                        ours:MATCH 
+func_8003F810    refresh_801d0200_buffers               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003F87C    func_8003F87C                          OK     len   0 diff2     -G8                        ours:MATCH 
+func_8003F8D4    func_8003F8D4                          OK     len-242 diff244   -G8                        ours:-     
+func_8003FCD8    arm_and_call_8003F8D4_state29          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FD14    func_8003FD14                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8003FE14    func_8003FE14                          OK     len   0 diff2     -G8                        ours:MATCH 
+func_8003FE70    rng_seed                               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FE80    func_8003FE80                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FEE0    call_80048658_255_0                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FF08    call_masked_and_store_orred            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FF34    call_80047430_neg8_0                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FF58    call_set_1582_1584_negated             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FF88    call_80048658_flagged                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FFB4    call_80045334_masked_flag              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FFD8    call_80047314_masked_flag              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8003FFFC    call_800473f0_dual_then_80047ec4       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004002C    find_free_slot_0x10_0x60               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004006C    find_free_slot_0x0_0x60                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800400AC    get_or_init_D_800EFE48_slot            OK     len   0 diff2     -G8                        ours:MATCH 
+func_8004020C    dispatch_slot_move_8009b410            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800402A0    func_800402A0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004036C    __builtin_delete                       MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80040390    init_slot_link_tables_and_flags        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_800403F0    reset_rec_flags_trigger                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80040410    func_80040410                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80040424    set_kind_and_clear_bit4                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004044C    set_pos_and_kind                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80040468    init_obj_id_pos_flags                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800404CC    set_30_32_and_call_80040468            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80040510    func_80040510                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80040588    func_80040588                            STUB
+func_80040814    run_active_rec_chain                   MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800408D0    func_800408D0                            STUB
+func_80040BF8    update_all_efe48_slots                 MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80040CAC    run_D_800EFE38_callback_list           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80040D14    run_efe48_slots_secondary_callback     MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80041340    func_80041340                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_8004141C    func_8004141C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004143C    accum_add_le16                         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80041464    accum_add_le16_xor_flag                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004149C    func_8004149C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80041534    func_80041534                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80041C8C    func_80041C8C                            STUB
+func_80041D60    func_80041D60                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80041E7C    func_80041E7C                          MATCH  len   0 diff0     -G8                        ours:-     
+func_80041F90    func_80041F90                          MATCH  len   0 diff0     -G8                        ours:-     
+func_80042188    func_80042188                            STUB
+func_800427DC    reset_obj_and_set_5A_flag08            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042824    func_80042824                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042874    call_80040468_store54                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800428A8    call_800404CC_store54                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800428EC    sub_table_lookup_set_flag              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042918    sub_from_global_set_flag               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004293C    sub_from_global_set_flag3              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042960    call_f24_check_flags_c0                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800429A8    read_le16                              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800429BC    get_ptr_le16_offset                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800429D8    reset_obj_state                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042A00    update_pos_frac_x                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042A28    update_pos_frac_y                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042A50    update_pos_frac                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042A78    update_pos_frac_xy                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042AA4    update_pos_frac_xyz                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042AD8    func_80042AD8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80042B08    clamp_approach_zero                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042B40    find_active_rec_by_id                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042B98    obj_flag80_test_and_set                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80042BC0    decay_countdown_or_delete              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043178    save_prev_pos                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004318C    lerp_position_toward_midpoint          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043230    func_80043230                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043328    func_80043328                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:-     
+func_800434F4    func_800434F4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004365C    func_8004365C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800438B8    func_800438B8                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80043960    func_80043960                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_80043D48    func_80043D48                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043DA0    find_matching_field_index_retry        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043E30    init_memcard_and_pad                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043E68    func_80043E68                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80043EBC    init_io_events                         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80044038    retry_card_clear_slot                  MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800440B4    try_acquire_slot_536                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800440F0    func_800440F0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004413C    card_info_clear_load_sequence          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800441DC    dispatch_object_init_sequence          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80044278    claim_slot536_11_and_card_info         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800442E4    dispatch_object_init_sequence_4        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80044380    claim_slot536_12_and_card_info         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800443EC    func_800443EC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80044470    func_80044470                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80044544    func_80044544                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80044598    func_80044598                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80044608    memcard_save_clear_load_poll_dispatch    STUB
+func_80044838    func_80044838                            STUB
+func_80044CD4    func_80044CD4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80044CFC    io_state_clear_cb                      MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80044D0C    io_state_set1_cb                       MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80044D20    io_state_set2_cb                       MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80044D34    io_state_set3_cb                       MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80044D48    func_80044D48                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80044DA0    set_8009b45c_514_515                   MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80044DC0    func_80044DC0                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80044E90    set_field514_515_range_flags           MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80044F58    init_local_flags_and_notify            MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80044FE4    get_8009b45c_510                       MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80044FFC    func_80044FFC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004503C    set_8009b45c_512_49                    MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80045114    func_80045114                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800451E0    call_80045208_masked_128               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80045208    func_80045208                            STUB
+func_8004544C    clear_8009b45c_busy                    MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_8004545C    arm_state_and_register_cb              OK     len   0 diff4     -G8                        ours:MATCH 
+func_80045484    entry_has_marker_byte                  MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80045804    func_80045804                          ERROR  len     diff      -G8                        ours:-     
+func_80045BE8    func_80045BE8                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800464F0    func_800464F0                            STUB
+func_8004666C    func_8004666C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800466C8    func_800466C8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8004671C    func_8004671C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80046768    s8009b45c_init                           STUB
+func_8004695C    func_8004695C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80046990    reset_field_record_flags               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80046A08    func_80046A08                          OK     len-233 diff235   -G8                        ours:-     
+func_80046F58    sound_shutdown_full                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80046FA0    func_80046FA0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047008    get_8009b45c_48                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004701C    set_8009b45c_f4a_low_nibble            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004703C    get_8009b45c_40                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047050    func_80047050                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800470B0    func_800470B0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047140    func_80047140                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800471D0    func_800471D0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80047278    call_split_word_halves                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800472A8    func_800472A8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80047314    call_8004733C_masked_flag              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004733C    func_8004733C                          MATCH  len   0 diff0     -G8                        ours:-     
+func_800473CC    call_800473F0_neg32                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800473F0    func_800473F0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80047430    call_set_1582_1584_masked              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047458    call_set_1582_1584_masked_b            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047480    func_80047480                            STUB
+func_8004763C    reset_43c_array_and_update_438         MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800476B4    func_800476B4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80047788    func_80047788                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80047864    spu_voice_set_attr_and_volumes         MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800478EC    func_800478EC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80047A68    build_id_ge_threshold_mask             MATCH  len   0 diff0     -G0                        ours:-     
+func_80047AD0    notify_and_arm_entry                   MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047B68    func_80047B68                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047BB4    func_80047BB4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047C50    func_80047C50                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80047C70    func_80047C70                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80047CC4    func_80047CC4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047DB0    func_80047DB0                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80047EC4    retry_spu_key_until_nonzero            MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047F38    build_low_nibble_match_mask            MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80047FAC    count_matching_entries_80047fac        MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004803C    func_8004803C                            STUB
+func_80048768    func_80048768                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80048920    func_80048920                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80048A28    combat_status_flag_dispatch              STUB
+func_80048C0C    set_8009b45c_vals_matching_id          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80048C70    copy_512_words                         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80048F14    func_80048F14                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80049010    func_80049010                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800490F0    set_8009b45c_1582_1584                 MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049108    set_8009b45c_1582_1584_b               MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049120    get_8009b45c_1582_nonzero              MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049138    func_80049138                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049200    call_80049230_sign16                   MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049230    func_80049230                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800492D8    sound_init                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80049308    retry_call_800496c4_or_refresh         MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049394    set_8009b45c_1564                      MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_800493F8    reset_1564_field_and_flag              MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049434    reset_8009b458_idle_state              MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800494F4    func_800494F4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049544    func_80049544                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049594    set_8009b458_81c                       MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800495A4    call_8004B9E0_if_flag814               MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800495DC    clear_8009b458_815                     MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800495EC    set_8009b458_815                       MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049600    set_8009b458_510_validated             MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049640    func_80049640                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_80049694    sound_shutdown                         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800496C4    func_800496C4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004975C    func_8004975C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800497E0    func_800497E0                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_800498BC    call_80077240_bool                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800498F8    clear_8009b458_4A4_if_set              MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049920    func_80049920                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:-     
+func_80049A64    func_80049A64                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049AF4    func_80049AF4                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_80049BAC    func_80049BAC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049C40    reset_slot_7e0_full_state              MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049CB0    reset_slot_7E0_if_active               MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049CF8    func_80049CF8                          OK     len  -2 diff13    -G0 -mno-split-addresses   ours:MATCH 
+func_80049DD8    func_80049DD8                          OK     len  -2 diff13    -G0 -mno-split-addresses   ours:MATCH 
+func_80049EC8    set_pos_masked_and_notify              MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049F10    set_pos_514_and_notify                 MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80049F50    set_8009b458_7e2_on_cabc3              MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_80049FB4    func_80049FB4                            STUB
+func_8004A0FC    func_8004A0FC                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004A27C    func_8004A27C                            STUB
+func_8004A2F8    func_8004A2F8                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004A3BC    func_8004A3BC                          MATCH  len   0 diff0     -G8                        ours:-     
+func_8004A43C    func_8004A43C                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:MATCH 
+func_8004A518    init_spu_voices                        OK     len   0 diff2     -G0 -mno-split-addresses   ours:-     
+func_8004A6D8    call_8004A518_wrapper                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004A6F8    func_8004A6F8                          OK     len   0 diff2     -G0 -msplit-addresses      ours:-     
+func_8004A764    func_8004A764                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8004A7C0    func_8004A7C0                          OK     len   0 diff2     -G0                        ours:MATCH 
+func_8004A854    find_lowest_qty_matching_item          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004A8E4    func_8004A8E4                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8004AAFC    func_8004AAFC                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:MATCH 
+func_8004ACE4    func_8004ACE4                          OK     len   0 diff4     -G8 -msplit-addresses      ours:MATCH 
+func_8004B374    func_8004B374                          OK     len   0 diff2     -G0 -mno-split-addresses   ours:-     
+func_8004B49C    func_8004B49C                            STUB
+func_8004B6E8    func_8004B6E8                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004B70C    func_8004B70C                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004B734    func_8004B734                          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004B854    guarded_start_stream_and_set_handle    OK     len   0 diff3     -G0 -mno-split-addresses   ours:-     
+func_8004B910    reset_8009b458_events_and_flags        MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004B990    set_8009b458_503_run_and_clear_500     MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004B9E0    run_8004c8c8_burst_if_flag502          MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004BAA0    byte_seq_compare_n                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004BAE4    read_stream_byte                       MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004BB34    func_8004BB34                          MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:MATCH 
+func_8004BBBC    func_8004BBBC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004BC2C    combine_four_8004BAE4_calls            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004BCA8    combine_two_8004BAE4_calls             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004BCE8    setup_track_tempo_and_division         MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004BE6C    int_add_inplace                        MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004BE80    func_8004BE80                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004BE88    handle_seq_meta_event                  MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:MATCH 
+func_8004C0AC    func_8004C0AC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8004C420    midi_command_dispatch                  OK     len   0 diff2     -G8 -msplit-addresses      ours:-     
+func_8004C560    func_8004C560                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8004C5C8    func_8004C5C8                            STUB
+func_8004C84C    decay_item_durability_list             MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004C8C8    process_timer_burst_records_8004c8c8   MATCH  len   0 diff0     -G8                        ours:-     
+func_8004CA60    func_8004CA60                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8004CABC    check_records_flag_all_set             MATCH  len   0 diff0     -G0 -mno-split-addresses   ours:-     
+func_8004CB0C    init_duelist_record_and_scan_hand        STUB
+func_8004D134    func_8004D134                            STUB
+func_8004D914    relink_ot_table_by_type_bucket         MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_8004DB14    func_8004DB14                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8004E7B0    func_8004E7B0                            STUB
+func_8004EB00    func_8004EB00                            STUB
+func_8004FE2C    duel_action_resolution_dispatch          STUB
+func_80050584    func_80050584                          MATCH  len   0 diff0     -G0 -msplit-addresses      ours:MATCH 
+func_800507D0    duel_phase_transition_dispatch           STUB
+func_80050F24    func_80050F24                            STUB
+func_80051350    func_80051350                            STUB
+func_80052528    blend_camera_zoom_target                 STUB
+func_80052694    update_camera_target_tracking          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800528AC    func_800528AC                            STUB
+func_800533D8    reset_gpu_state_and_flags              ERROR  len     diff      -G8                        ours:-     
+func_800540B4    func_800540B4                            STUB
+func_800559D4    duel_state_debug_dispatch                STUB
+func_8005611C    func_8005611C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80056504    voice_status_dispatch_800f2c40           STUB
+func_80056828    func_80056828                            STUB
+func_80057544    func_80057544                          OK     len   0 diff6     -G0 -mno-split-addresses   ours:-     
+func_800577B0    func_800577B0                            STUB
+func_80057E20    build_clamped_bounds_vec               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800580D4    build_obj_lwtransform_800f2c40           STUB
+func_80058434    update_3d_position                     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80058A7C    func_80058A7C                          MATCH  len   0 diff0     -G8                        ours:-     
+func_80058B4C    func_80058B4C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80058DC0    func_80058DC0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058DCC    func_80058DCC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058DD8    get_D_800F2C40_slot_status             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058E1C    func_80058E1C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058E3C    get_D_800F2C40_slot_field              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058E68    get_D_800F2C40_slot_field_bf5          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058E94    get_D_800F2C40_slot_field_e06          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058EC0    get_D_800F2C40_slot_bf5_indexed_u16    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80058F20    get_D_800F2C40_slot_entry_clamped      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058F74    get_D_800F2C40_slot_entry              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80058FB0    get_D_800F2C40_slot_u16_quad           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059000    func_80059000                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800590DC    func_800590DC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059134    init_light_triplet_800f2c40            MATCH  len   0 diff0     -G8                        ours:-     
+func_800591C0    get_D_800F39B0_slot_sub                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059214    func_80059214                          MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80059220    func_80059220                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005922C    func_8005922C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059284    set_D_800F2C40_slot_field              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800592AC    build_obj_rotmatrix_800f2c40           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800593D0    func_800593D0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005949C    get_D_800F39F0_slot                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800594C0    func_800594C0                          MATCH  len   0 diff0     -G8                        ours:-     
+func_80059520    get_D_800F2C40_slot_by_mod6            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059590    set_D_800F2C40_slot_bytes              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800595C8    set_obj_bounds_800f2c40                MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005969C    set_D_800F2C40_fE0D_and_notify         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059700    func_80059700                          MATCH  len   0 diff0     -G8                        ours:-     
+func_800597C8    update_record_field_and_notify         MATCH  len   0 diff0     -G8 -mno-split-addresses   ours:-     
+func_8005988C    func_8005988C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800598E4    wrap_80059908                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059908    func_80059908                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800599FC    repackage_args                         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059A50    copy_struct_call                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059AA8    getset_bigrec                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059AE0    func_80059AE0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059AEC    func_80059AEC                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059AF8    func_80059AF8                            STUB
+func_80059B90    func_80059B90                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059C18    func_80059C18                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059C24    init_two_systems                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059C88    test_neg2_8009af9a                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059C9C    reset_dispatch_state                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059CD0    test_neg2_8009af9a_b                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059CE4    duel_stage_dispatch_init               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059DD8    call_slot_handler_800fc1c_rows         MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80059EBC    func_80059EBC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80059F18    func_80059F18                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80059FAC    set_record_fields1826                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A010    set_record_fields22_2a                 MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A074    func_8005A074                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A0DC    set_record_count                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A130    set_record_fields46                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A188    set_af98_af99_from_sign                MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005A1F4    dist_to_stored_pos                     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005A2E0    func_8005A2E0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005A3D0    func_8005A3D0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8005A468    set_ptr_array_byte                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A4C4    obj_ptr_init_fields                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A53C    func_8005A53C                            STUB
+func_8005A618    func_8005A618                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005A878    check_record_flags                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005A8C4    deck_capacity_check                    OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_8005A98C    rgb_to_hls_8005a98c                    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8005B054    blend_color                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005B5FC    fill_words                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005B620    copy_words                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005B64C    select_reverb_preset                   OK     len   0 diff8     -G0 -mno-split-addresses   ours:MATCH 
+func_8005B85C    register_handler                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005BE3C    func_8005BE3C                            STUB
+func_8005BFC8    str_stream_wait_and_decode_frame         STUB
+func_8005C374    set3_8009b4a0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C388    lookup_speed_and_start_read            MATCH  len   0 diff0     -G0 -msplit-addresses      ours:-     
+func_8005C464    cd_queue_read_request                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C4F0    func_8005C4F0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8005C530    call_and_conditional                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C568    retry_calls                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C5C4    gp_flag_set_8009b064                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C5D4    func_8005C5D4                          OK     len   0 diff2     -G8 -msplit-addresses      ours:-     
+func_8005C62C    ds_open_and_read                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C690    gp_flag_set_8009b063                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C6A0    func_8005C6A0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005C768    const_dispatch3                        MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005C7BC    func_8005C7BC                            STUB
+func_8005CEF0    func_8005CEF0                            STUB
+func_8005D378    func_8005D378                            STUB
+func_8005D994    setup_positional_sfx                   ERROR  len     diff      -G8                        ours:MATCH D_8009B07A
+func_8005E808    func_8005E808                            STUB
+func_8005EBF4    func_8005EBF4                            STUB
+func_8005F070    func_8005F070                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005F198    func_8005F198                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005F1A4    idx8_80091570                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005F1B8    func_8005F1B8                          MATCH  len   0 diff0     -G8                        ours:-     
+func_8005F27C    func_8005F27C                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005F564    counter_bump_check                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005F588    check_dispatch_flags                   MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005F5C8    stat_growth_ratio_apply                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005F714    state_flag_gate_call_8005f91c          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005F7B0    func_8005F7B0                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     D_8009B07A
+func_8005F828    record_pair_walk_dispatch              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005FAE4    init_state_block                       MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005FB08    func_8005FB08                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005FB14    get_state_if_flag                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8005FB30    notify_pair_by_field6_range            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8005FBC4    tween_calc                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80060170    table_insert_800f5918                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800601D0    find_table_800f5918                    MATCH  len   0 diff0     -G8                        ours:-     
+func_800603DC    const_dispatch                         MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80060568    const_dispatch2                          STUB
+func_80060594    func_80060594                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_80060750    func_80060750                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_8006076C    func_8006076C                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_80060828    func_80060828                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_8006083C    func_8006083C                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_80060858    func_80060858                          ERROR  len     diff      -G8 -msplit-addresses      ours:-     
+func_8006086C    process_and_insert                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800608B8    func_800608B8                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80060AEC    process_and_insert_b                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80061008    func_80061008                          OK     len   0 diff4     -G8 -msplit-addresses      ours:MATCH 
+func_800610E0    func_800610E0                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_800611D0    func_800611D0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800612C0    gte_ot_insert_transformed_tris_lit_cli OK     len   0 diff16    -G8                        ours:-     
+func_8006151C    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff16    -G8                        ours:-     
+func_800617E0    gte_ot_insert_transformed_quads_lit_cl OK     len   0 diff17    -G8                        ours:-     
+func_80061A84    gte_ot_insert_transformed_quads_gourau OK     len   0 diff18    -G8                        ours:-     
+func_80061DDC    gte_ot_insert_transformed_tris_lit_id_ OK     len   0 diff16    -G8                        ours:-     
+func_80062058    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff16    -G8                        ours:-     
+func_8006233C    gte_ot_insert_transformed_quads_lit_id OK     len   0 diff17    -G8                        ours:-     
+func_80062600    gte_ot_insert_transformed_quads_gourau OK     len   0 diff18    -G8                        ours:-     
+func_80062978    gte_ot_insert_transformed_tris         OK     len   0 diff15    -G8                        ours:-     
+func_80062BC0    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff15    -G8                        ours:-     
+func_80062E70    gte_ot_insert_transformed_quads_lit    OK     len   0 diff16    -G8                        ours:-     
+func_80063100    gte_ot_insert_transformed_quads_gourau OK     len   0 diff17    -G8                        ours:-     
+func_80063444    gte_ot_insert_transformed_tris_lit_id  OK     len   0 diff15    -G8                        ours:-     
+func_800636AC    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff15    -G8                        ours:-     
+func_8006397C    gte_ot_insert_transformed_quads_lit_id OK     len   0 diff16    -G8                        ours:-     
+func_80063C2C    gte_ot_insert_transformed_quads_gourau OK     len   0 diff17    -G8                        ours:-     
+func_80063F90    gte_ot_insert_transformed_tris_lit_cli OK     len   0 diff32    -G8                        ours:-     
+func_80064248    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff32    -G8                        ours:-     
+func_80064568    gte_ot_insert_transformed_quads_lit_cl OK     len   0 diff35    -G8                        ours:-     
+func_80064868    gte_ot_insert_transformed_quads_gourau OK     len   0 diff37    -G8                        ours:-     
+func_80064C1C    gte_ot_insert_transformed_tris_lit_id_ OK     len   0 diff32    -G8                        ours:-     
+func_80064EF4    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff32    -G8                        ours:-     
+func_80065234    gte_ot_insert_transformed_quads_lit_id OK     len   0 diff35    -G8                        ours:-     
+func_80065554    gte_ot_insert_transformed_quads_gourau OK     len   0 diff37    -G8                        ours:-     
+func_80065928    gte_ot_insert_transformed_tris_lit_tra OK     len   0 diff30    -G8                        ours:-     
+func_80065BCC    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff30    -G8                        ours:-     
+func_80065ED8    gte_ot_insert_transformed_quads_lit_tr OK     len   0 diff33    -G8                        ours:-     
+func_800661C4    gte_ot_insert_transformed_quads_gourau OK     len   0 diff35    -G8                        ours:-     
+func_80066564    gte_ot_insert_transformed_tris_lit_id_ OK     len   0 diff30    -G8                        ours:-     
+func_80066828    gte_ot_insert_transformed_tris_gouraud OK     len   0 diff30    -G8                        ours:-     
+func_80066B54    gte_ot_insert_transformed_quads_lit_id OK     len   0 diff33    -G8                        ours:-     
+func_80066E60    gte_ot_insert_transformed_quads_gourau OK     len   0 diff35    -G8                        ours:-     
+func_80067354    gte_ot_insert_precolored_tris          OK     len   0 diff14    -G8                        ours:-     
+func_8006759C    gte_ot_insert_precolored_quads_dualcli OK     len   0 diff15    -G8                        ours:-     
+func_80067858    gte_ot_insert_precolored_tris_id       OK     len   0 diff14    -G8                        ours:-     
+func_80067ABC    gte_ot_insert_precolored_quads_dualcli OK     len   0 diff15    -G8                        ours:-     
+func_80067D94    gte_ot_insert_precolored_tris_noclip   OK     len   0 diff13    -G8                        ours:-     
+func_80067FD0    gte_ot_insert_precolored_quads_notag   OK     len   0 diff13    -G8                        ours:-     
+func_8006825C    gte_ot_insert_precolored_tris_id_nocli OK     len   0 diff13    -G8                        ours:-     
+func_800684B4    gte_ot_insert_precolored_quads         OK     len   0 diff13    -G8                        ours:-     
+func_8006875C    gte_ot_insert_precolored_tris_transluc OK     len   0 diff28    -G8                        ours:-     
+func_80068A00    gte_ot_insert_precolored_quads_dualcli OK     len   0 diff31    -G8                        ours:-     
+func_80068D18    gte_ot_insert_precolored_tris_transluc OK     len   0 diff28    -G8                        ours:-     
+func_80068FD8    gte_ot_insert_precolored_quads_dualcli OK     len   0 diff31    -G8                        ours:-     
+func_8006930C    gte_ot_insert_precolored_tris_transluc OK     len   0 diff26    -G8                        ours:-     
+func_800695A4    gte_ot_insert_precolored_quads_notag_t OK     len   0 diff27    -G8                        ours:-     
+func_8006988C    gte_ot_insert_precolored_tris_transluc OK     len   0 diff26    -G8                        ours:-     
+func_80069B40    gte_ot_insert_precolored_quads_translu OK     len   0 diff27    -G8                        ours:-     
+func_80069E44    gte_ot_insert_transformed_tris_flat    OK     len   0 diff10    -G8                        ours:-     
+func_80069F94    gte_ot_insert_transformed_tris_flat_3f OK     len   0 diff10    -G8                        ours:-     
+func_8006A0E8    gte_ot_insert_transformed_quads        OK     len   7 diff103   -G0 -mno-split-addresses   ours:-     
+func_8006A268    gte_ot_insert_transformed_quads_4field OK     len   7 diff105   -G0 -mno-split-addresses   ours:-     
+func_8006A3F0    gte_ot_insert_transformed_tris_flat_r1 OK     len   0 diff10    -G8                        ours:-     
+func_8006A540    gte_ot_insert_transformed_tris_flat_3f OK     len   0 diff10    -G8                        ours:-     
+func_8006A694    gte_ot_insert_transformed_quads_1c     OK     len   7 diff103   -G0 -mno-split-addresses   ours:-     
+func_8006A814    gte_ot_insert_transformed_quads_4field OK     len   7 diff105   -G0 -mno-split-addresses   ours:-     
+func_8006A99C    gte_ot_insert_indexed_tris             OK     len   7 diff95    -G0 -mno-split-addresses   ours:-     
+func_8006AAFC    gte_ot_insert_indexed_quads            OK     len   7 diff106   -G0 -mno-split-addresses   ours:-     
+func_8006AC88    gte_ot_insert_indexed_tris_1c          OK     len   7 diff95    -G0 -mno-split-addresses   ours:-     
+func_8006ADE8    gte_ot_insert_indexed_quads_20         OK     len   7 diff106   -G0 -mno-split-addresses   ours:-     
+func_8006BCA4    func_8006BCA4                            STUB
+func_8006C120    subdivide_triangle_recursive           MATCH  len   0 diff0     -G8 -fno-schedule-insns    ours:-     
+func_8006C2FC    set_bytes3                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8006C30C    copy_bytes3                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8006C330    avg_bytes3                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8006CD78    func_8006CD78                            STUB
+func_8006F1B4    func_8006F1B4                            STUB
+func_8007058C    stream_read_advance                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800705AC    stream_read16_advance                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800705D8    init_duel_buffers                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070650    func_80070650                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80070710    func_80070710                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80070738    func_80070738                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_800707C4    func_800707C4                          OK     len   0 diff2     -G8 -msplit-addresses      ours:MATCH 
+func_80070870    scan_table2_80070870                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800708C4    scan_table3_800708c4                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070920    scan_table2_or_3_by_kind               MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070988    stream_seek                            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800709C0    func_800709C0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070A40    func_80070A40                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070AC0    func_80070AC0                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070B3C    func_80070B3C                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070BB8    range_check_accum_f4f8                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80070C60    threshold_mod100_accum_f4f8            MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80070D00    push_item_or_assert                    MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80070DA8    pop_item_or_assert                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070E20    idx_table_random_range_from_stream     MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80070EB4    idx_table_diff_store                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80070F1C    func_80070F1C                          MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80071194    bitfield_compare_calls_store           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80071248    idx_table_bitfield_copy                MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800712B4    idx_table_reca_field0_copy             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80071320    reca_field0_flag_check_store           MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800713B8    idx_table_recb_field14_copy            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80071424    store_indexed_flag_from_table          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_80071460    func_80071460                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:-     
+func_8007149C    count_reca_nonzero_field0              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80071510    idx_table_write_flag_800eae90          MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_8007154C    idx_table_recb_xor_field19_flag        MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800715C4    idx_table_write_or_default_window2     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8007164C    idx_table_write_val16b                 MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80071688    idx_table_write_byte_5c82              MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800716C4    idx_table_write_byte_5c83              MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80071700    scan_reca_range_flag_gated_best          STUB
+func_80071924    func_80071924                            STUB
+func_80071B64    equip_score_best_slot                  MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80071EB8    func_80071EB8                          MATCH  len   0 diff0     -G0                        ours:-     
+func_80071FC8    func_80071FC8                          OK     len   4 diff60    -G8 -msplit-addresses      ours:-     
+func_8007214C    func_8007214C                          OK     len   2 diff59    -G8 -msplit-addresses      ours:-     
+func_800722CC    func_800722CC                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_8007249C    find_equip_slot_for_card               MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800725C4    idx_table_write_call_bool              MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80072640    scan_field88_check_store               MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_800726F4    func_800726F4                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800727C0    func_800727C0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80072DC0    func_80072DC0                          MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80072F1C    skip4bytes                             MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80072F54    skip4bytes_b                           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80072F8C    fill_5bytes_from_table                 MATCH  len   0 diff0     -G8 -msplit-addresses      ours:MATCH 
+func_80073050    idx_table_copy_lowbyte                 MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80073220    func_80073220                          MATCH  len   0 diff0     -G8                        ours:-     
+func_800732A0    filter_collect                         MATCH  len   0 diff0     -G8                        ours:-     
+func_80073300    func_80073300                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073308    func_80073308                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073310    scan_or_insert_window1_at31            MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073380    clear_table2_upper                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800733A8    scan_or_insert_window2_at126           MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073420    clear_table3_upper                     MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073448    flag_800eae90_set                      MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80073458    flag_800eae90_clear                    MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80073464    flag_800f5c7f_set                      MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80073474    func_80073474                          MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_80073480    set_reca_flag                          MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800734DC    func_800734DC                          OK     len   0 diff2     -G8 -msplit-addresses      ours:-     
+func_800735A0    idx_table_write_val16                  MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_800735DC    idx_table_copy_entry                   MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_80073624    idx_table_sum_store                    MATCH  len   0 diff0     -G8                        ours:MATCH 
+func_8007368C    idx_table_copy_byte                    MATCH  len   0 diff0     -G0                        ours:MATCH 
+func_800736C4    print_two_strings                      MATCH  len   0 diff0     -G8                        ours:MATCH 
+wrote /tmp/claude-1000/-home-marchaleski-ygofm/dee462d5-7566-4b34-9f28-c3e0e79e4c2f/scratchpad/manifest.tsv (1084 rows)
