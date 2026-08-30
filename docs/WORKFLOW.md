@@ -20,10 +20,30 @@ never a bare `pip install` — installing globally once broke another tool's pin
 
 ## Toolchain: PsyQ 4.5 (gcc 2.8.1, aspsx 2.79)
 
-Not 4.6. That was assumed for the project's first 219 functions and produced a
-byte-identical build anyway, because most functions are too small for the two
-versions to differ. `YGOFM_PSYQ=46` selects 4.6 for comparison. `tools/` is
-gitignored and must be re-fetched per machine.
+Not 4.6, and as of 2026-08-30 that is **measured at scale rather than
+inferred**. 4.6 was assumed for the project's first 219 functions and produced
+a byte-identical build anyway, which for years was the whole basis of this
+paragraph -- most functions are too small for the two versions to differ, so a
+small sample cannot tell them apart. At 981 functions it is not close:
+`YGOFM_PSYQ=46 .venv/bin/python tools_src/build.py` puts **288 functions at
+the wrong size**, with deltas up to ±28 instructions, while the same tree at
+4.5 hashes `84747e64...`. The largest discriminators, i.e. the test cases to
+settle this with anyone who believes otherwise:
+
+    func_80041068  +28    func_80022D94  -24    func_80059AF8  -21
+    func_80040DD8  +28    func_8005A98C  -22    func_80058838  -21
+
+This matters beyond bookkeeping, because the other decompilation of this
+binary (docs/MERGE_UNCHIGA.md) uses 4.6/4.7 and states that 4.6 is required.
+Both can be true: **750 of his functions compile to the retail bytes under our
+4.5**, so his C is not 4.6-specific -- his whole pipeline differs (ASPSX >=
+2.56 semantics emulated through maspsx, plus an asm round-trip fixup), and a
+different pipeline can reach the same bytes from a different SDK. What is
+*not* true is that this tree can be moved to 4.6 as a formality. Migrating it
+is a re-derivation of 288 functions, and the number is the argument.
+
+`tools/` is gitignored and must be re-fetched per machine; it holds psyq45,
+psyq46 and psyq47 side by side, so the comparison above costs one command.
 
 ## Adding a function
 
