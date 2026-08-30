@@ -60,8 +60,13 @@ s32 func_80044608(void) {
 
     case 2:
         if (D_8009B450 == D_8009B43D) {
-            c = D_8009B43C - 1;
-            D_8009B43C = c;
+            if (D_8009AF7C) {
+                c = D_8009B43C - 1;
+                D_8009B43C = c;
+            } else {
+                c = D_8009B43C - 1;
+                D_8009B43C = c;
+            }
             if ((s8)c > 0) {
                 goto shared340;
             }

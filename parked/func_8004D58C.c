@@ -28,9 +28,9 @@ void func_8004D58C(s32 arg0, u8 *arg1) {
     n = 0;
     m = 0;
     p3 = (u8 *)0;
+    ff = 0xFFFF;
     p2 = (u8 *)0;
     i = 0;
-    ff = 0xFFFF;
 
     t = D_800F2C40 + arg0 * 0xE20;
     c = t;

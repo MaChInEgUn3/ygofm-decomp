@@ -5577,3 +5577,43 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
     func_8004C84C.  The one plausible half, a base local for D_800F2848
     hoisted out of the loop, is +2 and 46 against a base of -1 and 58 --
     worse by the length rule.
+
+# ---
+2026-08-29, the rest of the score_permuter_outputs list.  Six worked, no
+match, and one finding that is worth more than any of them.
+  **`if (x) { A } else { A }` is a LIVE-RANGE hint and nothing else, and
+  there is no plausible spelling of it.**  Four instances now -- func_8002BD0C
+  (19 -> 14 on `if (d2)`), func_8004D75C (40 -> 21 on `if (r || t)`),
+  func_80045208 (25 -> 17 on `if (e)`), func_80044608 (38 -> 33 on
+  `if (D_8009AF7C)`).  In every one, `do { … } while (0);` round the SAME
+  statement is worth exactly nothing.  The mechanism was pinned down on
+  func_80045208, the smallest of them: a plain dead read (`p8 = e;`, `q = e;`,
+  at either position) is also worth nothing, because gcc deletes it before
+  allocation.  A BRANCH on `e` cannot be deleted -- cross-jumping the two
+  identical arms happens after register allocation -- so the branch is the
+  only thing that survives long enough to make `e` live at that point.  That
+  is why the idiom works and why every legitimate spelling of "read this
+  value here" fails.  All four are installed as placeholders.
+  * **func_8004D58C: 13 -> 12** on moving `ff = 0xFFFF;` one line down, below
+    `p3 = (u8 *)0;`.  The `new_var` for `t + 0xDF0` and the `!= 0` dropped
+    from the test are both worth nothing.  What is left is the master
+    register of five zero copies (`$t3` in retail, `$t5` in ours); twenty of
+    the 120 orderings of those six initialisations were swept and none beats
+    12.
+  * **func_80037DA4: 61 -> 54** on a SECOND NAME for the opcode --
+    `op2 = op;` assigned right after the read, used only by the
+    `(op2 & 0x80)` test.  Using it for the `switch (op2 & 0xF)` as well
+    scores the same, and using it ONLY for the switch is worth nothing, so
+    the 0x80 test is the site that matters.
+  * **func_80048A28: 65 -> 60**, two edits that compose: a name for
+    `(arg0 & 0x1F) * 2` (65 -> 64) and writing D_8009B45C INLINE at the two
+    sites in the `arg2 - 1 < 0x80` block instead of through the `b` local
+    (61 alone, 60 together).
+  * **func_8004803C: 140 -> 137**, and its 98 is REJECTED for length.  The
+    two `arg1 & 0xFF` masks the permuter added are semantically free -- the
+    function already does `arg1 = arg1 & 0xFF;` before them -- and they are
+    worth 3 on their own at equal length.  Reaching 98 needs the
+    identical-arms hint on top, and HERE that hint costs an instruction (+1),
+    unlike the four cases above.  `u8 arg1` in the signature, with or without
+    the explicit mask statement, is -1 and 154, so the byte parameter is not
+    the reading either.

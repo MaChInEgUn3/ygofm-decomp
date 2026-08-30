@@ -10,6 +10,7 @@ void func_80048A28(s32 arg0, s32 arg1, s32 arg2) {
     u8 *b;
     s32 i;
     s32 h;
+    s32 ix;
     s32 t;
     s32 n;
     s32 f;
@@ -27,7 +28,8 @@ void func_80048A28(s32 arg0, s32 arg1, s32 arg2) {
         b = D_8009B45C;
         f = arg0 & 0x100;
         f = f != 0;
-        n = *(u16 *)(b + ((arg0 & 0x1F) * 2 + (f << 6)) + 0x44C);
+        ix = (arg0 & 0x1F) * 2;
+        n = *(u16 *)(b + (ix + (f << 6)) + 0x44C);
         if (n == 0xFFFF) {
             return;
         }
@@ -48,9 +50,8 @@ void func_80048A28(s32 arg0, s32 arg1, s32 arg2) {
             if (t != 0) {
                 w2 = (u16)(arg2 + 0x80);
                 if ((u16)(arg2 - 1) < 0x80) {
-                    b = D_8009B45C;
-                    *(s16 *)(b + i * 2 + 0x414) =
-                        *(u8 *)(*(s32 *)(b + 0x444) + h * 8) * (0x80 - t);
+                    *(s16 *)(D_8009B45C + i * 2 + 0x414) =
+                        *(u8 *)(*(s32 *)(D_8009B45C + 0x444) + h * 8) * (0x80 - t);
                 }
                 if (w2 < 0x80) {
                     b = D_8009B45C;

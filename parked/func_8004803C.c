@@ -2,9 +2,9 @@
 
 void func_8004803C(s16 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
                    u8 arg6) {
-    u8 *b;
     s16 idx;
     s32 one;
+    u8 *b;
     s32 v;
     s32 n;
 
@@ -48,10 +48,10 @@ void func_8004803C(s16 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
         *(u16 *)(b + arg1 * 2 + 0x414) = *(u16 *)(b + 0x38C);
         *(u16 *)(b + arg1 * 2 + 0x41C) = *(u16 *)(b + 0x38E);
         (b + arg1)[0x424] = 0xFF;
-        (D_8009B45C + arg1)[0x428] = 0;
+        (D_8009B45C + (arg1 & 0xFF))[0x428] = 0;
 
         b = D_8009B45C;
-        *(s16 *)(b + arg1 * 2 + 0x42C) =
+        *(s16 *)(b + (arg1 & 0xFF) * 2 + 0x42C) =
             *(u8 *)(n + *(s32 *)(b + 0x444) + 1) * 4;
         func_80077120(b + 0x384, 0);
     }

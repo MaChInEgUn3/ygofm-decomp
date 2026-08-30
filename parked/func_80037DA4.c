@@ -5,6 +5,7 @@ void func_80037DA4(u8 *p) {
     u8 *c;
     u8 *base;
     s32 op;
+    s32 op2;
     s32 a1;
     s32 a2;
     s32 v;
@@ -17,6 +18,7 @@ void func_80037DA4(u8 *p) {
     c = *cp;
     op = *c;
     *cp = c + 1;
+    op2 = op;
     a2 = 0;
 
     if ((op & 0x10) != 0) {
@@ -55,7 +57,7 @@ void func_80037DA4(u8 *p) {
         break;
     }
 
-    if ((op & 0x80) != 0) {
+    if ((op2 & 0x80) != 0) {
         a1 = a1 + 0x8300;
     push:
         p[0x58] = p[0x58] + 1;
