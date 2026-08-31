@@ -1,3 +1,11 @@
+/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
+ * The body below is the retail instruction stream written out as inline
+ * asm. It is byte-exact and therefore invisible to build.py, which is
+ * exactly the problem: the oracle cannot tell transcribed assembly from
+ * real C, so nothing but this comment stops it being counted as done.
+ * Ported from Unchiga's tree, where it is tracked as known debt.
+ * Rewriting it as C is open work; see docs/ASM_DEBT.md.
+ */
 /* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
  * His C, his comments; the identifiers are rewritten to this repo's address
  * form and nothing else was touched. Verified the only way that counts here:
