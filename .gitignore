@@ -71,3 +71,9 @@ ct[abe][0-9]*
 # Working drafts of messages to other people. Never tracked: they are
 # notes-to-self about a conversation, not documentation of the binary.
 docs/DRAFT_*.md
+
+# Third-party reverse-engineering output shared privately (krystalgamer,
+# 2026-08-31): Hex-Rays C for this binary and for Duelist of the Roses.
+# Not ours to publish, and not derived from our own disassembly.
+gms.c
+dotr.c

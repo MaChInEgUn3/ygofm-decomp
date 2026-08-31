@@ -99,6 +99,41 @@ provenance -- the same contract as `docs/EXTERNAL_LEADS.txt` and the
 `UNVERIFIED datacrystal/` labels. It must not enter `variables.h` wearing the
 same clothes as an address read off a listing.
 
+## What DoTR actually gives us, and what it does not
+
+krystalgamer shared Ghidra output for Duelist of the Roses on 2026-08-31. It
+carries **2689 named functions** from real debug symbols, against 265
+auto-named ones. That is the resource, and it is large.
+
+**But DoTR is PlayStation 2 and this game is PlayStation 1.** Its symbol list
+is full of `AddDmacHandler`, `AddIntcHandler`, `AddSbusIntcHandler`,
+`audioDecSendToIOP` -- EE/IOP/SIF concepts that do not exist on the hardware
+this binary runs on. So the idea of pointing `tools_src/siblings.py` at DoTR
+and reading off structural matches, floated here before the file was opened,
+is **much weaker than it sounded**: different CPU generation, different SDK,
+different compiler. Instruction n-grams will not carry across that.
+
+What does carry is exactly what krystalgamer said it was: **the naming scheme,
+and the specific symbols the same team reused.** The sound driver is the
+demonstrated case. `g_SDValue` and `s_wSD_NUM_SEGROUP` appear 304 times in the
+DoTR output, and it names **48 distinct `SD_*` entry points** -- `SD_Init`,
+`SD_InitializeDevice`, `SD_BGMFadeOut`, `SD_BGMStop`, `SD_BGMGetVolume`,
+`SD_CallEveryVSync` and so on. Roughly half of those are SIF/IOP transfer
+plumbing with no PS1 counterpart; the high-level half plausibly has one.
+
+This binary's own sound cluster is two functions, found by their strings:
+
+| function | strings it references | reading |
+|---|---|---|
+| `func_80046768` | `SD_bgm.dat`, `SD_se.dat`, `MASTER.XA` | loads the sound archives |
+| `func_80046A08` | the `g_SDValue->…s_wSD_NUM_SEGROUP` trace, `Set SMF Mixer Out:%d`, `Set CD Mixer Out:%d` | device/mixer init |
+
+`func_80046A08` is what the shared string is printed from, so it is the anchor
+the whole comparison hangs on. In DoTR vocabulary it is an `SD_Init` /
+`SD_InitializeDevice`. That is a **hypothesis** -- the behaviour matches and
+the vocabulary is the same team's, but no PS1 function was matched to a PS2
+one and none can be.
+
 ## What this is not
 
 It is not a route to naming functions. Not one function name appears anywhere
