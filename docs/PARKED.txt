@@ -415,6 +415,7 @@ func_8004A764
 func_8005C5D4
     STILL OPEN -- src/func_8005C5D4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_80073220
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
 func_8003201C
     RESOLVED -- src/func_8003201C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004CABC
@@ -710,6 +711,7 @@ func_800594C0
     reusing this shape anywhere else; here that check is what made it safe.
 # --- scheduling / rematerialisation, candidate kept in parked/ ---
 func_800732A0
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     A stored permuter output measures 12, better than this entry. Found by
     tools_src/score_permuter_outputs.py on 2026-08-10 and NOT yet decomposed or
     semantically checked -- two of the audit's finds so far were wrong.
@@ -728,6 +730,7 @@ func_800732A0
     the stored output VERBATIM reproduces it. Copy the winner; do not retype
     it.
 func_8002CCE4
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
 func_80048C0C
     RESOLVED -- src/func_80048C0C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_800472A8
@@ -1406,6 +1409,7 @@ func_80048658 -- 65 differences, an **unfinished** park: the body is the same
   table walk, which is already right.
 
 func_80071EB8 -- 47 differences with the candidate kept, 32 with a worse-shaped
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   one, and an **unfinished** park because the two numbers disagree about which
   is closer to the truth.
   Counts entries in D_801AB000 between two bounds that `func_800707C4` writes
@@ -1465,6 +1469,7 @@ func_80047DB0_WAS -- unfinished, 67 differences. The func_80048920 family: a
   row better than the installed 61.
 
 func_80045334 -- unfinished, 52 differences and one instruction too many.
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     Structure is fully read and three levers landed on it, in this order:
     the aggregate form of D_8009B45C (retail's `lui/lw %lo` pair, where the
     scalar at -G8 is gp-relative and gcc then parks the pointer in a
@@ -1487,6 +1492,7 @@ func_80045334 -- unfinished, 52 differences and one instruction too many.
     in the first and put the add in the second.
 
 func_8001944C -- unfinished, 30 differences with equal lengths (70/70).
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     Needs the **default compiler with a -G0 assembler**, which is a
     combination the flag sweep could not produce until today: D_8009B0AC is a
     one-byte scalar, small data at -G8, so cc1psx emits one instruction and
@@ -1522,6 +1528,7 @@ func_8001944C -- unfinished, 30 differences with equal lengths (70/70).
     library function is a guess and the length got worse.
 
 func_8003B5C8 -- unfinished, 18 differences and one instruction too many, and
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     the whole of it is one induction variable. Twenty bytes of Shift-JIS
     full-width digits are copied from D_80010330 onto the stack, then read as
     ten big-endian halfword keys, each looked up in the four-byte-entry table
@@ -1867,6 +1874,7 @@ func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
     second. Discriminator not established.
 
 func_800464F0 -- unfinished, 61 differences with equal lengths (95/95). The
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     record compactor: walk D_8009B45C's 0x30-byte slots from +0x80, and when a
     slot's tag byte is 0x24, 0x29 or 0x2B, copy the next slot over it and
     decrement the count at +0x4C without advancing. Seven bare reads, no
@@ -2294,6 +2302,7 @@ func_8002C6C8_WAS -- 58 positional at 71/72 under _O2_G8_NOSTRENGTH (third user
     wrong-but-better this week; rerun from a better base when one exists.
 
 func_8003CA5C -- 4 differences at 72/72, a $v0/$v1 swap in one basic block:
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     retail keeps the first return's delay-slot 1 live in $v0 and runs the
     D_8009B398 load chain through $v1; we reuse $v0. The path 13 -> 4 is two
     permuter finds, both inert and decomposed: the +0x5A halfword read named
@@ -2459,6 +2468,7 @@ func_80022D94_WAS -- 8 differences, and they are a coupled pair in the strict
     about four slots early are D_8009B166, D_8009B1C4 and D_8009B158.
 
 func_80050F24 -- TWO differences, and both are one instruction: retail
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     computes a halfword's address into $v1 and loads through it, where we
     reuse the index's own $v0 for the sum. The rest matched on three
     documented levers.
@@ -3548,6 +3558,7 @@ func_8005A6A8 -- 1 difference at equal length (116/116): retail negates in
 
 
 func_8002E730 -- 2 differences at equal length (122/122), both of them one
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
     store two positions early. A screen-state toggle: it either recentres a
     rect or creates/destroys an overlay sprite.
     What paid:
@@ -3988,6 +3999,7 @@ func_8002DDFC_WAS -- 76/76, 56 differences, and every one of them is that retail
   reason the same residue needs different source there and here.
 
 func_80046768 -- 125/125, 46 differences, and all but a handful are a register
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   shift through the three unaligned struct copies: retail uses $t0-$t3 where
   we use $a3,$t0-$t2, so retail has one more register occupied there and we
   have not found what occupies it.
@@ -4062,6 +4074,7 @@ func_8005A98C -- re-examined; still 2, `mflo $v0` / `sll $v1,$t1,13` against
   spellings at 2 says the axis is elsewhere.
 
 func_800339D0 -- 134/134, THREE differences, and all three are one value's
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   register: retail holds `&D_800EB0F8` in $s0 and copies it into $a0 for the
   `func_80035B7C` call, filling that call's delay slot; we hold it in $a0
   directly and leave the slot a `nop`. Same residue as func_8003BF00.
@@ -4289,6 +4302,7 @@ real one-line lever, and two open.
     an index the target does not mask).
 
 func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   fourth member of the func_80040DD8 sprite-list family (same D_800EFE48 record
   array, same 0x70 stride, same `bltz`/`do`-`while` outer loop) but a different
   packet layout and a three-way tail.
@@ -4396,6 +4410,7 @@ func_800408D0 -- 3 differences. A permuter run from the 3-difference base
   read this as "the borrow lever does not apply here" -- it was not measured.
 
 func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   gp=0 at=0, default flags, no addressing work at all.
   A card-artwork setup routine: decodes a BCD card id
   (`((n >> 4) & 0xF) * 10 + (n & 0xF)`) into an index, then reads a per-card
@@ -4506,6 +4521,7 @@ func_8002DA1C -- 6 differences, first written 2026-08-21. 135 instructions,
   is +1 and `-fno-schedule-insns2` is 35. Permuter running.
 
 func_80071924 -- +12 instructions and 125 differences, first written
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   2026-08-21. 144 instructions, gp=0 at=0, default flags. Parked on a single
   mechanism and recorded mainly for that.
   The whole gap is **gcc's loop-invariant motion hoisting three comparison
@@ -5124,6 +5140,7 @@ func_80046294 -- 151/151, 5 differences, written 2026-08-28.  A queue
 
 
 func_80044608 -- 140/140, 38 differences, written 2026-08-29.  A small
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   state machine: two nested comparison trees on D_8009B43D and D_8009B450,
   each arm ticking a byte counter and calling one of three `func_8008B3xx`
   routines through func_80043D48 before returning -1.
@@ -5248,6 +5265,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
 
 
 func_80027508 -- 161 target, 162 built (+1), 25 differences, written
+    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   2026-08-29.  A duel-AI move chooser: four guarded calls, each of the form
   `if ((rand() & K) == 0) { if (f() == 0) return 0; }`, then it picks a card
   record out of D_801A7AD8, reads a field out of D_801D4244 and fills the

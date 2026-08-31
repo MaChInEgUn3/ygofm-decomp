@@ -13,8 +13,8 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **938** (83.6%) | **35,657** (43.5%) |
-| remaining | 184 (16.4%) | 46,221 (56.5%) |
+| decompiled and matching | **959** (85.5%) | **37,834** (46.2%) |
+| remaining | 163 (14.5%) | 44,044 (53.8%) |
 
 Both columns are worth reading, because they disagree sharply. Function count
 is well past halfway; **instruction count is not, and it is the honest
@@ -38,17 +38,16 @@ which is not transcription — C has no operators for coprocessor 2. Those were
 hand-rolled asm until 2026-08-31 and now call the PsyQ `gte_*` macros through
 `include/gte.h`, after krystalgamer pointed out that the SDK ships them.
 
-`src/` holds 1050 files; 938 of them are in scope and the rest are library or
+`src/` holds 1071 files; 959 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
 
 | size (instructions) | remaining | parked | unclaimed |
 |---|---|---|---|
-| ≤ 25 | 2 | 2 | **0** |
-| 26–50 | 8 | 8 | **0** |
-| 51–100 | 30 | 30 | **0** |
-| 101–200 | 63 | 52 | 11 |
+| 26–50 | 7 | 7 | **0** |
+| 51–100 | 22 | 22 | **0** |
+| 101–200 | 53 | 44 | 9 |
 | 201–400 | 54 | 1 | 53 |
 | > 400 | 27 | 0 | 27 |
 
