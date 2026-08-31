@@ -5764,3 +5764,44 @@ sweeps. Recording the negatives because each one used to be a guess:
     still `subu $v1,$zero,$v1` against our `subu $v1,$zero,$v0`: retail
     negates in place and gcc propagates the original in. Whatever produces
     that copy, it is not the tail's spelling and not a declared width.
+
+# ---
+2026-08-31, func_80058624 and func_8005A6A8: ONE residue, TWO functions, and
+the diagnosis that was in this file was pointing at the wrong thing.
+
+Both end with the same block -- `w = h / 16;` then an abs, a clamp to 0x7F,
+then a conditional negate -- and both leave exactly the same difference:
+retail `negu $v1,$v1` against our `subu $v1,$zero,$v0`. Two independently
+written functions with an identical residue is this file's own standing
+signal that the cause is systematic rather than local pressure.
+
+msearch settles what it is NOT. 110 spellings of the block on func_8005A6A8
+(five abs forms x two clamp forms x eleven tails, including `goto`, both
+polarities, the ternary, an in-place `v = -v`, and a dead `v = v;`) collapse
+to ten distinct instruction streams and none beats one difference. The same
+block on func_80058624: ten tail spellings, twelve `v`/`w` type combinations,
+all 75 single-declaration widths. Plus the ten hand shapes and 411 permuter
+iterations already recorded. **The tail's spelling is not the axis.**
+
+What it IS, from reading the listing instead of the diff. func_8005A6A8 has
+TWO of these sites and **the first one already matches**:
+
+        sra   $v0,$v0,4          w = h / 16
+        bgez  $v0,.L8005A82C
+         addu $v1,$v0,$zero      <- the copy, IN THE DELAY SLOT
+        negu  $v1,$v1            <- negate in place
+    .L8005A82C:
+        ...clamp...
+        bgtz  $s0,.L8005A848
+         addu $v0,$v1,$zero      <- same shape again
+        negu  $v0,$v0
+
+The two differ in one respect: the first branch tests the value being copied
+(`bgez` on `w`), so the copy has to survive; the second tests an unrelated
+variable (`bgtz` on `h`), so gcc coalesces `w = v` away and negates straight
+out of `v`'s register. Retail keeps the copy anyway and puts it in the
+branch's DELAY SLOT.
+
+So the question is not how to spell the negate. It is what fills that delay
+slot -- gcc has something else to put there and retail did not. That is a
+different search, and the two functions will fall together when it is found.
