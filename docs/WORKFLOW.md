@@ -18,29 +18,65 @@ noticed the first.
 sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`. Always the project `.venv`,
 never a bare `pip install` — installing globally once broke another tool's pins.
 
-## Toolchain: PsyQ 4.5 (gcc 2.8.1, aspsx 2.79)
+## Toolchain: cc1psx 2.8.1, maspsx emulating aspsx 2.79
 
-Not 4.6, and as of 2026-08-30 that is **measured at scale rather than
-inferred**. 4.6 was assumed for the project's first 219 functions and produced
-a byte-identical build anyway, which for years was the whole basis of this
-paragraph -- most functions are too small for the two versions to differ, so a
-small sample cannot tell them apart. At 981 functions it is not close:
+**The SDK number is not the compiler version, and calling it "PsyQ 4.5" here
+was wrong.** krystalgamer made the correction on 2026-08-31 -- *"psy-q 4.5 e a
+biblioteca de runtime, o compilador e diferente; para o decomp nao interessa o
+runtime, mas interessa saber que compilador eles teriam usado na altura"* --
+and it holds up under `strings`, which is the whole cost of checking it:
+
+| what the build actually runs | version |
+|---|---|
+| `tools/psyq45/BIN/CC1PSX.EXE` | **gcc 2.8.1**, `SN32 BUILD 4.0.0010` |
+| `tools/psyq46/.../CC1PSX.EXE` | **gcc 2.95.2**, `19991024 BUILD 4.0.0030` |
+| the assembler | **maspsx**, `--aspsx-version=2.79`, then GNU `as` |
+
+Three consequences, all of them things this file used to get wrong:
+
+  * `ASPSX.EXE` (2.79 in the 4.5 bundle, 2.86 in 4.6) is **never executed**.
+    maspsx emulates its quirks and `mipsel-none-elf-as` does the assembling, so
+    the assembler version in the heading was decoration.
+  * `YGOFM_PSYQ=46` swaps `CPPPSX.EXE` and `CC1PSX.EXE` and **nothing else**.
+    The environment variable is misnamed: it selects a *compiler*.
+  * `tools/psyq47.zip` contains `DOCS/`, `INCLUDE/`, `LIB/` and **zero `.EXE`
+    files**. A PsyQ release does not necessarily ship a compiler at all, which
+    is the correction in its cleanest form -- the number names a library
+    release, and library releases are exactly what a matching decomp does not
+    care about.
+
+So the measurement below is real and reproducible, and its **label** was the
+error. It is not "4.5 beats 4.6"; it is **gcc 2.8.1 against gcc 2.95.2**, two
+compilers seven years apart, and of course they differ. Stated that way it
+stops sounding like a claim about Sony's version numbering and starts being
+what it is: evidence about which compiler the 1999 build used.
+
 `YGOFM_PSYQ=46 .venv/bin/python tools_src/build.py` puts **288 functions at
 the wrong size**, with deltas up to ±28 instructions, while the same tree at
-4.5 hashes `84747e64...`. The largest discriminators, i.e. the test cases to
-settle this with anyone who believes otherwise:
+2.8.1 hashes `84747e64...`. It was assumed to be interchangeable for the
+project's first 219 functions and produced a byte-identical build anyway --
+most functions are too small for two compilers to differ on, so a small sample
+cannot tell them apart. The largest discriminators, i.e. the test cases to
+settle it with anyone who believes otherwise:
 
     func_80041068  +28    func_80022D94  -24    func_80059AF8  -21
     func_80040DD8  +28    func_8005A98C  -22    func_80058838  -21
 
 This matters beyond bookkeeping, because the other decompilation of this
-binary (docs/MERGE_UNCHIGA.md) uses 4.6/4.7 and states that 4.6 is required.
-Both can be true: **750 of his functions compile to the retail bytes under our
-4.5**, so his C is not 4.6-specific -- his whole pipeline differs (ASPSX >=
+binary (docs/MERGE_UNCHIGA.md) states that 4.6 is required. Both can be true:
+**750 of his functions compile to the retail bytes under cc1psx 2.8.1**, so
+his C is not tied to a later compiler -- his whole pipeline differs (ASPSX >=
 2.56 semantics emulated through maspsx, plus an asm round-trip fixup), and a
 different pipeline can reach the same bytes from a different SDK. What is
-*not* true is that this tree can be moved to 4.6 as a formality. Migrating it
-is a re-derivation of 288 functions, and the number is the argument.
+*not* true is that this tree can be moved as a formality. Migrating it is a
+re-derivation of 288 functions, and the number is the argument.
+
+**The general lesson is the one this file already teaches about the repo's own
+visibility: a label repeated for a month is not a measurement.** "PsyQ 4.5"
+sat in this heading, in `build.py`'s comments, in the environment variable's
+name and in a draft written for other people, and one `strings` call settles
+what it actually meant. When a version number is load-bearing, read it off the
+binary that runs.
 
 `tools/` is gitignored and must be re-fetched per machine; it holds psyq45,
 psyq46 and psyq47 side by side, so the comparison above costs one command.

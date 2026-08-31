@@ -33,9 +33,10 @@ MIPS in inline `__asm__` bodies, byte-exact and therefore invisible to the
 build's own check. They came in with a port from a second decompilation and
 are tracked in `docs/ASM_DEBT.md`; the honest count of decompiled functions is
 **974**, not 1050. Count it yourself with
-`.venv/bin/python tools_src/asm_debt.py`. A further 21 files carry GTE
-coprocessor asm, which is not transcription but should still be calling the
-PsyQ `gte_*` macros rather than hand-rolled instructions.
+`.venv/bin/python tools_src/asm_debt.py`. A further 5 files reach the GTE,
+which is not transcription — C has no operators for coprocessor 2. Those were
+hand-rolled asm until 2026-08-31 and now call the PsyQ `gte_*` macros through
+`include/gte.h`, after krystalgamer pointed out that the SDK ships them.
 
 `src/` holds 1050 files; 938 of them are in scope and the rest are library or
 above-scope functions matched along the way.
@@ -106,7 +107,8 @@ A fresh clone cannot build until you supply the game and the toolchains:
 1. **Provide the executable.** Dump your own disc and extract `SLUS_014.11`
    from it.
 2. **Fetch the toolchains** into `tools/` (gitignored, and must be re-fetched
-   per machine): the **PsyQ 4.5** SDK, MIPS binutils,
+   per machine): the **PsyQ 4.5** bundle (for its `cc1psx`, which is gcc
+   2.8.1 -- see Toolchain below), MIPS binutils,
    [maspsx](https://github.com/mkst/maspsx),
    [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) and
    [m2c](https://github.com/simonlindholm/m2c). See `docs/DECISIONS.md` for exact
@@ -136,11 +138,30 @@ On Windows the venv paths are `.venv/Scripts/python.exe` and
 
 ### Toolchain
 
-**PsyQ 4.5** (gcc 2.8.1, aspsx 2.79), not 4.6. 4.6 was assumed for the first
-219 functions and produced a byte-identical build anyway, because most
-functions are too small for the two versions to differ; `func_800495A4` is the
-discriminating case. `YGOFM_PSYQ=46` selects 4.6 for comparison. Pipeline is
+**Compiler: `cc1psx` reporting `2.8.1 SN32 BUILD 4.0.0010`** — gcc 2.8.1.
+Assembler: **maspsx** emulating aspsx 2.79, then GNU `as`. Pipeline is
 `CPPPSX → CC1PSX → maspsx → as → ld → objcopy`.
+
+The compiler ships *inside* the PsyQ 4.5 bundle, but the SDK number is not the
+compiler version and this README said otherwise for a month. What the bundles
+actually contain, per `strings`:
+
+| bundle | `CC1PSX.EXE` reports |
+|---|---|
+| PsyQ 4.5 | `2.8.1 SN32 BUILD 4.0.0010` |
+| PsyQ 4.6 | `2.95.2 19991024 BUILD 4.0.0030` |
+| PsyQ 4.7 | *no compiler at all* — the archive is `DOCS/`, `INCLUDE/`, `LIB/` |
+
+So `YGOFM_PSYQ=46` swaps the **compiler**, gcc 2.8.1 for gcc 2.95.2, and
+nothing else: the real `ASPSX.EXE` is never executed either way. Under 2.95.2
+this tree puts **288 functions at the wrong size**, deltas up to ±28
+instructions, which is unremarkable once stated as "two compilers seven years
+apart" rather than as a claim about Sony's version numbering. gcc 2.8.1 is
+what reproduces this binary.
+
+The correction is krystalgamer's, on 2026-08-31: *the PsyQ number names a
+runtime library release; for a decomp what matters is which compiler the
+original build used.*
 
 Layout is linker-driven and load-bearing: `build.py` emits one object per
 decompiled function plus one per run of consecutive undecompiled ones, then

@@ -24,9 +24,8 @@ count them, mark them, and say the number out loud.
 
 ## What is NOT debt
 
-**Inline asm for the GTE is not debt.** 21 further files carry
-`lwc2` / `swc2` / `mtc2` / `rtps` and similar coprocessor-2 instructions, which
-C has no operators for. A file is debt here only when ordinary MIPS — loads,
+**Inline asm for the GTE is not debt.** Five further files reach coprocessor 2
+-- `lwc2` / `swc2` / `mtc2` / `rtps` -- which C has no operators for. A file is debt here only when ordinary MIPS — loads,
 stores, arithmetic, branches, a `.global`, or a `.word` whose opcode field is
 not COP2/LWC2/SWC2 — appears inside the asm.
 
@@ -34,16 +33,19 @@ not COP2/LWC2/SWC2 — appears inside the asm.
 krystalgamer pointed out on 2026-08-31 that the PsyQ SDK ships these as macros
 — `GTEMAC.H` and `INLINE_C.H` give `gte_ldv0()`, `gte_rtps()`, `gte_stsxy()` —
 so a decomp calls those instead of hand-rolling the same instructions. All 21
-of ours are hand-rolled. That is a smaller debt than a transcription, not zero,
-and converting is free: the macros expand to the same words, so the build
-cannot notice and the source gets a great deal more readable.
+of ours were hand-rolled. **Converted on 2026-08-31, build still hashing**:
+`include/gte.h` keeps the SDK's names and operand conventions and routes them
+through the mnemonics in `include/gte_macros.inc`. The SDK header itself cannot
+be included -- `INLINE_C.H` is the DMPSX macro set and its command macros emit
+a *cookie*, `nop; nop; .word 0x0000007f`, which our pipeline would assemble as
+a literal word because it does not run Sony's `dmpsx` pass.
 
 The split, counted mechanically rather than by eye:
 
 | | files |
 |---|---|
-| real C, no inline asm | 953 |
-| GTE coprocessor asm only | 21 |
+| real C, no inline asm | 969 |
+| reaches the GTE (all via `gte_*` macros) | 5 |
 | **assembly transcription (debt)** | **76** |
 | total in `src/` | 1050 |
 
@@ -57,6 +59,16 @@ second pass scanned every string literal in the file, so the *constraints and
 clobbers* of legitimate GTE blocks (`"=r"`, `"r"`, `"memory"`, `"v0"`) were read
 as instructions and it reported 96 of 97 files as debt. Only the instruction
 template counts -- the strings before the first `:` at paren depth one.
+
+**A third instance arrived with the GTE conversion itself**, and it is the
+subtlest: converting a file to `gte_*` macros removes the word `__asm__` from
+it, so sixteen files silently moved into the "real C" bucket and the split
+drifted while the total stayed right. An empty template --
+`__asm__ volatile("" ::: "memory")`, a compiler barrier that emits no words --
+did the same thing from the other side, surviving every test because it
+contains no offending mnemonic. A count with no oracle behind it is exactly
+where a wrong answer lives; the classifier now keys on macro calls and on
+non-empty templates, and the three-way control is in the script.
 
 Both are the same failure this repo documents everywhere else: a tool
 answering confidently about something it did not measure. The check that would

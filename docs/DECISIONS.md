@@ -307,6 +307,29 @@ letting it justify not building something.**
 
 ### The compiler is PsyQ 4.5, not 4.6. This was wrong from the first commit.
 
+> **2026-08-31 — the heading is still mislabelled, and the label was the last
+> wrong part.** krystalgamer: *"psy-q 4.5 e a biblioteca de runtime, o
+> compilador e diferente; para o decomp nao interessa o runtime, mas interessa
+> saber que compilador eles teriam usado na altura."* `strings` on the two
+> `CC1PSX.EXE` binaries settles it in one command: the 4.5 bundle's reports
+> `2.8.1 SN32 BUILD 4.0.0010` and the 4.6 bundle's reports
+> `2.95.2 19991024 BUILD 4.0.0030`. So every measurement in this section is
+> **gcc 2.8.1 against gcc 2.95.2** — two compilers seven years apart — and not
+> a claim about SDK revisions at all. `tools/psyq47.zip` contains no `.EXE`
+> whatsoever (`DOCS/`, `INCLUDE/`, `LIB/`), which is the point in its purest
+> form: a PsyQ release need not ship a compiler.
+>
+> The bullet at the top of this file corroborates it from the other side
+> without anyone noticing at the time: decomp.me's `psyq4.6` preset is
+> literally named *"gcc 2.95.2 + aspsx 2.86 (CCPSX)"*. That mapping was sitting
+> in our own notes as evidence for the wrong proposition.
+>
+> Also worth recording: the real `ASPSX.EXE` (2.79 in 4.5, 2.86 in 4.6) is
+> **never executed** by `build.py` — maspsx emulates 2.79 and GNU `as`
+> assembles — so `YGOFM_PSYQ=46` varies the compiler and nothing else. The
+> environment variable is misnamed and the results below are unaffected.
+
+
 **Result first.** With the same 220 sources, PsyQ 4.5's `cc1psx` builds a
 byte-identical binary and 4.6 does not. No function matches under 4.6 that
 fails under 4.5. Switching versions then unlocked **eight** parked functions

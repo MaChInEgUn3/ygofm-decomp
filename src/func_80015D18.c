@@ -17,6 +17,8 @@ typedef signed char s8;
 typedef short s16;
 typedef int s32;
 
+#include "gte.h"
+
 /* Blacklist reclamation (config/blacklist.txt:584). Same RTPS/scratchpad
    -staging technique as func_8001B0CC.c (func_800015D18's own
    sibling, sim=0.25) and calibrate_screen_offset.c -- register-pinned
@@ -60,22 +62,11 @@ void func_80015D18(Obj *a0) {
         __asm__ volatile("" ::: "memory");
         scratch[2] = s0->z;
 
-        __asm__ volatile(
-            "lwc2 $0, 0(%0)\n"
-            "lwc2 $1, 4(%0)\n"
-            "nop\n"
-            "nop\n"
-            ".word 0x4a180001\n"   /* rtps */
-            :: "r" (scratch)
-            : "memory"
-        );
+        gte_ldv0(scratch);
+        gte_rtps();
     }
 
-    __asm__ volatile(
-        "swc2 $14, 0(%0)\n"
-        :: "r" (&s0->outX)
-        : "memory"
-    );
+    gte_stsxy(&s0->outX);
 
     s0->outX -= 0x20;
     s0->outY -= 0x1E;

@@ -96,6 +96,8 @@ struct Obj {
 
 typedef void (*ObjCallback)(struct Obj *, s32);
 
+#include "gte.h"
+
 extern void func_800878B0(s32 a0, s32 a1);
 extern void func_800878D0(s32 a0);
 extern void func_80088C50(struct Vec308 *a0, struct Mat *a1);
@@ -158,7 +160,7 @@ s32 func_80041F90(struct Obj *obj, s32 arg1, s32 arg2, struct Out *out) {
         func_80089CF0(v308, v310, v318, v318);
 
         otzp = &otz;
-        __asm__ volatile("swc2 $24, 0(%0)" : : "r"(otzp) : "memory");
+        gte_stopz(otzp);
 
         {
             s32 cb = obj->field10;
@@ -186,7 +188,7 @@ s32 func_80041F90(struct Obj *obj, s32 arg1, s32 arg2, struct Out *out) {
                 func_80089CF0(v308, v310, (struct Vec318 *)0x1F800318, v318);
 
                 otzp = &otz;
-                __asm__ volatile("swc2 $24, 0(%0)" : : "r"(otzp) : "memory");
+                gte_stopz(otzp);
             }
         }
     }

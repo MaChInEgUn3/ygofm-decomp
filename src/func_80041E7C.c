@@ -14,6 +14,8 @@ typedef signed char s8;
 typedef short s16;
 typedef int s32;
 
+#include "gte.h"
+
 /* Sets up the GTE geometry offset/screen distance, builds a rotation matrix
    from a packed 24-bit Euler angle (arg0, split into 8-bit X/Y/Z fields) via
    the PSX scratchpad SVECTOR/MATRIX at 0x1F800308/0x1F8002D0, installs it as
@@ -109,7 +111,7 @@ s32 func_80041E7C(u32 arg0, s32 arg1, s32 arg2, struct Out *arg3) {
 
     {
         s32 *p = &otz;
-        __asm__ volatile("swc2 $24, 0(%0)" : : "r"(p) : "memory");
+        gte_stopz(p);
     }
 
     return otz;

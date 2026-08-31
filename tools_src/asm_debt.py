@@ -48,6 +48,13 @@ import sys
 from pathlib import Path
 
 COP_MNEMONICS = {"lwc2", "swc2", "mtc2", "mfc2", "ctc2", "cfc2", "nop"}
+# A file that reaches the geometry engine through include/gte.h has no
+# `__asm__` of its own -- the asm lives in the macro. Counting it as "real C,
+# no inline asm" is how the split silently drifts as files are converted: the
+# clean bucket grew by three the moment the last raw block went away, which is
+# the same class of miscount as the two below wearing a nicer suit. A file that
+# touches the GTE stays in the GTE bucket however it spells it.
+GTE_MACRO = re.compile(r"\bgte_[a-z0-9_]+\s*\(")
 # COP2 (0x12), LWC2 (0x32), SWC2 (0x3A) in the top six bits.
 COP_OPCODES = (0x12, 0x32, 0x3A)
 
@@ -83,26 +90,41 @@ def templates(text):
         yield "".join(out)
 
 
+def is_debt(tpl):
+    """True when an instruction template contains ordinary MIPS."""
+    for line in tpl.replace("\\n", "\n").replace("\\t", " ").split("\n"):
+        line = line.split("/*")[0].strip()
+        if not line or line.startswith((".set", ".align")) or line.endswith(":"):
+            continue
+        if line.startswith(".global"):
+            return True
+        if line.startswith(".word"):
+            m = re.search(r"0x([0-9a-fA-F]+)", line)
+            if m and ((int(m.group(1), 16) >> 26) & 0x3F) not in COP_OPCODES:
+                return True
+            continue
+        if line.split()[0] not in COP_MNEMONICS:
+            return True
+    return False
+
+
 def classify(path):
-    """-> 'clean' | 'gte' | 'debt'."""
+    """-> 'clean' | 'gte' | 'debt'.
+
+    An EMPTY instruction template -- `__asm__ volatile("" ::: "memory")` -- is
+    a compiler barrier, not assembly: it emits no words. Letting one fall
+    through to the GTE bucket was the third instance of the miscount this file
+    documents, because an empty template contains no offending mnemonic and so
+    survives every test above.
+    """
     text = Path(path).read_text(errors="replace")
-    if "__asm__" not in text:
-        return "clean"
-    for tpl in templates(text):
-        for line in tpl.replace("\\n", "\n").replace("\\t", " ").split("\n"):
-            line = line.split("/*")[0].strip()
-            if not line or line.startswith((".set", ".align")) or line.endswith(":"):
-                continue
-            if line.startswith(".global"):
-                return "debt"
-            if line.startswith(".word"):
-                m = re.search(r"0x([0-9a-fA-F]+)", line)
-                if m and ((int(m.group(1), 16) >> 26) & 0x3F) not in COP_OPCODES:
-                    return "debt"
-                continue
-            if line.split()[0] not in COP_MNEMONICS:
-                return "debt"
-    return "gte"
+    if any(is_debt(t) for t in templates(text)):
+        return "debt"
+    if GTE_MACRO.search(text):
+        return "gte"
+    if any(t.strip() for t in templates(text)):
+        return "gte"
+    return "clean"
 
 
 def main():
@@ -113,8 +135,13 @@ def main():
     total = sum(len(v) for v in buckets.values())
     print("src/func_*.c                 : %d" % total)
     print("  real C, no inline asm      : %d" % len(buckets["clean"]))
-    print("  GTE coprocessor asm only   : %d  (should use the PsyQ gte_* macros)"
-          % len(buckets["gte"]))
+    # Key on a non-empty template, not on the word `__asm__`: a macro file
+    # still carries barrier blocks and they are not raw GTE.
+    raw = [p for p in buckets["gte"]
+           if any(t.strip() for t in
+                  templates(Path(p).read_text(errors="replace")))]
+    print("  reaches the GTE            : %d  (%d via gte_* macros, %d raw asm)"
+          % (len(buckets["gte"]), len(buckets["gte"]) - len(raw), len(raw)))
     print("  ASSEMBLY DEBT              : %d" % len(buckets["debt"]))
     print("\n  honest decompiled count    : %d" % (total - len(buckets["debt"])))
 

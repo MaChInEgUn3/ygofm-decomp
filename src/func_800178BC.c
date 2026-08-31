@@ -14,6 +14,8 @@ typedef signed char s8;
 typedef short s16;
 typedef int s32;
 
+#include "gte.h"
+
 /* Projects a fixed reference point (1000,0,1000) through the GTE with a
    temporary geometry setup, then reads back the resulting screen XY (SXY2)
    to derive the offset between the expected screen center (0xA0,0x6C) and
@@ -70,21 +72,12 @@ void func_800178BC(void) {
         v->y = 0;
         v->z = c;
 
-        __asm__ volatile(
-            "lwc2 $0, 0(%0)\n"
-            "lwc2 $1, 4(%0)\n"
-            "nop\n"
-            "nop\n"
-            ".word 0x4a180001\n" /* rtps */
-            : : "r"(v) : "memory"
-        );
+        gte_ldv0(v);
+        gte_rtps();
     }
     {
         register void *out asm("v0") = &sxy_raw;
-        __asm__ volatile(
-            "swc2 $14, 0(%0)\n"
-            : : "r"(out) : "memory"
-        );
+        gte_stsxy(out);
     }
 
     sx = (u16)(sxy_raw & 0xFFFF) - 0xA0;

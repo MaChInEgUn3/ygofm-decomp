@@ -14,6 +14,8 @@ typedef signed char s8;
 typedef short s16;
 typedef int s32;
 
+#include "gte.h"
+
 /* Projects the fixed 3D anchor point for slot index a0 through the GTE and
    returns its projected screen-space X coordinate.
 
@@ -64,23 +66,12 @@ s32 func_8001B0CC(s32 slot) {
         __asm__ volatile("" ::: "memory");
         scratch[2] = pt->z;
 
-        __asm__ volatile(
-            "lwc2 $0, 0(%0)\n"
-            "lwc2 $1, 4(%0)\n"
-            "nop\n"
-            "nop\n"
-            ".word 0x4a180001\n"   /* rtps */
-            :: "r"(scratch)
-            : "memory"
-        );
+        gte_ldv0(scratch);
+        gte_rtps();
     }
     {
         s16 *resptr = &result;
-        __asm__ volatile(
-            "swc2 $14, 0(%0)\n"
-            :: "r"(resptr)
-            : "memory"
-        );
+        gte_stsxy(resptr);
     }
 
     func_800878B0(0, 0);
