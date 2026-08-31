@@ -41,6 +41,14 @@
 0x8002D6C8  func  func_8002D6C8    optionsMenuLoop          addr-verified (mode table slot 0x80090B90)
 0x8002D730  func  func_8002D730    gameOverLoop             addr-verified (mode table slot 0x80090B94)
 0x8002D7C4  func  func_8002D7C4    hirataLoop               addr-verified (mode table slot 0x80090B98)
+#   GUTTED IN RETAIL. krystalgamer (2026-08-31): it is a debug menu option,
+#   a two Blue-Eyes fight. In this binary the handler is eight bytes --
+#   `jr $ra; nop` -- and the mode table is the only thing that references it,
+#   so the feature was removed and the slot kept. The name and the purpose
+#   come from the idb; the fact that it does nothing comes from our own
+#   listing, which is the two halves meeting. "hirata" also reaches this repo
+#   independently, as the assert path src/hirata/H_mctrl1.c -- see
+#   docs/SOURCE_NAMES.md.
 0x8002D7CC  func  func_8002D7CC    tradeLoop                addr-verified (mode table slot 0x80090B9C)
 0x8002DA1C  func  func_8002DA1C    creditsLoop              addr-verified (mode table slot 0x80090BA0)
 0x8002DC38  func  func_8002DC38    sub_8002DC38             addr-verified (mode table slot 0x80090BA4)
