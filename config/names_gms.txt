@@ -27,23 +27,23 @@
 # of our table, which silently shifted the first eight names by five slots.
 # Pair by address or do not pair.)
 
-0x80090B64  func  func_8002CE08    debugMenuLoop            addr-verified
-0x80090B68  func  func_8002D180    animatedBattleLoop       addr-verified
-0x80090B6C  func  func_8002CE64    campaignLoop             addr-verified
-0x80090B70  func  func_8002CEE8    duelLoop                 addr-verified
-0x80090B74  func  func_8002D0E0    libraryMenuLoop          addr-verified
-0x80090B78  func  func_8002D2D8    campaignOverworldLoop    addr-verified
-0x80090B7C  func  func_8002D3F8    freeDuelMenuLoop         addr-verified
-0x80090B80  func  func_8002D370    buildDeckMenuLoop        addr-verified
-0x80090B84  func  func_8002D588    mainMenuLoop             addr-verified
-0x80090B88  func  func_8002D62C    nameEntryLoop            addr-verified
-0x80090B8C  func  func_8002D684    passwordMenuLoop         addr-verified
-0x80090B90  func  func_8002D6C8    optionsMenuLoop          addr-verified
-0x80090B94  func  func_8002D730    gameOverLoop             addr-verified
-0x80090B98  func  func_8002D7C4    hirataLoop               addr-verified
-0x80090B9C  func  func_8002D7CC    tradeLoop                addr-verified
-0x80090BA0  func  func_8002DA1C    creditsLoop              addr-verified
-0x80090BA4  func  func_8002DC38    sub_8002DC38             addr-verified
+0x8002CE08  func  func_8002CE08    debugMenuLoop            addr-verified (mode table slot 0x80090B64)
+0x8002D180  func  func_8002D180    animatedBattleLoop       addr-verified (mode table slot 0x80090B68)
+0x8002CE64  func  func_8002CE64    campaignLoop             addr-verified (mode table slot 0x80090B6C)
+0x8002CEE8  func  func_8002CEE8    duelLoop                 addr-verified (mode table slot 0x80090B70)
+0x8002D0E0  func  func_8002D0E0    libraryMenuLoop          addr-verified (mode table slot 0x80090B74)
+0x8002D2D8  func  func_8002D2D8    campaignOverworldLoop    addr-verified (mode table slot 0x80090B78)
+0x8002D3F8  func  func_8002D3F8    freeDuelMenuLoop         addr-verified (mode table slot 0x80090B7C)
+0x8002D370  func  func_8002D370    buildDeckMenuLoop        addr-verified (mode table slot 0x80090B80)
+0x8002D588  func  func_8002D588    mainMenuLoop             addr-verified (mode table slot 0x80090B84)
+0x8002D62C  func  func_8002D62C    nameEntryLoop            addr-verified (mode table slot 0x80090B88)
+0x8002D684  func  func_8002D684    passwordMenuLoop         addr-verified (mode table slot 0x80090B8C)
+0x8002D6C8  func  func_8002D6C8    optionsMenuLoop          addr-verified (mode table slot 0x80090B90)
+0x8002D730  func  func_8002D730    gameOverLoop             addr-verified (mode table slot 0x80090B94)
+0x8002D7C4  func  func_8002D7C4    hirataLoop               addr-verified (mode table slot 0x80090B98)
+0x8002D7CC  func  func_8002D7CC    tradeLoop                addr-verified (mode table slot 0x80090B9C)
+0x8002DA1C  func  func_8002DA1C    creditsLoop              addr-verified (mode table slot 0x80090BA0)
+0x8002DC38  func  func_8002DC38    sub_8002DC38             addr-verified (mode table slot 0x80090BA4)
 # --- the AI virtual machine -- VERIFIED against asm/nonmatchings ------------
 # func_80070650 was found independently (the only function in the binary that
 # both touches D_800F5BE8 and contains a `jalr`) and then read against the
@@ -58,3 +58,491 @@
 0x800916E0  data  D_800916E0          aiFunctionTable          VERIFIED
 0x800F5BE8  data  D_800F5BE8          (struct; +8 aiWord2, +C dword_800F5BF4)  VERIFIED
 0x80074170  func  func_80074170       VSync                    VERIFIED (library)
+
+
+# --- names extracted from the .idb itself ---------------------------------
+# `python-idb` reads an IDA 6.x database without IDA; the archive header is
+# `IDA1`.  875 names total, 567 written by a person (the rest are IDA's own
+# sub_/loc_/jpt_/aString autonames, dropped).  461 of those land on a function
+# this repo has a listing for.  `myst_sub_XXXX` and `u_myst_sub_XXXX` are the
+# idb author's own placeholders -- kept below but marked, they are not names.
+#
+# CROSS-CHECKED, and it is why this set is worth trusting more than a wiki
+# guess: checkFusion (func_80019A60) references D_8017C2D8, which Data
+# Crystal's RAM map independently documents as the 64 KB fusion table.  Three
+# sources that never spoke to each other -- a 2018 idb, a community wiki and
+# our own disassembly -- agreeing on one address.  checkEquip (func_80019A08)
+# reaches a different table, D_8017A1D8, which is the same story one row down.
+#
+# Annotation only.  Nothing here is renamed.
+
+0x800129D8  func  func_800129D8    start
+0x80012A78  func  func_80012A78    __main
+0x80012AE8  func  func_80012AE8    __do_global_dtors
+0x80012B50  func  func_80012B50    gameInit
+0x80012CD4  func  func_80012CD4    vertBlankCallback
+0x800136E4  func  func_800136E4    setFilePosTable
+0x800138F4  func  func_800138F4    filePosition
+0x800170C8  func  func_800170C8    calcStats
+0x80019A08  func  func_80019A08    checkEquip
+0x80019A60  func  func_80019A60    checkFusion
+0x8001EE44  func  func_8001EE44    monGsBonus
+0x8001EF1C  func  func_8001EF1C    monBattleEffAtk
+0x8001EF78  func  func_8001EF78    monBattleEffDef
+0x80021558  func  func_80021558    rankScoreChange
+0x80021598  func  func_80021598    calcRankScore
+0x80021810  func  func_80021810    cardDrop
+0x800218F0  func  func_800218F0    u_maybe_endOfDuel
+0x800243F4  func  func_800243F4    shuffleDeck
+0x800245A0  func  func_800245A0    shuffleBothDecks
+0x80024704  func  func_80024704    compHalfwords
+0x8002497C  func  func_8002497C    getTerrainBoost
+0x8002BF3C  func  func_8002BF3C    setLibraryUsed
+0x8002C7E8  func  func_8002C7E8    checkRitual
+0x8002CB80  func  func_8002CB80    gsBonus
+0x8002CBF4  func  func_8002CBF4    baseCardStat
+0x8002CCE4  func  func_8002CCE4    toggleLibraryUsed
+0x8002DD74  func  func_8002DD74    mainLoop
+0x80032B60  func  func_80032B60    compDeckCard
+0x800356A0  func  func_800356A0    copyWords
+0x800357E8  func  func_800357E8    fillDigits
+0x800358FC  func  func_800358FC    randInterval
+0x80041434  func  func_80041434    unknown_libname_1
+0x80056504  func  func_80056504    maybe_loadMonsterModel
+0x80058F10  func  func_80058F10    GsGetWorkBase
+0x8005C4F0  func  func_8005C4F0    fileExists
+0x800705AC  func  func_800705AC    aiReadShortFromScript
+0x800705D8  func  func_800705D8    aiStructInit
+0x80070710  func  func_80070710    aiHandSize
+0x80070738  func  func_80070738    aiWinningCardRange
+0x800707C4  func  func_800707C4    aiCardRange
+0x80070870  func  func_80070870    aiInCardSet
+0x800708C4  func  func_800708C4    aiInTypeSet
+0x80070920  func  func_80070920    aiInSets
+0x80070988  func  func_80070988    aiInstJump
+0x800709C0  func  func_800709C0    aiInstJumpGe
+0x80070A40  func  func_80070A40    aiInstJumpAbove
+0x80070AC0  func  func_80070AC0    aiInstJumpEq
+0x80070B3C  func  func_80070B3C    aiInstJumpNeq
+0x80070BB8  func  func_80070BB8    aiInstJumpMid
+0x80070C60  func  func_80070C60    aiInstJumpRand
+0x80070D00  func  func_80070D00    aiInstCall
+0x80070DA8  func  func_80070DA8    aiInstRetn
+0x80070E20  func  func_80070E20    aiInstRand
+0x80070EB4  func  func_80070EB4    aiInstSub
+0x80071008  func  func_80071008    aiInstCardPower
+0x80071194  func  func_80071194    aiInstHighStat
+0x80071248  func  func_80071248    aiInstCtype
+0x800712B4  func  func_800712B4    aiInstReadCard
+0x80071320  func  func_80071320    aiInstFaceDown
+0x800713B8  func  func_800713B8    aiInstReadLp
+0x80071424  func  func_80071424    aiInstSetOpp
+0x80071460  func  func_80071460    aiInstSetField
+0x8007149C  func  func_8007149C    aiInstAiDeckSize
+0x80071510  func  func_80071510    ai_sub_80071510
+0x8007154C  func  func_8007154C    aiInstIsPinned
+0x800715C4  func  func_800715C4    aiInstComboStart
+0x8007164C  func  func_8007164C    aiInstBestDiff
+0x80071688  func  func_80071688    aiInstBestAtkr
+0x800716C4  func  func_800716C4    aiInstBestTarg
+0x80071700  func  func_80071700    aiInstStrongest
+0x80071924  func  func_80071924    aiInstWeakest
+0x80071B64  func  func_80071B64    aiInstKiller
+0x80071CB0  func  func_80071CB0    aiInstStopDef
+0x80071EB8  func  func_80071EB8    aiInstCntCard
+0x80071FC8  func  func_80071FC8    aiInstFindFirst
+0x8007214C  func  func_8007214C    aiInstFindCard
+0x800722CC  func  func_800722CC    aiInstMatchType
+0x8007249C  func  func_8007249C    aiInstCheckEquip
+0x800725C4  func  func_800725C4    aiInstCheckRitual
+0x80072640  func  func_80072640    aiInstFirstMon
+0x800726F4  func  func_800726F4    aiInstFirstType
+0x800727C0  func  func_800727C0    aiCompleteFusion
+0x80072A48  func  func_80072A48    aiInstBestCombo
+0x80072DC0  func  func_80072DC0    aiInstFusePerf
+0x80072F1C  func  func_80072F1C    aiInstHandSkip
+0x80072F54  func  func_80072F54    aiInstFieldSkip
+0x80072F8C  func  func_80072F8C    aiInstFaceUpPlay
+0x80073050  func  func_80073050    aiInstSetPos
+0x8007308C  func  func_8007308C    aiInstFindBestA
+0x80073220  func  func_80073220    aiInstPushComboC
+0x800732A0  func  func_800732A0    aiInstPushComboNc
+0x80073300  func  func_80073300    aiInstHandNop
+0x80073308  func  func_80073308    aiInstFieldNop
+0x80073310  func  func_80073310    aiInstAddCard
+0x80073380  func  func_80073380    aiInstClearCards
+0x800733A8  func  func_800733A8    aiInstAddType
+0x80073420  func  func_80073420    aiInstClearTypes
+0x80073448  func  func_80073448    ai_sub_80073448
+0x80073458  func  func_80073458    ai_sub_80073458
+0x80073464  func  func_80073464    aiInstUnkOn
+0x80073474  func  func_80073474    aiInstUnkOff
+0x80073480  func  func_80073480    aiInstMoveCard
+0x800734DC  func  func_800734DC    aiInstOppData
+0x800735A0  func  func_800735A0    aiInstStore
+0x800735DC  func  func_800735DC    aiInstRegSet
+0x80073624  func  func_80073624    aiInstAdd
+0x8007368C  func  func_8007368C    ai_sub_8007368C
+0x800736C4  func  func_800736C4    aiInstPrint
+0x80073704  func  func_80073704    PCopen
+0x80073724  func  func_80073724    PCclose
+0x80073734  func  func_80073734    PClseek
+0x80073758  func  func_80073758    PCread
+0x80073818  func  func_80073818    _SN_read
+0x80073830  func  func_80073830    InitHeap
+0x80073840  func  func_80073840    _bu_init
+0x80073850  func  func_80073850    SetMem
+0x80073860  func  func_80073860    OpenEvent
+0x80073870  func  func_80073870    CloseEvent
+0x80073880  func  func_80073880    TestEvent
+0x80073890  func  func_80073890    EnableEvent
+0x800738A0  func  func_800738A0    DisableEvent
+0x800738B0  func  func_800738B0    EnterCriticalSection
+0x800738C0  func  func_800738C0    ExitCriticalSection
+0x800738D0  func  func_800738D0    open
+0x800738E0  func  func_800738E0    lseek
+0x800738F0  func  func_800738F0    read
+0x80073900  func  func_80073900    write
+0x80073910  func  func_80073910    close
+0x80073920  func  func_80073920    nextfile
+0x80073930  func  func_80073930    Krom2RawAdd
+0x80073940  func  func_80073940    ChangeClearPAD
+0x80073950  func  func_80073950    SetRCnt
+0x800739EC  func  func_800739EC    GetRCnt
+0x80073A24  func  func_80073A24    StartRCnt
+0x80073A54  func  func_80073A54    StopRCnt
+0x80073A88  func  func_80073A88    ResetRCnt
+0x80073AC0  func  func_80073AC0    firstfile
+0x80073D60  func  func_80073D60    firstfile2
+0x80073D7C  func  func_80073D7C    ReadInitPadFlag
+0x80073D8C  func  func_80073D8C    PAD_init
+0x80073E1C  func  func_80073E1C    InitPAD
+0x80073EAC  func  func_80073EAC    StartPAD
+0x80073EDC  func  func_80073EDC    StopPAD
+0x800740F0  func  func_800740F0    FlushCache
+0x80074100  func  func_80074100    _remove_ChgclrPAD
+0x80074380  func  func_80074380    ChangeClearRCnt
+0x80074390  func  func_80074390    ResetCallback
+0x800743C0  func  func_800743C0    InterruptCallback
+0x800743F0  func  func_800743F0    DMACallback
+0x80074420  func  func_80074420    VSyncCallback
+0x80074454  func  func_80074454    VSyncCallbacks
+0x80074484  func  func_80074484    StopCallback
+0x800744B4  func  func_800744B4    RestartCallback
+0x800744E4  func  func_800744E4    CheckCallback
+0x800744F4  func  func_800744F4    GetIntrMask
+0x8007450C  func  func_8007450C    SetIntrMask
+0x80074A70  func  func_80074A70    ReturnFromException
+0x80074A80  func  func_80074A80    ResetEntryInt
+0x80074A90  func  func_80074A90    HookEntryInt
+0x80074AA0  func  func_80074AA0    startIntrVSync
+0x80074BC0  func  func_80074BC0    startIntrDMA
+0x80074E60  func  func_80074E60    SpuInit
+0x80074E80  func  func_80074E80    _SpuInit
+0x80074F68  func  func_80074F68    SpuStart
+0x80074FE0  func  func_80074FE0    _spu_init
+0x80075420  func  func_80075420    _spu_FiDMA
+0x800754DC  func  func_800754DC    _spu_Fr_
+0x80075584  func  func_80075584    _spu_t
+0x80075804  func  func_80075804    _spu_Fw
+0x80075888  func  func_80075888    _spu_Fr
+0x800758EC  func  func_800758EC    _spu_FsetRXX
+0x80075930  func  func_80075930    _spu_FsetRXXa
+0x800759D4  func  func_800759D4    _spu_FgetRXXa
+0x80075A10  func  func_80075A10    _spu_FsetPCR
+0x80075AB8  func  func_80075AB8    _spu_Fw1ts
+0x80075B20  func  func_80075B20    DeliverEvent
+0x80075B30  func  func_80075B30    _SpuDataCallback
+0x80075B60  func  func_80075B60    SpuQuit
+0x80075BE0  func  func_80075BE0    SpuSetReverb
+0x80075CB0  func  func_80075CB0    _SpuIsInAllocateArea
+0x80075D30  func  func_80075D30    _SpuIsInAllocateArea_
+0x80075DC0  func  func_80075DC0    SpuGetReverb
+0x80075DE0  func  func_80075DE0    SpuSetReverbModeParam
+0x800762C0  func  func_800762C0    _spu_setReverbAttr
+0x80076790  func  func_80076790    SpuReserveReverbWorkArea
+0x800767E0  func  func_800767E0    SpuIsReverbWorkAreaReserved
+0x80076820  func  func_80076820    SpuSetReverbVoice
+0x80076850  func  func_80076850    _SpuSetAnyVoice
+0x80076B10  func  func_80076B10    SpuGetReverbVoice
+0x80076B40  func  func_80076B40    _SpuGetAnyVoice
+0x80076B70  func  func_80076B70    SpuClearReverbWorkArea
+0x80076D10  func  func_80076D10    WaitEvent
+0x80076D20  func  func_80076D20    SpuReadDecodedData
+0x80076D90  func  func_80076D90    SpuSetIRQ
+0x80076ED0  func  func_80076ED0    SpuSetKey
+0x80077090  func  func_80077090    SpuGetKeyStatus
+0x80077120  func  func_80077120    SpuSetKeyOnWithAttr
+0x80077150  func  func_80077150    SpuWrite
+0x800771B0  func  func_800771B0    SpuSetTransferStartAddr
+0x80077210  func  func_80077210    SpuSetTransferMode
+0x80077240  func  func_80077240    SpuIsTransferCompleted
+0x800772F0  func  func_800772F0    SpuRGetAllKeysStatus
+0x800773C4  func  func_800773C4    SpuGetAllKeysStatus
+0x80077450  func  func_80077450    SpuSetVoiceAttr
+0x80077A50  func  func_80077A50    _spu_note2pitch
+0x80077B20  func  func_80077B20    _spu_pitch2note
+0x80077C50  func  func_80077C50    SpuGetVoiceEnvelope
+0x80077C70  func  func_80077C70    SpuSetCommonAttr
+0x80077FF0  func  func_80077FF0    SpuSetReverbModeType
+0x800781C0  func  func_800781C0    StSetRing
+0x80078270  func  func_80078270    StClearRing
+0x800782D0  func  func_800782D0    StUnSetRing
+0x80078350  func  func_80078350    data_ready_callback
+0x800783DC  func  func_800783DC    StGetBackloc
+0x80078440  func  func_80078440    StSetStream
+0x800784D0  func  func_800784D0    StFreeRing
+0x80078580  func  func_80078580    init_ring_status
+0x800785C0  func  func_800785C0    StGetNext
+0x80078680  func  func_80078680    StSetMask
+0x800786A0  func  func_800786A0    StCdInterrupt
+0x80078FBC  func  func_80078FBC    copyArray
+0x8007BAC0  func  func_8007BAC0    GsGetWorkBase_0
+0x8007BF60  func  func_8007BF60    GsGetWorkBase_1
+0x8007CD14  func  func_8007CD14    GsGetWorkBase_2
+0x8007CDE0  func  func_8007CDE0    DsRead
+0x8007D190  func  func_8007D190    DsReadSync
+0x8007D200  func  func_8007D200    DsReadCallback
+0x8007D214  func  func_8007D214    DsReadBreak
+0x8007D2F0  func  func_8007D2F0    DsRead2
+0x8007D3F0  func  func_8007D3F0    DsSearchFile
+0x8007DD50  func  func_8007DD50    DsStartReadySystem
+0x8007DDD4  func  func_8007DDD4    DsEndReadySystem
+0x8007DE38  func  func_8007DE38    DsReadySystemMode
+0x8007E288  func  func_8007E288    ER_active
+0x8007E298  func  func_8007E298    ER_clear
+0x8007E350  func  func_8007E350    PadChkVsync
+0x8007E370  func  func_8007E370    PadStartCom
+0x8007E390  func  func_8007E390    PadStopCom
+0x8007E600  func  func_8007E600    CdIntToPos
+0x8007E710  func  func_8007E710    CdPosToInt
+0x8007E8D0  func  func_8007E8D0    SetDumpFnt
+0x8007E910  func  func_8007E910    FntLoad
+0x8007E9B0  func  func_8007E9B0    FntOpen
+0x8007EC68  func  func_8007EC68    FntFlush
+0x8007EF84  func  func_8007EF84    FntPrint
+0x80082250  func  func_80082250    GPU_cw
+0x80082274  func  func_80082274    GetVideoMode
+0x80082290  func  func_80082290    BreakDraw
+0x80082324  func  func_80082324    IsIdleGPU
+0x80082384  func  func_80082384    ContinueDraw
+0x80082780  func  func_80082780    GetTPage
+0x800827C0  func  func_800827C0    GetClut
+0x800827E0  func  func_800827E0    AddPrim
+0x80082820  func  func_80082820    TermPrim
+0x80082840  func  func_80082840    SetSemiTrans
+0x80082870  func  func_80082870    SetShadeTex
+0x800828A0  func  func_800828A0    SetPolyF3
+0x800828C0  func  func_800828C0    SetPolyFT3
+0x800828E0  func  func_800828E0    SetPolyG3
+0x80082900  func  func_80082900    SetPolyGT3
+0x80082920  func  func_80082920    SetPolyF4
+0x80082940  func  func_80082940    SetPolyFT4
+0x80082960  func  func_80082960    SetPolyG4
+0x80082980  func  func_80082980    SetPolyGT4
+0x800829A0  func  func_800829A0    SetSprt8
+0x800829C0  func  func_800829C0    SetTile
+0x80082A80  func  func_80082A80    OpenTIM
+0x80082A90  func  func_80082A90    ReadTIM
+0x80082AF4  func  func_80082AF4    OpenTMD
+0x80084320  func  func_80084320    GsSortPoly
+0x800844F0  func  func_800844F0    GsSortSprite
+0x800849F0  func  func_800849F0    GsSortFastSprite
+0x80084B70  func  func_80084B70    GsSortFlipSprite
+0x80084DD0  func  func_80084DD0    GsInitGraph
+0x80084F60  func  func_80084F60    GsInitGraph2
+0x800851E8  func  func_800851E8    GsSortClear
+0x80085320  func  func_80085320    GsGetActiveBuff
+0x80085330  func  func_80085330    GsSetDrawBuffOffset
+0x80085440  func  func_80085440    GsSetDrawBuffClip
+0x800854C0  func  func_800854C0    GsInitVcount
+0x80085500  func  func_80085500    GsSwapDispBuff
+0x800855B0  func  func_800855B0    GsSetOrign
+0x800856A0  func  func_800856A0    GsDefDispBuff
+0x80085740  func  func_80085740    GsInit3D
+0x800857C0  func  func_800857C0    GsSetProjection
+0x800857E0  func  func_800857E0    GsSetFlatLight
+0x80085D50  func  func_80085D50    GsSetAmbient
+0x80085DB0  func  func_80085DB0    GsClearOt
+0x80085E10  func  func_80085E10    GsSortOt
+0x80085ED0  func  func_80085ED0    gte_rotate_z_matrix
+0x80085F90  func  func_80085F90    gte_scale_matrix
+0x800860B0  func  func_800860B0    gte_init
+0x80086100  func  func_80086100    GsGetTimInfo
+0x800861F0  func  func_800861F0    Gssub_make_matrix
+0x800862D0  func  func_800862D0    GsGetLw
+0x800866A0  func  func_800866A0    rsin
+0x800866DC  func  func_800866DC    sin_1
+0x80086770  func  func_80086770    rcos
+0x80086810  func  func_80086810    SetFogNearFar
+0x80086920  func  func_80086920    ccos
+0x800869F0  func  func_800869F0    csincos
+0x80086B10  func  func_80086B10    csin_1
+0x80086BB0  func  func_80086BB0    csin
+0x80086CF0  func  func_80086CF0    catan
+0x80086E50  func  func_80086E50    SquareRoot0
+0x80086EE0  func  func_80086EE0    gteMIMefunc
+0x80086F60  func  func_80086F60    MulMatrix0
+0x80087070  func  func_80087070    ApplyMatrixLV
+0x800871D0  func  func_800871D0    PushMatrix
+0x80087274  func  func_80087274    PopMatrix
+0x80087320  func  func_80087320    ReadRotMatrix
+0x80087370  func  func_80087370    MulMatrix
+0x80087480  func  func_80087480    MulMatrix2
+0x80087590  func  func_80087590    ApplyMatrix
+0x800875E0  func  func_800875E0    ApplyMatrixSV
+0x80087640  func  func_80087640    TransMatrix
+0x80087670  func  func_80087670    ScaleMatrix
+0x800877B0  func  func_800877B0    SetRotMatrix
+0x800877E0  func  func_800877E0    SetLightMatrix
+0x80087810  func  func_80087810    SetColorMatrix
+0x80087840  func  func_80087840    SetTransMatrix
+0x80087860  func  func_80087860    ReadGeomScreen
+0x80087870  func  func_80087870    SetBackColor
+0x80087890  func  func_80087890    SetFarColor
+0x800878B0  func  func_800878B0    SetGeomOffset
+0x800878D0  func  func_800878D0    SetGeomScreen
+0x800878E0  func  func_800878E0    RotTransPers
+0x80087910  func  func_80087910    RotTransPers3
+0x80087970  func  func_80087970    RotTrans
+0x800879A0  func  func_800879A0    NormalClip
+0x800879D0  func  func_800879D0    RotTransPers4
+0x80087A50  func  func_80087A50    RotAverage3
+0x80087AB0  func  func_80087AB0    RotAverage4
+0x80087B30  func  func_80087B30    RotAverageNclip3
+0x80087BC0  func  func_80087BC0    RotAverageNclip4
+0x80087C70  func  func_80087C70    RotColorDpq
+0x80087CC0  func  func_80087CC0    RotTransPersN
+0x80087D30  func  func_80087D30    RotMatrix
+0x80087FC0  func  func_80087FC0    RotMatrixYXZ
+0x80088250  func  func_80088250    RotMatrixZYX
+0x800884E0  func  func_800884E0    RotMatrixX
+0x80088680  func  func_80088680    RotMatrixY
+0x80088820  func  func_80088820    RotMatrixZ
+0x800889C0  func  func_800889C0    RotMatrixZXY
+0x80088C50  func  func_80088C50    RotMatrixZYX_gte
+0x80088E50  func  func_80088E50    RotMatrix_gte
+0x80089060  func  func_80089060    RotMatrixYXZ_gte
+0x80089260  func  func_80089260    DivideFT4
+0x80089460  func  func_80089460    ReadSZfifo4
+0x80089480  func  func_80089480    RCpolyFT4
+0x80089488  func  func_80089488    RCpolyFT4A
+0x800899A0  func  func_800899A0    ratan2
+0x80089B20  func  func_80089B20    _ExitCard
+0x80089D30  func  func_80089D30    GsScanAnim
+0x80089DD8  func  func_80089DD8    GsLinkAnim
+0x80089E20  func  func_80089E20    GsU_00000000
+0x80089E40  func  func_80089E40    GsU_02000000
+0x80089ED0  func  func_80089ED0    GsU_02000001
+0x80089F80  func  func_80089F80    GsScanUnit
+0x8008A138  func  func_8008A138    GsGetHeadpUnit
+0x8008A150  func  func_8008A150    GsSortUnit
+0x8008A280  func  func_8008A280    GsMapUnit
+0x8008A420  func  func_8008A420    GsMapCoordUnit
+0x8008A4A0  func  func_8008A4A0    GsGetLwUnit
+0x8008A760  func  func_8008A760    GsGetLwUnit_0
+0x8008AA30  func  func_8008AA30    GsGetLwsUnit
+0x8008AD50  func  func_8008AD50    GsSetRefViewUnit
+0x8008B2F0  func  func_8008B2F0    TransposeMatrix
+0x8008B330  func  func_8008B330    _card_info
+0x8008B340  func  func_8008B340    _card_load
+0x8008B350  func  func_8008B350    _card_write
+0x8008B360  func  func_8008B360    _card_read
+0x8008B370  func  func_8008B370    _new_card
+0x8008B380  func  func_8008B380    _card_status
+0x8008B390  func  func_8008B390    _card_wait
+0x8008B3A0  func  func_8008B3A0    _card_clear
+0x8008B4E0  func  func_8008B4E0    InitCARD2
+0x8008B4F0  func  func_8008B4F0    StartCARD2
+0x8008B500  func  func_8008B500    StopCARD2
+0x8008B5EC  func  func_8008B5EC    _patch_card
+0x8008B680  func  func_8008B680    _patch_card2
+0x8008B6F0  func  func_8008B6F0    _copy_memcard_patch
+0x8008B730  func  func_8008B730    _ExitCard_0
+0x8008B7B0  func  func_8008B7B0    SsInitHot
+0x8008D0D0  func  func_8008D0D0    UserFuncInit
+0x8008D0E0  func  func_8008D0E0    UserFuncOpen
+0x8008D15C  func  func_8008D15C    UserFuncExecute
+0x8008D1C8  func  func_8008D1C8    UserFuncComplete
+0x8008D1E0  func  func_8008D1E0    funcEvSpIOE
+0x8008D1F4  func  func_8008D1F4    funcEvSpError
+0x8008D208  func  func_8008D208    funcEvSpTimeout
+0x8008D21C  func  func_8008D21C    funcEvSpNewcard
+0x8008D230  func  func_8008D230    funcEvSpIOEx
+0x8008D244  func  func_8008D244    funcEvSpErrorx
+0x8008D258  func  func_8008D258    funcEvSpTimeoutx
+0x8008D26C  func  func_8008D26C    funcEvSpNewcardx
+0x8008D280  func  func_8008D280    _card_open
+0x8008D2B0  func  func_8008D2B0    _card_start
+0x8008D48C  func  func_8008D48C    _card_close
+0x8008D4AC  func  func_8008D4AC    _card_stop
+0x8008D560  func  func_8008D560    _clr_card_event
+0x8008D668  func  func_8008D668    _get_card_event
+0x8008D740  func  func_8008D740    _get_card_event_x
+0x8008D818  func  func_8008D818    _chk_card_event
+0x8008D854  func  func_8008D854    _chk_card_event_x
+0x8008E320  func  func_8008E320    bcopy
+0x8008E360  func  func_8008E360    bzero
+0x8008E390  func  func_8008E390    memcpy
+0x8008E3D0  func  func_8008E3D0    memset
+0x8008E400  func  func_8008E400    qsort
+0x8008E590  func  func_8008E590    rand
+0x8008E5C0  func  func_8008E5C0    srand
+0x8008E5D0  func  func_8008E5D0    strcat
+0x8008E680  func  func_8008E680    strcmp
+0x8008E6F0  func  func_8008E6F0    strcpy
+0x8008E740  func  func_8008E740    strlen
+0x8008E780  func  func_8008E780    strncmp
+0x8008E800  func  func_8008E800    strncpy
+0x8008E870  func  func_8008E870    printf
+0x8008E8B0  func  func_8008E8B0    prnt
+0x8008EF50  func  func_8008EF50    memchr
+0x8008EFA0  func  func_8008EFA0    _putchar
+0x8008F09C  func  func_8008F09C    _putchar_flash
+0x8008F0D8  func  func_8008F0D8    putchar
+0x8008F200  func  func_8008F200    sprintf
+0x8008FA80  func  func_8008FA80    memmove
+0x8008FAF0  func  func_8008FAF0    puts
+0x8008FB50  func  func_8008FB50    setjmp
+0x8008FB8C  func  func_8008FB8C    longjmp
+0x8008FBD0  func  func_8008FBD0    exit
+0x8008FBE0  func  func_8008FBE0    DecDCTReset
+0x8008FC14  func  func_8008FC14    DecDCTGetEnv
+0x8008FCA0  func  func_8008FCA0    DecDCTPutEnv
+0x8008FD38  func  func_8008FD38    DecDCTBufSize
+0x8008FE58  func  func_8008FE58    DecDCTinCallback
+0x8008FE7C  func  func_8008FE7C    DecDCToutCallback
+0x80090270  func  func_80090270    DecDCTvlcSize2
+0x800902A0  func  func_800902A0    DecDCTvlc2
+0x800905F0  func  func_800905F0    DecDCTvlcBuild
+
+# --- the idb author's own placeholders, NOT names --------------------------
+# 0x80012D4C  func_80012D4C    myst_sub_80012D4C
+# 0x80012DB4  func_80012DB4    myst_sub_80012DB4
+# 0x800137E4  func_800137E4    myst_sub_800137E4
+# 0x80013940  func_80013940    myst_sub_80013940
+# 0x80013998  func_80013998    u_myst_sub_80013998
+# 0x80013B04  func_80013B04    myst_sub_80013B04
+# 0x80014E1C  func_80014E1C    u_myst_sub_80014E1C
+# 0x800179F4  func_800179F4    u_myst_sub_800179F4
+# 0x80019CC8  func_80019CC8    myst_sub_80019CC8
+# 0x8001F0D0  func_8001F0D0    u_myst_sub_8001F0D0
+# 0x8001F364  func_8001F364    u_myst_sub_8001F364
+# 0x80021894  func_80021894    u_myst_sub_80021894
+# 0x80023144  func_80023144    u_myst_sub_80023144
+# 0x800245EC  func_800245EC    u_myst_sub_800245EC
+# 0x80024734  func_80024734    u_myst_sub_80024734
+# 0x80024E24  func_80024E24    myst_sub_80024E24
+# 0x80024E4C  func_80024E4C    myst_sub_80024E4C
+# 0x80027DF8  func_80027DF8    u_myst_sub_80027DF8
+# 0x80028220  func_80028220    myst_sub_80028220
+# 0x8002CCA8  func_8002CCA8    myst_sub_8002CCA8
+# 0x80031084  func_80031084    u_myst_sub_80031084
+# 0x80032C48  func_80032C48    u_myst_sub_80032C48
+# 0x8003F740  func_8003F740    myst_sub_8003F740
+# 0x8003F758  func_8003F758    myst_sub_8003F758
+# 0x8003F87C  func_8003F87C    myst_sub_8003F87C
+# 0x8004002C  func_8004002C    myst_sub_8004002C
+# 0x8004020C  func_8004020C    u_myst_sub_8004020C
+# 0x80040410  func_80040410    myst_sub_80040410
+# 0x8007CD24  func_8007CD24    myst_sub_8007CD24
