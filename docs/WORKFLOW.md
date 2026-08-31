@@ -32,6 +32,23 @@ and it holds up under `strings`, which is the whole cost of checking it:
 | `tools/psyq46/.../CC1PSX.EXE` | **gcc 2.95.2**, `19991024 BUILD 4.0.0030` |
 | the assembler | **maspsx**, `--aspsx-version=2.79`, then GNU `as` |
 
+**And the directory names are archive names, not CD contents -- a second
+label, corrected the same day.** krystalgamer, relaying mkst: the compilers
+shipped on the retail Psy-Q 4.5 and 4.6 CDs were **gcc 2.8.1 and gcc 2.7.2**,
+and mkst mislabelled this 2.95.2 as "psy-q 4.6" in the `mkst/esa` releases.
+Our `tools/psyq46` came from `psx.arthus.net/sdk/Psy-Q/Psy-Q_46.zip`, and its
+only compiler is an October-1999 gcc 2.95.2 -- later than the name implies.
+Nothing here can verify what a CD contained; `strings` verifies what these
+files contain, and those are different claims. Say "the archive we have as
+psyq46", not "PsyQ 4.6".
+
+**Untested here, and cheap: gcc 2.7.2.** If the period CDs carried 2.7.2
+beside 2.8.1, it is a compiler this tree has never run once. 2.8.1 reproduces
+all 1050 functions so it is not in doubt as the main one -- but no parked
+residue has ever been put in front of 2.7.2, and the 93 in `docs/PARKED.txt`
+are exactly the population where a second period compiler would show up if it
+were going to. Getting one: the `mkst/esa` releases ship compilers.
+
 Three consequences, all of them things this file used to get wrong:
 
   * `ASPSX.EXE` (2.79 in the 4.5 bundle, 2.86 in 4.6) is **never executed**.

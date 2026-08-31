@@ -67,6 +67,38 @@ expression out of the original source: a global **`g_SDValue`**, a struct member
 legible — `g_` global, `s_` struct member, `s_w` a word-sized one — and it is
 the only place in this binary where the original naming style is visible at all.
 
+## Duelist of the Roses is the same team, and that is the real lead
+
+krystalgamer, 2026-08-31, within an hour of the section above being written and
+arrived at independently: the *same* string is the seam, and it goes further
+than this binary.
+
+> *"o forbidden memories na posicao 0x80046AE0 faz o seguinte:
+> `printf("g_SDValue->s_stGlobalHdrSE.s_wSD_NUM_SEGROUP:%d\n", ...)`. o jogo
+> duelist of the roses contem uma variavel com exactamente o mesmo nome — ou
+> seja pelo menos as mesmas pessoas trabalharam nos 2 jogos e ate reutilizaram
+> codigo."*
+
+0x80046AE0 is the `addiu` half of the `lui`/`addiu` pair inside
+`func_80046A08` named above. Two people, two tools, one hour, same string:
+that is about as much confirmation as a single piece of evidence gets, and it
+is worth recording that the convergence happened rather than quietly merging
+the two accounts.
+
+What his half adds is the part this repo could not reach alone. A second game
+by the same people, sharing a symbol *name*, means the **naming convention is
+recoverable** even though the names in this binary are not. `SD` is the sound
+engine (SounD), `g_` a global, `s_` a struct member, `s_w` a word-sized one --
+and a scheme, applied consistently, gives defensible names for a whole
+subsystem rather than one variable.
+
+**The honesty constraint is his too, and it is the right one:** *"nao vai ser
+possivel extrair o verdadeiro nome, contudo da para fazer uma aproximacao."*
+An approximation derived from a sibling game is a hypothesis with a stated
+provenance -- the same contract as `docs/EXTERNAL_LEADS.txt` and the
+`UNVERIFIED datacrystal/` labels. It must not enter `variables.h` wearing the
+same clothes as an address read off a listing.
+
 ## What this is not
 
 It is not a route to naming functions. Not one function name appears anywhere

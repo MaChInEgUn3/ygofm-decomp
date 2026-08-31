@@ -146,14 +146,22 @@ The compiler ships *inside* the PsyQ 4.5 bundle, but the SDK number is not the
 compiler version and this README said otherwise for a month. What the bundles
 actually contain, per `strings`:
 
-| bundle | `CC1PSX.EXE` reports |
+| archive, as distributed by `psx.arthus.net` | its `CC1PSX.EXE` reports |
 |---|---|
-| PsyQ 4.5 | `2.8.1 SN32 BUILD 4.0.0010` |
-| PsyQ 4.6 | `2.95.2 19991024 BUILD 4.0.0030` |
-| PsyQ 4.7 | *no compiler at all* — the archive is `DOCS/`, `INCLUDE/`, `LIB/` |
+| `PSYQ...v4.5-MFD.zip` | `2.8.1 SN32 BUILD 4.0.0010` |
+| `Psy-Q_46.zip` | `2.95.2 19991024 BUILD 4.0.0030` |
+| `psyq47.zip` | *no compiler at all* — the archive is `DOCS/`, `INCLUDE/`, `LIB/` |
+
+The rows name **archives**, not CDs, and that distinction is load-bearing.
+krystalgamer reports (2026-08-31, from mkst) that the compilers on the retail
+Psy-Q 4.5 and 4.6 CDs were **gcc 2.8.1 and gcc 2.7.2** — so `Psy-Q_46.zip`
+carrying an October-1999 gcc 2.95.2 means that archive's compiler is later
+than its name suggests, and `mkst/esa` ships the same compiler labelled
+"psy-q 4.6". We cannot verify a CD's contents from here; what is measured
+above is what these files contain.
 
 So `YGOFM_PSYQ=46` swaps the **compiler**, gcc 2.8.1 for gcc 2.95.2, and
-nothing else: the real `ASPSX.EXE` is never executed either way. Under 2.95.2
+nothing else (the variable is misnamed: it selects a compiler): the real `ASPSX.EXE` is never executed either way. Under 2.95.2
 this tree puts **288 functions at the wrong size**, deltas up to ±28
 instructions, which is unremarkable once stated as "two compilers seven years
 apart" rather than as a claim about Sony's version numbering. gcc 2.8.1 is
@@ -162,6 +170,12 @@ what reproduces this binary.
 The correction is krystalgamer's, on 2026-08-31: *the PsyQ number names a
 runtime library release; for a decomp what matters is which compiler the
 original build used.*
+
+**Open, and untested here: gcc 2.7.2.** If the period CDs shipped 2.7.2
+alongside 2.8.1, it is a candidate this tree has never compiled a single
+function with. 2.8.1 reproduces all 1050, so it is not in doubt as the main
+compiler — but the parked residues in `docs/PARKED.txt` have never been put in
+front of 2.7.2, and that is a cheap experiment nobody has run.
 
 Layout is linker-driven and load-bearing: `build.py` emits one object per
 decompiled function plus one per run of consecutive undecompiled ones, then
