@@ -5711,3 +5711,44 @@ match, and one finding that is worth more than any of them.
     unlike the four cases above.  `u8 arg1` in the signature, with or without
     the explicit mask statement, is -1 and 154, so the byte parameter is not
     the reading either.
+
+# ---
+2026-08-31, FOURTEEN parked candidates replaced by Unchiga's, because his base
+is closer. The counts are ours -> his, all measured through our own toolchain
+with HIS unit flags (the flags are in each file's header; try_func's defaults
+report a different number, which is the func_800137E4 lesson again):
+
+    func_8004B374   -3/72 -> 0/2      func_8004A518   0/27 -> 0/2
+    func_8003BD14    0/42 -> 0/2      func_800260D0   0/25 -> 0/4
+    func_8003BF00   -1/35 -> 0/4      func_80049920   0/21 -> 0/2
+    func_8004B854   -2/34 -> 0/3      func_8005C5D4  -1/19 -> 0/2
+    func_8004C420    0/15 -> 0/2      func_80043328   0/12 -> 0/2
+    func_800734DC    0/10 -> 0/2      func_8003B808    0/8 -> 0/4
+    func_8004A6F8     0/6 -> 0/2      func_8002CCE4    0/3 -> 0/2
+
+  The prose above each entry is still ours and still worth reading -- it is
+  the record of what this tree measured on its own, and several of those
+  findings are cited elsewhere in this file. What changed is only which
+  candidate sits in `parked/`, and the rule is the obvious one: the park holds
+  the best known base, and his was better in every one of these.
+  Every one is now at 2-4 differences at correct length, which is msearch
+  range rather than permuter range.
+
+# ---
+2026-08-31, three axes closed EXHAUSTIVELY rather than sampled, by the new
+sweeps. Recording the negatives because each one used to be a guess:
+  * **Flags do not move the ported near-misses.** All six combos over the 60
+    units his C brings within eight differences: 0 improved. The control
+    matters more than the result -- func_800137E4 fed in at a synthetic base
+    of 42 comes back MATCH under `-G0 -mno-split-addresses`, so the sweep can
+    say yes and its zero is a real zero. His flag choices port correctly; what
+    is left in those 60 is shape.
+  * **Declaration width does not move them either.** Every local's width over
+    the 36 units within two differences: best stays 1-2, none reaches 0.
+  * **func_80058624 is characterised, not merely parked.** Ten spellings of
+    the negate tail, twelve `v`/`w` type combinations and all 75
+    single-declaration widths leave it at one difference -- on top of the ten
+    hand shapes and 411 permuter iterations already recorded. The residue is
+    still `subu $v1,$zero,$v1` against our `subu $v1,$zero,$v0`: retail
+    negates in place and gcc propagates the original in. Whatever produces
+    that copy, it is not the tail's spelling and not a declared width.

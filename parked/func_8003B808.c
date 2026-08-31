@@ -1,71 +1,110 @@
-#include "common.h"
+/* PARKED CANDIDATE PORTED from Unchiga's tree (docs/MERGE_UNCHIGA.md).
+ * Installed here because HIS base is closer than the one this tree
+ * reached: the counts are in PARKED.txt. Measure it with the flags on
+ * the next line -- they are his unit's, and try_func's default flags
+ * report a different number.
+ * FLAGS: -G0 -mno-split-addresses
+ */
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef signed char s8;
+typedef short s16;
+typedef int s32;
 
-void func_8003B808(u8 *p, s32 mode) {
-    s32 v;
-    s32 w;
-    s32 d;
-    s32 m;
-    s32 e;
-    s32 x;
+/* The obj-mode-dispatch family again, but reached through a 5-entry jump
+   table at D_80010224+0x124 instead of a compare tree.  Table verified
+   against the ROM (file offset 0xB48): {0x8003B840, 0x8003B8B4, 0x8003B8DC,
+   0x8003B944, 0x8003B970} -- ascending, so case order is source order.
 
-    switch (mode) {
-    case 0:
-        *(s16 *)(p + 0x32) = 0x100;
-        *(s16 *)(p + 0x30) = 0;
-        v = D_8009B0F4;
-        *(s16 *)(p + 4) = 0x40;
-        m = 0xFFDDFFFF;
-        D_8009B0F4 = v & m;
-        w = D_8009B0F4;
-        m = 0x10000;
-        do {
-            *(s32 *)(p + 0x1C) = m;
-            D_8009B0F4 = w | m;
-            p[0x46] = 2;
-            d = D_8009B118;
-            *(s16 *)(p + 6) = 0x10;
-        } while (0);
-        *(s32 *)(p + 8) = d;
-        *(s32 *)(p + 0xC) = d + 0x800;
-        break;
+   Computed-goto pattern copied from src/func_8001455C.c.  The internal jumps
+   0x0800EE6B / 0x0800EE65 / 0x0800EE6A are `j` to this function's own labels
+   (.L8003B9AC epilogue, .L8003B994 shared tail, .L8003B9A8 f46 store), not
+   calls; 0x2442F000 is addiu v0,v0,%lo(D_801AF000).  Every shared tail is
+   written out in full per arm, as for the rest of the family. */
 
-    case 1:
-        *(s32 *)(p + 0x1C) = 0x800;
-        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
-        *(s32 *)(p + 0xC) = D_8009B118;
-        *(s32 *)(p + 8) = D_8009B118;
-        p[0x46] = 1;
-        break;
+struct Obj {
+    s16 x;
+    s16 y;
+    s16 w;
+    s16 h;
+    s32 f8;
+    s32 fC;
+    char pad1[0x1C - 0x10];
+    s32 f1C;
+    char pad2[0x30 - 0x20];
+    s16 f30;
+    s16 f32;
+    char pad3[0x46 - 0x34];
+    u8 f46;
+};
 
-    case 2:
-        *(s16 *)(p + 2) = 0xF0;
-        *(s16 *)(p + 4) = 0x100;
-        e = D_8009B118;
-        *(s16 *)p = 0;
-        *(s16 *)(p + 6) = 4;
-        func_80081DE8(p, e);
-        *(s32 *)(p + 0xC) = (s32)D_801AF000;
-        *(s32 *)(p + 8) = (s32)D_801AF000;
-        x = D_8009B0F4;
-        *(s32 *)(p + 0x1C) = 0x800;
-        D_8009B0F4 = x & 0xFFDCFFFF;
-        p[0x46] = 1;
-        break;
+extern volatile u32 D_8009B0F4;
+extern s32 D_8009B118;
+extern s32 D_80010000;
+extern u8 D_800100A8[];
+extern u8 D_80010224[];
+extern u8 D_801AF000[];
+extern void func_80081DE8(struct Obj *rect, s32 *data);
 
-    case 3:
-        *(s32 *)(p + 0x1C) = 0x18000;
-        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
-        *(s32 *)(p + 0xC) = (s32)D_80010000;
-        *(s32 *)(p + 8) = (s32)D_80010000;
-        p[0x46] = 1;
-        break;
-
-    case 4:
-        *(s32 *)(p + 0x1C) = 0x2800;
-        D_8009B0F4 = D_8009B0F4 & 0xFFDCFFFF;
-        *(s32 *)(p + 0xC) = (s32)D_800101D8;
-        *(s32 *)(p + 8) = (s32)D_800101D8;
-        p[0x46] = 1;
-        break;
+void func_8003B808(struct Obj *obj, s32 sel) {
+    if ((u32)sel >= 5) {
+        return;
     }
+    {
+        void **table = (void **)(D_80010224 + 0x124);
+        asm volatile("" ::
+                     "g"(&&L8003B840), "g"(&&L8003B8B4), "g"(&&L8003B8DC),
+                     "g"(&&L8003B944), "g"(&&L8003B970));
+        goto *table[sel];
+    }
+
+L8003B840:
+    obj->f32 = 0x100;
+    obj->f30 = 0;
+    obj->w = 0x40;
+    obj->h = 0x10;
+    D_8009B0F4 &= 0xFFDDFFFF;
+    obj->f1C = 0x10000;
+    D_8009B0F4 |= 0x10000;
+    obj->f46 = 2;
+    obj->f8 = D_8009B118;
+    obj->fC = D_8009B118 + 0x800;
+    return;
+
+L8003B8B4:
+    obj->f1C = 0x800;
+    D_8009B0F4 &= 0xFFDCFFFF;
+    obj->fC = D_8009B118;
+    obj->f8 = D_8009B118;
+    obj->f46 = 1;
+    return;
+
+L8003B8DC:
+    obj->x = 0;
+    obj->y = 0xF0;
+    obj->w = 0x100;
+    obj->h = 4;
+    func_80081DE8(obj, (s32 *)D_8009B118);
+    obj->fC = (s32)D_801AF000;
+    obj->f8 = (s32)D_801AF000;
+    obj->f1C = 0x800;
+    D_8009B0F4 &= 0xFFDCFFFF;
+    obj->f46 = 1;
+    return;
+
+L8003B944:
+    D_8009B0F4 &= 0xFFDCFFFF;
+    obj->f1C = 0x18000;
+    obj->fC = D_80010000;
+    obj->f8 = D_80010000;
+    obj->f46 = 1;
+    return;
+
+L8003B970:
+    obj->f1C = 0x2800;
+    D_8009B0F4 &= 0xFFDCFFFF;
+    obj->fC = *(s32 *)(D_800100A8 + 0x130);
+    obj->f8 = *(s32 *)(D_800100A8 + 0x130);
+    obj->f46 = 1;
 }
