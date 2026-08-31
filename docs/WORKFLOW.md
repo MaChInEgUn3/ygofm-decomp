@@ -2277,6 +2277,23 @@ and the second is the one that costs:
     checked against the build. Several of those fifty-nine had prose here
     diagnosing a residue that did not exist.
 
+**Both spellings are now resolved in try_func, and a third was found the same
+hour.** `canon_addr()` turns `%hi`/`%lo` of any resolvable symbol into the
+immediate it assembles to -- splat's `D_XXXXXXXX` names ARE their addresses,
+so the map is exact by construction and an unresolvable name still compares
+strictly. And `GTE_OPS` maps the coprocessor-2 mnemonics the listings use
+(`rtpt`, `avsz3`, `avsz4`) onto the `c2 <imm>` objdump prints, reading the
+encodings out of `include/gte_macros.inc` so the two cannot drift.
+`check_try_func` went from 141/150 to **145/150** on the src direction and
+stayed at **93/93** on the parked direction -- the loosening ate nothing,
+which is the half that matters.
+**Five are still wrong and it is a fourth instance of the same class**:
+`renumber_labels` numbers the two sides differently on GTE-heavy functions,
+so every branch reads as a difference at a constant offset (`j L3` against
+`j L4`). Those five build byte-identical. When a whole function's branches
+differ by a constant label offset, that is the renderer, not the code.
+
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a

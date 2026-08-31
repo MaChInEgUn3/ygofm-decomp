@@ -116,6 +116,96 @@ def _gp_map():
 GP_SYMS = _gp_map()
 
 
+def _sym_addrs():
+    """name -> address, for resolving %hi/%lo to the number the assembler emits.
+
+    Mostly synthesised rather than read: splat's `D_XXXXXXXX` / `func_XXXXXXXX`
+    names ARE their addresses, so the map is exact by construction for every
+    name of that shape and the files only have to cover the rest.
+    """
+    out = {}
+    for name in ("undefined_syms_auto.txt", "undefined_funcs_auto.txt",
+                 "symbol_aliases.txt", "symbol_addrs.txt"):
+        p = ROOT / "config" / name
+        if not p.exists():
+            continue
+        for line in p.read_text().splitlines():
+            m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
+            if m:
+                out.setdefault(m.group(1).lower(), int(m.group(2), 16))
+    return out
+
+
+SYM_ADDRS = _sym_addrs()
+_RELOC = re.compile(
+    r"%(hi|lo)\(([A-Za-z_][A-Za-z_0-9]*)(?:\s*\+\s*(0x[0-9A-Fa-f]+|\d+))?\)")
+
+
+def _addr_of(sym):
+    s = sym.lower()
+    if s in SYM_ADDRS:
+        return SYM_ADDRS[s]
+    m = re.fullmatch(r"(?:d|func)_([0-9a-f]{6,8})", s)
+    return int(m.group(1), 16) if m else None
+
+
+def canon_addr(line):
+    """Resolve %hi/%lo of a known symbol to the immediate it assembles to.
+
+    ONE ADDRESS HAS SEVERAL SPELLINGS AND THEY ARE THE SAME TWO WORDS. This
+    file used to compare the rendered text, so
+    `lui $v0,%hi(D_80011434)` / `addiu %lo(D_80011434)` against
+    `lui $v0,32769` / `addiu $v0,5172` read as two differences -- and
+    `%lo(D_80010538+3836)` against `%lo(D_80011434)` read as two more, though
+    0x80010538 + 0xEFC is 0x80011434. On 2026-08-31 sixty-seven ported
+    candidates sitting at one to four such "differences" went to build.py
+    instead, and **fifty-nine were byte-identical**. The tool was inventing
+    work, which is the worst direction for a tool to be wrong in: a false
+    difference is indistinguishable from a real one until someone spends a
+    day on it.
+
+    A symbol this cannot resolve is left symbolic, so an unknown name still
+    compares strictly and nothing is quietly forgiven.
+    """
+    def sub(m):
+        kind, sym, off = m.group(1), m.group(2), m.group(3)
+        a = _addr_of(sym)
+        if a is None:
+            return m.group(0)
+        a = (a + (int(off, 0) if off else 0)) & 0xFFFFFFFF
+        if kind == "hi":
+            return str(((a + 0x8000) >> 16) & 0xFFFF)
+        lo = a & 0xFFFF
+        return str(lo - 0x10000 if lo >= 0x8000 else lo)
+    return GTE_OPS.get(line.strip(), _RELOC.sub(sub, line))
+
+
+def _gte_ops():
+    """GTE mnemonic -> the `c2 <imm>` objdump prints for the same word.
+
+    The target listings spell the coprocessor-2 ops by name (`rtpt`, `avsz3`,
+    `avsz4`); objdump has no mnemonic for them and prints `c2 2621488`. Same
+    instruction, same word, two spellings -- the third instance of that class
+    in this file after the gp-relative offsets and the %hi/%lo addresses, and
+    it was hiding nine functions that build byte-identical.
+
+    The encodings are not hardcoded here: include/gte_macros.inc carries them
+    in its own comments (`/*  RTPT  23  0x4A280030 ... */`) and is the file the
+    assembler already uses, so the two cannot drift apart.
+    """
+    out = {}
+    p = ROOT / "include" / "gte_macros.inc"
+    if not p.exists():
+        return out
+    for m in re.finditer(r"/\*\s+([A-Z][A-Z0-9]*)\s+\d+\s+0x([0-9A-Fa-f]{8})",
+                         p.read_text()):
+        out[m.group(1).lower()] = "c2 %d" % (int(m.group(2), 16) & 0x1FFFFFF)
+    return out
+
+
+GTE_OPS = _gte_ops()
+
+
 def normalise(line):
     """Reduce an asm line to `mnemonic operands` for comparison."""
     line = line.split("#")[0].strip()
@@ -512,8 +602,9 @@ def main():
     for i in range(max(len(w), len(g))):
         a = w[i] if i < len(w) else ""
         b = g[i] if i < len(g) else ""
-        mark = "  " if a == b else "<<"
-        if a != b:
+        same = a == b or (a and b and canon_addr(a) == canon_addr(b))
+        mark = "  " if same else "<<"
+        if not same:
             bad += 1
         print(f"{a:<44} {b:<40} {mark}")
     print("-" * 90)
