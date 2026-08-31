@@ -357,3 +357,26 @@ func_800905F0
 # end-of-list) and sits above LIBRARY_REGION next to func_80075D30, which is
 # already listed. Three of us wasted an afternoon on it and its neighbours.
 func_80075CB0
+
+# ---------------------------------------------------------------------------
+# BOUNDARY, reconciled against a third decomp on 2026-08-31.
+#
+# krystalgamer/memories-decomp puts the game/SDK boundary at 0x80073704 where
+# this project uses 0x80073840 and lists the stubs below it by hand. His
+# evidence checks out exactly against our own listings: func_80073704 opens
+# with `break 0, 259` -- service 0x103, the SN/PsyQ host-I/O call -- and
+# func_800736C4 below it is a debug routine that reaches printf (func_8008E870).
+#
+# In practice the two projects already agree. Five of the six functions in the
+# disputed range are listed in this file: func_80073704, func_80073724,
+# func_80073734, func_80073818, func_80073830. He moved a constant; we listed
+# exceptions; the sets are the same.
+#
+# ONE IS UNRESOLVED: func_80073758, 48 instructions, no `break` service call.
+# It takes (dst, ?, size), clamps each pass to 0x8000 and carries -1 as an
+# error sentinel -- a chunked 32 KB transfer loop, which reads as file I/O. It
+# is called from func_80059908, which is game code, but that decides nothing:
+# game code calls the SDK constantly. It is NOT listed below, so this project
+# still treats it as in scope. Whoever settles it should say which library it
+# is in, not which side of an address it sits on.
+# ---------------------------------------------------------------------------
