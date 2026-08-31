@@ -47,9 +47,20 @@ compiler duplicating a tail — which is the cross-jumping question in
 `docs/WORKFLOW.md` step 5, answered in advance for a function nobody has
 written yet. Write the assert **once** and expect two copies.
 
-Naming, hypothesis only: `H_` is plausibly the prefix for the files of a
-developer whose directory is `hirata`, and `mctrl` plausibly memory-card
-control. Neither is evidence and neither is in `variables.h`.
+Naming: `H_` is plausibly the prefix for the files of a developer whose
+directory is `hirata`. **The "mctrl = memory card control" half of this
+sentence was a guess and is now FALSIFIED**, which is the reason it was
+labelled a guess. The GMS idb names those two functions `aiInstCall`
+(func_80070D00) and `aiInstRetn` (func_80070DA8) -- they are the call and
+return opcodes of the duel AI's bytecode interpreter. So `H_mctrl1.c` is the
+AI virtual machine's source file, "mctrl" is machine control rather than
+memory card, and hirata wrote the AI. The empty `hirataLoop` debug mode in the
+same table is the same person's.
+
+Two independent sources, neither sufficient alone: the assert says which FILE
+and which LINE, the idb says what the functions ARE, and only together do they
+say that lines 379 and 403 of one developer's VM source are its call and
+return handlers.
 
 ## A named global, from a debug printf
 
