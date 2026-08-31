@@ -1,14 +1,14 @@
 # Assembly debt
 
-53 of the functions in `src/` are **transcriptions, not decompilations**. The
+**76** of the functions in `src/` are **transcriptions, not decompilations**. The
 body is the retail instruction stream written out as inline `__asm__`. Every
 one of them is byte-exact, which is precisely why they need a file of their
 own: `build.py` cannot tell transcribed assembly from real C, so nothing
 except an explicit marker stops them being counted as finished work.
 
-    grep -l 'ASSEMBLY DEBT' src/*.c | wc -l
+    .venv/bin/python tools_src/asm_debt.py
 
-All 53 came in with the port from Unchiga's tree, where they are tracked as
+All of them came in with the port from Unchiga's tree, where they are tracked as
 known debt and intended to be paid back before that project calls itself done.
 He said so before anyone asked, and his own `OVERSEER.md` ranks it second of
 three priorities, above speed:
@@ -24,26 +24,46 @@ count them, mark them, and say the number out loud.
 
 ## What is NOT debt
 
-**Inline asm for the GTE is legitimate and stays.** 44 further files carry
+**Inline asm for the GTE is not debt.** 21 further files carry
 `lwc2` / `swc2` / `mtc2` / `rtps` and similar coprocessor-2 instructions, which
-C has no operators for — the PsyQ SDK ships them as inline-asm macros itself,
-and this repo has `include/gte_macros.inc` for the same reason. A file is debt
-here only when ordinary MIPS — loads, stores, arithmetic, branches, a `.word`
-stream, a `.global`, branch labels — appears inside the asm.
+C has no operators for. A file is debt here only when ordinary MIPS — loads,
+stores, arithmetic, branches, a `.global`, or a `.word` whose opcode field is
+not COP2/LWC2/SWC2 — appears inside the asm.
+
+**But "not debt" is not "right", and that correction came from outside.**
+krystalgamer pointed out on 2026-08-31 that the PsyQ SDK ships these as macros
+— `GTEMAC.H` and `INLINE_C.H` give `gte_ldv0()`, `gte_rtps()`, `gte_stsxy()` —
+so a decomp calls those instead of hand-rolling the same instructions. All 21
+of ours are hand-rolled. That is a smaller debt than a transcription, not zero,
+and converting is free: the macros expand to the same words, so the build
+cannot notice and the source gets a great deal more readable.
 
 The split, counted mechanically rather than by eye:
 
 | | files |
 |---|---|
 | real C, no inline asm | 953 |
-| C plus GTE coprocessor asm | 44 |
-| **assembly transcription (debt)** | **53** |
+| GTE coprocessor asm only | 21 |
+| **assembly transcription (debt)** | **76** |
 | total in `src/` | 1050 |
 
-So the honest headline is **997 decompiled**, not 1050, and of the 926 counted
-in scope by `README.md`, 53 are transcriptions. All 53 are below the
-`0x80073840` cut, so none of them is out-of-scope library code that would
-excuse the shortcut.
+So the honest headline is **974 decompiled**, not 1050.
+
+**This number was published wrong twice before it was published right, and the
+two mistakes are worth more than the number.** The first pass classified by
+"contains a `.word` stream and a `.global`" and missed a hand-encoded seven-word
+call sequence in func_8004B854 that had neither: 53 counted, 54 true. The
+second pass scanned every string literal in the file, so the *constraints and
+clobbers* of legitimate GTE blocks (`"=r"`, `"r"`, `"memory"`, `"v0"`) were read
+as instructions and it reported 96 of 97 files as debt. Only the instruction
+template counts -- the strings before the first `:` at paren depth one.
+
+Both are the same failure this repo documents everywhere else: a tool
+answering confidently about something it did not measure. The check that would
+have caught either in a minute is the one now built into
+`tools_src/asm_debt.py` -- run the classifier against a file you know is clean,
+one you know is debt, and one you know is GTE, and see that it can say all
+three words.
 
 ## Paying it back
 

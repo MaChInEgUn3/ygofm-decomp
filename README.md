@@ -28,12 +28,14 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-**53 of these are assembly transcriptions, not decompilations** — inline
-`__asm__` bodies that are byte-exact and therefore invisible to the build's
-own check. They came in with the port from a second decompilation and are
-tracked as debt in `docs/ASM_DEBT.md`; the honest count of decompiled
-functions is 997, not 1050. A further 44 files carry GTE coprocessor asm,
-which C has no operators for and which is not debt.
+**76 of these are assembly transcriptions, not decompilations** — ordinary
+MIPS in inline `__asm__` bodies, byte-exact and therefore invisible to the
+build's own check. They came in with a port from a second decompilation and
+are tracked in `docs/ASM_DEBT.md`; the honest count of decompiled functions is
+**974**, not 1050. Count it yourself with
+`.venv/bin/python tools_src/asm_debt.py`. A further 21 files carry GTE
+coprocessor asm, which is not transcription but should still be calling the
+PsyQ `gte_*` macros rather than hand-rolled instructions.
 
 `src/` holds 1050 files; 938 of them are in scope and the rest are library or
 above-scope functions matched along the way.
