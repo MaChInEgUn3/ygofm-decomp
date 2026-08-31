@@ -3,8 +3,10 @@
 Build harness for the Yu-Gi-Oh! Forbidden Memories matching decompilation.
 
 Reproduces the original SLUS_014.11 executable from asm/ + src/ using the
-real PsyQ 4.6 toolchain, then verifies the result is byte-identical to the
-retail binary via sha1.
+period compiler -- cc1psx reporting gcc 2.8.1, shipped inside the PsyQ 4.5
+bundle -- then verifies the result is byte-identical to the retail binary via
+sha1. This docstring said "PsyQ 4.6" for months, which was wrong twice over:
+wrong bundle, and a bundle number is not a compiler version anyway.
 
 Layout is driven by the linker script, not by compiler output order. Every
 function is placed individually, in address order:
@@ -47,12 +49,20 @@ ROOT = Path(__file__).resolve().parent.parent
 WINDOWS = os.name == "nt"
 
 # --- toolchain locations (all gitignored, see docs/DECISIONS.md) -------------
-# PsyQ 4.5 is the game's compiler, not 4.6. Both reproduce almost every
-# function, but 4.6 cannot emit retail's combination of scheduled ordering
-# with -O1-style register reuse, and 4.5 can. Measured: with the same 220
-# sources, 4.5 is byte-identical and 4.6 leaves func_800495A4 wrong, with
-# no function matching under 4.6 that fails under 4.5. Set YGOFM_PSYQ=46 to
-# compare. See the toolchain-version section of docs/DECISIONS.md.
+# The compiler is gcc 2.8.1 -- what tools/psyq45/BIN/CC1PSX.EXE reports as
+# "2.8.1 SN32 BUILD 4.0.0010". The 4.6 bundle's cc1psx is gcc 2.95.2, and the
+# 4.7 archive ships no compiler at all, so the SDK number names a runtime
+# library release and never named a compiler (krystalgamer, 2026-08-31).
+#
+# YGOFM_PSYQ below is therefore MISNAMED: it swaps CPPPSX/CC1PSX and nothing
+# else, so it selects a compiler, not an SDK. The real ASPSX.EXE is never
+# executed either way -- maspsx emulates aspsx 2.79 and GNU as assembles.
+# The name is kept because scripts and notes use it; read it as "use 2.95.2".
+#
+# Measured: with the same 220 sources, 2.8.1 is byte-identical and 2.95.2
+# leaves func_800495A4 wrong, with no function matching under 2.95.2 that
+# fails under 2.8.1. At 1050 functions, 2.95.2 puts 288 at the wrong size.
+# See the toolchain section of docs/WORKFLOW.md.
 if os.environ.get("YGOFM_PSYQ") == "46":
     PSYQ_BIN = ROOT / "tools" / "psyq46" / "Psy-Q - 46" / "BIN"
 else:
@@ -95,8 +105,10 @@ EXPECTED_SHA1 = "84747e64f6da8e764206ec203e489acf8c9dcf7d"
 # from; we substitute our per-function objects for it.
 SPLAT_CODE_OBJ = "build/src/31D8.o"
 
-# ASPSX version bundled with PsyQ 4.6; maspsx emulates its quirks.
-ASPSX_VERSION = "2.79"  # PsyQ 4.5 ships aspsx 2.79 (4.6 shipped 2.86).
+# ASPSX version maspsx emulates. 2.79 is what the 4.5 bundle ships and 2.86
+# what 4.6 ships -- this comment said 4.6 while naming 2.79, contradicting
+# the line below it (both verified with `strings` on the two ASPSX.EXE).
+ASPSX_VERSION = "2.79"  # emulated by maspsx; the real ASPSX.EXE never runs.
 # Set from the SDK we now know the game used, not from a measurement: the
 # corpus does not currently discriminate -- 2.79 and 2.86 both produce a
 # byte-identical build, because the only behaviour maspsx varies between them
@@ -469,7 +481,7 @@ if _DROP:
 
 # DELAY_SLOT_MACRO_FUNCS used to imply -O1 -G0 -mno-split-addresses flags and a
 # -G0 assembler as well as the post-pass. The flag audit showed all seven match
-# with default flags under PsyQ 4.5 while still needing the post-pass, so the
+# with default flags under gcc 2.8.1 while still needing the post-pass, so the
 # set now means only what its name says: this function needs the delay-slot
 # macro rewrite. The old coupling was compensating for the wrong compiler.
 # The assembler's -G must match the compiler's, in both directions. When

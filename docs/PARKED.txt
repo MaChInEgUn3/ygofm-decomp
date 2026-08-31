@@ -368,19 +368,28 @@
 # a value read once into a local (retail reloads the table entry after the call
 # and compares it three times, so that part is right).
 func_80070650
+    RESOLVED -- src/func_80070650.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80018CF8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
   the history below is what this tree had reached on its own.
 func_80018CF8_WAS
 func_8002A6B8
+    RESOLVED -- src/func_8002A6B8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80033CF8
+    RESOLVED -- src/func_80033CF8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80047864
+    RESOLVED -- src/func_80047864.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A27C
 func_8004A3BC
+    RESOLVED -- src/func_8004A3BC.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80044E90
+    RESOLVED -- src/func_80044E90.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80045054
 func_80049434
+    RESOLVED -- src/func_80049434.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80049AF4
+    RESOLVED -- src/func_80049AF4.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004B854
+    STILL OPEN -- src/func_8004B854.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_8003D03C
     The stored 9 decomposed 2026-08-11 and installed: the D_8009B408 byte
     read named into an s8 local plus a dead if with identical arms
@@ -390,15 +399,24 @@ func_8003D03C
     run from the 9 base found nothing: its best-scoring outputs measure
     35-41 through try_func.
 func_80044F58
+    RESOLVED -- src/func_80044F58.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80047FAC
+    RESOLVED -- src/func_80047FAC.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80021810
+    RESOLVED -- src/func_80021810.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A6F8
+    STILL OPEN -- src/func_8004A6F8.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_8005C4F0
+    RESOLVED -- src/func_8005C4F0.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80047A68
+    RESOLVED -- src/func_80047A68.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A764
+    STILL OPEN -- src/func_8004A764.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_8005C5D4
+    STILL OPEN -- src/func_8005C5D4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_80073220
 func_8003201C
+    RESOLVED -- src/func_8003201C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004CABC
 # --- range-check fold: class emptied, see WORKFLOW.md. Both members
 # (func_80049544, func_80049640) matched once the condition was written as
@@ -416,6 +434,7 @@ func_800601D0
     copy, and that is worth the two instructions. Copy the declaration
     verbatim; do not tidy it.
 func_8002F440
+    RESOLVED -- src/func_8002F440.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # --- addressing / individual causes, described in DECISIONS.md ---
 # func_80070710: ten instructions, sequence identical, every register name
 # different -- retail reuses $a0 as the %hi temp of the scalar load it lands in
@@ -430,6 +449,7 @@ func_8002F440
 # lvalue read and a direct (s16) cast all give the same 52, and the rest of the
 # 52 is offsets shifting from it.
 func_80058A7C
+    RESOLVED -- src/func_80058A7C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80030D5C is TWO instructions: retail materialises the 0x2000000 mask
 # after loading D_8009B0F4, cc1psx puts it in the preceding branch's delay slot
 # and takes a nop after the load. Needs _O2_G8_MACRO restored when picked up.
@@ -444,6 +464,7 @@ func_80058A7C
 # `&` operands, spelling the test `!= 0`, and inverting the branch all leave
 # the same 2. The lever does not reach this class.
 func_80030D5C
+    RESOLVED -- src/func_80030D5C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80045114 checks the same slot field at n, n-1 and n-2 before appending.
 # The addressing needs a -G0 assembler entry (restore it when picked up) and
 # then the whole instruction stream is right -- 51 differences down to 38, all
@@ -451,6 +472,7 @@ func_80030D5C
 # 0x11 it compares against in $a2, we get $v1 and $a1. Base-first explicit
 # address arithmetic does not move it.
 func_80045114
+    RESOLVED -- src/func_80045114.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_800320BC finds the first free 0x10-byte slot and fills five fields from
 # a D_801D4244 entry. `k--` as its own statement gets retail's explicit
 # `addiu $v1,$a1,-1` instead of the -1 folding into the %lo. What does not come
@@ -460,6 +482,7 @@ func_80045114
 # +0x2D58 also 49, and the original single-expression form 45. Naming the table
 # base does not move it either.
 func_800320BC
+    RESOLVED -- src/func_800320BC.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_800734DC picks a table byte one of two ways and writes it to a slot.
 # Down from 12 to 10 by naming the table base *inside each arm* (a variable
 # outside gets hoisted and CSE'd across both, which is not what retail does)
@@ -469,6 +492,7 @@ func_800320BC
 # `lb`; duplicating that statement into both arms to force it is much worse
 # (32).
 func_800734DC
+    RESOLVED -- src/func_800734DC.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80059700 picks one of three mode bytes from the sign of arg1, then
 # dispatches on it. The three-way sign test matches once written as
 # `if (arg1 <= 0) { if (arg1 < 0) ... else ... } else ...` -- gcc turns the
@@ -487,12 +511,14 @@ func_800734DC
 # source wants the default to be v *and* the two registers distinct, and those
 # two pull against each other through copy propagation.
 func_80059700
+    RESOLVED -- src/func_80059700.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_800597C8 is 25 out on the scheduling of three independent operations at
 # the top -- the shift of arg2, its store to +0xE06 and the `(u16)` for the
 # fourth call argument. Retail reads the loop bound before the shift and puts
 # the mask in the guard's delay slot; we shift first. Duplicating the three
 # into both arms of the guard to force it is much worse (49).
 func_800597C8
+    RESOLVED -- src/func_800597C8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80015078 is func_80013B68's seven-argument sibling and matches except at
 # the exit: retail materialises the return value (`addu $v0,$s0,$zero`) BEFORE
 # reading D_8009B0F4 for the final `|= 0x20`, and reads it into $v1; cc1psx uses
@@ -505,6 +531,7 @@ func_800597C8
 # +0x6C and the `andi 0xFF` that a s32 local plus a `(u8)` cast at the
 # comparison produces. `f |= 0x80` as its own statement makes it 43.
 func_80025B28
+    RESOLVED -- src/func_80025B28.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80073758 reads in 0x8000-byte chunks until short or done. The whole
 # instruction stream matches, including the hoisted `sltu $s6,$s0` in the
 # loop-back delay slot and `total += got` in the branch delay slot. Five
@@ -528,6 +555,7 @@ func_80013B68
 # if/else) both give 35, and the sweep is flat -- so this is a layout question
 # about which stores share a block, not polarity.
 func_8001D5B4
+    STILL OPEN -- src/func_8001D5B4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 # func_80014EEC dispatches through D_8009B10C if set, otherwise checks the
 # D_8009B0F4/D_8009B134 flag pair and forwards seven arguments to
 # func_80013998. The flag-check block matches. The rest does not: retail saves
@@ -550,12 +578,14 @@ func_800137E4_WAS
 # what is left is a four-register rotation of the two table bases and the second
 # index ($t1/$a3/$t0 against $a3/$t0/$a2). Declaration order does not move it.
 func_80023090
+    RESOLVED -- src/func_80023090.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_800208D4: the first half matches. In the second, cc1psx hoists the
 # `D_8009B23A = 2` store and the %hi of D_800E9FF0 above the read-xor-store of
 # D_8009B1D5, where retail keeps them in source order; the 24 differences are
 # all that reordering. The source order already matches retail, naming the
 # pointer before the flag store does not move it, and the sweep is flat at 24.
 func_800208D4
+    RESOLVED -- src/func_800208D4.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_8002CBF4 reads D_801D4244[arg0-1] three times, in three blocks, and
 # retail materialises the base and recomputes arg0-1 for each -- gcc 2.8 has no
 # global CSE, so writing the expression inline three times is right and that
@@ -564,12 +594,14 @@ func_800208D4
 # the shift into its own statement is worse (29), and the sweep's best is
 # O1 G0 at 21.
 func_8002CBF4
+    STILL OPEN -- src/func_8002CBF4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 # func_80039140 copies and offsets nine halfwords from one object to another.
 # The instruction stream is identical, including the three reloads of +0x30 and
 # +0x32 that the intervening stores force. One register: retail keeps the source
 # pointer in $a1 and we put it in $v1 ($a0 holds the destination in both, having
 # overwritten arg0). Three declaration orders and the whole sweep sit at 13.
 func_80039140
+    RESOLVED -- src/func_80039140.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80038800 is underdetermined between -O levels rather than wrong. At -O2
 # the prologue matches (the $s1 copy scheduled between two saves) and the
 # registers do not; at -O1 the registers match and the prologue is unscheduled
@@ -579,6 +611,7 @@ func_80039140
 # (two variables, a named mask, an assignment split from the declaration, the
 # store moved) all leave it. Best is -O1 -G8 at 10.
 func_80038800
+    RESOLVED -- src/func_80038800.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80032370 is two loops over one 16-entry halfword table -- a sweep that
 # clears entries whose referenced byte is zero, then a compaction. Both loops
 # are instruction-for-instruction right, including the two reads per entry
@@ -588,6 +621,7 @@ func_80038800
 # read/write cursors and counter rotate with them. Four declaration orders and
 # inlining the byte base all give 17, 18 or 34, and the sweep is flat at 18.
 func_80032370
+    STILL OPEN -- src/func_80032370.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 # func_80045BE8 appends a 48-byte record with a struct assignment -- that is
 # where the four-word block-move loop comes from, and Rec48 in variables.h
 # exists for it. Addressing and control flow match; what is left is that retail
@@ -596,6 +630,7 @@ func_80032370
 # $a0. Every access through either then differs -- 45, almost all cascade.
 # Needs the -G0 assembler entry restored when picked up again.
 func_80045BE8
+    RESOLVED -- src/func_80045BE8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_800129D8 is crt0: it writes $sp, $gp and $fp and ends in `break 0,1`.
 # Filtered by candidates.py now, listed here so nobody re-derives that.
 # func_800129D8 is the C runtime entry stub, not a matching failure: it writes
@@ -607,6 +642,7 @@ func_80045BE8
 # it in $a1, so every store through it differs. Needs the -G0 assembler entry
 # restored when picked up again.
 func_8002C604
+    STILL OPEN -- src/func_8002C604.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 # func_800338E4: the four accesses to D_8009B146 are right (scalar + -G0
 # assembler, no alias) and so is the first half. What is left is a schedule:
 # retail reads D_8009B146, then +0x5AA8, then the counter at +0x5AAC; cc1psx
@@ -616,6 +652,7 @@ func_8002C604
 # reads of D_8009B146 differ in signedness -- lh for the subtraction, lhu for
 # the sum -- which the `(u16)` cast reproduces.
 func_800338E4
+    RESOLVED -- src/func_800338E4.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80012AE8 -- 26/24, 26 differences, and the diagnosis is now settled: it
 # is NOT cc1psx output at all. Re-tried 2026-08-21 and the C is entirely
 # reachable. The count `lui $s1,(0x0>>16); addiu $s1,$s1,0x0` is a %hi/%lo
@@ -648,6 +685,7 @@ func_80012AE8
 # call result and for n, all land on 14. The parked candidate is now the
 # right-sized one -- working-order step 1 says count first.
 func_8004C560
+    RESOLVED -- src/func_8004C560.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 # func_80038798 is ONE instruction: retail has `andi $v0,$a0,0x8000` where the
 # masked value lives in $a0; cc1psx folds `(x & 0xFFFF) & 0x8000` back to
 # `x & 0x8000` and reads $v0. Both registers are live (the masked value is the
@@ -656,8 +694,11 @@ func_8004C560
 # intermediate for the test, `&=` in two steps, `(s16)v < 0` -- best is still 1,
 # and the whole flag sweep is 1.
 func_80038798
+    RESOLVED -- src/func_80038798.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80040390
+    RESOLVED -- src/func_80040390.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_800594C0
+    RESOLVED -- src/func_800594C0.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     A stored permuter output measures 15 against 16; not yet decomposed.
     **16 -> 15**, marginal, and still one instruction short (23 against 24) --
     the base was too, so the shortfall is older than this change. The shape is
@@ -688,7 +729,9 @@ func_800732A0
     it.
 func_8002CCE4
 func_80048C0C
+    RESOLVED -- src/func_80048C0C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_800472A8
+    RESOLVED -- src/func_800472A8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     **20 -> 1.** Hold the masked argument in an `s16` local and compare
     `(u32)v` instead of `(u32)(arg0 & 0xFFFF)`. Safe because of the guard it
     sits under: the `else` arm is only reached when bit 15 is clear, so the
@@ -698,17 +741,23 @@ func_800472A8
     Permuter rerun from the new 1 base on 2026-08-10: no output at all, base not
     beaten.
 func_800382A8
+    RESOLVED -- src/func_800382A8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004733C
+    RESOLVED -- src/func_8004733C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80040510
+    RESOLVED -- src/func_80040510.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8005F7B0
 func_8004C84C
+    RESOLVED -- src/func_8004C84C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     A stored permuter output measures 14 and is INVALID: it deletes the
     `*(u16 *)(p + 0x1E) = 0;` store, and the listing has both halfword stores
     to +0x1E (`sh $v0` and `sh $zero`). Its other change, splitting
     `s32 o = 0x180;` into a declaration and a statement, measures the same 25
     and one instruction short on its own.
 func_80039E9C
+    RESOLVED -- src/func_80039E9C.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80036F80
+    RESOLVED -- src/func_80036F80.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     **30 -> 11.** The pointer at arg0+0x30 is dereferenced seven times in the
     source; naming it once before the `if` and using the name for the FIRST
     store only -- leaving the other six as inline re-reads -- is the whole
@@ -716,11 +765,13 @@ func_80036F80
     chained `& 0xFFFFFFFF` masks, which are identity and contribute nothing
     (the name alone measures the same 11).
 func_80045484
+    RESOLVED -- src/func_80045484.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     **8 -> 6** by splitting `s32 i = 1;` into a bare declaration and a separate
     `i = 1;` placed after the other initialiser. The initialiser-versus-
     statement distinction again: an initialiser lands with the declarations and
     a statement lands where it is written. Found in an unscored permuter output.
 func_8004A854
+    STILL OPEN -- src/func_8004A854.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_80016DDC MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
   the history below is what this tree had reached on its own.
 func_80016DDC_WAS
@@ -742,8 +793,11 @@ func_8005A618 MATCHED 2026-08-11, first user of the int-cast lever from
     second where it wraps a return rather than a statement pair. Semantically
     inert; do not tidy it away. Decomposed from a stored permuter output.
 func_80024D34
+    STILL OPEN -- src/func_80024D34.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_800496C4
+    RESOLVED -- src/func_800496C4.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8005A3D0
+    RESOLVED -- src/func_8005A3D0.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     A stored permuter output measures 13, better than this entry. Found by
     semantically checked -- two of the audit's finds so far were wrong.
     **33 -> 13**, and the change is semantically inert: the inner `break` wrapped
@@ -753,6 +807,7 @@ func_8005A3D0
     costs nothing at runtime and is not decoration. Found by
     score_permuter_outputs.py; decomposed and checked before installing.
 func_8003B744
+    RESOLVED -- src/func_8003B744.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     A stored permuter output measures 8 and is INVALID: it casts the index to
     `(unsigned char)` in the second return, and the listing contains no `andi`
     anywhere -- retail does not mask that index. Its other two changes,
@@ -1901,6 +1956,7 @@ func_8003A198_WAS -- 3 differences, 21/21, instruction-for-instruction identical
     -O1 -G0. No flag combination helps.
 
 func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes,
+    RESOLVED -- src/func_8003CEB8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
     outer loop over the buffer, inner loop of 8 shifts. Everything matches except
     the two initialisations: retail materialises zero twice
     (`addu $v1,$zero,$zero` for crc, `addu $a3,$zero,$zero` for i) and gcc
@@ -3760,6 +3816,7 @@ func_80048D08 -- one register-to-register copy, everything else exact.
   tie -- the function has no `%gp_rel` at all, so the threshold is free.
 
 func_80047480 -- one register, thirty sites: the system-block pointer is $a1
+    RESOLVED -- src/func_80047480.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
   where retail has $a2, and every store in the twenty-store initialiser block
   is off by that one register.  111/111 instructions, 60 differences, and the
   whole residue is that rotation plus two scheduling positions.
@@ -4506,6 +4563,7 @@ func_80048A28 -- 65 differences at the right length (121/121), first written
   `s32 arg0` is worth 1. Permuter running from this base.
 
 func_8005D994 -- 5 differences at the right length (132/132), first written
+    RESOLVED -- src/func_8005D994.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
   2026-08-21. gp=5 at=0, all one-byte flags, default flags, no addressing work.
   A sound-position setup: it builds two eight-byte packets on the stack, wraps
   two angles into (-0x800, 0x800] and hands both to func_8005F91C, which is

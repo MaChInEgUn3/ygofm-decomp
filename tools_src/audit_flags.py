@@ -5,8 +5,9 @@ Test every per-function flag override by dropping it and rebuilding.
     python tools_src/audit_flags.py            # report only
     python tools_src/audit_flags.py --prune    # also print the entries to delete
 
-Every entry in PER_FUNC_FLAGS / PER_FUNC_AS_FLAGS was derived under PsyQ 4.6,
-which turned out to be the wrong compiler (see docs/DECISIONS.md). So each is a
+Every entry in PER_FUNC_FLAGS / PER_FUNC_AS_FLAGS was derived under gcc 2.95.2
+(the cc1psx in the PsyQ 4.6 bundle), which turned out to be the wrong compiler
+-- the game was built with gcc 2.8.1, see docs/WORKFLOW.md. So each is a
 hypothesis that has never been tested against the compiler the game actually
 used. This drops them one at a time -- never in batches, because a single
 wrong-sized function shifts everything after it and a batch result cannot be
