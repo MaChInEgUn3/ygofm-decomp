@@ -1,9 +1,11 @@
-/* PARKED CANDIDATE PORTED from Unchiga's tree (docs/MERGE_UNCHIGA.md).
- * Installed here because HIS base is closer than the one this tree
- * reached: the counts are in PARKED.txt. Measure it with the flags on
- * the next line -- they are his unit's, and try_func's default flags
- * report a different number.
- * FLAGS: -G0 -msplit-addresses
+/* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
+ * His C, his comments; the identifiers are rewritten to this repo's address
+ * form and nothing else was touched. Verified the only way that counts here:
+ * tools_src/build.py rebuilds the retail image byte-for-byte with this in it.
+ *
+ * Self-contained by design -- it keeps his declarations rather than ours,
+ * because a declaration is a codegen input and his are what this C matched
+ * under. See docs/MERGE_UNCHIGA.md and tools_src/install_ported.py.
  */
 typedef unsigned char u8;
 typedef unsigned short u16;

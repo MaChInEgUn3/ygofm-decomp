@@ -2110,7 +2110,9 @@ func_80070710_WAS / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     the correct `[0]` form at 6. Read the semantics before the count.
     sweep_try.py run 2026-08-10: best is 8 at -O1 -G0, same as the base.
 
-func_8004B374 -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
+func_8004B374 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_8004B374_WAS -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, which
     is the whole problem: gcc uses eight callee-saved registers ($s0-$s7) where
     retail uses seven ($s0-$s6), and the extra sw/lw pair is the length.
     Structure is right on the first attempt. It scans records of 0x28 bytes
@@ -2288,7 +2290,9 @@ func_8005F27C MATCHED 2026-08-18, together with func_8005F5C8 and on one
     as-G rows also 1), and a 4700-iteration permuter run from this base
     that never beat the base's own score of 10.
 
-func_8004C420 -- 16 differences, two register swaps and one delay slot that
+func_8004C420 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_8004C420_WAS -- 16 differences, two register swaps and one delay slot that
     follows them. The structure is settled: retail branches out on
     `(c & 0x80) != 0` so the `== 0` arm is written first; the second name
     `d = c` is real and load-bearing (without it the function is 65 and a
@@ -2500,7 +2504,9 @@ func_800260D0 -- 25 differences, all of them the scheduling of one block:
     store (27) and below it (25, no change), moving the whole `e`
     computation above the +0x1A store (33) and the `m` read alone (32).
     Progression for anyone picking this up: 93, 40, 31, 25.
-func_80049920 -- 21 differences, 81/81, and they are all the *order* of the
+func_80049920 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_80049920_WAS -- 21 differences, 81/81, and they are all the *order* of the
     prologue: retail sets the counter to zero between two register saves and
     fills the guard's delay slot with the accumulator's zero, where we group
     the initialisations. No instruction is missing or extra.
@@ -3238,7 +3244,9 @@ func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
     the constants land in exchanged registers.
 
 
-func_8003BD14 -- 42 differences at equal length, and every one is the same
+func_8003BD14 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_8003BD14_WAS -- 42 differences at equal length, and every one is the same
     register rotation the rest of the family has. Fifth dispatcher
     (func_8003C328, func_8003C120, func_8004BCE8, func_80032184), and the
     first one where the whole recipe went in at once: `goto` arms in retail's
@@ -3787,7 +3795,9 @@ func_80047480 -- one register, thirty sites: the system-block pointer is $a1
   therefore lives in `$a0` across the block, which is the extra long-lived
   value that pushes `p` to `$a2` -- so the two are the same problem.
 
-func_8004A518 -- 113 built against 112, and the single extra instruction is a
+func_8004A518 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_8004A518_WAS -- 113 built against 112, and the single extra instruction is a
   callee-saved register: gcc hoists the loop-invariant `0x63` out of the
   middle loop into $s6, where retail materialises `addiu $v0,$zero,0x63`
   inside the body and reuses that register for the 0x40 two instructions
@@ -3862,7 +3872,9 @@ func_8003BF00 -- 111 built against 112, 35 differences (was 42), and the single 
   Two names for the D_8009B118 read, one in arm 3 and one in arm 5.  The -1
   is untouched.
 
-func_80043328 -- 115/115, 12 differences, all of them in the `mode == 0` arm:
+func_80043328 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
+  not code -- see the try_func note in WORKFLOW.md).
+func_80043328_WAS -- 115/115, 12 differences, all of them in the `mode == 0` arm:
   the 0x18000 constant's `lui`/`ori` pair is split (the `ori` scheduled into a
   load's shadow) where retail keeps it adjacent, and two stores sit before
   their load rather than in its shadow.

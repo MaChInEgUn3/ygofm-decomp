@@ -2259,6 +2259,24 @@ afterwards, completes normally -- so the toolchain is fine and it is that
 process. `ps | grep wineboot` and kill both. Twenty minutes went into this
 before the second try_func proved the toolchain was up.
 
+**try_func OVER-REPORTS a difference when one address is spelled two ways,
+and that hid 59 finished functions.** It compares the rendered text, so
+`lui $v0,%hi(D_80011434)` / `addiu %lo(D_80011434)` and `lui $v0,32769` /
+`addiu $v0,5172` read as two differences -- and they are the SAME TWO WORDS.
+So does `%lo(D_80010538+3836)` against `%lo(D_80011434)`: 0x80010538 + 0xEFC
+is 0x80011434, and splat's interior-symbol note further up this file is the
+same observation from the other side. On 2026-08-31, sixty-seven ported
+candidates sitting at one to four "differences" were fed to `build.py`
+instead, and **fifty-nine of them were byte-identical**. Two rules follow,
+and the second is the one that costs:
+  * when a residue is nothing but `%hi`/`%lo` against a bare `lui`/`addiu`
+    pair, or two symbols whose offsets make up the gap, **confirm with the
+    full build before believing the number**. That is one command and it is
+    the only arbiter there is.
+  * and never let a park entry record a difference count that was never
+    checked against the build. Several of those fifty-nine had prose here
+    diagnosing a residue that did not exist.
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a
