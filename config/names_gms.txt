@@ -1,0 +1,60 @@
+# Names from the "generic mad scientist" IDA database for SLUS_014.11, shared
+# by krystalgamer on 2026-08-31.  GMS reverse-engineered this game's AI and
+# wrote the tools that validate its speedruns.
+#
+# PROVENANCE, and it is NOT the same as config/names_unchiga.txt.  Those are
+# one decompiler's reading of the same listings we read.  These come from a
+# separate, older reverse-engineering effort against this exact binary, and
+# several are checkable against our own asm -- where a name is marked VERIFIED
+# below, the listing was read instruction by instruction and it matches.  That
+# makes those evidence rather than hypothesis, which nothing else in this
+# project's naming files can claim.
+#
+# Still ANNOTATION: nothing in this repo is renamed.  Every tool, every
+# PARKED.txt entry and every paragraph of WORKFLOW.md is keyed to the
+# `func_%08X` / `D_%08X` form, and the address form is the one thing that
+# cannot be wrong.
+#
+# addr        kind  canonical           GMS name                 status
+
+# --- the game's mode table, D_80090B64, 17 entries -------------------------
+# Pasted verbatim from the idb as `off_80090B64`.  Our table has exactly 17
+# entries in the same address range, so the pairing is by ADDRESS and is exact.
+# The address column here is the TABLE SLOT, not the function; the function is
+# named in the third column and its address is its name.
+# The semantic labels are GMS's reading and are taken on trust; the mapping is
+# not.  (First written by pairing the two lists SEQUENTIALLY from a partial dump
+# of our table, which silently shifted the first eight names by five slots.
+# Pair by address or do not pair.)
+
+0x80090B64  func  func_8002CE08    debugMenuLoop            addr-verified
+0x80090B68  func  func_8002D180    animatedBattleLoop       addr-verified
+0x80090B6C  func  func_8002CE64    campaignLoop             addr-verified
+0x80090B70  func  func_8002CEE8    duelLoop                 addr-verified
+0x80090B74  func  func_8002D0E0    libraryMenuLoop          addr-verified
+0x80090B78  func  func_8002D2D8    campaignOverworldLoop    addr-verified
+0x80090B7C  func  func_8002D3F8    freeDuelMenuLoop         addr-verified
+0x80090B80  func  func_8002D370    buildDeckMenuLoop        addr-verified
+0x80090B84  func  func_8002D588    mainMenuLoop             addr-verified
+0x80090B88  func  func_8002D62C    nameEntryLoop            addr-verified
+0x80090B8C  func  func_8002D684    passwordMenuLoop         addr-verified
+0x80090B90  func  func_8002D6C8    optionsMenuLoop          addr-verified
+0x80090B94  func  func_8002D730    gameOverLoop             addr-verified
+0x80090B98  func  func_8002D7C4    hirataLoop               addr-verified
+0x80090B9C  func  func_8002D7CC    tradeLoop                addr-verified
+0x80090BA0  func  func_8002DA1C    creditsLoop              addr-verified
+0x80090BA4  func  func_8002DC38    sub_8002DC38             addr-verified
+# --- the AI virtual machine -- VERIFIED against asm/nonmatchings ------------
+# func_80070650 was found independently (the only function in the binary that
+# both touches D_800F5BE8 and contains a `jalr`) and then read against the
+# idb's aiMain() line by line: the table index, the indirect call, all three
+# pointer comparisons and the VSync(1) >= 240 test are instruction-for-
+# instruction identical.  These are evidence.
+0x80070650  func  func_80070650       aiMain                   VERIFIED
+0x8007058C  func  func_8007058C       aiReadByteFromScript     VERIFIED
+0x80070FF8  func  func_80070FF8       aiInstEndHand            VERIFIED
+0x80071000  func  func_80071000       aiInstEndField           VERIFIED
+0x80070F1C  func  func_80070F1C       aiInstFieldPlay          VERIFIED
+0x800916E0  data  D_800916E0          aiFunctionTable          VERIFIED
+0x800F5BE8  data  D_800F5BE8          (struct; +8 aiWord2, +C dword_800F5BF4)  VERIFIED
+0x80074170  func  func_80074170       VSync                    VERIFIED (library)
