@@ -67,3 +67,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 ct[abe][0-9]*
+
+# Working drafts of messages to other people. Never tracked: they are
+# notes-to-self about a conversation, not documentation of the binary.
+docs/DRAFT_*.md
