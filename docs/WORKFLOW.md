@@ -2228,17 +2228,21 @@ nothing.
 
 ## Two habits that cost real time when skipped
 
-**The GitHub repo is private, since 2026-08-30.** This paragraph said "private
+**The GitHub repo is PUBLIC again, since 2026-08-31** -- reopened at krystalgamer's request ("deixa o teu repo publico, mais facil para referenciar") so the two other people working on this binary can cite it. He also has write access. **Check this with `gh repo view --json visibility` before repeating it**, which is the whole point of the paragraph and is the thing that failed last time.
+
+Before it was reopened the history was audited rather than assumed: no `.img`/`.ccd`/`.sub`/`.bin`/`.zip`, no `SLUS_014.11`, no `orig/`, `extracted/` or `third_party/` path was ever ADDED in any commit, and there is no blob over 2 MB anywhere in the history. `git log --all --diff-filter=A --name-only` and a `git rev-list --objects --all` size scan are two commands and they are what makes "safe to publish" a measurement instead of a belief. Run them before any future visibility change -- gitignore protects the working tree, not the history, and the two are not the same question.
+
+**The earlier version of this paragraph said "private
 again ... it was public for a few hours on 2026-08-07" for three weeks while
 `gh repo view` reported `"visibility":"PUBLIC"` the whole time -- it went back
 public and nobody updated the line. It surfaced only because a second decomper
 opened with "I'm surprised you're posting the converted C files publicly".
 **A fact about the outside world rots faster than anything else in this file;
 check it with the command, not with the paragraph.** Two consequences worth
-knowing. Pushing over HTTPS needs a
-credential helper now that anonymous access is gone -- `gh auth setup-git`
+knowing. Pushing over HTTPS needed a
+credential helper while anonymous access was gone -- `gh auth setup-git`
 configures it and the existing token already has `repo` scope; without it
-`git push` fails with a bare 403. And the traffic figures from the public
+`git push` failed with a bare 403. And the traffic figures from the public
 window are worth reading correctly: 0 forks, 0 stars, 7 unique visitors, but
 115 clones from 69 unique sources. That ratio is scraper bots, which hit new
 public repos within minutes -- not human interest, and not undoable. Going
