@@ -19,7 +19,10 @@ installing anything.
 Run it after any batch of permuter work, and after picking up an old park.
 """
 import subprocess, pathlib, re, json, os
-root=pathlib.Path('/home/marchaleski/ygofm')
+# Repo root, derived from this file's location -- it was hardcoded to one
+# machine's home directory, which both leaked a username into a public repo
+# and made the tool run against the wrong tree on any other checkout.
+root=pathlib.Path(__file__).resolve().parent.parent
 os.chdir(root)
 hits=0; checked=0
 for d in sorted(root.glob('build/permuter/func_*')):
