@@ -6,8 +6,31 @@ they are the **complement** of `community_offsets.md`:
 
 | source | points at | names |
 |---|---|---|
-| community file offsets | an instruction | a **function** |
-| GameShark codes | a RAM address | a **variable** |
+| community file offsets | an instruction in the FILE | a **function** |
+| GameShark codes | an address in RAM | a **variable** -- or a function |
+
+**That table's second row was wrong when first written here, and the
+correction is the interesting part.** A GameShark address in the 0x800Exxxx
+range and up is data, but PS1 RAM holds the executable too: an address below
+the game/SDK split is an INSTRUCTION, and a code writing to one is a runtime
+binary patch. `hugopocked`'s "All cards in library" is the specimen:
+
+```
+D002C322 1040        only if the halfword at 0x8002C322 is 0x1040
+8002C322 2400        write 0x2400 there
+```
+
+`0x8002C320` holds `beqz $v0, .L8002C358`, whose upper halfword in memory is
+`0x1040`. Writing `0x2400` makes the word `0x2400000D` -- `addiu $zero, $zero`
+-- which is a no-op. The cheat deletes the branch so the code always falls into
+the arm that displays the card. The conditional first line is a guard that the
+byte is what the hacker expected, which is also a version check.
+
+So the function containing it, **`func_8002BFCC`** (not decompiled here), is
+the Library's per-card display gate, and the `beqz` at +0x354 is the
+"have you seen this card" test. Neither the GMS idb nor Unchiga's roster names
+it. It sits immediately after `setLibraryUsed` (0x8002BF3C), which is the
+cluster you would expect.
 
 A code is a claim that writing one value to one address produces one named
 effect in the running game, tested by everyone who ever used it. Same standing
