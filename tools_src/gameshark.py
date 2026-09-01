@@ -30,10 +30,47 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+BIN = ROOT / "extracted" / "SLUS_014.11"
+DELTA = 0x8000F800          # vram -> file offset is the inverse
+SCOPE = 0x80073840          # below this is game code; above, SDK
 CODE = re.compile(r"^\s*([0-9A-Fa-f]{8})\s+([0-9A-Fa-f]{4})\s*$")
 KIND = {0x80: ("halfword write", 2), 0x30: ("byte write", 1),
         0xD0: ("equal-to test", 2), 0xE0: ("not-equal test", 2),
         0x50: ("repeat block", 0), 0x10: ("halfword write", 2)}
+
+
+def image_halfword(vram):
+    """The halfword at `vram` as the retail image holds it, or None if outside."""
+    off = vram - DELTA
+    if not BIN.exists() or off < 0 or off + 2 > BIN.stat().st_size:
+        return None
+    with open(BIN, "rb") as f:
+        f.seek(off)
+        b = f.read(2)
+    return b[0] | (b[1] << 8)          # little-endian
+
+
+def verify_guard(vram, expected):
+    """Check a D0/E0 guard against our own binary.
+
+    STRONG only for CODE addresses. A guard on a code address asserts an
+    instruction halfword, which never changes -- so a mismatch proves the code
+    was written for a different build and the row must be dropped. That is the
+    gate that keeps PAL/JP codes out of a compilation labelled NTSC-U.
+
+    A guard on a DATA address asserts a runtime value the game overwrites, and
+    the file only holds its initial value, so a mismatch there means nothing.
+    Reporting those as REJECTED would be the tool answering a question it did
+    not measure -- they come back UNCHECKABLE instead.
+    """
+    got = image_halfword(vram)
+    if got is None:
+        return "OUTSIDE", None
+    if vram >= SCOPE:
+        return "UNCHECKABLE", got       # data or SDK, not an instruction
+    if vram >= 0x80010000 and vram < SCOPE:
+        return ("VERIFIED" if got == expected else "REJECTED"), got
+    return "UNCHECKABLE", got
 
 
 def symbols():

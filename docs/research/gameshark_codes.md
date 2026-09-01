@@ -80,3 +80,74 @@ GameShark version and say nothing about the game.
 
 Sources: gamehacking.org/game/90203, almarsguides.com. Codes are the work of
 the hackers credited on those pages (StalkerX, 00Kevin and others).
+
+
+## The full compilation (2026-09-01)
+
+Harvested exhaustively rather than sampled, because breadth is what tells you
+which codes are worth reading.
+
+| source | codes | access |
+|---|---:|---|
+| gamehacking.org, 70 groups | **1960** | `POST /modules/game.php` with `gamID`+`grpID`, the endpoint `fillGroup()` calls |
+| almarsguides.com, 5 pages | 296 | plain fetch |
+| kodewerx forum | 8 | plain fetch |
+| **total** | **~2264** | |
+
+cheatcc returns 403 with no clean fallback and is the one source not covered.
+Headless Playwright is blocked by Cloudflare on gamehacking.org while plain
+`urllib` with a browser UA is not, which is the opposite of the usual and
+worth knowing before anyone spends an hour on a browser.
+
+### Four structures, derived from the bulk rather than listed
+
+**The trunk is 722 cards, not 250.** Max Card Codes parts 1–6 are byte writes
+from `0x801D0250` to `0x801D0521`, **every consecutive gap exactly 1**. That is
+0x2D2 = 722 entries, and gamehacking has a category literally named "722 Slot
+Chest Card Deck Codes". The earlier note here said 250 because almarsguides
+only publishes 250 — a sampled source gave a wrong constant and only the full
+harvest caught it.
+
+**The Library flag shares that array.** `801D0250 0505` with a `5000FF02`
+repeat (255 iterations, step 2) plus `801D044E 0505` with `50006A02` (106 more)
+covers exactly the same 722-byte span. So the per-card byte carries both the
+count and the seen-in-Library flag.
+
+**Opponents are a 4-byte record array at `0x801D0720`, 39 of them.** One code
+pair per duelist, `270F` then `0000` two bytes later. Sorted by address the
+stride is 4 with exactly two breaks — and **both breaks are errors in the
+source**, provable from the arithmetic alone:
+
+* Simon Muran's pair is `0720`/`0724`, a gap of 4 where every other duelist's
+  pair is 2 apart. His second address should be `0722`.
+* Villager 3's `0734` collides with Villager 2's second address. It should be
+  `0736`/`0738`.
+
+With those two corrected the array is stride-4 with no gaps from `0x801D0720`
+to `0x801D07BC`, exactly 39 slots. The full table is in
+`third_party/gameshark/opponents.tsv`.
+
+**Monster records are stride 0x1C with ATK at +0xE and DEF at +0x10.** From the
+Card 1–5 codes: `801A7B72`, `801A7B8E`, `801A7BAA`, `801A7BC6`, `801A7BE2` —
+0x1C apart, and against Unchiga's `playerMonsters 0x801A7B64` that puts ATK at
++0xE. A second block at `801A7D16` follows the same stride until card 5, where
+`801A7D82` breaks it by 4; expected is `801A7D86`. Third source error found the
+same way.
+
+## The verification gate, and its honest limit
+
+`tools_src/gameshark.py` now checks every `D0`/`E0` guard against
+`extracted/SLUS_014.11`, and the distinction matters more than the check:
+
+* **a guard on a CODE address** asserts an instruction halfword, which never
+  changes. Mismatch proves the code targets another build → `REJECTED`. That is
+  what keeps PAL/JP codes out of a list labelled NTSC-U.
+* **a guard on a DATA address** asserts a runtime value the game overwrites,
+  and the file holds only its initial value. Mismatch there means nothing, so
+  those report `UNCHECKABLE` rather than a verdict the tool did not earn.
+
+Measured: `D002C322 1040` (the Library patch) is `VERIFIED` — our image really
+does hold `0x1040` there. The three runtime guards in the Free Duel and In-Duel
+codes come back `UNCHECKABLE`, correctly. A deliberately wrong guard on the
+same address comes back `REJECTED`, which is the control: a gate that cannot
+say no is not a gate.
