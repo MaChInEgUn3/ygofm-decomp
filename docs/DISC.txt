@@ -68,8 +68,28 @@ Three things this falsified
    `80213728`**, 20 KB at `80237728`, at 68/87/88% non-zero. The density
    figure in the old comment was right and the address was off by 0x68000,
    which is the signature of a number that was reasoned about rather than
-   measured. Corrected in place. Whether the 116 KB block is the card table is
-   still a guess; nothing has been decoded out of it.
+   measured. Corrected in place.
+
+   RESOLVED 2026-09-01, and the guess was wrong in a useful way: the 116 KB
+   block is the game's TEXT blob (all 722 card names, the 24 type names and
+   the 10 guardian-star names, 0xFF-delimited, in the custom 1-byte encoding
+   Data Crystal publishes as a .tbl), and the 20 KB block beside it is the
+   card STATS table -- 722 packed u32s at file 0x1C4A44 (= vram 0x801D4244
+   under the plain file+0x8000F800 formula): ATK bits 0-8 x10, DEF bits 9-17
+   x10, guardian stars bits 18-25, type bits 26-30. Decoded and verified on
+   Blue-Eyes, Dark Magician, Kuriboh and card 722. The PS-X header's
+   t_addr/t_size (0x80010000, 0x1D0000) describe ONE linear load, which is
+   what makes that formula hold here.
+
+   OPEN, and it is a build-config question, not a doc one: config/
+   SLUS_014.11.yaml gives the `carddata` segment an explicit vram override
+   (0x800fe728, "vram jumps past the bss gap") that contradicts the linear
+   header. The build still hashes because splat emits the bytes in file
+   order whatever it labels them -- but it means splat's own asm/data dump
+   for this region may carry the wrong vram, which is exactly why a first
+   read of D_801D4244 through the yaml came back as zeros. Verify the
+   override against the header before trusting any symbol splat placed in
+   this segment; fixing it means re-splitting and re-checking the hash.
 
 What is established about the 24 addresses
 ------------------------------------------
