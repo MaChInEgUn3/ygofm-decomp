@@ -216,20 +216,47 @@ and the bonus is looked up per type per terrain [`getTerrainBoost`
 `func_8002497C`, table at `0x800909D4`]. Terrain persists until another field
 card replaces it.
 
-### Magic, traps, equips
+### Magic, traps, equips — what each card does, from the code
 
-A magic card played from the hand takes effect immediately and is discarded.
-The effects are few and fixed: destroy all monsters, destroy monsters of a
-type, raise or lower attack, change terrain, and so on.
+The game does not read a card's *text*; it reads its **number**. When a card
+from one of the three non-monster ranges is played, a placement state machine
+[`func_80019608`] hands the id to a guard [`func_80026BA4`] that accepts only
+301–350, 651–700 and 721, converts it to a small index, and a per-tick
+dispatcher [`func_80026B34`] looks that index up in a 104-byte table
+[`0x80090AD4`] to get an **effect group**, 0–13, then calls the group's
+handler from a 30-entry function table [`0x80090A5C`] — one entry for the
+announce pass and one for the resolve pass. So every spell in the game is one
+of fourteen behaviours, and which cards share a behaviour is data:
 
-An **equip** card is played onto one of your monsters and raises its stats —
-but only if that equip is valid for that monster, which is another hidden
-table [`equipTable` `0x8017A1D8`, checked by `checkEquip` `func_80019A08`].
-An invalid equip is wasted.
+| group | cards | what the handler does |
+|---|---|---|
+| 0 | all 34 **equips** and all 10 **traps** | nothing at play time — equips resolve when attached to a monster, traps when triggered |
+| 1 | Forest, Wasteland, Mountain, Sogen, Umi, Yami | sets the terrain [`0x8009B364`] and recomputes bonuses |
+| 2 | Mooyan Curry, Red Medicine, Goblin's Secret Remedy, Soul of the Pure, Dian Keto the Cure Master | restores life points by a per-card amount |
+| 3 | Sparks, Hinotama, Final Flame, Ookazi, Tremendous Fire | deals 50 / 100 / 200 / 500 / 1000 damage to the opponent's life points |
+| 4 | Dark Hole, Dragon Capture Jar | acts on every monster on the field (Dragon Capture Jar is special-cased by id) |
+| 5 | Warrior Elimination, Eternal Rest, Stain Storm, Crush Card, Eradicating Aerosol, Breath of Light, Eternal Draught | destroys monsters selected by one per-card parameter — by the names, a monster type each |
+| 6 | Stop Defense | flips a defending monster to attack |
+| 7 | Raigeki | destroys the opponent's monsters |
+| 8 | Dark-piercing Light | reveals face-down monsters |
+| 9 | Spellbinding Circle, Shadow Spell | lowers an enemy monster's stats by 500 / 1000, on a timer |
+| 10 | Swords of Revealing Light | reveals the opponent's field and installs a lasting effect on their side |
+| 11 | Cursebreaker | removes an effect |
+| 12 | all 24 **rituals** | validates the three tributes [`checkRitual`, `0x801799D8`] and performs the summon |
+| 13 | Harpie's Feather Duster | destroys the opponent's magic/trap zone |
 
-A **trap** is placed face down in a magic/trap zone and triggers on the
-opponent's action — an attack of a certain strength, a magic card. Traps in
-this game are automatic; there is no choosing when to spring them.
+The "what" column is the handler's code as read, with the card names filled
+in from the effect table; the two rows marked *by the names* are the reading
+that the names make obvious but the code was not traced far enough to state
+outright. Groups 6, 7, 8, 10, 11 and 13 all use the same animated
+slot-by-slot scan, which is why they play out visibly one zone at a time.
+
+An **equip** is played onto one of your monsters and raises its stats — but
+only if that equip is valid for that monster, which is a hidden table
+[`equipTable` `0x8017A1D8`, checked by `checkEquip` `func_80019A08`]. An
+invalid equip is wasted. A **trap** is placed face down in a magic/trap zone
+and springs on the opponent's action automatically; there is no choosing
+when.
 
 ### Fusion
 
@@ -304,12 +331,37 @@ You own cards in the **trunk**: one byte per card, 722 of them
 lives in that same byte. Your **deck** is a separate list of 40 [`0x801D0200`]
 drawn from the trunk.
 
-Cards have a **type** (Dragon, Spellcaster, Zombie, Warrior, Beast-Warrior,
-Beast, Winged Beast, Fiend, Fairy, Insect, Dinosaur, Reptile, Fish, Sea
-Serpent, Machine, Thunder, Aqua, Pyro, Rock, Plant, plus Magic, Trap, Equip,
-Ritual, Field), an **attack** and **defence**, two **Guardian Stars**, a
-**level**, a **password**, and a **starchip cost**. The static per-card data is
-loaded into a runtime table [`0x801D4244`].
+Of the 722 cards, **621 are monsters, 34 equips, 33 magic, 24 rituals and 10
+traps** [counted from the game's own type field]. The 101 non-monsters occupy
+three fixed id ranges — 301–350, 651–700 and 721 — which is how the duel code
+recognises them.
+
+Every card has a **type**: ids 0–19 are the monster types in the game's own
+order — Dragon, Spellcaster, Zombie, Warrior, Beast-Warrior, Beast, Winged
+Beast, Fiend, Fairy, Insect, Dinosaur, Reptile, Fish, Sea Serpent, Machine,
+Thunder, Aqua, Pyro, Rock, Plant — and 20 Magic, 21 Trap, 22 Ritual, 23 Equip.
+**There is no "field" kind**: Forest, Wasteland, Mountain, Sogen, Umi and Yami
+are ordinary magic cards (type 20) that happen to set the terrain.
+
+Monsters also carry an **attack**, a **defence**, two **Guardian Stars** and a
+**level**; every card has a **password** and a **starchip cost**. The stats
+are packed one 32-bit word per card [`0x801D4244`, file `0x1C4A44`: ATK bits
+0–8 ×10, DEF bits 9–17 ×10, second star bits 18–21, first star bits 22–25,
+type bits 26–30 — read from `baseCardStat` and `monGsBonus`]. Names are a
+single 0xFF-delimited text blob in the game's own one-byte encoding
+[`0x801D6001`], the level is the low nibble of a byte per card
+[`0x801D5332`], and passwords and costs are not in the executable at all —
+they are 8-byte records in `WA_MRG.MRG` on the disc (cost, then the password
+as reversed BCD).
+
+Guardian Star ids: 1 Mars, 2 Jupiter, 3 Saturn, 4 Uranus, 5 Pluto, 6 Neptune
+— the six-cycle — and 7 Mercury, 8 Sun, 9 Moon, 10 Venus — the four-cycle.
+Blue-Eyes White Dragon is Sun/Mars, 3000/2500, Dragon, level 8, cost 999999.
+
+**24 cards have no password at all** — a sentinel in place of one — and they
+are the fusion-only and story-only cards: Blue-eyes Ultimate Dragon, Gate
+Guardian, Black Luster Soldier, Magician of Black Chaos, Cosmo Queen, Dark
+Magic Ritual and the like. You cannot buy those; you fuse, ritual or win them.
 
 The **password** system doubles as the shop: every card's eight-digit code is
 printed on the real card, and entering it at the Password screen buys the card
