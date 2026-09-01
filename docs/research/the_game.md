@@ -178,10 +178,13 @@ advantage —
     Sun → Moon → Venus → Mercury → Sun
     Mars → Jupiter → Saturn → Uranus → Pluto → Neptune → Mars
 
-— and when a monster attacks or is attacked, if its chosen star beats the
-other monster's, it gets **+500** to attack and defence for that battle
-[`gsBonus` `func_8002CB80`, `monGsBonus` `func_8001EE44`]. Choosing the right
-star is the moment-to-moment skill of the game.
+— and the rule, read from the code [`gsBonus` `func_8002CB80`, decompiled],
+is stricter than "beats": only **adjacent** stars in a cycle interact. If your
+star is the one immediately *before* the opponent's in its cycle you get
+**+500**; if it is the one immediately *after*, **−500**; any other distance,
+or a star from the other cycle, is 0. The code treats stars 1–6 as the
+six-cycle and 7–10 as the four-cycle. Choosing the right star is the
+moment-to-moment skill of the game.
 
 ### Battle
 
@@ -344,11 +347,35 @@ writes it back to the card when you save.
 
 ---
 
+## How input reaches the game
+
+Every screen reads the pad the same way, and the chain is fully located. The
+PsyQ pad driver fills a buffer [`0x800EF668`, handed to `InitPAD` by
+`func_8003CBE8`]. Once per frame `func_8003CC38` [decompiled] folds both pads'
+raw button bits into one word [`0x8009B3A8`, pad 1 low, pad 2 high, inverted
+from active-low]. Then `func_8003CCD8` derives the words the game actually
+reads: **held** [`0x8009B3A4`], **pressed this frame**
+[`0x8009B398` = `(now ^ before) & now`], and a repeat word [`0x8009B394`,
+inferred]. Thirty-seven functions test buttons against those; the
+pressed-this-frame word is the one most of them use.
+
+What is *not* established is a clean button-to-action map per screen: the
+mode handlers share input helpers, so static call-reach attributes the same
+button set to several modes. That map is a runtime-tracing job — the recomp's
+function-entry trace is the right tool — and it is left open here.
+
 ## What is unverified
 
 * The exact scoring weights that produce each rank, and the exact starchip
   award per rank. The functions and tables are located; their contents have
   not been read.
+* Three duel rules stated above from memory of the game, not from code:
+  whether a monster played this turn can attack; whether the game imposes a
+  limit on copies of one card in a deck; and whether running out of cards to
+  draw loses the duel. Direct attack on an empty field is likewise unread.
+* The per-screen button map (see the input section).
+* Campaign progression — which duel unlocks which map node — is not mapped
+  at all. The AI scripts each duelist runs are not read.
 * The full set of magic-card effects and trap triggers.
 * Whether monsters in Free Duel two-player use the same AI interpreter (they
   should not; that mode has two human players).
