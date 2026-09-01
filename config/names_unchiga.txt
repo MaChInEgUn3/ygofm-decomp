@@ -18,24 +18,32 @@
 #
 # REFRESHED 2026-08-31 from his tangos/work branch: 365 names added.
 #
+# Unchiga asked on 2026-09-01 that his MECHANICAL names not be treated as
+# names -- "I wouldn't consider those to be readable".  142 rows whose name
+# carries a baked-in address are commented out below rather than deleted,
+# the same treatment the idb author's own myst_sub_ placeholders get in
+# config/names_gms.txt.  Several sit on functions the idb DOES name:
+# 0x8002CE08 debugMenuLoop, 0x8002CE64 campaignLoop, 0x8002D684
+# passwordMenuLoop, 0x8002DC38, 0x8002C7E8 checkRitual.
+#
 # addr        kind  canonical                their name
-0x80010000  data  D_80010000        D_80010000_arr
+# MECHANICAL (not a name) 0x80010000  data  D_80010000        D_80010000_arr
 0x800129D8  func  func_800129D8     __SN_ENTRY_POINT
 0x80012A78  func  func_80012A78     __main
 0x80012AE8  func  func_80012AE8     __do_global_dtors
 0x80012CD4  func  func_80012CD4     D_80012CD4_fn
 0x80012D4C  func  func_80012D4C     call_four_update_funcs
-0x80012D84  func  func_80012D84     call_80012d4c_n_times
+# MECHANICAL (not a name) 0x80012D84  func  func_80012D84     call_80012d4c_n_times
 0x80012E5C  func  func_80012E5C     gpu_disp_buff_swap_and_ot_sort_dispatch
 0x800143DC  func  func_800143DC     copy_9e18_to_9e60_and_flags
-0x80014EEC  func  func_80014EEC     reinit_d800e9e60_obj
+# MECHANICAL (not a name) 0x80014EEC  func  func_80014EEC     reinit_d800e9e60_obj
 0x800154E4  func  func_800154E4     draw_screen_fade_overlay
-0x800157DC  func  func_800157DC     call_80015780_flags_and_8001572c
+# MECHANICAL (not a name) 0x800157DC  func  func_800157DC     call_80015780_flags_and_8001572c
 0x80015870  func  func_80015870     reset_9ec8_state_if_flag145
 0x80015998  func  func_80015998     loop_call_four_update_funcs_while_flag80
-0x80015B50  func  func_80015B50     call_800158b8_flag_80015870_and_loop
-0x80015C0C  func  func_80015C0C     call_80015780_flag_and_8001572c
-0x80016D04  func  func_80016D04     forward_fields_30_32_to_80016784
+# MECHANICAL (not a name) 0x80015B50  func  func_80015B50     call_800158b8_flag_80015870_and_loop
+# MECHANICAL (not a name) 0x80015C0C  func  func_80015C0C     call_80015780_flag_and_8001572c
+# MECHANICAL (not a name) 0x80016D04  func  func_80016D04     forward_fields_30_32_to_80016784
 0x80016D2C  func  func_80016D2C     draw_digit_sprites
 0x80016E70  func  func_80016E70     draw_digit_widget_pair
 0x8001700C  func  func_8001700C     card_flag_test_c000
@@ -59,48 +67,48 @@
 0x8001D3C4  func  func_8001D3C4     tick_lerp_position_toward_target
 0x8001F364  func  func_8001F364     duel_flags_state_and_field_spawn_dispatch
 0x80020D4C  func  func_80020D4C     update_orbiting_effect_obj
-0x80021894  func  func_80021894     ring_buffer_insert_801d0200
+# MECHANICAL (not a name) 0x80021894  func  func_80021894     ring_buffer_insert_801d0200
 0x80022EEC  func  func_80022EEC     apply_stat_template_or_delete
 0x800235C0  func  func_800235C0     update_active_move_record
-0x80023FBC  func  func_80023FBC     decode_status_flags_call_80023d08
+# MECHANICAL (not a name) 0x80023FBC  func  func_80023FBC     decode_status_flags_call_80023d08
 0x800240B0  func  func_800240B0     cursor_card_pick_tick
 0x800245EC  func  func_800245EC     duel_seq_step
 0x80024704  func  func_80024704     card_id_compare
 0x800249E0  func  func_800249E0     card_record_fill
 0x80024C1C  func  func_80024C1C     spawn_card_type_icon_obj
 0x80024D34  func  func_80024D34     opponent_field_record_fill
-0x80024DC8  func  func_80024DC8     init_800eb26c_fields_from_args
+# MECHANICAL (not a name) 0x80024DC8  func  func_80024DC8     init_800eb26c_fields_from_args
 0x80024E24  func  func_80024E24     flag80_test_and_set
 0x800255FC  func  func_800255FC     arm_field_effect_marker
 0x80025BEC  func  func_80025BEC     spawn_or_rearm_field_effect_marker
 0x800262D4  func  func_800262D4     obj_lifecycle_state_dispatch
-0x80026C6C  func  func_80026C6C     table801a7ad8_collect_below_threshold
-0x80026D18  func  func_80026D18     table801a7ad8_find_matches
-0x80028220  func  func_80028220     init_801ab00c_pair
+# MECHANICAL (not a name) 0x80026C6C  func  func_80026C6C     table801a7ad8_collect_below_threshold
+# MECHANICAL (not a name) 0x80026D18  func  func_80026D18     table801a7ad8_find_matches
+# MECHANICAL (not a name) 0x80028220  func  func_80028220     init_801ab00c_pair
 0x800291E0  func  func_800291E0     init_container_entry_objs
 0x80029528  func  func_80029528     call_4036c_clear_entry_fields
 0x80029EB0  func  func_80029EB0     list_entry_byte
 0x8002A660  func  func_8002A660     scroll_follow_cursor
 0x8002C518  func  func_8002C518     test_byte_flag_591_else_find_id_index
-0x8002C598  func  func_8002C598     reset_pool_800ead88
+# MECHANICAL (not a name) 0x8002C598  func  func_8002C598     reset_pool_800ead88
 0x8002C6C8  func  func_8002C6C8     duel_phase_overlay_dispatch
-0x8002C7E8  func  func_8002C7E8     table801a7ad8_recipe_lookup
+# MECHANICAL (not a name) 0x8002C7E8  func  func_8002C7E8     table801a7ad8_recipe_lookup
 0x8002C9B4  func  func_8002C9B4     collect_field_slot_ptrs
 0x8002CD48  func  func_8002CD48     call_ccca8_then_cce4_if_zero
 0x8002CDE8  func  func_8002CDE8     __builtin_vec_new
-0x8002CE08  func  func_8002CE08     mask_test_call_800eb26c_two_calls
-0x8002CE64  func  func_8002CE64     mask_test_800eb26c_notify_and_recheck
-0x8002D684  func  func_8002D684     mask_test_call_800eb26c
+# MECHANICAL (not a name) 0x8002CE08  func  func_8002CE08     mask_test_call_800eb26c_two_calls
+# MECHANICAL (not a name) 0x8002CE64  func  func_8002CE64     mask_test_800eb26c_notify_and_recheck
+# MECHANICAL (not a name) 0x8002D684  func  func_8002D684     mask_test_call_800eb26c
 0x8002D7CC  func  func_8002D7CC     spawn_fade_teardown_dispatch
-0x8002DC38  func  func_8002DC38     mask_test_800eb26c_reinit_and_poll
+# MECHANICAL (not a name) 0x8002DC38  func  func_8002DC38     mask_test_800eb26c_reinit_and_poll
 0x8002E470  func  func_8002E470     stream_read_index_and_check_ready
-0x8002F9D4  func  func_8002F9D4     read_stream_u16le_call_8002ee5c
+# MECHANICAL (not a name) 0x8002F9D4  func  func_8002F9D4     read_stream_u16le_call_8002ee5c
 0x80030198  func  func_80030198     init_duel_field_state
-0x80030250  func  func_80030250     init_800eb2c0_fields_from_args
+# MECHANICAL (not a name) 0x80030250  func  func_80030250     init_800eb2c0_fields_from_args
 0x80030CB0  func  func_80030CB0     guarded_init_and_poll_result
 0x80030D5C  func  func_80030D5C     guarded_init_and_notify
-0x80030E30  func  func_80030E30     mask_test_call_800eb2eb_state3
-0x80030E7C  func  func_80030E7C     mask_test_call_800eb2eb_state4
+# MECHANICAL (not a name) 0x80030E30  func  func_80030E30     mask_test_call_800eb2eb_state3
+# MECHANICAL (not a name) 0x80030E7C  func  func_80030E7C     mask_test_call_800eb2eb_state4
 0x80031E04  func  func_80031E04     call_31cd4_loop
 0x80032328  func  func_80032328     call_14e1c_137e4
 0x80032BD4  func  func_80032BD4     compare_rec_two_level_std
@@ -109,10 +117,10 @@
 0x800357E8  func  func_800357E8     int_to_digits
 0x800358FC  func  func_800358FC     call_8e590_mod
 0x80035BE4  func  func_80035BE4     forward_args_call_35ab8_35af0
-0x80035DF4  func  func_80035DF4     clear_two_fields_800eb288
+# MECHANICAL (not a name) 0x80035DF4  func  func_80035DF4     clear_two_fields_800eb288
 0x80036BCC  func  func_80036BCC     find_entry_by_be16_id
 0x80036D70  func  func_80036D70     read_stream_u32be
-0x8003735C  func  func_8003735C     scan_flag80_entries_800eb288
+# MECHANICAL (not a name) 0x8003735C  func  func_8003735C     scan_flag80_entries_800eb288
 0x800374A8  func  func_800374A8     set_field81_call_373c8
 0x800384E4  func  func_800384E4     read_stream_byte_set_bit12
 0x80038B08  func  func_80038B08     call_4036c_reset_field48_81_98
@@ -145,14 +153,14 @@
 0x8003F70C  func  func_8003F70C     call_8003F454_or_default
 0x8003FCD8  func  func_8003FCD8     arm_and_call_8003F8D4_state29
 0x8003FE70  func  func_8003FE70     rng_seed
-0x8003FEE0  func  func_8003FEE0     call_80048658_255_0
+# MECHANICAL (not a name) 0x8003FEE0  func  func_8003FEE0     call_80048658_255_0
 0x8003FF08  func  func_8003FF08     call_masked_and_store_orred
-0x8003FF34  func  func_8003FF34     call_80047430_neg8_0
+# MECHANICAL (not a name) 0x8003FF34  func  func_8003FF34     call_80047430_neg8_0
 0x8003FF58  func  func_8003FF58     call_set_1582_1584_negated
-0x8003FF88  func  func_8003FF88     call_80048658_flagged
-0x8003FFB4  func  func_8003FFB4     call_80045334_masked_flag
-0x8003FFD8  func  func_8003FFD8     call_80047314_masked_flag
-0x8003FFFC  func  func_8003FFFC     call_800473f0_dual_then_80047ec4
+# MECHANICAL (not a name) 0x8003FF88  func  func_8003FF88     call_80048658_flagged
+# MECHANICAL (not a name) 0x8003FFB4  func  func_8003FFB4     call_80045334_masked_flag
+# MECHANICAL (not a name) 0x8003FFD8  func  func_8003FFD8     call_80047314_masked_flag
+# MECHANICAL (not a name) 0x8003FFFC  func  func_8003FFFC     call_800473f0_dual_then_80047ec4
 0x8004002C  func  func_8004002C     find_free_slot_0x10_0x60
 0x8004006C  func  func_8004006C     find_free_slot_0x0_0x60
 0x800400AC  func  func_800400AC     get_or_init_D_800EFE48_slot
@@ -162,14 +170,14 @@
 0x80040424  func  func_80040424     set_kind_and_clear_bit4
 0x8004044C  func  func_8004044C     set_pos_and_kind
 0x80040468  func  func_80040468     init_obj_id_pos_flags
-0x800404CC  func  func_800404CC     set_30_32_and_call_80040468
+# MECHANICAL (not a name) 0x800404CC  func  func_800404CC     set_30_32_and_call_80040468
 0x80040814  func  func_80040814     run_active_rec_chain
 0x80040BF8  func  func_80040BF8     update_all_efe48_slots
 0x8004143C  func  func_8004143C     accum_add_le16
 0x80041464  func  func_80041464     accum_add_le16_xor_flag
 0x800427DC  func  func_800427DC     reset_obj_and_set_5A_flag08
-0x80042874  func  func_80042874     call_80040468_store54
-0x800428A8  func  func_800428A8     call_800404CC_store54
+# MECHANICAL (not a name) 0x80042874  func  func_80042874     call_80040468_store54
+# MECHANICAL (not a name) 0x800428A8  func  func_800428A8     call_800404CC_store54
 0x800428EC  func  func_800428EC     sub_table_lookup_set_flag
 0x80042918  func  func_80042918     sub_from_global_set_flag
 0x8004293C  func  func_8004293C     sub_from_global_set_flag3
@@ -196,37 +204,37 @@
 0x80044D0C  func  func_80044D0C     io_state_set1_cb
 0x80044D20  func  func_80044D20     io_state_set2_cb
 0x80044D34  func  func_80044D34     io_state_set3_cb
-0x80044DA0  func  func_80044DA0     set_8009b45c_514_515
+# MECHANICAL (not a name) 0x80044DA0  func  func_80044DA0     set_8009b45c_514_515
 0x80044E90  func  func_80044E90     set_field514_515_range_flags
-0x80044FE4  func  func_80044FE4     get_8009b45c_510
-0x8004503C  func  func_8004503C     set_8009b45c_512_49
-0x800451E0  func  func_800451E0     call_80045208_masked_128
-0x8004544C  func  func_8004544C     clear_8009b45c_busy
+# MECHANICAL (not a name) 0x80044FE4  func  func_80044FE4     get_8009b45c_510
+# MECHANICAL (not a name) 0x8004503C  func  func_8004503C     set_8009b45c_512_49
+# MECHANICAL (not a name) 0x800451E0  func  func_800451E0     call_80045208_masked_128
+# MECHANICAL (not a name) 0x8004544C  func  func_8004544C     clear_8009b45c_busy
 0x8004545C  func  func_8004545C     arm_state_and_register_cb
 0x80045484  func  func_80045484     entry_has_marker_byte
 0x80046F58  func  func_80046F58     sound_shutdown_full
-0x80047008  func  func_80047008     get_8009b45c_48
-0x8004701C  func  func_8004701C     set_8009b45c_f4a_low_nibble
-0x8004703C  func  func_8004703C     get_8009b45c_40
+# MECHANICAL (not a name) 0x80047008  func  func_80047008     get_8009b45c_48
+# MECHANICAL (not a name) 0x8004701C  func  func_8004701C     set_8009b45c_f4a_low_nibble
+# MECHANICAL (not a name) 0x8004703C  func  func_8004703C     get_8009b45c_40
 0x80047278  func  func_80047278     call_split_word_halves
-0x80047314  func  func_80047314     call_8004733C_masked_flag
-0x800473CC  func  func_800473CC     call_800473F0_neg32
+# MECHANICAL (not a name) 0x80047314  func  func_80047314     call_8004733C_masked_flag
+# MECHANICAL (not a name) 0x800473CC  func  func_800473CC     call_800473F0_neg32
 0x80047430  func  func_80047430     call_set_1582_1584_masked
 0x80047458  func  func_80047458     call_set_1582_1584_masked_b
 0x80048A28  func  func_80048A28     combat_status_flag_dispatch
-0x800490F0  func  func_800490F0     set_8009b45c_1582_1584
-0x80049108  func  func_80049108     set_8009b45c_1582_1584_b
-0x80049120  func  func_80049120     get_8009b45c_1582_nonzero
-0x80049200  func  func_80049200     call_80049230_sign16
+# MECHANICAL (not a name) 0x800490F0  func  func_800490F0     set_8009b45c_1582_1584
+# MECHANICAL (not a name) 0x80049108  func  func_80049108     set_8009b45c_1582_1584_b
+# MECHANICAL (not a name) 0x80049120  func  func_80049120     get_8009b45c_1582_nonzero
+# MECHANICAL (not a name) 0x80049200  func  func_80049200     call_80049230_sign16
 0x800492D8  func  func_800492D8     sound_init
-0x80049434  func  func_80049434     reset_8009b458_idle_state
-0x80049594  func  func_80049594     set_8009b458_81c
+# MECHANICAL (not a name) 0x80049434  func  func_80049434     reset_8009b458_idle_state
+# MECHANICAL (not a name) 0x80049594  func  func_80049594     set_8009b458_81c
 0x800495A4  func  func_800495A4     call_8004B9E0_if_flag814
-0x800495DC  func  func_800495DC     clear_8009b458_815
-0x800495EC  func  func_800495EC     set_8009b458_815
-0x80049600  func  func_80049600     set_8009b458_510_validated
+# MECHANICAL (not a name) 0x800495DC  func  func_800495DC     clear_8009b458_815
+# MECHANICAL (not a name) 0x800495EC  func  func_800495EC     set_8009b458_815
+# MECHANICAL (not a name) 0x80049600  func  func_80049600     set_8009b458_510_validated
 0x80049694  func  func_80049694     sound_shutdown
-0x800498F8  func  func_800498F8     clear_8009b458_4A4_if_set
+# MECHANICAL (not a name) 0x800498F8  func  func_800498F8     clear_8009b458_4A4_if_set
 0x80049CB0  func  func_80049CB0     reset_slot_7E0_if_active
 0x80049EC8  func  func_80049EC8     set_pos_masked_and_notify
 0x80049F10  func  func_80049F10     set_pos_514_and_notify
@@ -247,7 +255,7 @@
 0x80052528  func  func_80052528     blend_camera_zoom_target
 0x800533D8  func  func_800533D8     reset_gpu_state_and_flags
 0x800559D4  func  func_800559D4     duel_state_debug_dispatch
-0x800580D4  func  func_800580D4     build_obj_lwtransform_800f2c40
+# MECHANICAL (not a name) 0x800580D4  func  func_800580D4     build_obj_lwtransform_800f2c40
 0x80058434  func  func_80058434     update_3d_position
 0x80058DD8  func  func_80058DD8     get_D_800F2C40_slot_status
 0x80058E3C  func  func_80058E3C     get_D_800F2C40_slot_field
@@ -262,7 +270,7 @@
 0x80059284  func  func_80059284     set_D_800F2C40_slot_field
 0x8005949C  func  func_8005949C     get_D_800F39F0_slot
 0x80059590  func  func_80059590     set_D_800F2C40_slot_bytes
-0x80059DD8  func  func_80059DD8     call_slot_handler_800fc1c_rows
+# MECHANICAL (not a name) 0x80059DD8  func  func_80059DD8     call_slot_handler_800fc1c_rows
 0x8005A1F4  func  func_8005A1F4     dist_to_stored_pos
 0x8005A8C4  func  func_8005A8C4     deck_capacity_check
 0x8005B64C  func  func_8005B64C     select_reverb_preset
@@ -394,14 +402,14 @@
 0x800775A4  func  func_800775A4     text_154
 0x800775AC  func  func_800775AC     text_15C
 0x800775B4  func  func_800775B4     text_164
-0x800775BC  func  func_800775BC     text_16C_800775BC
+# MECHANICAL (not a name) 0x800775BC  func  func_800775BC     text_16C_800775BC
 0x8007766C  func  func_8007766C     text_21C
 0x80077674  func  func_80077674     text_224
 0x8007767C  func  func_8007767C     text_22C
 0x80077684  func  func_80077684     text_234
 0x8007768C  func  func_8007768C     text_23C
 0x80077694  func  func_80077694     text_244
-0x8007769C  func  func_8007769C     text_24C_8007769C
+# MECHANICAL (not a name) 0x8007769C  func  func_8007769C     text_24C_8007769C
 0x80077A50  func  func_80077A50     _spu_note2pitch
 0x80077B20  func  func_80077B20     _spu_pitch2note
 0x80077C50  func  func_80077C50     SpuGetVoiceEnvelope
@@ -772,7 +780,7 @@
 0x80089570  func  func_80089570     loc_F0
 0x800895BC  func  func_800895BC     loc_13C
 0x800895F0  func  func_800895F0     loc_170
-0x80089910  func  func_80089910     text_490_80089910
+# MECHANICAL (not a name) 0x80089910  func  func_80089910     text_490_80089910
 0x800899A0  func  func_800899A0     ratan2
 0x80089B20  func  func_80089B20     _patch_gte
 0x80089C00  func  func_80089C00     SetDQA
@@ -785,9 +793,9 @@
 0x80089CF0  func  func_80089CF0     RotAverageNclip3_nom
 0x80089D30  func  func_80089D30     GsScanAnim
 0x80089DD8  func  func_80089DD8     GsLinkAnim
-0x80089E20  func  func_80089E20     GsU_00000000
-0x80089E40  func  func_80089E40     GsU_02000000
-0x80089ED0  func  func_80089ED0     GsU_02000001
+# MECHANICAL (not a name) 0x80089E20  func  func_80089E20     GsU_00000000
+# MECHANICAL (not a name) 0x80089E40  func  func_80089E40     GsU_02000000
+# MECHANICAL (not a name) 0x80089ED0  func  func_80089ED0     GsU_02000001
 0x80089F80  func  func_80089F80     GsScanUnit
 0x8008A138  func  func_8008A138     GsGetHeadpUnit
 0x8008A150  func  func_8008A150     GsSortUnit
@@ -964,9 +972,9 @@
 0x800902A0  func  func_800902A0     DecDCTvlc2
 0x800905B8  func  func_800905B8     loc_348
 0x800905F0  func  func_800905F0     DecDCTvlcBuild
-0x800908A0  data  D_800908A0        D_800908A0_arr
+# MECHANICAL (not a name) 0x800908A0  data  D_800908A0        D_800908A0_arr
 0x80090E0C  data  D_80090E0C        pow10_table
-0x80091508  data  D_80091508        L_80091508
+# MECHANICAL (not a name) 0x80091508  data  D_80091508        L_80091508
 0x8009AF76  data  D_8009AF76        D_8009AF76_b
 0x8009AFA3  data  D_8009AFA3        D_8009AFA3_arr
 0x8009AFA4  data  D_8009AFA4        D_8009AFA4_arr
@@ -1058,7 +1066,7 @@
 0x800134B4  func  func_800134B4     zero_word_table_and_flag
 0x80013898  func  func_80013898     ds_init_and_wait_ready
 0x800138F4  func  func_800138F4     retry_until_nonzero_then_finalize
-0x80013A94  func  func_80013A94     init_800e9e18_once
+# MECHANICAL (not a name) 0x80013A94  func  func_80013A94     init_800e9e18_once
 0x800140A0  func  func_800140A0     ds_packet_dispatch_5_2
 0x80014134  func  func_80014134     ds_packet_dispatch
 0x800141A8  func  func_800141A8     ds_command_dispatch_v2
@@ -1068,21 +1076,21 @@
 0x80014390  func  func_80014390     call_7e710_store_and_clear_bit
 0x80014FA4  func  func_80014FA4     check_duel_flags_call_15010
 0x80015010  func  func_80015010     update_state_flags_2
-0x80015038  func  func_80015038     call_80015010_if_flags
+# MECHANICAL (not a name) 0x80015038  func  func_80015038     call_80015010_if_flags
 0x800151B0  func  func_800151B0     reset_obj_fields_and_flag
 0x800156B8  func  func_800156B8     fill_byte_range_10_to_39
-0x8001572C  func  func_8001572C     reset_field6_7_800e9ec8_flag_v2
+# MECHANICAL (not a name) 0x8001572C  func  func_8001572C     reset_field6_7_800e9ec8_flag_v2
 0x80015780  func  func_80015780     reset_obj_poll_flag_and_call
-0x800159D8  func  func_800159D8     call_80015780_then_80015998
+# MECHANICAL (not a name) 0x800159D8  func  func_800159D8     call_80015780_then_80015998
 0x80015BD8  func  func_80015BD8     set_obj_fields_5_6
 0x80015BF0  func  func_80015BF0     set_obj_fields_4_5_6
-0x80015CFC  func  func_80015CFC     gp_flag_set_8009b141
+# MECHANICAL (not a name) 0x80015CFC  func  func_80015CFC     gp_flag_set_8009b141
 0x80017130  func  func_80017130     init_geom_scratch_record
-0x8001778C  func  func_8001778C     clear_entry_fields_801a7ad8
+# MECHANICAL (not a name) 0x8001778C  func  func_8001778C     clear_entry_fields_801a7ad8
 0x800178BC  func  func_800178BC     calibrate_screen_offset
-0x8001798C  func  func_8001798C     register_handler_800171A8
-0x80017DB4  func  func_80017DB4     set_marker_from_table801a7ad8_flags
-0x80017E3C  func  func_80017E3C     obj_apply_table801a7ad8_flags
+# MECHANICAL (not a name) 0x8001798C  func  func_8001798C     register_handler_800171A8
+# MECHANICAL (not a name) 0x80017DB4  func  func_80017DB4     set_marker_from_table801a7ad8_flags
+# MECHANICAL (not a name) 0x80017E3C  func  func_80017E3C     obj_apply_table801a7ad8_flags
 0x80018004  func  func_80018004     create_obj_set_flag_and_marker
 0x8001D344  func  func_8001D344     step_component_toward_target
 0x8001D518  func  func_8001D518     get_or_create_cached_slot
@@ -1091,37 +1099,37 @@
 0x80022618  func  func_80022618     debug_effect_msg_selector
 0x80022674  func  func_80022674     obj_charge_meter_dispatch
 0x80022FF0  func  func_80022FF0     clear_entry_list_5
-0x80024060  func  func_80024060     call_80023fbc_read_field25
-0x80024088  func  func_80024088     call_80023d08_read_field25
+# MECHANICAL (not a name) 0x80024060  func  func_80024060     call_80023fbc_read_field25
+# MECHANICAL (not a name) 0x80024088  func  func_80024088     call_80023d08_read_field25
 0x80024388  func  func_80024388     pad_l2_check_call_dispatch
-0x80024954  func  func_80024954     call_80024914_clear_field22
-0x80025028  func  func_80025028     find_table801a7ad8_entry_matching_id
+# MECHANICAL (not a name) 0x80024954  func  func_80024954     call_80024914_clear_field22
+# MECHANICAL (not a name) 0x80025028  func  func_80025028     find_table801a7ad8_entry_matching_id
 0x80025B28  func  func_80025B28     advance_obj_timer_and_check_thresholds
 0x80025EE0  func  func_80025EE0     reset_or_configure_obj_call_48658
 0x80028260  func  func_80028260     unpack_high_bit_value
-0x800282E8  func  func_800282E8     test_and_set_flag_8009b248
-0x80029574  func  func_80029574     clear_entry_fields_800ea0e8
+# MECHANICAL (not a name) 0x800282E8  func  func_800282E8     test_and_set_flag_8009b248
+# MECHANICAL (not a name) 0x80029574  func  func_80029574     clear_entry_fields_800ea0e8
 0x8002A788  func  func_8002A788     card_list_cursor_move
 0x8002A9C0  func  func_8002A9C0     sprite_quad_gpu_prim
-0x8002BD0C  func  func_8002BD0C     select_render_preset_800100a8
-0x8002BF3C  func  func_8002BF3C     notify_set_flags_801d0200_801d0250
+# MECHANICAL (not a name) 0x8002BD0C  func  func_8002BD0C     select_render_preset_800100a8
+# MECHANICAL (not a name) 0x8002BF3C  func  func_8002BF3C     notify_set_flags_801d0200_801d0250
 0x8002C4DC  func  func_8002C4DC     find_index_in_id_table
 0x8002C570  func  func_8002C570     test_byte_flag_591
-0x8002C5CC  func  func_8002C5CC     find_free_slot_800ead88
-0x8002C604  func  func_8002C604     alloc_init_pool_entry_800ead88
-0x8002C68C  func  func_8002C68C     call_8002c604_set_flag80_if_nonzero
+# MECHANICAL (not a name) 0x8002C5CC  func  func_8002C5CC     find_free_slot_800ead88
+# MECHANICAL (not a name) 0x8002C604  func  func_8002C604     alloc_init_pool_entry_800ead88
+# MECHANICAL (not a name) 0x8002C68C  func  func_8002C68C     call_8002c604_set_flag80_if_nonzero
 0x8002C938  func  func_8002C938     collect_high_bit_records
 0x8002CB50  func  func_8002CB50     copy_5words_and_clear
 0x8002CB80  func  func_8002CB80     calc_wrap_scroll_delta
 0x8002CD8C  func  func_8002CD8C     reset_flags_four_calls
-0x8002D3F8  func  func_8002D3F8     mask_test_800eb26c_dual_calls_conditional
+# MECHANICAL (not a name) 0x8002D3F8  func  func_8002D3F8     mask_test_800eb26c_dual_calls_conditional
 0x8002DA1C  func  func_8002DA1C     duel_setup_state_machine_dispatch
 0x8002DD74  func  func_8002DD74     main_task_dispatch_loop
 0x8002E060  func  func_8002E060     create_slot_2_and_tag
 0x8002E370  func  func_8002E370     set_flag2_from_entry_search
-0x8002E3B4  func  func_8002E3B4     test_and_set_flag_8009b27c
-0x8002E3DC  func  func_8002E3DC     call_8002e3b4_wrapper
-0x8002E3FC  func  func_8002E3FC     create_obj_and_init_800404cc
+# MECHANICAL (not a name) 0x8002E3B4  func  func_8002E3B4     test_and_set_flag_8009b27c
+# MECHANICAL (not a name) 0x8002E3DC  func  func_8002E3DC     call_8002e3b4_wrapper
+# MECHANICAL (not a name) 0x8002E3FC  func  func_8002E3FC     create_obj_and_init_800404cc
 0x8002E6B8  func  func_8002E6B8     parse_stream_header_and_opt_fields
 0x8002EB48  func  func_8002EB48     stream_read_dispatch_byte
 0x8002EDB0  func  func_8002EDB0     advance_input_byte_and_dispatch
@@ -1136,9 +1144,9 @@
 0x8003006C  func  func_8003006C     stream_read_u16le
 0x80030090  func  func_80030090     set_obj_fields_12_13_14
 0x800300AC  func  func_800300AC     set_obj_fields_12_13_14_v128
-0x80030EC8  func  func_80030EC8     arm_state_call_8003fcd8_dispatch
-0x80030F80  func  func_80030F80     call_80033c90_wrapper
-0x80031000  func  func_80031000     arm_state_call_8003fd14_dispatch
+# MECHANICAL (not a name) 0x80030EC8  func  func_80030EC8     arm_state_call_8003fcd8_dispatch
+# MECHANICAL (not a name) 0x80030F80  func  func_80030F80     call_80033c90_wrapper
+# MECHANICAL (not a name) 0x80031000  func  func_80031000     arm_state_call_8003fd14_dispatch
 0x80031784  func  func_80031784     gsortfastsprite_ring_draw
 0x80031F7C  func  func_80031F7C     release_last_id_entry
 0x8003201C  func  func_8003201C     build_id_histogram_and_leading_count
@@ -1151,21 +1159,21 @@
 0x80033BE8  func  func_80033BE8     flash_indicator_and_dispatch
 0x80033C90  func  func_80033C90     reset_state_and_set_mode7
 0x80033CA8  func  func_80033CA8     reset_state_and_set_mode7_v2
-0x80033CC4  func  func_80033CC4     update_field11589_from_table
+# MECHANICAL (not a name) 0x80033CC4  func  func_80033CC4     update_field11589_from_table
 0x80035598  func  func_80035598     compare_u32
 0x80035668  func  func_80035668     set_state_and_color
 0x80035680  func  func_80035680     set_active_ptr_and_flag4
 0x800358A0  func  func_800358A0     clear_trailing_separator_bytes
-0x80035AB8  func  func_80035AB8     set_entry_fields_800eb0f8
+# MECHANICAL (not a name) 0x80035AB8  func  func_80035AB8     set_entry_fields_800eb0f8
 0x80035B7C  func  func_80035B7C     cleanup_entry_clear_three_call_delete
 0x80035C38  func  func_80035C38     forward_args_call_35ab8_35af0_or_flag
-0x80035CA8  func  func_80035CA8     clear_matching_byte_800eaf08
-0x80035CE4  func  func_80035CE4     reset_free_slot_800eaf08
-0x80035D10  func  func_80035D10     find_free_slot_800eaf08
-0x80035DB8  func  func_80035DB8     clear_matching_byte_800eb288
+# MECHANICAL (not a name) 0x80035CA8  func  func_80035CA8     clear_matching_byte_800eaf08
+# MECHANICAL (not a name) 0x80035CE4  func  func_80035CE4     reset_free_slot_800eaf08
+# MECHANICAL (not a name) 0x80035D10  func  func_80035D10     find_free_slot_800eaf08
+# MECHANICAL (not a name) 0x80035DB8  func  func_80035DB8     clear_matching_byte_800eb288
 0x80036D3C  func  func_80036D3C     read_stream_u16le_multi
 0x80036F80  func  func_80036F80     set_flags_from_battle_mode
-0x800373C8  func  func_800373C8     set_flag80_entries_800eb288
+# MECHANICAL (not a name) 0x800373C8  func  func_800373C8     set_flag80_entries_800eb288
 0x8003767C  func  func_8003767C     reset_and_advance_multi_stream
 0x800377AC  func  func_800377AC     clear_field51_if_flag_zero
 0x8003787C  func  func_8003787C     set_field81_bit80_call_39fd4
@@ -1176,14 +1184,14 @@
 0x800379C4  func  func_800379C4     clear_field81_unless_result1
 0x800379F8  func  func_800379F8     set_field81_countdown_call_36d3c
 0x80037D6C  func  func_80037D6C     read_stream_byte_multi_to_field81
-0x80038070  func  func_80038070     call_80038024_with_flag
+# MECHANICAL (not a name) 0x80038070  func  func_80038070     call_80038024_with_flag
 0x80038094  func  func_80038094     read_stream_byte_then_call
 0x800380D4  func  func_800380D4     read_stream_signed_byte_multi_accumulate
 0x80038110  func  func_80038110     read_stream_byte_multi_accumulate
 0x800382A8  func  func_800382A8     obj_stream_read_speed_opcode
-0x80038388  func  func_80038388     call_80036d3c_store_field56
+# MECHANICAL (not a name) 0x80038388  func  func_80038388     call_80036d3c_store_field56
 0x800383B0  func  func_800383B0     clear_field96_call_store_field97
-0x80038690  func  func_80038690     call_80036d3c_into_8003ff08
+# MECHANICAL (not a name) 0x80038690  func  func_80038690     call_80036d3c_into_8003ff08
 0x80038898  func  func_80038898     read_stream_byte_set_state5
 0x800389C4  func  func_800389C4     clear_flag_bit3
 0x800389D8  func  func_800389D8     advance_slot_and_merge_stream_word
@@ -1194,20 +1202,20 @@
 0x80038E7C  func  func_80038E7C     decrement_field88_and_check_wrap
 0x80039AAC  func  func_80039AAC     test_and_set_obj_flag19
 0x80039AD4  func  func_80039AD4     clear_table_entry_and_set_flag
-0x80039E9C  func  func_80039E9C     reset_800eb010_records_and_8015c410
+# MECHANICAL (not a name) 0x80039E9C  func  func_80039E9C     reset_800eb010_records_and_8015c410
 0x80039F1C  func  func_80039F1C     test_and_set_obj_flag51
 0x80039FD4  func  func_80039FD4     reset_field48_and_call
 0x80039FF8  func  func_80039FF8     set_flag10_if_low_bits_clear
 0x8003B6AC  func  func_8003B6AC     set_range_D_800EB288_field24
-0x8003C2B4  func  func_8003C2B4     register_two_handlers_8003c120
+# MECHANICAL (not a name) 0x8003C2B4  func  func_8003C2B4     register_two_handlers_8003c120
 0x8003C4E0  func  func_8003C4E0     init_state_bar_and_load
-0x8003C8CC  func  func_8003C8CC     state_machine_dispatch_8009b37c
+# MECHANICAL (not a name) 0x8003C8CC  func  func_8003C8CC     state_machine_dispatch_8009b37c
 0x8003CB7C  func  func_8003CB7C     reset_history_ring_and_flags
 0x8003CFC8  func  func_8003CFC8     seed_rng_and_fill_scramble_array
-0x8003D2B8  func  func_8003D2B8     check_8003d288_and_state
-0x8003F758  func  func_8003F758     init_800efe18_and_setup_gpu
-0x8003F810  func  func_8003F810     refresh_801d0200_buffers
-0x8004020C  func  func_8004020C     dispatch_slot_move_8009b410
+# MECHANICAL (not a name) 0x8003D2B8  func  func_8003D2B8     check_8003d288_and_state
+# MECHANICAL (not a name) 0x8003F758  func  func_8003F758     init_800efe18_and_setup_gpu
+# MECHANICAL (not a name) 0x8003F810  func  func_8003F810     refresh_801d0200_buffers
+# MECHANICAL (not a name) 0x8004020C  func  func_8004020C     dispatch_slot_move_8009b410
 0x80040CAC  func  func_80040CAC     run_D_800EFE38_callback_list
 0x80040D14  func  func_80040D14     run_efe48_slots_secondary_callback
 0x80043DA0  func  func_80043DA0     find_matching_field_index_retry
@@ -1218,7 +1226,7 @@
 0x800442E4  func  func_800442E4     dispatch_object_init_sequence_4
 0x80044380  func  func_80044380     claim_slot536_12_and_card_info
 0x80044F58  func  func_80044F58     init_local_flags_and_notify
-0x80046768  func  func_80046768     s8009b45c_init
+# MECHANICAL (not a name) 0x80046768  func  func_80046768     s8009b45c_init
 0x80046990  func  func_80046990     reset_field_record_flags
 0x8004763C  func  func_8004763C     reset_43c_array_and_update_438
 0x80047864  func  func_80047864     spu_voice_set_attr_and_volumes
@@ -1226,40 +1234,40 @@
 0x80047AD0  func  func_80047AD0     notify_and_arm_entry
 0x80047EC4  func  func_80047EC4     retry_spu_key_until_nonzero
 0x80047F38  func  func_80047F38     build_low_nibble_match_mask
-0x80047FAC  func  func_80047FAC     count_matching_entries_80047fac
-0x80048C0C  func  func_80048C0C     set_8009b45c_vals_matching_id
+# MECHANICAL (not a name) 0x80047FAC  func  func_80047FAC     count_matching_entries_80047fac
+# MECHANICAL (not a name) 0x80048C0C  func  func_80048C0C     set_8009b45c_vals_matching_id
 0x80048C70  func  func_80048C70     copy_512_words
-0x80049308  func  func_80049308     retry_call_800496c4_or_refresh
-0x80049394  func  func_80049394     set_8009b45c_1564
+# MECHANICAL (not a name) 0x80049308  func  func_80049308     retry_call_800496c4_or_refresh
+# MECHANICAL (not a name) 0x80049394  func  func_80049394     set_8009b45c_1564
 0x800493F8  func  func_800493F8     reset_1564_field_and_flag
-0x800498BC  func  func_800498BC     call_80077240_bool
+# MECHANICAL (not a name) 0x800498BC  func  func_800498BC     call_80077240_bool
 0x80049C40  func  func_80049C40     reset_slot_7e0_full_state
-0x80049F50  func  func_80049F50     set_8009b458_7e2_on_cabc3
+# MECHANICAL (not a name) 0x80049F50  func  func_80049F50     set_8009b458_7e2_on_cabc3
 0x8004A518  func  func_8004A518     init_spu_voices
 0x8004A854  func  func_8004A854     find_lowest_qty_matching_item
-0x8004B910  func  func_8004B910     reset_8009b458_events_and_flags
-0x8004B990  func  func_8004B990     set_8009b458_503_run_and_clear_500
-0x8004B9E0  func  func_8004B9E0     run_8004c8c8_burst_if_flag502
+# MECHANICAL (not a name) 0x8004B910  func  func_8004B910     reset_8009b458_events_and_flags
+# MECHANICAL (not a name) 0x8004B990  func  func_8004B990     set_8009b458_503_run_and_clear_500
+# MECHANICAL (not a name) 0x8004B9E0  func  func_8004B9E0     run_8004c8c8_burst_if_flag502
 0x8004BC2C  func  func_8004BC2C     combine_four_8004BAE4_calls
 0x8004C84C  func  func_8004C84C     decay_item_durability_list
-0x8004C8C8  func  func_8004C8C8     process_timer_burst_records_8004c8c8
+# MECHANICAL (not a name) 0x8004C8C8  func  func_8004C8C8     process_timer_burst_records_8004c8c8
 0x80052694  func  func_80052694     update_camera_target_tracking
-0x80056504  func  func_80056504     voice_status_dispatch_800f2c40
+# MECHANICAL (not a name) 0x80056504  func  func_80056504     voice_status_dispatch_800f2c40
 0x80057E20  func  func_80057E20     build_clamped_bounds_vec
-0x80059134  func  func_80059134     init_light_triplet_800f2c40
-0x800592AC  func  func_800592AC     build_obj_rotmatrix_800f2c40
+# MECHANICAL (not a name) 0x80059134  func  func_80059134     init_light_triplet_800f2c40
+# MECHANICAL (not a name) 0x800592AC  func  func_800592AC     build_obj_rotmatrix_800f2c40
 0x80059520  func  func_80059520     get_D_800F2C40_slot_by_mod6
-0x800595C8  func  func_800595C8     set_obj_bounds_800f2c40
+# MECHANICAL (not a name) 0x800595C8  func  func_800595C8     set_obj_bounds_800f2c40
 0x8005969C  func  func_8005969C     set_D_800F2C40_fE0D_and_notify
 0x800597C8  func  func_800597C8     update_record_field_and_notify
-0x800598E4  func  func_800598E4     wrap_80059908
+# MECHANICAL (not a name) 0x800598E4  func  func_800598E4     wrap_80059908
 0x800599FC  func  func_800599FC     repackage_args
 0x80059A50  func  func_80059A50     copy_struct_call
 0x80059AA8  func  func_80059AA8     getset_bigrec
 0x80059C24  func  func_80059C24     init_two_systems
-0x80059C88  func  func_80059C88     test_neg2_8009af9a
+# MECHANICAL (not a name) 0x80059C88  func  func_80059C88     test_neg2_8009af9a
 0x80059C9C  func  func_80059C9C     reset_dispatch_state
-0x80059CD0  func  func_80059CD0     test_neg2_8009af9a_b
+# MECHANICAL (not a name) 0x80059CD0  func  func_80059CD0     test_neg2_8009af9a_b
 0x80059CE4  func  func_80059CE4     duel_stage_dispatch_init
 0x80059FAC  func  func_80059FAC     set_record_fields1826
 0x8005A010  func  func_8005A010     set_record_fields22_2a
@@ -1269,31 +1277,31 @@
 0x8005A468  func  func_8005A468     set_ptr_array_byte
 0x8005A4C4  func  func_8005A4C4     obj_ptr_init_fields
 0x8005A878  func  func_8005A878     check_record_flags
-0x8005A98C  func  func_8005A98C     rgb_to_hls_8005a98c
+# MECHANICAL (not a name) 0x8005A98C  func  func_8005A98C     rgb_to_hls_8005a98c
 0x8005B054  func  func_8005B054     blend_color
 0x8005B5FC  func  func_8005B5FC     fill_words
 0x8005B620  func  func_8005B620     copy_words
 0x8005B85C  func  func_8005B85C     register_handler
-0x8005C374  func  func_8005C374     set3_8009b4a0
+# MECHANICAL (not a name) 0x8005C374  func  func_8005C374     set3_8009b4a0
 0x8005C464  func  func_8005C464     cd_queue_read_request
 0x8005C530  func  func_8005C530     call_and_conditional
 0x8005C568  func  func_8005C568     retry_calls
-0x8005C5C4  func  func_8005C5C4     gp_flag_set_8009b064
+# MECHANICAL (not a name) 0x8005C5C4  func  func_8005C5C4     gp_flag_set_8009b064
 0x8005C62C  func  func_8005C62C     ds_open_and_read
-0x8005C690  func  func_8005C690     gp_flag_set_8009b063
+# MECHANICAL (not a name) 0x8005C690  func  func_8005C690     gp_flag_set_8009b063
 0x8005C768  func  func_8005C768     const_dispatch3
-0x8005F1A4  func  func_8005F1A4     idx8_80091570
+# MECHANICAL (not a name) 0x8005F1A4  func  func_8005F1A4     idx8_80091570
 0x8005F564  func  func_8005F564     counter_bump_check
 0x8005F588  func  func_8005F588     check_dispatch_flags
 0x8005F5C8  func  func_8005F5C8     stat_growth_ratio_apply
-0x8005F714  func  func_8005F714     state_flag_gate_call_8005f91c
+# MECHANICAL (not a name) 0x8005F714  func  func_8005F714     state_flag_gate_call_8005f91c
 0x8005F828  func  func_8005F828     record_pair_walk_dispatch
 0x8005FAE4  func  func_8005FAE4     init_state_block
 0x8005FB14  func  func_8005FB14     get_state_if_flag
 0x8005FB30  func  func_8005FB30     notify_pair_by_field6_range
 0x8005FBC4  func  func_8005FBC4     tween_calc
-0x80060170  func  func_80060170     table_insert_800f5918
-0x800601D0  func  func_800601D0     find_table_800f5918
+# MECHANICAL (not a name) 0x80060170  func  func_80060170     table_insert_800f5918
+# MECHANICAL (not a name) 0x800601D0  func  func_800601D0     find_table_800f5918
 0x800603DC  func  func_800603DC     const_dispatch
 0x80060568  func  func_80060568     const_dispatch2
 0x8006086C  func  func_8006086C     process_and_insert
@@ -1361,8 +1369,8 @@
 0x8007058C  func  func_8007058C     stream_read_advance
 0x800705AC  func  func_800705AC     stream_read16_advance
 0x800705D8  func  func_800705D8     init_duel_buffers
-0x80070870  func  func_80070870     scan_table2_80070870
-0x800708C4  func  func_800708C4     scan_table3_800708c4
+# MECHANICAL (not a name) 0x80070870  func  func_80070870     scan_table2_80070870
+# MECHANICAL (not a name) 0x800708C4  func  func_800708C4     scan_table3_800708c4
 0x80070920  func  func_80070920     scan_table2_or_3_by_kind
 0x80070988  func  func_80070988     stream_seek
 0x80070BB8  func  func_80070BB8     range_check_accum_f4f8
@@ -1378,7 +1386,7 @@
 0x800713B8  func  func_800713B8     idx_table_recb_field14_copy
 0x80071424  func  func_80071424     store_indexed_flag_from_table
 0x8007149C  func  func_8007149C     count_reca_nonzero_field0
-0x80071510  func  func_80071510     idx_table_write_flag_800eae90
+# MECHANICAL (not a name) 0x80071510  func  func_80071510     idx_table_write_flag_800eae90
 0x8007154C  func  func_8007154C     idx_table_recb_xor_field19_flag
 0x800715C4  func  func_800715C4     idx_table_write_or_default_window2
 0x8007164C  func  func_8007164C     idx_table_write_val16b
@@ -1398,9 +1406,9 @@
 0x80073380  func  func_80073380     clear_table2_upper
 0x800733A8  func  func_800733A8     scan_or_insert_window2_at126
 0x80073420  func  func_80073420     clear_table3_upper
-0x80073448  func  func_80073448     flag_800eae90_set
-0x80073458  func  func_80073458     flag_800eae90_clear
-0x80073464  func  func_80073464     flag_800f5c7f_set
+# MECHANICAL (not a name) 0x80073448  func  func_80073448     flag_800eae90_set
+# MECHANICAL (not a name) 0x80073458  func  func_80073458     flag_800eae90_clear
+# MECHANICAL (not a name) 0x80073464  func  func_80073464     flag_800f5c7f_set
 0x80073480  func  func_80073480     set_reca_flag
 0x800735A0  func  func_800735A0     idx_table_write_val16
 0x800735DC  func  func_800735DC     idx_table_copy_entry
@@ -1416,6 +1424,6 @@
 0x8007E4F0  func  func_8007E4F0     wrap_cd_getsector2
 0x8007E600  func  func_8007E600     lba_to_msf
 0x8007E710  func  func_8007E710     msf_to_lba
-0x8007E860  func  func_8007E860     getset_800f8394
-0x8007E880  func  func_8007E880     getset_800f8398
+# MECHANICAL (not a name) 0x8007E860  func  func_8007E860     getset_800f8394
+# MECHANICAL (not a name) 0x8007E880  func  func_8007E880     getset_800f8398
 0x8007E8D0  func  func_8007E8D0     range_check_set
