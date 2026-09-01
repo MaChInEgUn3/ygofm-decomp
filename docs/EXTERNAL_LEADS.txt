@@ -75,3 +75,45 @@ loop walks the fusion table tells you its bounds before you write a line. If a
 name here ever turns out to be worth keeping, verify it against behaviour
 first and then annotate the symbol in the usual place; do not promote anything
 out of this file by citation alone.
+
+# ---------------------------------------------------------------------------
+# COMMUNITY CHEAT OFFSETS -- a fourth source, and the only one that is
+# self-verifying. Added 2026-09-01.
+#
+# krystalgamer's observation: the Brazilian/Spanish/Vietnamese FM scene has
+# been sharing cheats and patches for years and every one states a FILE OFFSET
+# into SLUS_014.11, never a virtual address. That is why the corpus has never
+# been usable by a decomp -- and it is one addition away from being usable,
+# because this project already knows the delta (0x8000F800).
+#
+# `tools_src/offset.py` does the conversion and prints the containing function
+# and the instruction the byte belongs to.
+#
+# WHY THIS SOURCE IS BETTER THAN THE OTHER THREE: a cheat is a claim that
+# changing ONE byte produces ONE observable effect in the running game. It
+# names a behaviour and points at the instruction that implements it, and it
+# has been tested by everyone who ever used it. That is closer to evidence
+# than a wiki row or a name in someone's database.
+#
+# WORKED EXAMPLE (credited to Markin Marcal): "Olho do Milenio, Offset 8864 no
+# SLUS ... o codigo FF, substitua por 00 e voce vera a mao do NPC, substitua
+# por 01 e voce vera as cartas ocultas."
+#
+#   8864 is ambiguous between decimal and hex and the tutorials never say
+#   which. The stated byte settles it: decimal 8864 holds 0x00, hex 0x8864
+#   holds 0xFF. So it is hex -> vram 0x80018064, inside func_80018004:
+#
+#       lb    $v0, 0x1F($v0)     signed byte out of the card record
+#       bgez  $v0, .L8001806C    if >= 0, skip
+#       addiu $v0, $zero, 0xFF   <- the cheat patches this immediate's low half
+#       sb    $v0, 0x67($a0)     store into +0x67 of the object
+#
+#   So +0x67 is a card's VISIBILITY marker (0xFF = hidden) and the sign test on
+#   +0x1F is what classifies a card as the opponent's. func_80018004 is already
+#   decompiled here; neither the GMS idb nor the other decomp names it, and
+#   Unchiga's roster has the mechanical `create_obj_set_flag_and_marker`.
+#
+#   Still a HYPOTHESIS in the sense this file means: nobody here has run the
+#   patched binary. What is measured is the offset, the byte, the instruction
+#   and the field; what is taken on trust is that the effect is as described.
+# ---------------------------------------------------------------------------
