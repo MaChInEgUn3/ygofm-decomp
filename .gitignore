@@ -77,3 +77,15 @@ docs/DRAFT_*.md
 # Not ours to publish, and not derived from our own disassembly.
 gms.c
 dotr.c
+
+# Unchiga naming corpus, shared 2026-08-31 while he prepares a PR of his own.
+# NOT ignored because it is unwanted -- ignored so an `add -A` here cannot land
+# his work under our authorship. It should arrive as his commits.
+symbols_guide.md
+known_functions.md
+known_variables.md
+findings.md
+suspects.md
+descriptions.md
+fm-field-guide.html
+naming_crosscheck.md
