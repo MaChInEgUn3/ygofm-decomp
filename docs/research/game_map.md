@@ -109,18 +109,27 @@ publish only 250 codes give the wrong constant.
 `0x800EA004` and the opponent's at `0x800EA024`. Each side also carries the
 ticking on-screen figure two bytes below the true value.
 
-**The game's fixed tables.**
+**The game's rule tables — and where they really live.**
 
-| table | address | touched by |
+| table | runtime address | touched by |
 |---|---|---|
 | fusion | `0x8017C2D8` | 2 functions (1 matched) |
 | equip | `0x8017A1D8` | 2 (1) |
 | ritual | `0x801799D8` | 4 (1) |
-| terrain bonuses | `0x800909D4` | — |
+| rank scoring | `0x801798A8` | `rankScoreChange`, `calcRankScore` |
+| terrain bonuses | `0x800909D4` | `getTerrainBoost` — an `s8[20][6]`, in the executable |
 
-Those small counts are the useful part: the fusion rules are reached from
-essentially one place, so "how does fusion work" is a two-function question,
-not a subsystem.
+Only the terrain table is in the executable. **The other four are zero in
+`SLUS_014.11` at those addresses** — verified byte by byte, and not an
+addressing slip, because the card-stats table at `0x801D4244` decodes exactly
+under the same file+0x8000F800 formula. They are loaded from `WA_MRG.MRG` at
+runtime, like the duel overlay at `0x80146000`. Their record formats are
+known from the code that reads them (see `the-game.md`), so an agent working
+on fusion needs the disc, not just the executable.
+
+Those small reader counts are the useful part: the fusion rules are reached
+from essentially one place, so "how does fusion work" is a two-function
+question, not a subsystem.
 
 ## The AI is a virtual machine
 
