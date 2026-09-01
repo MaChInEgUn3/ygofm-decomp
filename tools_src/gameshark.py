@@ -34,9 +34,16 @@ BIN = ROOT / "extracted" / "SLUS_014.11"
 DELTA = 0x8000F800          # vram -> file offset is the inverse
 SCOPE = 0x80073840          # below this is game code; above, SDK
 CODE = re.compile(r"^\s*([0-9A-Fa-f]{8})\s+([0-9A-Fa-f]{4})\s*$")
+# Every type EXCEPT the 0x50 repeat directive carries an address. Treating the
+# C0/C2/D2/D3 conditionals as address-less directives silently dropped 13
+# addresses from a compilation that claimed to be complete.
 KIND = {0x80: ("halfword write", 2), 0x30: ("byte write", 1),
-        0xD0: ("equal-to test", 2), 0xE0: ("not-equal test", 2),
-        0x50: ("repeat block", 0), 0x10: ("halfword write", 2)}
+        0x10: ("halfword write", 2), 0x11: ("halfword write", 2),
+        0xD0: ("equal-to test", 2), 0xD1: ("not-equal test", 2),
+        0xD2: ("less-than test", 2), 0xD3: ("greater-than test", 2),
+        0xE0: ("not-equal test", 2), 0xE2: ("test", 2),
+        0xC0: ("test", 2), 0xC2: ("test", 2),
+        0x50: ("repeat block", 0)}
 
 
 def image_halfword(vram):
