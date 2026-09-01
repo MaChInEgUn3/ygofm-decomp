@@ -213,8 +213,37 @@ Wasteland, Mountain, Sogen (meadow), Umi (sea), Yami (dark)**, or normal
 [`0x8009B364`]. Each monster type is helped or hurt by each terrain — a Fish
 gains 500 on Umi, a Dragon gains 500 on Mountain, a Fairy loses 500 on Yami —
 and the bonus is looked up per type per terrain [`getTerrainBoost`
-`func_8002497C`, table at `0x800909D4`]. Terrain persists until another field
-card replaces it.
+`func_8002497C`, reading an `s8[20][6]` at `0x800909D4` and multiplying by
+10]. Terrain persists until another field card replaces it. The whole table,
+read from the executable:
+
+| type | forest | wasteland | mountain | meadow(sogen) | sea(umi) | dark(yami) |
+|---|---|---|---|---|---|---|
+| Dragon | · | · | +500 | · | · | · |
+| Spellcaster | · | · | · | · | · | +500 |
+| Zombie | · | +500 | · | · | · | · |
+| Warrior | · | · | · | +500 | · | · |
+| Beast-Warrior | +500 | · | · | +500 | · | · |
+| Beast | +500 | · | · | · | · | · |
+| Winged Beast | · | · | +500 | · | · | · |
+| Fiend | · | · | · | · | · | +500 |
+| Fairy | · | · | · | · | · | −500 |
+| Insect | +500 | · | · | · | · | · |
+| Dinosaur | · | +500 | · | · | · | · |
+| Reptile | · | · | · | · | · | · |
+| Fish | · | · | · | · | +500 | · |
+| Sea Serpent | · | · | · | · | +500 | · |
+| Machine | · | · | · | · | −500 | · |
+| Thunder | · | · | +500 | · | +500 | · |
+| Aqua | · | · | · | · | +500 | · |
+| Pyro | · | · | · | · | −500 | · |
+| Rock | · | +500 | · | · | · | · |
+| Plant | +500 | · | · | · | · | · |
+
+Only the 20 monster types have rows — the function returns 0 for anything
+else — and every cell is one of exactly three values. The column-to-terrain
+names come from the community cheat list, not from code; the code only says
+"column = terrain byte − 1".
 
 ### Magic, traps, equips — what each card does, from the code
 
@@ -278,6 +307,26 @@ field: play a hand card onto a field monster.
 Three specific monsters on your field plus the matching ritual magic card
 summon a ritual monster [`ritualData` `0x801799D8`, `checkRitual`
 `func_8002C7E8`]. Rare in practice.
+
+### Where the rule tables live
+
+| table | runtime address | read by |
+|---|---|---|
+| fusion | `0x8017C2D8` | `checkFusion` |
+| equip | `0x8017A1D8` | `checkEquip` |
+| ritual | `0x801799D8` | `checkRitual` |
+| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` |
+| terrain bonuses | `0x800909D4` | `getTerrainBoost` |
+
+Only the terrain table is in the executable. **The other four are zero in
+`SLUS_014.11` at those addresses** — checked byte by byte, and not an
+addressing slip, since the card-stats table decodes exactly under the same
+formula. They are loaded at runtime from `WA_MRG.MRG`, the way the duel
+overlay is. Their record formats are known from the code that reads them —
+a per-card offset list into packed pair records for fusion; `(key, count,
+members…)` runs for equip; five-halfword records for ritual; ten rows of
+`(threshold, value)` pairs for rank — and decoders exist; the bytes are being
+pulled from the disc.
 
 ### The opponent's turn
 
