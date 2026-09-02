@@ -163,8 +163,26 @@ stars needed at the password screen"** (hugopocked). `0x80038C60` holds
 carries the star cost. The containing function is **`func_80038BF0`**.
 
 The other patch codes target `0x8016xxxx`–`0x8018xxxx`, which is not in the
-main executable — that is **overlay** code, loaded at runtime, so checking them
-needs the overlay rather than `SLUS_014.11`.
+main executable — that is **overlay** code, loaded at runtime from
+`WA_MRG.MRG`. The password-shop overlay has since been located on the disc
+(`docs/DISC.txt`, 2026-09-02), and three of those codes verify against it, all
+by hugopocked:
+
+**`D016A87C 1823` / `8016A87E 2400` — "buying cards does not subtract
+stars".** `0x8016A87C` holds `subu $v1, $v1, $s0`, the subtraction of the
+card's star cost; the patch makes it `addiu $zero, $zero, 0x1823`, a no-op.
+
+**`D016A882 1480` / `8016A882 2400` — "bought cards arrive immediately".**
+`0x8016A880` holds `bnez $a0, +3`; the patch turns the branch into a no-op.
+
+**`D016A6E0 0005` / `8016A6E0 A9BE` / `D016A6E2 1040` / `8016A6E2 0805` —
+"no limit on re-buying a card you already own".** `0x8016A6E0` holds
+`beqz $v0, +5`; the patch replaces it with `j 0x8016A6F8`, taking the
+already-owned path unconditionally.
+
+The Free Duel unlock patch (`D01683D4 0002` …) and the two "enable" codes
+guard a *different* overlay loaded to the same region, and that one was not
+found in raw form on the disc; those three remain unverified.
 
 ## From other sources
 

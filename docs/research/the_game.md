@@ -394,11 +394,13 @@ the region a work buffer. Wrong: what goes to `LoadImage2` is the staging
 buffer `D_8009B118` with a RECT at `D_800E9D70`; the table addresses go into
 the record's destination field, and the region is just where the loader puts
 the tables. The section also said the equip table was scanned for across both
-archives "with that exact validity test: no candidate". The test was wrong,
-not the archive: it capped a key's member count at 120, and 8 of the 34 keys
-exceed that, so the chain check broke on the second key every time. The rank
-signature never had a chance either — it was matching smooth byte runs, as the
-section said.
+archives "with that exact validity test: no candidate" — keys in 301–350. The
+archive was fine and the test was narrower than the table: seven of the 34
+equip keys are above 350 (651–668, the second run of non-monster ids), eight
+keys have more than 120 members (Megamorph equips 621), and a chain check
+that stops at the first key it does not expect never reaches the fifteenth
+row it demands. The rank signature never had a chance either — it was
+matching smooth byte runs, as the section said.
 
 **The per-duelist block** is the other loader in the same family,
 `func_800179F4`:
@@ -504,12 +506,18 @@ bytes at a 3-sector stride, not 7,056 at a 7,056-byte stride; with the wrong
 stride a third of the slots read as garbage, the four final bosses appeared to
 have no drops, and Nitemare and DarkNite appeared swapped against the
 GameShark record order. All three were artefacts of the stride. With the
-game's own arithmetic there are no invalid slots, Seto 3rd, Nitemare, DarkNite
-and Duel Master K all have full pools, and the block index and the save
-record index are both the opponent id — so no swap can exist between them.
-Which *name* belongs to which id remains the cheat archives' claim (index 36
-Nitemare, 37 DarkNite); the decks do not settle it. The "1216-byte trailer" was
-the rank table plus 104 unread bytes.
+game's own arithmetic there are no invalid slots and every one of the 39
+blocks has full pools. What the data does show is **duplication**: blocks 0
+and 1 (Simon Muran and Teana, by the cheat archives' order) are byte-identical
+from deck to rank table, and Seto 3rd's three pools are byte-identical to
+Rex Raptor's — so "Seto 3rd drops Pumpking" is true and is a copy. On the
+order: the block is indexed by the opponent id `D_8009B361` (measured); the
+win/loss records are in the order the cheat archives publish (their claim —
+the function that writes a record was not traced here). No swap is *visible*
+between the two, and nothing here proves one impossible. Which *name*
+belongs to which id is likewise the archives' claim (index 36 Nitemare, 37
+DarkNite); the decks do not settle it. The "1216-byte trailer" was the rank
+table plus 104 unread bytes.
 
 Also in that block, at `+0`, is what the community calls the opponent's
 *deck* — and it is a **fourth weight table**, 722 × u16 summing to 2048, not
@@ -617,11 +625,17 @@ function-entry trace is the right tool — and it is left open here.
   above); the cut-offs and the payout are not.
 * The three duel-blob chunks that go to `0x801A8000`, `0x801A9800` and
   `0x80100000`, and the 104-byte tail of the duelist block.
-* The code at `0x80168000` that four GameShark patch codes target. Its guard
-  halfwords appear nowhere in `WA_MRG.MRG`, `SU.MRG` or `MODEL.MRG` in raw
-  form — the same scanner finds the executable's own guards at the right
-  offset, so the negative is real — which means that region is unpacked or
-  generated at run time, or those codes were written for another build.
+* `0x80168000` is an overlay slot: different menu blobs load different code
+  there. The **password-shop overlay** is located — 0x7800 bytes at `+0x20800`
+  of the blob at sector `0x1EDF` and again at `+0x23800` of the one at
+  `0x1F2F`, byte-identical, placed by `func_8003BA14` — and the three shop
+  patch codes verify against it instruction for instruction (see
+  `gameshark_codes_list.md`). The overlay the Free Duel unlock patch and the
+  two "enable" codes target is a different one, and its guard halfwords
+  appear nowhere in `WA_MRG.MRG`, `SU.MRG` or `MODEL.MRG` in raw form (the
+  same scanner finds the executable's and the shop overlay's guards), so
+  either it is unpacked or generated at run time, or those codes are for
+  another build.
 * Three duel rules stated above from memory of the game, not from code:
   whether a monster played this turn can attack; whether the game imposes a
   limit on copies of one card in a deck; and whether running out of cards to

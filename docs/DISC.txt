@@ -226,9 +226,22 @@ record's destination field. And the earlier scan that reported "no equip
 candidate in either archive" capped the member count per key at 120, which
 several keys exceed, so it broke on the second key every time.
 
-Still open: the code at 0x80168000 (D_800101D8) that four GameShark patch
-codes guard against. Their eight guard halfwords, searched as a relative
-pattern at both byte alignments over WA_MRG.MRG, SU.MRG and MODEL.MRG, occur
-nowhere; the same scanner finds the executable's own verified guards at file
-offset 0x1CB22, so the negative is a measurement. That region is unpacked or
-generated at run time, or the codes are for another build.
+0x80168000 (D_800101D8) is an overlay SLOT, not one overlay: each menu blob
+carries the code its screen needs and func_8003BA14-style callbacks drop it
+there. Searching the GameShark guard halfwords as one eight-halfword pattern
+found nothing anywhere -- correctly, because they belong to two different
+overlays. Searched per code group: the four password-shop guards hit twice in
+WA_MRG.MRG, at file 0x0F90000 (blob 0x1EDF + 0x20800) and 0x0FBB000 (blob
+0x1F2F + 0x23800), a 0x7800-byte chunk whose first 6 sectors are code
+(`jr $ra` density 6/5/3/9/6/3 per sector, then zero) and which is identical
+in both copies; func_8003BA14 (in src/) has the arm that sets size 0x7800
+and destination D_800101D8. Three patch codes then verify against it:
+0x8016A87C `subu $v1,$v1,$s0` (the star-cost subtraction) -> nop,
+0x8016A880 `bnez $a0,+3` -> nop, 0x8016A6E0 `beqz $v0,+5` -> `j 0x8016A6F8`.
+The Free Duel unlock (0x801683D4) and enable-code guards (0x80168100,
+0x80168188) do not match this image (it has `lw $s3,0x2C($sp)`, `sw $zero,
+0x10($sp)` and a `jal` there) and match nothing raw in any archive; the same
+scanner finds the executable's guards at file 0x1CB22. That overlay is
+unpacked or generated at run time, or those codes are for another build.
+Extending gameshark.py's gate to the located overlay is the obvious next
+step and has not been done.

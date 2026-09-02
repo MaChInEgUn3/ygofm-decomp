@@ -64,3 +64,22 @@ from collections import Counter
 print("fusion: distinct results=%d, top results=%s"%(len({c for *_,c in F}),[(names[c],n) for c,n in Counter(c for *_,c in F).most_common(3)]))
 td=[i for i,n in names.items() if n=='Thunder Dragon']; print("Thunder Dragon",td,"+ itself ->",[names[c] for a,b,c in F if a in td and b in td])
 print("equip: Legendary Sword? key 301 =",names[301],"members",sum(1 for k,_ in E if k==301))
+
+# --- per-duelist block, the rest of it: deck weights and the three drop pools.
+# Each is 722 x u16 and sums to 2048 (the draw is a 0..2047 roll walked
+# against cumulative weights); the runtime pools D_8017878C / D_80178D40 /
+# D_801792F4 are these offsets from D_801781D8.
+POOLS=[("deck",0x0),("pow",0x5B4),("bcd",0xB68),("tec",0x111C)]
+blocks=[mrg[(0x1D33+3*d)*S:(0x1D33+3*d+3)*S] for d in range(39)]
+with open(os.path.join(out,'drops.tsv'),'w') as f, open(os.path.join(out,'deck_weights.tsv'),'w') as g:
+    f.write("duelist_index\tpool\tcard_id\tcard\tweight\n"); g.write("duelist_index\tcard_id\tcard\tweight\n")
+    for d,blk in enumerate(blocks):
+        for nm,off in POOLS:
+            w=struct.unpack_from('<722H',blk,off); assert sum(w)==2048, (d,nm,sum(w))
+            for i,x in enumerate(w):
+                if x:
+                    if nm=="deck": g.write("%d\t%d\t%s\t%d\n"%(d,i+1,names[i+1],x))
+                    else: f.write("%d\t%s\t%d\t%s\t%d\n"%(d,nm,i+1,names[i+1],x))
+dups=[(a,b) for a in range(39) for b in range(a+1,39) if blocks[a]==blocks[b]]
+pdups=[(a,b) for a in range(39) for b in range(a+1,39) if blocks[a][0x5B4:0x16D0]==blocks[b][0x5B4:0x16D0]]
+print("drops: 39 x 4 weight tables, all sum 2048; identical whole blocks: %s; identical pool triples: %s"%(dups,pdups))
