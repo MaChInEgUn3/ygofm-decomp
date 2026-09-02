@@ -30,7 +30,9 @@ names={}
 cards=os.path.join(out,'cards.tsv')
 if os.path.exists(cards):
     names={int(r['card_number']):r['name'] for r in csv.DictReader(open(cards),delimiter='\t')}
-names=__import__('collections').defaultdict(lambda:'', names) if names else __import__('collections').defaultdict(str)
+class _Names(dict):
+    def __missing__(self, k): return str(k)   # no cards.tsv: print the id
+names=_Names(names)
 # --- per-terrain duel blob: sector 0x16C6 + 235*terrain, 235 sectors (func_8001798C) ---
 LAYOUT=[(0x00000,0x20000,'VRAM (768,256)'),(0x20000,0x2000,'staging -> LoadImage2 rect(256,240,256,16)'),
         (0x22000,0x2800,'equip table -> D_8017A1D8'),(0x24800,0x10000,'fusion table -> D_8017C2D8'),
