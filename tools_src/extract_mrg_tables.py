@@ -72,16 +72,24 @@ print("equip: Legendary Sword? key 301 =",names[301],"members",sum(1 for k,_ in 
 # against cumulative weights); the runtime pools D_8017878C / D_80178D40 /
 # D_801792F4 are these offsets from D_801781D8.
 POOLS=[("deck",0x0),("pow",0x5B4),("bcd",0xB68),("tec",0x111C)]
+# Block index = opponent id (D_8009B361), 1-based; block 0 duplicates block 1.
+# Names assigned by matching each block's pools against the Neoseeker guide's
+# per-duelist "cards won" lists (92-100% per duelist); see the_game.md 6.4.
+DUELISTS=["(unused: copy of 1)","Simon Muran","Teana","Jono","Villager 1","Villager 2","Villager 3","Seto","Heishin",
+ "Rex Raptor","Weevil Underwood","Mai Valentine","Bandit Keith","Shadi","Yami Bakura","Pegasus","Isis","Kaiba",
+ "Mage Soldier","Jono 2nd","Teana 2nd","Ocean Mage","High Mage Secmeton","Forest Mage","High Mage Anubisius",
+ "Mountain Mage","High Mage Atenza","Desert Mage","High Mage Martis","Meadow Mage","High Mage Kepura",
+ "Labyrinth Mage","Seto 2nd","Guardian Sebek","Guardian Neku","Heishin 2nd","Seto 3rd","DarkNite","Nitemare"]
 blocks=[mrg[(0x1D33+3*d)*S:(0x1D33+3*d+3)*S] for d in range(39)]
 with open(os.path.join(out,'drops.tsv'),'w') as f, open(os.path.join(out,'deck_weights.tsv'),'w') as g:
-    f.write("duelist_index\tpool\tcard_id\tcard\tweight\n"); g.write("duelist_index\tcard_id\tcard\tweight\n")
+    f.write("duelist_id\tduelist\tpool\tcard_id\tcard\tweight\n"); g.write("duelist_id\tduelist\tcard_id\tcard\tweight\n")
     for d,blk in enumerate(blocks):
         for nm,off in POOLS:
             w=struct.unpack_from('<722H',blk,off); assert sum(w)==2048, (d,nm,sum(w))
             for i,x in enumerate(w):
                 if x:
-                    if nm=="deck": g.write("%d\t%d\t%s\t%d\n"%(d,i+1,names[i+1],x))
-                    else: f.write("%d\t%s\t%d\t%s\t%d\n"%(d,nm,i+1,names[i+1],x))
+                    if nm=="deck": g.write("%d\t%s\t%d\t%s\t%d\n"%(d,DUELISTS[d],i+1,names[i+1],x))
+                    else: f.write("%d\t%s\t%s\t%d\t%s\t%d\n"%(d,DUELISTS[d],nm,i+1,names[i+1],x))
 dups=[(a,b) for a in range(39) for b in range(a+1,39) if blocks[a]==blocks[b]]
 pdups=[(a,b) for a in range(39) for b in range(a+1,39) if blocks[a][0x5B4:0x16D0]==blocks[b][0x5B4:0x16D0]]
 print("drops: 39 x 4 weight tables, all sum 2048; identical whole blocks: %s; identical pool triples: %s"%(dups,pdups))

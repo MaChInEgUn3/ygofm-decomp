@@ -75,6 +75,13 @@ matched. Three left.
   reads and writes; `0x8009B390` is also the guard in the take-control cheat,
   so it is a live duel-state flag rather than save data.
 
+One more caution, from the disc side: the per-duelist drop blocks are in
+opponent-id order, 1-based, and that order puts **DarkNite at 37 and
+Nitemare at 38** (matched against an independent per-duelist drop list at
+92–100 % for all 39; `the-game.md` §6.4). If the records follow the same id,
+the two published labels for those rows are swapped. The block order is
+measured; the record order is still the archives' claim.
+
 **A warning that belongs with the data.** Unchiga found incorrect Free Duel
 record codes while building the rematch mod for the recomp, and the published
 cheat list does contain two errors that the stride exposes: Simon Muran's

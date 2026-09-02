@@ -217,7 +217,11 @@ differs -- so "seven redundant copies" is seven terrain variants.
 The per-duelist block is the sibling loader, `func_800179F4`: 3 sectors at
 0x1D33 + 3*opponent into 0x801781D8 -- deck weights +0, drop pools +0x5B4 /
 +0xB68 / +0x111C, rank table +0x16D0, 104 unread bytes at +0x1798. Every one
-of the 156 weight tables sums to 2048.
+of the 156 weight tables sums to 2048. The block index is the opponent id,
+1-based (block 0 is a copy of block 1; 8 and 35 are Heishin's two duels and
+are identical): matched block by block against the Neoseeker guide's
+"cards won" lists, every duelist lands on one block at 92-100%, with
+DarkNite at 37 and Nitemare at 38 -- see docs/research/the_game.md 6.4.
 
 Two retractions. `func_800171A8` does NOT pass the table addresses to
 LoadImage (the earlier reading in the research notes); it passes the staging
