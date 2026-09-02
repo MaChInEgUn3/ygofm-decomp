@@ -323,9 +323,9 @@ filled in from the card table:
 |---|---|---|---|
 | terrain bonuses | `0x800909D4` | `getTerrainBoost` | in the executable |
 | ritual | `0x801799D8` | `checkRitual` | **found**: `WA_MRG.MRG` @ `0xB97800` |
-| fusion | `0x8017C2D8` | `checkFusion` | not yet located |
-| equip | `0x8017A1D8` | `checkEquip` | not yet located |
-| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` | not yet located |
+| fusion | `0x8017C2D8` | `checkFusion` | not located — see below |
+| equip | `0x8017A1D8` | `checkEquip` | not located — see below |
+| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` | not located — see below |
 
 Four of the five are zero in `SLUS_014.11` at their runtime addresses — and
 the reason is now known rather than guessed. `func_800171A8` (mislabelled
@@ -336,6 +336,18 @@ one moment and the rule tables at another. The tables are read from disc into
 it when needed, by separate reads with separate file positions: the disc
 layout is not the RAM layout (the bytes that follow the ritual table on disc
 are pixel data, not the equip table).
+
+**What was searched, so nobody repeats it.** The equip table's shape from
+the code — runs of `(key in 301–350, count, count × ids in 1–722)` ending in a
+zero key — was scanned for across all of `WA_MRG.MRG` and `SU.MRG` with that
+exact validity test: **no candidate in either file.** The rank table's shape —
+ten rows of five `(threshold, value)` pairs — only ever matched degenerate
+regions (smooth increasing byte runs that satisfy "non-decreasing" at every
+offset), so that signature is too weak to find it. A fusion scan that runs
+the verified decoder on every plausible offset-array start was begun on both
+files and did not complete. The three remain unlocated; the likeliest reasons
+are that the disc holds them compressed or in a container the decoders do
+not expect, or in `MODEL.MRG`, which was not searched.
 
 The game opens exactly seven disc files, named in a table the boot code
 walks [`0x8009078C`, `setFilePosTable` `func_800136E4` → `CdSearchFile` →

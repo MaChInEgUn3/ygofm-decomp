@@ -122,10 +122,15 @@ ticking on-screen figure two bytes below the true value.
 Only the terrain table is in the executable. **The other four are zero in
 `SLUS_014.11` at those addresses** — verified byte by byte, and not an
 addressing slip, because the card-stats table at `0x801D4244` decodes exactly
-under the same file+0x8000F800 formula. They are loaded from `WA_MRG.MRG` at
-runtime, like the duel overlay at `0x80146000`. Their record formats are
-known from the code that reads them (see `the-game.md`), so an agent working
-on fusion needs the disc, not just the executable.
+under the same file+0x8000F800 formula. The region is a work buffer:
+`func_800171A8` hands those addresses to `LoadImage` as VRAM-upload sources,
+so it holds image data at one moment and rule tables at another, filled by
+separate disc reads. The **ritual** table was found on the disc
+(`WA_MRG.MRG` @ `0xB97800`, 24 records, verified). **Fusion, equip and rank
+were not** — the code-derived signatures were scanned across `WA_MRG.MRG`
+and `SU.MRG` without a hit; `the-game.md` records exactly what was tried. An
+agent working on fusion needs the disc and a loader trace, not just the
+executable.
 
 Those small reader counts are the useful part: the fusion rules are reached
 from essentially one place, so "how does fusion work" is a two-function
