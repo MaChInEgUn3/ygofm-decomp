@@ -181,3 +181,54 @@ call targets, is inside the overlay. It is not an outlier. It is the first
 piece of evidence for exactly this, and it was sitting in
 `config/undefined_funcs_auto.txt` the whole time -- func_8001BAF0, decompiled
 here on 2026-08-29, `jal`s straight into it.
+
+
+RESOLVED 2026-09-02: the duel blob's layout, and the four rule tables
+---------------------------------------------------------------------
+The overlay above is chunk 7 of a 13-chunk stream, and the whole stream is
+now read off the code rather than found by scanning. `func_8001798C` (in
+`src/`) issues
+
+    func_80014E1C(0, 0, D_8009B364 * 235 + 0x16C6, 0xEB, func_800171A8, 0, 0)
+
+-- 235 sectors of WA_MRG.MRG from sector 0x16C6 + 235*terrain, seven
+terrains, callback `func_800171A8`. The callback is a switch over the chunk
+index (jtbl_800100C0); each case writes the chunk's size into the transfer
+record at +0x1C and its destination at +0xC (or VRAM x/y at +0x30/+0x32).
+Case order and sizes:
+
+    +0x00000 0x20000 VRAM(768,256)     +0x46000 0x16000 0x80146000 = THE OVERLAY
+    +0x20000 0x02000 staging           +0x5C000 0x01800 0x801A8000
+    +0x22000 0x02800 0x8017A1D8 equip  +0x5D800 0x01800 0x801A9800
+    +0x24800 0x10000 0x8017C2D8 fusion +0x5F000 0x04000 VRAM(832,0)
+    +0x34800 0x00800 0x801799D8 ritual +0x63000 0x02800 0x80100000
+    +0x35000 0x01000 staging           +0x65800 0x10000 VRAM(640,256)
+    +0x36000 0x10000 VRAM(x=512)                        = 0x75800 = 235*0x800
+
+The sum is the proof. 0x16C6 + 0x46000/0x800 = sector 5970 = LBA 16072, which
+is exactly where Unchiga's extractor puts the overlay -- two derivations, one
+from his tool and one from our loader, agreeing to the sector. The three
+tables decode with every id in 1..722 (fusion 25,131 rows, equip 4,041, ritual
+24); `tools_src/extract_mrg_tables.py` reproduces all of it from the raw
+archive. Hashing every chunk in every terrain copy: twelve of thirteen are
+byte-identical across all seven, and only the last (the field picture)
+differs -- so "seven redundant copies" is seven terrain variants.
+
+The per-duelist block is the sibling loader, `func_800179F4`: 3 sectors at
+0x1D33 + 3*opponent into 0x801781D8 -- deck weights +0, drop pools +0x5B4 /
++0xB68 / +0x111C, rank table +0x16D0, 104 unread bytes at +0x1798. Every one
+of the 156 weight tables sums to 2048.
+
+Two retractions. `func_800171A8` does NOT pass the table addresses to
+LoadImage (the earlier reading in the research notes); it passes the staging
+buffer D_8009B118 with a RECT at D_800E9D70, and the tables go through the
+record's destination field. And the earlier scan that reported "no equip
+candidate in either archive" capped the member count per key at 120, which
+several keys exceed, so it broke on the second key every time.
+
+Still open: the code at 0x80168000 (D_800101D8) that four GameShark patch
+codes guard against. Their eight guard halfwords, searched as a relative
+pattern at both byte alignments over WA_MRG.MRG, SU.MRG and MODEL.MRG, occur
+nowhere; the same scanner finds the executable's own verified guards at file
+offset 0x1CB22, so the negative is a measurement. That region is unpacked or
+generated at run time, or the codes are for another build.

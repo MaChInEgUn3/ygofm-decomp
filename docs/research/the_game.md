@@ -302,16 +302,32 @@ make a bigger dragon — most are not, and part of the game's culture is the
 community's fusion lists. Fusion can also be done with a card already on the
 field: play a hand card onto a field monster.
 
+**The table has now been read off the disc** — it is the 64 KB chunk at
+`+0x24800` of the duel blob described under *Where the rule tables live*
+(`WA_MRG.MRG` @ `0xB87800` in the terrain-0 copy; decoder
+`tools_src/decode_tables.py`, extractor `tools_src/extract_mrg_tables.py`).
+It holds **25,131 recipes** producing **204 distinct results**, and every id
+in it is a valid card. The encoding is what `checkFusion` reads: a
+`u16 offset[723]` indexed by the *smaller* of the two card ids (zero means
+"no recipe as the smaller partner"), and at each offset a run of 5-byte
+records, each packing two `(partner, result)` pairs as 10-bit ids. Two things
+in it that anyone who has played the game will recognise: Thunder Dragon +
+Thunder Dragon → Twin-headed Thunder Dragon; and the results are wildly
+uneven — **Nekogal #2 is the result of 1200 recipes, Mystical Sand of 1174, Cyber
+Soldier of 1008**. That is the game's fusion sink: most pairs of a weak monster
+with the right type fall into a handful of mid-level results, which is why
+random fusing in the early game keeps producing the same few cards.
+
 ### Rituals
 
 Three specific monsters on your field plus the matching ritual magic card
 summon a ritual monster [`ritualData` `0x801799D8`, `checkRitual`
-`func_8002C7E8`]. The table is **not** in the executable; it was found on the
-disc, in `WA_MRG.MRG` at offset `0xB97800`, as 24 five-halfword records — and
-the same bytes recur at all seven of the redundant overlay-image locations
-the disc keeps, which is what marks it as real game data rather than a lucky
-pattern. Every tribute and result is a valid card id. Three of the 24, names
-filled in from the card table:
+`func_8002C7E8`]. The table is **not** in the executable; it is the 2 KB
+chunk at `+0x34800` of the duel blob (`WA_MRG.MRG` @ `0xB97800` in the
+terrain-0 copy), read straight into `0x801799D8` by the duel loader, and it is
+byte-identical in all seven terrain copies. 24 five-halfword records; every
+tribute and result is a valid card id. Three of the 24, names filled in from
+the card table:
 
 * Black Luster Ritual = Beaver Warrior + Gaia the Fierce Knight + Kuriboh → Black Luster Soldier
 * Zera Ritual = King of Yamimakai + Wicked Dragon with the Ersatz Head + Ryu-kishin Powered → Zera The Mant
@@ -319,40 +335,93 @@ filled in from the card table:
 
 ### Where the rule tables live
 
-| table | runtime address | read by | on disc |
+| table | runtime address | read by | on disc (`WA_MRG.MRG`, terrain-0 copy) | size |
+|---|---|---|---|---|
+| terrain bonuses | `0x800909D4` | `getTerrainBoost` | in the executable | 120 B |
+| equip | `0x8017A1D8` | `checkEquip` | duel blob `+0x22000` = `0xB85000` | 0x2800 |
+| fusion | `0x8017C2D8` | `checkFusion` | duel blob `+0x24800` = `0xB87800` | 0x10000 |
+| ritual | `0x801799D8` | `checkRitual` | duel blob `+0x34800` = `0xB97800` | 0x800 |
+| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` | duelist block `+0x16D0` (sector `0x1D33 + 3 × opponent`) | 200 B |
+
+All four disc tables decode with every id in range, and the equip one holds
+**4,041 (equip, monster) pairs over exactly the 34 equip cards** (Legendary
+Sword alone equips 63 monsters; the biggest, Megamorph, equips 621).
+
+**How they get there** was read off a function that is already decompiled
+here, `func_8001798C`, and it replaces the "work buffer" explanation this
+section used to give. The duel's disc load is one call:
+
+    func_80014E1C(0, 0, terrain * 235 + 0x16C6, 235, func_800171A8, 0, 0);
+
+— 235 sectors (481,280 bytes) of `WA_MRG.MRG` starting at sector `0x16C6`,
+one such **blob per terrain type** (`D_8009B364`, 0–6), 235 sectors apart,
+with `func_800171A8` as the callback. That callback is a thirteen-case state
+machine (jump table `jtbl_800100C0`): each case takes the next chunk of the
+stream and fills a transfer record — destination at `+0xC`, size at `+0x1C`,
+and for VRAM-bound chunks the x/y at `+0x30`/`+0x32`. **The thirteen sizes,
+in case order, sum to exactly 235 × 2048**, which is the proof of the layout
+below; the three table chunks and the overlay were then decoded or verified in
+place.
+
+| blob offset | size | destination | what |
 |---|---|---|---|
-| terrain bonuses | `0x800909D4` | `getTerrainBoost` | in the executable |
-| ritual | `0x801799D8` | `checkRitual` | **found**: `WA_MRG.MRG` @ `0xB97800` |
-| fusion | `0x8017C2D8` | `checkFusion` | not located — see below |
-| equip | `0x8017A1D8` | `checkEquip` | not located — see below |
-| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` | not located — see below |
+| `+0x00000` | 0x20000 | VRAM (768, 256) | picture data |
+| `+0x20000` | 0x2000 | staging buffer, then `LoadImage2` rect (256, 240) 256×16 | picture data |
+| `+0x22000` | 0x2800 | `0x8017A1D8` | **equip table** |
+| `+0x24800` | 0x10000 | `0x8017C2D8` | **fusion table** |
+| `+0x34800` | 0x800 | `0x801799D8` | **ritual table** |
+| `+0x35000` | 0x1000 | staging buffer, then `LoadImage2` rect (0, 240) 256×8 | picture data |
+| `+0x36000` | 0x10000 | VRAM (x = 512) | picture data |
+| `+0x46000` | 0x16000 | `0x80146000` | the 90 KB **code overlay** (`docs/DISC.txt`) |
+| `+0x5C000` | 0x1800 | `0x801A8000` | not read |
+| `+0x5D800` | 0x1800 | `0x801A9800` | not read |
+| `+0x5F000` | 0x4000 | VRAM (832, 0) | picture data |
+| `+0x63000` | 0x2800 | `0x80100000` | not read |
+| `+0x65800` | 0x10000 | VRAM (640, 256) | the field picture — the **only** chunk that differs between the seven terrains |
 
-Four of the five are zero in `SLUS_014.11` at their runtime addresses — and
-the reason is now known rather than guessed. `func_800171A8` (mislabelled
-"select_sound_preset" in one roster) passes those very addresses to the PsyQ
-`LoadImage` as the *source* of two VRAM uploads, a 256×240 image and a 256×8
-one. So `0x80179xxx`–`0x8017Fxxx` is a **work buffer**, holding image data at
-one moment and the rule tables at another. The tables are read from disc into
-it when needed, by separate reads with separate file positions: the disc
-layout is not the RAM layout (the bytes that follow the ritual table on disc
-are pixel data, not the equip table).
+Measured: the case order, the sizes, the table destinations, and the
+per-terrain comparison (twelve of the thirteen chunks are byte-identical
+across all seven blobs). Readings: that the VRAM coordinates in the record
+are where the picture chunks land, and what the three "not read" chunks are
+for. The VRAM x-coordinates 640–832 are past the 640-pixel framebuffers, so
+those chunks go to the texture area, not the screen. "Seven redundant copies
+of the overlay", as the disc notes put it, is therefore seven terrain variants
+of one 64 KB picture, each shipped with a duplicate of the other 416 KB.
 
-**What was searched, so nobody repeats it.** The equip table's shape from
-the code — runs of `(key in 301–350, count, count × ids in 1–722)` ending in a
-zero key — was scanned for across all of `WA_MRG.MRG` and `SU.MRG` with that
-exact validity test: **no candidate in either file.** The rank table's shape —
-ten rows of five `(threshold, value)` pairs — only ever matched degenerate
-regions (smooth increasing byte runs that satisfy "non-decreasing" at every
-offset), so that signature is too weak to find it. A fusion scan that runs
-the verified decoder on every plausible offset-array start was begun on both
-files and did not complete. The three remain unlocated; the likeliest reasons
-are that the disc holds them compressed or in a container the decoders do
-not expect, or in `MODEL.MRG`, which was not searched.
+**Retracted.** The earlier version of this section said `func_800171A8`
+passed the table addresses to `LoadImage` as VRAM-upload *sources*, making
+the region a work buffer. Wrong: what goes to `LoadImage2` is the staging
+buffer `D_8009B118` with a RECT at `D_800E9D70`; the table addresses go into
+the record's destination field, and the region is just where the loader puts
+the tables. The section also said the equip table was scanned for across both
+archives "with that exact validity test: no candidate". The test was wrong,
+not the archive: it capped a key's member count at 120, and 8 of the 34 keys
+exceed that, so the chain check broke on the second key every time. The rank
+signature never had a chance either — it was matching smooth byte runs, as the
+section said.
+
+**The per-duelist block** is the other loader in the same family,
+`func_800179F4`:
+
+    func_80014E1C(0, 0, opponent * 3 + 0x1D33, 3, ..., 0x801781D8);
+
+three sectors per duelist, indexed by the opponent id (`D_8009B361`), into
+`0x801781D8`. The 6,144-byte block is: the opponent's **deck weights**
+(722 × u16) at `+0`; the **POW, BCD and TEC drop-pool weights** at `+0x5B4`,
+`+0xB68`, `+0x111C` — 1,460 bytes each, and the runtime copies `0x8017878C`,
+`0x80178D40`, `0x801792F4` are exactly those offsets from `0x801781D8`; the
+**rank table** at `+0x16D0`, 200 bytes, identical for all 39 duelists; and
+104 bytes at `+0x1798` not read here.
 
 The game opens exactly seven disc files, named in a table the boot code
 walks [`0x8009078C`, `setFilePosTable` `func_800136E4` → `CdSearchFile` →
 `CdPosToInt`]: `WA_MRG.MRG`, `SU.MRG`, `MODEL.MRG`, `MOVIE.STR`, `SD_SE.DAT`,
-`SD_BGM.DAT`, `MASTER.XA`. Everything else is an entry inside one of those.
+`SD_BGM.DAT`, `MASTER.XA`. Everything else is an entry inside one of those,
+addressed by sector from the file's start. The other decompiled callers of
+`func_80014E1C` load the menus the same way — fixed sector constants in
+`WA_MRG.MRG` (`0x1690`, `0x1E88`, `0x1EDF`, `0x1F2F`, `0x1F85`, `0x1FA7`,
+`0x2115`, `0x2147`, `0x2157`, `0x2189`, one indexed at `0x1FD9`) each with its
+own dispatcher callback; six more callers are still assembly.
 
 ### The opponent's turn
 
@@ -378,9 +447,32 @@ Winning goes to the results screen.
 Every won duel is **scored**. During the duel the game counts how many turns
 it took, how many effective attacks you made, how many defensive wins, how
 many face-down plays, how many pure magic cards, traps, fusions and equips
-[each event feeds `rankScoreChange` `func_80021558`, values from a table at
-`0x801798A8`; the running score at `0x80179A04`]. At the end those become a
-single score [`calcRankScore` `func_80021598`] and a **rank**:
+in a per-duel statistics record. At the end `calcRankScore` [`func_80021598`]
+runs each counter through `rankScoreChange` [`func_80021558`], which walks one
+row of the table at `0x801798A8` — five `(threshold, value)` pairs, the first
+threshold above the counter supplies the value — and sums them into a single
+score. The table is on the disc, in every duelist's block, and it is the same
+for all 39. Read out:
+
+| row | counter (record field) | score by counter value | what it counts (reading) |
+|---|---|---|---|
+| 0 | `+0x00` | <5: +12 · <9: +8 · <29: 0 · <33: −8 · else −12 | turns |
+| 1 | `+0x01` | <2: +4 · <4: +2 · <10: 0 · <20: −2 · else −4 | effective attacks |
+| 2 | `+0x02` | <2: 0 · <6: −10 · <10: −20 · <15: −30 · else −40 | defensive wins |
+| 3 | `+0x03` | <1: 0 · <11: −2 · <21: −4 · <31: −6 · else −8 | face-down plays |
+| 4 | `+0x04` | <1: +2 · <4: −4 · <7: −8 · <10: −12 · else −16 | fusions |
+| 5 | `+0x05` | <1: +2 · <3: −8 · <5: −16 · <7: −24 · else −32 | equips |
+| 6 | `+0x17` (s8) | <9: +15 · <13: +12 · <33: 0 · <37: −5 · else −7 | cards used |
+| 7 | `+0x13` (s16) | <100: −7 · <1000: −5 · <7000: 0 · <8000: +4 · else +6 | remaining LP |
+| 8 | `+0x07` | <1: +4 · <5: 0 · <10: −4 · <15: −8 · else −12 | magic cards |
+| 9 | `+0x08` | same as row 8 | traps |
+
+The thresholds and values are measured; the row-to-counter pairing is read
+off the call sites in `calcRankScore`. The *category* names are a reading —
+they are the rows of the rank guide the community has published for twenty
+years, matched threshold for threshold, and the LP row (100 / 1000 / 7000 /
+8000) is unmistakable — but the record's fields are not named in any source
+here. The score then becomes a **rank**:
 
     S-POW   A-POW   B   C   D   A-TEC   S-TEC
 
@@ -393,30 +485,38 @@ bytes], more for a better rank. And you receive **one card**, drawn at random
 from the beaten duelist's drop pool *for that rank* [`cardDrop`
 `func_80021810`, a weighted draw over a table of 722 halfword weights].
 
-The pools live on the disc: `WA_MRG.MRG` holds a **7056-byte block per
-duelist**, 39 of them at a fixed stride, each starting with four 1460-byte
-weight tables — 722 × u16 weights plus padding, matching the record the draw
-code walks — followed by 1216 bytes not yet understood. The runtime copies
-sit 1460 bytes apart [`0x8017878C`, `0x80178D40`, `0x801792F4`, the POW, BCD
-and TEC pools]. Decoded, the tables are sparse and concrete: Rex Raptor's
-heaviest drops are Kazejin, Korogashi and Boo Koo; Pegasus's are LaLa Li-oon
-and Akakieisu; Simon Muran's is Shadow Specter in all three pools.
+The pools live on the disc, in the per-duelist block the duel loader reads
+(three sectors at `0x1D33 + 3 × opponent` of `WA_MRG.MRG`, laid out under
+*Where the rule tables live*): three tables of 722 × u16 weights, one per
+pool, at `+0x5B4`, `+0xB68` and `+0x111C` of the block, which are the runtime
+copies' own offsets from `0x801781D8` [`0x8017878C`, `0x80178D40`,
+`0x801792F4` — POW, BCD, TEC in that order]. **Every one of the 39 × 3 tables
+decodes, and every one sums to exactly 2048**, so the draw is a random number
+in 0–2047 walked against cumulative weights. Concrete: Rex Raptor's POW pool
+leans on Pumpking the King of Ghosts, Stone D. and Barrel Rock, his TEC pool
+on Wasteland, Dark Hole and Barrel Rock; Pegasus's POW pool on Umi, Mystical
+Elf and Rogue Doll; Simon Muran's three pools are the same list headed by
+Shadow Specter and Time Wizard. Duel Master K drops Roaring Ocean Snake and
+B. Dragon Jungle King for POW and BCD, Electro-whip and Cyber Shield for TEC.
 
-Three caveats that belong next to that. **Which of the four slots is which
-pool is positional**, and a third of the 156 slots did not decode as weight
-tables at all (they hold a fixed-point-looking pattern instead), so the
-POW/BCD/TEC labels are the best reading, not a proven one. **The four final
-opponents — Seto 3rd, Nitemare, DarkNite, Duel Master K — have no valid drop
-slots**, consistently, which fits them being scripted encounters. And **the
-per-duelist block order disagrees with the save-record order on Nitemare and
-DarkNite**: the drop blocks put DarkNite at index 36 and Nitemare at 37, the
-GameShark win/loss labels the other way round. One of the two sources has
-them swapped and nothing here settles which.
+**Retracted, from the earlier version of this section.** The block is 6,144
+bytes at a 3-sector stride, not 7,056 at a 7,056-byte stride; with the wrong
+stride a third of the slots read as garbage, the four final bosses appeared to
+have no drops, and Nitemare and DarkNite appeared swapped against the
+GameShark record order. All three were artefacts of the stride. With the
+game's own arithmetic there are no invalid slots, Seto 3rd, Nitemare, DarkNite
+and Duel Master K all have full pools, and the block index and the save
+record index are both the opponent id — so no swap can exist between them.
+Which *name* belongs to which id remains the cheat archives' claim (index 36
+Nitemare, 37 DarkNite); the decks do not settle it. The "1216-byte trailer" was
+the rank table plus 104 unread bytes.
 
-Also on the disc, per duelist, is what the community calls the opponent's
-*deck* — but it decodes as a **fourth weight table**, not a fixed list of 40
-cards. The opponent's deck is drawn from a weighted pool, the same way your
-drop is.
+Also in that block, at `+0`, is what the community calls the opponent's
+*deck* — and it is a **fourth weight table**, 722 × u16 summing to 2048, not
+a fixed list of 40 cards. The opponent's deck is drawn from a weighted pool,
+the same way your drop is. Nitemare's heaviest deck weights are Harpie's
+Feather Duster, Blue-eyes White Dragon and Raigeki; Duel Master K's are
+Twin-headed Thunder Dragon, Aqua Dragon and Meteor Dragon.
 
 ## Cards, the trunk and the Library
 
@@ -512,9 +612,16 @@ function-entry trace is the right tool — and it is left open here.
 
 ## What is unverified
 
-* The exact scoring weights that produce each rank, and the exact starchip
-  award per rank. The functions and tables are located; their contents have
-  not been read.
+* The score cut-offs that turn the summed rank score into S-POW … S-TEC, and
+  the starchip award per rank. The per-event weights are now read (table
+  above); the cut-offs and the payout are not.
+* The three duel-blob chunks that go to `0x801A8000`, `0x801A9800` and
+  `0x80100000`, and the 104-byte tail of the duelist block.
+* The code at `0x80168000` that four GameShark patch codes target. Its guard
+  halfwords appear nowhere in `WA_MRG.MRG`, `SU.MRG` or `MODEL.MRG` in raw
+  form — the same scanner finds the executable's own guards at the right
+  offset, so the negative is real — which means that region is unpacked or
+  generated at run time, or those codes were written for another build.
 * Three duel rules stated above from memory of the game, not from code:
   whether a monster played this turn can attack; whether the game imposes a
   limit on copies of one card in a deck; and whether running out of cards to

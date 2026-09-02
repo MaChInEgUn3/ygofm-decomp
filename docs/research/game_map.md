@@ -111,26 +111,26 @@ ticking on-screen figure two bytes below the true value.
 
 **The game's rule tables — and where they really live.**
 
-| table | runtime address | touched by |
-|---|---|---|
-| fusion | `0x8017C2D8` | 2 functions (1 matched) |
-| equip | `0x8017A1D8` | 2 (1) |
-| ritual | `0x801799D8` | 4 (1) |
-| rank scoring | `0x801798A8` | `rankScoreChange`, `calcRankScore` |
-| terrain bonuses | `0x800909D4` | `getTerrainBoost` — an `s8[20][6]`, in the executable |
+| table | runtime address | touched by | on disc (`WA_MRG.MRG`) |
+|---|---|---|---|
+| fusion | `0x8017C2D8` | 2 functions (1 matched) | duel blob `+0x24800` (`0xB87800`), 64 KB, 25,131 recipes |
+| equip | `0x8017A1D8` | 2 (1) | duel blob `+0x22000` (`0xB85000`), 10 KB, 4,041 pairs |
+| ritual | `0x801799D8` | 4 (1) | duel blob `+0x34800` (`0xB97800`), 2 KB, 24 records |
+| rank scoring | `0x801798A8` | `rankScoreChange`, `calcRankScore` | duelist block `+0x16D0`, 200 B, same for all 39 |
+| terrain bonuses | `0x800909D4` | `getTerrainBoost` — an `s8[20][6]`, in the executable | — |
 
-Only the terrain table is in the executable. **The other four are zero in
-`SLUS_014.11` at those addresses** — verified byte by byte, and not an
-addressing slip, because the card-stats table at `0x801D4244` decodes exactly
-under the same file+0x8000F800 formula. The region is a work buffer:
-`func_800171A8` hands those addresses to `LoadImage` as VRAM-upload sources,
-so it holds image data at one moment and rule tables at another, filled by
-separate disc reads. The **ritual** table was found on the disc
-(`WA_MRG.MRG` @ `0xB97800`, 24 records, verified). **Fusion, equip and rank
-were not** — the code-derived signatures were scanned across `WA_MRG.MRG`
-and `SU.MRG` without a hit; `the-game.md` records exactly what was tried. An
-agent working on fusion needs the disc and a loader trace, not just the
-executable.
+Only the terrain table is in the executable; the other four are zero in
+`SLUS_014.11` because the duel loader reads them from the disc. That loader
+is already decompiled — `func_8001798C` issues a 235-sector read at sector
+`0x16C6 + 235 × terrain` of `WA_MRG.MRG` with `func_800171A8` as the
+per-chunk callback, and the callback's thirteen chunk sizes sum to exactly
+235 sectors, which fixes every chunk's offset. `func_800179F4` does the same
+for the per-duelist block (3 sectors at `0x1D33 + 3 × opponent` →
+`0x801781D8`: deck weights, three drop pools, rank table). All four tables
+are decoded and every id in them is a valid card; `tools_src/decode_tables.py`
+holds the decoders (read off `checkFusion`, `checkEquip`, `checkRitual` and
+`rankScoreChange`) and `tools_src/extract_mrg_tables.py` the sector
+arithmetic. `the-game.md` has the full blob layout and what was retracted.
 
 Those small reader counts are the useful part: the fusion rules are reached
 from essentially one place, so "how does fusion work" is a two-function
