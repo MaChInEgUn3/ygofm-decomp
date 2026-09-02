@@ -306,27 +306,41 @@ field: play a hand card onto a field monster.
 
 Three specific monsters on your field plus the matching ritual magic card
 summon a ritual monster [`ritualData` `0x801799D8`, `checkRitual`
-`func_8002C7E8`]. Rare in practice.
+`func_8002C7E8`]. The table is **not** in the executable; it was found on the
+disc, in `WA_MRG.MRG` at offset `0xB97800`, as 24 five-halfword records — and
+the same bytes recur at all seven of the redundant overlay-image locations
+the disc keeps, which is what marks it as real game data rather than a lucky
+pattern. Every tribute and result is a valid card id. Three of the 24, names
+filled in from the card table:
+
+* Black Luster Ritual = Beaver Warrior + Gaia the Fierce Knight + Kuriboh → Black Luster Soldier
+* Zera Ritual = King of Yamimakai + Wicked Dragon with the Ersatz Head + Ryu-kishin Powered → Zera The Mant
+* War-lion Ritual = Frenzied Panda + Leogun + Garvas → Super War-lion
 
 ### Where the rule tables live
 
-| table | runtime address | read by |
-|---|---|---|
-| fusion | `0x8017C2D8` | `checkFusion` |
-| equip | `0x8017A1D8` | `checkEquip` |
-| ritual | `0x801799D8` | `checkRitual` |
-| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` |
-| terrain bonuses | `0x800909D4` | `getTerrainBoost` |
+| table | runtime address | read by | on disc |
+|---|---|---|---|
+| terrain bonuses | `0x800909D4` | `getTerrainBoost` | in the executable |
+| ritual | `0x801799D8` | `checkRitual` | **found**: `WA_MRG.MRG` @ `0xB97800` |
+| fusion | `0x8017C2D8` | `checkFusion` | not yet located |
+| equip | `0x8017A1D8` | `checkEquip` | not yet located |
+| rank scoring | `0x801798A8` | `rankScoreChange` / `calcRankScore` | not yet located |
 
-Only the terrain table is in the executable. **The other four are zero in
-`SLUS_014.11` at those addresses** — checked byte by byte, and not an
-addressing slip, since the card-stats table decodes exactly under the same
-formula. They are loaded at runtime from `WA_MRG.MRG`, the way the duel
-overlay is. Their record formats are known from the code that reads them —
-a per-card offset list into packed pair records for fusion; `(key, count,
-members…)` runs for equip; five-halfword records for ritual; ten rows of
-`(threshold, value)` pairs for rank — and decoders exist; the bytes are being
-pulled from the disc.
+Four of the five are zero in `SLUS_014.11` at their runtime addresses — and
+the reason is now known rather than guessed. `func_800171A8` (mislabelled
+"select_sound_preset" in one roster) passes those very addresses to the PsyQ
+`LoadImage` as the *source* of two VRAM uploads, a 256×240 image and a 256×8
+one. So `0x80179xxx`–`0x8017Fxxx` is a **work buffer**, holding image data at
+one moment and the rule tables at another. The tables are read from disc into
+it when needed, by separate reads with separate file positions: the disc
+layout is not the RAM layout (the bytes that follow the ritual table on disc
+are pixel data, not the equip table).
+
+The game opens exactly seven disc files, named in a table the boot code
+walks [`0x8009078C`, `setFilePosTable` `func_800136E4` → `CdSearchFile` →
+`CdPosToInt`]: `WA_MRG.MRG`, `SU.MRG`, `MODEL.MRG`, `MOVIE.STR`, `SD_SE.DAT`,
+`SD_BGM.DAT`, `MASTER.XA`. Everything else is an entry inside one of those.
 
 ### The opponent's turn
 
@@ -365,13 +379,32 @@ wasted cards. The middle ranks are everything else.
 The rank decides two rewards. You receive **starchips** [`0x801D07E0`, 4
 bytes], more for a better rank. And you receive **one card**, drawn at random
 from the beaten duelist's drop pool *for that rank* [`cardDrop`
-`func_80021810`; pools at `0x8017878C` POW, `0x80178D40` BCD, `0x801792F4`
-TEC]. Each duelist has three pools, and the good cards are usually in S-TEC or
-S-POW — which is why players learn to win *in a particular way* against a
-particular opponent. A community cheat that forces S-TEC every time patches
-the very function that computes the rank.
+`func_80021810`, a weighted draw over a table of 722 halfword weights].
 
----
+The pools live on the disc: `WA_MRG.MRG` holds a **7056-byte block per
+duelist**, 39 of them at a fixed stride, each starting with four 1460-byte
+weight tables — 722 × u16 weights plus padding, matching the record the draw
+code walks — followed by 1216 bytes not yet understood. The runtime copies
+sit 1460 bytes apart [`0x8017878C`, `0x80178D40`, `0x801792F4`, the POW, BCD
+and TEC pools]. Decoded, the tables are sparse and concrete: Rex Raptor's
+heaviest drops are Kazejin, Korogashi and Boo Koo; Pegasus's are LaLa Li-oon
+and Akakieisu; Simon Muran's is Shadow Specter in all three pools.
+
+Three caveats that belong next to that. **Which of the four slots is which
+pool is positional**, and a third of the 156 slots did not decode as weight
+tables at all (they hold a fixed-point-looking pattern instead), so the
+POW/BCD/TEC labels are the best reading, not a proven one. **The four final
+opponents — Seto 3rd, Nitemare, DarkNite, Duel Master K — have no valid drop
+slots**, consistently, which fits them being scripted encounters. And **the
+per-duelist block order disagrees with the save-record order on Nitemare and
+DarkNite**: the drop blocks put DarkNite at index 36 and Nitemare at 37, the
+GameShark win/loss labels the other way round. One of the two sources has
+them swapped and nothing here settles which.
+
+Also on the disc, per duelist, is what the community calls the opponent's
+*deck* — but it decodes as a **fourth weight table**, not a fixed list of 40
+cards. The opponent's deck is drawn from a weighted pool, the same way your
+drop is.
 
 ## Cards, the trunk and the Library
 
