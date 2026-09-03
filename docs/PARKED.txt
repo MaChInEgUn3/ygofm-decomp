@@ -5828,3 +5828,36 @@ func_800222F4 -- 201/201, 36 differences, written 2026-09-03. The debug/test
   Residue: retail materialises func_80012D84's constant argument before the
   call-result copy and we do it after, and in the 0x40 block retail reads the
   first field through the result register and the rest through the copy.
+
+func_80057AF4 -- 203/203, 32 differences, written 2026-09-03. The animation
+  slot loader: it clears, restores or installs one of a record's slots and
+  copies 3 or 5 words per element through func_8005B620.
+  gp=0, at=0, so any -G is free and none of it is needed; default flags, and
+  a full flag sweep says so.
+  What paid: the three-way dispatcher written as `goto` targets in retail's
+  own address order (-2 to exact length -- an if/else chain lays the arms
+  inline and cannot emit the two `j epilogue` pairs); `s32` for the saved
+  slot byte, because a `u8` masks with `andi 0xFF` before each compare where
+  retail compares the byte directly; explicit grouping of the row index,
+  `p + (i * 2 + p[0xE0F] * 0x74) + 0x2C8`, which alone is 122 differences to
+  53 with the s32; `(p + i / 8)[0xBEC]` for the bit table so the `addu` comes
+  out base-first; and `q++` before `i++` in both loops, which is what puts
+  the cursor bump in the back edge's delay slot and the counter's before the
+  bound load (-1 per loop).
+  Residue, and it is ONE scheduling decision repeated in both loops: retail
+  fills the `lbu p[0xE0F]` load-delay slot with `sll i*2` and leaves the
+  `beq c, 0xFFFF` slot empty, where we put `n = 3` in the compare's slot and
+  a nop after the load. The shift counts follow from it -- retail's `srav`
+  and `sllv` take the count from n's own register, ours are `sra`/`sll` by
+  the immediate 3.
+  Measured and dead: five spellings of the bit test (`i / 8` with `i % 8`, a
+  named quotient, a hand-written bias with `if` and with a ternary, and
+  `i >> n`), five of the row index (named scaled index, named row, a
+  negation subtraction, constant-first, base-first), six declaration orders,
+  and assigning `i = 0` above the entry guard (+1 each).
+  And the whole binary was scanned for the idiom: `srav` with its count in a
+  saved register holding a small constant appears in exactly ONE in-scope
+  listing, this one. The four matched functions that use `srav` all shift by
+  a genuinely variable count (func_8002CCA8's `0x80 >> (arg0 & 7)`), so the
+  source shape behind this one is not something this tree has seen, and the
+  permuter is the right tool rather than more spellings.
