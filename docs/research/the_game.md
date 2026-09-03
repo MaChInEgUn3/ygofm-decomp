@@ -1095,12 +1095,14 @@ The unlock is one flag per duelist, `0x6E0 + id`, in the save's flag array
 **overlay** loaded to `0x80168000` with the Free Duel blob (§12.2), marks all
 40 grid entries available and then, for ids 1–38, clears the entry whose flag
 is not set [the loop at `0x801683C0`–`0x801683EC` calls `func_8002CCA8(0x6E0
-+ id)`]; entry 39 — Duel Master K — is never cleared, which is why he is
-always there. Two consequences: the flags for ids 32–38 sit in the fifth
++ id)`]; entry 39 is never cleared — which fits Duel Master K being always
+there, if that entry is his (a reading). Two consequences: the flags for ids 32–38 sit in the fifth
 byte, `0x801D06F8`, so the published "all opponents" cheat, which writes four
 bytes, covers ids 1–31 and leaves the last seven locked; and the "all
 opponents" *patch* code turns the clearing branch at `0x801683D4` into a jump
-past it, which unlocks everyone. The list is presented in campaign order: Simon Muran first,
+past it, which unlocks everyone.
+
+The list is presented in campaign order: Simon Muran first,
 Duel Master K last. Only two campaign duelists can be permanently missing
 from it: Villager 3 (never dueled before the festival) and Seto 2nd (all
 five shrines cleared before the labyrinth).
