@@ -545,6 +545,11 @@ PER_FUNC_AS_FLAGS["func_8005BB7C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80031084"] = "-G1"
 # func_8003D74C: s8 D_8009B34D[4] (sized arm) stored through $at beside one-byte gp symbols.
 PER_FUNC_AS_FLAGS["func_8003D74C"] = "-G1"
+# func_8005B8A0: D_800FE0CC/D0/D4, D_80010000 and the RGB bytes inflated to eight
+# bytes so they leave small data at -G4 while the four-byte gp scalars stay.
+PER_FUNC_AS_FLAGS["func_8005B8A0"] = "-G4"
+# func_8004C114: gp=0; the scalar D_8009B458 bare so each lui/lw pair stays indivisible.
+PER_FUNC_AS_FLAGS["func_8004C114"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"

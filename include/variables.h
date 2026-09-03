@@ -730,6 +730,10 @@ extern u8 D_800F2B20[];
 extern s16 D_800F2B4A[];
 #ifdef D_8009B142_SIZED
 extern u8 D_8009B142[2];
+#elif defined(D_8009B142_SIZED8)
+/* Eight bytes it does not have: non-small at as -G4 beside four-byte gp
+   scalars (func_8005B8A0), so the pair stays indivisible. */
+extern u8 D_8009B142[8];
 #elif defined(D_8009B142_IS_AGGREGATE)
 extern u8 D_8009B142[];
 #else
@@ -737,6 +741,10 @@ extern u8 D_8009B142;
 #endif
 #ifdef D_8009B143_SIZED
 extern u8 D_8009B143[2];
+#elif defined(D_8009B143_SIZED8)
+/* Eight bytes it does not have: non-small at as -G4 beside four-byte gp
+   scalars (func_8005B8A0), so the pair stays indivisible. */
+extern u8 D_8009B143[8];
 #elif defined(D_8009B143_IS_AGGREGATE)
 extern u8 D_8009B143[];
 #else
@@ -744,6 +752,10 @@ extern u8 D_8009B143;
 #endif
 #ifdef D_8009B144_SIZED
 extern u8 D_8009B144[2];
+#elif defined(D_8009B144_SIZED8)
+/* Eight bytes it does not have: non-small at as -G4 beside four-byte gp
+   scalars (func_8005B8A0), so the pair stays indivisible. */
+extern u8 D_8009B144[8];
 #elif defined(D_8009B144_IS_AGGREGATE)
 extern u8 D_8009B144[];
 #else
@@ -1279,12 +1291,30 @@ extern u8 D_800938B3;
 extern u8 D_80093898;
 extern u8 D_8009466A;
 
+/* func_8005B8A0 stores this through $at beside four-byte gp scalars, and
+   reads D_800FE0D0/D_800FE0D4 through %hi/%lo pairs in the same unit: no -G
+   separates them, so that file takes -mno-split-addresses with all three
+   unsized (the fourth addressing form). */
+#ifdef D_800FE0CC_IS_AGGREGATE
+extern s16 D_800FE0CC[];
+#elif defined(D_800FE0CC_SIZED8)
+extern s16 D_800FE0CC[4];
+#else
 extern s16 D_800FE0CC;
+#endif
 /* Screen size used by the transition in func_8005BB7C: width read as a
    halfword in three places and as a word once, rows as a word and once as a
    halfword -- both widths are in the listing. */
+#ifdef D_800FE0D0_IS_AGGREGATE
+extern u16 D_800FE0D0[];
+extern s32 D_800FE0D4[];
+#elif defined(D_800FE0D0_SIZED8)
+extern u16 D_800FE0D0[4];
+extern s32 D_800FE0D4[2];
+#else
 extern u16 D_800FE0D0;
 extern s32 D_800FE0D4;
+#endif
 
 /* Pointers into larger runtime structures. Reached gp-relative from one
  * unit and via %hi/%lo from another, so the declaration stays a plain

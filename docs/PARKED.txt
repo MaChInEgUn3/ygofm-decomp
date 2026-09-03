@@ -5788,3 +5788,47 @@ branch's DELAY SLOT.
 So the question is not how to spell the negate. It is what fills that delay
 slot -- gcc has something else to put there and retail did not. That is a
 different search, and the two functions will fall together when it is found.
+
+func_80027228 -- 11 differences at equal length (184/184), written 2026-09-03.
+  The fusion-search pair of func_80026DC8 (0.886 sibling). Goto-labelled
+  hit blocks in retail's address order, base local for D_800EAE88 with the
+  first store through the symbol, and the permuter's one find: the second
+  hit's first read written inline rather than named (34 -> 11). Residue is
+  the divide temporaries' registers (mfhi $t0/$t1) in both hit blocks and
+  the %hi of D_800EAE88 landing in $a3 where retail keeps it in $s0. A second
+  permuter run from the 11 base saturated (10941 iterations, no output).
+
+func_800556E8 -- 187/187 reachable, best exact-length candidate 134 (all-volatile
+  E06) and the installed f2 at -4/149, written 2026-09-03. The card-window
+  scroll step: the E06 field is reloaded after its own store (a volatile read
+  on that one site is right; volatile everywhere costs an `andi` per read), the
+  sel==6 condition is `||` of two `&&` with the call reached by `goto`, and the
+  residue is register allocation: `st`/`d` exchanged ($v1/$a0), `p`/`n`
+  exchanged ($s1/$s0), and the two `addu $a0,$s4` slot fills that follow from
+  `st` not being in $a0. -fno-schedule-insns measured and wrong. Permuter
+  outputs at 187/187 sit at 108-110; their edits (`E06 + 1 <= w`, a
+  `do { call: … } while (0)`, a named 0xE06 offset) are not yet decomposed.
+
+func_8005B8A0 -- 183/183, 4 differences, written 2026-09-03. func_8005BB7C's
+  sibling (the other screen-transition entry). Addressing: no -G separates the
+  four-byte gp scalars from the 1/2/4-byte bare-wanting symbols, so
+  D_800FE0CC/D0/D4, D_80010000 and the RGB bytes take eight-byte arms and the
+  unit assembles at -G4 (-mno-split-addresses with unsized arrays hoisted the
+  RGB addresses into $s3-$s5 and made D_80010000 gp-relative). Source levers:
+  `m ^= 1` written before func_80085500() and pinned with do/while (the
+  scheduler otherwise hoists it above four calls), unsigned compare of
+  D_8009B06C, `if (r != 0) return r; return 0;`. Residue: `addiu $a0,$sp,0x18`
+  (the &rect argument) materialised as the FIRST instruction of two blocks in
+  retail, second in ours -- a rect pointer local takes a saved register in
+  every scope tried. The permuter's best stored output is at 2.
+
+func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
+  message dispatcher (status 0x80/0x90/0xB0/0xC0/0xE0). gp=0, scalar
+  D_8009B458 at as -G0 so each lui/lw pair stays indivisible; u8 third and
+  fourth parameters; the three record loops as rotated `for`s with the
+  pointer re-read as the body's last statement. Residue is allocation: `ch`
+  and the first-data copy exchanged ($t3/$t4), `p` in $a0 where retail keeps
+  $t1 -- and the function is one pseudo from a cliff: naming ANY extra value
+  (a halfword copy, a constant pin) puts `ch` in $a0 and deletes its five
+  argument copies (-5/-6). Also open: retail sinks the halfword store below
+  the word loads inside the loops.
