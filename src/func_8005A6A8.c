@@ -41,7 +41,8 @@ void func_8005A6A8(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
         h = (arg0 * d + arg1 * f + g) / n;
         w = h / 16;
         v = w;
-        if (v < 0) {
+        w = v < 0;
+        if (w) {
             v = -v;
         }
         if (v >= 0x80) {
