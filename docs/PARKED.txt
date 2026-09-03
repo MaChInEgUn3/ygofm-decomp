@@ -5815,8 +5815,10 @@ func_800222F4 -- 201/201, 36 differences, written 2026-09-03. The debug/test
   retail re-reads each of those halfwords per path.
   What paid, in order: the two dispatchers are **if-chains with an explicit
   `>= 2`, not switches** -- retail's tree tests 1, then `slti 2` for the
-  default, then 2 and 3, which is four tests for three cases and no switch
-  shape produces it; the arms are `goto` targets in retail's address order;
+  default, then 2 and 3, which is four tests for three cases. The `switch`
+  was measured: gcc balances three nodes and pivots at 2, and a fourth case
+  would put the range inside the jump-table rule instead, so neither shape
+  reaches retail's tree. One switch spelling measured, one reasoned about; the arms are `goto` targets in retail's address order;
   the dispatched byte is read into an `s32` local so the bound test is
   `slti` and not `sltiu`; the flag word is NOT a local (`f = D_8009B23A &
   0x4000` before the guard and again inside it makes gcc duplicate the whole

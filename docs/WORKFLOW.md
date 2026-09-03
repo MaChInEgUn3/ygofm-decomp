@@ -1017,6 +1017,18 @@ permuter found the first; the second is the same idea applied by hand.
    than fall into its neighbour: 83 differences to 60, and the length
    error from -6 to -2. Same lever as func_8003B378's single out-of-line
    arm, one level up.
+   **And the mirror: a `return X;` after each inner switch emits a RETURN
+   BLOCK that retail shares.** Two nested-switch dispatchers, func_8005FE44
+   and func_8005FC1C, map an id to one of a dozen function addresses; with
+   `return arg0;` written after each inner `switch` gcc emits a second
+   `jr $ra` / `addu $v0,$a0,$zero` pair, and `break;` in each arm with ONE
+   `return arg0;` after the outer switch is a MATCH for both. func_8005FC1C
+   had been parked since 2026-08-28 at +2 with exactly that residue written
+   in its entry, and the fix took one substitution once its sibling was
+   written. So: when a dispatcher is +2 and the extra pair is an epilogue,
+   count the `return`s before reading anything else -- and note that a grep
+   of PARKED.txt for other shared-return residues found none in this class,
+   so it is a two-instance lever, not a sweep.
    **A switch whose arms share a tail may want that tail written out per
    arm, not once after the switch.** func_8004C5C8 has six arms that all end
    `field18 = field1C & mask; field1C >>= shift;` with three different

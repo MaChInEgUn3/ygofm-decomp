@@ -1253,9 +1253,11 @@ extern u16 D_8009B2A4;
  * retail loads it afresh for every one; without volatile gcc commons the lot
  * into a single register. */
 #ifdef D_8009B398_SIZED
-/* The same eight bytes it does not have, without volatile: func_800222F4
-   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
-   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+/* The same eight bytes it does not have, without volatile. Added as the
+   non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
+   seven instructions short, because retail really does re-read this halfword
+   on each path -- so no file defines it. Kept because sweep_guards.py will
+   try it against other parked candidates. */
 extern u16 D_8009B398[4];
 #elif defined(D_8009B398_SIZED_VOLATILE)
 /* Eight bytes it does not have. func_800307B8 reads it three times with no
@@ -1374,9 +1376,11 @@ extern u8 *D_8009B1CC;
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
 #ifdef D_8009B394_SIZED
-/* The same eight bytes it does not have, without volatile: func_800222F4
-   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
-   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+/* The same eight bytes it does not have, without volatile. Added as the
+   non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
+   seven instructions short, because retail really does re-read this halfword
+   on each path -- so no file defines it. Kept because sweep_guards.py will
+   try it against other parked candidates. */
 extern u16 D_8009B394[4];
 #elif defined(D_8009B394_SIZED_VOLATILE)
 /* Eight bytes it does not have. func_80020988 reads it twice in one block --
@@ -1399,9 +1403,11 @@ extern u16 D_8009B3A0;
 /* func_80023FBC reads it five times in a row and retail reloads each time,
  * which only a volatile does. */
 #ifdef D_8009B3A4_SIZED
-/* The same eight bytes it does not have, without volatile: func_800222F4
-   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
-   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+/* The same eight bytes it does not have, without volatile. Added as the
+   non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
+   seven instructions short, because retail really does re-read this halfword
+   on each path -- so no file defines it. Kept because sweep_guards.py will
+   try it against other parked candidates. */
 extern u16 D_8009B3A4[4];
 #elif defined(D_8009B3A4_IS_VOLATILE_SIZED)
 /* Eight bytes it does not have: func_80013360 needs the bare form for this
