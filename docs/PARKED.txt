@@ -5803,3 +5803,26 @@ func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   (a halfword copy, a constant pin) puts `ch` in $a0 and deletes its five
   argument copies (-5/-6). Also open: retail sinks the halfword store below
   the word loads inside the loops.
+
+func_800222F4 -- 201/201, 36 differences, written 2026-09-03. The debug/test
+  menu step: it tears the menu down and rebuilds it on D_8009B23A's 0x4000
+  bit, then steps a four-entry mode on the pad bits.
+  Addressing: D_8009B394, D_8009B398 and D_8009B3A4 want the bare %hi/%lo
+  form while D_8009B180/D_8009B184 (four bytes) stay gp-relative, so the
+  window is `4 <= G < 8` -- the SIZED_VOLATILE arms plus `as -G4`. The
+  volatile matters: the non-volatile eight-byte arms (a new `_SIZED` arm was
+  added to variables.h for the probe) are -5 to -7 instructions, because
+  retail re-reads each of those halfwords per path.
+  What paid, in order: the two dispatchers are **if-chains with an explicit
+  `>= 2`, not switches** -- retail's tree tests 1, then `slti 2` for the
+  default, then 2 and 3, which is four tests for three cases and no switch
+  shape produces it; the arms are `goto` targets in retail's address order;
+  the dispatched byte is read into an `s32` local so the bound test is
+  `slti` and not `sltiu`; the flag word is NOT a local (`f = D_8009B23A &
+  0x4000` before the guard and again inside it makes gcc duplicate the whole
+  tail -- writing both tests against the global is -9 to -2); and the 0x40
+  block needs its own pointer name plus a second copy of it, because sharing
+  `e` with the rebuild arm puts it in a callee-saved register.
+  Residue: retail materialises func_80012D84's constant argument before the
+  call-result copy and we do it after, and in the 0x40 block retail reads the
+  first field through the result register and the rest through the copy.

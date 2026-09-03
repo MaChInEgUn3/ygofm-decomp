@@ -1252,7 +1252,12 @@ extern u16 D_8009B2A4;
  * these shared one #elif ladder. func_8003C7A0 tests five different bits and
  * retail loads it afresh for every one; without volatile gcc commons the lot
  * into a single register. */
-#ifdef D_8009B398_SIZED_VOLATILE
+#ifdef D_8009B398_SIZED
+/* The same eight bytes it does not have, without volatile: func_800222F4
+   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
+   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+extern u16 D_8009B398[4];
+#elif defined(D_8009B398_SIZED_VOLATILE)
 /* Eight bytes it does not have. func_800307B8 reads it three times with no
  * store between -- so volatile -- and needs the non-small form while the one-
  * and two-byte gp scalars around it stay %gp_rel, which puts the size in the
@@ -1368,7 +1373,12 @@ extern u8 *D_8009B18C;
 extern u8 *D_8009B1CC;
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
-#ifdef D_8009B394_SIZED_VOLATILE
+#ifdef D_8009B394_SIZED
+/* The same eight bytes it does not have, without volatile: func_800222F4
+   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
+   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+extern u16 D_8009B394[4];
+#elif defined(D_8009B394_SIZED_VOLATILE)
 /* Eight bytes it does not have. func_80020988 reads it twice in one block --
  * so volatile -- and needs the non-small form while FOUR-byte gp scalars in
  * the same unit stay %gp_rel, which is the window `4 < N <= 8` at `as -G4`.
@@ -1388,7 +1398,12 @@ extern u8 D_8009B32C;
 extern u16 D_8009B3A0;
 /* func_80023FBC reads it five times in a row and retail reloads each time,
  * which only a volatile does. */
-#ifdef D_8009B3A4_IS_VOLATILE_SIZED
+#ifdef D_8009B3A4_SIZED
+/* The same eight bytes it does not have, without volatile: func_800222F4
+   needs the non-small form (four-byte gp scalars in the unit stay %gp_rel,
+   so `as -G4`) and reads it once per path, so nothing has to be reloaded. */
+extern u16 D_8009B3A4[4];
+#elif defined(D_8009B3A4_IS_VOLATILE_SIZED)
 /* Eight bytes it does not have: func_80013360 needs the bare form for this
  * symbol while D_8009B098, also two bytes, stays gp-relative, so no real
  * threshold separates them -- see WORKFLOW's third dup-%hi branch. Volatile
