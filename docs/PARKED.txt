@@ -5861,3 +5861,28 @@ func_80057AF4 -- 203/203, 32 differences, written 2026-09-03. The animation
   a genuinely variable count (func_8002CCA8's `0x80 >> (arg0 & 7)`), so the
   source shape behind this one is not something this tree has seen, and the
   permuter is the right tool rather than more spellings.
+
+func_80060B38 -- 206/206, 61 differences, written 2026-09-03. Draws a card's
+  six colour swatches and then up to seven ATK/DEF pairs, all through the
+  0x1F800320 scratchpad packet -- the func_80040DD8 family.
+  gp=0, at=0, default flags. THE SIGNATURE WAS WRONG: functions.h had it
+  PROVISIONAL with one parameter and the listing copies `$a1` into `$s7` at
+  entry and passes it as func_800849F0's second argument, so it takes two;
+  the one decompiled caller (func_80061008, which only takes its address)
+  still MATCHES with the corrected prototype.
+  What paid, in order: a base local for the packet used with displacements
+  (WORKFLOW's rule for a hardware address); the three record reads batched
+  into names before the store group (145 -> 136); the two large packet
+  constants 0x808080 and 0x100010 as NAMED locals assigned as the function's
+  first statements, which is what puts their `lui`/`ori` pairs in the
+  prologue where retail has them (70 -> 61); and the asymmetry between the
+  two digit buffers -- retail reads `a[j]` ONCE (the value feeds both the
+  `< 10` test and the shift) and `b[j]` TWICE, so `a[j]` wants a `u8` local
+  and `b[j]` must stay written out twice. That one line is +2 and 130 to
+  exact length and 70, and an `s32` local for it is 71.
+  Residue: the prologue block's scheduling. Retail materialises
+  D_801A8000's address before the two word stores and emits the 0xFB store
+  between the +4 and +6 stores; we emit them in source order and the
+  scheduler places them differently. Five positions for the record-base
+  assignment were measured and all five give exactly 61, which is the usual
+  sign that source order is not the axis.
