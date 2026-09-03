@@ -5806,8 +5806,14 @@ func_800556E8 -- 187/187 reachable, best exact-length candidate 134 (all-volatil
   residue is register allocation: `st`/`d` exchanged ($v1/$a0), `p`/`n`
   exchanged ($s1/$s0), and the two `addu $a0,$s4` slot fills that follow from
   `st` not being in $a0. -fno-schedule-insns measured and wrong. Permuter
-  outputs at 187/187 sit at 108-110; their edits (`E06 + 1 <= w`, a
-  `do { call: … } while (0)`, a named 0xE06 offset) are not yet decomposed.
+  outputs at 187/187 go down to 97. Two of that best one's edits were
+  decomposed on 2026-09-03: naming the second `p[0xDC7] == n` comparison
+  (`z = p[0xDC7] == n; if (z)`) is 149/-4 to 136/-3 and is installed; the
+  other half is a `goto tail;` duplicated into both arms of an always-true
+  `if (p)`, which is the shape retail actually has -- its 0x3E arm jumps to
+  `.L80055950`, a SECOND entry point inside the shared tail, past the tail's
+  own `lbu 0xE16` because that arm already loaded it. A plausible spelling
+  for that duplication has not been found; the permuter's is a no-op guard.
 
 func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   message dispatcher (status 0x80/0x90/0xB0/0xC0/0xE0). gp=0, scalar

@@ -8,6 +8,7 @@ void func_800556E8(s32 idx) {
     s32 st;
     s32 v;
     s32 cur;
+    s32 z;
     s32 d;
 
     p = D_800F2C40 + idx * 0xE20;
@@ -77,7 +78,8 @@ void func_800556E8(s32 idx) {
                     if (p[0xE0F] != 0) {
                         func_80057AF4(idx, 0, 0);
                     }
-                    if (p[0xDC7] == n) {
+                    z = p[0xDC7] == n;
+                    if (z) {
                         func_8005F714(-1, idx + 2, *(u16 *)(p + 0x8B0));
                         p[0xDC7] = 0;
                         p[0xBF4] = 1;
