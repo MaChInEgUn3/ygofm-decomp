@@ -539,6 +539,8 @@ PER_FUNC_AS_FLAGS["func_80041068"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80040588"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800408D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
+# func_8005BB7C: s16 D_800FE0CC stored through $at beside one-byte gp symbols.
+PER_FUNC_AS_FLAGS["func_8005BB7C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"

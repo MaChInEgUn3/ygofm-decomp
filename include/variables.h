@@ -75,6 +75,7 @@ extern u8 D_8009B49C;
 extern u32 D_8009B068;
 extern u32 D_8009B06C;
 extern u32 D_8009B070;
+extern u8 D_8009B061;
 extern u8 D_8009B063;
 extern u8 D_8009B064;
 extern u8 D_8009B078;
@@ -1276,6 +1277,11 @@ extern u8 D_80093898;
 extern u8 D_8009466A;
 
 extern s16 D_800FE0CC;
+/* Screen size used by the transition in func_8005BB7C: width read as a
+   halfword in three places and as a word once, rows as a word and once as a
+   halfword -- both widths are in the listing. */
+extern u16 D_800FE0D0;
+extern s32 D_800FE0D4;
 
 /* Pointers into larger runtime structures. Reached gp-relative from one
  * unit and via %hi/%lo from another, so the declaration stays a plain

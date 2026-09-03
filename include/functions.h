@@ -104,7 +104,7 @@ void func_800472A8(s32 arg0);
 s32 func_80047AD0(s32 arg0);  /* every path returns 1 */
 void func_800530C4(void);  /* PROVISIONAL */
 void func_800533D8(void);  /* PROVISIONAL */
-void func_8005BB7C(s32 arg0);
+s32 func_8005BB7C(s32 arg0);
 s32 func_8005BE3C(void);  /* PROVISIONAL */
 void func_80042A50(u8 *arg0);
 void func_80047EC4(void);  /* PROVISIONAL */
