@@ -1362,6 +1362,13 @@ extern u16 D_8009B3A4;
 extern u16 D_8009B3A6;
 extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
+/* func_8003F454's state machine: the result of func_8008CCE8(1, &D_8009B3F0,
+   &D_8009B3F4), the two out-parameters it fills, and the per-state handler
+   table it dispatches through with D_8009B3DE. */
+extern s32 D_8009B3BC;
+extern s32 D_8009B3F0;
+extern s32 D_8009B3F4;
+extern void (*D_80090F9C[])(void);
 extern u16 Base2_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
