@@ -200,6 +200,9 @@ extern s16 D_8009B33C;
 /* Six one-byte thresholds, table[i] * 100 against func_800170C8's result;
    func_8001F0D0 reads [5] as splat's D_8009AF29 (the same address). */
 extern u8 D_8009AF24[6];
+/* Passed by address to func_8007EF84 22 times per frame by func_80031084;
+   width unknown, unsized so the loop hoists its %hi. */
+extern u8 D_8009AF54[];
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
 /* Passed to func_80040410 by func_80024E58; gp-relative there. */
@@ -1375,6 +1378,10 @@ extern s32 D_8009B3BC;
 extern s32 D_8009B3F0;
 extern s32 D_8009B3F4;
 extern void (*D_80090F9C[])(void);
+/* func_80031084's two 32-entry handler tables, chosen by D_8009B2F0 and
+   indexed by D_8009B2EB & 0x1F. */
+extern void (*D_80090D7C[])(void);
+extern void (*D_80090D84[])(void);
 extern u16 Base2_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
