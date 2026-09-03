@@ -5809,19 +5809,6 @@ func_800556E8 -- 187/187 reachable, best exact-length candidate 134 (all-volatil
   outputs at 187/187 sit at 108-110; their edits (`E06 + 1 <= w`, a
   `do { call: … } while (0)`, a named 0xE06 offset) are not yet decomposed.
 
-func_8005B8A0 -- 183/183, 4 differences, written 2026-09-03. func_8005BB7C's
-  sibling (the other screen-transition entry). Addressing: no -G separates the
-  four-byte gp scalars from the 1/2/4-byte bare-wanting symbols, so
-  D_800FE0CC/D0/D4, D_80010000 and the RGB bytes take eight-byte arms and the
-  unit assembles at -G4 (-mno-split-addresses with unsized arrays hoisted the
-  RGB addresses into $s3-$s5 and made D_80010000 gp-relative). Source levers:
-  `m ^= 1` written before func_80085500() and pinned with do/while (the
-  scheduler otherwise hoists it above four calls), unsigned compare of
-  D_8009B06C, `if (r != 0) return r; return 0;`. Residue: `addiu $a0,$sp,0x18`
-  (the &rect argument) materialised as the FIRST instruction of two blocks in
-  retail, second in ours -- a rect pointer local takes a saved register in
-  every scope tried. The permuter's best stored output is at 2.
-
 func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   message dispatcher (status 0x80/0x90/0xB0/0xC0/0xE0). gp=0, scalar
   D_8009B458 at as -G0 so each lui/lw pair stays indivisible; u8 third and

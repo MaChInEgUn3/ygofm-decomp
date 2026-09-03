@@ -34,11 +34,9 @@ s32 func_8005B8A0(u8 *src, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
         func_8007F6CC(0);
         func_80074170(0);
         func_80085500();
-        do { } while (0);
-        m = m ^ 1;
-        rect[0] = m * 0x140;
-        rect[1] = 0;
+        rect[0] = (m ^ 1) * 0x140;
         rect[2] = D_800FE0D0[0];
+        rect[1] = 0;
         rect[3] = D_800FE0D4[0];
         func_8007F850(rect, D_8009B144[0], D_8009B143[0], D_8009B142[0]);
         rect[0] = 0;
