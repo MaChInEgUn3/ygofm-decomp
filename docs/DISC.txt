@@ -267,3 +267,15 @@ them at 0x8016A6C0..0x8016A764). The scene scripts drive the story flags
 through opcode handlers (func_8002E918, func_80038AB0 -- table-called, no
 direct jal). The two 'enable' codes match neither overlay and stay
 unplaced.
+
+2026-09-03, the campaign's data: func_8002FD10(scene) loads 49 sectors at
+0x1E57 (callback func_8002FB78: 0x8000 to VRAM, 0x800, 0x1000 -> D_801A8000,
+0xF000 -> *D_80010000; sum 0x18800 = 49 sectors). The 4 KB at blob+0x8800 is
+the EVENT SCRIPT: u16 offset[199] then byte streams run by func_8002FA54
+through D_80090C50 (23 opcodes). The dialogue texts are NOT on the disc:
+they are 160 KB of the executable at 0x801B11D6..0x801D859F, indexed by the
+u16 table at 0x801C0000 (id 0x5xx -> entry id-0x100, base 0x801B0000, per
+func_800383DC), with control codes F0..FF dispatched through D_80090F18;
+F9 <u16> is the flag opcode and F8 19 <id> the duelist unlock.
+tools_src/campaign_script.py parses both and prints the story-flag map that
+docs/research/the_game.md 7.11 carries.

@@ -68,7 +68,7 @@ binary; the addresses are measured here and every one matches.
 |---|---|---|
 | the deck | `0x801D0200` | 40 × u16 card ids |
 | the trunk (chest) | `0x801D0250` | 722 bytes, one per card: copies owned |
-| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` a per-duelist flag set together with the unlock (`0x1F + id`; reading: defeated in campaign — nothing that tests it was traced); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, tested and set by the shop); `0x6E1`–`0x706` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
+| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` a per-duelist flag set together with the unlock (`0x1F + id`; reading: defeated in campaign — nothing that tests it was traced); `0x47`–`0x6F` the story's own flags, mapped one by one in §7.11; `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, tested and set by the shop); `0x6E1`–`0x706` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). |
 | duelist win/loss records | `0x801D0720` (= `0x801D0534 + 0x1EC`) | 39 × {u16 wins, u16 losses} |
 | last cards dropped | `0x801D07BC` | 10 × u16 (UNVERIFIED, Data Crystal) |
 | starchips | `0x801D07E0` | u32 |
@@ -76,8 +76,8 @@ binary; the addresses are measured here and every one matches.
 
 Campaign progress — where the story is, which shrines are cleared, which
 Millennium Items are held — is not a variable but **flags in that array**,
-set and tested by the scene scripts' own opcodes (§7.10); which flag number
-means which story event is not mapped (§13).
+set and tested by the campaign's event script and by the dialogue texts
+themselves (§7.10, §7.11).
 
 **What is shared.** Four systems are used by more than one mode and are worth
 knowing by name before reading any of them:
@@ -622,7 +622,7 @@ A duel ends the moment one of these holds, checked after every action:
 
 Start during a duel offers `QUIT DUEL? NO YES`; what quitting counts as is
 not verified (§13). What a win or a loss *means* is decided by the
-caller (§6, §7.11, §8).
+caller (§6, §7.12, §8).
 
 ### 5.11 The opponent
 
@@ -804,7 +804,7 @@ duelist's **win/loss record** [`0x801D0720`, 39 × {u16 wins, u16 losses}]
 and, in the campaign, sets the duelist's **Free Duel unlock bit**
 [`0x801D06F4`]. Free Duel shows the record as `WIN n LOSS n` on its select
 screen. A duel lost in Free Duel records a loss and nothing else happens; a
-duel lost in the campaign is game over (§7.11), except the one scripted loss.
+duel lost in the campaign is game over (§7.12), except the one scripted loss.
 
 > **This stage — entered from:** the duel's exit, by its caller. **Reads:**
 > the statistics record, the rank table and drop pools (disc block), the RNG.
@@ -821,7 +821,7 @@ The story mode is two modes working together — **dialogue scenes**
 `0x8002D2D8`] — that call into the duel for every fight and into the shared
 menus for every shop. It is strictly linear with one branch (§7.6) and one
 point of no return (§7.8). Losing any campaign duel is **game over** except
-the one scripted loss (§7.11).
+the one scripted loss (§7.12).
 
 **How a campaign screen works.** A location shows a picture, the characters
 present, and a dialogue with the current speaker; when the player has a
@@ -899,9 +899,10 @@ Ground**, **Town Plaza**, **Shrine**.
 *Pharaoh's Palace.* Simon offers `<Duel>` / `<Pass>` (id 1) — the
 walkthroughs place this before the festival, the Neoseeker guide's unlock
 note after meeting Jono; both are reported. Passing gets
-`<Don't go>` / `<Go>` (to bed); losing to him sends you to your room and ends
-the evening, which is the closest thing to a loss the game forgives here —
-one guide calls it game over, another a reset; treat it as unverified.
+`<Don't go>` / `<Go>` (to bed). Losing to him is **game over** like any
+other campaign loss [event 97 of the event script: dialogue 504 "Simon Muran
+(lose)", then the game-over opcode]; the guides that say otherwise are
+wrong.
 
 *Card Shop.* The shop menu (save, build deck, title, leave).
 
@@ -1048,21 +1049,123 @@ continues in Free Duel with every campaign duelist available.
 > [`0x8009B364`] and opponent id [`0x8009B361`] before each duel. **Uses:**
 > the duel engine, the disc loader (scene pictures and the per-terrain duel
 > blob), the card shop's menus, the memory card. **Where progress lives:** in
-> the save's **flag array** [`0x801D0618`, §1]. The story is data-driven:
-> the scene scripts have opcodes whose handlers read 16-bit operands from
-> the script and test or set flags [`func_8002E918` is one; it has no direct
-> caller, it is reached through the opcode table], which is why the
-> campaign modes' own code stores almost nothing by name; the loaders read
-> the flags too — the Egypt
-> map loader [`func_8003C0C0`] picks the blob at sector `0x1FD9` or, if flag
-> `0x47` is set, the one at `0x2077` (the map before and after Heishin's
-> coup). The scripts also do the unlocking: one opcode handler
-> [`func_80038AB0`, operand = duelist id] sets flag `0x1F + id` and
-> `0x6E0 + id` (Free Duel), and the scenes issue it after a win. Which flag
-> number is which story event, and what `0x1F + id` is read for, is the
-> part still unmapped (§13).
+> the save's **flag array** [`0x801D0618`, §1], and the whole story is
+> data-driven at two levels:
+>
+> * an **event script** — 4 KB loaded to `0x801A8000` as the third chunk of
+>   the 49-sector blob at `WA_MRG.MRG` sector `0x1E57` [`func_8002FD10(scene)`
+>   loads it, callback `func_8002FB78`]. It begins with a `u16 offset[199]`
+>   table, one entry per event, and each event is a byte stream run by
+>   `func_8002FA54` through a 23-opcode table [`0x80090C50`, opcode = byte &
+>   0x1F]. The opcodes that matter for the flow: 1 = show location picture,
+>   2 = run dialogue N, 3 = flag (set/clear, or "if flag, jump")
+>   [`func_8002E918`], 8 = go to map location N, 12 = jump, 18 = game over,
+>   19 = credits, 21 = "if the deck is not 40 cards, jump" (the deck check),
+>   22 = title. Almost every event is "picture, dialogue, then map / game
+>   over": the event script is the campaign's dispatcher, and it tests flags
+>   to pick the variant of a location (events 33–46, 51 and 79 test `0x20`,
+>   `0x26`, the five High Mages' flags, `0x47`, `0x48`, `0x4D`, `0x5A`,
+>   `0x6F`);
+> * the **dialogue texts**, which are in the executable [160 KB at
+>   `0x801B11D6`–`0x801D859F`; text id `0x5xx` → `u16` table at `0x801C0000`
+>   index `id − 0x100`, pointer = `0x801B0000` + offset, per
+>   `func_800383DC`]. Bytes below `0xF0` are characters (the community's
+>   `table.tbl` decodes `0x00`–`0x5B`); `0xF0`–`0xFF` are control codes
+>   dispatched through a 16-entry table [`0x80090F18`, `func_800393B0`]:
+>   `F8 op` selects a 27-entry sub-table [`0x80090EAC`] whose op `0x19` is
+>   `func_80038AB0`, **unlock duelist** (sets `0x1F + id` and `0x6E0 + id`);
+>   `F9 u16` is the **flag** code [`func_80038D2C`: bit 14 set/clear, else
+>   "if flag, jump"]; `FA` wait, `FB` menu, `FC` insert a word, `FD` jump,
+>   `FE` newline, `FF` end. So every SET of a story flag is inside a line of
+>   dialogue, and every duelist's unlock is inside their "you won" line.
+>
+> The loaders read the flags too — the Egypt map loader [`func_8003C0C0`]
+> picks the blob at sector `0x1FD9` or, if flag `0x47` is set, the one at
+> `0x2077`. §7.11 lists every story flag with the dialogue that sets it;
+> `tools_src/campaign_script.py` (in `MaChInEgUn3/ygofm-decomp`) reproduces
+> both parses and the table.
 
-### 7.11 Losing
+### 7.11 The story flags
+
+Read off the event script and the dialogue texts (§7.10): "set by" and
+"tested by" are dialogue ids (Data Crystal's names where it has them), plus
+the event-script events that test the flag. The "what it records" column is
+what the setting line of dialogue says, so it is a reading of the game's own
+text rather than of code.
+
+| flag | set by (dialogue) | tested by | what it records |
+|---|---|---|---|
+| `0x20` | (unlock opcode, with `0x6E1`) |  + events 46 | Simon Muran beaten |
+| `0x21` | (unlock opcode, with `0x6E2`) | 508 | Teana beaten |
+| `0x23` | (unlock opcode, with `0x6E4`) | 50B | Villager 1 beaten |
+| `0x24` | (unlock opcode, with `0x6E5`) | 50F | Villager 2 beaten |
+| `0x25` | (unlock opcode, with `0x6E6`) | 513 | Villager 3 beaten |
+| `0x26` | (unlock opcode, with `0x6E7`) | 5F8 + events 42,44,46 | Seto beaten |
+| `0x31` | (unlock opcode, with `0x6F2`) | 57D | Mage Soldier beaten |
+| `0x34` | (unlock opcode, with `0x6F5`) | 58C | Ocean Mage beaten |
+| `0x35` | (unlock opcode, with `0x6F6`) | 595,596,59F,5A0,5A9,5AA,5B3,5B4,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 36 | High Mage Secmeton beaten |
+| `0x36` | (unlock opcode, with `0x6F7`) | 596 | Forest Mage beaten |
+| `0x37` | (unlock opcode, with `0x6F8`) | 58C,595,59F,5A0,5A9,5AA,5B3,5B4,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 33 | High Mage Anubisius beaten |
+| `0x38` | (unlock opcode, with `0x6F9`) | 5A0 | Mountain Mage beaten |
+| `0x39` | (unlock opcode, with `0x6FA`) | 58C,595,596,59F,5A9,5AA,5B3,5B4,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 38 | High Mage Atenza beaten |
+| `0x3A` | (unlock opcode, with `0x6FB`) | 5AA | Desert Mage beaten |
+| `0x3B` | (unlock opcode, with `0x6FC`) | 58C,595,596,59F,5A0,5A9,5AA,5B3,5B4,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 34 | High Mage Martis beaten |
+| `0x3C` | (unlock opcode, with `0x6FD`) | 5B4 | Meadow Mage beaten |
+| `0x3D` | (unlock opcode, with `0x6FE`) | 58C,595,596,59F,5A0,5A9,5AA,5B3,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 40 | High Mage Kepura beaten |
+| `0x47` | 56A | — + events 44,45,46 | the tournament is over and the prince is back in Egypt (set by Simon in 56A) |
+| `0x48` | 505 | — + events 46 | heard Simon's tale of the cards (505) |
+| `0x49` | 50C | 50B | Villager 1 has told you about the festival (50C) |
+| `0x4A` | 510 | 50F | talked to Villager 2 (510) |
+| `0x4B` | 514 | 513 | talked to Villager 3 (514) |
+| `0x4D` | 53D | — + events 51 | saw the mages waiting for Seto at the shrine (53D) |
+| `0x4E` | 537 | 52E | Villager 1 has lost to you and changed his line (537) |
+| `0x4F` | 53A | 530 | Villager 2 has lost to you and gone home (53A) |
+| `0x50` | 585,586 | 57F | met Sadin at King's Valley (585/586) |
+| `0x51` | 581 | 57F,585 | found the map to the Forbidden Ruins in the palace (581) |
+| `0x52` | 585 | 585 | handed the map to Sadin (585) |
+| `0x53` | 58A | 585 | entered the Forbidden Ruins (58A) |
+| `0x54` | 58A | 58A | looked at the map in the ruins (58A) |
+| `0x5A` | 583 | — + events 79 | found the hidden Dueling Grounds (583) |
+| `0x5B` | 5DA | 5DA | set and re-tested inside Jono 2nd's hub dialogue (5DA); purpose read as a once-only line |
+| `0x5C` | 5DA | 595,59F,5A9,5B3,5BD,5DA,5DB | the kidnapping scene has played (5DA; High Mage defeats test it) |
+| `0x5D` | 5BF | 5D9,5DA,5DB,5DC,5DD,5DE | all five High Mages beaten: Seto's "you defeated the High Mages" (5BF) |
+| `0x5E` | 5D8 | 5D8 | visited the hiding card shop (5D8) |
+| `0x5F` | 5DA | 5DA | set and re-tested inside dialogue 5DA; purpose read as a once-only line |
+| `0x60` | 58A | 58A | looked at the drawing in the ruins (58A) |
+| `0x61` | 5DB | 5D7,5DB | set and re-tested inside Teana 2nd's dialogue (5DB); purpose read as a once-only line |
+| `0x62` | 5DB | 5DB | set and re-tested inside dialogue 5DB; purpose read as a once-only line |
+| `0x63` | 5DC | 5DC | set and re-tested inside dialogue 5DC; purpose read as a once-only line |
+| `0x64` | 5DC | 5DC | set and re-tested inside dialogue 5DC; purpose read as a once-only line |
+| `0x65` | 5DD | 5DD | set and re-tested inside dialogue 5DD; purpose read as a once-only line |
+| `0x66` | 5DD | 5DD | set and re-tested inside dialogue 5DD; purpose read as a once-only line |
+| `0x67` | 5DE | 5DE | set and re-tested inside dialogue 5DE; purpose read as a once-only line |
+| `0x68` | 5DE | 5DE | set and re-tested inside dialogue 5DE; purpose read as a once-only line |
+| `0x69` | 5F2 | 5F1,5F2 | labyrinth: progress bit (5F2) |
+| `0x6A` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
+| `0x6B` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
+| `0x6C` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
+| `0x6D` | 5BF | 5EE | set with 0x5D after the fifth High Mage; tested by Seto at the labyrinth door (5EE) |
+| `0x6E` | 501,502 | 542,5EE | Simon's evening lecture has happened (501/502) |
+| `0x6F` | 521,522 | 502,507,51F + events 43 | Seto has challenged you at the festival (521/522) |
+
+Events in the event script that test flags: 0x20→46, 0x26→42,44,46, 0x35→36, 0x37→33, 0x39→38, 0x3B→34, 0x3D→40, 0x47→44,45,46, 0x48→46, 0x4D→51, 0x5A→79, 0x6F→43
+
+Three things the table shows on its own. Every duelist's unlock sits in
+their "you won" dialogue — ids 1–38, one each, which is the independent
+confirmation of the id order in §6.4. The five shrines are gated on the
+**High Mage's** `0x1F + id` flag and skip the gate mage on the **Low
+Mage's** (`0x34`, `0x36`, `0x38`, `0x3A`, `0x3C` tested by the shrine
+dialogues), so "shrine cleared" is not a flag of its own. And the labyrinth
+keeps its progress in four bits, `0x69`–`0x6C`, which is why a wrong turn
+costs another Labyrinth Mage duel rather than a reset.
+
+Not read: the ending text (5D7) tests `0xD3`, `0x14A`, `0x17E`, `0x22A`,
+`0x501`, `0x700` and clears `0x1DC` / sets `0x539`, all outside the story
+range — probably card-seen and password flags for its completion bonus;
+Nitemare's win text tests `0x5F7`; and the small-id menu texts `0x40`–`0x45`
+do not parse with the control-code widths used here.
+
+### 7.12 Losing
 
 A lost campaign duel goes to **game over** [`gameOverLoop` `0x8002D730`],
 which offers a retry of the same duel or a return to the title (the save is
@@ -1198,7 +1301,8 @@ The constants an agent will see as bare immediates, and what each one is:
 
 The card database (stats, levels, names), the terrain table, the effect-group
 table and handler tables, the mode table, the AI opcode table, and the
-in-game text. The rule tables of the duel are **not** here: their addresses
+in-game text — every dialogue line of the campaign is here, 160 KB from
+`0x801B11D6`, with its pointer table at `0x801C0000` (§7.10). The rule tables of the duel are **not** here: their addresses
 are zero in the file because the duel loader fills them from disc.
 
 ### 12.2 On the disc
@@ -1297,11 +1401,10 @@ music tracks (ids 0x00–0x38) and the terrain and type ids used above.
 
 Not verified in code:
 
-* which flag numbers in the save's flag array are the story's — the array,
-  its test/set routines, the script opcodes that drive it and four of its
-  ranges are located (§1), but no story flag except `0x47` has a known
-  meaning yet, and nothing that reads the per-duelist `0x1F + id` flags was
-  traced;
+* what the labyrinth's four progress bits (`0x69`–`0x6C`) each mean, which
+  fork sets which; and the eight flags the ending text tests and sets;
+* the control-code widths of the text engine were read from the handlers
+  and hold for 1,528 of the 1,536 texts — six menu texts do not parse;
 * the per-screen button maps outside the duel and Build Deck;
 * whether a monster played this turn may attack this turn (stated from play);
 * the three victory-condition score adjustments (+2 / −40 / +40) and the
