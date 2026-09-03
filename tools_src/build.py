@@ -543,6 +543,8 @@ PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8005BB7C"] = "-G1"
 # func_80031084: volatile u16 D_8009B394/D_8009B398 bare beside one-byte gp symbols.
 PER_FUNC_AS_FLAGS["func_80031084"] = "-G1"
+# func_8003D74C: s8 D_8009B34D[4] (sized arm) stored through $at beside one-byte gp symbols.
+PER_FUNC_AS_FLAGS["func_8003D74C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"
