@@ -196,6 +196,9 @@ extern s16 D_8009B1AC;
 extern s16 D_8009B1AE;
 extern u8 D_80090A4C[];
 extern s16 D_8009B33C;
+/* Six one-byte thresholds, table[i] * 100 against func_800170C8's result;
+   func_8001F0D0 reads [5] as splat's D_8009AF29 (the same address). */
+extern u8 D_8009AF24[6];
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
 /* Passed to func_80040410 by func_80024E58; gp-relative there. */
