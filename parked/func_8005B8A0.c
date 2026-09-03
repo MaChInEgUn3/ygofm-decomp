@@ -34,7 +34,8 @@ s32 func_8005B8A0(u8 *src, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
         func_8007F6CC(0);
         func_80074170(0);
         func_80085500();
-        do { m = m ^ 1; } while (0);
+        do { } while (0);
+        m = m ^ 1;
         rect[0] = m * 0x140;
         rect[1] = 0;
         rect[2] = D_800FE0D0[0];
