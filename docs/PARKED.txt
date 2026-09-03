@@ -3037,28 +3037,6 @@ func_8002A4A8_WAS -- 14 differences, two register rotations, and the other 96
     is 30; a fresh name declared first, last or in the middle is 7.
 
 
-func_8001B938 -- 3 differences, one register. 107 of 110 instructions are
-    byte-identical; retail holds the unpacked 5-bit field in $a0 (reusing the
-    register the record index just freed) and we hold it in $v1 (reusing the
-    one the D_801D4244 base just freed). Both are free at that point and
-    nothing else in the function differs. Seven shapes measured -- naming the
-    record index and reusing the field's own name for it, splitting the
-    `>> 26` from the `& 0x1F` against one name (4), naming the halfword read
-    between them, and the declaration order of the four locals -- and every
-    one of them is 3.
-    Also measured after the fact: the borrowed-later-live-local hint that
-    took func_8002A4A8 from 14 to 3 does not apply here -- borrowing the
-    loop counter for the record index is 6, borrowing the byte-table index
-    is 18, and using one name for both the index and the field is 10.
-    Two readings got it here and both are now WORKFLOW lines: a base local
-    for D_8015C424 (against the symbol the 0x4B6B8 folds into `%hi`), and
-    then a SECOND name for the intermediate pointer, because retail splits
-    that offset as 0x48000 in a register plus 0x36B8 as the load's
-    displacement and one local only gets you the whole constant in the
-    register.
-
-
-
 func_80025D30 -- 38 differences at -1 instruction; the addressing is solved
     and what is left is one constant's materialisation. Decode: a five-step
     timer that decrements D_8009B20C[1], reloads it to 0x10, picks a record
@@ -3528,34 +3506,6 @@ func_8004D58C -- 13 differences at equal length (116/116). The sibling of
     for the modulo (16); `d = d << 3` (14); `i - d * 8` and `i - (d << 3)`
     (13, no change); inlining the division into the address (15). The
     permuter's best of eight outputs is 12 and carries a `new_var` artifact.
-
-func_8005A6A8 -- 1 difference at equal length (116/116): retail negates in
-    place, `subu $v1,$zero,$v1`, and we read the copy's source instead,
-    `subu $v1,$zero,$v0`. Both are correct; it is which pseudo gcc's copy
-    propagation picked. A geometry helper -- two square roots, a reciprocal
-    /12, a real `div` by a variable, and a clamp.
-    What paid:
-      - naming the `+8` field read so the four table reads happen in retail's
-        order ([8], [0xC], [0x14], [0]): 79 to 71.
-      - and the one worth remembering: **the `- 0x2BC` on the first square
-        root's result belongs AFTER the second call.** Written before it, gcc
-        fuses the call-result move and the subtraction into one
-        `addiu $s0,$v0,-700` and the function is an instruction short;
-        written after, retail's `addu $s0,$v0,$zero` / `addiu $s0,$s0,-700`
-        pair appears, because the raw result now has to survive a call in a
-        callee-saved register before anything is done to it. Ten spellings of
-        the subtraction measured at the earlier position -- two statements,
-        `-=`, a fresh name, a fresh name plus a copy, and four placements
-        among the neighbouring multiplies -- all 79 at -1. Moving it past the
-        call is 9 at equal length.
-      - three names for the clamp chain rather than two, and *which* name
-        takes which role: `w = h / 16; v = w; ... w = v;` is 1, the same three
-        statements with v and w exchanged is 9, and a genuinely third name is
-        3.
-    Measured and dead on the last difference: four spellings of the negation
-    (test on the other name, `0 - v`, an explicit if/else, negating the other
-    name) -- all 1, which is the tell that this is not a source axis.
-
 
 func_8002E730 -- 2 differences at equal length (122/122), both of them one
     MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
@@ -4967,49 +4917,6 @@ func_8002BD0C -- 140 target, 140 built, 19 differences, written 2026-08-21,
   the three plausible `do { } while (0);` shapes with the same effect
   reproduces it (two of them are -3, because the do/while lets gcc cross-jump
   join1's tail into arm 2's).
-
-func_80020988 -- 151 target, 150 built (-1), 72 differences, written
-  2026-08-28. A menu appear/animate/dismiss handler returning a status code
-  (0, -1, 1, 2). Third out of the dup-%hi pool. **The whole first half -- the
-  block that creates the two widgets, 75 instructions with two calls each
-  taking eight arguments -- is exact on the first draft**, so what follows is
-  a small residue in a small tail.
-  Addressing: the gp side is D_8009B152 (1 byte) and D_8009B188/D_8009B18C/
-  D_8009B1CC (4 bytes each), and the two bare-wanting symbols are D_8009B394
-  and D_8009B398, both `u16`. The bare ones are NARROWER than the widest gp
-  one, so no threshold exists and this is WORKFLOW's third dup-%hi branch:
-  inflate. D_8009B398_SIZED_VOLATILE already existed for exactly this; a
-  matching D_8009B394_SIZED_VOLATILE arm was added, and the unit assembles at
-  `as -G4`. Both need the volatile as well -- D_8009B394 is read twice in one
-  block and D_8009B398 twice across calls, and retail reloads every time.
-  Four globals had no declaration at all and are new in variables.h.
-  What is measured so far: `e` borrowing `q`'s name is worth 2 (74 -> 72), the
-  two being in mutually exclusive branches and retail carrying both in $s3.
-  Residue, and the -1 is part of it: retail leaves the `(D_8009B398 & 0xE0)`
-  test as `beq` falling into the body with the zero return value in its delay
-  slot, and we emit the inverted `bne` plus a `j`, which is +2 there and means
-  something else is -3. Three tail shapes measured (the body inside the `if`,
-  a `goto zero;` label, the plain early return) and all are -1 at 72/73.
-  **The -1 is now located exactly**: retail's `addu $v0,$v1,$zero` copy of the
-  `e[0x21] + e[0x60]` sum, and the tail is otherwise instruction-for-
-  instruction. But it is NOT the two-names tell, and this is the first time
-  that reading has failed. Retail masks the copy 0x7F for the branch and the
-  original 0xFF **in that branch's delay slot**; we compute the 0x7F mask,
-  branch with the STORE in the delay slot, and mask 0xFF after -- one
-  instruction fewer because one register serves both masks. So the real
-  question is what fills the delay slot, not how many names the sum has.
-  Measured and worthless, all at -1: a second name `w` for the sum at five
-  declared types (s32/s16/u16/u8/s8), the same copy borrowed into `one`, `b`
-  and `c` (92/95/98 -- much worse), `u8` for the sum itself,
-  `do { } while (0);` round the store and round the sum-plus-store, and the
-  store moved above the `|= 4`.
-  Retail also reads the flags halfword at `+8` BEFORE the two bytes it sums,
-  where we read the bytes first.
-  The permuter's only exact-length output is semantically wrong -- it holds
-  the pre-write flags value in a `volatile` local and reuses it for the
-  `& 0xFFFB`, where retail re-reads after the write. Its correct length is an
-  accident of the volatile's own store-and-reload.
-
 
 func_8004803C -- 157 target, 157 built, 140 differences, written 2026-08-28
   (-4/151 on the first draft the same day).  Fourth out of the dup-%hi pool.
