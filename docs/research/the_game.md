@@ -772,6 +772,7 @@ matches one block at 92–100 %, and the order is the opponent id
 | id | duelist | id | duelist | id | duelist |
 |---|---|---|---|---|---|
 | 0 | (unused; a copy of 1) | 13 | Shadi | 26 | High Mage Atenza |
+| **39** | **Duel Master K** | | | | |
 | 1 | Simon Muran | 14 | Yami Bakura | 27 | Desert Mage |
 | 2 | Teana | 15 | Pegasus | 28 | High Mage Martis |
 | 3 | Jono | 16 | Isis | 29 | Meadow Mage |
@@ -785,11 +786,13 @@ matches one block at 92–100 %, and the order is the opponent id
 | 11 | Mai Valentine | 24 | High Mage Anubisius | 37 | **DarkNite** |
 | 12 | Bandit Keith | 25 | Mountain Mage | 38 | **Nitemare** |
 
-Two things fall out of that table on their own. Blocks 8 and 35 are
-byte-identical: Heishin's first and second duels share one set of tables.
-And **Duel Master K has no block** — the list of what he drops matches
-Villager 3's block (id 6) at 100 %, so he draws from it [a reading from the
-match; the code that maps K to id 6 was not traced]. It also corrects the
+Two things fall out of that table on their own. Blocks 8 and 35 —
+Heishin's first and second duels — share the same three drop pools and rank
+table but carry different deck weights. And **Duel Master K is block 39**:
+its three drop pools are byte-identical to Villager 3's (which is why the
+community's list of what he drops matches Villager 3's block at 100 %), and
+its stored deck is a placeholder identical to Simon Muran's, because his
+script plays a copy of the player's deck instead (§8). It also corrects the
 earlier version of this document, which named the blocks by the GameShark
 record order and was off by one from Teana onward — and it means the two
 **GameShark win/loss labels for Nitemare and DarkNite are probably swapped**
@@ -850,7 +853,7 @@ available in Free Duel (§8), with two exceptions noted.
 | 3 | Jono | Duel Ground, after the festival | optional | |
 | 4 | Villager 1 | Duel Ground | optional | present before and after the tournament |
 | 5 | Villager 2 | Duel Ground | optional | present before and after |
-| 6 | Villager 3 | Duel Ground | optional | **only before the festival** — one of the two duelists you can miss for Free Duel (the other is Seto 2nd); Duel Master K draws from his tables (§6.4) |
+| 6 | Villager 3 | Duel Ground | optional | **only before the festival** — one of the two duelists you can miss for Free Duel (the other is Seto 2nd); Duel Master K's drop pools are a copy of his (§6.4) |
 | 7 | Seto | Duel Ground, after the festival | forced | the first real challenge |
 | 8 | Heishin | Palace, after Seto | forced **loss** | the only duel you must lose; winning it repeats it, and beating him even once unlocks him for Free Duel |
 | 9 | Rex Raptor | KaibaCorp tournament, preliminaries | forced | |
@@ -1198,7 +1201,7 @@ after the story: every guide's "farm X for Y" is a Free Duel loop.
 **Duel Master K** is the exception in every way: not in the campaign, always
 unlocked, plays a **copy of your own deck** [the patch that makes his deck
 editable flips one byte, `0x8585` in the executable, from "copy the player's
-deck" to "use a deck"], and draws his drops from Villager 3's tables (§6.4).
+deck" to "use a deck"], and his drop pools are a copy of Villager 3's (§6.4).
 
 The unlock is one flag per duelist, `0x6E0 + id`, in the save's flag array
 [bytes `0x801D06F4`–`0x801D06F8`]. The screen's own code, which lives in an
@@ -1415,9 +1418,9 @@ Not verified in code:
 * the three victory-condition score adjustments (+2 / −40 / +40) and the
   names of the ten score categories (matched to the community's table);
 * the initial-deck generator's group tables (Data Crystal names them);
-* Duel Master K's mapping to Villager 3's drop tables (inferred from a 100 %
-  match); the whole duelist-id order rests on 92–100 % matches against one
-  independent list;
+* the whole duelist-id order rests on 92–100 % matches against one
+  independent list, and on every unlock opcode sitting in the right win
+  dialogue (§7.11);
 * the win/loss record order (the archives' claim; only the drop-block order
   is measured);
 * what Simon Muran's loss in the opening does (the guides disagree), and
