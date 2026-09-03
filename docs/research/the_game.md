@@ -68,7 +68,7 @@ binary; the addresses are measured here and every one matches.
 |---|---|---|
 | the deck | `0x801D0200` | 40 × u16 card ids |
 | the trunk (chest) | `0x801D0250` | 722 bytes, one per card: copies owned |
-| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` a per-duelist flag set together with the unlock (`0x1F + id`; reading: defeated in campaign — nothing that tests it was traced); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, tested and set by the shop); `0x6E1`–`0x6E6` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
+| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` a per-duelist flag set together with the unlock (`0x1F + id`; reading: defeated in campaign — nothing that tests it was traced); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, tested and set by the shop); `0x6E1`–`0x706` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
 | duelist win/loss records | `0x801D0720` (= `0x801D0534 + 0x1EC`) | 39 × {u16 wins, u16 losses} |
 | last cards dropped | `0x801D07BC` | 10 × u16 (UNVERIFIED, Data Crystal) |
 | starchips | `0x801D07E0` | u32 |
@@ -286,8 +286,9 @@ The campaign's card shop opens this same screen. [`buildDeckMenuLoop`
 ### 4.2 The trunk
 
 One byte per card [`0x801D0250`, 722 bytes]: the number of copies owned.
-(The Library's "seen" mark is *not* in this byte — it is flag `0x120 + card`
-in the save's flag array, §1.) Cards move in
+(The Library's "seen" test reads flag `0x120 + card` in the save's flag
+array, §1, not this byte; whether the byte also carries a bit was not
+checked.) Cards move in
 through duel drops, passwords and trades; they move out only through trades
 (nothing in the game destroys a card permanently — a "temporary" card seen
 in a duel, §4.4 and §5.4, is never in the trunk at all).
@@ -1097,10 +1098,11 @@ The unlock is one flag per duelist, `0x6E0 + id`, in the save's flag array
 is not set [the loop at `0x801683C0`–`0x801683EC` calls `func_8002CCA8(0x6E0
 + id)`]; entry 39 is never cleared — which fits Duel Master K being always
 there, if that entry is his (a reading). Two consequences: the flags for ids 32–38 sit in the fifth
-byte, `0x801D06F8`, so the published "all opponents" cheat, which writes four
-bytes, covers ids 1–31 and leaves the last seven locked; and the "all
-opponents" *patch* code turns the clearing branch at `0x801683D4` into a jump
-past it, which unlocks everyone.
+byte, `0x801D06F8`, so by this arithmetic the published "all opponents"
+cheat, which writes four bytes, covers ids 1–31 — the community reports it
+as unlocking everyone, and the two were not reconciled here (nothing was run);
+and the "all opponents" *patch* code turns the clearing branch at
+`0x801683D4` into a jump past it, which unlocks everyone.
 
 The list is presented in campaign order: Simon Muran first,
 Duel Master K last. Only two campaign duelists can be permanently missing
