@@ -68,7 +68,7 @@ binary; the addresses are measured here and every one matches.
 |---|---|---|
 | the deck | `0x801D0200` | 40 × u16 card ids |
 | the trunk (chest) | `0x801D0250` | 722 bytes, one per card: copies owned |
-| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` duelist *defeated in campaign* (`0x1F + id`); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, a reading); `0x6E1`–`0x6E6` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
+| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` a per-duelist flag set together with the unlock (`0x1F + id`; reading: defeated in campaign — nothing that tests it was traced); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, tested and set by the shop); `0x6E1`–`0x6E6` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
 | duelist win/loss records | `0x801D0720` (= `0x801D0534 + 0x1EC`) | 39 × {u16 wins, u16 losses} |
 | last cards dropped | `0x801D07BC` | 10 × u16 (UNVERIFIED, Data Crystal) |
 | starchips | `0x801D07E0` | u32 |
@@ -76,7 +76,7 @@ binary; the addresses are measured here and every one matches.
 
 Campaign progress — where the story is, which shrines are cleared, which
 Millennium Items are held — is not a variable but **flags in that array**,
-set and tested by the dialogue scripts themselves (§7.10); which flag number
+set and tested by the scene scripts' own opcodes (§7.10); which flag number
 means which story event is not mapped (§13).
 
 **What is shared.** Four systems are used by more than one mode and are worth
@@ -330,8 +330,8 @@ shown; confirming deducts the starchips and puts one copy in the trunk.
 Three rules:
 
 * a card can be bought **once** — a second entry of the same password is
-  refused [the shop tests a per-card flag and, on purchase, sets flag
-  `0x400 + card` "used" and `0x120 + card` "seen" in the flag array; the
+  refused [the shop tests flag `0x400 + card` and, on purchase, sets it
+  "used" and `0x120 + card` "seen" in the flag array; the
   "buy again" cheat patches the test's branch at `0x8016A6E0`, and the
   "unlimited passwords" cheat zeroes exactly the bytes those flags occupy,
   `0x801D0698`–`0x801D06F3`];
@@ -1047,16 +1047,19 @@ continues in Free Duel with every campaign duelist available.
 > [`0x8009B364`] and opponent id [`0x8009B361`] before each duel. **Uses:**
 > the duel engine, the disc loader (scene pictures and the per-terrain duel
 > blob), the card shop's menus, the memory card. **Where progress lives:** in
-> the save's **flag array** [`0x801D0618`, §1]. The story is data-driven: a
-> dialogue-script interpreter [`func_8002E918`, reading a byte stream] tests
-> and sets flags as scene operands, which is why the campaign modes' own
-> code stores almost nothing by name; the loaders read them too — the Egypt
+> the save's **flag array** [`0x801D0618`, §1]. The story is data-driven:
+> the scene scripts have opcodes whose handlers read 16-bit operands from
+> the script and test or set flags [`func_8002E918` is one; it has no direct
+> caller, it is reached through the opcode table], which is why the
+> campaign modes' own code stores almost nothing by name; the loaders read
+> the flags too — the Egypt
 > map loader [`func_8003C0C0`] picks the blob at sector `0x1FD9` or, if flag
 > `0x47` is set, the one at `0x2077` (the map before and after Heishin's
-> coup). The scripts also do the unlocking: one script opcode
-> [`func_80038AB0`, operand = duelist id] sets flag `0x1F + id` (defeated)
-> and `0x6E0 + id` (Free Duel), and the scenes issue it after a win. Which
-> flag number is which story event is the part still unmapped (§13).
+> coup). The scripts also do the unlocking: one opcode handler
+> [`func_80038AB0`, operand = duelist id] sets flag `0x1F + id` and
+> `0x6E0 + id` (Free Duel), and the scenes issue it after a win. Which flag
+> number is which story event, and what `0x1F + id` is read for, is the
+> part still unmapped (§13).
 
 ### 7.11 Losing
 
@@ -1291,11 +1294,10 @@ music tracks (ids 0x00–0x38) and the terrain and type ids used above.
 Not verified in code:
 
 * which flag numbers in the save's flag array are the story's — the array,
-  its test/set routines, the script interpreter that drives it and four of
-  its ranges are located (§1), but no story flag except `0x47` has a known
-  meaning yet;
-* that flags `0x400 + card` mean "password used" (inferred from the shop
-  setting them on purchase and the cheat zeroing exactly their bytes);
+  its test/set routines, the script opcodes that drive it and four of its
+  ranges are located (§1), but no story flag except `0x47` has a known
+  meaning yet, and nothing that reads the per-duelist `0x1F + id` flags was
+  traced;
 * the per-screen button maps outside the duel and Build Deck;
 * whether a monster played this turn may attack this turn (stated from play);
 * the three victory-condition score adjustments (+2 / −40 / +40) and the

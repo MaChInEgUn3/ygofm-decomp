@@ -262,5 +262,8 @@ itself reads the save's flag array through func_8002CCA8(0x6E0 + id) for
 ids 1..38 -- which is how the 'unlock mask' at 0x801D06F4 is really bits
 0x6E1..0x6E6 of a 256-byte flag array at 0x801D0618 (D_801D0000 + 0x618),
 the same array that holds the Library's seen flags (0x120 + card) and the
-shop's password-used flags (0x400 + card). The two 'enable' codes match
-neither overlay and stay unplaced.
+shop's password-used flags (0x400 + card; the shop overlay tests and sets
+them at 0x8016A6C0..0x8016A764). The scene scripts drive the story flags
+through opcode handlers (func_8002E918, func_80038AB0 -- table-called, no
+direct jal). The two 'enable' codes match neither overlay and stay
+unplaced.

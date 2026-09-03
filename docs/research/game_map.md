@@ -103,7 +103,7 @@ the duel code. Our own decompiled sources already index it as
 |---|---|---|
 | `0x801D0200` | 0x50 | the player's deck |
 | `0x801D0250` | 722 | the trunk: one byte per card, holding the count *and* the seen-in-Library flag |
-| `0x801D0618` | 256 | the flag array: 2048 one-bit flags (`func_8002CCA8` tests, `func_8002CCE4` sets/clears) — duelist defeated `0x1F+id`, story flags, card seen `0x120+card`, password used `0x400+card`, Free Duel unlock `0x6E0+id` (the "unlock bitmask" at `0x801D06F4` is bytes 220–224 of it) |
+| `0x801D0618` | 256 | the flag array: 2048 one-bit flags (`func_8002CCA8` tests, `func_8002CCE4` sets/clears; scene-script opcodes drive the story ones) — a per-duelist flag `0x1F+id`, story flags, card seen `0x120+card`, password used `0x400+card`, Free Duel unlock `0x6E0+id` (the "unlock bitmask" at `0x801D06F4` is bytes 220–224 of it) |
 | `0x801D0534 + 0x1EC` | 156 | the 39 duelist records |
 | `0x801D07BC` | | last cards dropped (per Data Crystal) |
 | `0x801D07DC + 4` | 4 | starchips |
