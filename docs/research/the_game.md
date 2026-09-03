@@ -716,13 +716,20 @@ counter supplies the value added to the score. The rows, measured:
 
 The +0 byte is the **way the duel ended**: +2 for taking the LP to 0, −40
 for a deck-out, +40 for Exodia (that it is added is measured; the three
-values are the community's). The thresholds, values and the counter each row reads are measured;
-the *names* of the categories are the community's, matched row for row to
-the published rank guide — and this corrects the earlier version of this
-document, which had rows 4, 5, 8 and 9 labelled as fusions, equips, magic
-and traps in the wrong order. Which of rows 8 and 9 is fusions and which is
-equips is not settled (their values are identical, so the score does not
-care).
+values are the community's). The thresholds, values and the counter each row reads are measured. The
+category names are the game's own: the post-duel result screens [text ids
+`0x40`–`0x45`, laid out by the duel-end code] print them as TURNS, EFFECTIVE
+ATTACKS, DEFENSIVE WINS and DEFENSIVE LOSSES, AVERAGE ATK/DFD FACTOR and
+CARD DESTRUCTION under "Offense/Defense statistics", then COMBO PLAYS,
+FACE-DOWN PLAYS, INITIATE FUSION, EQUIP MAGIC, CHANGE FIELD, PURE MAGIC and
+TRIGGER TRAP under "Special arts", then CARDS USED and REMAINING LP. Which
+label goes with which row was matched through the community's published
+table, which uses the same names — and this corrects the earlier version of
+this document, which had rows 4, 5, 8 and 9 labelled as fusions, equips,
+magic and traps in the wrong order. Which of rows 8 and 9 is INITIATE FUSION
+and which EQUIP MAGIC is not settled (their values are identical, so the
+score does not care); the screens also show figures the score does not use,
+such as the average ATK factor.
 
 ### 6.2 The rank
 
@@ -1170,9 +1177,12 @@ choice — `func_80038BF0`]: at forks 1, 2 and 4 "Go right" leads on and "Go
 left" to the mage, at fork 3 it is the reverse — right, right, left, right,
 as every guide says, now read off the bytes.
 
-Not read: Nitemare's win text tests flag `0x5F7` in a jump-only branch, and
-the small-id menu texts `0x40`–`0x45` do not parse with the control-code
-widths used here. The ending text (5D7) sets and tests nothing.
+Not read: Nitemare's win text tests flag `0x5F7` in a jump-only branch. The
+ending text (5D7) sets and tests nothing. Text ids `0x40`–`0x45` are not
+dialogue at all: they are the post-duel result screens (the category labels
+of §6.1), laid out for the duel-end code rather than run as a dialogue
+stream — read as one, they contain an `F8 FF` pair that would dispatch to a
+null pointer — so the dialogue parser skips them.
 
 ### 7.12 Losing
 
@@ -1412,7 +1422,8 @@ Not verified in code:
 
 * what flag `0x5F7`, tested by Nitemare's win text, means;
 * the control-code widths of the text engine were read from the handlers
-  and hold for 1,528 of the 1,536 texts — six menu texts do not parse;
+  and hold for every dialogue text; the six post-duel result screens are
+  a different layout and are skipped (§7.11);
 * the per-screen button maps outside the duel and Build Deck;
 * whether a monster played this turn may attack this turn (stated from play);
 * the three victory-condition score adjustments (+2 / −40 / +40) and the

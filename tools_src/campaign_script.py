@@ -70,8 +70,12 @@ for i,o in enumerate(offs):
     ev.append((i,o,items))
 # ---------- dialogue texts ----------
 SUB={0:1,1:1,2:1,3:4,4:1,5:1,6:0,7:2,8:0,9:0,10:1,11:1,12:1,13:6,14:2,15:1,16:2,17:1,18:0,19:0,20:1,21:1,22:0,23:2,24:2,25:1,26:0}
+# ids 0x40..0x45 are the post-duel result screens: laid out for the duel-end
+# code, not run as a dialogue stream (they hold an F8 FF pair that would
+# dispatch to a null pointer). They carry the score category labels, no flags.
+RESULT_SCREENS=set(range(0x40,0x46))
 ptr={}
-for tid in list(range(0,0x100))+list(range(0x500,0x600)):
+for tid in [t for t in range(0,0x100) if t not in RESULT_SCREENS]+list(range(0x500,0x600)):
     idx=tid-0x100 if tid>=0x500 else tid; ptr[tid]=BASE+struct.unpack_from('<H',exe,T+idx*2)[0]
 owners=sorted((a,t) for t,a in ptr.items()); starts=[a for a,_ in owners]
 def owner(pos):
