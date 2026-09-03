@@ -3626,28 +3626,6 @@ func_8004E7B0 -- 94 differences at -5. A camera-angle update with two
     `z` shared versus per-arm (that one is the -17 to -5).
 
 
-func_8005FC1C -- 27 differences at +2 (138/140). A function-pointer relocation
-    table: it looks `arg0` up in D_800F5918's 80 eight-byte entries, then
-    dispatches on the found value's high and low halves to one of twelve
-    hand-written GTE routines.
-    What paid, and it is almost entirely one lever: **the case order decides
-    the arm order in memory**, and the target's is not numeric. Reading the
-    arm addresses out of the listing gives 9, 0x209, 0x11, 0x211, 0xD, 0x20D,
-    0x15, 0x215 for the first group and 0xD, 0x20D, 0x15, 0x215 for the
-    second -- an interleaving of the two 0x200 ranges, not a sort. Writing
-    the cases in that order is 30 differences to 27, and every arm's label
-    then lands where retail's does.
-    What is left: retail's SECOND dispatch has two inline `jr $ra` /
-    `addu $v0,$a0,$zero` returns, one per subtree leaf, where we emit one
-    shared block and two `j` to it (+2). The first dispatch, which has a
-    deeper tree, already comes out with its four inline returns. Measured and
-    dead: explicit `default:` labels in one or both switches (27, unchanged),
-    an explicit `default:` in the outer switch too (27), and hand-writing the
-    second dispatch as the nested `if` tree retail's branches describe --
-    that is -2 rather than +2 and inlines each arm's address load into its
-    return, a different shape again. The full flag sweep says the default row
-    is best.
-
 func_8005A98C MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
   the history below is what this tree had reached on its own.
 func_8005A98C_WAS -- 2 differences at equal length (133/133), all of them

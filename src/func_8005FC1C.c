@@ -62,7 +62,7 @@ have:
         case 0x215:
             return (s32)func_8006A814;
         }
-        return arg0;
+        break;
     case 0x1000000:
     case 0x1100000:
     case 0x1200000:
@@ -77,7 +77,7 @@ have:
         case 0x215:
             return (s32)func_8006ADE8;
         }
-        return arg0;
+        break;
     }
     return arg0;
 }
