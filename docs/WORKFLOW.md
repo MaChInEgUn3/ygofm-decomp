@@ -1687,6 +1687,13 @@ inside it. Run this after any batch of permuter work and whenever picking up an
 old park.
 Two cautions the same run established. The dirname score is the permuter's own
 weighted metric and does not track try_func's count, so re-score everything.
+**And the re-score has to rank by `(abs(length error), differences)`, which
+the tool did not do until 2026-09-03**: it reported func_8004803C's stored
+output as "137 -> 98" and the 98 was a 158/157 candidate -- the positional
+count read as a win only because it was being compared across a length
+error. Decomposed on its own base, no half of that output moves the parked
+137 at all. Same class as the never-compare-across-length-errors trap in
+try_func, one tool further out.
 And a better count is **not** a better candidate: two of the first seven finds
 were semantically wrong and scored far better than the correct source — one
 deleted a store the target has (func_8004C84C, 14 against a correct 25), the

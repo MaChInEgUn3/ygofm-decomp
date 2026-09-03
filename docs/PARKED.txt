@@ -5593,12 +5593,12 @@ func_8001BAF0 -- 149/150 (-1), 98 differences, written
     (-3 and 68), `d2 = d;` before them with the stores through `d2` (-1 and
     65), the same with the stores through `d` (19), and `d2 = d;` after them
     (19).  Installed as a placeholder; the spelling is open.
-  * **func_80020988: 72 -> 46**, and this one does NOT decompose.  Its output
-    is three edits at once -- a named `0x2000`, an `if (1)` round one store,
-    and `if (D_8009B152) { A } else { A }` round the tail.  The named
-    constant alone is 72, and the plausible reading of the third (writing
-    `D_8009B152 |= 0x40; return 0;` out in both arms of the `0x2000` test) is
-    -1 and 76.  Not installed.
+  * **func_80020988: 72 -> 46**, which was first written up here as "does
+    NOT decompose" and does: the whole 46 is `do { } while (0);` round the
+    tail's `D_8009B152 |= 0x40` (the named `0x2000` is worth nothing and the
+    identical-arms `if` is the same lever spelled by the permuter).  From
+    that base the function MATCHED on 2026-09-03 -- see the commit -- and
+    the `do`/`while` ended up round the OTHER read-modify-write.
 
   **The full run: 65 candidates checked, 18 with a better stored output, and
   one of them was a MATCH nobody had opened.**  func_8005D994 was parked at 5
