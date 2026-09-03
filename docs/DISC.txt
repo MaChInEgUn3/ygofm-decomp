@@ -249,3 +249,18 @@ scanner finds the executable's guards at file 0x1CB22. That overlay is
 unpacked or generated at run time, or those codes are for another build.
 Extending gameshark.py's gate to the located overlay is the obvious next
 step and has not been done.
+
+2026-09-03: the Free Duel overlay is on the disc too. Its screen loads 87
+sectors at 0x1E88 (func_8003B9BC, callback func_8003B808, in parked/), and
+the callback's last arm puts 0x2800 bytes at D_800101D8: blob + 0x29000 =
+MRG 0x0F6D000, 8 KB of code then zeros, one copy only. Both Free Duel unlock
+guards match there (0x801683D4 = 0x14400002, `bnez $v0,+2`), and four of
+the five function addresses Unchiga read out of a live disassembly of that
+screen land on `addiu $sp` prologues (0x80168FB4 entry, 0x80168C7C,
+0x80168A9C, 0x80168090; 0x80168004 is a frameless leaf). The unlock loop
+itself reads the save's flag array through func_8002CCA8(0x6E0 + id) for
+ids 1..38 -- which is how the 'unlock mask' at 0x801D06F4 is really bits
+0x6E1..0x6E6 of a 256-byte flag array at 0x801D0618 (D_801D0000 + 0x618),
+the same array that holds the Library's seen flags (0x120 + card) and the
+shop's password-used flags (0x400 + card). The two 'enable' codes match
+neither overlay and stay unplaced.

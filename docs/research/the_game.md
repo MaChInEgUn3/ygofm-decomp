@@ -67,17 +67,17 @@ binary; the addresses are measured here and every one matches.
 | what | where | shape |
 |---|---|---|
 | the deck | `0x801D0200` | 40 × u16 card ids |
-| the trunk (chest) | `0x801D0250` | 722 bytes, one per card: copies owned, plus the "seen in Library" flag |
-| password-use counter | `0x801D0534 + 0x164` | |
-| Free Duel unlock mask | `0x801D06F4` (= `0x801D0534 + 0x1C0`) | 4 bytes; how the 39 duelists map onto it is not known (32 bits cannot hold one each) |
+| the trunk (chest) | `0x801D0250` | 722 bytes, one per card: copies owned |
+| the **flag array** | `0x801D0618` | 256 bytes = 2048 one-bit flags, numbered 0–0x7FF, MSB first within each byte [tested by `func_8002CCA8`, set/cleared by `func_8002CCE4`]. Known ranges: `0x20`–`0x45` duelist *defeated in campaign* (`0x1F + id`); `0x47` story flag (selects the second Egypt map); `0x121`–`0x3F2` card *seen* for the Library (`0x120 + card`); `0x401`–`0x6D2` password *already used* (`0x400 + card`, a reading); `0x6E1`–`0x6E6` Free Duel *unlocked* (`0x6E0 + id`, bytes `0x801D06F4`–`0x801D06F8`). The rest of the low range is where the story's own flags live |
 | duelist win/loss records | `0x801D0720` (= `0x801D0534 + 0x1EC`) | 39 × {u16 wins, u16 losses} |
 | last cards dropped | `0x801D07BC` | 10 × u16 (UNVERIFIED, Data Crystal) |
 | starchips | `0x801D07E0` | u32 |
 | player name, duelist code | in the same block | (offsets not measured) |
 
 Campaign progress — where the story is, which shrines are cleared, which
-Millennium Items are held — is also in this block; its exact bytes are not
-located yet (see §13).
+Millennium Items are held — is not a variable but **flags in that array**,
+set and tested by the dialogue scripts themselves (§7.10); which flag number
+means which story event is not mapped (§13).
 
 **What is shared.** Four systems are used by more than one mode and are worth
 knowing by name before reading any of them:
@@ -285,8 +285,9 @@ The campaign's card shop opens this same screen. [`buildDeckMenuLoop`
 
 ### 4.2 The trunk
 
-One byte per card [`0x801D0250`, 722 bytes]: the number of copies owned, with
-the "seen" flag for the Library folded into the same byte. Cards move in
+One byte per card [`0x801D0250`, 722 bytes]: the number of copies owned.
+(The Library's "seen" mark is *not* in this byte — it is flag `0x120 + card`
+in the save's flag array, §1.) Cards move in
 through duel drops, passwords and trades; they move out only through trades
 (nothing in the game destroys a card permanently — a "temporary" card seen
 in a duel, §4.4 and §5.4, is never in the trunk at all).
@@ -308,7 +309,9 @@ its picture, name, type, level, guardian stars, ATK/DEF and text, and its
 password; a card you have not is an unknown entry. "Seen" is set by owning
 the card and also by having it appear in a duel — a fusion result or a ritual
 summon you made counts, and those show with a semi-transparent icon because
-you saw them without owning them. The completion figure counts both. From a
+you saw them without owning them [the mark is flag `0x120 + card` in the
+flag array, set by `func_8002BF3C` and by the shop on purchase]. The
+completion figure counts both. From a
 card's page, pressing right or × shows the card in **3-D**, rotating [a cheat
 freezes the rotation by writing `0x800F284A`]. [`libraryMenuLoop`
 `0x8002D0E0`; the "have you seen it" test that decides whether a card is
@@ -327,8 +330,11 @@ shown; confirming deducts the starchips and puts one copy in the trunk.
 Three rules:
 
 * a card can be bought **once** — a second entry of the same password is
-  refused [the "buy again" cheat patches the test in the shop overlay at
-  `0x8016A6E0`];
+  refused [the shop tests a per-card flag and, on purchase, sets flag
+  `0x400 + card` "used" and `0x120 + card` "seen" in the flag array; the
+  "buy again" cheat patches the test's branch at `0x8016A6E0`, and the
+  "unlimited passwords" cheat zeroes exactly the bytes those flags occupy,
+  `0x801D0698`–`0x801D06F3`];
 * you must be able to afford it; the cost is deducted [the subtraction is
   `subu $v1, $v1, $s0` at `0x8016A87C` in that overlay];
 * the bought card is delivered when you leave the screen [the "arrive
@@ -1041,10 +1047,16 @@ continues in Free Duel with every campaign duelist available.
 > [`0x8009B364`] and opponent id [`0x8009B361`] before each duel. **Uses:**
 > the duel engine, the disc loader (scene pictures and the per-terrain duel
 > blob), the card shop's menus, the memory card. **Where progress lives:** in
-> the save block; the exact bytes are not yet located (the campaign modes'
-> reach writes only duel-state and input globals directly — see §13), so the
-> progress variables are set through the shared save-block routines rather
-> than by name.
+> the save's **flag array** [`0x801D0618`, §1]. The story is data-driven: a
+> dialogue-script interpreter [`func_8002E918`, reading a byte stream] tests
+> and sets flags as scene operands, which is why the campaign modes' own
+> code stores almost nothing by name; the loaders read them too — the Egypt
+> map loader [`func_8003C0C0`] picks the blob at sector `0x1FD9` or, if flag
+> `0x47` is set, the one at `0x2077` (the map before and after Heishin's
+> coup). The scripts also do the unlocking: one script opcode
+> [`func_80038AB0`, operand = duelist id] sets flag `0x1F + id` (defeated)
+> and `0x6E0 + id` (Free Duel), and the scenes issue it after a win. Which
+> flag number is which story event is the part still unmapped (§13).
 
 ### 7.11 Losing
 
@@ -1075,8 +1087,17 @@ unlocked, plays a **copy of your own deck** [the patch that makes his deck
 editable flips one byte, `0x8585` in the executable, from "copy the player's
 deck" to "use a deck"], and draws his drops from Villager 3's tables (§6.4).
 
-The unlock lives in a 4-byte field [`0x801D06F4`, the one the "all opponents"
-cheat fills with 0xFFFFFFFF]; how 39 duelists map onto its bits is not known. The list is presented in campaign order: Simon Muran first,
+The unlock is one flag per duelist, `0x6E0 + id`, in the save's flag array
+[bytes `0x801D06F4`–`0x801D06F8`]. The screen's own code, which lives in an
+**overlay** loaded to `0x80168000` with the Free Duel blob (§12.2), marks all
+40 grid entries available and then, for ids 1–38, clears the entry whose flag
+is not set [the loop at `0x801683C0`–`0x801683EC` calls `func_8002CCA8(0x6E0
++ id)`]; entry 39 — Duel Master K — is never cleared, which is why he is
+always there. Two consequences: the flags for ids 32–38 sit in the fifth
+byte, `0x801D06F8`, so the published "all opponents" cheat, which writes four
+bytes, covers ids 1–31 and leaves the last seven locked; and the "all
+opponents" *patch* code turns the clearing branch at `0x801683D4` into a jump
+past it, which unlocks everyone. The list is presented in campaign order: Simon Muran first,
 Duel Master K last. Only two campaign duelists can be permanently missing
 from it: Villager 3 (never dueled before the festival) and Seto 2nd (all
 five shrines cleared before the labyrinth).
@@ -1217,10 +1238,16 @@ deck weights at +0, the POW / BCD / TEC drop pools at +0x5B4 / +0xB68 /
 unread bytes at +0x1798. All 156 weight tables sum to 2048.
 
 **Overlays.** `0x80146000` receives the duel's code overlay above; a second
-slot at `0x80168000` receives per-screen code from the menu blobs — the
-password shop's is a 0x7800-byte chunk at `+0x20800` of the blob at sector
-`0x1EDF` (and again at `+0x23800` of the one at `0x1F2F`), which is where
-the three shop GameShark patches were verified.
+slot at `0x80168000` receives per-screen code from the menu blobs. Two are
+located: the **password shop's**, a 0x7800-byte chunk at `+0x20800` of the
+blob at sector `0x1EDF` (and again at `+0x23800` of the one at `0x1F2F`),
+where the three shop GameShark patches were verified; and the **Free Duel
+screen's**, the last 0x2800 bytes (`+0x29000`) of its 87-sector blob at
+`0x1E88` [loader `func_8003B9BC`, callback `func_8003B808`], 8 KB of code
+whose entry `0x80168FB4` is one of the executable's own call targets and
+where the Free Duel unlock patch was verified. The executable's other call
+targets in that range belong to whichever overlay is resident at the time,
+so they do not all resolve in one image.
 
 **The scan the tables were found by** is reproducible: `tools_src/
 extract_mrg_tables.py` in `MaChInEgUn3/ygofm-decomp` reads all of the
@@ -1263,10 +1290,12 @@ music tracks (ids 0x00–0x38) and the terrain and type ids used above.
 
 Not verified in code:
 
-* the campaign's progress variables — which bytes of the save block hold the
-  story position, cleared shrines, held Items and the labyrinth flag; the
-  campaign modes' reachable functions store only duel-state and input
-  globals directly, so these go through shared routines not yet traced;
+* which flag numbers in the save's flag array are the story's — the array,
+  its test/set routines, the script interpreter that drives it and four of
+  its ranges are located (§1), but no story flag except `0x47` has a known
+  meaning yet;
+* that flags `0x400 + card` mean "password used" (inferred from the shop
+  setting them on purchase and the cheat zeroing exactly their bytes);
 * the per-screen button maps outside the duel and Build Deck;
 * whether a monster played this turn may attack this turn (stated from play);
 * the three victory-condition score adjustments (+2 / −40 / +40) and the
@@ -1280,12 +1309,13 @@ Not verified in code:
 * what Simon Muran's loss in the opening does (the guides disagree), and
   when his duel is offered (before or after the festival);
 * what quitting a duel through `QUIT DUEL?` counts as;
-* how the 39 duelists map onto the 4-byte unlock field;
+* what the two "enable" GameShark codes target — their guards match neither
+  located overlay;
 * the home terrains of the five shrines and the finale (only Sebek/Neku's
   Yami is sourced);
 * three chunks of the duel blob and the 104-byte tail of the duelist block;
-* the overlay the Free Duel unlock cheat and the two "enable" codes target —
-  not found raw on the disc.
+* the Free Duel overlay has since been located (§12.2), so only the two
+  "enable" codes remain unplaced.
 
 Corrected from the earlier version of this document: the rank-table
 category labels (rows 4, 5, 8, 9); the seven-rank list (ten); the duelist
