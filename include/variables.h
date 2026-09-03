@@ -1293,8 +1293,11 @@ extern u8 D_8009466A;
 
 /* func_8005B8A0 stores this through $at beside four-byte gp scalars, and
    reads D_800FE0D0/D_800FE0D4 through %hi/%lo pairs in the same unit: no -G
-   separates them, so that file takes -mno-split-addresses with all three
-   unsized (the fourth addressing form). */
+   separates them, so the measured route is the SIZED8 arms (eight bytes it
+   does not have) at as -G4. The IS_AGGREGATE arms are the other route,
+   -mno-split-addresses with unsized arrays, which was tried first and
+   rejected: it hoisted the RGB byte addresses into $s3-$s5 and left
+   D_80010000 gp-relative. */
 #ifdef D_800FE0CC_IS_AGGREGATE
 extern s16 D_800FE0CC[];
 #elif defined(D_800FE0CC_SIZED8)
