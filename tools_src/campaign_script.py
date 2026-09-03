@@ -80,7 +80,8 @@ def walk(a,end):
     p=a; out=[]
     while p<end:
         b=exe[p]
-        if b<0xF0 or b in (0xFA,0xFE,0xFF): p+=1; continue
+        if b==0xFF: break          # the text's own end; what follows is a jump-only block or the next text
+        if b<0xF0 or b in (0xFA,0xFE): p+=1; continue
         if b<=0xF5: p+=2
         elif b==0xF6: p+=3
         elif b==0xF7: p+=4
@@ -104,9 +105,50 @@ for k,(a,t) in enumerate(owners):
         o=owner(pos)
         if o is None: continue
         by[v if kind!='UNLOCK' else 0x1000+v][kind].add(o)
+# ops in jump-only blocks (past a text's FF) have no owner: attribute them to the
+# 0x5xx texts whose control flow reaches them (F9 conditional targets, FD jumps,
+# menu jump tables), so "set by" names the dialogue the player is in.
+def flow(start, limit=0x2000):
+    out=[]; seen=set(); work=[start]
+    while work:
+        p=work.pop()
+        while p not in seen and 0<=p-start<limit or (p not in seen and abs(p-start)<0x4000):
+            seen.add(p); b=exe[p]
+            if b==0xFF: break
+            if b<0xF0 or b in (0xFA,0xFE): p+=1; continue
+            if b<=0xF5: p+=2
+            elif b==0xF6: p+=3
+            elif b==0xF7: p+=4
+            elif b==0xF8:
+                op=exe[p+1]
+                if op>=27: break
+                if op==25: out.append(('UNLOCK',exe[p+2]))
+                p+=2+SUB[op]
+            elif b==0xF9:
+                v=struct.unpack_from('<H',exe,p+1)[0]; f=v&0x7FF
+                if v&0x4000: out.append(('CLR' if v&0x8000 else 'SET',f)); p+=3
+                else: out.append(('IF!' if v&0x8000 else 'IF',f)); work.append(BASE+struct.unpack_from('<H',exe,p+3)[0]); p+=5
+            elif b==0xFB:
+                c=exe[p+1]; p+=2
+                if c&8: p+=1
+                if c&0x80:
+                    n=max(1,len(out) and 1)  # jump table: follow the first few targets
+                    for k in range(4): work.append(BASE+struct.unpack_from('<H',exe,p+2*k)[0])
+                    break
+            elif b==0xFC: p+=3
+            elif b==0xFD: work.append(BASE+struct.unpack_from('<H',exe,p+1)[0]); break
+            else: p+=1
+    return out
+reach=collections.defaultdict(lambda: collections.defaultdict(set))
+for tid in range(0x500,0x600):
+    for kind,v in flow(ptr[tid]):
+        key=v if kind!='UNLOCK' else 0x1000+v; reach[key][kind].add(tid)
+for key,d in reach.items():
+    for kind in ('SET','CLR','UNLOCK'):
+        if kind in d and not by[key].get(kind): by[key][kind]=set(d[kind])
 def snip(t):
     a=ptr[t]; return ''.join(tbl.get(b,'') if b<0x60 else (' ' if b==0xFE else '') for b in exe[a:a+160]).strip()
-MEANING={0x47:'the tournament is over and the prince is back in Egypt (set by Simon in 56A)',0x48:"heard Simon's tale of the cards (505)",0x49:'Villager 1 has told you about the festival (50C)',0x4A:'talked to Villager 2 (510)',0x4B:'talked to Villager 3 (514)',0x4D:'saw the mages waiting for Seto at the shrine (53D)',0x4E:'Villager 1 has lost to you and changed his line (537)',0x4F:'Villager 2 has lost to you and gone home (53A)',0x50:'met Sadin at King\'s Valley (585/586)',0x51:'found the map to the Forbidden Ruins in the palace (581)',0x52:'handed the map to Sadin (585)',0x53:'entered the Forbidden Ruins (58A)',0x54:'looked at the map in the ruins (58A)',0x5A:'found the hidden Dueling Grounds (583)',0x5B:'set and re-tested inside Jono 2nd\'s hub dialogue (5DA); purpose read as a once-only line',0x5C:'the kidnapping scene has played (5DA; High Mage defeats test it)',0x5D:'all five High Mages beaten: Seto\'s "you defeated the High Mages" (5BF)',0x5E:'visited the hiding card shop (5D8)',0x5F:'set and re-tested inside dialogue 5DA; purpose read as a once-only line',0x60:'looked at the drawing in the ruins (58A)',0x61:'set and re-tested inside Teana 2nd\'s dialogue (5DB); purpose read as a once-only line',0x62:'set and re-tested inside dialogue 5DB; purpose read as a once-only line',0x63:'set and re-tested inside dialogue 5DC; purpose read as a once-only line',0x64:'set and re-tested inside dialogue 5DC; purpose read as a once-only line',0x65:'set and re-tested inside dialogue 5DD; purpose read as a once-only line',0x66:'set and re-tested inside dialogue 5DD; purpose read as a once-only line',0x67:'set and re-tested inside dialogue 5DE; purpose read as a once-only line',0x68:'set and re-tested inside dialogue 5DE; purpose read as a once-only line',0x69:'labyrinth: progress bit (5F2)',0x6A:'labyrinth: progress bit (5F3)',0x6B:'labyrinth: progress bit (5F3)',0x6C:'labyrinth: progress bit (5F3)',0x6D:'set with 0x5D after the fifth High Mage; tested by Seto at the labyrinth door (5EE)',0x6E:"Simon's evening lecture has happened (501/502)",0x6F:'Seto has challenged you at the festival (521/522)'}
+MEANING={0x47:'the tournament is over and the prince is back in Egypt (set by Simon in 56A)',0x48:"heard Simon's tale of the cards (505)",0x49:'Villager 1 has told you about the festival (50C)',0x4A:'talked to Villager 2 (510)',0x4B:'talked to Villager 3 (514)',0x4D:'saw the mages waiting for Seto at the shrine (53D)',0x4E:'Villager 1 has lost to you and changed his line (537)',0x4F:'Villager 2 has lost to you and gone home (53A)',0x50:'met Sadin at King\'s Valley (585/586)',0x51:'found the map to the Forbidden Ruins in the palace (581)',0x52:'handed the map to Sadin (585)',0x53:'entered the Forbidden Ruins (58A)',0x54:'looked at the map in the ruins (58A)',0x5A:'found the hidden Dueling Grounds (583)',0x5B:'set and re-tested inside Jono 2nd\'s hub dialogue (5DA); purpose read as a once-only line',0x5C:'the kidnapping scene has played (5DA; High Mage defeats test it)',0x5D:'all five High Mages beaten: Seto\'s "you defeated the High Mages" (5BF)',0x5E:'visited the hiding card shop (5D8)',0x5F:'set and re-tested inside dialogue 5DA; purpose read as a once-only line',0x60:'looked at the drawing in the ruins (58A)',0x61:'set and re-tested inside Teana 2nd\'s dialogue (5DB); purpose read as a once-only line',0x62:'set and re-tested inside dialogue 5DB; purpose read as a once-only line',0x63:'set and re-tested inside dialogue 5DC; purpose read as a once-only line',0x64:'set and re-tested inside dialogue 5DC; purpose read as a once-only line',0x65:'set and re-tested inside dialogue 5DD; purpose read as a once-only line',0x66:'set and re-tested inside dialogue 5DD; purpose read as a once-only line',0x67:'set and re-tested inside dialogue 5DE; purpose read as a once-only line',0x68:'set and re-tested inside dialogue 5DE; purpose read as a once-only line',0x69:'Labyrinth Mage beaten once (5F2 sets the next unset bit of 0x69-0x6C on each win; they only vary Jono\'s line at the next fork)',0x6A:'Labyrinth Mage beaten twice',0x6B:'Labyrinth Mage beaten three times',0x6C:'Labyrinth Mage beaten four times',0x6D:'set with 0x5D after the fifth High Mage; tested by Seto at the labyrinth door (5EE)',0x6E:"Simon's evening lecture has happened (501/502)",0x6F:'Seto has challenged you at the festival (521/522)'}
 fmt=lambda s: ','.join('%03X'%t for t in sorted(s))
 if '--md' in sys.argv:
     print("| flag | set by (dialogue) | tested by | what it records |"); print("|---|---|---|---|")

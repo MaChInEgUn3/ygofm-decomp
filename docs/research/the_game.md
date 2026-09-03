@@ -992,7 +992,8 @@ After **two to four** shrines, going to the hidden Dueling Grounds triggers
 Jono: Teana has been kidnapped as bait for the Puzzle. You and Jono enter the
 **Vast Shrine**'s labyrinth; the **Labyrinth Mage** (id 31) forces a duel. Then
 four forks — `<Go right>`, `<Go right>`, `<Go left>`, `<Go right>` is the
-way through; any wrong turn means another Labyrinth Mage duel. At the end,
+way through [read off the menus' jump tables, §7.11]; any wrong turn means
+another Labyrinth Mage duel and a restart from the first fork. At the end,
 Heishin and **Seto 2nd** (id 32): forced duel; Seto was "testing" you and
 frees Teana. Back to the shrines for the rest.
 
@@ -1100,7 +1101,7 @@ text rather than of code.
 | `0x23` | (unlock opcode, with `0x6E4`) | 50B | Villager 1 beaten |
 | `0x24` | (unlock opcode, with `0x6E5`) | 50F | Villager 2 beaten |
 | `0x25` | (unlock opcode, with `0x6E6`) | 513 | Villager 3 beaten |
-| `0x26` | (unlock opcode, with `0x6E7`) | 5F8 + events 42,44,46 | Seto beaten |
+| `0x26` | (unlock opcode, with `0x6E7`) |  + events 42,44,46 | Seto beaten |
 | `0x31` | (unlock opcode, with `0x6F2`) | 57D | Mage Soldier beaten |
 | `0x34` | (unlock opcode, with `0x6F5`) | 58C | Ocean Mage beaten |
 | `0x35` | (unlock opcode, with `0x6F6`) | 595,596,59F,5A0,5A9,5AA,5B3,5B4,5BD,5DA,5DB,5DC,5DD,5DE,5E3,5E4,5E5,5E6,5E7,5E8,5E9,5EA + events 36 | High Mage Secmeton beaten |
@@ -1120,9 +1121,9 @@ text rather than of code.
 | `0x4D` | 53D | — + events 51 | saw the mages waiting for Seto at the shrine (53D) |
 | `0x4E` | 537 | 52E | Villager 1 has lost to you and changed his line (537) |
 | `0x4F` | 53A | 530 | Villager 2 has lost to you and gone home (53A) |
-| `0x50` | 585,586 | 57F | met Sadin at King's Valley (585/586) |
-| `0x51` | 581 | 57F,585 | found the map to the Forbidden Ruins in the palace (581) |
-| `0x52` | 585 | 585 | handed the map to Sadin (585) |
+| `0x50` | 586 | — | met Sadin at King's Valley (585/586) |
+| `0x51` | 581 | 585 | found the map to the Forbidden Ruins in the palace (581) |
+| `0x52` | 575,585 | 585 | handed the map to Sadin (585) |
 | `0x53` | 58A | 585 | entered the Forbidden Ruins (58A) |
 | `0x54` | 58A | 58A | looked at the map in the ruins (58A) |
 | `0x5A` | 583 | — + events 79 | found the hidden Dueling Grounds (583) |
@@ -1132,7 +1133,7 @@ text rather than of code.
 | `0x5E` | 5D8 | 5D8 | visited the hiding card shop (5D8) |
 | `0x5F` | 5DA | 5DA | set and re-tested inside dialogue 5DA; purpose read as a once-only line |
 | `0x60` | 58A | 58A | looked at the drawing in the ruins (58A) |
-| `0x61` | 5DB | 5D7,5DB | set and re-tested inside Teana 2nd's dialogue (5DB); purpose read as a once-only line |
+| `0x61` | 5DB | 5DB | set and re-tested inside Teana 2nd's dialogue (5DB); purpose read as a once-only line |
 | `0x62` | 5DB | 5DB | set and re-tested inside dialogue 5DB; purpose read as a once-only line |
 | `0x63` | 5DC | 5DC | set and re-tested inside dialogue 5DC; purpose read as a once-only line |
 | `0x64` | 5DC | 5DC | set and re-tested inside dialogue 5DC; purpose read as a once-only line |
@@ -1140,13 +1141,13 @@ text rather than of code.
 | `0x66` | 5DD | 5DD | set and re-tested inside dialogue 5DD; purpose read as a once-only line |
 | `0x67` | 5DE | 5DE | set and re-tested inside dialogue 5DE; purpose read as a once-only line |
 | `0x68` | 5DE | 5DE | set and re-tested inside dialogue 5DE; purpose read as a once-only line |
-| `0x69` | 5F2 | 5F1,5F2 | labyrinth: progress bit (5F2) |
-| `0x6A` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
-| `0x6B` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
-| `0x6C` | 5F3 | 5F1,5F2 | labyrinth: progress bit (5F3) |
-| `0x6D` | 5BF | 5EE | set with 0x5D after the fifth High Mage; tested by Seto at the labyrinth door (5EE) |
-| `0x6E` | 501,502 | 542,5EE | Simon's evening lecture has happened (501/502) |
-| `0x6F` | 521,522 | 502,507,51F + events 43 | Seto has challenged you at the festival (521/522) |
+| `0x69` | 5F2 | 5F1,5F2 | Labyrinth Mage beaten once (5F2 sets the next unset bit of 0x69-0x6C on each win; they only vary Jono's line at the next fork) |
+| `0x6A` | 5F2 | 5F1,5F2 | Labyrinth Mage beaten twice |
+| `0x6B` | 5F2 | 5F1,5F2 | Labyrinth Mage beaten three times |
+| `0x6C` | 5F2 | 5F1,5F2 | Labyrinth Mage beaten four times |
+| `0x6D` | 595,59F,5A9,5B3,5BD | 5EE | set with 0x5D after the fifth High Mage; tested by Seto at the labyrinth door (5EE) |
+| `0x6E` | 501 | 542,5EE | Simon's evening lecture has happened (501/502) |
+| `0x6F` | 521,522 | 507,51F + events 43 | Seto has challenged you at the festival (521/522) |
 
 Events in the event script that test flags: 0x20→46, 0x26→42,44,46, 0x35→36, 0x37→33, 0x39→38, 0x3B→34, 0x3D→40, 0x47→44,45,46, 0x48→46, 0x4D→51, 0x5A→79, 0x6F→43
 
@@ -1156,14 +1157,19 @@ confirmation of the id order in §6.4. The five shrines are gated on the
 **High Mage's** `0x1F + id` flag and skip the gate mage on the **Low
 Mage's** (`0x34`, `0x36`, `0x38`, `0x3A`, `0x3C` tested by the shrine
 dialogues), so "shrine cleared" is not a flag of its own. And the labyrinth
-keeps its progress in four bits, `0x69`–`0x6C`, which is why a wrong turn
-costs another Labyrinth Mage duel rather than a reset.
+does **not** save your position: its four bits `0x69`–`0x6C` count Labyrinth
+Mage wins — the mage's "you won" text (5F2) sets the next unset one and then
+always presents the first fork again, with a different line from Jono each
+time ("Let's move on", "Teana's waiting for us", "déjà vu", "these guys are
+everywhere"). The route itself is in the menus' jump tables [after a menu's
+options comes `FB 80` and one `u16` target per option, indexed by the
+choice — `func_80038BF0`]: at forks 1, 2 and 4 "Go right" leads on and "Go
+left" to the mage, at fork 3 it is the reverse — right, right, left, right,
+as every guide says, now read off the bytes.
 
-Not read: the ending text (5D7) tests `0xD3`, `0x14A`, `0x17E`, `0x22A`,
-`0x501`, `0x700` and clears `0x1DC` / sets `0x539`, all outside the story
-range — probably card-seen and password flags for its completion bonus;
-Nitemare's win text tests `0x5F7`; and the small-id menu texts `0x40`–`0x45`
-do not parse with the control-code widths used here.
+Not read: Nitemare's win text tests flag `0x5F7` in a jump-only branch, and
+the small-id menu texts `0x40`–`0x45` do not parse with the control-code
+widths used here. The ending text (5D7) sets and tests nothing.
 
 ### 7.12 Losing
 
@@ -1401,8 +1407,7 @@ music tracks (ids 0x00–0x38) and the terrain and type ids used above.
 
 Not verified in code:
 
-* what the labyrinth's four progress bits (`0x69`–`0x6C`) each mean, which
-  fork sets which; and the eight flags the ending text tests and sets;
+* what flag `0x5F7`, tested by Nitemare's win text, means;
 * the control-code widths of the text engine were read from the handlers
   and hold for 1,528 of the 1,536 texts — six menu texts do not parse;
 * the per-screen button maps outside the duel and Build Deck;
