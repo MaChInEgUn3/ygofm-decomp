@@ -737,6 +737,15 @@ extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];
 extern u8 D_800EB15C[];
 extern u8 D_800F2B20[];
+/* Interior symbols of the D_800F2B20 record. func_80052D2C writes 0x12 and
+ * 0x1A through their own names in one arm of an if and through the record
+ * base in the other, and the two spellings are not interchangeable: a named
+ * unsized array gets cc1psx's own %hi/%lo pair per reference, where the base
+ * form shares one address register across both stores. Same bytes, different
+ * instruction counts -- the listing is what says which arm is which. */
+extern s16 D_800F2B32[];
+extern s16 D_800F2B3A[];
+extern s16 D_800F2B42[];
 extern s16 D_800F2B4A[];
 #ifdef D_8009B142_SIZED
 extern u8 D_8009B142[2];
