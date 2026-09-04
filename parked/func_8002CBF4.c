@@ -21,8 +21,9 @@
  * exchanged registers ($v0/$v1) inside one block. Every attempt to name it is
  * +1 -- reusing the dead `v` in three statements, the same in one expression,
  * and a `do { } while (0);` round the read -- because a name for a call
- * argument gives gcc a copy retail does not have. A fresh-name version failed
- * to compile (see the tick's log). A named index before the `if` is -2 and a
+ * argument gives gcc a copy retail does not have; a fresh name `t` in three statements is +0 and 6.
+ * (The first run of that variant printed nothing: a wine-server race with the
+ * permuter restarting in the same second, not a compile error -- read the log.) A named index before the `if` is -2 and a
  * base local in the `>> 9` arm is -1. Permuter queued; the box runs one at a
  * time and func_8002C7E8 has it.
  */
