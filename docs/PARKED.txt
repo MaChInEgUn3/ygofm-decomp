@@ -6622,3 +6622,41 @@ func_80019608 and func_80045208, follow-up 2026-09-04 -- two more permuter
     is overwritten before its own use -- the borrowed-dead-name lever.
     Rewriting the deref to go through `p8` as well scores identically, so
     the bare copy is what goes in.
+
+# ---
+Permuter-output sweep, 2026-09-04, the remaining four flagged rows. One win
+    and three rejects, and the rejects are worth their space because each
+    one names a shape to recognise.
+    func_8004803C -- 119 to 86, census unchanged at four opcodes. The edit
+    is legitimate and is func_8002778C's lever: DELETE the third
+    `b = D_8009B45C;` reload and write the symbol inline in the three
+    references that follow it. gcc hoists the address itself and puts it
+    where retail does; the cached local was pinning a register. Dropping the
+    reload statement while KEEPING `b` is -1 and 132, so it is the inline
+    spelling that matters, not the removal.
+    Remaining census: `andi -1, lhu +1, addu +1, nop -1` -- retail masks a
+    value it already has in a register where we reload it.
+    func_80048A28 -- REJECT. Hoists `new_var = i * 2;` above the `do` loop
+    that does `i++` at its end, so the index freezes at its entry value.
+    func_8005E808 -- REJECT. Deletes `w = *(s16 *)(e + 0x20);` and inlines
+    the read into the test, but leaves `m = w;` standing, so `w` is read
+    uninitialised. Unlike func_800528AC's case the read here IS the whole
+    lever: four legitimate double-read spellings (`w = R; m = w; if (R < 0)`,
+    `m = R; w = m; if (R < 0)`, `w = R; m = R; if (w < 0)`, and the same
+    with the assignments swapped) are all 71, i.e. byte-identical, because
+    gcc CSEs the second read into a copy. Also 71: an explicit `else` arm
+    for the non-negative path. `m = R;` with no `w` at all is 77.
+    Its census is the interesting part and is NOT what the permuter was
+    touching: `mult +1, sll +1, lhu -1, addiu -1, addu -1, nop +1`, from a
+    block where retail loads `lhu $a0,16($t0)` through a base register and
+    we emit `lhu $a0,%lo(D_800F5768+16)($v0)`, with a duplicated `sll` and
+    `mult` beside it. Routing those two reads through the function's
+    existing `t = D_800F5768;` local is much worse (+5 and 208, with two
+    extra `sw`/`lw` pairs) because `t` then lives across the calls and
+    spills -- retail's base is materialised locally in that arm, so what is
+    wanted is a block-scoped base, not the long-lived one.
+    func_800556E8 -- NOT MEASURED, needs care. It rewrites a stored `v` as
+    `*(volatile u16 *)(p + 0xE06) + sp`, which is line 43's expression; but
+    `v` has three assignments (lines 43, 51, 54) and they reach different
+    stores, so inlining one is only sound on one path. Check the reaching
+    definitions before measuring it.
