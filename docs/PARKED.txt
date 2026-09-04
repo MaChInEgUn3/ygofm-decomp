@@ -140,6 +140,21 @@
 # into an indexed bare-symbol load (`lui $at; addu $at; lw %lo($at)`) instead of
 # retail's la + addu + lw, which is worse. Four source orders for the two reads
 # (pointer first, value first, address-only in a variable) give 9, 12 and 14.
+# 2026-09-04: candidate RECOVERED from git (the Unchiga merge deleted it and put
+# a transcription in src/) and re-measured at 6, not 9 -- the 9 above predates
+# the dup-%hi retraction. Confirmed independently by re-deriving the same four
+# source orders without reading this entry first: they give 9, 12, 9 and 9, so
+# every one is worse than leaving both reads inline. New and also worth nothing:
+# naming the 0x60100 constant (6), the same constant pinned with
+# `do { } while (0);` (18, much worse), and writing the +0x4C4 store before the
+# +0x4C0 one with the table read named (6).
+# sweep_try.py, full table 2026-09-04: best 6, reached at the defaults AND at
+# `O2 G8 / as G0` and `O2 G8 / as G2`. Those as-only rows postdate the
+# separation of the compiler's -G from the assembler's, so this is their first
+# run here; they tie rather than help. Every other row is 9 or worse.
+# The residue is six instructions in a different ORDER, all present: retail
+# forms the whole `D_80011434[arg0]` address before touching D_8009B458, and
+# schedules `sw $ra,0x10($sp)` late, after the `ori $a1,$a1,0x100`.
 # ---
 # func_8004A6F8 is func_8004A764 with three fields copied from arg1 instead of
 # constants, and it sits on the same barrier at 8. It is here for the one thing
