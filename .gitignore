@@ -99,3 +99,8 @@ krystal_35_sources.md
 
 # GameShark harvest (third-party work, cited not redistributed)
 third_party/gameshark/
+
+# cc1psx/wine scratch files dropped in the repo root by try_func and the
+# permuter. Five of these were swept in by `git add -A` across four commits
+# before anyone noticed.
+/ctc*
