@@ -2718,7 +2718,11 @@ func_8007214C -- 59 differences at +2 length, and the diagnosis is one
     59), and the four flag rows -- nostrength 59, nosched 57, nosched2 69,
     O1 71.
 
-func_80046DE8 -- 17 differences at +2 length, and both extra instructions
+func_80046DE8 -- MATCHED, and src/func_80046DE8.c is the source. The park
+  below is the historical record of how it looked at 17 differences and +2;
+  its parked/ candidate has been deleted, because it was the PRE-match
+  version and re-reading it would send someone back to a solved function.
+  Original entry: 17 differences at +2 length, and both extra instructions
     are load-delay `nop`s we cannot fill. The structure is settled.
     Two readings mattered to get here and both are reusable:
       - there is NO base local. Writing `p = D_8009B45C;` once per group and
