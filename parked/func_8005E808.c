@@ -80,7 +80,8 @@ void func_8005E808(u8 *p) {
             for (j = 1; j < 0xA; j++) {
                 d0 = b[j - 1][0] - b[j][0];
                 d1 = b[j - 1][1] - b[j][1];
-                d2 = b[j - 1][2] - b[j][2];
+                d2 = b[j][2];
+                d2 = b[j - 1][2] - d2;
                 acc += func_80086E50(d0 * d0 + d1 * d1 + d2 * d2);
             }
             v = mag * acc / 1000;

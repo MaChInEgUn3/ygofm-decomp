@@ -6125,7 +6125,7 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
   to the top of case 1 is worth nothing.
 
-func_8005E808 -- 251/251, 80 differences, written 2026-09-04. A geometry
+func_8005E808 -- 251/251, 77 differences, written 2026-09-04. A geometry
   step: it clamps a magnitude from the caller's record, then walks two
   8-byte entries and, per entry, dispatches on a tag to one of three
   distance calculations, keeping the largest result in +0x22.
@@ -6181,6 +6181,10 @@ func_8005E808 -- 251/251, 80 differences, written 2026-09-04. A geometry
   between the two reads -- and it is the borrowed-dead-local lever with an
   unconditional read in front of a conditional assignment. From the permuter,
   installed from the readable source.
+  And 80 -> 77 on splitting the THIRD difference of the second loop across
+  two statements against one name -- `d2 = b[j][2]; d2 = b[j-1][2] - d2;`.
+  Only the third; the first two want the single expression. From the
+  permuter, and it is the one-name-across-two-statements lever.
 
   Same day, from its own permuter: 114 -> 97 on a LOCAL ALIAS FOR THE
   PARAMETER. `e = p;` as the first statement, with every reference going
