@@ -6459,3 +6459,68 @@ func_800528AC -- 288/288 and 249 differences, `-fno-strength-reduce` (now in
     a win, it is a different length AND structurally wrong, since retail has
     cc1psx's split pair here.
     Handed to the permuter.
+
+# ---
+func_800279BC -- 271/271, 14 differences, empty opcode census. Default flags,
+    gp=4 at=0, no jump table. Candidate in parked/func_800279BC.c. This one
+    went 161 -> 14 in one session on five source-shape levers and nothing
+    else, so the entry is mostly a record of WHICH levers, because every one
+    of them was rejected on an earlier base before it was accepted on a
+    later one.
+    INSTALLED, in the order they were found:
+      1. Block layout as `goto` targets in retail's own address order
+         (257 -> 199), and an `s32` return type with five `return 0;`
+         (199 -> 190).
+      2. In the `func_80026D18(c,0xA,0x14)` arm, write the `[9]` modulo
+         FIRST and the two zero stores after it. Retail materialises ONE
+         `%hi(D_800EAE88)` pair and lets the zero stores fill the `mult`
+         latency; with the zero stores written first we emit a SECOND pair
+         and the census carries `lui +1`. 161 -> 143, and the census went
+         from three opcodes to one.
+      3. ONE NAME for the index and the byte it reads: `r = n - 1;
+         if (r != 0) r = func_800358FC(n); r = *(s8 *)(a[r] + 0x18);`.
+         Retail carries both in `$a3`. 143 -> 128, exact length, census
+         EMPTY. Twelve spellings of a two-name version -- borrowing `r`,
+         `n`, `j`, a fresh `m`, a phase split, the value hoisted above the
+         `n == 0` guard -- are all BYTE-IDENTICAL, so the axis is the
+         merge, not the placement.
+      4. `pb++` written AFTER the call, not before it. Retail fills the
+         `bne`'s delay slot with `addiu $s0,$s0,4` and leaves the `jal`'s
+         slot a `nop`; with `pb++` first, gcc sinks it into the `jal` slot
+         and the delay-slot filler then takes the `hit:` block's first
+         instruction (`lui $a3,26214`, the reciprocal) into the `bne` slot
+         instead. 180 -> 67. `*(++pb)` and `pb = pb + 1;` are identical.
+      5. The two `% 5` divide chains in the `check:` arm INTERLEAVE only if
+         the second read is named and assigned BEFORE the `[0xA]` store
+         (func_80026DC8's lever). In the `plain:` arm the whole modulo
+         expression goes at the top of the block instead -- naming just the
+         read there is -2 and 124, because the name narrows to QImode.
+         Same idiom, opposite spellings, two arms of one function.
+      6. `D_800EAE88[0xB] = 0;` moved AFTER `[0xA]` in the `check:` arm
+         (30) and after `[0xA]` in the `hit:` arm (14).
+    THE RE-MEASURE RULE PAID FOR ITSELF FOUR TIMES HERE, and that is the
+    thing worth carrying away. Lever 6's `check:` half was measured on the
+    z2 base as 185 against 180 -- WORSE -- and on the gg base as 30 against
+    36. Lever 3's borrow spellings were byte-identical on the p1 base and
+    the merge only became visible once lever 2 closed. An intermediate
+    271/271 with an EMPTY census (y1, 128) was a FALSE zero: the scan
+    loop's missing `nop` was cancelled by the un-interleaved chains, and
+    fixing the chains made the length go to -1 before it came back. So a
+    clean census is not a clean function while two faults can cancel.
+    REMAINING, all pure register allocation:
+      1. `i` is in `$a0` where retail has `$a2`, at all four of its sites,
+         and the `$a0`/`$a1`/`$a2` rotation through the second half follows
+         from it (10 of the 14). MEASURED AND DEAD at 271/271 and 14:
+         `i = 0xA;` hoisted above the outer `if`, above the function's
+         first store, `do { i = 0xA; } while (0);` on either assignment or
+         both, and six declaration orders. Every one is byte-identical,
+         which is the wrong-axis tell.
+      2. `addiu $a1,$a1,-4` -- retail reuses one register for the
+         sign-extend and the bias; we get `$a3`. `r = (s8)r; r -= 4;` and
+         `r = (s8)r; r = r - 4;` are both +1 difference (15).
+      3. `lbu $v0,d_8009b1d5` before `addiu $a1,$sp,16` -- retail
+         materialises the 0x90000000 mask's `lui` before the read and does
+         `pa = a` after. Moving `pa = a;` below the `h = ...` line is
+         neutral alone (14) and NEGATIVE combined with lever 2's spelling
+         (41), so the two are coupled.
+    Handed to the permuter.
