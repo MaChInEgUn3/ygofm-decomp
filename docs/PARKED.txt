@@ -436,16 +436,16 @@ func_80047A68
     RESOLVED -- src/func_80047A68.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A764
     STILL OPEN -- src/func_8004A764.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
-func_8005C5D4
-    STILL OPEN, but the C is now WRITTEN: parked/func_8005C5D4.c, 22/22 and 16
-    differing, 2026-09-04. The transcription's asm barrier was chasing a ghost
-    -- the +1 is gcc's own induction-variable correction and comes out of a
-    plain `for` with the timeout test after the loop. The constant is a maspsx
-    emulation gap (aspsx 2.79 splits 0x7FFFFFFF as lui 0x8000 / addiu -1;
-    maspsx emits lui/ori; retail has zero lui/ori pairs of that kind), and
-    the fix is a build.py post-maspsx rewrite per function, the
-    SMALL_DATA_NOP_FUNCS precedent. src/ keeps the transcription until both
-    close. Full notes in the candidate's header.
+func_8005C5D4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalgamer's src/game/func_8005C5D4.c, unchanged but for the include. AND A
+  RETRACTION: the 2026-09-04 diagnosis of a maspsx `li` emulation gap was
+  WRONG. There is no 0x7FFFFFFF in this function. His source is
+  `timeout = 0x800000` with `if (--timeout <= 0)`: `lui $v1,0x80` is the
+  initialiser (0x800000, no low half) and `addiu $v1,$v1,-1` is the loop's
+  pre-decrement scheduled ahead of the first test. The raw words are
+  3C030080 2463FFFF; the entry above said 3C038000, a byte-order misreading,
+  and splat's D_7FFFFF = 0x7FFFFF was right all along. The binary-wide scan
+  from that tick (zero lui/ori pairs on true constants) stands as a fact; the
+  conclusion drawn from it does not.
 func_80073220
     MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
 func_8003201C
@@ -7642,3 +7642,13 @@ func_800177C4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_800177C4.c 
   The transcription's own notes claimed its raw-asm address materialisation
   and register pins were the only way to reach the bytes; plain C plus one
   documented flag reaches them.
+
+func_80016DDC RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalgamer's src/game/func_80016DDC.c, unchanged but for the include. The lever
+  nobody here tried: `magnitude = __builtin_abs(difference);` -- the abs as a
+  builtin is what gives retail's `subu $a1,$zero,$a1` on the COPY. Our
+  candidate sat one instruction from this for a day on exactly that point.
+
+func_8003A198 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalgamer's src/game/func_8003A198.c, reformatted. A three-deep chain on ONE
+  `u16 *p` with `if (*p)` at each level and no locals for the offsets -- no
+  dead-store hint, no nested-if-with-goto, none of the levers this park spent
+  weeks on. The whole walk is the pointer.
