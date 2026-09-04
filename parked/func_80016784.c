@@ -10,12 +10,12 @@ void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *o;
     s32 n;
     s32 d;
+    s8 c;
     s32 g1;
     s32 g2;
     s32 t;
     u8 *z;
     u8 *y;
-    u8 *pk;
 
     if ((u32)(arg2 + 0x33) < 0x173) {
         if (arg3 >= -0x3B) {
@@ -61,8 +61,7 @@ void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
                         func_80042188(k, y, arg1, fl, o);
                         k[0xE] = (n % 10) * 0xC;
                         *(u16 *)(k + 4) = *(u16 *)(k + 4) + 0xC;
-                        pk = k;
-                        goto join;
+                        func_80042188(k, y, arg1, fl, o);
                     }
                 } else if (arg0[0x69] == 0) {
                     *(s32 *)(k + 8) = 0x100020;
@@ -71,18 +70,18 @@ void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
                     *(u16 *)(k + 6) = *(u16 *)(o + 0xA) + 0x28;
                     switch (arg0[0x68]) {
                     case 23:
-                        *(u16 *)(k + 0xE) = 0x20;
+                        k[0xE] = 0x20;
                     case 20:
                         func_80042188(k, y, arg1, fl, o);
                         *(u16 *)(k + 0x12) = *(u16 *)(k + 0x12) + 1;
                         break;
                     case 21:
-                        *(u16 *)(k + 0xE) = 0x40;
+                        k[0xE] = 0x40;
                         func_80042188(k, y, arg1, fl, o);
                         *(u16 *)(k + 0x12) = *(u16 *)(k + 0x12) + 2;
                         break;
                     case 22:
-                        *(u16 *)(k + 0xE) = 0x60;
+                        k[0xE] = 0x60;
                         func_80042188(k, y, arg1, fl, o);
                         *(u16 *)(k + 0x12) = *(u16 *)(k + 0x12) + 3;
                         break;
@@ -96,7 +95,7 @@ void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
                         *(u16 *)(k + 0xA) = 8;
                         *(u16 *)(k + 4) = *(u16 *)(o + 8) + 0xE;
                         d = func_800170C8(e);
-                        func_800357E8(d, 4, sp18);
+                        func_800357E8((s16)d, 4, sp18);
                         func_800357E8(d >> 0x10, 4, sp20);
                         do {
                             k[0xE] = sp18[i] * 8;
@@ -114,14 +113,13 @@ void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
                     *(s32 *)(z + 0x14) = *(s32 *)(arg0 + 0xC);
                     *(s16 *)(z + 4) = *(u16 *)(o + 8) + 6;
                     *(s16 *)(z + 6) = *(u16 *)(o + 0xA) + 6;
+                    c = e[0x18];
                     *(s32 *)(z + 0x10) = 0x380;
                     *(s32 *)(z + 8) = 0x200028;
-                    *(s16 *)(z + 0x12) = e[0x18] + 0xE0;
-                    *(u8 *)(z + 0xE) = (e[0x18] % 5) * 0x28;
-                    *(u8 *)(z + 0xF) = (e[0x18] / 5) << 5;
-                    pk = z;
-                join:
-                    func_80042188(pk, y, arg1, fl, o);
+                    *(s16 *)(z + 0x12) = c + 0xE0;
+                    *(u8 *)(z + 0xE) = (c % 5) * 0x28;
+                    *(u8 *)(z + 0xF) = (c / 5) << 5;
+                    func_80042188(z, y, arg1, fl, o);
                 }
                 *(s32 *)(k + 8) = 0x3C0034;
                 *(u16 *)(k + 0xE) = 0x8000;
