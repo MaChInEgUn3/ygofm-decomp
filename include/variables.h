@@ -1657,7 +1657,16 @@ extern u8 D_800A5768[];
 extern u8 D_800F2B50[];
 extern u8 D_800F2C40[];
 extern u8 D_800E9DB0[];
+#ifdef D_800E9EF0_IS_PTR_VOLATILE
+/* The two pointers as a volatile array. func_80019608 does two
+ * read-modify-writes in a row on the record each one points at, and gcc folds
+ * the second read into the value it just wrote unless the POINTER load itself
+ * is unforwardable -- with two independent pointer loads it can no longer
+ * prove the two field accesses are the same object either. */
+extern u8 *volatile D_800E9EF0[2];
+#else
 extern u8 D_800E9EF0[];
+#endif
 /* The pointer one word past D_800E9EF0 under its own name: func_80019608
  * reaches it both ways -- as %lo(D_800E9EF4) where the source named it,
  * and as 4(reg) off a base the same block already holds. */
