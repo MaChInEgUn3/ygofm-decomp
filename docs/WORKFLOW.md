@@ -1051,6 +1051,30 @@ permuter found the first; the second is the same idea applied by hand.
    of the call's argument, and an explicit `goto` gives a plain branch with
    nothing to duplicate. So the lever is for a shared tail whose entry does
    not need the target's first instruction copied into a delay slot.
+   **COUNT THE STACK-ARGUMENT STORES AGAINST THE `jal`s. That one grep decides
+   whether a shared `goto join` call is right, and it costs nothing.** A call
+   with five or more arguments stores the fifth at `0x10($sp)`, once per
+   textual call site -- so `grep -cE 'sw +\$[a-z0-9]+, 0x10\(\$sp\)'` counts
+   SOURCE call sites while `grep -c 'jal +<callee>'` counts what survived
+   cross-jumping. func_80016784 has TEN against NINE: two textual calls were
+   merged into one `jal`, and the shared `join:` we had written cannot
+   produce that, because a label in C puts every argument store *after* it
+   and retail's `.L80016C64` sits ON the `jal` with the other arm's
+   `sw $s3,0x10($sp)` before its own `j`. Writing both calls inline and
+   deleting the join variable was 242 differences to 150, the largest single
+   step in that function. Equal counts mean the call really is shared. This
+   is the same family as func_80030998 and func_80052694 -- a call written in
+   both arms with only the tail cross-jumped -- but here the evidence is a
+   number rather than a reading, so check it *first* on any callee with more
+   than four arguments.
+   It also settles the copy that usually gets chased instead: retail's
+   `addu $a0,$fp,$zero` before a run of stores through `$a0` is the call's own
+   argument setup scheduled early, and the stores follow it because
+   post-reload CSE rewrites a base to an equivalent hard register. No
+   source-level copy produces it -- four spellings of `pk = z` (before the
+   stores, after them, with three, five or nine routed through it) came out
+   BYTE-IDENTICAL, which is what a closed axis looks like.
+
       **A call whose ARGUMENT SETUP is duplicated into both arms of an `if`,
    with only the tail shared, is a call written in BOTH arms.** func_80030998
    picks one of two tables and calls func_80030250 with seven arguments;
@@ -2477,6 +2501,19 @@ the run it judged completed. The cheapest way to fall into this is a **filter**:
 `try_func.py ... | grep -E '<<|differing|MATCH'` prints nothing both for a clean
 match and for a compile error, because the error text matches none of the three
 patterns. Read try_func's last lines, not a grep of them.
+**Three cancellations in ONE function, and each one hid the largest lever
+left.** func_80016784 sat at -2 while four missing sign-extends at a call
+offset two extra instructions elsewhere; at +1 while two extra unsigned
+reciprocal divides offset a shortfall of the same size; and it rejected the
+`s32 c = (s8)e[0x18];` declaration at -1/134 in favour of `s8 c` at +2/124 --
+where the `s8` was wrong, and once everything else was right the same `s32`
+went to 352/352. Every one of those read as "nearly right" and every one was
+a stop sign. The rule that falls out: **a length error smaller than about
+five is not evidence of anything, and a candidate rejected while ANOTHER
+fault was still open must be re-measured once that fault closes.** Keep the
+rejected spellings; they are not dead, they were measured on a broken
+instrument.
+
 **The `(abs(length_error), differences)` order assumes the length error is
 ONE fault, and when it is two faults cancelling it inverts.** func_80027508
 reached 161/161 with 95 differences while two errors offset each other -- the
