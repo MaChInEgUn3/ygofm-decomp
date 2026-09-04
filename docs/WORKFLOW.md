@@ -1400,6 +1400,19 @@ survive it. Same value, same spelling, two live ranges, and the copy is the
 class change. So before reaching for a derived offset, ask whether the copy
 sits on a boundary where the register class changes.
 
+**A parameter copy as the function's FIRST instruction means there is NO
+local -- write the cast inline at every use.** The rule above is about making
+a copy appear; this is the mirror, and it is the commoner mistake. Retail's
+`addu $t1,$a0,$zero` sitting between the `addiu $sp` and the `sw $ra` is the
+allocator giving the parameter's pseudo a `$t` register, and gcc emits it in
+the prologue. Writing `p = (u8 *)arg0;` as a local does **not** reproduce it:
+gcc coalesces the copy, then splits the live range itself and sinks the copy
+into the entry guard's branch delay slot -- where retail has an unrelated
+`lui`. Writing `(u8 *)arg0` inline at every reference gives retail's copy at
+instruction two and frees the delay slot for the `lui`. func_8005CEF0, and
+the tell is a copy you *do* produce but in the wrong place, which reads as a
+scheduling problem and is a naming one.
+
 **A dead assignment only works if gcc cannot prove it redundant, and that is
 usually an offset.** Where the target has a plain copy of a pointer into a
 caller-saved register and you have none, `e = o;` will not produce it --
