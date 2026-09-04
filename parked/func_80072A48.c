@@ -8,6 +8,7 @@ void func_80072A48(void) {
     u8 *e;
     s32 a;
     s32 opp;
+    u8 *r2;
     s32 k;
     s32 i;
     s32 off;
@@ -70,9 +71,10 @@ void func_80072A48(void) {
     b = (u8 *)D_800F5BE8;
     if (b[0x9C] != 0) {
         r = (u8 *)D_801AB000;
+    r2 = r;
         off = 0x84;
         do {
-            e = r + off;
+            e = r2 + off;
             id = *(s16 *)e;
             n = i + 0xB;
             if (id != 0 && func_80070920(opp, n) == 0) {

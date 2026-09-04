@@ -5985,6 +5985,16 @@ func_80072A48 -- 222/222, 95 differences, written 2026-09-04. The AI's
   not the loop node, which is the opposite of the D_8009B0F4 family. The
   placeholder is installed with a comment saying so; a plausible source
   shape with the same effect has not been found.
+  2026-09-04, from the permuter-output harvest: 81 -> 73 on a SECOND NAME for
+  the D_801AB000 base in the second loop -- `r2 = r;` immediately after the
+  base is taken, with the loop's `e = r2 + off;` reading the copy and the
+  first loop keeping `r`. That is func_8007308C's rule: a plain copy survives
+  when the two live ranges want different register classes, and here the
+  pre-loop use and the loop use are exactly that. Ordinary source, installed
+  from the readable file.
+  The 95 -> 81 identical-arm PLACEHOLDER is still load-bearing and stays:
+  removing it on top of the new base is 87, so it is worth 14 differences,
+  not a leftover. Its plausible spelling is still open.
 
 
 func_8001825C -- 235/235, 55 differences, written 2026-09-04. The
