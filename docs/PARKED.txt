@@ -6903,3 +6903,38 @@ func_800482B0, follow-up 2 (2026-09-04) -- two negatives and a tooling fix.
     the most promising hand lever left, but it cannot be located by a
     positional diff while the prologue is shifted -- find it by re-syncing
     the two streams on their matching blocks rather than by row index.
+
+# ---
+func_800482B0, follow-up 3 (2026-09-04) -- the BLOCK LAYOUT was wrong, and
+    finding it needed a diagnostic the project did not have.
+    Reading the target's LABEL ORDER rather than its instructions settles
+    it: after the entry test and the `arg0 & 0x8000` arm's
+    `func_800451E0` + return, retail emits `.L8004833C` / `.L80048358` /
+    `.L80048364` -- the two channel-store arms and the SHARED
+    `func_8004803C` call -- and only THEN `.L8004839C`, the mask scan that
+    runs first. So the call block is a `goto` target written INSIDE the
+    returning branch, which is func_8002538C's rule. Moving `play:` and its
+    call up between `return;` and the closing brace of the
+    `if ((arg0 & 0x8000) != 0)` block removes two whole census entries
+    (`addu +1` and `j +1` vanish; ten opcodes to eight).
+    The two arms keep their own copies of the `sra` for `(s16)arg1` and the
+    `lbu` of sp22 and share only from `.L80048364`, which is the
+    cross-jump stopping where the arms first differ -- arm A needs a symbol
+    reload and arm B already has the base in `$v1`. And the second argument
+    is `lbu $a1,0x435($v1)`, i.e. the channel is READ BACK from
+    D_8009B45C after being stored, which the candidate already does.
+    THE MEASUREMENT THAT FOUND IT is worth more than the edit. Once the
+    FIRST row differs -- here because cc1psx hoists the D_8009B45C load
+    above the frame setup -- the difference count is worthless and so is
+    any fault located by row index. Aligning the two OPCODE streams
+    (difflib matching blocks over just the mnemonics) is position
+    independent and still measures structure: this edit took it from
+    173/235 to 205/234 while the difference count said nothing. It is now
+    printed by $SP/diag.py on every run.
+    STATE: -3 of 234, census `addiu +2, beq +2, andi -1, bne -2, lbu -1,
+    nop -1, sll -1, srl -1`, summing to -3. The `beq +2 / bne -2` pair is
+    still the best hand lever and is now locatable, since the streams align
+    for 205 of 234 instructions. Note this candidate is -3 where the
+    previous one was -1: it is installed anyway because both censuses sum
+    to their length error, so both are "fully explained", and at that point
+    the tie-break is the number of distinct faults -- eight against ten.
