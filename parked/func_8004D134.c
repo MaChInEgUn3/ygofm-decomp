@@ -46,7 +46,10 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
         o1 = 6; o2 = 2; step = 0x1C; adv = 0x34;
         break;
     case 0x215:
-        o1 = 0xA; o2 = 6; step = 0x20; adv = 0x34;
+        o1 = 0xA;
+        o2 = 6;
+        step = 0x20;
+        do { adv = 0x34; } while (0);
         break;
     default:
         return 0;

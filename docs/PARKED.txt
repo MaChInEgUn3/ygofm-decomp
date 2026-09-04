@@ -6189,7 +6189,7 @@ func_8005E808 -- 251/251, 80 differences, written 2026-09-04. A geometry
   split, and routing everything through the alias coalesces it away again.
   Which reference stays behind is not derivable; the permuter found it.
   Installed from the readable source, not the permuter's formatting.
-func_8004D134 -- 280/278 (+2), 75 differences, written 2026-09-04. Walks a
+func_8004D134 -- 280/278 (+2), 70 differences, written 2026-09-04. Walks a
   record array applying a per-format offset table: a switch on *arg1 picks
   four constants, then a loop does halfword bit surgery at two of them and
   keeps a running MAXIMUM over a format-dependent set of halfword fields.
@@ -6211,6 +6211,16 @@ func_8004D134 -- 280/278 (+2), 75 differences, written 2026-09-04. Walks a
   ours keeps the `arg0 * 4 - 0xA` bias in $s0 where retail has it in $a1.
   Eleven values are live across the loop, so this is allocation pressure
   rather than a source shape.
+  Same day, from its permuter: 75 -> 70 on a `do { adv = 0x34; } while (0);`
+  round the LAST of case 0x215's four constant assignments -- the arms of
+  this switch are almost certainly macros in the original, which is what
+  that idiom is for. Only that one arm wants it.
+  Also scored and NOT taken: two outputs reach EXACT LENGTH but at 218 and
+  222 differences, and both do it by moving `bias = arg0 * 4 - 0xA;` inside
+  the switch AFTER the default arm's `return 0;` -- unreachable code, the
+  non-installable class. Worth recording because by the standard
+  (abs(length), differences) order they outrank the +2 candidate, and they
+  are plainly worse: a length fixed by dead code is not a length fixed.
   Measured and dead: writing the middle comparisons' store INSIDE the `if`,
   which is literally what retail's listing shows, is 83 -- gcc reaches that
   layout on its own from the simpler spelling, so copying the block
