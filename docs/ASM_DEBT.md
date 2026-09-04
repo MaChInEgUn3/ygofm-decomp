@@ -1,6 +1,6 @@
 # Assembly debt
 
-**76** of the functions in `src/` are **transcriptions, not decompilations**. The
+**18** of the functions in `src/` are **transcriptions of compiler output** that are owed as C -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
 body is the retail instruction stream written out as inline `__asm__`. Every
 one of them is byte-exact, which is precisely why they need a file of their
 own: `build.py` cannot tell transcribed assembly from real C, so nothing
@@ -158,3 +158,37 @@ port took the function count up and the honest count down, and it deleted the
 evidence in the same commit, so nothing in the tree recorded the trade. The
 only reason it is visible now is `git log --diff-filter=D`. Run that sweep
 against `parked/` after ANY bulk import, not five days later.
+
+
+## Two populations, and only one of them is debt (2026-09-04)
+
+`asm_debt.py` counted 70 transcriptions. Reading their retail listings rather
+than their C files splits them cleanly, on a criterion no C compiler crosses:
+
+| | frame (`addiu $sp`) | `sw $ra` | `jal` | `$s` saved off-stack | distinct s/t regs | cop2 insns |
+|---|---|---|---|---|---|---|
+| 52 functions, all `0x8006xxxx` | **none** | **none** | **0** | **4 to 10** (into the caller's struct) | 13-18 | 8-39 |
+| 18 functions | frame or call in every one | | | 0 | | 0-4 |
+
+gcc 2.8.1 never saves callee-saved registers into a data structure, never
+emits a leaf with ten live `$s`/`$t` registers and no frame, and never writes
+a 39-instruction coprocessor sequence. The 52 are the GTE ordering-table
+inserters the original shipped as hand-written assembly, exactly as WORKFLOW's
+`candidates.HAND_WRITTEN` note said of the block. They are not owed as C and
+they are not "unfinished": they are finished, as asm, the way the original
+was. krystalgamer's inventory reached the same verdict independently -- all
+52 carry `handwritten_asm` in his `functions.csv`, and none of our 18 do.
+
+So the honest count moves from 1019 to **1071**, and the debt from 70 to
+**18**, of which 14 already have real C in `parked/` (one at a single
+difference). `asm_debt.py` now applies the criterion itself
+(`hand_written_original`) and reports the two buckets separately.
+
+**The trap this corrects.** `candidates.HAND_WRITTEN` is a mnemonic regex
+(`wc2|rtps|mfc2|mtc2|...`), and it puts func_80015DFC and func_800177C4 on
+the hand-written side -- both are compiled code that reaches the GTE through
+what became `include/gte.h`, and both now have real C (one retired, one at
+-1). A function that USES the coprocessor is not a function that WAS written
+by hand; the frame and the call are the tell, not the mnemonic. Four of the
+18 are matched as C in krystalgamer's tree, which is the next thing to look
+at.
