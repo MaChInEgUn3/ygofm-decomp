@@ -2270,6 +2270,45 @@ on a combination that had been in the table for weeks.
   cc1psx's own pair, default flags. func_8003C950 wants `lui/sb` on a one-byte
   symbol and `%gp_rel` on a four-byte one; running that check first made it a
   first-try match with no iteration at all.
+  **A FIFTH form, and it is the honest spelling of the third: place the symbol
+  in `.data`.** `extern u8 sym __attribute__((section(".data")));` takes the
+  symbol out of small data at the **compiler**, with its *true* size and no
+  assembler `-G` at all -- so it reaches the bare form that the
+  inflate-the-size-and-lower-`-G` recipe reaches, without either half of that
+  recipe. cc1psx 2.8.1 accepts the attribute on an `extern`, which is not
+  obvious and is the thing to check first if this ever stops working.
+  func_80030FA0 is the worked example and it is now installed that way:
+  `D_8009B365` and `D_8009B26C` declared into `.data`, `D_8009B2F1` and
+  `D_8009B2B2` left plain so they keep `%gp_rel`, default assembler flags, and
+  the `PER_FUNC_AS_FLAGS["func_80030FA0"] = "-G2"` line deleted. The control
+  says the attribute is doing the work rather than something else: the same
+  source with plain scalars at default flags is **10 instructions against 12**.
+
+  **Why this matters beyond one function, and where it came from.** It is
+  krystalgamer's route, raised as a review objection on our first PR to his
+  tree, and the objection is one this file should have made itself. `u8
+  D_8009B365[4]` is a *mechanism written as a measurement*: four is simply the
+  number that clears the assembler threshold, and it spans `0x8009B366` and
+  `0x8009B367`, which are two separate symbols his tree has already named
+  (`gFreeDuel_bCursorColumn`, `gFreeDuel_bCursorRow`). Nothing breaks -- it is
+  an `extern`, only `[0]` is read -- but the declaration states something false
+  about the object in the one file a reader would trust. Every `[8]` in the
+  recipe above has the same defect, including the ones this file argues *for*
+  ("when you inflate a size, inflate it to eight, not to the truth" is advice
+  to write a falsehood, and it was correct only because no alternative had been
+  measured).
+
+  **The sweep this opens, and it is not done.** 56 functions carry an
+  intermediate `PER_FUNC_AS_FLAGS` (30 at `-G4`, 17 at `-G1`, 9 at `-G2`) and
+  another 124 carry `-G0`; every one is a candidate for conversion, and each
+  conversion removes a per-function assembler flag *and* an inflated size. One
+  conversion is measured; 179 are not. Do them a few at a time against the full
+  build, not in a batch -- `-G0` takes every scalar in a unit out of `%gp_rel`
+  at once, so those are the ones most likely to need more than a declaration
+  change. And note the flag is not always replaceable: `.data` moves *named*
+  symbols, where `-G0` moves everything, so a function that genuinely wants the
+  whole unit non-small still wants the flag.
+
   A per-file `#ifdef SYM_IS_SCALAR` guard in `variables.h` lets two functions
   disagree about the same symbol. `lui $at` therefore means *either* of the two
   bare forms; separate them by what else the function needs, and prefer the

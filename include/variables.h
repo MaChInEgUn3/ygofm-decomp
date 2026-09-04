@@ -1614,7 +1614,11 @@ extern u8 *D_8009B274;
 extern u8 *D_8009B290;
 extern s8 D_8009B2F1;
 extern u8 D_8009B2B2;
-#ifdef D_8009B365_SIZED
+#ifdef D_8009B365_IN_DATA
+/* PROBE: krystalgamer's route to the bare form -- an explicit .data placement
+ * takes the symbol out of small data at the COMPILER, with its true size. */
+extern u8 D_8009B365 __attribute__((section(".data")));
+#elif defined(D_8009B365_SIZED)
 extern u8 D_8009B365[4];
 #elif defined(D_8009B365_IS_SCALAR)
 extern u8 D_8009B365;
@@ -1796,7 +1800,9 @@ extern u8 D_8009B268[];
 /* Aggregate by default, because most users reach it through %hi/%lo. Files
  * that need the gp-relative form define D_8009B26C_IS_SCALAR first -- see the
  * per-file declaration note on D_8009B398. */
-#ifdef D_8009B26C_SIZED
+#ifdef D_8009B26C_IN_DATA
+extern u8 D_8009B26C __attribute__((section(".data")));
+#elif defined(D_8009B26C_SIZED)
 extern u8 D_8009B26C[4];
 #elif defined(D_8009B26C_IS_SCALAR)
 extern u8 D_8009B26C;
