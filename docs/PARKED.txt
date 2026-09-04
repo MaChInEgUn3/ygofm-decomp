@@ -7112,3 +7112,29 @@ func_80023144, follow-up 2026-09-04 -- +6 to +10, and that is an IMPROVEMENT.
     REMAINING: `addiu +2, addu +3, andi +2, lbu +3`, summing to +10, all
     positive -- ten instructions we emit and retail does not. The `lbu +3`
     and `andi +2` are the place to start.
+
+# ---
+func_80023144, follow-up 2 -- +10 to +3, census four opcodes to three,
+    alignment 198/210 to 202/210. Two edits and one bug caught.
+      1. THE `mode` COPY WAS WRITTEN THREE TIMES. `v = mode;` before the
+         `unk17 == 3` block, again inside it, and `v = mode + 2;` in the
+         `== 2` block -- m2c has only two, and the census's `addu +3` was
+         exactly those three `addu $a1,$s3,$zero` copies. ONE assignment,
+         placed after the `== 3` block's closing brace so it picks up the
+         `mode += 4`, removes the `addu` entry outright.
+         FIRST ATTEMPT AT THIS WAS A BUG and the score hid it: a scripted
+         edit dropped the copy in at the wrong brace, INSIDE the `== 3`
+         block, so `v` was uninitialised whenever that branch did not run.
+         It compiled and scored +9 with four opcodes -- better than the
+         correct +10 -- which is the uninitialised-read reject shape
+         arriving from my own edit rather than from the permuter. Placing
+         it correctly is +7 and three opcodes, so the right version wins
+         anyway; it would not always.
+      2. `arg0[0x17]` WAS READ THREE TIMES, retail reads it twice. The
+         `== 3` test and the `D_801D5608[2] = arg0[0x17];` store are in
+         different blocks so gcc cannot common them. Naming it --
+         `k = arg0[0x17];` with the test and the store both on `k` -- is
+         +7 to +3 and takes `addiu +2` with it. Using the same name for the
+         later `== 2` test as well is worse (four opcodes, alignment 201),
+         so retail really does re-read for that one.
+    REMAINING: `andi +2, lbu +2, nop -1`, summing to +3.
