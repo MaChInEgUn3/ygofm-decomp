@@ -1,40 +1,26 @@
-/* Natural form: 11 differing instructions.
+/* ONE differing instruction at 37/37: retail has `subu $a1,$zero,$a1`,
+ * negating the COPY, and gcc emits `subu $a1,$zero,$v1`, negating the
+ * original, because it knows the copy still equals `d` and propagates it.
+ * Every register is now correct.
  *
- * Replacing the guard with `a = d == 0; if (a) return;` reaches 1 -- using the
- * variable for the early test makes it live before the abs and fixes the whole
- * register assignment of the band selection. That is not plausible source and
- * it is not this candidate; it is recorded here so the next attempt knows the
- * register assignment is reachable and the remaining instruction is
- * `subu $a1,$zero,$a1`, retail negating the copy where gcc negates the
- * original. Do not start from the artificial guard: it is one instruction out
- * and structurally wrong, which is a worse place to start than eleven out and
- * right.
+ * 2026-09-04, 11 -> 1 on ONE line: `do { a = -a; } while (0);`.
+ * The permuter found it as an identical-arm `if (arg0) { a = -a; } else
+ * { a = -a; }` paired with `d -= step` rewritten as `d = d - step`.
+ * Decomposed: the rewrite is worth NOTHING (11), the identical-arm `if` alone
+ * is 1, and the `do { } while (0);` alone is also 1 -- so the plausible
+ * spelling reaches the whole gain and the implausible one is not needed. Read
+ * it as a macro in the original, which is what that idiom is for.
  *
- * 2026-09-04, re-measured after this file was RECOVERED from git -- the
- * Unchiga merge deleted it and put a transcription in src/. Still 11 at 37/37.
- * The note above explains the artificial guard by "making the variable live
- * before the abs", so eight plausible spellings of that were tried and every
- * one is WORSE:
- *   `s32 a = d;` as an initialiser above the guard                      12
- *   the same with the guard testing `a` instead of `d`                  12
- *   the same with `step` declared before `a`                            12
- *   the same with the abs written as a ternary                          12
- *   the difference computed into `a` first and `d = a;` after it,
- *     so `a` is live from the first statement, guard on `a`             12
- *   the same with the guard on `d`                                      12
- *   `step = 9;` hoisted above the abs                             -1 and 28
- *   `step = 9;` hoisted above the early-return guard               -1 and 29
- * So "live before the abs" is not the mechanism, or not one an initialiser
- * reaches. What the artificial guard actually does is assign a BOOLEAN to `a`
- * -- a different value, not a copy of `d` -- which is why copy propagation
- * cannot then rewrite the negation. That is the thing to attack.
+ * The header this file used to carry explained the earlier 1-difference
+ * variant as "making the variable live before the abs". That was WRONG and is
+ * retracted: eight spellings of it were measured (initialiser above the guard,
+ * guard on `a`, declaration order, ternary abs, the difference computed into
+ * `a` first, `step = 9` hoisted two ways) and every one is 12 or worse.
  *
- * The residue read as two faults rather than eleven differences:
- *   1. `a` and `step` have exchanged registers ($a1 against $a2), which
- *      accounts for ten of the eleven; and
- *   2. one real instruction -- retail has `subu $a1,$zero,$a1`, negating the
- *      COPY, where we get `subu $a2,$zero,$v1`, negating the original,
- *      because gcc knows the copy still equals `d` and propagates it.
+ * The last instruction is copy propagation and four attempts do not move it,
+ * all still 1: wrapping the copy in its own `do { } while (0);`, testing
+ * `d < 0` instead of `a < 0`, both together, and writing the negation as
+ * `a = 0 - a;`.
  */
 #include "common.h"
 
@@ -49,7 +35,7 @@ void func_80016DDC(u8 *arg0) {
 
     a = d;
     if (a < 0) {
-        a = -a;
+        do { a = -a; } while (0);
     }
 
     step = 9;
