@@ -47,7 +47,7 @@ void func_8004020C(s32 arg0);
 void func_80045334(s32 arg0);
 void func_80047314(s32 arg0);
 void func_80047430(s32 arg0, s32 arg1);
-void func_80016784(u8 *arg0, s32 arg1, s16 arg2, s16 arg3);
+void func_80016784(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 /* Takes a second argument: func_80023FBC sets $a1 and func_80023D08 reads it
  * before writing it (bltz $a1). The one-argument form was a guess. */
 void func_80023D08(u8 *arg0, s32 arg1);
