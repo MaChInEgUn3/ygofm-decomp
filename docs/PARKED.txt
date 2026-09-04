@@ -6791,3 +6791,48 @@ func_80045F3C, follow-up 2 (2026-09-04) -- installed candidate changed from
     across the back edge (+2, `addu +1`), with or without the bump moved;
     and hoisting the base above the guard so the guard tests `b` too (-1,
     one reload short).
+
+# ---
+func_800482B0 -- NEW 2026-09-04, written from scratch, +2 of 234 on the
+    first afternoon. Candidate in parked/func_800482B0.c. NEEDS `as -G0`
+    (same as func_80045F3C; not yet in PER_FUNC_AS_FLAGS). Step 0: gp=0,
+    at=0, no jump table, no block move, no runtime divide, and D_8009B45C
+    is the ONLY symbol it touches -- so recipe branch 1 and the scalar
+    declaration, exactly as for func_80045F3C.
+    Decode: the sound-channel allocator. Returns early if the id's entry in
+    the table at *(s32 *)(D_8009B45C + 0x43C) is 0xFFFF, and again through
+    func_800451E0 if bit 15 of the id is set. Then it picks a channel four
+    ways in turn: an explicit mask in the low nibble of arg4 (first set bit,
+    via func_80047F38), an occurrence count in the high nibble (scan the
+    four channels for the Nth already playing this id), a round-robin from
+    the cursor at 0x435 looking for a silent channel, and finally a priority
+    comparison against the per-channel byte table at 0x40C. Each of the
+    four ends in the same seven-argument func_8004803C call.
+    TWO DECODE ERRORS FOUND AND FIXED, both by reading the listing rather
+    than m2c: the table at 0x40C is stride ONE (`addu $v0,$v0,$a1` with the
+    raw channel byte, then `lbu 0x40C($v0)`), where m2c's struct-array
+    notation implied a wider stride; and the 0x404 table is stride TWO with
+    `lhu`. The seven-argument call site count checks out -- three
+    `sw ...,0x10($sp)` against three `jal func_8004803C`, so the three sites
+    are genuinely separate and none was cross-jumped.
+    THE OPEN PROBLEM IS THE FRAME, and it is worth stating precisely
+    because it makes every stack reference in the diff wrong at once.
+    Retail's frame is 88 bytes: three stack locals at 0x20 (s16, the
+    out-parameter of func_80077C50), 0x22 (u8) and 0x28 (u16), with the
+    callee-saved block starting at 0x30. Ours is 104: `arg1` is SPILLED to
+    the stack (`sh $a1,40($sp)`, an instruction retail does not have) and
+    the three locals land at 0x28, 0x30 and 0x38 with the saved block
+    pushed to 0x40. Retail instead keeps arg1 in `$fp` with an
+    `addu $fp,$a1,$zero` as the third instruction of the prologue, which is
+    WORKFLOW's parameter-copy-in-the-prologue shape. So the fix is register
+    pressure: the draft declares seven `s32` locals (m, i, n, bit, done, c,
+    hi) where retail gets by on s0-s7 plus fp, and the gap between 0x22 and
+    0x28 says retail has a fourth stack object I have not identified.
+    Census at +2: `addiu +2, beq +2, j +1, sh +1, lhu +3, andi -1, bne -2,
+    lbu -1, nop -1, sll -1, srl -1`, which sums to +2. The `srl -1` is
+    retail's `srl $s5,$v0,4` -- the high nibble computed ONCE into a
+    register -- and a named `hi = (arg4 & 0xF0) >> 4;` local does NOT
+    produce it (byte-identical to the inline spelling), so that wants an
+    unsigned intermediate or a different expression; try it again after the
+    frame is right, since everything here is being measured through a
+    displaced stack.
