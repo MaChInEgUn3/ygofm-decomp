@@ -6660,3 +6660,52 @@ Permuter-output sweep, 2026-09-04, the remaining four flagged rows. One win
     `v` has three assignments (lines 43, 51, 54) and they reach different
     stores, so inlining one is only sound on one path. Check the reaching
     definitions before measuring it.
+
+# ---
+func_80045F3C -- NEW 2026-09-04, written from scratch, +8 of 214 with a
+    nine-opcode census. Candidate in parked/func_80045F3C.c. NEEDS
+    `as -G0` (not yet in build.py's PER_FUNC_AS_FLAGS -- add it when this
+    reaches exact length). Step 0: gp=0, at=0, no jump table, so recipe
+    branch 1 applies and any -G is free.
+    Decode: the event-queue pop for the D_8009B45C record. Calls
+    func_800773C4 on +0x15D8, ORs a bitmask from four flags at 0x15EC-0x15EF
+    (each `== 3` contributing bits 20-23) and passes it to func_80076ED0,
+    clears a pending-sound field under `unk40 & 0x80`, calls func_80045C98,
+    and then -- if 0x7C is clear and the queue count at 0x4C is non-zero --
+    dispatches on the head event's type byte, copies the 0x30-byte event
+    into the header fields at 0x4E..0x78, decrements the count, and shifts
+    the rest of the queue down by 0x30 with a `Msg30` struct assignment.
+    `Msg30` in types.h is exactly this event: 0x30 bytes, alignment 4, with
+    `kind`/`unk2`/`unk8` at the offsets used, and the listing's aligned
+    `lw`/`sw` block move (no `lwl`/`lwr`) confirms the alignment.
+    ADDRESSING, settled: the scalar declaration plus `as -G0` is the form.
+    The default `-G8` assembler renders the bare symbol unexpanded and is
+    `lui -13`; `D_8009B45C_IS_AGGREGATE` with `[0]` on every reference is
+    +18 and `lw +19` because each reference becomes its own reload; the
+    aggregate arm plus `-mno-split-addresses` is +45. Scalar + `as -G0` is
+    `lui +2, lw +2`, i.e. two reloads too many, and nothing else has come
+    close.
+    THE SWITCH IS THE OPEN QUESTION and the census names it. Retail's
+    dispatch is a FOUR-node comparison tree -- `beq 0x44` at the root, then
+    `slti 0x45`, then `beq 0x29`, `beq 0x2A`, then `bne 0x45` -- with the
+    0x44/0x45 arms SHARING one body block and 0x29/0x2A sharing another.
+    Written as `case 0x44: case 0x45:` gcc's group_case_nodes merges each
+    adjacent pair into a RANGE node and emits range tests instead:
+    `slti +3, beq -3, bne +2, addiu -4, j -1`, five opcodes of census that
+    are entirely this.
+    Writing all four bodies out separately (parked as
+    $SP/match/best_j3_80045F3C.c, not installed) reproduces the tree
+    EXACTLY -- census drops to four opcodes, `addu -1, lui +2, lw +2,
+    nop +9`, and every one of those five switch opcodes goes to zero -- at
+    the cost of +12 length, because retail shares the bodies and the
+    duplicate spelling does not. So the shape wanted is retail's unmerged
+    nodes WITH shared bodies, and neither spelling has both yet.
+    MEASURED AND DEAD: an `if`/`else if` chain with `||` (+7 but
+    `sltiu +2`, gcc goes unsigned), GNU `case 0x44 ... 0x45:` ranges
+    (identical to the plain shared spelling), and `goto` from separate case
+    labels into a shared block (+17, and it adds two more symbol reloads).
+    ALSO INSTALLED: the `unk40` read-modify-write wants the
+    read-then-stores-then-writeback local (`v = *(u16 *)(base + 0x40);`
+    ... two stores ... `v &= 0xFF7F;` and store back), which is +9 to +8 and
+    one `nop`, and is func_8003B808's rule.
+    Next: the `nop +9` has not been looked at at all.
