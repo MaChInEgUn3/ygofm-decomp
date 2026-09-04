@@ -2986,45 +2986,6 @@ func_80039794 -- 43 differences, six of them real, and the decode plus three
     Flag sweep on top of the installed pair: nothing better.
     Handed to the permuter.
 
-func_800243F4 -- 10 differences, all of them register names inside the
-    shuffle loop's four-instruction swap, and the other 93 instructions are
-    byte-identical. Decode: a 40-entry deck builder. With a null source it
-    zeroes a 0x2D2-byte stack histogram and then draws 40 distinct cards by
-    walking D_801781D8's 0x2D0 halfword weights against a running total
-    until it passes `(rand() & 0x7FF) + 1` -- the same pick func_80021810
-    makes one 1460-byte tier further into the table, see that entry --
-    rejecting any index already used three times; with a non-null source it copies 40 halfwords straight
-    through. Either way it then does 160 random pair swaps of both the
-    halfword and the byte arrays.
-    Four levers landed and are worth reading:
-      - **one counter for all three loops.** Retail's $s1 is the histogram
-        clear index, the weight-walk index and the shuffle counter; two
-        names for those put the walk index in a caller-saved register and
-        cost a whole callee-saved register (28 differences to 10).
-      - **the parameters walk and two locals hold the bases**, not the other
-        way round: `b16 = out16; b8 = out8;` at the top with `out16`/`out8`
-        themselves advancing gives retail's `addu $s0,$a1,$zero` /
-        `addu $s6,$s0,$zero` pair; cursors derived from saved copies gives
-        the same instructions with every register exchanged.
-      - the clear loop is written **downward** (`for (i = 0x2D1; i >= 0;
-        i--)`); the forward form gets a descending pointer walk instead of
-        retail's base-plus-index.
-      - the weight table's base is a local assigned before the outer loop,
-        or gcc re-materialises `%hi` inside it.
-    What is left: retail loads the two halfwords in the order [x] then [y],
-    and every spelling we can find loads [y] first. Six measured -- both
-    source orders of the two reads, both orders of the two stores, and
-    address locals in the `base + i * 2` and `i * 2 + base` forms (the first
-    also flips the `addu` to base-first, which is a second difference). The
-    byte half of the same swap comes out in retail's order with no help at
-    all, so it is specifically the halfword pair.
-    A permuter run produced a 6 and it is REJECTED: pycparser's round trip
-    had rewritten `s32 func_800358FC(s32)` to `long long func_800358FC(s32)`
-    and the function body was character-for-character the base, so the whole
-    gain is the wider return type shuffling register pressure. The target
-    reads no $v1 after either call. Third instance of this class -- when a
-    permuter output's body matches the base, diff the *declarations*.
-
 
 func_8002A4A8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
   the history below is what this tree had reached on its own.

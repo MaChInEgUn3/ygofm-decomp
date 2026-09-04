@@ -1538,6 +1538,20 @@ groupings -- twelve spellings, all 2 or 6 differences. `z = 0;` at the top of
 the block with `off = z; i = z;` is a MATCH (func_8004BE88). Same family as
 the one-name-for-two-sequential-constants rule in step 2, read for a constant
 that is used twice at once rather than twice in sequence.
+**A permuter's parenthesised embedded assignment is usually a CHAINED
+assignment, and the chain's ORDER is load-bearing.** func_800243F4 sat parked
+at 10 differences with a note saying six spellings of its halfword swap had
+been measured and none moved it. The scorer found a complete MATCH sitting
+unread in an output directory, and the whole edit was one line: the permuter
+had written `t16 = (t8 = *(u16 *)(b16 + x * 2));`, where `t8` is the byte
+swap's temp four lines later and is dead at that point. Written as ordinary C
+it is `t16 = t8 = *(u16 *)(b16 + x * 2);` and that is also a MATCH -- but the
+other order, `t8 = t16 = ...`, is 4. So when a permuter output wraps an
+assignment in parentheses, rewrite it as a chain and measure BOTH orders;
+one of them is the source and the other is not. Same family as the
+"assigning to a local that is not yet live" hint, with a spelling anyone
+would write.
+
 **And that hint has a PLAUSIBLE spelling: assign the load inside the
 condition that tests it.** func_80045C98's second clamp is
 `if ((b = *(s16 *)(D_8009B45C + 0x1580)) >= D_8009B45C[0x1584])`, where `b`
