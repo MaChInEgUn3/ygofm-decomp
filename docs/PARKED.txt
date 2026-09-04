@@ -7187,3 +7187,25 @@ func_80023144, follow-up 4 -- -1 to 210/210, 73 differences to 37,
     delay slot while we use it to fill the preceding `lbu`'s; and
     `%hi(D_800E9FF0)` against `%hi(D_801D5608)` materialised in the other
     order at two sites.
+
+# ---
+func_80023144, follow-up 5 -- hand plateau at 210/210 and 37 differences.
+    The missing `addu` is a DELAY-SLOT DUPLICATION, not a missing copy.
+    Retail has `addu $a1,$s2,$zero` TWICE: once after the `mode += 2` in the
+    `arg0[0x17] == 2` block (we have that one, and the whole surrounding
+    block matches instruction for instruction) and once in the delay slot of
+    the `bne` that skips the block -- gcc redirecting the branch to
+    target+4 and duplicating the join's first instruction. We emit a `nop`
+    there instead. That is a scheduler decision with no obvious source
+    handle.
+    MEASURED AND DEAD, all 210/210 with the identical two-opcode census and
+    alignment 205: splitting `arg0[0x17] == 2 && arg0[0x18] != 0` into
+    nested `if`s, `mode += 2;` for `mode = mode + 2;`, and (worse, +2)
+    writing the store before the named read at the second `unk19` site.
+    ALSO OPEN: retail materialises `%hi(D_801D5608)` EARLY, before the
+    D_800E9FF0 index computation, and splits its `%lo` across the `lb`; we
+    emit the pair together and later. Both symbols are unsized arrays so
+    cc1psx's splittable pair is available to us -- this is scheduling, not
+    addressing.
+    The permuter's first output on this base is cosmetic (the array index
+    rewritten as pointer arithmetic) and scores identically.
