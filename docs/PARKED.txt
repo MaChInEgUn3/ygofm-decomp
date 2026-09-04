@@ -7209,3 +7209,35 @@ func_80023144, follow-up 5 -- hand plateau at 210/210 and 37 differences.
     addressing.
     The permuter's first output on this base is cosmetic (the array index
     rewritten as pointer arithmetic) and scores identically.
+
+# ---
+func_80031874 -- NEW 2026-09-04, written from scratch, -1 of 280, census 17
+    opcodes, alignment 232/280. Candidate in parked/func_80031874.c. Step 0:
+    gp=4, at=0, no jump table, no runtime divide -- default flags, no
+    addressing work at all.
+    Decode: it draws a duel-side status panel. Sets up two hardware primitive
+    buffers at 0x1F800020 and 0x1F800060, writes a colour and size to each,
+    positions them from `arg0`'s +0x30/+0x32 minus D_8009B146/D_8009B148,
+    picks a palette row out of D_80090DD8 by the side byte at `arg0[0x67]`,
+    then loops eight times over 0x10-byte card slots emitting numbers through
+    func_800358A0/func_800357E8 and func_800316F0.
+    M2C GOT A THIRD STRIDE WRONG, and it is worth stating as a pattern now:
+    it rendered `D_8009B2FC + s6 * 4 + 4` as `D_8009B2FC + (s6 * 0x2D4C + 4)`
+    -- inventing a 0x2D4C structure from what the listing plainly shows as
+    `sll $v0,$v0,2`. It also rendered the `D_8009B2FC + s2 + 0x606A` byte
+    reads as a struct index when `addu $v0,$v0,$s2` is stride ONE. Read the
+    shift and the addu before believing any m2c stride.
+    THE HARDWARE ADDRESSES ARE BASE LOCALS, INCLUDING IN CALL ARGUMENTS.
+    WORKFLOW's func_8002A9C0 entry says to use a base local per block but to
+    keep the call arguments as literals; here that is wrong, and the census
+    says so loudly. With literals the first draft carried `lui +18, ori +8,
+    addu -27` -- retail materialises each of 0x1F800020, 0x1F800060 and
+    0x1F800000 ONCE and copies the register at every call, where literals
+    give a fresh lui/ori pair per call site. Routing the call arguments
+    through the locals too is `lui +18` to `-3` and the alignment 213 to 232.
+    So the "keep call arguments as literals" advice is specific to
+    func_8002A9C0's shape, not general.
+    REMAINING at -1: `addu -5, nop +4, andi +3, sra +2, sll -2, sh -2` and
+    eleven smaller entries. The `andi +3` and `sra +2` are width and
+    signedness on the byte fields -- the same class that was worth four
+    opcodes on func_80023144 -- and are the place to start.
