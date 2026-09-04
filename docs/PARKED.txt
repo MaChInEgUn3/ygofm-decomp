@@ -420,7 +420,11 @@ func_80047FAC
 func_80021810
     RESOLVED -- src/func_80021810.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A6F8
-    STILL OPEN -- src/func_8004A6F8.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
+    STILL OPEN, but the C is now WRITTEN: parked/func_8004A6F8.c, 27/27 and 8
+    differing, 2026-09-04. The address/value split from the old entry is the
+    length lever; the residue is the 0x60100 constant born late where retail
+    hoists it to the first instruction. Eleven spellings in the header. src/
+    keeps the transcription.
 func_8005C4F0
     RESOLVED -- src/func_8005C4F0.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80047A68
