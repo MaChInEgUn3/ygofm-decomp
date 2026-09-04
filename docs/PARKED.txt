@@ -7055,3 +7055,32 @@ func_80023144 -- step 0 only, 2026-09-04. 210 instructions, gp=5, at=14, no
     D_801A7AD8 by index, sets a mode byte at D_8009B34E from the record's
     flag word and a table lookup in D_801D4244, and then dispatches on
     arg0's byte at +0x17. Callee func_80023090 returns `u8`.
+
+# ---
+func_80023144 -- NEW 2026-09-04, written from scratch, +6 of 210, census six
+    opcodes, alignment 194/210. Candidate in parked/func_80023144.c. NEEDS
+    `as -G4` (config/flag_overrides.json for now; PER_FUNC_AS_FLAGS when it
+    matches) plus the five `_SIZED8` guards it #defines at the top.
+    ADDRESSING, the reason for those guards: gp=5, at=14. Five symbols want
+    the bare form through `$at` -- D_8009B344, D_8009B34E, D_8009B355 and
+    D_8009B320 (`u8`) and D_8009B338 (`s16`) -- while D_8009B1D5 wants
+    `%gp_rel`. The bare-wanting ones are no wider than the gp-relative one,
+    so no real `-G` threshold exists between them: recipe branch 3, declare
+    each `[8]` and assemble at `-G4`. That clears the assembler's threshold
+    while staying under cc1psx's own `-G8`, so the bare form survives. The
+    guards are new in variables.h and inert until #defined.
+    FIVE LOAD WIDTHS were wrong in the first draft and the listing names all
+    of them: `D_8009B1C8 + 0x1F` and `arg0 + 0x10` and `arg0 + 0x16` are
+    `lb` (signed bytes, not the `u8` and `s16` m2c implied), while
+    `arg0 + 0x14` and the object's `+0x16` are `lbu` where I had written
+    `*(s16 *)`. Fixing the five took the census from ten opcodes to six and
+    removed the `lb`, `lh`, `slti` and `sltiu` entries outright.
+    OPEN: retail STORES D_8009B344 and then reads it straight back --
+    `sb %lo` / `lui` / `lbu %lo` / `nop` -- to add 0x17 to it, and gcc
+    forwards the stored value instead. A `_SIZED8_VOLATILE` guard (added to
+    variables.h, NOT installed) does force the reload and lifts the
+    alignment to 197, but it makes every other reference reload too and the
+    length goes +6 to +11, so it loses on the first ranking key. The right
+    spelling is still open.
+    Remaining census: `addiu +2, addu +3, andi +2, lbu +2, lui -2, sb -1`,
+    summing to +6.

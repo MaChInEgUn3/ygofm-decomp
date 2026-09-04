@@ -813,8 +813,22 @@ extern u32 D_801D0534;
 /* Five pairs of halfwords, indexed by `D_801D0534 % 5` (func_8002DA1C). */
 extern u16 D_80090B50[];
 /* Data Crystal RAM map, UNVERIFIED: selected card ID */
+#ifdef D_8009B338_SIZED8
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare
+ * store goes through $at while the one-byte gp-relative D_8009B1D5
+ * beside it keeps %gp_rel (func_80023144). */
+extern s16 D_8009B338[8];
+#else
 extern s16 D_8009B338;
+#endif
+#ifdef D_8009B320_SIZED8
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare
+ * store goes through $at while the one-byte gp-relative D_8009B1D5
+ * beside it keeps %gp_rel (func_80023144). */
+extern u8 D_8009B320[8];
+#else
 extern u8 D_8009B320;
+#endif
 extern u8 D_801D07DC[];
 #ifdef D_8009B3D4_SIZED
 extern u8 D_8009B3D4[4];
@@ -1487,9 +1501,34 @@ extern u8 D_8009B2F8;
 #endif
 extern u8 D_8009B324;
 extern u8 D_8009B325;
+#ifdef D_8009B344_SIZED8_VOLATILE
+/* Sized out of small data AND volatile: func_80023144 stores this byte and
+ * then reads it straight back to add to it, which gcc otherwise forwards. */
+extern volatile u8 D_8009B344[8];
+#elif defined(D_8009B344_SIZED8)
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare
+ * store goes through $at while the one-byte gp-relative D_8009B1D5
+ * beside it keeps %gp_rel (func_80023144). */
+extern u8 D_8009B344[8];
+#else
 extern u8 D_8009B344;
+#endif
+#ifdef D_8009B34E_SIZED8
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare
+ * store goes through $at while the one-byte gp-relative D_8009B1D5
+ * beside it keeps %gp_rel (func_80023144). */
+extern u8 D_8009B34E[8];
+#else
 extern u8 D_8009B34E;
+#endif
+#ifdef D_8009B355_SIZED8
+/* Eight bytes it does not have: at -G4 that is non-small, so the bare
+ * store goes through $at while the one-byte gp-relative D_8009B1D5
+ * beside it keeps %gp_rel (func_80023144). */
+extern u8 D_8009B355[8];
+#else
 extern u8 D_8009B355;
+#endif
 extern u8 D_8009B357;
 extern u8 D_8009B3C7;
 extern u8 D_8009B3CF;
