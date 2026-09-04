@@ -5974,7 +5974,11 @@ func_8001825C -- 235/235, 55 differences, written 2026-09-04. The
     D_800907D8, $s0 = D_801A7AD8, $s3 = the record, and we have them at
     $s3/$s1/$s0. FIVE assignments measured: base locals in r/q (99), q/r
     (98), b/u (56), u/b (55) and the symbols written inline (55). Inline is
-    what is installed. This is not an axis; it wants the permuter.
+    what is installed -- but the RECORD wants its own name: `e` was shared
+    with the second half of the function, two phases that never overlap, and
+    giving block 4 its own is 55 -> 52. Splitting the widget pointer the same
+    way is 59 and splitting the table-walk pointer is 52, so it is that one
+    name and not the shape. The rest of the rotation is still open.
   * loop 2's base sits in $a1 where retail keeps it in $v0, three
     instructions.
   * arm2 emits an extra `andi 0xFFFF` converting the `f | 0x4000` value to
