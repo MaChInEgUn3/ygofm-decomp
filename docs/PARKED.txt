@@ -6211,6 +6211,12 @@ func_8004D134 -- 280/278 (+2), 69 differences, written 2026-09-04. Walks a
   delay slot -- is +4 and 282 in both loop shapes tried.
   And 70 -> 69 on `z = x; z = z >> 6;` against one name rather than the
   single expression -- the one-name-across-two-statements lever again.
+    2026-09-04, from a permuter output the scorer re-read: 77 -> 71 on one
+    borrowed name. The `d1 * d1` term inside the accumulate loop wants
+    `w = d1;` written after the `d2 = b[j][2];` read and the square taken of
+    `w` -- where `w` is the function's OWN earlier local, dead by then. A
+    fresh name in the same position is 77, i.e. worth nothing, so it is the
+    borrow. Third instance this session of borrow-beats-fresh.
 
 func_80029EC4 -- 270/268 (+2), 145 differences, written 2026-09-04. Builds
   GPU packets in the scratchpad: a three-deep loop nest filling the packet

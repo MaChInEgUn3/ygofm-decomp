@@ -1819,6 +1819,25 @@ not a scorer bug. And read the whole diff: the duplicated call decomposed to
 worth exactly nothing, so the entire gain was the rename the head of the diff
 did not show.
 
+**Half of what the scorer flags is unusable, and the rejects have exactly
+three shapes.** One scorer run on 2026-09-04 produced six "better" outputs:
+two were real (func_80019608's borrowed read, func_800222F4's redundant copy),
+one was a complete MATCH (func_800243F4), and THREE had to be thrown away --
+which is the rate to expect, not an unlucky batch. The shapes:
+  * **an assignment placed between a `break;` and the next `case:`**, i.e. in
+    unreachable code, with the variable then read in a later arm. That is an
+    uninitialised read wearing a `new_var` name. func_8004D134 and
+    func_80045208 both did it, and both scored an exact length that way.
+  * **a cast dropped from an lvalue**, which can be a width change --
+    func_80029EC4's `*((s32 *) pkt)` became `*pkt` on a `u8 *`.
+  * **an assignment embedded in an expression that clobbers the LOOP
+    COUNTER**, or a cursor read replaced by the fixed buffer it walks.
+    func_8005EBF4's 226 -> 209 was entirely those two, and its two legitimate
+    edits (`+=` and a rewritten loop test) are worth nothing on their own.
+So: read `diff.txt` in full, ask of every `new_var` whether the line that
+assigns it can actually execute, and check the declared type of anything that
+loses a cast. The score is a weighted diff and it cannot see any of this.
+
 **A permuter output that drops a cast can be a WIDTH change, and that is the
 false-zero trap wearing its plainest disguise.** func_80029EC4's best output
 rewrote `*((s32 *) pkt) = 0x8000000;` as `*pkt = 0x8000000;` and scored
