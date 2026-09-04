@@ -7413,3 +7413,31 @@ func_80031874, follow-up 7 -- -2 to 280/280, differences 251 to 239, on
     differing is `sh R,4(R)` at 10 against 11.
     REMAINING at 280/280, 253/280, 239 differences: `sh -1` (one store at
     the `+4` offset), `nop +3, lui -3, addiu +2, ori -2` and five smaller.
+
+# ---
+func_80023144, follow-up 6 -- 210/210 with an EMPTY census, alignment
+    205/210 to 206/210, 37 differences to 36. INSTALLED FROM THE PERMUTER
+    AND THE SHAPE IS NOT PLAUSIBLE SOURCE -- flagged here so nobody reads it
+    as a finding about the original.
+    Its edit wraps `D_801D5608[2] = 3;` in an `if`/`else` whose two arms are
+    IDENTICAL, with the condition reading
+    `D_800E9FF0[D_8009B1D5 ^ 1].unk19`. It is legal -- both arms do the same
+    thing so the condition's value cannot matter, and the field is
+    initialised, so this is not the uninitialised-read reject shape. It is
+    simply not something anyone writes.
+    WHAT IT IS NOT is a block boundary. That was the obvious reading, and
+    the two substitutes that test it both come back at the BASE score
+    (37, two census opcodes, 205): `do { D_801D5608[2] = 3; } while (0);`
+    and the same identical-arm `if` with the condition on `c`, a value
+    already in hand. So the lever is specifically the EXTRA READ of that
+    field, not the shape around it -- which is the opposite of
+    func_800528AC, where the identical-arm `if` WAS just a block boundary
+    and `do { } while (0);` reached it.
+    THE PLAUSIBLE SPELLING WAS LOOKED FOR AND NOT FOUND. The natural way to
+    make that field be read twice is to write the side choice as a default
+    plus a correction rather than as an index -- `c = D_800E9FF0[B1D5 ^ 1]
+    .unk19; if (arg0[0x10] >= 2) c = D_800E9FF0[B1D5].unk19;` and its
+    mirror. Both are semantically identical to the installed `side` index
+    and both are much worse: +5 and 199/210, +2 and 200/210.
+    Kept as the park because a park is working material and the improvement
+    is real; it must NOT go to src/ in this shape.
