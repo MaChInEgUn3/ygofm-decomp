@@ -531,6 +531,12 @@ PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800610E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80024734"] = "-G0"
+# Parked, not yet in src/, so these two are inert for the build -- they are
+# here so try_func and permute.py agree with the measurement. Both functions
+# touch D_8009B45C and nothing else, both grep gp=0 at=0, so recipe branch 1
+# applies: the scalar declaration with a -G0 assembler.
+PER_FUNC_AS_FLAGS["func_80045F3C"] = "-G0"
+PER_FUNC_AS_FLAGS["func_800482B0"] = "-G0"
 # D_800EAE88 sized to eight so it comes out bare; 8 > 4 takes it out of small
 # data while the four-byte D_8009B1C8 beside it stays gp-relative.
 PER_FUNC_AS_FLAGS["func_800279BC"] = "-G4"
