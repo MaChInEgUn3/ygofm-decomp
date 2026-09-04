@@ -1,0 +1,540 @@
+	.text
+	.ent	func_8004D134
+func_8004D134:
+	.frame	$sp,16,$31		# vars= 0, regs= 4/0, args= 0, extra= 0
+	.mask	0x000f0000,-4
+	.fmask	0x00000000,0
+	subu	$sp,$sp,16
+	move	$24,$4
+	sw	$18,8($sp)
+	sw	$19,12($sp)
+	sw	$17,4($sp)
+	sw	$16,0($sp)
+	lw	$4,0($6)
+	lw	$3,20($6)
+	lw	$25,32($sp)
+	lw	$2,4($4)
+	lhu	$19,2($4)
+	sll	$2,$2,2
+	addu	$3,$3,$2
+	sltu	$2,$24,2
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L2
+	move	$18,$5
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	j	$L64
+	move	$2,$0
+	.set	macro
+	.set	reorder
+
+$L2:
+	lhu	$4,0($18)
+	li	$2,21			# 0x00000015
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L10
+	sltu	$2,$4,22
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L18
+	li	$2,13			# 0x0000000d
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L7
+	sltu	$2,$4,14
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L19
+	li	$2,9			# 0x00000009
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L4
+	move	$2,$0
+	.set	macro
+	.set	reorder
+
+	j	$L64
+$L19:
+	li	$2,17			# 0x00000011
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L7
+	move	$2,$0
+	.set	macro
+	.set	reorder
+
+	j	$L64
+$L18:
+	li	$2,525			# 0x0000020d
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L9
+	sltu	$2,$4,526
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L20
+	li	$2,521			# 0x00000209
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L5
+	move	$2,$0
+	.set	macro
+	.set	reorder
+
+	j	$L64
+$L20:
+	li	$2,529			# 0x00000211
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L9
+	li	$2,533			# 0x00000215
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L11
+	move	$2,$0
+	.set	macro
+	.set	reorder
+
+	j	$L64
+$L4:
+	li	$14,6			# 0x00000006
+	li	$13,2			# 0x00000002
+	li	$10,20			# 0x00000014
+	.set	noreorder
+	.set	nomacro
+	j	$L3
+	li	$11,32			# 0x00000020
+	.set	macro
+	.set	reorder
+
+$L5:
+	li	$14,10			# 0x0000000a
+	li	$13,6			# 0x00000006
+	li	$10,24			# 0x00000018
+	.set	noreorder
+	.set	nomacro
+	j	$L3
+	li	$11,32			# 0x00000020
+	.set	macro
+	.set	reorder
+
+$L7:
+	li	$14,6			# 0x00000006
+	li	$13,2			# 0x00000002
+	li	$10,24			# 0x00000018
+	.set	noreorder
+	.set	nomacro
+	j	$L3
+	li	$11,40			# 0x00000028
+	.set	macro
+	.set	reorder
+
+$L9:
+	li	$14,10			# 0x0000000a
+	li	$13,6			# 0x00000006
+	li	$10,28			# 0x0000001c
+	.set	noreorder
+	.set	nomacro
+	j	$L3
+	li	$11,40			# 0x00000028
+	.set	macro
+	.set	reorder
+
+$L10:
+	li	$14,6			# 0x00000006
+	li	$13,2			# 0x00000002
+	.set	noreorder
+	.set	nomacro
+	j	$L67
+	li	$10,28			# 0x0000001c
+	.set	macro
+	.set	reorder
+
+$L11:
+	li	$14,10			# 0x0000000a
+	li	$13,6			# 0x00000006
+	li	$10,32			# 0x00000020
+$L67:
+	li	$11,52			# 0x00000034
+$L3:
+	addu	$15,$3,28
+	addu	$12,$19,-1
+	sll	$2,$24,2
+	addu	$17,$2,-10
+	sll	$2,$24,4
+	addu	$16,$2,15320
+	.set	noreorder
+	.set	nomacro
+	beq	$19,$0,$L22
+	addu	$5,$3,14
+	.set	macro
+	.set	reorder
+
+	addu	$9,$3,24
+$L24:
+	sltu	$2,$24,2
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L25
+	addu	$4,$3,$14
+	.set	macro
+	.set	reorder
+
+	lhu	$2,0($4)
+	#nop
+	addu	$8,$2,$17
+	sra	$2,$2,7
+	andi	$6,$2,0x0003
+	slt	$2,$6,3
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L26
+	sh	$8,0($4)
+	.set	macro
+	.set	reorder
+
+	andi	$2,$8,0xff7f
+	sh	$2,0($4)
+$L26:
+	slt	$2,$6,2
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L25
+	addu	$8,$3,$13
+	.set	macro
+	.set	reorder
+
+	lhu	$2,0($8)
+	#nop
+	addu	$6,$2,$16
+	srl	$4,$2,6
+	slt	$2,$4,16
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L25
+	sh	$6,0($8)
+	.set	macro
+	.set	reorder
+
+	andi	$2,$6,0x003f
+	addu	$6,$2,16
+	sh	$6,0($8)
+	.set	noreorder
+	.set	nomacro
+	bgez	$4,$L29
+	move	$2,$4
+	.set	macro
+	.set	reorder
+
+	addu	$2,$4,15
+$L29:
+	andi	$2,$2,0x07f0
+	subu	$2,$4,$2
+	sll	$2,$2,6
+	or	$2,$6,$2
+	sh	$2,0($8)
+$L25:
+	.set	noreorder
+	.set	nomacro
+	beq	$7,$0,$L30
+	li	$2,21			# 0x00000015
+	.set	macro
+	.set	reorder
+
+	lhu	$4,0($18)
+	#nop
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L48
+	sltu	$2,$4,22
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L60
+	li	$2,13			# 0x0000000d
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L36
+	sltu	$2,$4,14
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L61
+	li	$2,9			# 0x00000009
+	.set	macro
+	.set	reorder
+
+	beq	$4,$2,$L32
+	.set	noreorder
+	.set	nomacro
+	j	$L68
+	addu	$9,$9,$10
+	.set	macro
+	.set	reorder
+
+$L61:
+	li	$2,17			# 0x00000011
+	beq	$4,$2,$L44
+	.set	noreorder
+	.set	nomacro
+	j	$L68
+	addu	$9,$9,$10
+	.set	macro
+	.set	reorder
+
+$L60:
+	li	$2,525			# 0x0000020d
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L40
+	sltu	$2,$4,526
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L62
+	li	$2,521			# 0x00000209
+	.set	macro
+	.set	reorder
+
+	beq	$4,$2,$L34
+	.set	noreorder
+	.set	nomacro
+	j	$L68
+	addu	$9,$9,$10
+	.set	macro
+	.set	reorder
+
+$L62:
+	li	$2,529			# 0x00000211
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$2,$L46
+	li	$2,533			# 0x00000215
+	.set	macro
+	.set	reorder
+
+	beq	$4,$2,$L53
+	.set	noreorder
+	.set	nomacro
+	j	$L68
+	addu	$9,$9,$10
+	.set	macro
+	.set	reorder
+
+$L32:
+	lw	$4,0($7)
+	lhu	$6,-12($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L34:
+	lw	$4,0($7)
+	lhu	$6,-8($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L36:
+	lw	$4,0($7)
+	lhu	$6,-12($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L37
+	move	$4,$6
+$L37:
+	sw	$4,0($7)
+	lhu	$6,-8($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L70
+	move	$4,$6
+	sw	$6,0($7)
+$L70:
+	lhu	$6,-4($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L40:
+	lw	$4,0($7)
+	lhu	$6,-8($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L41
+	move	$4,$6
+$L41:
+	sw	$4,0($7)
+	lhu	$6,-4($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L71
+	move	$4,$6
+	sw	$6,0($7)
+$L71:
+	lhu	$6,0($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L44:
+	lw	$4,0($7)
+	lhu	$6,-10($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L46:
+	lw	$4,0($7)
+	lhu	$6,-6($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L48:
+	lw	$4,0($7)
+	lhu	$6,-14($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L49
+	move	$4,$6
+$L49:
+	sw	$4,0($7)
+	lhu	$6,-8($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L72
+	move	$4,$6
+	sw	$6,0($7)
+$L72:
+	lhu	$6,-4($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L51
+	move	$4,$6
+$L51:
+	sw	$4,0($7)
+	lhu	$6,0($9)
+	.set	noreorder
+	.set	nomacro
+	j	$L69
+	slt	$2,$4,$6
+	.set	macro
+	.set	reorder
+
+$L53:
+	lw	$4,0($7)
+	lhu	$6,0($5)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L54
+	move	$4,$6
+$L54:
+	sw	$4,0($7)
+	lhu	$6,-4($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L73
+	move	$4,$6
+	sw	$6,0($7)
+$L73:
+	lhu	$6,0($9)
+	#nop
+	slt	$2,$4,$6
+	beq	$2,$0,$L56
+	move	$4,$6
+$L56:
+	sw	$4,0($7)
+	lhu	$6,0($15)
+	#nop
+	slt	$2,$4,$6
+$L69:
+	beq	$2,$0,$L57
+	move	$4,$6
+$L57:
+	sw	$4,0($7)
+$L30:
+	addu	$9,$9,$10
+$L68:
+	addu	$15,$15,$10
+	lw	$2,0($25)
+	addu	$12,$12,-1
+	addu	$2,$2,$11
+	sw	$2,0($25)
+	li	$2,-1			# 0xffffffff
+	.set	noreorder
+	.set	nomacro
+	bne	$12,$2,$L24
+	addu	$3,$3,$10
+	.set	macro
+	.set	reorder
+
+$L22:
+	move	$2,$19
+$L64:
+	lw	$19,12($sp)
+	lw	$18,8($sp)
+	lw	$17,4($sp)
+	lw	$16,0($sp)
+	#nop
+	.set	noreorder
+	.set	nomacro
+	j	$31
+	addu	$sp,$sp,16
+	.set	macro
+	.set	reorder
+
+	.end	func_8004D134

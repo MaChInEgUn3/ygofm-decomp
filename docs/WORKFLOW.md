@@ -2503,6 +2503,16 @@ nothing ever went red. Surfaced on func_8002FD10, whose two `$at` stores the
 check had just told me did not exist. Same lesson as the park filter and the
 `| grep -E` hazard: **when a filter says zero, prove it can say one.**
 
+**Second instance of the same trap, and it cost a wrong conclusion:
+`grep -c 'break 7'` returns ZERO on func_8005EBF4, which contains seven.**
+splat writes `break      7` with padding, so the single-space pattern matches
+nothing -- and "no `break 7`" reads as "no runtime division", which is a
+*positive* finding about the source and sends you looking for reciprocal
+multiplies that are not there. Use `grep -cE 'break +7'`. The general form is
+the rule below and it is worth stating as a habit rather than a list: **every
+grep against a splat listing must allow runs of whitespace**, because splat
+column-aligns its mnemonics and operands.
+
 **A scan is only as good as the filters it copies.** The `lui $at` pool was
 counted three times and was wrong twice, each time because the ad-hoc scan
 skipped a filter `candidates.py` already applies. 167 became 136 when the
