@@ -5886,3 +5886,26 @@ func_80060B38 -- 206/206, 61 differences, written 2026-09-03. Draws a card's
   scheduler places them differently. Five positions for the record-base
   assignment were measured and all five give exactly 61, which is the usual
   sign that source order is not the axis.
+
+func_80056504 -- 201/201, 143 differences, written 2026-09-04. The model
+  loader: it records a model id in the player's record, tears down the old
+  one and pulls the new one off M:/mrgSU through func_80014EEC -- one of
+  three shapes depending on the id and on which player slot it is.
+  gp=0, at=3 (all three are D_8009B0F4), so recipe branch 1: real
+  declarations and `as -G0`. The two path strings are the rodata symbols
+  D_800114F8 and D_80011580, not literals, so nothing has to be placed.
+  What paid: the fail path is one shared `r++` reached by five branches, so
+  the four range tests and the two id tests are `goto fail`; and the record
+  address `D_800F2C40 + n * 0xE20` must be written INLINE in the model arm
+  rather than through a local -- a local is CSE'd against the one computed
+  after func_8004CB0C and the function comes out ELEVEN instructions short,
+  because losing that computation also makes the model arm's tail identical
+  to the ok arm's and gcc cross-jumps the two D_8009B0F4 stores together.
+  Reusing `id` for the looked-up sub-id in the big-slot arm is 147 to 143;
+  retail carries both in $s0.
+  Residue: the six parameters' saved registers are rotated against retail's
+  and gcc spills the fourth to its home slot, so we need ten callee-saved
+  values where retail needs nine. Measured and dead: masking the first
+  parameter in place (+1, 185), copying it into the local before masking
+  (+1, 185), a separate name for each of the three func_80014EEC results
+  (no change), and five declaration orders (all exactly 143).

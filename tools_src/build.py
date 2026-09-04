@@ -553,6 +553,8 @@ PER_FUNC_AS_FLAGS["func_8004C114"] = "-G0"
 # func_800222F4 (parked): volatile u16 D_8009B394/B398/B3A4 sized to eight bytes
 # so they leave small data while the four-byte D_8009B180/B184 stay %gp_rel.
 PER_FUNC_AS_FLAGS["func_800222F4"] = "-G4"
+# func_80056504 (parked): gp=0, so the D_8009B0F4 stores take the bare form.
+PER_FUNC_AS_FLAGS["func_80056504"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"
