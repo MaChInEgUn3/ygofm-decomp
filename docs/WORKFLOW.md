@@ -2579,6 +2579,19 @@ appears or disappears after an edit you can explain, check whether the
 *other* fault moved too: a zero that arrives without you fixing anything is
 worth one structural diff before you trust it.
 
+**And the census is what breaks the tie between two candidates at the SAME
+length: read whether its deltas point ONE way or cancel.** func_800279BC
+reached 271/271 twice with different sources. One scores 177 and its census
+is `addiu -1, addu +2, j +1, nop +1, sll -2, sra -1` -- four extra against
+four missing, i.e. two faults that happen to sum to zero. The other scores
+196 and its census is `addiu -1, lui +1`. The difference COUNT prefers the
+first and it is the worse candidate; the second is two opcodes from correct.
+So the ranking rule `(abs(length_error), differences)` needs a third key
+that comes BEFORE differences: **the number of opcodes whose delta is
+non-zero.** A candidate whose census is nearly empty is close even when its
+positional diff is large, because one wrongly-placed value rotates every
+register downstream and the diff charges for all of them.
+
 **An edit worth ZERO differences can still be the right edit, and only the
 opcode census says so.** func_800528AC's flags word declared `u32` rather
 than `s32` scores 249 either way -- but the census turns two `sra` into two
