@@ -25,7 +25,7 @@ void func_800528AC(void) {
     i = 0;
     do {
         if (p[0] & 1) {
-            sd = (*(u16 *)p >> 1) & 1;
+            do { sd = (*(u16 *)p >> 1) & 1; } while (0);
             if (D_800F2C40[sd * 0xE20 + 0xE1F] != 0) {
                 if (func_8005A8C4(sd, p[0x13]) == 0) {
                     fl = *(u16 *)p;
@@ -76,8 +76,8 @@ void func_800528AC(void) {
                                 *(u8 *)(*(s32 *)(q + 0x1E0) + 0xC) = bank;
                             }
                             func_8004DC38(e, j, v, sv);
-                            j++;
                             q += 4;
+                            j++;
                         } while (j < (s32)e[0xE1B]);
                     }
                     if (bank != 0) {

@@ -6391,7 +6391,7 @@ all three measures identically and is what a person would write, so that is
 what is installed. The remaining fault is unchanged: one biased giv for the
 `*(u16 *)(r + 6)` read, costing the seventh callee-saved register.
 
-func_800528AC -- 288/288 and 249 differences, `-fno-strength-reduce` (now in
+func_800528AC -- 288/288 and 125 differences, `-fno-strength-reduce` (now in
     build.py's PER_FUNC_FLAGS). Written from scratch on 2026-09-04; +55-
     equivalent to exact length in one session.
     Decode: a 10-iteration loop over 0x18-byte records at D_800F2B50. For a
@@ -6524,3 +6524,31 @@ func_800279BC -- 271/271, 14 differences, empty opcode census. Default flags,
          neutral alone (14) and NEGATIVE combined with lever 2's spelling
          (41), so the two are coupled.
     Handed to the permuter.
+
+# ---
+func_800528AC, follow-up 2026-09-04 -- 249 to 125 on a COUPLED PAIR the
+    permuter found, and the half that looked like the lever was a passenger.
+    Its stored output-3180-1 carried three edits. Two decompose to nothing:
+    a `new_var = lo;` copy (249, no change) and swapping `j++; q += 4;` to
+    `q += 4; j++;` in the second inner loop (-1 and 274, i.e. WORSE alone).
+    The third was `if (side || p) { sd = X; } else { sd = X; }` around the
+    side computation -- identical arms, and `side` is not assigned until
+    seven lines LATER, so on the first iteration of the do-loop it reads an
+    uninitialised local. That is WORKFLOW's first reject shape and it is not
+    installable.
+    IT DID NOT NEED TO BE. `do { sd = ...; } while (0);` in the same place
+    is +1 and 153, and `if (p != 0) { sd = X; } else { sd = X; }` -- an
+    always-true test on a local that IS initialised -- scores IDENTICALLY at
+    +1 and 153. So the uninitialised read was never the mechanism; the block
+    boundary was, and two legitimate spellings reach it. Then the
+    `q += 4; j++;` swap, worth -1 on its own, closes the +1: together they
+    are 288/288 and 125. Neither alone is anything, which is why a
+    one-at-a-time sweep had missed both.
+    The general lesson, and it narrows WORKFLOW's fourth permuter class:
+    when a win depends on an uninitialised read, ask whether the read is
+    load-bearing or whether the SHAPE around it is. Substitute an always-
+    true test on an initialised value; if the score is unchanged, the read
+    was a passenger and `do { } while (0);` will do.
+    MEASURED AND DEAD on the new base: nothing yet -- the residue has not
+    been re-read since the drop, and every entry in the old "measured and
+    dead" list above was compiled against the 249 base and must be re-tried.
