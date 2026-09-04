@@ -6836,3 +6836,43 @@ func_800482B0 -- NEW 2026-09-04, written from scratch, +2 of 234 on the
     unsigned intermediate or a different expression; try it again after the
     frame is right, since everything here is being measured through a
     displaced stack.
+
+# ---
+func_800482B0, follow-up 2026-09-04 -- +2 to -1 and THE FRAME IS NOW EXACT,
+    on one edit: merging two `s32` locals that never coexist.
+    The frame was 104 against retail's 88 with `arg1` spilled to the stack,
+    and the diagnosis in the entry above ("register pressure, seven locals
+    where retail uses s0-s7 plus fp") was right. Merging `done` into `n` --
+    `n` is live only in the occurrence-count scan and `done` only in the two
+    round-robin loops, so they never overlap -- drops the spill entirely.
+    The stack is then 0x20 (s16, the func_80077C50 out-parameter), 0x22 (u8)
+    and 0x28 (u16) with the saved block at 0x30, which is retail's layout
+    exactly, and the frame is 88.
+    THE 0x22-TO-0x28 GAP IS NOT A FOURTH OBJECT. The entry above guessed it
+    was; it is not. With the spill gone the three locals pack at 2, 1 and
+    then 0x28, and the hole is just padding before the word-aligned saved
+    block. Trying to fill it with `u8 sp22[6]` is WORSE and instructive:
+    gcc allocates arrays before scalars, so the array took 0x20 and pushed
+    the s16 out to 0x28 -- the layout got further from retail, not closer.
+    Merging `bit` into `m` as well (they also never coexist) is the same -1
+    but `addu +2` instead of `+1` and one more `nop` gone, so it is a
+    lateral move; the single merge is what is installed.
+    THE HIGH-NIBBLE SPELLING, re-measured now the stack is not displaced --
+    and the earlier "byte-identical, so this axis is closed" reading was an
+    artefact of measuring through the bad frame. `hi = (arg4 & 0xF0) >> 4;`
+    and `(arg4 >> 4) & 0xF` both still leave `srl -1`, but
+    `u32 hi = (u32)(arg4 & 0xF0) >> 4;` DOES produce retail's
+    `srl $s5,$v0,4` -- the srl entry disappears from the census -- at the
+    cost of one `sra`. Same ten opcodes either way, so neither is installed
+    yet; the unsigned intermediate is the structurally right one and should
+    go in once the sra is understood.
+    REMAINING at -1, census `addiu +2, addu +1, beq +2, j +1, andi -1,
+    bne -2, lbu -1, nop -1, sll -1, srl -1`, summing to -1. The diff count
+    (232) is meaningless: the FIRST row differs because cc1psx hoists the
+    `lui`/`lw` of D_8009B45C above the frame setup where retail emits it
+    fourth, and everything after is shifted. Retail's prologue is
+    `addiu $sp` / `sw $fp` / `addu $fp,$a1,$zero` / `lw $a1,0x68($sp)` --
+    arg1 into `$fp` and arg4 reloaded -- where we put arg4 in `$s7` and
+    arg0 in `$s6` and never use `$fp` for a parameter. That is allocation
+    and scheduling, i.e. the permuter's class, and the function is now
+    structurally right enough to hand to it.

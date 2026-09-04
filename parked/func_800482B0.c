@@ -8,7 +8,6 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
     s32 i;
     s32 n;
     s32 bit;
-    s32 done;
     s32 c;
 
     sp22 = arg2;
@@ -18,7 +17,7 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
             func_800451E0(arg0 & 0xFFFF, 0);
             return;
         }
-        done = 0;
+        n = 0;
         m = arg4 & 0xF;
         if (m != 0) {
             m = func_80047F38(m, arg4);
@@ -65,7 +64,7 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
         do {
             func_80077C50(D_8009B45C[0x435] + 0x14, &sp20);
             if (sp20 == 0) {
-                done = 1;
+                n = 1;
                 func_8004803C(arg0 & 0xFFFF, D_8009B45C[0x435], arg1, sp22,
                               (s32)(s16)sp28, arg4 & 0xFF, arg5 & 0xFF);
             }
@@ -76,14 +75,14 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
             D_8009B45C[0x435] = D_8009B45C[0x435] + 1;
             i++;
             D_8009B45C[0x435] = D_8009B45C[0x435] & 3;
-        } while (i < 4 && (u8)done == 0);
-        if ((u8)done == 0) {
+        } while (i < 4 && (u8)n == 0);
+        if ((u8)n == 0) {
             i = 0;
             bit = 1 << D_8009B45C[0x435];
             do {
                 c = D_8009B45C[0x435];
                 if ((u32)(arg5 & 0xFF) >= (u32)D_8009B45C[c + 0x40C]) {
-                    done = 1;
+                    n = 1;
                     func_8004803C(arg0 & 0xFFFF, c, arg1, sp22, (s32)(s16)sp28,
                                   arg4 & 0xFF, arg5 & 0xFF);
                 }
@@ -94,7 +93,7 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
                 D_8009B45C[0x435] = D_8009B45C[0x435] + 1;
                 i++;
                 D_8009B45C[0x435] = D_8009B45C[0x435] & 3;
-            } while (i < 4 && (u8)done == 0);
+            } while (i < 4 && (u8)n == 0);
         }
     }
 }
