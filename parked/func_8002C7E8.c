@@ -1,4 +1,4 @@
-/* 16 differing at 84/84, from 18. RECOVERED from git 2026-09-04 (the Unchiga
+/* 14 differing at 84/84, from 18. RECOVERED from git 2026-09-04 (the Unchiga
  * merge deleted it and put a transcription in src/).
  *
  * One lever, worth two: the record cursor's `r += 0x1C` moved from the end
@@ -21,6 +21,12 @@
  *   `i = 0;` as a statement before the first for                       16
  *   t assigned through a second name (`e = D_801799D8; t = e;`)       18
  * Permuter started from this base.
+ *
+ * 16 -> 14, permuter-found and decomposed: the scaled index written through
+ * the INNER loop counter, which is dead at that point --
+ * `j = k * 28; r = D_801A7AD8 + j;`. The same statement through a fresh name
+ * `m` is 16, so it is the borrow of a name whose live range resumes later
+ * that does the work (the func_8002A4A8 rule), not the naming of the product.
  */
 #include "common.h"
 
@@ -52,7 +58,8 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
         k = 0x14;
     }
 
-    r = D_801A7AD8 + k * 28;
+    j = k * 28;
+    r = D_801A7AD8 + j;
 
     for (i = 0; i < 5; i++, r += 0x1C) {
         sl[i] = (u8 *)0;
