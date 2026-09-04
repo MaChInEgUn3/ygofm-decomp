@@ -18,7 +18,7 @@ installing anything.
 
 Run it after any batch of permuter work, and after picking up an old park.
 """
-import subprocess, pathlib, re, json, os, sys
+import subprocess, pathlib, re, json, os, sys, collections
 # Repo root, derived from this file's location -- it was hardcoded to one
 # machine's home directory, which both leaked a username into a public repo
 # and made the tool run against the wrong tree on any other checkout.
@@ -38,24 +38,45 @@ for d in sorted(root.glob('build/permuter/func_*')):
     txt=cand.read_text()
     ov={f:{"as":"-G0"}} if '"as": "-G0"' in txt else None
     if ov: open('config/flag_overrides.json','w').write(json.dumps(ov))
+    def census(out):
+        # Number of opcodes whose count differs between the two columns.
+        # This is the MIDDLE ranking key and it is not decoration: the
+        # positional diff charges for every register name downstream of one
+        # misplaced value, so a candidate can be two opcodes from correct and
+        # still score worse than one whose faults cancel. func_8005AE68's
+        # `u8 lim` reads as 22 -> 26 on the count alone and is 4 census
+        # opcodes to 2 -- it removes a variable shift (srav) that retail does
+        # not have. On the old ordering that row was invisible.
+        lines=out.split('\n')
+        try: i=next(n for n,l in enumerate(lines) if l.startswith('TARGET'))
+        except StopIteration: return 999
+        T=collections.Counter(); B=collections.Counter()
+        for l in lines[i+2:]:
+            if not l.strip() or 'instruction(s)' in l or 'differing' in l: break
+            t=l[:45].strip(); b=l[45:].replace('<<','').strip()
+            if t: T[t.split()[0]]+=1
+            if b: B[b.split()[0]]+=1
+        return sum(1 for k in set(T)|set(B) if T[k]!=B[k])
     def score(p):
         r=subprocess.run(['.venv/bin/python','tools_src/try_func.py',f,str(p)],
                          capture_output=True,text=True)
-        # (abs(length error), differences): a count is only comparable at
-        # equal length -- func_8004803C's "137 -> 98" was a 158/157 output.
+        # (abs(length error), census opcodes, differences). A count is only
+        # comparable at equal length -- func_8004803C's "137 -> 98" was a
+        # 158/157 output -- and at equal length the census breaks the tie
+        # before the count does.
         m=re.search(r'(\d+) target instruction\(s\), (\d+) built', r.stdout)
         le=abs(int(m.group(2))-int(m.group(1))) if m else 999
         m=re.search(r'(\d+) differing', r.stdout)
         n=int(m.group(1)) if m else (0 if 'MATCH' in r.stdout else 999)
-        return (le,n)
+        return (le,census(r.stdout),n)
     base=score(cand); checked+=1
     # Progress to stderr: this walks ~1750 outputs across the whole park and
     # takes hours, so a run with no output is indistinguishable from a hung
     # one -- which is the failure mode WORKFLOW records for silent sweeps.
-    print(f'  {f}: base len{base[0]}/{base[1]}, scoring {len(outs)} outputs',
+    print(f'  {f}: base len{base[0]}/cen{base[1]}/{base[2]}, scoring {len(outs)} outputs',
           file=sys.stderr, flush=True)
     best=min((score(p),str(p)) for p in outs)
     if os.path.exists('config/flag_overrides.json'): os.remove('config/flag_overrides.json')
     if best[0] < base:
-        hits+=1; print(f"MELHOR {f}: len{base[0]}/{base[1]} -> len{best[0][0]}/{best[0][1]}  {best[1]}", flush=True)
+        hits+=1; print(f"MELHOR {f}: len{base[0]}/cen{base[1]}/{base[2]} -> len{best[0][0]}/cen{best[0][1]}/{best[0][2]}  {best[1]}", flush=True)
 print(f"FIM: {checked} funcoes checadas, {hits} com saida melhor", flush=True)
