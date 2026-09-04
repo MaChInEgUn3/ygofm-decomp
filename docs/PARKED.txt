@@ -7084,3 +7084,31 @@ func_80023144 -- NEW 2026-09-04, written from scratch, +6 of 210, census six
     spelling is still open.
     Remaining census: `addiu +2, addu +3, andi +2, lbu +2, lui -2, sb -1`,
     summing to +6.
+
+# ---
+func_80023144, follow-up 2026-09-04 -- +6 to +10, and that is an IMPROVEMENT.
+    I had rejected the volatile guard an hour ago on the length key alone.
+    That was the wrong key and the entry above says so incorrectly. The +6
+    candidate's census was `addiu +2, addu +3, andi +2, lbu +2, lui -2,
+    sb -1`: the two negatives are the store/reload/store sequence retail has
+    and we lacked, i.e. FIVE missing instructions cancelling against eleven
+    extra ones. `D_8009B344_SIZED8_VOLATILE` supplies exactly those five --
+    the six-instruction `sb %lo` / `lui` / `lbu %lo` / `nop` / `addiu 0x17`
+    / `sb %lo` block matches retail instruction for instruction -- and the
+    census becomes all-positive with one fewer distinct opcode. By the
+    ranking as written (sum, then distinct opcodes) the volatile candidate
+    wins; I ranked on |length| and got it backwards.
+    THEN the named flag read. Retail issues `lhu $v0,0x16(rec)` BEFORE the
+    stores to D_8009B34E and D_8009B355 in two separate blocks, so the store
+    covers the load's delay slot; we store first and take a `nop`. Writing
+    `fl = *(u16 *)(e + 0x16);` above the store group is func_800434F4's
+    lever and closes the `nop` entry: alignment 198/210, four census
+    opcodes.
+    ONLY ONE OF THE TWO SITES WANTS IT. Applying the read at the first site
+    and at the second site score IDENTICALLY (+10, four opcodes, 198), and
+    applying it at BOTH is one instruction short (`nop -1`, +9, five
+    opcodes). The first site is installed; the second is equivalent and
+    untried in combination with anything else.
+    REMAINING: `addiu +2, addu +3, andi +2, lbu +3`, summing to +10, all
+    positive -- ten instructions we emit and retail does not. The `lbu +3`
+    and `andi +2` are the place to start.

@@ -1,4 +1,4 @@
-#define D_8009B344_SIZED8
+#define D_8009B344_SIZED8_VOLATILE
 #define D_8009B34E_SIZED8
 #define D_8009B355_SIZED8
 #define D_8009B320_SIZED8
@@ -13,13 +13,15 @@ void func_80023144(u8 *arg0, s32 arg1) {
     s32 mode;
     s32 id;
     s8 c;
+    s32 fl;
     u8 side;
 
     e = D_801A7AD8 + arg1 * 0x1C;
+    fl = *(u16 *)(e + 0x16);
     D_8009B34E[0] = 0;
     D_8009B355[0] = 0;
     mode = 0x50;
-    if ((*(u16 *)(e + 0x16) & 0x8000) != 0) {
+    if ((fl & 0x8000) != 0) {
         id = *(s16 *)(e + 0xC);
         f = D_801D4244[id - 1];
         D_8009B34E[0] = 1;
