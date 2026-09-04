@@ -915,6 +915,36 @@ permuter found the first; the second is the same idea applied by hand.
    written before, it stays before. That is the whole of func_80044DC0's last
    three differences: `sp10[3] = 0;` after `sp10[0] = …` rather than before, and
    the two arms of the `if` both writing index 1 first.
+   **The general form, and it decides a `%hi` pair as well as a schedule:
+   in a run of stores to ONE symbol, the store whose value starts a MULTIPLY
+   goes FIRST.** func_800279BC writes `D_800EAE88[9]`, `[0xA]` and `[0xB]` in
+   one arm, where `[9]` is a `% 5` reciprocal expansion. With the two constant
+   stores written first, gcc materialises a SECOND `%hi(D_800EAE88)` pair --
+   the census carries `lui +1` and the whole arm reads as an addressing
+   problem. With the modulo first, one pair covers all three and the constant
+   stores fall into the `mult` latency exactly where retail schedules them:
+   161 differences to 143, and the census from three opcodes to one.
+   **Then permute the position of the remaining constant store among the
+   others**, which is a second lever and a bigger one -- moving
+   `[0xB] = 0;` after `[0xA]` was 57 to 30 in one arm and 30 to 14 in
+   another. That move had been measured on an EARLIER base as 185 against
+   180, i.e. clearly worse, and was correctly rejected then; five levers
+   later it is clearly better. It is the sharpest instance yet of the rule
+   that a spelling rejected while another fault was open has not been
+   measured at all.
+
+   **An increment written BEFORE a call is sunk into the call's delay slot,
+   and the cost lands on the NEXT branch.** In func_800279BC's search loop
+   `pb++;` sits above `if (func_80019A08(...) != 0) goto hit;`; gcc puts the
+   `addiu` in the `jal`'s slot, and the delay-slot filler then has nothing
+   left for the following `bne`, so it takes the *target block's* first
+   instruction instead -- here a `lui` of the `% 5` reciprocal, which reads
+   in the diff as a constant hoisted into the loop as an invariant. It is
+   not: retail leaves the `jal`'s slot a `nop` and fills the `bne`'s with
+   the increment. Writing `pb++;` after the call is 180 differences to 67,
+   and `*(++pb)` and `pb = pb + 1;` are identical to it. **The tell is a
+   constant belonging to a block AFTER the loop appearing INSIDE it** --
+   look at what filled the delay slot before it, not at the constant.
 5. **Which test is written first**, when the target has more exit blocks than
    you produce. `if (x == 0) return 0;` then the body, versus the body under
    `if (x != 0)` with `return 0` after it, are *different layouts*: the first
