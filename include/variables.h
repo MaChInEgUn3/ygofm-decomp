@@ -380,10 +380,26 @@ extern s32 D_80090E0C[];
 extern s32 D_800F5B98[];
 /* Four handles func_800440F0 hands to func_80043D48 in one go. */
 extern s32 D_800F2AE0[];
+#ifdef D_800EAE88_SIZED8
+/* Eight bytes it does not have. func_800279BC references this base three
+ * times across calls and branches; as an unsized array cc1psx emits its own
+ * %hi/%lo pair, gcc commons the %hi into a FIFTH callee-saved register that
+ * retail does not save, and the whole prologue shifts. A sized declaration
+ * clears cc's own -G8 so the symbol comes out bare -- one instruction to
+ * gcc, so there is nothing to common -- and 8 > 4 takes it out of small data
+ * at `as -G4`, where the four-byte D_8009B1C8 beside it stays gp-relative. */
+extern u8 D_800EAE88[8];
+#else
 extern u8 D_800EAE88[];
+#endif
 /* The byte at D_800EAE88[0xA] under its own name: func_80070F1C writes it
  * through both, and splat had already given the address a symbol. */
 extern u8 D_800EAE92[];
+/* D_800EAE88[9] under its own name, same case as D_800EAE92 below it:
+ * func_800279BC clears it through the interior symbol and writes it through
+ * the base plus 9 in the same function, and splat had already named the
+ * address. */
+extern u8 D_800EAE91[];
 extern u8 D_800EAE8E[];
 extern u8 D_800EAE8F[];
 /* Two bytes under the guard so an assembler at -G2 treats it as non-small (two would still be small):
