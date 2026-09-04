@@ -6398,3 +6398,12 @@ allocation wrong" is exactly its class.
 One tooling note worth keeping: `grep -c 'break 7'` returns ZERO on this
 function, which has seven of them. splat writes `break      7` with padding.
 Use `grep -cE 'break +7'`. Same class as the `lui  *\$at, %hi(` trap.
+
+func_8005EBF4 -- improved 275 -> 226 differences (still 287/287) on
+2026-09-04. The permuter found it and it is ordinary C: the three
+`b[i] = <expr>; ... a[i] = b[i];` pairs are CHAINED ASSIGNMENTS,
+`b[i] = a[i] = <expr>;`. Same lever as func_8002FB78 -- a store whose value
+the next statement also uses. The permuter chained only [0] and [1]; chaining
+all three measures identically and is what a person would write, so that is
+what is installed. The remaining fault is unchanged: one biased giv for the
+`*(u16 *)(r + 6)` read, costing the seventh callee-saved register.
