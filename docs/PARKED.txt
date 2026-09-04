@@ -5813,7 +5813,8 @@ func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   argument copies (-5/-6). Also open: retail sinks the halfword store below
   the word loads inside the loops.
 
-func_800222F4 -- 201/201, 36 differences, written 2026-09-03. The debug/test
+func_800222F4 -- 201/201, 25 differences, written 2026-09-03,
+  improved 2026-09-04. The debug/test
   menu step: it tears the menu down and rebuilds it on D_8009B23A's 0x4000
   bit, then steps a four-entry mode on the pad bits.
   Addressing: D_8009B394, D_8009B398 and D_8009B3A4 want the bare %hi/%lo
@@ -5837,6 +5838,14 @@ func_800222F4 -- 201/201, 36 differences, written 2026-09-03. The debug/test
   Residue: retail materialises func_80012D84's constant argument before the
   call-result copy and we do it after, and in the 0x40 block retail reads the
   first field through the result register and the rest through the copy.
+  2026-09-04: 36 -> 25 on a `do { ... } while (0);` wrapped round the whole
+  second dispatcher -- the mode read, the four-way if-chain and case 0's two
+  stores, twenty-three lines. The permuter found it and the same wrapper
+  applied to the readable source reproduces it exactly, so nothing
+  machine-formatted was installed. Legal C: the `goto`s leave the block and
+  the two labels inside it are only jumped to from inside. This is the
+  "arms were macros in the original" reading, and it is the largest single
+  use of that idiom so far -- the previous record was five statements.
 
 func_80057AF4 -- 203/203, 32 differences, written 2026-09-03. The animation
   slot loader: it clears, restores or installs one of a record's slots and

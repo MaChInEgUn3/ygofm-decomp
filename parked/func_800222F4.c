@@ -90,29 +90,31 @@ void func_800222F4(void) {
         e = func_8002C604(D_8009AF2C);
         *(u8 *)((s32)&D_8009B16C + 2) = (*(u8 *)((s32)&D_8009B16C + 2) + 1) & 7;
         b = g;
-        *(s16 *)(g + 0x1A) = D_8009AF2D;
-        m = D_8009AF2E;
-        if (m == 1) {
-            goto s1;
-        }
-        if (m >= 2) {
-            goto ge2;
-        }
-        if (m == 0) {
-            goto s0;
-        }
-        return;
-    ge2:
-        if (m == 2) {
-            goto s2;
-        }
-        if (m == 3) {
-            goto s3;
-        }
-        return;
-    s0:
-        *(s16 *)(b + 2) = -0x18;
-        *(u16 *)b = D_800908A0[0xC];
+        do {
+            *(s16 *)(g + 0x1A) = D_8009AF2D;
+            m = D_8009AF2E;
+            if (m == 1) {
+                goto s1;
+            }
+            if (m >= 2) {
+                goto ge2;
+            }
+            if (m == 0) {
+                goto s0;
+            }
+            return;
+        ge2:
+            if (m == 2) {
+                goto s2;
+            }
+            if (m == 3) {
+                goto s3;
+            }
+            return;
+        s0:
+            *(s16 *)(b + 2) = -0x18;
+            *(u16 *)b = D_800908A0[0xC];
+        } while (0);
         *(u16 *)(b + 4) = D_800908A0[0xD];
         return;
     s1:
