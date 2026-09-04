@@ -6330,3 +6330,11 @@ lever, and it was worth 8 of the 18.
 
 Next: the permuter. This is exactly its class -- instruction-for-instruction
 right, only the allocation wrong -- and it has never been run on this function.
+
+func_80019608 -- improved 91 -> 86 differences (256/256) on 2026-09-04.
+The permuter found it and it is ordinary source: a NAMED READ of
+`*(u16 *)(p + 8)` hoisted ABOVE the `D_8009B174 = m | 0x80;` store that
+precedes it, so the load covers its own delay slot. Same lever as
+func_800434F4's `d = D_8009B118;` -- retail loads before a store the source
+writes first. Candidate updated in parked/func_80019608.c; permuter restarted
+from the new base.
