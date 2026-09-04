@@ -15,7 +15,7 @@ void func_80031874(u8 *arg0, s32 arg1) {
     s32 v;
     u16 fp;
     u8 s6;
-    u8 t;
+    s32 t;
     s32 s2;
 
     g = (u8 *)0x1F800020;

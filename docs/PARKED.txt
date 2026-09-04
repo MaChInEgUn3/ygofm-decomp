@@ -7341,3 +7341,29 @@ func_80031874, follow-up 4 -- +1 to 280/280, differences 242 to 238, on
     261); and dropping `v`, the `arg0 + 4` word (+3, 247, 245).
     REMAINING at 280/280, 248/280, 238 differences: `nop +5, sh -4, andi +3,
     lui -3, addu -2, sw +2` and five smaller.
+
+# ---
+func_80031874, follow-up 5 -- census 12 opcodes to 11, alignment 248/280 to
+    251/280, on `s32 t` for the `+0x5AC4` byte. That is the FOURTH local in
+    this session declared to match its load's width and wrong for it
+    (func_8005AE68's `lim`, func_80023144's `c`, this function's `s2`, and
+    now `t`). It removes the `slti` and `sltiu` entries outright, because
+    `(s32)t < 3` on a `u8` local was being done in QImode.
+    Installed at -2 over a 280/280 candidate with 238 differences, on the
+    committed ranking: both censuses sum to their length error, and this one
+    wins on distinct opcodes (11 against 12) AND on alignment (251 against
+    248), which are the two keys above the difference count. Noting the
+    tension explicitly because last tick I went the other way on a
+    ONE-point alignment gap; three points plus an opcode is not the same
+    call.
+    THE SPILLED BYTE IS `s6` AND IT IS STILL THERE. Reading the stack writes
+    directly settles what the census only hinted: retail saves ten registers
+    at sp+24..60 and writes `sp10` at sp+16, and we do exactly the same PLUS
+    `sb $a0,0x20($sp)`. Same register budget, one extra byte in the frame.
+    MEASURED AND DEAD for freeing it, none of which removes the `sb`:
+    merging `v` into `s2` (245 differences), merging `p30` into `s2` (244),
+    merging both position locals into `s2` and `v` (-1, 259), and `s32 s6`
+    itself, which removes the `sb` but costs `lhu +2` and takes the
+    alignment to 246 (b2, ten opcodes but clearly worse structure).
+    REMAINING at -2, 251/280, 251 differences: `sh -4, nop +3, lui -3,
+    sw +2, ori -2` and six smaller.
