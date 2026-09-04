@@ -277,6 +277,9 @@ PER_FUNC_FLAGS = {
     # func_800722CC: the two reads at +6 inside the search loop get their own
     # biased giv, which costs a callee-saved register and five instructions.
     "func_800722CC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
+    # PARKED at 288/288 and 249; the flag removes a biased giv the target
+    # does not have. See docs/PARKED.txt.
+    "func_800528AC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # func_8001825C: PARKED at 235/235 and 55. Both 28-byte-record loops
     # grow a second cursor at base+4 without it, and the function then
     # saves a fifth callee-saved register -- 234 differences against 194.

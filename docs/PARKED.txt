@@ -6384,3 +6384,72 @@ the next statement also uses. The permuter chained only [0] and [1]; chaining
 all three measures identically and is what a person would write, so that is
 what is installed. The remaining fault is unchanged: one biased giv for the
 `*(u16 *)(r + 6)` read, costing the seventh callee-saved register.
+
+func_800528AC -- 288/288 and 249 differences, `-fno-strength-reduce` (now in
+    build.py's PER_FUNC_FLAGS). Written from scratch on 2026-09-04; +55-
+    equivalent to exact length in one session.
+    Decode: a 10-iteration loop over 0x18-byte records at D_800F2B50. For a
+    live record it takes a side from bit 1 of the flags word, indexes
+    D_800F2C40 + side * 0xE20, saves that record's 4-byte field at +0xDC0
+    into a stack Word4, writes an interpolated colour there, runs two loops
+    over e[0xE1B] calling func_8004DC38, and restores the saved Word4. The
+    colour is a real lerp with a RUNTIME divide (seven `break 7`, so the
+    divisor is the variable `hi`):
+        col.unkK = p[0x10+K] * (hi - lo) / hi + p[0x14+K] * lo / hi;
+    for K = 0, 1, 2, with `col.unk3 = p[0x13];` written FIRST -- the listing
+    stores 0x1B before 0x18/0x19/0x1A.
+    THE FRAME WAS RIGHT ON THE FIRST DRAFT: `Word4 save; Word4 col; s32 i;
+    u16 sv; s32 off;` lands at sp+0x10, 0x18, 0x20, 0x24, 0x28, exactly
+    retail's. Note the 0x10 -> 0x18 step -- gcc rounds each stack local up,
+    so two adjacent Word4s are eight apart, not four. That looks like a
+    missing local and is not one.
+    Levers that are IN the candidate:
+      - **`hi`, `lo` and `sh` are `u16` locals.** Retail has three
+        `andi 0xFFFF` that exist only when a u16 local crosses into int
+        context; an explicit `& 0xFFFF` at a call site is NOT the same
+        instruction. 233 -> 141, the largest single lever here.
+      - `-fno-strength-reduce`, which removes a biased giv stepping alongside
+        the cursor. On the pre-u16 base it read as a regression and it is not:
+        with the u16 locals in, it takes the candidate from +3 to exact
+        length. func_800722CC's trigger verbatim.
+      - `u32 fl` for the flags word. It changes NOTHING in the difference
+        count (249 either way) and it is still right: the census says the
+        two `sra` become `srl` and all four shifts then match retail. A
+        count-only comparison discards this edit; the opcode census keeps it.
+      - `s32 v`, not `u8 v`, for the two inner-loop locals -- retail has no
+        `andi 0xFF` there.
+      - the tail written with NO local: `*(u16 *)(p + 0xC) = *(u16 *)(p + 0xC)
+        + func_80058E1C();` then `if ((u32)*(u16 *)(p + 0xC) >= ...)`. The
+        second READ is what stops the `sh` sinking into the branch delay slot
+        (func_8003B378). The named-local spelling scored BETTER (239 vs 251)
+        while the u16 fault was still open.
+      - `D_8009AF9C = (s32)(D_800F2B50 + off + 1)`. The relocation is
+        `%hi(D_800F2B50 + 0x1)`, literally +1; the first draft had +0x18 from
+        misreading m2c's `&(D_800F2B50 + 1)[sp28]`.
+    WHAT IS LEFT is three missing `addu` and three extra `nop`, and they are
+    the SAME three: retail's copies fill load-delay slots that we leave
+    empty. Adding any one copy in source costs +1 without removing a `nop`,
+    so this is coupled allocation and not a naming question.
+      1. the base copy. Retail emits `lui $v0,%hi / addiu $v0,$v0,%lo /
+         addu $s5,$v0,$zero`; we emit the pair straight into the cursor's
+         register, and every register name downstream follows from that.
+         MEASURED AND DEAD, all at 288/288 and 249-250: `p = D_800F2B50 +
+         off;` with off just set to 0; assigning p after i and off; a dead
+         derived `e = p + 8;` beside it; `bp = D_800F2B50; p = bp + 0;`; a
+         plain `bp = D_800F2B50; p = bp;` (coalesces); and
+         `do { p = ...; } while (0);` (+2). func_8007308C's recipe needs a
+         pre-loop use that dies before the loop and there is none here.
+      2. `addu $a3,$s3,$zero` -- retail masks `sh` ONCE into a register
+         before the first inner loop and copies it at the call; we emit the
+         `andi` at the call site. An `s32 shv = sh;` before the loop is +1
+         and 268.
+      3. `addu $a3,$s2,$zero` -- retail holds `sv` in a register across the
+         second loop; we reload `lhu 36($sp)` every iteration. An
+         `s32 sv2 = sv;` before that loop is +1 and 272, and both together
+         are +2 and 276.
+    Flags measured on the final base, all worse or not comparable:
+    -fno-schedule-insns 259, -fno-schedule-insns2 +6, -fno-function-cse 249
+    (identical), -mno-split-addresses +2 and 166 -- and that last one is NOT
+    a win, it is a different length AND structurally wrong, since retail has
+    cc1psx's split pair here.
+    Handed to the permuter.

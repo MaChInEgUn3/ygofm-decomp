@@ -2560,6 +2560,18 @@ appears or disappears after an edit you can explain, check whether the
 *other* fault moved too: a zero that arrives without you fixing anything is
 worth one structural diff before you trust it.
 
+**An edit worth ZERO differences can still be the right edit, and only the
+opcode census says so.** func_800528AC's flags word declared `u32` rather
+than `s32` scores 249 either way -- but the census turns two `sra` into two
+`srl` and all four shifts then match retail exactly. The difference count
+cannot see it, because the register names around the shift are wrong in both
+and a positional diff charges for those regardless. So run
+`collections.Counter` over the first token of both columns after every batch
+and read the OPCODE deltas, not the total: an edit that moves an opcode from
+the wrong mnemonic to the right one is progress even at an unchanged count,
+and an edit that leaves the census untouched is a passenger however good the
+number looks.
+
 **And never rank candidates by the difference count alone.** The diff is
 positional — line *i* against line *i*, no alignment pass — so one missing
 instruction marks every line after it as differing. A candidate one `nop` short
