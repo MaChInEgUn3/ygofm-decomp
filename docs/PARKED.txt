@@ -7241,3 +7241,29 @@ func_80031874 -- NEW 2026-09-04, written from scratch, -1 of 280, census 17
     eleven smaller entries. The `andi +3` and `sra +2` are width and
     signedness on the byte fields -- the same class that was worth four
     opcodes on func_80023144 -- and are the place to start.
+
+# ---
+func_80031874, follow-up 2026-09-04 -- census 17 opcodes to 14, alignment
+    232/280 to 236/280, differences 257 to 252. Two edits, both the
+    widest-natural-type rule.
+      1. The two position reads `*(s16 *)(arg0 + 0x30)` and `+0x32` want
+         NAMED LOCALS taken at the top, beside the `+4` word read. Retail
+         issues all three `lh`/`lw` in its first four instructions and only
+         subtracts D_8009B146/D_8009B148 later; written inline in the
+         subtraction they come out after the whole constant-store block.
+         Alignment 232 to 234.
+      2. `s2` held `*(s16 *)(q - 4)` and I declared it `s16` to match the
+         load. `s32 s2` removes THREE census entries at once -- `sra +2`,
+         `lh -1` and `lhu +1` -- because the narrow local made gcc
+         re-narrow the value at every use. Same rule that was worth four
+         opcodes on func_80023144's `s8 c` an hour ago; that is now three
+         functions in one session where a local declared to match its
+         load's width was the fault.
+    NOT INSTALLED: `s32 s6` for the side byte. It removes one `andi` and the
+    `sb`/`sh` entries but ADDS `lhu +2` and costs alignment (230 against
+    236), so unlike the other two it trades one fault for another. Retail
+    does mask that byte somewhere; leave it `u8` until the surrounding
+    census is smaller.
+    REMAINING at -4: `sll -4` is the new lead -- retail has seven shifts and
+    we have three, so four scalings are being folded away. Then
+    `addu -5, nop +5, andi +3, lui -3`.
