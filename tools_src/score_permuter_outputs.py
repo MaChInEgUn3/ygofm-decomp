@@ -22,6 +22,11 @@ import subprocess, pathlib, re, json, os
 # Repo root, derived from this file's location -- it was hardcoded to one
 # machine's home directory, which both leaked a username into a public repo
 # and made the tool run against the wrong tree on any other checkout.
+# HAZARD: this writes and then DELETES config/flag_overrides.json, which
+# try_func.py and build.py both read. Do not run it while you are measuring a
+# candidate through an override of your own -- the delete lands mid-run and the
+# measurement silently falls back to the default assembler flags. Same class as
+# WORKFLOW's rule about background jobs that rewrite build.py.
 root=pathlib.Path(__file__).resolve().parent.parent
 os.chdir(root)
 hits=0; checked=0

@@ -2293,7 +2293,11 @@ and re-pushing or force-pushing would be wrong. Read the two hashes in the
 error before doing anything.
 
 **Never run a background job that rewrites `build.py` (or any shared config)
-while you are measuring.** A sweep that patches `SMALL_DATA_NOP_FUNCS` per
+while you are measuring.** `score_permuter_outputs.py` is one: it writes and
+then deletes `config/flag_overrides.json`, which try_func and build.py both
+read, so a manual measurement that needs its own override can silently fall
+back to the default assembler flags while the scorer runs. It now says so at
+the top. A sweep that patches `SMALL_DATA_NOP_FUNCS` per
 candidate and restores the file afterwards restores the copy it read at
 *start-up* -- so every `PER_FUNC_AS_FLAGS` line added while it ran was
 silently deleted when it finished. The build then went red with 550
