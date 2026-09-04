@@ -5841,6 +5841,15 @@ func_800222F4 -- 201/201, 25 differences, written 2026-09-03,
   the two labels inside it are only jumped to from inside. This is the
   "arms were macros in the original" reading, and it is the largest single
   use of that idiom so far -- the previous record was five statements.
+    2026-09-04, from a permuter output: 25 -> 24. `b` was serving TWO
+    unrelated values -- `&D_8009AF2C` in the earlier block and a copy of `g`
+    in the D_8009B398 block -- and the second is a redundant copy. Deleting
+    `b = g;` and writing `g` at all seven later sites is the whole gain. The
+    permuter had paired it with `if (D_8009B394[0]) { call(); } else {
+    call(); }`, which decomposes to worth EXACTLY NOTHING (24 either way);
+    a `do { } while (0);` round the same call is also 24. Replacing *every*
+    `b` including the earlier block's is -1 and 47, which is what happens
+    when the split is made at the wrong place.
 
 func_80057AF4 -- 203/203, 32 differences, written 2026-09-03. The animation
   slot loader: it clears, restores or installs one of a record's slots and
@@ -6085,6 +6094,13 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   164; a separate name for case 3b's record reads is worth nothing; naming
   the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
   to the top of case 1 is worth nothing.
+    2026-09-04, from a permuter output the scorer re-read: 86 -> 76 on ONE
+    named read. The second `*(s32 *)(q + 4) & mk` in the b2[1] block wants
+    `c = *(s32 *)(q + 4); *(s32 *)(q + 4) = c & mk;`, where `c` is BORROWED
+    from the arms above -- a fresh name at the same position is 86, i.e.
+    worth nothing, so it is the borrow and not the naming. The same edit on
+    the FIRST `& mk` (through b2[0]) is 77, and both together are 77, so it
+    is that one site only.
 
 func_8005E808 -- 251/251, 77 differences, written 2026-09-04. A geometry
   step: it clamps a magnitude from the caller's record, then walks two

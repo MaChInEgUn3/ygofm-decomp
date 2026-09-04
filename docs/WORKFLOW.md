@@ -1806,6 +1806,28 @@ count read as a win only because it was being compared across a length
 error. Decomposed on its own base, no half of that output moves the parked
 137 at all. Same class as the never-compare-across-length-errors trap in
 try_func, one tool further out.
+**Reconstruct a permuter win from its FULL diff, not from the head of it.**
+func_800222F4's `diff.txt` opens with a duplicated call and a deleted `b = g;`,
+and reconstructing just those two is +2 and 201 -- nowhere near the stored
+24. The rest of the file renames seven later `b` uses to `g`, and the point
+is that `b` was serving TWO unrelated values: `&D_8009AF2C` in an earlier
+block and a copy of `g` in this one. Split at the right place it is 24;
+renaming *every* `b`, including the earlier block's, is -1 and 47. Two things
+follow. Run the stored `source.c` through try_func FIRST to confirm the
+number, so a failed reconstruction is visibly a reconstruction failure and
+not a scorer bug. And read the whole diff: the duplicated call decomposed to
+worth exactly nothing, so the entire gain was the rename the head of the diff
+did not show.
+
+**A permuter output that drops a cast can be a WIDTH change, and that is the
+false-zero trap wearing its plainest disguise.** func_80029EC4's best output
+rewrote `*((s32 *) pkt) = 0x8000000;` as `*pkt = 0x8000000;` and scored
+len2/145 -> len0/190 -- an exact length, which the ranking rule prefers.
+`pkt` is `u8 *`, so that is a BYTE store: the two instructions it "saved" are
+the ones the word store needs, and the code no longer does what the function
+does. Read the pointer's declared type before crediting any output that
+removes a cast from an lvalue.
+
 And a better count is **not** a better candidate: two of the first seven finds
 were semantically wrong and scored far better than the correct source — one
 deleted a store the target has (func_8004C84C, 14 against a correct 25), the
