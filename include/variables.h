@@ -527,6 +527,8 @@ extern u8 D_8009B1EC;
 extern u8 D_8009B1ED;
 extern u8 D_8009B164;
 extern u16 D_8009B16C;
+/* Signed: func_80019608 passes it to func_80026BA4 with `lh`. */
+extern s16 D_8009B150;
 extern u8 D_8009B174;
 extern u8 D_800EB224[];
 extern VoidFn D_80090998[];
@@ -1656,6 +1658,10 @@ extern u8 D_800F2B50[];
 extern u8 D_800F2C40[];
 extern u8 D_800E9DB0[];
 extern u8 D_800E9EF0[];
+/* The pointer one word past D_800E9EF0 under its own name: func_80019608
+ * reaches it both ways -- as %lo(D_800E9EF4) where the source named it,
+ * and as 4(reg) off a base the same block already holds. */
+extern u8 D_800E9EF4[];
 /* Reached as a base plus two halfword offsets, which is what a struct
  * access compiles to; a bare array lets gcc fold the first store's offset
  * into the %lo and form the base only for the second. */
