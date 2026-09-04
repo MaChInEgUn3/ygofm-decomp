@@ -6876,3 +6876,30 @@ func_800482B0, follow-up 2026-09-04 -- +2 to -1 and THE FRAME IS NOW EXACT,
     arg0 in `$s6` and never use `$fp` for a parameter. That is allocation
     and scheduling, i.e. the permuter's class, and the function is now
     structurally right enough to hand to it.
+
+# ---
+func_800482B0, follow-up 2 (2026-09-04) -- two negatives and a tooling fix.
+    `as -G0` is now in build.py's PER_FUNC_AS_FLAGS for this function and for
+    func_80045F3C. Both are inert for the build (neither is in src/), but
+    permute.py reads PER_FUNC_AS_FLAGS directly, so WITHOUT the entry the
+    permuter would have been measuring these against the wrong assembler
+    flags for its entire run. That is worth knowing before handing any
+    -G0 function to it.
+    CLOSED AXIS: retail's prologue copies arg0 TWICE --
+    `addu $t0,$a0,$zero` then `addu $s4,$t0,$zero` -- and uses `$t0` for the
+    `& 0x8000` test and `$s4` for every `& 0xFFFF` reference, which reads
+    exactly like func_8003BF00's two-names-for-one-parameter shape. It is
+    not reachable that way here: a second local `p = arg0;` used for the
+    test, used for all the masked references, or used for the masked
+    references with the test on `arg0`, are all THREE byte-identical to the
+    single-name version. gcc coalesces the copy, and the derived-offset
+    trick that normally forces one has nowhere to go on a parameter that is
+    only ever masked.
+    Handed to the permuter, which is the right tool for what is left:
+    census `addiu +2, addu +1, beq +2, j +1, andi -1, bne -2, lbu -1,
+    nop -1, sll -1, srl -1` at -1, with the whole diff shifted because
+    cc1psx hoists the D_8009B45C load above the frame setup. The `beq +2 /
+    bne -2` pair is two tests whose polarity is inverted somewhere and is
+    the most promising hand lever left, but it cannot be located by a
+    positional diff while the prologue is shifted -- find it by re-syncing
+    the two streams on their matching blocks rather than by row index.
