@@ -5930,3 +5930,26 @@ func_80072A48 -- 222/222, 95 differences, written 2026-09-04. The AI's
   register for two values twice (the D_800F5B98 base then the entry index,
   and the slot count then the D_800F5BE8 base), which may or may not be name
   reuse in the source; the permuter is running on it.
+
+func_80022674 -- 223/224 (-1), 81 differences, written 2026-09-04. A three-
+  state slide animation on a sprite: state 0 drops it, states 1 and 2 pan it
+  in and then out, each with its own "already started" and "already
+  finished" flag bit.
+  gp=2, at=0, default flags.
+  What paid, in order: the dispatcher is an if-chain with an explicit
+  `>= 2` and the three arms are `goto` targets in retail's address order,
+  with the shared reset block (clear +0x6C, zero +0x24, call func_80017E3C)
+  written INSIDE state 0's arm where retail has it; the `& 0x20` alternate
+  arm of states 1 and 2 must be OUT OF LINE too -- writing it as the
+  fall-through is -6 and moving it behind a `goto` is +2 and 155 -> 126;
+  and the two finish blocks share only their last two stores, with the
+  counter constant AND the +8 read written per arm (+2 and 126 -> -1 and
+  81). That last one is WORKFLOW's per-arm named read, and it is worth 45
+  differences here.
+  Residue: retail sinks the `sb` of +0x22 into the counter test's branch
+  delay slot and we emit it before the branch, twice (+2); retail reloads
+  +0x2A after storing it where we forward the stored value (-1 lhu, +1
+  andi); and its counter test is `sll 16` where ours is `andi 0xFFFF`.
+  Measured and dead on those: `s16`, `u16` and `s32` for the counter, a
+  separate name for the pan accumulator, an `s16` store for the negative
+  constant, and swapping the per-arm read with the per-arm constant.
