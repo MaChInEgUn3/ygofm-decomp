@@ -4896,6 +4896,15 @@ func_8002BD0C -- 140 target, 140 built, 19 differences, written 2026-08-21,
   reproduces it (two of them are -3, because the do/while lets gcc cross-jump
   join1's tail into arm 2's).
 
+func_8004803C -- 157/157, 119 differences (was 137), improved 2026-09-04 by
+  decomposing a permuter output that the re-scorer surfaced once it ranked by
+  length. Six edits, and NO HALF of them reaches 119 on its own: the base
+  local declared FIRST, an `s16` copy of the table index used for both `* 8`
+  computations (136 alone), `* 8 * 2` rather than `* 0x10` (137 alone, i.e.
+  nothing), the 0x404/0x414/0x41C/0x424/0x428 block written against the
+  symbol with the base local re-assigned AFTER it (153 alone, i.e. worse),
+  and the two redundant `& 0xFF` on an already-masked arg1 dropped. Coupled,
+  they are 119. Original entry follows.
 func_8004803C -- 157 target, 157 built, 140 differences, written 2026-08-28
   (-4/151 on the first draft the same day).  Fourth out of the dup-%hi pool.
   A sound-voice setup: it looks a 16-bit id up in one table, derives two
