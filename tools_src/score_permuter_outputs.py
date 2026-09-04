@@ -18,7 +18,7 @@ installing anything.
 
 Run it after any batch of permuter work, and after picking up an old park.
 """
-import subprocess, pathlib, re, json, os
+import subprocess, pathlib, re, json, os, sys
 # Repo root, derived from this file's location -- it was hardcoded to one
 # machine's home directory, which both leaked a username into a public repo
 # and made the tool run against the wrong tree on any other checkout.
@@ -49,6 +49,11 @@ for d in sorted(root.glob('build/permuter/func_*')):
         n=int(m.group(1)) if m else (0 if 'MATCH' in r.stdout else 999)
         return (le,n)
     base=score(cand); checked+=1
+    # Progress to stderr: this walks ~1750 outputs across the whole park and
+    # takes hours, so a run with no output is indistinguishable from a hung
+    # one -- which is the failure mode WORKFLOW records for silent sweeps.
+    print(f'  {f}: base len{base[0]}/{base[1]}, scoring {len(outs)} outputs',
+          file=sys.stderr, flush=True)
     best=min((score(p),str(p)) for p in outs)
     if os.path.exists('config/flag_overrides.json'): os.remove('config/flag_overrides.json')
     if best[0] < base:
