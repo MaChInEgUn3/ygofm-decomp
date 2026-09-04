@@ -7138,3 +7138,23 @@ func_80023144, follow-up 2 -- +10 to +3, census four opcodes to three,
          later `== 2` test as well is worse (four opcodes, alignment 201),
          so retail really does re-read for that one.
     REMAINING: `andi +2, lbu +2, nop -1`, summing to +3.
+
+# ---
+func_80023144, follow-up 3 -- +3 to -1, census three opcodes to ONE, 73
+    differences, alignment 202/210. One declaration.
+    `c` held `D_800E9FF0[side].unk19`, which is an `s8` field, and I had
+    declared the local `s8` to match. That is the narrow-local trap: retail
+    reads the field ONCE with `lb` and then does `sltiu $v0,$v0,4` on the
+    same sign-extended register, while the `s8` local made gcc read it a
+    SECOND time with `lbu` and mask with `andi 0xFF` to get `(u32)c`. Two
+    sites, so `lbu +2, andi +2`, which is the whole of the remaining +3
+    (with `addiu +2` already closed). `s32 c` -- the widest natural type,
+    cast at the point of use -- removes all four. `(u8)c >= 4` on the `s8`
+    local instead is +3 and unchanged, so it is the DECLARATION and not the
+    comparison.
+    REMAINING: one `nop`. In two places we fill a load-delay slot that
+    retail leaves empty -- the `lbu %lo(D_8009B344)` reload (we put the
+    `addu $a0,$s0,$zero` call argument there, retail puts it in the `jal`'s
+    own slot) and the `lw 0(arg0)` before the final `lbu 0x16` (we put the
+    call-result copy there). Both are the scheduler having an instruction
+    available that retail's did not. Not yet closed.

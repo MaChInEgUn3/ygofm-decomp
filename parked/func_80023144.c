@@ -12,7 +12,7 @@ void func_80023144(u8 *arg0, s32 arg1) {
     s32 v;
     s32 mode;
     s32 id;
-    s8 c;
+    s32 c;
     s32 k;
     s32 fl;
     u8 side;
