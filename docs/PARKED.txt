@@ -6938,3 +6938,39 @@ func_800482B0, follow-up 3 (2026-09-04) -- the BLOCK LAYOUT was wrong, and
     previous one was -1: it is installed anyway because both censuses sum
     to their length error, so both are "fully explained", and at that point
     the tie-break is the number of distinct faults -- eight against ten.
+
+# ---
+func_800482B0, follow-up 4 (2026-09-04) -- -3 to -1, census eight opcodes to
+    FOUR, opcode-stream alignment 205/234 to 219/234. Two edits, both found
+    by walking the gaps between the aligned streams rather than by row
+    index.
+      1. THE MASK-SCAN LOOP TESTS THE WRONG WAY. Written as
+         `while ((m & 1) == 0) { c++; m >>= 1; if ((u8)c >= 4) goto scan; }`
+         the built code carries `addiu $s0,$s0,1` immediately followed by
+         `addiu $s0,$s0,-1` -- gcc rotating the loop and then compensating
+         the counter on the way out. Retail tests to EXIT
+         (`bnez $v0,.L8004833C` at the top of the body) and its counter is
+         never compensated. Writing it as
+         `do { if ((m & 1) != 0) goto found_a; c++; m >>= 1; }
+         while ((u8)c < 4); goto scan;` removes both the `beq +2` and the
+         `addiu +2` census entries at once.
+         The two `D_8009B45C[0x435] = c;` stores also move up into the
+         early block as labelled entries `found_a:` and `found_b:` ahead of
+         `play:`, which is retail's `.L8004833C` / `.L80048358` /
+         `.L80048364` exactly -- two arms that each store the channel and
+         share only the call.
+      2. THERE IS A FLAG TEST BEFORE THE ROUND-ROBIN BLOCK that the draft
+         did not have. Retail has `andi $v0,$s3,255` / `bne $v0,$zero,<end>`
+         between the occurrence scan and the round-robin loop, i.e. an
+         explicit `if ((u8)done != 0) return;`. m2c had rendered it as
+         `if (!(0U & 0xFF))` -- it had PROVED the flag zero there and folded
+         the test away, which is exactly why reading m2c's output rather
+         than the listing hid it. Adding the guard is -6 to -1 and takes the
+         alignment from 210 to 219.
+    MEASURED AND DEAD: hoisting `(s32)(s16)sp28` into a local before the
+    round-robin block, at either side of the new guard (-4, five opcodes,
+    alignment 204 and 206) -- retail recomputes the conversion at each of
+    the three call sites and does not share it. Also still lateral: the
+    `u32 hi = (u32)(arg4 & 0xF0) >> 4;` spelling, which trades `srl -1` for
+    `sra -1` at identical alignment.
+    REMAINING at -1: `lbu -1, nop +2, sll -1, srl -1`, summing to -1.

@@ -16,6 +16,11 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
         if ((arg0 & 0x8000) != 0) {
             func_800451E0(arg0 & 0xFFFF, 0);
             return;
+        found_a:
+            D_8009B45C[0x435] = c;
+            goto play;
+        found_b:
+            D_8009B45C[0x435] = c;
         play:
             func_8004803C(arg0 & 0xFFFF, D_8009B45C[0x435], arg1, sp22, (s32)(s16)sp28,
                           arg4 & 0xFF, arg5 & 0xFF);
@@ -27,15 +32,14 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
             m = func_80047F38(m, arg4);
             if (m != 0) {
                 c = 0;
-                while ((m & 1) == 0) {
+                do {
+                    if ((m & 1) != 0) {
+                        goto found_a;
+                    }
                     c++;
                     m = m >> 1;
-                    if ((u8)c >= 4) {
-                        goto scan;
-                    }
-                }
-                D_8009B45C[0x435] = c;
-                goto play;
+                } while ((u8)c < 4);
+                goto scan;
             }
         }
     scan:
@@ -49,8 +53,7 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
                     *(u16 *)(D_8009B45C + ((u8)c) * 2 + 0x404) == (arg0 & 0xFFFF)) {
                     n++;
                     if ((u8)n == ((arg4 & 0xF0) >> 4)) {
-                        D_8009B45C[0x435] = c;
-                        goto play;
+                        goto found_b;
                     }
                 }
                 i++;
@@ -61,6 +64,9 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
     out:
         bit = 1 << D_8009B45C[0x435];
         i = 0;
+        if ((u8)n != 0) {
+            return;
+        }
         do {
             func_80077C50(D_8009B45C[0x435] + 0x14, &sp20);
             if (sp20 == 0) {
