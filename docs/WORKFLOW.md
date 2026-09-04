@@ -1075,6 +1075,41 @@ permuter found the first; the second is the same idea applied by hand.
    live, and the length comes right -- 124 differences and -11 to 13 and 0.
    So when a local holding a constant vanishes, the question is not how to
    make gcc keep it; it is which call site was supposed to be a second copy.
+   **Which of several identical arms gets merged is decided by the block that
+   PHYSICALLY PRECEDES THE LABEL, and that is the mechanism behind the
+   "permute the case order" rule above.** gcc 2.8's `find_cross_jump`
+   compares the insns before a jump against the insns before the jump's
+   LABEL -- not against every other block that reaches it -- so an arm merges
+   only with whichever block happens to sit immediately above the join.
+   func_800229F4 has two `if (flag)` finish blocks whose four arms all end
+   `sw` + jump-to-join; retail merges the two ELSE arms (the second one is
+   the block above the join) and leaves the two THEN arms with their own
+   copies, which no amount of reordering *inside* an arm reaches. The lever
+   is a local: with one name assigned in both arms of each `if` and the store
+   after them, all four arms end identically and gcc merges the then-arms too
+   -- three instructions short. Writing the store directly in each arm keeps
+   retail's layout. So when a length error is a small negative and the missing
+   instructions are a duplicated store-and-jump, look for a local that made
+   two arms identical, and delete it.
+   **And the same local decides whether a following read is FORWARDED.**
+   gcc 2.8 has no global CSE, so a load is forwarded from a store only inside
+   one basic block. A store written at the join is already in the join block
+   when CSE runs, and the read after it is folded into the stored value; a
+   store written inside each arm is still in the arm's own block, and only
+   cross-jumping -- a much later pass -- moves it down, so the read stays a
+   real reload. Two arms of func_800229F4 want the reload and two want the
+   forward, in the same function, and the tell is whether the target has an
+   `lhu` of the address it has just stored.
+   **A sum of two `lhu` shifted right is UNSIGNED in the source.** Both
+   operands promote to `int`, so the natural `s32` gives `sra`; retail's
+   `srl` needs the value to be `u32`. An `(u32)` cast at the use is not the
+   same thing and was measured worse -- the declaration is the lever.
+   **And a negative constant stored to a halfword wants an `s16` lvalue.**
+   `*(u16 *)(p + K) = -0x3F80;` is the HImode constant 0xC080 and gcc
+   materialises it `ori $v0,$zero,49280`; `*(s16 *)(p + K) = -0x3F80;` is
+   const_int -16256 and gives retail's `addiu $v0,$zero,-16256`. The same
+   sixteen bits are stored either way, so nothing but the instruction says
+   which the source had.
    **The same pass from the other side: do not block a cross-jump.** gcc merges
    two arms only when their instruction sequences are *identical*, and two arms
    computing the same value from different expressions — one from a global, one
