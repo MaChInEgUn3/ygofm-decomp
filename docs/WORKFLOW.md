@@ -2620,6 +2620,13 @@ so every branch reads as a difference at a constant offset (`j L3` against
 differ by a constant label offset, that is the renderer, not the code.
 
 
+**try_func's trailing arguments REPLACE the compiler flags; they do not
+append.** `try_func f cand.c -msplit-addresses` compiles with only that flag --
+no `-O2`, no `-G0` -- and on func_8004B854 read as +31 before anyone looked at
+the `flags:` line it prints. Pass the whole set (`-quiet -O2 -G0
+-msplit-addresses`), and read that header line before the count, which is the
+same rule as the stale-flag-table one below wearing the other shoe.
+
 **try_func costs FOUR SECONDS, not forty, and it parallelises -- so sweep by
 the handful, not one at a time.** Measured on 2026-09-04: a cold candidate
 (content changed, so no cache hit) is 4.2s; three cold candidates started
