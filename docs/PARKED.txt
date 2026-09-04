@@ -6270,3 +6270,63 @@ func_80029EC4 -- 270/268 (+2), 145 differences, written 2026-09-04. Builds
   rather than storing the expression straight into pkt2+4. The
   borrowed-dead-local lever, and the largest single step in this function
   after the arm order.
+func_80052D2C -- 230/230 and 10 differences, in two clusters, register
+allocation and one scheduling decision. Candidate in parked/func_80052D2C.c.
+No flag reaches it: the full sweep_try table floors at 10 on default flags
+(O2 G8), with `as G2` and `as G4` tying and everything else far worse.
+
+Got here from -6 and 174 differences on nine levers, all read off the listing:
+
+  * the splat interior symbols D_800F2B32/3A/42 are REAL references. They are
+    D_800F2B20 + 0x12/0x1A/0x22, and the THEN arms name them (cc1psx's own
+    %hi/%lo pair per reference) while the ELSE arms use the record base with
+    plain displacements. Writing both through the base is four `lui` short.
+    Declared them in variables.h;
+  * the store goes INSIDE each arm of `if (arg3 >= 0)`. With it at the join
+    gcc if-converts -- the else value goes in the branch's delay slot and the
+    then value overwrites it -- which is two instructions short per arm;
+  * a base local for D_800F2B20 PER BLOCK. Without one, cc1psx folds the first
+    reference into %lo(sym+K) and derives the base from that, so every later
+    displacement is K too small (func_800300C8's rule). With ONE shared name
+    it is +4, because the name spans the function and takes callee-saved $s0;
+  * one reused name for the paired loads through arg1/arg2, so they cannot be
+    grouped -- retail issues `lhu $v0; nop; sh` twice through the same
+    register;
+  * `do { } while (0);` round those two read/store pairs, worth a nop and 15
+    differences. The same pin on the arg2 pair is worth nothing;
+  * the `k = ((u16 *)arg1)[2];` assignment moved BELOW the first b store;
+  * a separate name for the absolute value: retail has `addu $v0,$s3,$zero` in
+    the `bgez` delay slot then `subu $v0,$zero,$v0`, which is an unconditional
+    assignment followed by a conditional one, not `arg3 = -arg3` in place;
+  * TWO COUPLED LEVERS, each a regression alone -- `do { t = arg3; } while
+    (0);` is +1 and 41, a base local for D_800F56F0 in the `& 2` arm is -1 and
+    70, and together they are 230/230 and 18;
+  * a base name PER ELSE-ARM (q1, q2). One shared name makes the pseudo span
+    two blocks, and gcc's local allocator only combines the %hi temp with the
+    address pseudo for a pseudo referenced in exactly ONE block. 18 -> 10.
+
+The remaining two clusters:
+
+  a) 2 differences -- the `|= 2` block. Retail materialises the base with
+     `lui $v1 / addiu $v1,$v1` (one register, the local-alloc combine above);
+     we get `lui $v0 / addiu $v1,$v0`. Giving THAT block its own name too is
+     the obvious next step and is +1 and 97 -- it fixes this cluster and costs
+     more elsewhere. Writing it inline is +1 and 97; `|= 2` rather than
+     `= ... | 2` is identical.
+  b) 8 differences -- the abs block. Retail's `subu` reads the COPY ($v0);
+     ours reads arg3 directly, because gcc copy-propagates through
+     `t = arg3`. The `do { } while (0);` round the copy does not stop it, and
+     `if (t < 0)` and `if (arg3 < 0)` score identically, which is the
+     wrong-axis tell. The ternary -- `arg3 = (arg3 < 0 ? -arg3 : arg3) * 2;`,
+     func_8002BAB4's spelling -- does NOT transfer: it deletes the branch
+     entirely and is -2 and 82. The `ori 65534` / `lhu 4($s2)` order and the
+     `sh 40($a2)` sinking into the `beq` slot are downstream of this.
+
+Worth recording because it nearly went in as a false negative: an earlier test
+of "separate names for the else arms" used ONE name shared by both arms, which
+is still two blocks and therefore still global -- it scored 93, unchanged, and
+read as "per-arm names measured dead". They are not; one name PER ARM is the
+lever, and it was worth 8 of the 18.
+
+Next: the permuter. This is exactly its class -- instruction-for-instruction
+right, only the allocation wrong -- and it has never been run on this function.
