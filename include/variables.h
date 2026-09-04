@@ -205,6 +205,14 @@ extern u8 D_8009AF24[6];
 extern u8 D_8009AF54[];
 extern u16 D_8009B22A;
 extern u8 D_8009B1B8;
+/* One byte, gp-relative: a countdown that func_8001825C decrements and then
+ * sign-extends, which is the `sll 24` tell for a named result rather than a
+ * read-back of the global. */
+extern u8 D_8009B1B9;
+/* Four bytes -- splat also names D_8009B209 and D_8009B20A, and D_8009B20C is
+ * the next symbol -- so the size is the real one and it stays small data at
+ * -G8, which is what lets cc1psx take its address with addiu $v1,$gp. */
+extern s8 D_8009B208[4];
 /* Passed to func_80040410 by func_80024E58; gp-relative there. */
 extern u8 *D_8009B214;
 extern u16 D_8009B220;

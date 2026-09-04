@@ -5948,3 +5948,53 @@ func_80072A48 -- 222/222, 95 differences, written 2026-09-04. The AI's
   placeholder is installed with a comment saying so; a plausible source
   shape with the same effect has not been found.
 
+
+func_8001825C -- 235/235, 55 differences, written 2026-09-04. The
+  start-of-turn routine: it flags D_8009B23A, sweeps two ranges of the
+  28-byte D_801A7B64 records re-arming each live one, allocates the two
+  D_8009B1F0 widgets, and then either walks the ten-card hand or runs the
+  two-widget alternative. Two more arms handle the already-flagged case.
+  gp=5, at=0, and the addressing needs nothing -- see the negative below.
+  NEEDS -fno-strength-reduce (194 against 234 on the sweep): without it
+  both record loops grow a second cursor at base+4 and the function saves a
+  fifth callee-saved register. The flag is per FILE and it KILLS the third
+  loop's givs, so that loop's two cursors are written out by hand, reusing
+  loop 1's names because retail reuses loop 1's registers. That one edit was
+  176 -> 55 and is the largest step in the function.
+  What else paid: `i = 5;` and `i = 0x14;` as statements BEFORE the cursor
+  rather than in the for-init, which is where retail puts them; `s32 h` not
+  `s16` for the value saved across the func_80024D34 call, so the read is
+  `lh`; and a base local in loop 2 that both cursors derive from -- that one
+  is +1 in length and correct, because retail's block is five instructions
+  and ours was four. Two faults cancelling, so do not read its length as a
+  regression.
+  Residue, and every part of it has been measured against at least three
+  shapes:
+  * block 4 rotates three callee-saved registers -- retail has $s1 =
+    D_800907D8, $s0 = D_801A7AD8, $s3 = the record, and we have them at
+    $s3/$s1/$s0. FIVE assignments measured: base locals in r/q (99), q/r
+    (98), b/u (56), u/b (55) and the symbols written inline (55). Inline is
+    what is installed. This is not an axis; it wants the permuter.
+  * loop 2's base sits in $a1 where retail keeps it in $v0, three
+    instructions.
+  * arm2 emits an extra `andi 0xFFFF` converting the `f | 0x4000` value to
+    SImode, and the D_8009B36A block is one instruction SHORT because we
+    hoist its `lui` into a branch delay slot retail leaves empty. The two
+    cancel, which is why the length reads 235/235.
+  Measured and dead, with the reasoning that was wrong written down because
+  it was plausible:
+  * the D_8009B36A empty delay slot IS the bare-symbol tell, and sizing the
+    symbol out of small data does not fix it here. The window looked blocked
+    by D_8009B1F0 (8 bytes, and retail takes its address gp-relatively), so
+    a 4-byte per-file arm was added to open it; `as -G4` alone is neutral
+    (55, so the threshold is safe), and `D_8009B36A_SIZED8` on top is +1 and
+    89. Both new guard arms were REMOVED again rather than left in
+    variables.h with comments claiming a purpose they do not serve.
+  * D_8009B0F4 and D_8009B134 never interleave their %hi/%lo pairs in
+    retail, which reads as the indivisible bare form; their `_SIZED` arms at
+    `as -G4` are 56, one worse than the aggregate arms.
+  * `u16` for the arm2 value, to kill the `andi 0xFFFF`: +1 and 212. The
+    extra pseudo rotates the whole function.
+  New in variables.h for this: `u8 D_8009B1B9;` and `s8 D_8009B208[4];` --
+  the second at its real width, which is what keeps cc1psx taking its
+  address with `addiu $v1,$gp`.
