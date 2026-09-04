@@ -1091,6 +1091,20 @@ permuter found the first; the second is the same idea applied by hand.
    retail's layout. So when a length error is a small negative and the missing
    instructions are a duplicated store-and-jump, look for a local that made
    two arms identical, and delete it.
+   **A store retail keeps and you lose is a DEAD-STORE elimination, and the
+   fix is another store between the two.** `m[i] = m[i] + q[i]; m[i] = m[i]
+   / 2;` reads as two statements and two stores, and it is one: gcc forwards
+   the first store into the second read and then drops it, because nothing
+   reads the slot in between. That the array's address ESCAPES to a later
+   call does not save it -- the escape is after both stores, so the
+   elimination is legal and gcc takes it. No name, cast or `volatile` on the
+   local changes this. What does is separating the two groups so another
+   store sits between them: on func_8006BCA4's three midpoints, writing all
+   three sums and then all three divides keeps both stores per component and
+   is a MATCH, where per-component pairs are three instructions short. The
+   scheduler then interleaves them back into retail's own order (sum0, sum1,
+   div0, sum2, div1, div2), which is why the emitted code looks like the
+   per-component spelling and is not.
    **And the same local decides whether a following read is FORWARDED.**
    gcc 2.8 has no global CSE, so a load is forwarded from a store only inside
    one basic block. A store written at the join is already in the join block
