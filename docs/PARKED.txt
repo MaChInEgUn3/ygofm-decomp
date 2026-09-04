@@ -2328,6 +2328,14 @@ func_80045208 -- 25 differences at 75/75, register-allocation class. The
     permuter runs produced only outputs that score better on its weighted
     metric and measure 42-77 through try_func against the base's 25 --
     the divergence documented in WORKFLOW, in its strongest form yet.
+  2026-09-04, from the permuter-output harvest: its best stored output is 16
+  against the installed 17, and it is NOT installable -- two of its three
+  changes read an uninitialised local (`new_var2` is assigned only in
+  unreachable code after a `break`, and `new_var` is derived from it). The
+  third change, swapping the `buf+4` and `buf+8` stores, is ordinary source
+  and was measured ALONE: 17, exactly the base. That negative is the useful
+  part -- it proves the uninitialised read is the whole lever rather than a
+  passenger, which is the same shape as func_80046768.
 
 func_8005F27C MATCHED 2026-08-18, together with func_8005F5C8 and on one
     shape -- see that entry. What stood here follows.
@@ -5918,6 +5926,13 @@ func_80060B38 -- 206/206, 61 differences, written 2026-09-03. Draws a card's
   scheduler places them differently. Five positions for the record-base
   assignment were measured and all five give exactly 61, which is the usual
   sign that source order is not the axis.
+  2026-09-04, from the permuter-output harvest: 61 -> 46 on ONE line moved.
+  The +6 store belongs between the +4 store and the +0x12 one, not after
+  both. All six orders of that three-store group were then measured by hand:
+  (4,6,0x12) is 46, (6,4,0x12) is 52, (4,0x12,6) and (6,0x12,4) are 61, and
+  either order with 0x12 first is 77. So the installed order is the optimum
+  and not a local one -- worth knowing, because the permuter only reports
+  what it happened to try.
 
 func_80056504 -- 201/201, 143 differences, written 2026-09-04. The model
   loader: it records a model id in the player's record, tears down the old
