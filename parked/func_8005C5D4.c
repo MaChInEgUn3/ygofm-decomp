@@ -26,20 +26,14 @@
  *    `lui r,K; ori r,r,M` pairs with M >= 0x8000, so aspsx 2.79 never emits
  *    the lui/ori form for such a value; the sign-adjusted form is what it
  *    does, and the count of such pairs the scan found is below.
- *    lui/addiu pairs splat symbolised as auto-constants: 740
- *      of those with bit 15 set in the low half (aspsx sign-adjusted form): 392
- *        func_80012B50 D_8009B4A8 0x8009b4a8
- *        func_8008B90C D_800FE348 0x800fe348
- *        func_80027DF8 D_800E9FF0 0x800e9ff0
- *        func_8008CA78 D_800FE348 0x800fe348
- *        func_800434F4 D_801AF000 0x801af000
- *        func_80043960 D_801AF000 0x801af000
- *        func_80043960 D_801AF000 0x801af000
- *        func_8003A560 D_801AF000 0x801af000
- *        func_8003A560 D_801AF000 0x801af000
- *        func_8003A560 D_801AF800 0x801af800
- *        func_8003A560 D_8015C410 0x8015c410
- *        func_8003A560 D_801AF000 0x801af000
+ *    auto-symbols that are NOT RAM/scratchpad addresses (true constants): 10 ['0x7fffff', '0x80210000', '0x8021007a', '0x8021007b', '0x8021007c', '0x8021007d', '0x8021007e', '0x8021007f', '0xa000df80', '0xa000dfac']
+ *    lui/addiu pairs on a TRUE constant (aspsx sign-adjusted form): 2
+ *        func_8008B5C4 D_A000DFAC 0xa000dfac
+ *        func_8008B5C4 D_A000DF80 0xa000df80
+ *    (A first version of this scan counted 740 pairs, 392 with bit 15 set,
+ *    and was WRONG: undefined_syms_auto.txt is mostly real RAM addresses that
+ *    lack a declared symbol, and cc1psx forms those pairs itself with no
+ *    maspsx involvement. Only values outside the RAM ranges are constants.)
  *    The fix belongs in build.py as a post-maspsx rewrite, the
  *    SMALL_DATA_NOP_FUNCS precedent -- versioned, per function, documented as
  *    an emulation gap -- not in the gitignored tools/maspsx checkout and not
