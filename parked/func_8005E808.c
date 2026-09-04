@@ -86,9 +86,10 @@ void func_8005E808(u8 *p) {
             v = mag * acc / 1000;
             goto put;
         case 4:
+            m = *(u16 *)fp;
             v = *(u16 *)(D_800F5768 + 0x10);
             if (*(s16 *)(D_800F5768 + 0x10) < *(s16 *)fp) {
-                v = *(u16 *)fp;
+                v = m;
             }
             n = (s16)v;
             n = n * 6284;

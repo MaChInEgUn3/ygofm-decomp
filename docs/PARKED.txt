@@ -6121,7 +6121,7 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
   to the top of case 1 is worth nothing.
 
-func_8005E808 -- 251/251, 97 differences, written 2026-09-04. A geometry
+func_8005E808 -- 251/251, 80 differences, written 2026-09-04. A geometry
   step: it clamps a magnitude from the caller's record, then walks two
   8-byte entries and, per entry, dispatches on a tag to one of three
   distance calculations, keeping the largest result in +0x22.
@@ -6171,6 +6171,12 @@ func_8005E808 -- 251/251, 97 differences, written 2026-09-04. A geometry
   cursor. The other half of that output, an unsigned intermediate for the
   masked tag, was measured alone at 97 -- exactly the base. So the entire
   gain was the wrong substitution.
+  And 97 -> 80 on hoisting case 4's `*(u16 *)fp` read ABOVE the comparison
+  that guards it, into the dead magnitude local: `m = *(u16 *)fp;` then
+  `v = sym[0x10]; if (...) v = m;`. Semantically identical -- nothing stores
+  between the two reads -- and it is the borrowed-dead-local lever with an
+  unconditional read in front of a conditional assignment. From the permuter,
+  installed from the readable source.
 
   Same day, from its own permuter: 114 -> 97 on a LOCAL ALIAS FOR THE
   PARAMETER. `e = p;` as the first statement, with every reference going
