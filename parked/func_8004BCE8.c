@@ -1,3 +1,28 @@
+/* +1 at 98/97, 82 differing (the count is shift-inflated; the park entry
+ * names the real residue as four instructions). RECOVERED from git
+ * 2026-09-04 (the Unchiga merge deleted it and put a transcription in src/).
+ *
+ * The +1 is the third `andi $v0,$a1,0xFF`: gcc fills the `m != 0x3C` branch's
+ * delay slot by copying the shared mask block's first instruction, where
+ * retail's mask block BEGINS with `addu $a0,$s0,$zero` -- the func_8004BAE4
+ * argument -- so that copy is what retail's slot holds. Eight spellings
+ * measured 2026-09-04 and none of them reaches it:
+ *   the argument named as `a = p;` at the `mask:` label                  +1
+ *   the same pinned with `do { } while (0);`                            +1
+ *   named at the top of the dispatcher, before `m` is read              +1
+ *   named inside both shift arms with explicit gotos                    +5
+ * (the park entry had already measured it at the `store:` join: +4). A named
+ * call argument is constant-propagated back to the call from every position,
+ * which is the func_80025F3C rule; that entry's answer was to name an
+ * UNRELATED read in the same block instead, and that has not been tried here.
+ * On the other recorded fault, the +0x808 store sinking past the divu:
+ *   the divisor read BACK from +0x808 (func_80048F14's read-back rule)      +1, 82
+ *   the store pinned with `do { } while (0);`                              +1, 83
+ *   a base local for the first store so it shares p's load                 +1, 82
+ *   read-back and base local together                                      +1, 82
+ * All at +1, so none of these was measured on a sound instrument; re-try
+ * them once the length is right.
+ */
 #include "common.h"
 
 s32 func_8004BCE8(void) {
