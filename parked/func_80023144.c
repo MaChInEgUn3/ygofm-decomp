@@ -8,6 +8,7 @@
 void func_80023144(u8 *arg0, s32 arg1) {
     u8 *e;
     u8 *o;
+    u8 *p;
     s32 f;
     s32 v;
     s32 mode;
@@ -69,7 +70,6 @@ void func_80023144(u8 *arg0, s32 arg1) {
             D_8009B320[0] = func_80023090(arg0, D_800E9F48 + D_8009B1D5 * 0x70);
         }
     }
-    v = mode;
     if (arg0[0x17] == 2 && arg0[0x18] != 0) {
         side = D_8009B1D5;
         if (*(s8 *)(arg0 + 0x10) < 2) {
@@ -83,11 +83,11 @@ void func_80023144(u8 *arg0, s32 arg1) {
             }
             D_8009B355[0] = 1;
         }
-        v = mode + 2;
+        mode = mode + 2;
     }
-    o = *(u8 **)arg0;
-    o = func_80035BE4(arg0[0x14], v, *(s16 *)(o + 0x30) + 0x10,
-                      *(s16 *)(o + 0x32) + *(s8 *)(arg0 + 0x16), 0x120, 0x40);
+    p = *(u8 **)arg0;
+    o = func_80035BE4(arg0[0x14], mode, *(s16 *)(p + 0x30) + 0x10,
+                      *(s16 *)(p + 0x32) + *(s8 *)(arg0 + 0x16), 0x120, 0x40);
     *(s8 *)(o + 0x59) = *(*(u8 **)arg0 + 0x16) + 1;
     func_80039A14(o);
 }

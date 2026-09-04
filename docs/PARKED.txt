@@ -7158,3 +7158,32 @@ func_80023144, follow-up 3 -- +3 to -1, census three opcodes to ONE, 73
     own slot) and the `lw 0(arg0)` before the final `lbu 0x16` (we put the
     call-result copy there). Both are the scheduler having an instruction
     available that retail's did not. Not yet closed.
+
+# ---
+func_80023144, follow-up 4 -- -1 to 210/210, 73 differences to 37,
+    alignment 205/210. Two edits and a refinement to the ranking rule.
+      1. A SEPARATE NAME FOR THE CALL RESULT. `o` held both the object
+         pointer read out of `arg0` and the result of func_80035BE4, which
+         costs an extra `addu`; `p` for the pointer and `o` for the result
+         is -1 with the census going from `nop -1` to `addu -1` and the
+         alignment 202 to 205.
+      2. THE `v` VARIABLE DOES NOT EXIST. Dropping it entirely -- `mode`
+         carries the value, `mode = mode + 2;` in the `== 2` block, and
+         `mode` passed to the call -- is exact length and HALVES the
+         difference count, 73 to 37, at the same alignment. This is the
+         third measurement of that shape today: it was worse at +6 and at
+         +10 and is right here, which is the re-measure rule paying out
+         again.
+    THE RANKING REFINEMENT, and it matters. The installed candidate's census
+    is `addu -1, nop +1` -- two entries that CANCEL, which my own rule calls
+    a false zero. Reading the gap shows it is ONE fault: at T155 retail has
+    `addu $a1,$s2,$zero` and we have a `nop` in the same slot. An
+    instruction REPLACED BY A NOP shows up as a cancelling pair and is a
+    single substitution, not two independent faults. So "the deltas cancel"
+    is not by itself proof of two faults -- walk the gap and see whether the
+    two entries land in the same slot before believing it.
+    REMAINING at 210/210: that one `addu $a1,$s2,$zero`; the
+    `addu $a0,$s0,$zero` call argument, which retail puts in the `jal`'s
+    delay slot while we use it to fill the preceding `lbu`'s; and
+    `%hi(D_800E9FF0)` against `%hi(D_801D5608)` materialised in the other
+    order at two sites.
