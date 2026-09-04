@@ -7294,3 +7294,24 @@ func_80031874, RETRACTION 2026-09-04. The entry two above says "m2c got a
     with no shift at all and stand.
     REMAINING at +1: `nop +6, sh -4, andi +3, lui -3, addu -2, sw +2` and
     five smaller entries.
+
+# ---
+func_80031874, follow-up 3 -- the side byte's type is measured three ways
+    and NONE of them wins, which is itself the finding.
+    Re-measured on the corrected-stride base (the previous reading was taken
+    with the 0x2D4C fault open, so it did not count): `s32 s6` and
+    `(s32)arg0[0x67]` are both 280/280 exact with twelve census opcodes but
+    alignment 247/280 and 263 differences, against the installed `u8`'s +1,
+    twelve opcodes, 249/280 and 242. `u16 s6` is +1/249/251. The installed
+    candidate wins on alignment and differences at equal opcode count, so
+    `u8` stays -- the widening trades `lbu -1, lhu +2` for the `andi` it
+    removes, exactly as it did before the stride was fixed.
+    WHAT THE GAP ACTUALLY SHOWS is a STACK SPILL, not a mask: we emit
+    `sb $a0,0x14($sp)` and then `andi $a0,$a0,255`, i.e. the side byte is
+    being written to the frame. Retail's only stack traffic there is
+    `sw $v1,0x10($sp)` for the `sp10` pointer, which we also have -- so we
+    carry one stack object more than retail and the census's `sw +2` is
+    that. The type is not the lever; the extra frame slot is. Look for a
+    local that does not need to exist rather than for a wider declaration.
+    REMAINING at +1, 249/280, 242 differences: `nop +6, sh -4, andi +3,
+    lui -3, addu -2, sw +2` and five smaller.
