@@ -7029,3 +7029,29 @@ func_800482B0, follow-up 6 (2026-09-04) -- -1 to 234/234 with an EMPTY
     arg5 in `$s7`; we put arg0 in `$fp`, arg4 in `$s6`, arg5 in `$s5`, and
     every register downstream follows. Pure allocation -- the permuter's
     class, restarted from this base.
+
+# ---
+func_800482B0, follow-up 7 -- the prologue axis is closed by hand. At
+    234/234 with an empty census, the 192 positional differences are all the
+    parameter-to-register assignment, and re-measuring the second-name
+    shapes on THIS base (the rule says a rejection under an open fault does
+    not count) changes nothing: `p = arg0;` used for the `& 0x8000` test is
+    byte-identical, and used for every masked reference it is WORSE
+    (`andi +1, nop -1`, alignment 221). The permuter's first stored output
+    on the new base is also worse (`addu +1, nop -1`). Left to the permuter.
+
+# ---
+func_80023144 -- step 0 only, 2026-09-04. 210 instructions, gp=5, at=14, no
+    jump table, no block move, no runtime divide. This is the harder
+    addressing branch and it is worth writing down before any C is typed:
+    FIVE symbols want the bare form through `$at` -- D_8009B34E, D_8009B355,
+    D_8009B344 and D_8009B320 (all `u8`) and D_8009B338 (`s16`) -- while
+    D_8009B1D5 wants `%gp_rel`. The bare-wanting symbols are NARROWER than
+    or equal to the gp-relative one, so no real `-G` threshold separates
+    them; this is recipe branch 3, i.e. inflate each bare-wanting symbol to
+    a declared `[8]` and assemble at `as -G4`, which clears the assembler's
+    threshold while staying under cc1psx's own `-G8` so the bare form
+    survives. Decode from m2c: it reads a 0x1C-byte record out of
+    D_801A7AD8 by index, sets a mode byte at D_8009B34E from the record's
+    flag word and a table lookup in D_801D4244, and then dispatches on
+    arg0's byte at +0x17. Callee func_80023090 returns `u8`.
