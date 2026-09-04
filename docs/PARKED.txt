@@ -5909,3 +5909,24 @@ func_80056504 -- 201/201, 143 differences, written 2026-09-04. The model
   parameter in place (+1, 185), copying it into the local before masking
   (+1, 185), a separate name for each of the three func_80014EEC results
   (no change), and five declaration orders (all exactly 143).
+
+func_80072A48 -- 222/222, 95 differences, written 2026-09-04. The AI's
+  move search: it walks the five hand slots and then the field rows, scores
+  each with func_800727C0, and writes a verdict word back to
+  D_800F5B98[slot]. Sibling of the parked func_800727C0.
+  gp=0, at=0, default flags, and the instruction count was right on the
+  first draft.
+  What paid: a base local for D_800F5BE8 in the loops but a SECOND name for
+  the first section's stores and zeroing loop -- one name for both is 119
+  differences and splitting it is 95, because retail keeps the first
+  section's base in a caller-saved $v1 and the loops' in $s1. Writing that
+  first section inline instead is +1 and worse: cc1psx folds the +0x9C into
+  the symbol's %lo and every later offset is 0x9C too small, which is the
+  fold the base local exists to stop.
+  Residue: the whole callee-saved class is rotated by one -- our `i` is $s3
+  where retail has $s2, `opp` $s7 against $s6, the verdict slot $fp against
+  $s7 -- and the two `addu` operand orders that differ are consequences of
+  it, not causes (both spellings measured, both 95). Retail also reuses one
+  register for two values twice (the D_800F5B98 base then the entry index,
+  and the slot count then the D_800F5BE8 base), which may or may not be name
+  reuse in the source; the permuter is running on it.
