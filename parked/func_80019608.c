@@ -155,12 +155,14 @@ void func_80019608(void) {
         D_8009B174 = 4;
         return;
     case 4:
-        if ((m & 0x80) != 0) {
-            D_8009B23A = 5;
+        do {
+            if ((m & 0x80) != 0) {
+                D_8009B23A = 5;
+                return;
+            }
+            D_8009B174 = m | 0x80;
+            func_80026BA4(D_8009B150, 1);
             return;
-        }
-        D_8009B174 = m | 0x80;
-        func_80026BA4(D_8009B150, 1);
-        return;
+        } while (0);
     }
 }

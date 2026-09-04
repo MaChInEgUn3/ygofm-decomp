@@ -32,6 +32,7 @@ s32 func_80045208(s32 a, s16 arg1) {
                 k = 0x50;
                 break;
             case 0x9000:
+                p8 = q;
                 w = a + 0x7000;
                 e = *(u8 **)(q + 0x518);
                 k = 0x60;

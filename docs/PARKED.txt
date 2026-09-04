@@ -6595,3 +6595,30 @@ func_80072A48, follow-up 2026-09-04 -- a permuter output that reaches an
     So an empty census is not a correctness check either -- it says the
     opcode MULTISET matches, and a cursor that advances on the wrong path
     executes the same opcodes.
+
+# ---
+func_80019608 and func_80045208, follow-up 2026-09-04 -- two more permuter
+    outputs decomposed, and the first case where the CENSUS key chose a
+    candidate the difference count rejects.
+    func_80019608: the whole usable edit is `do { ... } while (0);` round
+    `case 4`'s body. That is 77 differences against the base's 76 -- WORSE
+    on the count -- and its census is EMPTY where the base carries
+    `beq +1, bne -1`, i.e. the base gets a branch polarity wrong and this
+    fixes it. Ranked (length, census, differences) it wins, and the extra
+    positional difference is the usual charge for one value moving. The
+    output's other hunk is a `do { } while (0);` placed after a `return;`,
+    i.e. unreachable, and does nothing.
+    MEASURED AND DEAD on that base, for the two read-modify-writes where
+    retail uses ONE register and we use two: `n = n | 0x20; D_8009B174 = n;`
+    (79), `n |= 0x20; D_8009B174 = n;` (79), dropping the local for
+    `D_8009B174 = D_8009B174 | 0x20;` (+1 and 118) or `|= 0x20` (+1 and
+    118), and moving `n = D_8009B174;` down to just before the or (+1 and
+    119). The hoisted read above the `*(u16 *)(p + 8)` store is
+    load-bearing -- it is func_800434F4's named-read lever and removing it
+    costs an instruction. Also dead: writing the `p + 0x60` decrement with
+    no local and a second read (+1 and 107).
+    func_80045208: 17 to 16 on a single dead `p8 = q;` written at the top of
+    `case 0x9000:`, where `p8` is a real local belonging to another arm and
+    is overwritten before its own use -- the borrowed-dead-name lever.
+    Rewriting the deref to go through `p8` as well scores identically, so
+    the bare copy is what goes in.
