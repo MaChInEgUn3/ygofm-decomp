@@ -1,3 +1,27 @@
+/* 16 differing at 84/84, from 18. RECOVERED from git 2026-09-04 (the Unchiga
+ * merge deleted it and put a transcription in src/).
+ *
+ * One lever, worth two: the record cursor's `r += 0x1C` moved from the end
+ * of the first loop's body into the for clause AFTER `i++`
+ * (`for (i = 0; i < 5; i++, r += 0x1C)`), so it is what fills the loop-back
+ * delay slot while the stack cursor's own `addiu 4` comes first, which is
+ * retail's order. The other order in the for clause is 18 (no change).
+ *
+ * The residue is register naming and nothing else: retail carries `k` and
+ * both loops' `i` in $a3 and forms the k*28 temporary in $v1 with the table
+ * base in $v0; we carry k in $v1, i in $a2, and swap the temp and the base.
+ * Two of the sixteen are the t = D_801799D8 pair going through $v0 in retail
+ * and self-referencing through $t4 here.
+ *
+ * Measured and dead on 2026-09-04:
+ *   k merged into i (retail reuses $a3 for both, which READS as one name):
+ *     28, much worse, and byte-identical across four variants -- the
+ *     register-reuse-is-not-name-reuse rule, confirmed again
+ *   four declaration orders of i/j/n/k on top of the lever            16
+ *   `i = 0;` as a statement before the first for                       16
+ *   t assigned through a second name (`e = D_801799D8; t = e;`)       18
+ * Permuter started from this base.
+ */
 #include "common.h"
 
 s32 func_8002C7E8(s32 arg0, s32 arg1) {
@@ -30,12 +54,11 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
 
     r = D_801A7AD8 + k * 28;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 5; i++, r += 0x1C) {
         sl[i] = (u8 *)0;
         if ((*(u16 *)(r + 0x16) & 0x8000) != 0) {
             sl[i] = r;
         }
-        r += 0x1C;
     }
 
     t += 2;
