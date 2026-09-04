@@ -79,8 +79,7 @@ void func_80019608(void) {
         if ((m & 0x20) != 0) {
             goto c1d;
         }
-        c = p[0x21] + 6;
-        p[0x21] = c;
+        c = (p[0x21] = p[0x21] + 6);
         if ((s8)c < 0) {
             return;
         }

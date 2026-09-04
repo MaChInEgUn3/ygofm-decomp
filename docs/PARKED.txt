@@ -6079,7 +6079,11 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
     the permuter and it did not: declaration order is only gcc's TIEBREAK,
     so the axis was the live-range shape all along, and splitting the name
     is what changes that.
-  Residue, 98 differences and all of it allocation: the switch's `2`
+  * and the p[0x21] bump written as a CHAINED assignment,
+    `c = (p[0x21] = p[0x21] + 6);` rather than two statements. 98 -> 94, and
+    it is ordinary C -- the permuter found it, and the same shape is already
+    in WORKFLOW for func_8002FB78.
+  Residue, 94 differences and all of it allocation: the switch's `2`
   constant lands in $a1 rather than $a0, the 0x2000030 mask in $a0 rather
   than $v0, and the D_8009B0F4/D_8009B134 %hi/%lo pairs come out
   interleaved where retail emits them one after the other.
