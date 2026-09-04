@@ -6113,3 +6113,47 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   164; a separate name for case 3b's record reads is worth nothing; naming
   the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
   to the top of case 1 is worth nothing.
+
+func_8005E808 -- 251/251, 114 differences, written 2026-09-04. A geometry
+  step: it clamps a magnitude from the caller's record, then walks two
+  8-byte entries and, per entry, dispatches on a tag to one of three
+  distance calculations, keeping the largest result in +0x22.
+  gp=1, at=0, default flags, no addressing work at all.
+  Drafted cold and reached exact length in five passes. What paid, in
+  order, and three of these are corrections a reader would not have made:
+  * TWO NAMES for the abs at the top -- `w = *(s16 *)(p + 0x20); m = w;
+    if (w < 0) m = -m;`. Retail copies into $s0 in the bgez's delay slot,
+    which is only possible with the test on a different register.
+  * a named read of D_8009B074 written BEFORE the `p->0x24 = 0` store, so
+    the lw is hoisted above it and covers its own load delay.
+  * the switch arms written in RETAIL'S ADDRESS ORDER -- 0x80/0x81 first,
+    then case 1, then case 4, with case 4 falling into the shared
+    compare-store and case 1 reaching it by goto. Before this the second
+    call was forty-five instructions out of place; after it, all six calls
+    align within one. Largest single step in the function.
+  * func_8005EBF4 takes FIVE arguments, not four: the fifth is a cursor
+    into the stack array stepping 6, `func_8005EBF4(p, i, j, 0x1E, b[j])`.
+  * the clamp comparison is UNSIGNED, so the value is a `u32`.
+  * SEMANTIC: the second loop compares CONSECUTIVE entries, `b[j-1] -
+    b[j]`, not each against `b[0]`.
+  * SEMANTIC: case 4 multiplies by 6284, not 999 -- the shift chain is
+    sll1/addu/sll4/addu/sll3/addu/sll2/subu/sll2, and 6284 is 2*pi*1000 --
+    and its final divide is an UNSIGNED `/ 4096000`: the same magic
+    0x10624DD3 with `srl 18` where the signed `/1000` uses `sra 6`.
+  * case 4's min is written against the SYMBOL, `D_800F5768 + 0x10`, not
+    against the loop cursor -- through the cursor gcc builds a second
+    biased giv. And it is an unconditional assignment followed by a
+    conditional one, not a ternary: the ternary is +9.
+  * separate names for two values that were sharing one: the D_8009B074
+    pointer against the D_800F5768 cursor, and the prologue's raw field
+    read against case 4's accumulator. 121 -> 114.
+  Residue: the callee-saved allocation is rotated. Retail has $s4 = the
+  parameter, $s5 = the +2 cursor, $s6 = the table cursor, $s7 = the outer
+  counter, $fp = the record cursor, $s0 = the clamped magnitude; ours has
+  the parameter in $s7 and everything else shifted behind it.
+  Measured and dead: THREE declaration orders built to match retail's
+  register order exactly, all 251/251 and 114 -- declaration order is only
+  gcc's tiebreak, so identical scores mean the axis is live-range shape;
+  making the 0x80 arm's sum and difference one variable with `(s16)` casts
+  is +3 and 199, and without the casts 116; the abs in case 4 as a ternary
+  is +9; naming case 4's product before the divide is identical.
