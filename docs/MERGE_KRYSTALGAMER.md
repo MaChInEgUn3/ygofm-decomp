@@ -170,3 +170,42 @@ probe harness is `tmp/port/probe.py` in the clone: it imports his own
 `audit_unchiga_candidates.compile_candidate` and `link_candidate`, so a
 candidate is measured through *his* compiler, *his* maspsx and *his* linker,
 and it sweeps every profile plus synthetic ones in about a minute.
+
+
+## The portable gap is 94, not 166 -- and the first one measured does not port
+
+Two corrections to the numbers above, both from actually working the list.
+
+**65 of the gap functions are ASSEMBLY DEBT and cannot be offered at all.**
+Filtering our `src/func_*.c` for `asm`/`__asm__` outside comments against his
+`unmatched_asm` set: of 159 (it was 166; he has matched seven himself since),
+**94 are pure C and 65 are transcriptions**. His `audit_unchiga_candidates.py`
+raises `AuditError("preprocessed candidate contains asm")` and his
+copilot-instructions require pure C, so those 65 are correctly unofferable --
+they are our debt, not his gap. func_8005C5D4 was the smallest of them and is
+Unchiga's transcription with three `__asm__` blocks. **Run this filter first
+every time**; the raw gap number is meaningless without it.
+
+**And the smallest pure one, func_80013B04, reaches exact length and stops.**
+25/25 words under `gcc_2_8_1_g8_split`, 11 differing, all of them in the first
+twelve instructions -- instructions 13 through 25 are byte-identical. The
+target preserves *both* arguments in `$a2`/`$a3` before the condition and fills
+the `beqz` delay slot with `lui $a1,0x10`, the first half of the 0x100010
+constant; his gcc sinks the `arg1` copy into that delay slot instead and
+materialises the constant afterwards. Same instructions, different placement.
+Six spellings -- the `do { } while (0)` constant pin at three positions, the
+sum written as one expression, and named locals for one or both arguments --
+all score 11 or worse, which is the wrong-axis tell.
+
+**The part that matters: our tree matches this function with cc1psx at default
+flags and no source tricks whatsoever.** `src/func_80013B04.c` is plain C with
+no guards and no `PER_FUNC_AS_FLAGS` line. So the difference is between the two
+2.8.1 builds -- Sony's `CC1PSX.EXE` and his from-source `mips-sony-psx-gcc` --
+in where the delay-slot filler takes its instruction from. That is the first
+hard evidence that **some of the 94 will not port at any source spelling**, and
+it bounds the whole exercise: the compiler difference recorded further up this
+file as "a mechanical translation rule" is only mechanical for the addressing
+half. Candidate and full evidence are preserved in his tree at
+`tmp/port/rotated/func_80013B04.{c,diff,notes}`; nothing was written to his
+ledger, because his external history for that address is already terminal at
+`deferred` and `post_terminal_resolution` is only for an exact result.
