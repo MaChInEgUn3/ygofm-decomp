@@ -95,3 +95,30 @@ itself:
 
 When one is rewritten, delete the marker comment with the asm — the count
 above is the progress meter, and it should only ever go down.
+
+
+## Two counts, two questions -- do not mix them
+
+`asm_debt.py` answers "how many functions are transcriptions rather than
+decompilations", and its answer is **76**. That is the honest-progress number
+and it is the one this file's headline uses.
+
+It is **not** the number that decides what can be offered upstream, and reading
+it as though it were cost a wrong figure in a pull-request comment on
+2026-09-04. krystalgamer's external-candidate harness
+(`tools/project/audit_unchiga_candidates.py`) rejects on
+
+    ASM_PATTERN = re.compile(r"\b(?:asm|__asm|__asm__)\b")
+
+applied to the **preprocessed** candidate, so anything carrying that token is
+refused -- a register pin (`register s32 v1 asm("v1")`), an empty scheduling
+barrier (`asm volatile("" :: "r"(v))`), and a GTE macro that expands to one,
+none of which are transcription. By that criterion **155** of our 1089 files
+are unofferable, twice the debt count.
+
+So: 76 is what we owe ourselves, 155 is what we cannot hand over. A crude
+`grep -c asm` answers the second question and gets mistaken for the first,
+which is exactly the miscount this tool's own docstring was written to prevent
+-- committed twice already, and now a third time from the other direction.
+Quote the tool for debt and the pattern for portability, and say which you
+mean.
