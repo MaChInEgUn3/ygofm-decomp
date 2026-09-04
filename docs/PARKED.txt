@@ -6999,3 +6999,33 @@ func_800482B0, follow-up 5 (2026-09-04) -- the remaining four census opcodes
     WORKFLOW already says to rerun it from an improved base; the concrete
     cost of not doing so is now measured. Restart the permuter every time
     the installed candidate improves.
+
+# ---
+func_800482B0, follow-up 6 (2026-09-04) -- -1 to 234/234 with an EMPTY
+    census and alignment 224/234. Two edits.
+      1. THE CALL IS WRITTEN IN BOTH ARMS, not once behind a shared label.
+         Retail's `andi $a0,$s4,0xFFFF` and `sll $a2,$fp,16` sit in the
+         DELAY SLOTS of the two branches into the play block -- that is
+         duplicated argument setup, func_80030998's shape, and it is why
+         the census carried `nop +2` beside `andi -1` and `sll -1`. The
+         earlier diagnosis in follow-up 5 ("gcc hoists arg0 & 0xFFFF out of
+         the loop as an invariant") was WRONG: the hoist is real but it is
+         a consequence, not the fault. With `found_a:` and `found_b:` each
+         carrying their own copy of the call and return, gcc cross-jumps
+         the shared tail and fills both slots. -1 and four opcodes to
+         234/234 and two.
+         Keeping the shared `play:` label and merely adding a second
+         `goto play;` is unchanged, so it is the duplication that matters,
+         not the branch structure.
+      2. The two remaining opcodes were the `srl`/`sra` swap, and on this
+         base `u32 hi = (u32)(arg4 & 0xF0) >> 4;` finally closes it --
+         census EMPTY. It had been measured twice before and called
+         "lateral" both times, on bases that were -6 and -1; this is the
+         third instance today of a spelling that only becomes right once
+         the faults around it are gone.
+    REMAINING: 192 positional differences, ALL of them the prologue's
+    parameter-to-register assignment. Retail puts arg1 in `$fp`, arg0 in
+    `$t0` and then `$s4`, arg4 in `$a1` reloaded from the incoming area,
+    arg5 in `$s7`; we put arg0 in `$fp`, arg4 in `$s6`, arg5 in `$s5`, and
+    every register downstream follows. Pure allocation -- the permuter's
+    class, restarted from this base.
