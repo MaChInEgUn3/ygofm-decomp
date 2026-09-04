@@ -20,7 +20,7 @@ s32 func_8005AE68(s32 arg0, s32 arg1, s32 arg2) {
     Hsv hsv;
     Rgb3 rgb;
     u32 c;
-    s32 lim;
+    u8 lim;
     s32 f;
     s32 h;
     u8 m;

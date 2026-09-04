@@ -6552,3 +6552,46 @@ func_800528AC, follow-up 2026-09-04 -- 249 to 125 on a COUPLED PAIR the
     MEASURED AND DEAD on the new base: nothing yet -- the residue has not
     been re-read since the drop, and every entry in the old "measured and
     dead" list above was compiled against the 249 base and must be re-tried.
+
+# ---
+func_8005AE68, follow-up 2026-09-04 -- 22 to 21 and the census from four
+    opcodes to two, on ONE declaration. `lim` was `s32` and holds only
+    0x1F, used as `lim - rgb.x` which promotes to int, so narrowing it is
+    free. As `s32` the base emitted a VARIABLE shift (`srav`) where retail
+    has a constant `sra`; `u8 lim` removes that pair from the census
+    entirely. `char` and `s8` score identically -- under
+    `-D__CHAR_UNSIGNED__` all three are the same value here -- so `u8` goes
+    in as the honest spelling. The permuter found it as `char lim`, and the
+    scorer flagged it only because the census is now a ranking key: on the
+    old (length, differences) ordering this row read as 22 -> 26 and would
+    have been discarded.
+    REMAINING at 21: retail keeps `andi $s1,$s0,7` and then
+    `andi $s0,$s1,255`, i.e. the redundant second mask survives, where gcc
+    combines the two (7 & 255 == 7) into one and we emit a plain
+    `addu $s0,$s1,$zero` copy. MEASURED AND DEAD, all 21: `m = h;
+    m = m & 0xFF;`, `m = h; m &= 0xFF;`, `m = h;` alone, and
+    `m = arg1 & 7; m = m & 0xFF;`. The one-name-across-two-statements
+    fold-blocker does not reach this one. The rest is a prologue rotation --
+    retail holds the parameter in `$s3` and we use `$s5`.
+
+# ---
+func_80072A48, follow-up 2026-09-04 -- a permuter output that reaches an
+    EMPTY census and is still wrong, verified against the listing rather
+    than assumed. output-1365-2 scores len0/cen0/100 against the base's
+    len0/cen2/73 and its whole gain is moving `off += 0xC;` INSIDE the
+    `if (id != 0 && func_80070920(...) == 0)` block, so the record cursor
+    would only advance when the test passes.
+    The listing settles it: `addiu $s5, $s5, 0xC` at 80072D08 sits in the
+    DELAY SLOT of the loop-back `bnez $v0, .L80072C1C` at 80072D04, and
+    `.L80072CF8` -- the label every early-out inside the body jumps to --
+    is at 634F8, BEFORE that branch. A delay slot executes whether or not
+    its branch is taken, so every path through the body reaches the
+    increment. Retail advances unconditionally; the edit is a real
+    behaviour change.
+    Its four LEGITIMATE edits decompose to exactly nothing, all 222/222 and
+    73: `off = func_8007058C(); k = off;`, a named `nv2 = i + 0xB; n = nv2;`,
+    a named `np = e + 4;` for the store, and a `do { } while (0);` round the
+    four statements the permuter had duplicated into identical arms.
+    So an empty census is not a correctness check either -- it says the
+    opcode MULTISET matches, and a cursor that advances on the wrong path
+    executes the same opcodes.
