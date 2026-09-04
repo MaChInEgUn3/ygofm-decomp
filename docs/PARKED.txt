@@ -7315,3 +7315,29 @@ func_80031874, follow-up 3 -- the side byte's type is measured three ways
     local that does not need to exist rather than for a wider declaration.
     REMAINING at +1, 249/280, 242 differences: `nop +6, sh -4, andi +3,
     lui -3, addu -2, sw +2` and five smaller.
+
+# ---
+func_80031874, follow-up 4 -- +1 to 280/280, differences 242 to 238, on
+    deleting one local. `a3 = sp10[0x2D45];` was written IDENTICALLY in both
+    arms of the `s6 == 0` branch; retail reads that byte once, at the call
+    site (`lbu $a3,0x2D45($t3)` off the sp10 pointer reloaded from the
+    frame). Deleting the local and writing the read inline in the
+    func_80031784 call reaches exact length. Assigning it once after the
+    if/else, or once immediately before the call, score IDENTICALLY, so the
+    lever is having no local rather than where it sits.
+    Note this was installed over a candidate one point BETTER on alignment
+    (248 against 249). At equal census-opcode count the committed ranking
+    puts alignment before differences, but a one-point alignment gap is
+    noise at 280 instructions against exact length and four fewer
+    differences, and the source is also plainly better -- a duplicated
+    assignment in two arms of one `if` is redundancy, not a lever.
+    THE EXTRA FRAME SLOT IS STILL THERE and is now located exactly. Stack
+    maps: retail occupies sp+16, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60;
+    we occupy those AND sp+20. So one 4-byte local too many, which is the
+    census's `sw +2`.
+    MEASURED AND DEAD -- none of these frees sp+20, and all three are worse:
+    reading the `+0x5AC4` byte inline at both its uses instead of through
+    `t` (+1, 247, 241); dropping the `p30`/`p32` position locals (-1, 246,
+    261); and dropping `v`, the `arg0 + 4` word (+3, 247, 245).
+    REMAINING at 280/280, 248/280, 238 differences: `nop +5, sh -4, andi +3,
+    lui -3, addu -2, sw +2` and five smaller.

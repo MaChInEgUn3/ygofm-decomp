@@ -15,7 +15,6 @@ void func_80031874(u8 *arg0, s32 arg1) {
     s32 v;
     u16 fp;
     u8 s6;
-    u8 a3;
     u8 t;
     s32 s2;
 
@@ -42,16 +41,14 @@ void func_80031874(u8 *arg0, s32 arg1) {
     if (s6 == 0) {
         *(s16 *)(h + 4) = x + 0x88;
         *(s16 *)(h + 6) = y + 0xF;
-        a3 = sp10[0x2D45];
         pal = D_80090DD8;
     } else {
         *(s16 *)(h + 4) = x + 0x6A;
         *(s16 *)(h + 6) = y + 0xF;
-        a3 = sp10[0x2D45];
         pal = D_80090DD8 + s6 * 0x10;
     }
     s5 = 0;
-    func_80031784(h, arg1, pal, a3);
+    func_80031784(h, arg1, pal, sp10[0x2D45]);
     fp = 0x2B;
     q += 8;
     do {
