@@ -1730,6 +1730,20 @@ what proves the uninitialised read is the whole lever rather than a passenger.
 So: decompose these too, and write down the mechanism even when no legitimate
 spelling of it has been found.
 
+**And an unusable permuter output can still name a lever that beats its own
+score -- twice in one session.** The rule above is about rejecting a bad
+candidate; this is the other half. On func_80032370 the best output scored 7
+against a base of 17 and is an uninitialised read: it deletes `r = t;`, walks
+`r` while dereferencing `t`, and wraps the stale comparison as
+`new_var = r != w;`. What it was *doing* is dropping the separate read cursor
+and walking `t` itself, which is ordinary C and semantically identical because
+`t` is dead after the loop. Written honestly that is **3**, not 7. On
+func_8004A8E4 the best output scored 12 by making three edits at once, and
+dropping the one that is worth nothing alone gives **11**. So the routine is:
+score the outputs, read the diff of the best, and then write what it was
+reaching for -- the permuter optimises a weighted diff and will happily reach
+a mechanism by an illegal route, or carry a passenger to get there.
+
 **Read what the permuter actually changed before believing its score.**
 One genuine instance: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
 out of a copy loop and read `*new_var` inside, so every iteration copies the

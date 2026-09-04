@@ -7549,3 +7549,26 @@ func_80024D34 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_80024D34.c
   `q` earlier in the function is 13.
   So the function needed FOUR names (b, g, t, q) where the natural spelling has
   none, and no subset of them is better than the transcription it replaces.
+
+func_80032370 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_80032370.c
+  is real C and the build hashes 84747e64. Recovered from git at 18 differences,
+  taken to 17 by hand, and closed by TWO edits found by reading a permuter
+  output rather than installing it.
+  The permuter's best output scored 7 and is NOT installable: it deletes
+  `r = t;`, reads `*t` in the loop while advancing `r`, and wraps the stale
+  comparison as `new_var = r != w;` -- an uninitialised read, the commonest of
+  the three reject shapes. What it was really doing is dropping the separate
+  read cursor and walking `t` itself, which is ordinary C and semantically
+  identical because `t` is dead after the loop. Written honestly that is
+  17 -> 3, i.e. **better than the permuter's own 7**, which is the second time
+  today that reading a candidate beat its score (func_8004A8E4 was the first).
+  The last three were the two pointers' derivation order. gcc folded -0x56C
+  into the relocation and derived the table from the byte map
+  (`%lo(D_801D07BC+-1388)` then `addiu +1388`); retail forms the table from the
+  symbol and derives the map from it. `s16 *t = (s16 *)D_801D07BC;` followed by
+  `u8 *m = (u8 *)t - 0x56C;` is a MATCH, and so are two other spellings of the
+  same derivation, so it is the direction that matters and not the form.
+  Everything measured before that is in the file's own history: six spellings of
+  declaration order and the `do { } while (0);` pin, all 17 or 18, which makes
+  this function a counterexample to the rotated-register rule as well as a
+  retirement.
