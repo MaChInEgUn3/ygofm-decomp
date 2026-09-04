@@ -6114,7 +6114,7 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
   to the top of case 1 is worth nothing.
 
-func_8005E808 -- 251/251, 114 differences, written 2026-09-04. A geometry
+func_8005E808 -- 251/251, 97 differences, written 2026-09-04. A geometry
   step: it clamps a magnitude from the caller's record, then walks two
   8-byte entries and, per entry, dispatches on a tag to one of three
   distance calculations, keeping the largest result in +0x22.
@@ -6157,3 +6157,11 @@ func_8005E808 -- 251/251, 114 differences, written 2026-09-04. A geometry
   making the 0x80 arm's sum and difference one variable with `(s16)` casts
   is +3 and 199, and without the casts 116; the abs in case 4 as a ternary
   is +9; naming case 4's product before the divide is identical.
+
+  Same day, from its own permuter: 114 -> 97 on a LOCAL ALIAS FOR THE
+  PARAMETER. `e = p;` as the first statement, with every reference going
+  through `e` except the single `p[0x26] = 1;` store. That is
+  func_8003BF00's lever -- a parameter copy only survives when the uses are
+  split, and routing everything through the alias coalesces it away again.
+  Which reference stays behind is not derivable; the permuter found it.
+  Installed from the readable source, not the permuter's formatting.
