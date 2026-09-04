@@ -1962,6 +1962,30 @@ func_8003A198_WAS -- 3 differences, 21/21, instruction-for-instruction identical
     which saturated at 3 in ~4 minutes. Discriminator not established.
     sweep_try.py run 2026-08-10: best is 3, reached at both the defaults and
     -O1 -G0. No flag combination helps.
+    2026-09-04, ASSEMBLY DEBT: the candidate above was RECOVERED from git and
+    restored to parked/func_8003A198.c. It had been deleted by the Unchiga
+    merge, which replaced it in src/ with a TRANSCRIPTION -- two
+    `__asm__("addu %0, %1, %2")` blocks plus two `register ... asm()` pins. So
+    the trade the port made here is explicit: a matching transcription in
+    exchange for losing pure C that was three register names away. Re-measured
+    today at 3, unchanged.
+    Four fresh shapes tried before the recovery, all pure C, all 21/21:
+      - the whole walk on ONE cursor with the sum as one expression: 8
+      - the same with the cursor reused into the arg1 parameter: 8
+      - nested `if`s on one cursor: 8
+      - a named scaled index per stage: 11
+    So an unaided re-derivation lands at 8 and the recovered candidate is 3;
+    the two levers in it are not rediscoverable by inspection, which is the
+    argument for reading the park before writing anything.
+    Three more measured on the recovered base, all new:
+      - a THIRD load variable so block 2 stops loading over its own input,
+        which is the one visible asymmetry against block 3: 3, no change
+      - the same with the `p = (e = arg0 + v)` hint dropped: 11, so the hint
+        is doing all the work and the asymmetry is a red herring
+      - the hint moved to block 3 instead of block 2: 12
+    Block 3 is byte-identical to retail and block 2 is not, from sources that
+    differ only in that hint -- so the question is why the same shape allocates
+    differently in the two blocks, not what block 2 is missing.
 
 func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes,
     RESOLVED -- src/func_8003CEB8.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
