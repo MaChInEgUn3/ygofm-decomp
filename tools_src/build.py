@@ -537,6 +537,10 @@ PER_FUNC_AS_FLAGS["func_80024734"] = "-G0"
 # applies: the scalar declaration with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_80045F3C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800482B0"] = "-G0"
+# Parked too. Five one- and two-byte symbols want the bare form through $at
+# while the one-byte D_8009B1D5 keeps %gp_rel, and no real -G separates them,
+# so each bare-wanting symbol is declared [8] and the assembler runs at -G4.
+PER_FUNC_AS_FLAGS["func_80023144"] = "-G4"
 # D_800EAE88 sized to eight so it comes out bare; 8 > 4 takes it out of small
 # data while the four-byte D_8009B1C8 beside it stays gp-relative.
 PER_FUNC_AS_FLAGS["func_800279BC"] = "-G4"
