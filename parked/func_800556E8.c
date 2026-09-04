@@ -66,7 +66,20 @@ void func_800556E8(s32 idx) {
                         goto tail;
                     }
                 } else if (*(u16 *)(p + 0xE06) != 0) {
-                    goto tail;
+                    /* PLACEHOLDER, not source. `p` is never null, so both
+                     * arms are the same and this is semantically a no-op --
+                     * but it stops gcc cross-jumping this path with the one
+                     * above, which is the four instructions retail has and we
+                     * did not. The permuter found it; a plausible spelling
+                     * with the same effect has NOT been found. Retail
+                     * duplicates the `idx < 2` test three times around here,
+                     * so the real source shape is probably a different
+                     * nesting of the two guards, not a wrapper. */
+                    if (p) {
+                        goto tail;
+                    } else {
+                        goto tail;
+                    }
                 }
                 n = 6;
                 if (p[0xDC7] == n) {

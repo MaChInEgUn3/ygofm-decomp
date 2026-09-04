@@ -5785,8 +5785,8 @@ func_80027228 -- 11 differences at equal length (184/184), written 2026-09-03.
   the %hi of D_800EAE88 landing in $a3 where retail keeps it in $s0. A second
   permuter run from the 11 base saturated (10941 iterations, no output).
 
-func_800556E8 -- 187/187 reachable, best exact-length candidate 134 (all-volatile
-  E06) and the installed f2 at -4/149, written 2026-09-03. The card-window
+func_800556E8 -- 187/187 and 97 differences, written 2026-09-03,
+  improved 2026-09-04. The card-window
   scroll step: the E06 field is reloaded after its own store (a volatile read
   on that one site is right; volatile everywhere costs an `andi` per read), the
   sel==6 condition is `||` of two `&&` with the call reached by `goto`, and the
@@ -5801,6 +5801,20 @@ func_800556E8 -- 187/187 reachable, best exact-length candidate 134 (all-volatil
   `.L80055950`, a SECOND entry point inside the shared tail, past the tail's
   own `lbu 0xE16` because that arm already loaded it. A plausible spelling
   for that duplication has not been found; the permuter's is a no-op guard.
+  2026-09-04: -4 and 136 -> exact length and 97, from the permuter-output
+  harvest. The change is `if (p) { goto tail; } else { goto tail; }` on the
+  SECOND of the two paths that reach the tail. `p` is never null so both arms
+  are identical and it is semantically a no-op, but it stops gcc cross-jumping
+  that path with the one above, and those are the four instructions retail has
+  and we did not. It is INSTALLED AS A MARKED PLACEHOLDER with a comment
+  saying so; no plausible source spelling with the same effect has been found.
+  The lead for whoever picks this up: retail duplicates the `idx < 2` test
+  three times around this block, so the real shape is probably a different
+  nesting of the two guards rather than a wrapper on one goto.
+  Also confirmed already installed and NOT a new finding: the harvest's other
+  change on this function, `z = p[0xDC7] == n; if (z)`, was in the candidate
+  already -- decomposing the output is what showed that, and installing it
+  wholesale would have read as two wins where there is one.
 
 func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   message dispatcher (status 0x80/0x90/0xB0/0xC0/0xE0). gp=0, scalar
