@@ -7625,3 +7625,20 @@ func_80015DFC
     residue is a delay-slot fill choice at the join before the func_80016784
     call, and seven spellings of the join score identically. src/ keeps the
     transcription. Full notes in the candidate's header.
+
+func_800177C4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_800177C4.c is
+  real C through the gte_* macros and the build hashes 84747e64; the
+  transcription's raw lwc2/rtps/swc2, three register pins and two raw-asm
+  address materialisations are gone. Needs -fno-strength-reduce (now in
+  PER_FUNC_FLAGS): without it gcc gives the output cursor a SECOND induction
+  variable biased +2 for the `dst + 2` stores, +2 instructions, where retail
+  walks one cursor with displacements 0 and 2 -- the func_800722CC shape, its
+  fourth user. Then: the RTPS result pointer named once before the loop (the
+  loop otherwise re-forms &r per iteration, 5 -> 2 under the flag), and
+  `i = 0;` written ABOVE `pr = &r;` so the preheader comes out in retail's
+  order (2 -> MATCH; the func_8005611C rule). The levers from func_80015DFC
+  carried over unchanged: the two-halfword struct for the GTE result and the
+  D_8009B1D5 read named right after the y read (+1 without it).
+  The transcription's own notes claimed its raw-asm address materialisation
+  and register pins were the only way to reach the bytes; plain C plus one
+  documented flag reaches them.

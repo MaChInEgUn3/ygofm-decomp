@@ -895,6 +895,11 @@ extern u8 D_80177EA4[];
 extern u8 D_801A7E20[];
 extern u8 D_8015C424[];
 extern s16 D_800908A0[];
+/* Read once with lh through cc1psx's own %hi/%lo pair (func_800177C4,
+ * func_8001B0CC), so unsized: the aggregate form is what the listing has. */
+extern s16 D_800F2856[];
+/* Thirty {x, y} halfword pairs, filled by func_800177C4's RTPS loop. */
+extern s16 D_800EA070[];
 extern s8 D_8015C410[];
 extern u8 D_801A7AD8[];
 /* D_801A7AD8 + 0x8C, i.e. record 5 of the same 28-byte table, under its own

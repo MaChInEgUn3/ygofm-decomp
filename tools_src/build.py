@@ -337,7 +337,9 @@ PORTED_FLAGS = {
     "func_800137E4": ["-quiet", "-O2", "-G0", "-mno-split-addresses"],
     "func_80015D18": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80015DFC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_800177C4": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
+    # func_800177C4: a second giv on the output cursor (dst and dst+2) without it;
+    # retail walks one cursor with plain displacements.
+    "func_800177C4": _O2_G8_NOSTRENGTH,
     "func_800178BC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80018608": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001898C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
