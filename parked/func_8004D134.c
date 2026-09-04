@@ -70,7 +70,8 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
                 u = e + o2;
                 x = *(u16 *)u;
                 v = x + big;
-                z = x >> 6;
+                z = x;
+            z = z >> 6;
                 *(u16 *)u = v;
                 if (z >= 0x10) {
                     v = (v & 0x3F) + 0x10;

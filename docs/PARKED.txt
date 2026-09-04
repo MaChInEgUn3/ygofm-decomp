@@ -6193,7 +6193,7 @@ func_8005E808 -- 251/251, 77 differences, written 2026-09-04. A geometry
   split, and routing everything through the alias coalesces it away again.
   Which reference stays behind is not derivable; the permuter found it.
   Installed from the readable source, not the permuter's formatting.
-func_8004D134 -- 280/278 (+2), 70 differences, written 2026-09-04. Walks a
+func_8004D134 -- 280/278 (+2), 69 differences, written 2026-09-04. Walks a
   record array applying a per-format offset table: a switch on *arg1 picks
   four constants, then a loop does halfword bit surgery at two of them and
   keeps a running MAXIMUM over a format-dependent set of halfword fields.
@@ -6232,8 +6232,10 @@ func_8004D134 -- 280/278 (+2), 70 differences, written 2026-09-04. Walks a
   one shared is identical at 75; and hoisting `i = n;` above the guard --
   which is where retail's `addu $t6,$s1,$zero` sits, in the guard's own
   delay slot -- is +4 and 282 in both loop shapes tried.
+  And 70 -> 69 on `z = x; z = z >> 6;` against one name rather than the
+  single expression -- the one-name-across-two-statements lever again.
 
-func_80029EC4 -- 270/268 (+2), 169 differences, written 2026-09-04. Builds
+func_80029EC4 -- 270/268 (+2), 145 differences, written 2026-09-04. Builds
   GPU packets in the scratchpad: a three-deep loop nest filling the packet
   at 0x1F800320 and calling func_800849F0 per visible entry, then a second
   phase at 0x1F800000 with a four-way switch and four func_80084130 calls.
@@ -6262,3 +6264,9 @@ func_80029EC4 -- 270/268 (+2), 169 differences, written 2026-09-04. Builds
   the same reason.
   Measured and dead: moving the phase-2 base local after the mask (no
   change, 191); naming the `pkt+6` read in the advance block (no change).
+
+  Same day, from its permuter: 169 -> 145 on NAMING the phase-2 x difference
+  into the dead `t` local (the D_8009B09C & 0x7F value, finished by then)
+  rather than storing the expression straight into pkt2+4. The
+  borrowed-dead-local lever, and the largest single step in this function
+  after the arm order.
