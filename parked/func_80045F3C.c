@@ -79,13 +79,13 @@ void func_80045F3C(void) {
             off = 0;
             i = 0;
             do {
-                b = D_8009B45C + off + 0x80;
-                b[0] = s[0];
-                *(Msg30 *)b = *(Msg30 *)s;
+                b = D_8009B45C;
+                b[off + 0x80] = s[0];
+                *(Msg30 *)(D_8009B45C + off + 0x80) = *(Msg30 *)s;
                 off += 0x30;
                 i++;
                 s += 0x30;
-            } while (i < *(s16 *)(D_8009B45C + 0x4C));
+            } while (i < *(s16 *)(b + 0x4C));
         }
     }
 }

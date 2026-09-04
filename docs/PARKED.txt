@@ -6753,3 +6753,41 @@ func_80045F3C, follow-up 2026-09-04 -- +8 and nine census opcodes to
     `s = s + 0x30;`, the bump moved inside the `if`, both orderings of it
     against `off += 0x30;` and `i++;`, and a `b = D_8009B45C + off;` base
     with `+0x80` displacements on both accesses.
+
+# ---
+func_80045F3C, follow-up 2 (2026-09-04) -- installed candidate changed from
+    the 214/214 one to a +1 one, on purpose, and the reason is a sharpening
+    of the ranking rule worth stating on its own.
+    The 214/214 candidate's census is `addu -1, nop +1`: the deltas CANCEL,
+    so its zero is two faults that happen to sum to nothing. The installed
+    candidate is +1 with a census of `nop +1` alone -- the census SUMS to
+    the length error, which means the length error is fully explained by one
+    fault. So the test to apply at the top of the ranking is not just
+    "is the length zero" but **does the census sum to the length error**.
+    Sum equals the error: one fault, and you know what it is. Sum is
+    smaller in absolute value than the deltas present (i.e. they cancel):
+    two or more faults, and a zero there is false. This is the same trap as
+    the +12 switch reading above, one level up -- there the sum EXPLAINED a
+    non-zero length and the candidate was right; here the sum FAILS to
+    explain a zero length and the candidate is worse.
+    The edit that got there: read the base into `b` at the top of the loop
+    body and write the loop's own test through `b`
+    (`} while (i < *(s16 *)(b + 0x4C));`), leaving the struct copy's
+    destination as an inline symbol reference. That restores retail's second
+    `addu` without adding a third reload per iteration.
+    REMAINING: one `nop`. Retail fills the pre-loop reload's load-delay slot
+    with `s += 0x30;` -- `lui`/`lw`/`addiu $s0,$s0,48`/`lh $v0,76($v1)` --
+    and gcc sinks ours into the loop preheader instead, leaving the slot
+    empty. Retail's byte store then reuses that same reload's register
+    (`addu $v1,$v1,$a1`), so the guard read and the body's `sb` share one
+    symbol load.
+    MEASURED AND DEAD for the bump, ALL of them +1 with the identical
+    one-opcode census, which is the wrong-axis tell: `do { s += 0x30; }
+    while (0);`, `s = &s[0x30];`, `s = s + 0x30;`, the bump moved above the
+    `func_80045514()` call, moved above the 0x4C decrement, moved inside the
+    `if`, and a named `n = *(s16 *)(D_8009B45C + 0x4C);` guard local with
+    the bump both before and after it.
+    ALSO DEAD: assigning the base at the END of the loop body so it carries
+    across the back edge (+2, `addu +1`), with or without the bump moved;
+    and hoisting the base above the guard so the guard tests `b` too (-1,
+    one reload short).
