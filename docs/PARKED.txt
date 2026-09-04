@@ -7267,3 +7267,30 @@ func_80031874, follow-up 2026-09-04 -- census 17 opcodes to 14, alignment
     REMAINING at -4: `sll -4` is the new lead -- retail has seven shifts and
     we have three, so four scalings are being folded away. Then
     `addu -5, nop +5, andi +3, lui -3`.
+
+# ---
+func_80031874, RETRACTION 2026-09-04. The entry two above says "m2c got a
+    third stride wrong" and that it "rendered `D_8009B2FC + s6 * 4 + 4` as
+    `D_8009B2FC + (s6 * 0x2D4C + 4)`, inventing a 0x2D4C structure from what
+    the listing plainly shows as `sll $v0,$v0,2`". THAT IS WRONG. m2c was
+    right and I misread the listing.
+    The scaling is a MULTIPLY-BY-CONSTANT EXPANSION, nine instructions long,
+    and I read only its last step: `sll $s6,3` / `addu $s6` (x9) /
+    `sll 4` (x144) / `addu $s6` (x145) / `sll 2` + `addu` (x725) /
+    `sll 2` (x2900) / `subu $s6` (x2899) / `sll 2` = **0x2D4C**. The
+    `sll $v0,$v0,2` I quoted is the final doubling of that chain, not the
+    whole index. Writing `s6 * 0x2D4C + 4` is what closes the `sll -4`
+    entry: census 14 opcodes to 12, alignment 236/280 to 249/280,
+    differences 252 to 242.
+    THE LESSON IS SPECIFIC AND WORTH KEEPING. A shift immediately before the
+    `addu` that forms an address is NOT necessarily the whole scale factor.
+    When m2c reports a large odd stride, look for a run of
+    `sll`/`addu`/`subu` on ONE register and evaluate the whole chain before
+    contradicting it -- a large constant that is not a power of two is
+    expanded, not multiplied, and the expansion looks exactly like ordinary
+    index arithmetic if you read only its tail. The other two m2c stride
+    corrections today (func_800482B0's 0x40C table and this function's
+    stride-one `+0x606A` reads) were checked against `addu $v0,$v0,$s2`
+    with no shift at all and stand.
+    REMAINING at +1: `nop +6, sh -4, andi +3, lui -3, addu -2, sw +2` and
+    five smaller entries.
