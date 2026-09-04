@@ -2444,6 +2444,30 @@ so every branch reads as a difference at a constant offset (`j L3` against
 differ by a constant label offset, that is the renderer, not the code.
 
 
+**try_func costs FOUR SECONDS, not forty, and it parallelises -- so sweep by
+the handful, not one at a time.** Measured on 2026-09-04: a cold candidate
+(content changed, so no cache hit) is 4.2s; three cold candidates started
+together finish in 6.0s against 12.6s serial, on a box whose four permuters
+are already using half of its eight cores. A repeat of an unchanged candidate
+is 0.1s, because there is a cache -- which is why an accidental re-measurement
+looks instant and a real one does not.
+
+This matters because the cost of a measurement decides the *shape* of the
+work. Believing it was forty seconds, I was testing two or three spellings of
+a lever and then reasoning about the rest; at four seconds the right move is
+to write eight and measure them in one command:
+
+    ( for v in v1 v2 v3 v4 v5 v6 v7 v8; do
+        .venv/bin/python tools_src/try_func.py <func> $SP/$v.c > $SP/r_$v.txt 2>&1 &
+      done; wait )
+
+Each run gets its own `build/scratch/tryNNNNNN`, so they do not collide. Eight
+variants against func_8005EBF4's remaining giv came back in about fifteen
+seconds, six of them tied and two worse -- which is the wrong-axis tell, and it
+is worth far more as a *complete* negative than as three inconclusive probes.
+The sweep tools in `tools_src/` already work this way; hand measurement had not
+caught up.
+
 **A tool's answer only counts if it measured what you think.** Nine bugs in
 this project were tools reporting confidently on something they had not
 measured — a
