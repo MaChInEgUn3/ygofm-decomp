@@ -7572,3 +7572,17 @@ func_80032370 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_80032370.c
   declaration order and the `do { } while (0);` pin, all 17 or 18, which makes
   this function a counterexample to the rotated-register rule as well as a
   retirement.
+
+func_8002ABB4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED, FIRST TRY. src/
+  func_8002ABB4.c is real C and the build hashes 84747e64. Recovered from git at
+  22 differences over 60/60 and closed by naming TWO reads from arg0 one
+  statement earlier than their stores:
+      b = *(s32 *)(arg0 + 0x18);   before   *(u16 *)(p + 0x60) = 0x100;
+      c = *(s32 *)(arg0 + 0x44);   before   *(s32 *)(p + 0xC) = 0;
+  The residue read straight off the columns: retail issues each of those loads
+  BEFORE the unrelated store that precedes its own, and holds the value across
+  it; written inline the load sinks to just above its store. That is WORKFLOW's
+  "a group of loads batched before a group of stores has to come from the
+  source" rule, applied twice. Naming the first read (arg0 + 0x48) as well is
+  also a MATCH, so it is not load-bearing; naming all three as initialisers at
+  the top is -1, because the batch then crosses the 0x100 store.
