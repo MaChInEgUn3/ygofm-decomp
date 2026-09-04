@@ -6104,7 +6104,11 @@ func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
   * and the D_8009B0F4/D_8009B134 guard assigned to the dead SWITCH
     SELECTOR before the test -- `st = (...) != 0; if (st)`. 94 -> 93, from
     the permuter; the borrowed-dead-local lever again.
-  Residue, 93 differences and all of it allocation: the switch's `2`
+  * case 3b's record pointer COPIED into the dead `q` name, and its sibling
+    slot read through the SYMBOL rather than the base local -- 93 -> 91.
+    From the permuter, whose own output scored 92; the readable spelling of
+    the same two changes is one better.
+  Residue, 91 differences and all of it allocation: the switch's `2`
   constant lands in $a1 rather than $a0, the 0x2000030 mask in $a0 rather
   than $v0, and the D_8009B0F4/D_8009B134 %hi/%lo pairs come out
   interleaved where retail emits them one after the other.
@@ -6160,6 +6164,13 @@ func_8005E808 -- 251/251, 97 differences, written 2026-09-04. A geometry
   making the 0x80 arm's sum and difference one variable with `(s16)` casts
   is +3 and 199, and without the casts 116; the abs in case 4 as a ternary
   is +9; naming case 4's product before the divide is identical.
+  Permuter negative worth keeping: its best output re-scores at 86 against
+  97 and is NOT installable -- it reads the first record through the fixed
+  parameter alias where the loop walks a cursor stepping 8, so the two agree
+  only on the first of the two iterations. Retail reads `0($fp)`, the
+  cursor. The other half of that output, an unsigned intermediate for the
+  masked tag, was measured alone at 97 -- exactly the base. So the entire
+  gain was the wrong substitution.
 
   Same day, from its own permuter: 114 -> 97 on a LOCAL ALIAS FOR THE
   PARAMETER. `e = p;` as the first statement, with every reference going
