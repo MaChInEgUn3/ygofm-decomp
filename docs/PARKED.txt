@@ -5939,6 +5939,14 @@ func_80072A48 -- 222/222, 95 differences, written 2026-09-04. The AI's
   register for two values twice (the D_800F5B98 base then the entry index,
   and the slot count then the D_800F5BE8 base), which may or may not be name
   reuse in the source; the permuter is running on it.
+  **95 -> 81 from the permuter, and the spelling is open.** Its edit is
+  `if (i) { A } else { A }` round the second loop's first score-update
+  block, with both arms identical -- a no-op that duplicates the block and
+  changes how gcc cross-jumps it. `do { A } while (0);` round the same
+  block is worth exactly nothing (95), so the lever is the duplication and
+  not the loop node, which is the opposite of the D_8009B0F4 family. The
+  placeholder is installed with a comment saying so; a plausible source
+  shape with the same effect has not been found.
 
 func_80022674 -- 223/224 (-1), 81 differences, written 2026-09-04. A three-
   state slide animation on a sprite: state 0 drops it, states 1 and 2 pan it
