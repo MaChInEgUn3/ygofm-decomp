@@ -6218,3 +6218,33 @@ func_8004D134 -- 280/278 (+2), 75 differences, written 2026-09-04. Walks a
   one shared is identical at 75; and hoisting `i = n;` above the guard --
   which is where retail's `addu $t6,$s1,$zero` sits, in the guard's own
   delay slot -- is +4 and 282 in both loop shapes tried.
+
+func_80029EC4 -- 270/268 (+2), 169 differences, written 2026-09-04. Builds
+  GPU packets in the scratchpad: a three-deep loop nest filling the packet
+  at 0x1F800320 and calling func_800849F0 per visible entry, then a second
+  phase at 0x1F800000 with a four-way switch and four func_80084130 calls.
+  gp=0, at=0, default compiler flags. Needs D_8009B09C_IS_AGGREGATE and
+  D_8009B146_IS_AGGREGATE -- with no %gp_rel anywhere in the unit, the
+  default scalar arms would go gp-relative at -G8.
+  THE LOOP NEST WAS RIGHT ON THE FIRST DRAFT: calls 1-4 align at gap 0 and
+  every fault since has been in phase 2. That came from decoding the
+  arithmetic into a note before writing any C -- the constant 178 is both
+  the divisor of (D_8009B148 - 8) and a multiplier, and the second chain is
+  the same 178x+8 applied to 8*(25n), i.e. 1424b+8. All of it is emitted as
+  shift chains, so none of it is readable from the C side.
+  What paid after the draft:
+  * a BASE LOCAL for D_800EA1E8 in phase 2. Retail materialises it once and
+    reads 8($t0)/0xA($t0); against the symbol we get %lo(sym+8) and a second
+    materialisation.
+  * the +0xA difference computed ONCE into a local and stored to BOTH
+    pkt2+0xA and pkt2+6 -- retail has one subu feeding two sh.
+  * the middle loop's two increments in the order `k += 0xA; j++;` rather
+    than the reverse. +3 and 191 to +2 and 169: with j++ written first, gcc
+    emits it ahead of the `lhu 6(pkt)` and leaves a load-delay nop; written
+    second it fills that slot, which is where retail has it.
+  Residue: retail puts case 0's `t * 8` in the switch's branch delay slot
+  and we put the default arm's pointer copy there instead, which costs the
+  two instructions. The `t / 32` divide's own copy is placed differently for
+  the same reason.
+  Measured and dead: moving the phase-2 base local after the mask (no
+  change, 191); naming the `pkt+6` read in the advance block (no change).
