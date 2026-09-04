@@ -6662,8 +6662,9 @@ Permuter-output sweep, 2026-09-04, the remaining four flagged rows. One win
     definitions before measuring it.
 
 # ---
-func_80045F3C -- NEW 2026-09-04, written from scratch, +8 of 214 with a
-    nine-opcode census. Candidate in parked/func_80045F3C.c. NEEDS
+func_80045F3C -- NEW 2026-09-04, written from scratch, 214/214 with a
+    TWO-opcode census (see the follow-up below; this paragraph records the
+    +8 state it started from). Candidate in parked/func_80045F3C.c. NEEDS
     `as -G0` (not yet in build.py's PER_FUNC_AS_FLAGS -- add it when this
     reaches exact length). Step 0: gp=0, at=0, no jump table, so recipe
     branch 1 applies and any -G is free.
@@ -6709,3 +6710,46 @@ func_80045F3C -- NEW 2026-09-04, written from scratch, +8 of 214 with a
     ... two stores ... `v &= 0xFF7F;` and store back), which is +9 to +8 and
     one `nop`, and is func_8003B808's rule.
     Next: the `nop +9` has not been looked at at all.
+
+# ---
+func_80045F3C, follow-up 2026-09-04 -- +8 and nine census opcodes to
+    214/214 and TWO, in one session, on three edits that the census found in
+    the order it named them.
+      1. THE SWITCH. Writing all four case bodies out separately reproduces
+         retail's four-node comparison tree exactly and costs NOTHING in
+         length -- gcc cross-jumps the duplicate bodies back together, which
+         is why the earlier reading ("+12, retail shares the bodies, so this
+         spelling cannot be right") was wrong. The +12 was entirely the two
+         other faults below; its census summed to exactly +12 and that is
+         what should have been read. With shared `case` labels
+         group_case_nodes merges each adjacent pair into a RANGE node and
+         emits range tests: five census opcodes, all of it this.
+      2. THE `nop +9` WAS A STRUCT COPY. Retail copies +0x5C..+0x78 from
+         the event at s+0x10 as a BLOCK MOVE -- four `lw` then four `sw`,
+         twice -- where eight individual `*(s32 *)` assignments each carry
+         their own load-delay `nop`. `Words8` in types.h is exactly eight
+         words: `*(Words8 *)(D_8009B45C + 0x5C) = *(Words8 *)(s + 0x10);`
+         is +12 to +5 and the nop census from +9 to +1. The neighbouring
+         0x50/0x54/0x58 stores really are individual `lw`/`sw` in the
+         listing, so the block starts at 0x5C and not before.
+      3. TWO SYMBOL RELOADS, one per block. The `unk40` arm wants a
+         block-scoped base local covering all four of its accesses (+5 to
+         +3; the `v` read-writeback local is then redundant and three
+         spellings score identically, so the plain compound
+         `*(u16 *)(b + 0x40) = *(u16 *)(b + 0x40) & 0xFF7F;` goes in). The
+         queue-shift loop wants ONE pointer local for both the byte store
+         and the struct copy -- `b = D_8009B45C + off + 0x80; b[0] = s[0];
+         *(Msg30 *)b = *(Msg30 *)s;` -- which is +3 to exact length.
+    REMAINING, and it is a CANCELLING PAIR at exact length, so do not read
+    the zero as clean: `addu -1, nop +1`, 55 differences. Retail computes
+    the shift loop's destination TWICE (`addu $v1,$v1,$a1` for the `sb` off
+    a base carried from the loop test, then `addu $v0,$v0,$a1` off a fresh
+    reload for the copy) and puts `s += 0x30;` in the reload's load-delay
+    slot where we leave a `nop`. Separating the two destination
+    computations brings the `addu` back and costs a third reload per
+    iteration (+3 and `lui +1, lw +1`), so the two are coupled: retail has
+    two reloads per iteration and three `addu`, and no spelling has both.
+    MEASURED AND DEAD, all 214/214 with the same two-opcode census:
+    `s = s + 0x30;`, the bump moved inside the `if`, both orderings of it
+    against `off += 0x30;` and `i++;`, and a `b = D_8009B45C + off;` base
+    with `+0x80` displacements on both accesses.
