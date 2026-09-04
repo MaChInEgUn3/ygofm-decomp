@@ -1184,6 +1184,9 @@ extern u8 D_800E9E18[];
 /* The second function inside the func_8002DD74 listing; splat has not split
  * it yet, so it is only reachable by address. func_8002DF2C passes it as a
  * callback. */
+/* Read as one word through %hi/%lo by func_80029EC4 and passed on as the
+ * second argument of the packet calls. */
+extern s32 D_800E9D9C[];
 extern u8 D_800EA1E8[];
 /* Overlay-region halfwords, defined by config/undefined_syms_auto.txt. */
 extern s16 D_80181002;
