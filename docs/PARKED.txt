@@ -7395,3 +7395,21 @@ func_80031874, follow-up 6 -- census 11 opcodes to 10, alignment 251/280 to
     REMAINING at -2, 253/280, 251 differences: `sh -2` (one store each at
     the `+4` and `+6` offsets, retail 11 and 9 against our 10 and 8),
     `nop +3, lui -3, ori -2` and six smaller.
+
+# ---
+func_80031874, follow-up 7 -- -2 to 280/280, differences 251 to 239, on
+    STORE ORDER inside two arms of one `if`. The `s6 == 0` branch writes
+    `h + 4` and `h + 6` in both arms, and the `h + 6` store is textually
+    identical in each; gcc cross-jumps it and emits one copy where retail
+    has two. Writing the `+6` store BEFORE the `+4` store in both arms
+    recovers it -- the arms then differ at the instruction before the join,
+    which is where find_cross_jump gives up.
+    Two other shapes for the same merge are worth recording as dead, both
+    -2 and 251 differences, i.e. no change: assigning `pal` first in each
+    arm, and rewriting the whole thing as an early `goto` past the else. It
+    is specifically the ORDER of the two stores, not the arm structure.
+    The offset buckets confirm it cleanly: the `sh R,6(R)` count went 8
+    against retail's 9 to 9 against 9, and the only store bucket still
+    differing is `sh R,4(R)` at 10 against 11.
+    REMAINING at 280/280, 253/280, 239 differences: `sh -1` (one store at
+    the `+4` offset), `nop +3, lui -3, addiu +2, ori -2` and five smaller.
