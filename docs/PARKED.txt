@@ -6974,3 +6974,28 @@ func_800482B0, follow-up 4 (2026-09-04) -- -3 to -1, census eight opcodes to
     `u32 hi = (u32)(arg4 & 0xF0) >> 4;` spelling, which trades `srl -1` for
     `sra -1` at identical alignment.
     REMAINING at -1: `lbu -1, nop +2, sll -1, srl -1`, summing to -1.
+
+# ---
+func_800482B0, follow-up 5 (2026-09-04) -- the remaining four census opcodes
+    are ONE fault, and it is a loop-invariant hoist.
+    Walking the gaps: retail has `andi $a0,$s4,0xFFFF` at T[70] and
+    `andi $v0,$s4,0xFFFF` at T[94] and `sll $a2,$fp,16` at T[100], and we
+    have a `nop` at all three. We instead emit `andi $s4,$s6,0xFFFF` ONCE,
+    in the occurrence loop's preheader. So gcc hoists `arg0 & 0xFFFF` out
+    of the loop as an invariant and then has nothing left to fill three
+    load-delay slots with; retail recomputes the mask at each use and the
+    recomputations ARE the slot fillers. That single fact accounts for
+    `andi -1`, `sll -1` and `nop +2` together, and probably `lbu -1` too.
+    MEASURED AND DEAD, all identical at -1 with the same four-opcode census
+    and alignment 219/234: flipping the comparison so the masked value is
+    on the left, writing the mask as `(u16)arg0`, and both together. The
+    comparison-operand axis is closed here.
+    What is wanted is a spelling gcc will not hoist. Not yet found.
+    ALSO: THE PERMUTER HAD BEEN RUNNING FROM A STALE BASE for 5300
+    iterations. It was started before the loop-form and guard edits, and
+    its best stored output re-scores at ten census opcodes and alignment
+    193/234 against the installed candidate's four and 219 -- i.e. every
+    one of those iterations was mutating a candidate two levers behind.
+    WORKFLOW already says to rerun it from an improved base; the concrete
+    cost of not doing so is now measured. Restart the permuter every time
+    the installed candidate improves.
