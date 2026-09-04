@@ -1663,7 +1663,7 @@ extern u8 D_800E9DB0[];
  * the second read into the value it just wrote unless the POINTER load itself
  * is unforwardable -- with two independent pointer loads it can no longer
  * prove the two field accesses are the same object either. */
-extern u8 *volatile D_800E9EF0[2];
+extern u8 *volatile D_800E9EF0[];
 #else
 extern u8 D_800E9EF0[];
 #endif

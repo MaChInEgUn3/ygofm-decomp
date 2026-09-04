@@ -458,6 +458,7 @@ HOIST_EPILOGUE_FUNCS = {
 }
 
 SMALL_DATA_NOP_FUNCS = {
+    "func_80019608",
     # `lbu` of a struct field followed by a gp-relative `sb` of it: maspsx
     # expects the store to expand through $at and fill the slot.
     "func_80015310",
