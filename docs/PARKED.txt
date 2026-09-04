@@ -5998,3 +5998,54 @@ func_8001825C -- 235/235, 55 differences, written 2026-09-04. The
   New in variables.h for this: `u8 D_8009B1B9;` and `s8 D_8009B208[4];` --
   the second at its real width, which is what keeps cc1psx taking its
   address with `addiu $v1,$gp`.
+
+func_80019608 -- 256/256, 132 differences, written 2026-09-04. The
+  fade/transition state machine: a switch on D_8009B174 & 0xF with cases
+  1..4, each carrying sub-states in bits 0x80, 0x40 and 0x20 of the same
+  byte, driving the two D_800E9EF0 widgets through a wipe.
+  gp=19, at=0, default compiler flags. Needs "func_80019608" in
+  SMALL_DATA_NOP_FUNCS (an lhu of a record field followed by the
+  gp-relative sh of it into D_8009B150; maspsx expects the store to expand
+  through $at and fill the load-delay slot, which a small-data store does
+  not) and the D_800E9EF0_IS_PTR_VOLATILE arm in variables.h.
+  From -13 and 247 differences to exact length in three passes:
+  * a base local for D_800E9EF0 in the three arms that touch both slots.
+    That is retail's 4($s1) form, and it is what stops gcc disambiguating
+    the global from the stores through the record pointer, so the reloads
+    come back. -13 -> -11.
+  * the two slots declared `u8 *volatile []`, UNSIZED. The volatile blocks
+    the read-modify-write folds, and the mechanism is one step removed from
+    the usual rule: it is the POINTER load that becomes unforwardable, and
+    once gcc has two independent pointer loads it can no longer prove the
+    two field accesses touch the same object either, so the value fold goes
+    with it. -11 -> -5. It must be unsized: at [2] it is eight bytes, small
+    data at -G8, and the reference is then ONE bare instruction where retail
+    has cc1psx's own %hi/%lo pair.
+  * the pointer NAMED per read-modify-write. Worth NOTHING without the
+    volatile -- gcc coalesces it -- and REQUIRED with it, because each RMW
+    otherwise reads the volatile pointer twice, once as lvalue and once as
+    rvalue. The two levers are only correct together, which is why
+    measuring either alone said the wrong thing.
+  * SEPARATE NAMES for case 3's two func_80019564 results. One name for both
+    is +2 and 160 differences: gcc copies each result out of $v0 into $a2
+    because the name's live range spans the whole arm, and that copy chain
+    also blocks the sw from filling func_800428EC's branch delay slot. Two
+    names is exact length and 132.
+  * and ONE BASE NAME PER ARM for D_800E9EF0. One name shared by cases 1b,
+    3 and 3b is 132; three names is 98, and it is what puts the record in
+    $s3 where retail has it. The rotation below was diagnosed as needing
+    the permuter and it did not: declaration order is only gcc's TIEBREAK,
+    so the axis was the live-range shape all along, and splitting the name
+    is what changes that.
+  Residue, 98 differences and all of it allocation: the switch's `2`
+  constant lands in $a1 rather than $a0, the 0x2000030 mask in $a0 rather
+  than $v0, and the D_8009B0F4/D_8009B134 %hi/%lo pairs come out
+  interleaved where retail emits them one after the other.
+  Measured and dead: FOUR declaration orders (base and mask first, base
+  first, record last, the scratch pointer first) all score 256/256 and 132
+  exactly -- declaration order is not the axis; THREE spellings of case 4's
+  arm order all scored 258/160 before the length was fixed; a
+  `do { mk = 0xF7FFFFFF; } while (0);` pin for the mask constant is +1 and
+  164; a separate name for case 3b's record reads is worth nothing; naming
+  the masked D_8009B0F4 value in the guard is 102; and hoisting the `-1`
+  to the top of case 1 is worth nothing.
