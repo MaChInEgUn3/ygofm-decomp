@@ -748,6 +748,10 @@ extern s8 D_8009B345;
 extern u8 D_8009B34C;
 /* A handler pointer, cleared by func_80037CE0 and called by func_80038E1C. */
 extern ObjFn D_8009B340;
+/* One u32 per card, indexed by id-1: bits 0..8 ATK/10, 9..17 DEF/10, 18..21
+ * and 22..25 the two Guardian Stars, 26..30 the type. VERIFIED from our own
+ * listings (func_80018608's andi 0x1FF / sra 9, func_80017F04's sra 26) after
+ * the layout was read off Unchiga's recomp; see docs/EXTERNAL_LEADS.txt. */
 extern s32 D_801D4244[];
 extern s16 D_801D4D8E[];
 extern u8 D_801D5708[];

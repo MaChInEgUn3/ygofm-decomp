@@ -117,3 +117,75 @@ out of this file by citation alone.
 #   patched binary. What is measured is the offset, the byte, the instruction
 #   and the field; what is taken on trust is that the effect is as described.
 # ---------------------------------------------------------------------------
+
+
+Second pass, 2026-09-04 -- the enhancement sources, measured
+-------------------------------------------------------------
+Same source, at dca7cdd (2026-09-03). Read from a shallow scratch clone; nothing
+copied. The symbol map (symbols.toml) has ONE entry and is not where the value
+is: the value is 97 `#define name address /* meaning */` lines spread across
+57 enhancement sources, plus one 813-line handoff document about extending
+the card count, which documents record layouts because it had to.
+
+Cross-referenced against include/variables.h and functions.h: 43 of the 97 are
+D_ symbols this tree declares, 7 are func_ symbols, 47 are addresses this tree
+has no symbol for at all. Of the 43, TWENTY-SIX carry no comment here and a
+meaning there.
+
+VERIFIED against our own listings before being written down (the contract):
+
+  * D_801D4244 -- one u32 per card, indexed by id-1, and the bit layout their
+    handoff reports as measured over all 722 stock cards:
+        bits  0..8   ATK / 10          bits 18..21  Guardian Star 1
+        bits  9..17  DEF / 10          bits 22..25  Guardian Star 2
+        bits 26..30  type (0..19 monster types, 20 Spell, 21 Trap,
+                          22 Ritual, 23 Equip)
+    Our listings agree without being asked: func_80018608 reads it and does
+    `andi 0x1FF` then `sra 9; andi 0x1FF`; func_80017F04 and func_8001B938
+    do `sra 26; andi 0x1F`. That is bits 0..8, 9..17 and 26..30 exactly.
+    Level is not in the word. krystalgamer's tree names this gDuel_adwCardStats.
+  * D_8009B26C -- "& 0x1F is the mode index": func_80028880's region does
+    `lbu` of it followed by `andi 0x1F`. Their other half, "0xC3 = in duel",
+    was NOT found by the grep used and stays a lead.
+  * Their gp is 0x8009AF08, which is ours (config/symbol_aliases.txt), so
+    every "gp+N" offset in their comments resolves exactly here.
+
+UNVERIFIED leads, one per symbol this tree declares without a comment. Each is
+our restatement of their inline comment, not their text; several have a name
+there and no stated meaning, which is recorded as such rather than guessed:
+  D_80010384  (named NAME_TAIL there; no meaning given)
+  D_8009AF08  (named PSX_DROP_GP there; no meaning given)
+  D_8009B112  (named FR_EFFECT_FLAGS there; no meaning given)
+  D_8009B140  (named PSX_FUSION_CARD_DETAIL there; no meaning given)
+  D_8009B23A  campaign overlay state: 0xE00D
+  D_8009B246  u16 card id for the viewer
+  D_8009B24B  0x14 on every chest viewer open
+  D_8009B26C  &0x1F = mode index; 0xC3 = in duel
+  D_8009B26E  (named FR_SUBSTATE there; no meaning given)
+  D_8009B32E  (named IDX_ADDR there; no meaning given)
+  D_8009B33A  == 0xFF on the shopkeeper menu
+  D_8009B345  menu row count (gp+1085)
+  D_8009B34D  menu cursor    (gp+1093)
+  D_8009B350  gp+1096: 1 while a menu is open
+  D_8009B394  new-press mask, swapped
+  D_8009B3DE  $gp + 0x4D6, u8
+  D_8009B3EB  $gp + 0x4E3, u8
+  D_8009B3FA  $gp + 0x4F2, u16
+  D_800EA030  (named PSX_FUSION_SELECT there; no meaning given)
+  D_800EB0F8  (named PSX_DROP_WIDGET0 there; no meaning given)
+  D_800EB12C  (named SHOP_DLG_MODE there; no meaning given)
+  D_801781D8  (named PSX_DROP_RESIDENT_BASE there; no meaning given)
+  D_8017A1D8  (named PSX_FUSION_EQUIP_BASE there; no meaning given)
+  D_801B0000  (named SHOP_LBL_BASE there; no meaning given)
+  D_801D0000  offsets are relative to here
+  D_801D3200  memcard transfer buffer
+
+The 47 addresses this tree does not declare are not listed: they are splat
+interior addresses or record fields, and a lead for a symbol that does not
+exist yet is a lead for splitting, which is a different job. The extraction
+lives in the scratch clone's leads.txt for the session that wants it.
+
+What this pass says about the question "would the recomp add more than
+emulator traces": for NAMING, yes, and by a lot per hour -- one static read
+produced 26 leads and 3 verifications, where one trace round trip produced one
+answer over four PRs. For MATCHING, still nothing, and that has not changed.
