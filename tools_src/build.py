@@ -617,6 +617,9 @@ PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"
 # declared into .data instead, which takes them out of small data at the
 # compiler with their true one-byte size. See D_8009B365_IN_DATA.
 PER_FUNC_AS_FLAGS["func_8004ACE4"] = "-G0"
+# func_8004CA60: the bare-symbol form so gcc has nothing to hoist out of the loop;
+# no %gp_rel in the function, so -G0 is free (recipe branch 1).
+PER_FUNC_AS_FLAGS["func_8004CA60"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048920"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_80047DB0"] = "-G0"

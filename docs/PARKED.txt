@@ -2096,8 +2096,20 @@ func_800466C8_WAS -- 6 differences, 21/21. Three reads of the gp-relative pointe
     Permuter rerun from the new 2 base on 2026-08-10: best output measures 3,
     worse than the base.
 
-func_8004CA60 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
-  the history below is what this tree had reached on its own.
+func_8004CA60 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_8004CA60.c
+  is real C, PER_FUNC_AS_FLAGS carries its `-G0`, and the build hashes 84747e64.
+  It had been MATCHED 2026-08-30 by PORTING Unchiga's TRANSCRIPTION, which
+  deleted the 1-difference candidate below; recovered from git, it first
+  re-measured at -2 because the recovery sweep ran WITHOUT the `as -G0` the
+  candidate's own header asks for -- read the flags before the count. With
+  the flag it was 1, and the last instruction was the FIRST store's address:
+  `p[off + 0x53C] = one;` is the `tbl[i + K]` form and gives
+  `addu index,base`; `*((p + off) + 0x53C) = one;` gives retail's
+  `addu base,index` and is a MATCH, as are `(p + off)[0x53C]` and the same
+  with an explicit cast. `p[0x53C + off]` stays at 1. The entry below had
+  located the residue on the SECOND store, which was already written in the
+  base-first form and was never the problem.
+  The history below is what this tree had reached on its own.
 func_8004CA60_WAS -- 1 difference, 23/23. Clears a byte at +0x53C and a word at
     +0x518 of each 0x2C-byte record, for *(u16 *)(base + 0x7FA) records, with
     the base pointer D_8009B458 re-read every iteration. Four levers, all
