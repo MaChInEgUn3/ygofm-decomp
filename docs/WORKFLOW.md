@@ -708,6 +708,20 @@ meaningful, and skipping to the last one wastes hours:
    differences to 1). The divisor being a literal in the *source* is
    therefore not what the listing shows; read the `break 7` and stop
    guessing.
+   **A value gcc can PROVE fits sixteen bits loses its mask, and the fix is an
+   initialiser it cannot bound.** Retail masking with `andi $v0,$t0,0xFFFF`
+   before a compare means the source wrote a `(u16)` cast that survived; write
+   `s32 bestv = 0xFFFF;` and gcc folds that cast away, because every value the
+   variable can hold -- the literal, or a `u16` load -- provably fits. `-1` is
+   the SAME value through the cast and is not provably bounded, so the mask
+   comes back: func_8004A854, 13 differences to 11. It costs something in
+   exchange, which is why it is not a free win: `-1` and the neighbouring
+   `best = -1` are then one value, so gcc materialises it once and copies where
+   retail has `addiu $t1,$zero,-1` and `ori $t0,$zero,0xFFFF` separately. A
+   `u16` or `u32` declaration reaches neither half (13 both). **Observed once**,
+   and the discriminator that would give both halves at once is not
+   established.
+
    **A named offset flips it the other way.** Where the base is a *parameter*
    rather than a symbol, no index spelling reaches `addu base,index` — four
    were tried on func_8004DB14 (`p + i * 4 + 0x1E0`, `((u8 **)p + i)[0x78]`,

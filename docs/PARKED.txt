@@ -7522,3 +7522,30 @@ func_80023144, follow-up 6 -- 210/210 with an EMPTY census, alignment
     and both are much worse: +5 and 199/210, +2 and 200/210.
     Kept as the park because a park is working material and the improvement
     is real; it must NOT go to src/ in this shape.
+
+func_80024D34 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_80024D34.c
+  is real C and the build hashes 84747e64. Recovered from git at 16 differences
+  (the Unchiga merge had deleted it and put a transcription in src/), closed by
+  TWO COUPLED LEVERS plus one ordering fix.
+  Neither lever works alone, and each alone reads as a regression with a LENGTH
+  error, which is the shape that gets a candidate rejected:
+    - the 0x48000 split on its own              +3 and 20
+    - the D_800908A0 cursor on its own          -3 and 26
+    - both together                              3
+  The first is WORKFLOW's func_8001B938 recipe exactly: `b = D_8015C424;` then
+  `g = b + i * 28 + 0x48000;` as one expression, read as `*(u8 **)(g + 0x36B8)`,
+  which is what stops gcc folding both constants into the relocation and
+  emitting `%hi(D_8015C424+5)` / `%lo(D_8015C424-18760)`. The candidate's old
+  header said "holding it in a local is worse (30)" -- true of a local for the
+  CONSTANT, and it is the base local plus the intermediate pointer that is
+  needed, not a name for 0x48000.
+  The second is the two-reads-of-one-record rule: retail forms one cursor into
+  D_800908A0 and reads `0($a2)` and `2($a2)` off it, where the index form
+  computes two addresses.
+  The last three differences were pure ORDER -- retail materialises
+  D_800908A0's address before the index shift, we did it after -- and a base
+  local for the second table fixes it: `t = D_800908A0; q = &t[i * 2];` is a
+  MATCH. `D_800908A0 + i * 2` and an integer-cast sum are both 3, and assigning
+  `q` earlier in the function is 13.
+  So the function needed FOUR names (b, g, t, q) where the natural spelling has
+  none, and no subset of them is better than the transcription it replaces.
