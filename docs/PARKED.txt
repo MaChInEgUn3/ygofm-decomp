@@ -7615,3 +7615,13 @@ func_8002ABB4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED, FIRST TRY. src/
   source" rule, applied twice. Naming the first read (arg0 + 0x48) as well is
   also a MATCH, so it is not load-bearing; naming all three as initialisers at
   the top is -1, because the batch then crosses the 0x100 store.
+
+func_80015DFC
+    STILL OPEN, but the C is now WRITTEN: parked/func_80015DFC.c, 61/62 and
+    18 differing, 2026-09-04, through the gte_* macros rather than the
+    transcription's raw coprocessor asm. Four levers found (a two-halfword
+    struct for the GTE result, the x read named before the zero store, the
+    D_8009B1D5 read named after the y read, and D_800E9D98 into .data); the
+    residue is a delay-slot fill choice at the join before the func_80016784
+    call, and seven spellings of the join score identically. src/ keeps the
+    transcription. Full notes in the candidate's header.

@@ -1332,7 +1332,14 @@ extern volatile u16 D_8009B398;
 #else
 extern u16 D_8009B398;
 #endif
+#ifdef D_800E9D98_IN_DATA
+/* Out of small data with its true size, so cc1psx emits its own %hi/%lo pair
+ * and the lui half can be hoisted into a delay slot the way retail has it
+ * (func_80015DFC), while the one-byte gp-relative flags beside it stay put. */
+extern s32 D_800E9D98 __attribute__((section(".data")));
+#else
 extern s32 D_800E9D98;
+#endif
 extern s32 D_80093788;
 extern s32 D_800F5F80;
 extern s32 D_800F5F84;
