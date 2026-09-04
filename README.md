@@ -28,11 +28,15 @@ list but not the hand-written block its own caption claimed to exclude — the
 same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
 miscounts.
 
-**76 of these are assembly transcriptions, not decompilations** — ordinary
-MIPS in inline `__asm__` bodies, byte-exact and therefore invisible to the
-build's own check. They came in with a port from a second decompilation and
-are tracked in `docs/ASM_DEBT.md`; the honest count of decompiled functions is
-**974**, not 1050. Count it yourself with
+**15 of these are assembly transcriptions of compiler output, not
+decompilations** — ordinary MIPS in inline `__asm__` bodies, byte-exact and
+therefore invisible to the build's own check. A further **52** are transcriptions
+of code the original shipped as **hand-written assembly** (the GTE ordering-table
+inserters: no stack frame, no `jal`, callee-saved registers parked in the
+caller's structure), which no compiler ever produced and which are therefore
+finished as asm, not owed as C. Both populations came in with a port from a
+second decompilation and are tracked in `docs/ASM_DEBT.md`; the honest count of
+decompiled functions is **1074**, and the 15 are the debt. Count it yourself with
 `.venv/bin/python tools_src/asm_debt.py`. A further 5 files reach the GTE,
 which is not transcription — C has no operators for coprocessor 2. Those were
 hand-rolled asm until 2026-08-31 and now call the PsyQ `gte_*` macros through
