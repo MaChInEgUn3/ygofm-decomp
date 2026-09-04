@@ -122,3 +122,39 @@ which is exactly the miscount this tool's own docstring was written to prevent
 -- committed twice already, and now a third time from the other direction.
 Quote the tool for debt and the pattern for portability, and say which you
 mean.
+
+
+## The port DELETED the pure C it replaced, and git still has it
+
+**22 of the 76 transcriptions had a `parked/<func>.c` that the Unchiga merge
+removed.** Fourteen of those are pure C with no `asm` of any kind, they still
+compile, and re-measured on 2026-09-04 they rank:
+
+    2   func_8005A98C  133/133      13  func_8004A854  36/36
+    3   func_8003A198   21/21       16  func_80024D34  37/37
+    6   func_8004A764   23/23       17  func_8004A8E4  23/23
+    8   func_80070710   10/10       18  func_8002C7E8  84/84
+    11  func_80016DDC   37/37       18  func_80032370  34/34
+                                    22  func_8002ABB4  60/60
+                                    24  func_8002C604  34/34
+
+plus four carrying a length error (func_8004CA60, func_8002CBF4,
+func_8001D5B4, func_8004BCE8). All fourteen are restored to `parked/`.
+
+**func_8005A98C came back and was retired the same hour**, on one line -- see
+its PARKED.txt entry. A 133-instruction function sat as transcribed assembly
+for five days while C that was two register names away sat in git history.
+
+Two things follow, and the second is the one that costs.
+
+**Recover before you re-derive.** func_8003A198 was re-derived from scratch
+first: four independent pure-C shapes, all at exact length, best **8**. The
+recovered candidate is **3**, and its two levers -- nested `if`s for a shared
+exit, and a dead store acting as an allocation hint -- are not reachable by
+inspection. An unaided rewrite lands nowhere near what was already known.
+
+**A merge that improves the headline number can destroy work silently.** The
+port took the function count up and the honest count down, and it deleted the
+evidence in the same commit, so nothing in the tree recorded the trade. The
+only reason it is visible now is `git log --diff-filter=D`. Run that sweep
+against `parked/` after ANY bulk import, not five days later.

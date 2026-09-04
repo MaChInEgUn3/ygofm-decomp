@@ -3646,8 +3646,27 @@ func_8004E7B0 -- 94 differences at -5. A camera-angle update with two
     `z` shared versus per-arm (that one is the -17 to -5).
 
 
-func_8005A98C MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
-  the history below is what this tree had reached on its own.
+func_8005A98C RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_8005A98C.c
+  is now real C and the build hashes 84747e64. It had been MATCHED 2026-08-30 by
+  PORTING Unchiga's TRANSCRIPTION, which deleted the candidate below; that
+  candidate was recovered from git, still measured 2, and one line closed it:
+
+      u = (hi << 13) + n / df;   /* was: n = n / df + (hi << 13); */
+      n = u;
+
+  The residue was `mflo $v0` / `sll $v1,$t1,13` against our `mflo $v1` /
+  `sll $v0,$t1,13`, with the `addu $v0,$v1,$v0` that consumes them IDENTICAL in
+  both -- so it reads as an operand-order question and swapping the operands is
+  WORSE (3). It is the commutative-destination shape WORKFLOW records from
+  func_8005F27C and func_8005F5C8: each half is reachable alone and they do not
+  compose, so a fresh name gives the order and loses the register, the original
+  name as destination gives the register and loses the order, and BOTH are 3.
+  The fresh name plus the copy back takes both, because the copy links the new
+  pseudo to `n` and coalesces away. The other order of the same shape,
+  `u = n / df + (hi << 13); n = u;`, is 1.
+  Third instance of that lever, first one found by reading the rule rather than
+  by the permuter.
+  The history below is what this tree had reached on its own.
 func_8005A98C_WAS -- 2 differences at equal length (133/133), all of them
     register naming. An RGB-to-HSV converter, leaf, gp == 0, no addressing
     work at all.
