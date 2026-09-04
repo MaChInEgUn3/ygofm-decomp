@@ -2173,6 +2173,29 @@ func_80070710_WAS / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     array declaration stores the symbol's ADDRESS and measures 4, better than
     the correct `[0]` form at 6. Read the semantics before the count.
     sweep_try.py run 2026-08-10: best is 8 at -O1 -G0, same as the base.
+    2026-09-04, ASSEMBLY DEBT RETIREMENT: real C written for it for the first
+    time, kept in parked/func_80070710.c. src/ still holds the transcription,
+    which matches; this does not, so nothing was swapped. It reaches 10/10 with
+    the same 8 register-name differences the entries above record, so the
+    residue is confirmed on a fresh derivation rather than inherited.
+    Two spellings ADDED to the six already listed, both predicted to work by
+    WORKFLOW's "a symbol added last is emitted last; a base local is how you
+    move it" rule, and both worth nothing:
+      - `u8 *t = D_800917F0;` assigned FIRST, then `s32 i = D_8009B361[0];`
+      - the same with the index inline, and an s32 variant added as integers
+    All eight spellings are byte-identical to each other. The rule does not
+    reach this function, which is worth knowing because the diff LOOKS exactly
+    like an ordering problem: the target materialises the table first and we
+    materialise the index first.
+    The sharper reading of the columns, which none of the earlier entries
+    states: the target spends ONE register on the index -- `lui $a0,%hi` then
+    `lb $a0,%lo(...)($a0)` into the same register -- and we spend two, `$v0`
+    for the %hi and `$a0` for the loaded byte. That extra live value is what
+    pushes the table out of `$v0` into `$v1`, and every downstream register
+    follows. So the question is not which symbol is materialised first; it is
+    why gcc will not land the byte in the register that held its own %hi.
+    Permuter restarted from this base (score 65) rather than from the
+    transcription, which is the base Unchiga's 2.5M iterations used.
 
 func_8004B374 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
   not code -- see the try_func note in WORKFLOW.md).
