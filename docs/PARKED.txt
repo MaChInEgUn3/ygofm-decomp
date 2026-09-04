@@ -428,7 +428,15 @@ func_80047A68
 func_8004A764
     STILL OPEN -- src/func_8004A764.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 func_8005C5D4
-    STILL OPEN -- src/func_8005C5D4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
+    STILL OPEN, but the C is now WRITTEN: parked/func_8005C5D4.c, 22/22 and 16
+    differing, 2026-09-04. The transcription's asm barrier was chasing a ghost
+    -- the +1 is gcc's own induction-variable correction and comes out of a
+    plain `for` with the timeout test after the loop. The constant is a maspsx
+    emulation gap (aspsx 2.79 splits 0x7FFFFFFF as lui 0x8000 / addiu -1;
+    maspsx emits lui/ori; retail has zero lui/ori pairs of that kind), and
+    the fix is a build.py post-maspsx rewrite per function, the
+    SMALL_DATA_NOP_FUNCS precedent. src/ keeps the transcription until both
+    close. Full notes in the candidate's header.
 func_80073220
     MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
 func_8003201C
