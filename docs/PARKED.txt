@@ -6179,3 +6179,32 @@ func_8005E808 -- 251/251, 97 differences, written 2026-09-04. A geometry
   split, and routing everything through the alias coalesces it away again.
   Which reference stays behind is not derivable; the permuter found it.
   Installed from the readable source, not the permuter's formatting.
+func_8004D134 -- 280/278 (+2), 75 differences, written 2026-09-04. Walks a
+  record array applying a per-format offset table: a switch on *arg1 picks
+  four constants, then a loop does halfword bit surgery at two of them and
+  keeps a running MAXIMUM over a format-dependent set of halfword fields.
+  gp=0, at=0, no calls, no symbols, default flags. Five parameters -- the
+  fifth is read from 0x18($sp) with an eight-byte frame.
+  What paid:
+  * the running maximum CARRIED IN A LOCAL. Written as `if (*arg3 < x)
+    *arg3 = x;` repeated it is -6 and 159; read once into `m` and stored
+    after each compare it is +2 and 81. Retail reads the accumulator once
+    and keeps it in a register.
+  * BOTH comparisons unsigned -- the `arg0 < 2` guard and the switch value,
+    which is a `u16` read and therefore signed-positive to gcc. `(u32)`
+    casts on each: 81 -> 75. Same lever as func_8006041C the same night.
+  Also decoded and worth keeping: the `z % 16` inside the surgery block is
+  emitted `bgez / addiu 0xF / andi 0x7F0 / subu` rather than the usual
+  sra/sll pair, because gcc knows z = x >> 6 with x a u16, so z < 0x400 and
+  the mask is exact.
+  Residue: we save THREE callee-saved registers where retail saves two --
+  ours keeps the `arg0 * 4 - 0xA` bias in $s0 where retail has it in $a1.
+  Eleven values are live across the loop, so this is allocation pressure
+  rather than a source shape.
+  Measured and dead: writing the middle comparisons' store INSIDE the `if`,
+  which is literally what retail's listing shows, is 83 -- gcc reaches that
+  layout on its own from the simpler spelling, so copying the block
+  structure too closely costs two; one running-max name per arm instead of
+  one shared is identical at 75; and hoisting `i = n;` above the guard --
+  which is where retail's `addu $t6,$s1,$zero` sits, in the guard's own
+  delay slot -- is +4 and 282 in both loop shapes tried.
