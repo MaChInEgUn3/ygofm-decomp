@@ -7367,3 +7367,31 @@ func_80031874, follow-up 5 -- census 12 opcodes to 11, alignment 248/280 to
     alignment to 246 (b2, ten opcodes but clearly worse structure).
     REMAINING at -2, 251/280, 251 differences: `sh -4, nop +3, lui -3,
     sw +2, ori -2` and six smaller.
+
+# ---
+func_80031874, follow-up 6 -- census 11 opcodes to 10, alignment 251/280 to
+    253/280, and the `sw +2` entry gone. Two stores of small constants into
+    the hardware buffer's `+8` field are HALFWORD, not word:
+    `*(u16 *)(g + 8) = 0x18;` and `= 8;` where I had written `*(s32 *)`.
+    HOW IT WAS FOUND is the part worth keeping. The census said `sh -4,
+    sw +2` and I had been reading that as two separate faults. Counting the
+    stores by OFFSET rather than by opcode -- a Counter over the `sh` lines
+    with the register names normalised away -- shows retail has TWO
+    `sh R,8(R)` and we have NONE, while every other offset matches or is
+    off by one. That is one fault, not two: the same two stores appear in
+    our column as `sw`. So when a census carries a store opcode in one
+    direction and another in the other, bucket the stores by their
+    displacement before looking for a source lever; the offsets name the
+    site immediately where the totals cannot.
+    The neighbouring `*(s32 *)(g + 8) = 0x80008;` and `*(s32 *)(h + 8) =
+    0x100010;` really are words -- retail has `sw $a2,0x8($s0)` and
+    `sw $v1,0x8($t2)` for those -- so the field is written both ways and
+    only the small constants are halfwords.
+    MEASURED AND DEAD: declaring the hardware pointers volatile, in three
+    scopes (the `g` halfword accesses alone, plus the `g` words, plus the
+    `h` accesses). None touches `sh -4` and all add nops -- +3 to +5 length
+    and the alignment down to 239-243. The hardware registers are not
+    volatile in the original.
+    REMAINING at -2, 253/280, 251 differences: `sh -2` (one store each at
+    the `+4` and `+6` offsets, retail 11 and 9 against our 10 and 8),
+    `nop +3, lui -3, ori -2` and six smaller.
