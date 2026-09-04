@@ -6407,3 +6407,76 @@ the next statement also uses. The permuter chained only [0] and [1]; chaining
 all three measures identically and is what a person would write, so that is
 what is installed. The remaining fault is unchanged: one biased giv for the
 `*(u16 *)(r + 6)` read, costing the seventh callee-saved register.
+
+func_80016784 -- 352 instructions, +1 and 242 differences. A GPU-packet
+dispatcher: four scratchpad bases, a nine-way switch on arg0[0x68], and nine
+call sites to func_80042188.
+
+Levers that are IN the candidate and are not to be re-derived:
+
+  * four separate base locals (o=0x1F8003E0, k=0x1F800320, y=0x1F800344,
+    z=0x1F800000) with EVERY use going through them, call arguments included.
+    This is the opposite of func_8002A9C0 and was measured both ways.
+  * arg2/arg3 are s32 in the prototype, per a matched ported caller
+    (src/func_80015DFC.c). Committed separately.
+  * one shared call via `goto join`, not a call per arm.
+  * `n / 10` and `n % 10`, never a re-read of arg0[0x67] -- the re-read picks
+    the UNSIGNED reciprocal 0xCCCCCCCD where retail has the signed
+    0x66666667.
+  * NO (s8) cast on e[0x18]: three plain inline reads. One shared name for
+    the three uses is -6 instructions (x1/x2, 344 built), a narrow `s8` name
+    is -5, and three separate (s8) casts are +8. Retail has exactly one
+    `sll 24`/`sra 24` in the whole function and it is still not reproduced;
+    this is the one place where the arithmetic is known-wrong and no
+    spelling found reaches it.
+  * `fl` is assigned AFTER the two `sh` stores through `o` and before the
+    `t = *(s32 *)(arg0 + 4)` load. This is the advisor's read and it was
+    worth 5: gcc cannot hoist the `lhu 0x14($s6)` through a store via `o`
+    (both u8 *, both may alias), so the load stays down while the `lui $a0,1`
+    for the constant floats up on its own. Hoisting the whole statement --
+    which is what an earlier candidate did -- brings the load up with the
+    constant and is wrong. Position relative to the `t` load does not matter
+    (u1 and u4 are identical at 306).
+  * both arguments to func_80041F90 are `(s16)*(u16 *)(...) + K`, the cast
+    INSIDE the addition. The callee's real prototype is s32/s32 (its own
+    matched file says so), so this is a source-level narrowing at the call
+    site and not a prototype disagreement. `(s16)(x + K)` puts the
+    sll/sra after the addiu and is 6 differences worse; `*(s16 *)(...)`
+    measures identically to the cast.
+  * two named reads of `*(s32 *)(arg0 + 0xC)`, one per block, each assigned
+    ABOVE the stores that precede its use. Retail issues `lw 0xC($s6)` before
+    `addiu $v0,$zero,9`/`sb` in the first block and before the
+    `ori`/`sw 0x10` pair in the second. Worth 287 -> 242 TOGETHER; either
+    alone is 279 or 250. Naming the 0xFFFFFF mask instead is worth exactly
+    nothing, which is the "a constant argument cannot be hoisted by naming
+    it -- name an unrelated read instead" rule paying out.
+
+Measured and dead:
+  * `z` hoisted above the function's entry guards, on two bases: 327 and 331
+    against 306. The register-priority reading behind it is right (see below)
+    and this spelling of it is not.
+  * the tail of the z-store block written through `pk` (`pk = z;` before the
+    +0x10 store, five stores through pk): -3 instructions on the u1 base,
+    because the copy coalesces. Retail really does store +0x10/8/0x12/0xE/0xF
+    through `$a0` = a copy of `$fp`, so the shape is right and the spelling
+    is not -- a plain copy needs a reason to survive.
+  * naming the 0xFFFFFF mask, at two positions.
+
+The two known remaining faults, both diagnosed:
+
+  1. `$s7` and `$fp` are exchanged for the whole function. Retail puts arg1
+     in `$s7` and `z` in `$fp`; we do the reverse. gcc allocates $s0..$s7
+     before $fp, so this is an allocation-priority inversion, and the
+     reference counts say why: retail's `$fp` has 11 lines and ours has 15,
+     because our `z` has 13 source uses and retail's has 8. The other five
+     are the `pk` stores above. So closing the copy question and closing the
+     register swap are the same problem.
+  2. Retail hoists the func_80042188 argument setup -- `addu $a1,$s4`,
+     `addu $a2,$s7`, `addu $a3,$s5`, `sw $s3,0x10($sp)` -- up into the
+     `mult`/`mfhi` latency of the preceding divide chain, where we emit it
+     immediately before the `jal`.
+
+History: +55 -> -2/311 -> +1/242 in one session. Do NOT rank candidates for
+this function on the length error: it was -2 for a long stretch while four
+missing sign-extends at the func_80041F90 call cancelled two extra
+instructions elsewhere, and the -2 read as "nearly right".
