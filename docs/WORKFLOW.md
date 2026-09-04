@@ -2391,6 +2391,14 @@ and the second is the one that costs:
   * and never let a park entry record a difference count that was never
     checked against the build. Several of those fifty-nine had prose here
     diagnosing a residue that did not exist.
+  * and a park entry's "measured and dead" list is worth NOTHING while the
+    candidate has a length error. func_80022674 was parked at -1 with an
+    `s16` store for a negative halfword constant listed among the shapes
+    that had been tried and had not moved the count -- it was the last
+    difference, and it read as dead only because a positional diff on a
+    223/224 candidate is already shifted past it. When you pick up a park
+    whose length is wrong, fix the LENGTH first and then re-try everything
+    the entry says is dead; the list was compiled with a broken instrument.
 
 **Both spellings are now resolved in try_func, and a third was found the same
 hour.** `canon_addr()` turns `%hi`/`%lo` of any resolvable symbol into the
