@@ -6338,3 +6338,63 @@ precedes it, so the load covers its own delay slot. Same lever as
 func_800434F4's `d = D_8009B118;` -- retail loads before a store the source
 writes first. Candidate updated in parked/func_80019608.c; permuter restarted
 from the new base.
+
+func_8005EBF4 -- 287/287 and 275 differences, but the ZERO IS FALSE: it is two
+faults cancelling, and the real state is ONE fault. Candidate in
+parked/func_8005EBF4.c. 287 instructions, gp=2, at=0, default flags.
+
+The loop body is instruction-for-instruction identical to retail -- all four
+`lw` of c[0..3], the four index-first `addu`, the four `lh`, the call setup,
+and the whole Horner chain of three `mult`/`div` pairs match exactly. Only
+register NAMES differ, and they differ because of one extra callee-saved
+register.
+
+Five things that had to be right first, all read off the listing:
+
+  * **the head is an EXACT POINTER DIVISION.** `subu / sll1 / addu / sll4 /
+    addu / sll8 / addu / sll16 / addu / negu / sra 3` builds v * 0x33333333,
+    negates it (= v * 0xCCCCCCCD, the modular inverse of 5) and shifts by 3 --
+    an exact divide by 40. That sequence appears ONLY for a typed pointer
+    difference; `(arg0 - D_800F5788) / 0x28` on `u8 *` gives a mult/mfhi
+    reciprocal and reads as a different function. It needs a 40-byte record
+    type declared purely for the subtraction;
+  * **the pointer difference is RECOMPUTED per block**, not held. Retail
+    rebuilds that whole chain inside the `arg3 != 0` block. A local `i` is
+    -11 instructions;
+  * **the divisor is read per block too.** `lbu %gp_rel(D_8009B078)` appears
+    TWICE. A local `d` holds it in a callee-saved register: 277 -> 226;
+  * **the frame.** Retail saves SIX registers ($s0-$s4, $ra) at 0x60-0x77.
+    `sw $s1, 0x10($sp)` is NOT a local -- it is the FIFTH OUTGOING ARGUMENT of
+    func_8005FBC4, which takes six, so the outgoing area is 0x18 and the
+    locals are 0x18-0x5F: three 4-pointer arrays and a 24-byte object, not 32.
+    `0x88($sp)` is above the frame and is the fifth INCOMING argument, which
+    confirms the five-argument signature independently of the caller;
+  * **arg3 is s32, not u16.** As u16 gcc emits an `andi $s1,$s1,0xFFFF` in the
+    loop preheader that retail does not have. That removal is what makes the
+    length read as exact -- it cancels the giv's extra instruction, so the
+    zero must not be trusted.
+
+The one remaining fault: I emit THREE cursors in the final loop --
+`addiu $s2,$sp,0x4E`, `addiu $s3,8`, `addiu $s4,2` -- where retail has TWO,
+`addiu $s1,8` and `addiu $s3,2`, reading 0/2/4/6($s1) off a single cursor.
+The extra is a biased giv for the `*(u16 *)(r + 6)` read, and it is the
+seventh callee-saved register, which is why the frame is 128 where retail is
+120.
+
+Measured and dead on that fault:
+  * `-fno-strength-reduce`, the documented lever for exactly this shape
+    (func_800722CC): -1 and 270 on the corrected base, -1 and 252 on the
+    earlier one. It removes givs retail keeps;
+  * naming the +6 read and taking it before the `r += 8` bump, which is what
+    m2c prints: identical, 226;
+  * `m++` written inline before that read, dropping the `for`'s third clause
+    (func_80061008's lever): -7.
+
+Not yet tried: indexing sp48 by the loop counter rather than a cursor, a
+separate counter name for the final loop, sweep_try, and the permuter -- which
+is started on it, since "instruction-for-instruction right, only the
+allocation wrong" is exactly its class.
+
+One tooling note worth keeping: `grep -c 'break 7'` returns ZERO on this
+function, which has seven of them. splat writes `break      7` with padding.
+Use `grep -cE 'break +7'`. Same class as the `lui  *\$at, %hi(` trap.
