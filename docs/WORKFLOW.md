@@ -1448,6 +1448,17 @@ permuter found the first; the second is the same idea applied by hand.
    inside a loop that also contains calls, the source's loop was a `goto`**,
    and the same spelling is what WORKFLOW's "unrotated `while`" rule above
    already reaches for a different reason. The cost to know is one variant.
+   **And the bound, measured the same hour: it is for a loop where retail
+   hoists NOTHING.** func_8007214C's park says "gcc hoists three loop
+   invariants that retail keeps inside the loop", which reads like the same
+   case and is not -- retail hoists the constants 1, 3 and 6 and a `%hi`
+   into the preheader and keeps only the 8 and a `slti` inside, so its loop
+   was a real loop and the `goto` form, which hoists nothing, is -7 there.
+   What decides which invariants a real loop hoists is loop.c's cost test
+   (`threshold * savings * lifetime >= insn_count`, with the threshold
+   halved when the loop contains a call); which source spelling moves one
+   constant across that line is not established. Read the preheader before
+   reaching for the `goto`: some invariants hoisted means a real loop.
 
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
