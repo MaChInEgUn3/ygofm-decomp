@@ -27,6 +27,8 @@
  * bestv is wider than the declared type. `u16 bestv = -1` with v as u32,
  * s32, `(u16)v` on the update, `(s32)v` in the compare, or assigned
  * rather than initialised, all fold it (2). No legal spelling found.
+ * That second run saturated at 10500 iterations; its other score-10 output
+ * sets `best` to 0xFFFF (wrong return value) -- the two constants swapped.
  *
  * ---- older entry, measured on the cursor form (kept for the record) ----
  * 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
