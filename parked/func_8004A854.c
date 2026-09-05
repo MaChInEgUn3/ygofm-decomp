@@ -1,4 +1,27 @@
-/* 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
+/* 1 differing at 36/36 (2026-09-05 14:xx; was 11). THE CURSOR WAS THE FAULT:
+ * the explicit `o += 0x28` byte cursor was a hand-written copy of gcc's own
+ * giv. Written as the index form `p = D_8009B458 + i * 0x28` inside a plain
+ * `for`, strength reduction builds the 40-step giv itself, initialises it
+ * from `i` after the guard (`addu $a3,$a1,$zero`), puts `i = 0` in the
+ * guard's delay slot and the `i++` in the lh's -- all three "prologue
+ * order" and "increment slot" faults below vanished at once (11 -> 1).
+ * `while` with `i++` at the bottom, and `&D_8009B458[i * 0x28]`, are the
+ * same 1. This is WORKFLOW's "an explicit byte-offset cursor is usually
+ * gcc's giv" rule (func_800727C0), and every "dead" spelling in the old
+ * entry below was measured on the cursor form, i.e. on a broken instrument.
+ *
+ * The last difference is the 0xFFFF: retail `ori $t0,$zero,65535` as a
+ * second constant and keeps `andi $v0,$t0,65535` before the compare; with
+ * `bestv = -1` we copy best's -1 (1 difference, the mask survives), and
+ * with 0xFFFF in any of s32/u32/u16, with `bestv >= v`, `(u16)bestv >= v`,
+ * `(bestv & 0xFFFF) >= v`, and v as s32, the mask folds (2). combine keeps
+ * the mask only when a reaching def of bestv is not provably 16-bit; a
+ * union `{ s32 w; u16 h; }` does keep it (subreg set) but costs an
+ * insertion mask (31), and `v | (bestv & 0xFFFF0000)` is 28. Permuter
+ * queued from this base.
+ *
+ * ---- older entry, measured on the cursor form (kept for the record) ----
+ * 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
  *
  * 2026-09-04: RECOVERED from git (the Unchiga merge deleted it and put a
  * transcription in src/), re-measured at 13, and taken to 11 by ONE character:
@@ -41,19 +64,16 @@
 s32 func_8004A854(u8 arg0) {
     s32 best = -1;
     s32 bestv = -1;
-    s32 i = 0;
-    s32 o = i;
+    s32 i;
 
-    while (i < *(s16 *)(D_8009B458 + 0x510)) {
-        u8 *p = D_8009B458 + o;
+    for (i = 0; i < *(s16 *)(D_8009B458 + 0x510); i++) {
+        u8 *p = D_8009B458 + i * 0x28;
         u16 v = *(u16 *)(p + 0x19E);
 
         if ((u16)bestv >= v && p[0x183] == arg0 && p[0x18D] != 0) {
             bestv = v;
             best = i;
         }
-        i++;
-        o += 0x28;
     }
 
     return best;
