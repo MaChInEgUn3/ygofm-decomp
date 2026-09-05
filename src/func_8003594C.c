@@ -1,3 +1,4 @@
+#define D_8009B0F4_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_8003594C(s32 arg0) {

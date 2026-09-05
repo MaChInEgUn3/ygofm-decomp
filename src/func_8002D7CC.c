@@ -1,5 +1,7 @@
 #define D_8009B26C_IS_SCALAR
 #define D_8009B269_IS_SCALAR
+#define D_8009B398_IN_DATA_VOLATILE
+#define D_8009B39A_IN_DATA
 #include "common.h"
 
 void func_80032328(void);

@@ -5,6 +5,7 @@
  * instruction count, six registers wrong. D_8009B098 is a `u16` and
  * D_8009B428 beside it a `u8`, so `as -G1` gives the `lui $at` store while the
  * byte keeps %gp_rel. */
+#define D_8009B098_IN_DATA
 #include "common.h"
 
 void func_80043960(s32 mode) {

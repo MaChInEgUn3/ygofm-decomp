@@ -552,7 +552,6 @@ PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80046768"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800339D0"] = "-G4"
-PER_FUNC_AS_FLAGS["func_80043960"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80013154"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"
 # Same body as func_80040DD8 with a 12-byte stride; retail reaches
@@ -564,7 +563,6 @@ PER_FUNC_AS_FLAGS["func_800408D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 # func_8005BB7C: s16 D_800FE0CC stored through $at beside one-byte gp symbols.
 # func_80031084: volatile u16 D_8009B394/D_8009B398 bare beside one-byte gp symbols.
-PER_FUNC_AS_FLAGS["func_80031084"] = "-G1"
 # func_8003D74C: s8 D_8009B34D[4] (sized arm) stored through $at beside one-byte gp symbols.
 # func_8005B8A0: D_800FE0CC/D0/D4, D_80010000 and the RGB bytes inflated to eight
 # bytes so they leave small data at -G4 while the four-byte gp scalars stay.
@@ -578,7 +576,6 @@ PER_FUNC_AS_FLAGS["func_800222F4"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80056504"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
-PER_FUNC_AS_FLAGS["func_8002D7CC"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80048A28"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003BA14"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005B64C"] = "-G0"
@@ -649,7 +646,6 @@ PER_FUNC_AS_FLAGS["func_80013360"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002F4C0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800464F0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B9BC"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8001BD48"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8004BAE4"] = "-G0"
 # Parked; kept so PARKED.txt's difference counts reproduce.
 PER_FUNC_AS_FLAGS["func_8004CABC"] = "-G0"
@@ -673,7 +669,6 @@ PER_FUNC_AS_FLAGS["func_800289BC"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8005B4D8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DC38"] = "-G1"
-PER_FUNC_AS_FLAGS["func_8003594C"] = "-G2"
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002A660"] = "-G0"
@@ -737,7 +732,6 @@ PER_FUNC_AS_FLAGS["func_8003353C"] = "-G0"
 # func_800371A8: every gp-relative symbol here is one byte, so the window
 # 1 <= G < 2 exists -- D_8009B398 (u16 scalar) goes bare and stays one
 # instruction to the delay-slot filler, which is retail's nop.
-PER_FUNC_AS_FLAGS["func_800371A8"] = "-G1"
 # func_8002FD10: D_8009B146/D_8009B148 declared [4] (eight bytes) go non-small
 # at -G4 and expand through $at, while the four-byte D_8009B2A0 and the
 # two-byte D_8009B2A4 keep %gp_rel. Same pair of knobs as func_8002E470.
@@ -750,10 +744,8 @@ PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"
 # func_80015310: every gp-relative symbol in it is one byte, so the four-byte
 # D_8009B0D8 goes bare at -G2 -- one instruction to the delay-slot filler,
 # which is retail's nop in front of the pair.
-PER_FUNC_AS_FLAGS["func_80015310"] = "-G2"
 # func_8003DA40: the only gp-relative symbol is a one-byte flag, so the u16
 # D_8009AF76 goes bare at -G1 and the pair stays in one register.
-PER_FUNC_AS_FLAGS["func_8003DA40"] = "-G1"
 # func_8002E730: five symbols want the non-small form and the gp-relative ones
 # top out at four bytes, so every bare-wanting symbol is sized into (4, 8].
 PER_FUNC_AS_FLAGS["func_8002E730"] = "-G4"
@@ -800,7 +792,6 @@ PER_FUNC_AS_FLAGS["func_80047B68"] = "-G0"
 # only other access is the one-byte D_8009AFA2, which must stay %gp_rel. Small
 # data is size <= -G, so the window is 1 <= G < 4 and -G2 sits in the middle.
 # -G0 takes D_8009AFA2 out with it and costs 43.
-PER_FUNC_AS_FLAGS["func_8005A8C4"] = "-G2"
 # Recipe branch 1 again (no %gp_rel in the function at all), but reached from
 # the delay-slot side rather than the addressing side: the two instructions
 # are the same either way, and what differs is that retail leaves the branch

@@ -517,7 +517,9 @@ extern u8 D_800F5C83[];
  * store, so a named reload written before a store through a pointer can be
  * hoisted above it the way retail's is -- which was that function's whole
  * length error. */
-#ifdef D_8009B0F4_IN_DATA
+#ifdef D_8009B0F4_IN_DATA_VOLATILE
+extern volatile s32 D_8009B0F4 __attribute__((section(".data")));
+#elif defined(D_8009B0F4_IN_DATA)
 extern s32 D_8009B0F4 __attribute__((section(".data")));
 #elif defined(D_8009B0F4_SIZED_VOLATILE)
 /* The sized arm plus volatile, for a function that needs BOTH the non-small
@@ -1199,7 +1201,11 @@ extern u8 D_8009B0C1[8];  /* a size it does not have: 8 > the -G4 this
 #else
 extern u8 D_8009B0C1;
 #endif
+#ifdef D_8009B098_IN_DATA
+extern u16 D_8009B098 __attribute__((section(".data")));
+#else
 extern u16 D_8009B098;
+#endif
 /* Volatile in func_80012B50, which sets it beside the volatile D_8009B0C8 and
  * D_8009B09C and where retail keeps all four stores in source order -- which
  * only happens if this one is volatile too, otherwise gcc sinks the
@@ -1535,7 +1541,11 @@ extern volatile u16 D_8009B394;
 extern u16 D_8009B394;
 #endif
 extern u16 D_8009B396;
+#ifdef D_8009B39A_IN_DATA
+extern u16 D_8009B39A __attribute__((section(".data")));
+#else
 extern u16 D_8009B39A;
+#endif
 extern u16 D_8009B39E;
 extern u8 D_8009B32C;
 extern u16 D_8009B3A0;
@@ -1937,7 +1947,11 @@ extern u8 *D_800EB184;
  * form would go gp-relative and collapse to one instruction. */
 extern s32 D_800FE240[];
 #else
+#ifdef D_800FE240_IN_DATA
+extern s32 D_800FE240 __attribute__((section(".data")));
+#else
 extern s32 D_800FE240;
+#endif
 #endif
 extern s32 D_800947B8;
 /* Reached through %hi/%lo, so unsized rather than a scalar. Nothing had

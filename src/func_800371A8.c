@@ -1,3 +1,4 @@
+#define D_8009B398_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_80037110(u8 *arg0);

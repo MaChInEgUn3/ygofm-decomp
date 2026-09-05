@@ -1,3 +1,4 @@
+#define D_800FE240_IN_DATA
 #include "common.h"
 
 s32 func_8005A8C4(s32 arg0, s32 arg1) {

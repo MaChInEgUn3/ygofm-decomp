@@ -1,4 +1,5 @@
 
+#define D_8009AF76_IN_DATA
 #include "common.h"
 
 void func_80039794(void);
