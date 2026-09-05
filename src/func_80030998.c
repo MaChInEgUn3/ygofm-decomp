@@ -1,5 +1,5 @@
-#define D_8009B26C_SIZED
-#define D_8009B27A_SIZED
+#define D_8009B26C_IN_DATA
+#define D_8009B27A_IN_DATA
 #define D_8009B398_IS_AGGREGATE
 #include "common.h"
 
@@ -65,8 +65,8 @@ void func_80030998(void) {
             return;
         }
         h = D_8009B2C8;
-        D_8009B26C[0] = 2;
+        D_8009B26C = 2;
         D_8009AF46 = h;
-        D_8009B27A[0] = h;
+        D_8009B27A = h;
     }
 }

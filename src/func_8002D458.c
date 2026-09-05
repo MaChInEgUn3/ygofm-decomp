@@ -1,7 +1,7 @@
-#define D_8009B27A_SIZED
-#define D_8009B0D1_SIZED
-#define D_8009B3D4_SIZED
-#define D_8009B365_SIZED
+#define D_8009B27A_IN_DATA
+#define D_8009B0D1_IN_DATA
+#define D_8009B3D4_IN_DATA
+#define D_8009B365_IN_DATA
 #define D_8009B268_IS_SCALAR
 #define D_8009B26C_IS_SCALAR
 #define D_8009B26D_IS_SCALAR
@@ -17,9 +17,9 @@ void func_8002D458(s32 arg0) {
         func_8003BBF8();
         func_8016AA6C();
         *(s16 *)D_801D07DC = 0x30;
-        D_8009B27A[0] = 0x30;
-        D_8009B3D4[0] = 1;
-        D_8009B0D1[0] = 0;
+        D_8009B27A = 0x30;
+        D_8009B3D4 = 1;
+        D_8009B0D1 = 0;
         D_8009B26C = 2;
         break;
     case 2:
@@ -33,10 +33,10 @@ void func_8002D458(s32 arg0) {
         break;
     case 5:
         D_8009B26C = 2;
-        D_8009B27A[0] = D_801D07DC[0];
+        D_8009B27A = D_801D07DC[0];
         break;
     case 6:
-        D_8009B365[0] = 0;
+        D_8009B365 = 0;
         D_8009B26C = 6;
         break;
     case 7:

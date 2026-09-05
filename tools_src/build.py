@@ -612,7 +612,6 @@ PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004803C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
-PER_FUNC_AS_FLAGS["func_8002D458"] = "-G2"
 # func_80030FA0 no longer needs an assembler -G: the two bare-form symbols are
 # declared into .data instead, which takes them out of small data at the
 # compiler with their true one-byte size. See D_8009B365_IN_DATA.
@@ -634,7 +633,6 @@ PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80038530"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003C7A0"] = "-G1"
-PER_FUNC_AS_FLAGS["func_8002D180"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80020BE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004BBBC"] = "-G0"

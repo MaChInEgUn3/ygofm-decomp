@@ -334,7 +334,9 @@ extern s16 D_800E9D70[];
  * not small data, so this one goes through the assembler's `$at` while the
  * one-byte scalars beside it keep %gp_rel.  The size is a codegen knob, not a
  * measurement -- see the -G-threshold section in DECISIONS.md. */
-#ifdef D_8009B27A_SIZED
+#ifdef D_8009B27A_IN_DATA
+extern u8 D_8009B27A __attribute__((section(".data")));
+#elif defined(D_8009B27A_SIZED)
 extern u8 D_8009B27A[4];
 #else
 extern u8 D_8009B27A[];
@@ -436,7 +438,9 @@ extern s32 D_800EB12C[];
 extern VoidFn D_80090C50[];
 extern u8 *D_8009B2FC;
 extern u8 D_80090DD8[];
-#ifdef D_8009B0D1_IS_SCALAR
+#ifdef D_8009B0D1_IN_DATA
+extern u8 D_8009B0D1 __attribute__((section(".data")));
+#elif defined(D_8009B0D1_IS_SCALAR)
 extern u8 D_8009B0D1;
 #elif defined(D_8009B0D1_SIZED)
 extern u8 D_8009B0D1[4];
@@ -464,7 +468,9 @@ extern u8 D_8009B3C0;
 /* func_80038530 reaches this and its six neighbours through the assembler's
  * bare form, which needs the scalar declaration plus a -G0 assembler; every
  * other user takes them as unsized arrays. */
-#ifdef D_8009B364_SIZED8
+#ifdef D_8009B364_IN_DATA
+extern u8 D_8009B364 __attribute__((section(".data")));
+#elif defined(D_8009B364_SIZED8)
 /* Eight bytes it does not have, so that at `as -G4` it is not small data while
  * the four-byte gp scalars beside it are (func_80024E58, recipe branch 3).
  * Still at or below cc's own -G8, so cc1psx keeps emitting the bare symbol and
@@ -862,7 +868,9 @@ extern u8 D_8009B320[8];
 extern u8 D_8009B320;
 #endif
 extern u8 D_801D07DC[];
-#ifdef D_8009B3D4_SIZED
+#ifdef D_8009B3D4_IN_DATA
+extern u8 D_8009B3D4 __attribute__((section(".data")));
+#elif defined(D_8009B3D4_SIZED)
 extern u8 D_8009B3D4[4];
 #else
 extern u8 D_8009B3D4[];
@@ -1080,7 +1088,9 @@ extern u16 D_8009B372;
 #else
 extern u16 D_8009B372[];
 #endif
-#ifdef D_8009B369_SIZED8
+#ifdef D_8009B369_IN_DATA
+extern u8 D_8009B369 __attribute__((section(".data")));
+#elif defined(D_8009B369_SIZED8)
 /* Eight bytes it does not have: cc1psx keeps the bare symbol and an assembler
  * below -G8 expands it, so the reference is one instruction to the scheduler
  * (func_8002CEE8). */
@@ -1129,7 +1139,9 @@ extern volatile s32 D_8009B0C8;
 #endif
 /* func_80013154 reaches it gp-relatively; the array arm is for the units that
  * take its address. */
-#ifdef D_8009B0A3_SIZED8
+#ifdef D_8009B0A3_IN_DATA
+extern u8 D_8009B0A3 __attribute__((section(".data")));
+#elif defined(D_8009B0A3_SIZED8)
 /* Eight bytes it does not have. cc1psx at -G8 still sees 8 <= 8 and emits the
  * bare symbol; an assembler at -G1 sees 8 > 1 and expands the store through
  * $at, which is what func_8002CEE8 has while the one-byte D_8009B26C and
@@ -1160,7 +1172,9 @@ extern u8 D_8009B0AC;
 /* func_80012DB4 reaches this gp-relatively AND re-reads it every iteration of
  * its wait loop, next to the volatile D_8009B0C8 -- without volatile gcc hoists
  * this load out of the loop and the loop head moves. */
-#ifdef D_8009B0C0_IS_VOLATILE
+#ifdef D_8009B0C0_IN_DATA
+extern u8 D_8009B0C0 __attribute__((section(".data")));
+#elif defined(D_8009B0C0_IS_VOLATILE)
 extern volatile u8 D_8009B0C0;
 #elif defined(D_8009B0C0_SIZED)
 /* Two bytes so an assembler at -G1 treats it as non-small and expands the bare
@@ -1307,7 +1321,9 @@ extern u8 D_800F39B0[];
  * carries the -G0 override (see PER_FUNC_FLAGS in tools_src/build.py).
  */
 
-#ifdef D_8009B362_SIZED8
+#ifdef D_8009B362_IN_DATA
+extern u8 D_8009B362 __attribute__((section(".data")));
+#elif defined(D_8009B362_SIZED8)
 /* Eight bytes it does not have, so cc1psx keeps the bare symbol (8 <= its own
  * -G8) and an assembler at -G1 expands it -- one instruction to the
  * delay-slot filler either way, which is what stops func_8002CEE8 hoisting a
@@ -1552,7 +1568,9 @@ extern void (*D_80090D84[])(void);
 extern u16 Base2_8009B3FA;
 extern u8 D_8009B3DE;
 extern u8 D_8009B3C1;
-#ifdef D_8009B2F8_SIZED8
+#ifdef D_8009B2F8_IN_DATA
+extern u8 D_8009B2F8 __attribute__((section(".data")));
+#elif defined(D_8009B2F8_SIZED8)
 /* Same knob as D_8009B0A3 above, for the same unit. */
 extern u8 D_8009B2F8[8];
 #elif defined(D_8009B2F8_IS_AGGREGATE)

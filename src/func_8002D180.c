@@ -1,7 +1,7 @@
 #define D_8009B26C_IS_SCALAR
 #define D_8009B269_IS_SCALAR
-#define D_8009B0C0_SIZED
-#define D_8009B364_SIZED
+#define D_8009B0C0_IN_DATA
+#define D_8009B364_IN_DATA
 #include "common.h"
 
 void func_8002D180(void) {
@@ -16,7 +16,7 @@ void func_8002D180(void) {
     v = D_8009B26C;
     if ((v & 0x40) == 0) {
         D_8009B26C = v | 0x40;
-        D_8009B0C0[0] = 1;
+        D_8009B0C0 = 1;
         func_800530C4();
         func_800533D8();
 
@@ -31,7 +31,7 @@ void func_8002D180(void) {
             e += 8;
             func_80053248(1, *(s16 *)e - 1, *(s16 *)(e + 2), *(s16 *)(e + 4),
                           e[7], e[6]);
-            func_80053248(2, D_8009B364[0]);
+            func_80053248(2, D_8009B364);
         }
         func_800159D8();
     } else {

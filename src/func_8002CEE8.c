@@ -1,11 +1,11 @@
 #define D_8009B26C_IS_SCALAR
-#define D_8009B0A3_SIZED8
-#define D_8009B2F8_SIZED8
-#define D_8009B27A_SIZED
-#define D_80010000_SIZED
-#define D_8009B362_SIZED8
+#define D_8009B0A3_IN_DATA
+#define D_8009B2F8_IN_DATA
+#define D_8009B27A_IN_DATA
+#define D_80010000_IN_DATA
+#define D_8009B362_IN_DATA
 #define D_8009B370_SIZED8
-#define D_8009B369_SIZED8
+#define D_8009B369_IN_DATA
 #include "common.h"
 
 void func_8002CEE8(void) {
@@ -18,10 +18,10 @@ void func_8002CEE8(void) {
     if ((f & 0x40) == 0) {
         D_8009B26C = f | 0x40;
         D_8009B26E = 1;
-        if (D_8009B369[0] == 0 && D_8009B361[0] >= 0) {
+        if (D_8009B369 == 0 && D_8009B361[0] >= 0) {
             D_8009B26E = 0;
         }
-        D_8009B0A3[0] = 0xA;
+        D_8009B0A3 = 0xA;
         return;
     }
 
@@ -46,8 +46,8 @@ void func_8002CEE8(void) {
 m0:
     if ((v & 0x80) == 0) {
         D_8009B26E = v | 0x80;
-        D_8009B2F8[0] = 0x80;
-        func_800323F8(D_80010000[0], D_801D0200, 0, 0x80);
+        D_8009B2F8 = 0x80;
+        func_800323F8(D_80010000, D_801D0200, 0, 0x80);
         func_80015A00();
         return;
     }
@@ -77,12 +77,12 @@ m2:
     func_8003FF34();
     func_80047AD0(2);
     func_800134B4();
-    D_8009B0A3[0] = 6;
+    D_8009B0A3 = 6;
     func_80012D84(4);
     func_800137E4();
     D_8009B26C = D_8009B368[0];
     if (D_8009B26C != mode) {
         return;
     }
-    D_8009B27A[0] = *(u8 *)&D_8009B370[D_8009B362[0]];
+    D_8009B27A = *(u8 *)&D_8009B370[D_8009B362];
 }
