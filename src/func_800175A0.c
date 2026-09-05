@@ -1,4 +1,4 @@
-#define D_8009B361_IS_SIZED
+#define D_8009B361_IN_DATA
 #include "common.h"
 
 void func_800175A0(void) {
@@ -12,7 +12,7 @@ void func_800175A0(void) {
     s8 *r;
 
     e = D_800E9FF0;
-    if (D_8009B361[0] < 0) {
+    if (D_8009B361 < 0) {
         sp[0] = D_8009B234;
         sp[1] = D_8009B236;
     } else {
@@ -41,14 +41,14 @@ void func_800175A0(void) {
     }
 
     if (D_8009B360[0] < 0) {
-        if (D_8009B361[0] < 0) {
+        if (D_8009B361 < 0) {
             D_800E9FF0[1].unk1A[5] = *(u8 *)&D_8009B230;
             D_800E9FF0[0].unk1A[5] = *(u8 *)&D_8009B230;
         } else {
             D_800EA02F[0] = -1;
         }
     } else {
-        if (D_8009B361[0] >= 0) {
+        if (D_8009B361 >= 0) {
             D_800EA02F[0] = -1;
         }
     }

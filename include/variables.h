@@ -642,7 +642,9 @@ extern Slot70 D_800EFE48[];
  * config/symbol_aliases.txt and func_80012AE8. */
 extern s32 D_800906E0;
 extern u8 CtorCount_0[];
-#ifdef D_80010000_SIZED
+#ifdef D_80010000_IN_DATA
+extern u8 *D_80010000 __attribute__((section(".data")));
+#elif defined(D_80010000_SIZED)
 /* Eight bytes it does not have, for the same reason as D_800EAE98: at -G4 the
  * symbol is non-small, so the `lui`/`lw` pair the assembler expands stays in
  * one register (func_8002FD10). */
@@ -1315,7 +1317,9 @@ extern u8 D_8009B362[8];
 extern u8 D_8009B362[];
 #endif
 /* Data Crystal RAM map, UNVERIFIED: opponent ID */
-#ifdef D_8009B361_IS_SCALAR
+#ifdef D_8009B361_IN_DATA
+extern s8 D_8009B361 __attribute__((section(".data")));
+#elif defined(D_8009B361_IS_SCALAR)
 extern s8 D_8009B361;
 #elif defined(D_8009B361_IS_SIZED)
 /* Eight bytes it does not have, so it clears an assembler -G4 and cc1psx's
@@ -1407,7 +1411,9 @@ extern u8 D_8009466A;
    -mno-split-addresses with unsized arrays, which was tried first and
    rejected: it hoisted the RGB byte addresses into $s3-$s5 and left
    D_80010000 gp-relative. */
-#ifdef D_800FE0CC_IS_AGGREGATE
+#ifdef D_800FE0CC_IN_DATA
+extern s16 D_800FE0CC __attribute__((section(".data")));
+#elif defined(D_800FE0CC_IS_AGGREGATE)
 extern s16 D_800FE0CC[];
 #elif defined(D_800FE0CC_SIZED8)
 extern s16 D_800FE0CC[4];
@@ -1417,7 +1423,10 @@ extern s16 D_800FE0CC;
 /* Screen size used by the transition in func_8005BB7C: width read as a
    halfword in three places and as a word once, rows as a word and once as a
    halfword -- both widths are in the listing. */
-#ifdef D_800FE0D0_IS_AGGREGATE
+#ifdef D_800FE0D0_IN_DATA
+extern u16 D_800FE0D0 __attribute__((section(".data")));
+extern s32 D_800FE0D4 __attribute__((section(".data")));
+#elif defined(D_800FE0D0_IS_AGGREGATE)
 extern u16 D_800FE0D0[];
 extern s32 D_800FE0D4[];
 #elif defined(D_800FE0D0_SIZED8)

@@ -637,7 +637,6 @@ PER_FUNC_AS_FLAGS["func_8003C7A0"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002D180"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80020BE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
-PER_FUNC_AS_FLAGS["func_800175A0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004BBBC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003D46C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004C77C"] = "-G0"
@@ -803,7 +802,6 @@ PER_FUNC_AS_FLAGS["func_800495A4"] = "-G0"
 # delay slot, not the addressing: bare, the reference is one instruction to
 # gcc, so it cannot be half-hoisted into the bgez's slot and retail's nop
 # survives. Same lever as func_800175A0.
-PER_FUNC_AS_FLAGS["func_80019CC8"] = "-G4"
 # No %gp_rel anywhere in the function, so any -G is free: recipe branch 1.
 # The real scalar declaration plus -G0 gives the assembler's own expansion
 # through the destination register, which is retail's lui $v1 / lw $v1(...$v1).
