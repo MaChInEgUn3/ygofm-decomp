@@ -36,7 +36,12 @@ def main():
 
 def _compile(src, out, asm, masm):
 
-    flags = B.PER_FUNC_FLAGS.get(FUNC, B.CC1_FLAGS)
+    # PERMUTER_CC_FLAGS overrides build.py's row for this run only. Needed when
+    # the parked candidate is measured at flags the row does not carry -- e.g.
+    # func_8002C7E8, whose row keeps -mno-split-addresses for the transcription
+    # in src/ while the candidate's 12 is at plain -G8 (2026-09-05).
+    env_flags = os.environ.get("PERMUTER_CC_FLAGS")
+    flags = env_flags.split() if env_flags else B.PER_FUNC_FLAGS.get(FUNC, B.CC1_FLAGS)
     r = subprocess.run([*B.PSYQ_RUNNER, str(B.CC1PSX), *flags,
                         str(src), "-o", str(asm)],
                        capture_output=True, text=True)
