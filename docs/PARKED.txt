@@ -7660,12 +7660,13 @@ func_8004B374
     retail keeps arg1 unmasked in $s5 and masks it per iteration, gcc hoists
     the mask. Diagnosis and the register-pressure hypothesis in the header.
 
-func_80049920
-    STILL OPEN, but the C is now PURE and at EXACT LENGTH: parked/func_80049920.c,
-    81/81, 5 differing under -G8/as -G0 (7 under the file's flags),
-    2026-09-05, from the listing in one tick with none of the transcription's
-    aliases or pins. Six levers in the header; the five left are i and mask
-    with $s3/$s4 exchanged, a pure allocation tie-break. Permuter running.
+func_80049920 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
+    The five ($s3/$s4 exchanged between i and mask) closed on `z = 0;` with
+    the entry guard compared against z: a third zero pseudo numbered before
+    the guard breaks the allocation tie. Found by the permuter as an
+    uninitialised new_var; the initialised spelling scores identically.
+    Under the file's old -G0 -mno-split-addresses it is still 2, so the
+    as -G0 row stays and the cc row is gone. Permuter stopped.
 
 func_8004A518
     STILL OPEN, but the C is now PURE: parked/func_8004A518.c, +2 at 114/112

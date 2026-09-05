@@ -1427,23 +1427,27 @@ permuter found the first; the second is the same idea applied by hand.
    retail's single cursor with two plain displacements. All three spellings
    are the same C; only the third reproduces the target.
 
-   **OPEN: an invariant that retail leaves INSIDE a call-bearing loop, and gcc
-   hoists into a callee-saved register.** Two functions, same shape, no
-   source spelling found. func_8004B374: retail keeps `arg1` raw in `$s5` and
-   does `andi $v0,$s5,0xFF` every iteration in a delay slot; gcc hoists the
-   mask into `$s4` once. func_8004A518: retail materialises the literal 0x63
-   with `addiu $v0,$zero,0x63` inside the loop; gcc hoists it into `$s6`,
-   which is the seventh callee-saved register and two instructions of
-   prologue retail does not have. Measured and dead on both: a `u8` or `s32`
-   local for the value assigned inside the loop, the same before the loop, a
-   `u8` PARAMETER (byte-identical output), a `do { } while (0);` pin, the
-   literal instead of a name, `-fno-schedule-insns` and `-fno-schedule-insns2`.
-   The transcriptions reached retail's bytes with an empty asm launder on the
-   register (B374) and register pins (A518) -- i.e. by telling gcc the value
-   changes every iteration. Whatever retail's source did, it made loop.c
-   decline to move an invariant it plainly could; the discriminator is not
-   established, and it is worth one probe on a four-line loop through cc1psx
-   before another function is spent on it.
+   **CLOSED 2026-09-05: an invariant that retail leaves INSIDE a call-bearing
+   loop, and gcc hoists into a callee-saved register, is a loop written with
+   `goto`.** gcc 2.8's loop pass runs only between the NOTE_INSN_LOOP_BEG /
+   LOOP_END notes the front end emits for `for`, `while` and `do`; a loop
+   made of a label and a conditional `goto` back to it has no notes, so no
+   invariant motion and no strength reduction happen on it at all. Two
+   functions, same shape, same fix, same day: func_8004B374 (retail masks
+   `arg1` with `andi` every iteration in a delay slot; gcc hoisted it into
+   `$s4`, 21 differences, all downstream of that) and func_8004A518 (retail
+   materialises the literal 0x63 per iteration; gcc hoisted it into `$s6`,
+   a seventh callee-saved register and +2). Rewritten as
+   `top: ...body...; if (++i < n) goto top;` both are exact length at once
+   and the residue is register names only (29 and 51, then 11 and 11 on
+   ordinary naming levers). Measured and dead before that on both: a `u8` or
+   `s32` local for the value inside or before the loop, a `u8` parameter, a
+   `do { } while (0);` pin, the literal instead of a name, both scheduler
+   flags, and `while (1)` with a `break` -- which still carries the notes and
+   is still +2. So: **when retail keeps an obviously invariant instruction
+   inside a loop that also contains calls, the source's loop was a `goto`**,
+   and the same spelling is what WORKFLOW's "unrotated `while`" rule above
+   already reaches for a different reason. The cost to know is one variant.
 
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
@@ -1666,6 +1670,17 @@ by one. The permuter found it as `if (… == (o = 0))`, which is the same
 thing spelled where nobody would write it; the plain statement one line
 earlier scores identically. Reach for it when a whole register *class* is
 rotated and no ordering inside the loop moves it.
+**And a THIRD zero pseudo is a tie-break of its own.** func_80049920 sat at
+5 with `i` and `mask` holding $s3/$s4 exchanged -- both zeroed, one copied from
+the other in the guard's delay slot, and no declaration order, `do { } while
+(0);` pin or borrow moved which won $s3. `z = 0;` before the entry guard and
+`if (*(s16 *)(base + 0x510) > z)` instead of `> 0` is a MATCH: the literal
+becomes a pseudo numbered before the two counters and the allocator's
+tie-break falls the other way. The permuter found it as an uninitialised
+`new_var`, which is unusable as written; the initialised spelling scores
+identically, and that is the general move for that reject class -- read what
+the uninitialised name is *compared against* and give the constant a name.
+
 **Two more instances the same hour, and it is now the first thing to try
 when a residue is nothing but register names.** func_800727C0 sat at 16
 differences that were entirely the prologue -- retail copies the parameter

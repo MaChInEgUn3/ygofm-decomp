@@ -412,15 +412,12 @@ PORTED_FLAGS = {
     "func_80049434": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_800496C4": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_800497E0": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
-    "func_80049920": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_80049AF4": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004A0FC": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
-    "func_8004A518": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004A6F8": ['-quiet', '-O2', '-G0', '-msplit-addresses'],
     "func_8004A764": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8004A854": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004A8E4": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_8004B374": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004B854": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004BCE8": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004C420": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -549,6 +546,7 @@ PER_FUNC_AS_FLAGS["func_800279BC"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80048D08"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047480"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A518"] = "-G0"
+PER_FUNC_AS_FLAGS["func_8004B374"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
