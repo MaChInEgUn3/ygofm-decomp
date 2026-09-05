@@ -70,6 +70,7 @@
  * into `j` (12), a fresh `w` (10), k as a ternary (6, same), `s16 k` (69),
  * k's assignment pinned (15). What is left: k in $a2 where retail has $a3,
  * and the borrowed read in $a2 where retail's temp is $v0 -- allocation.
+ * Permuter from this 6-base: 8700 iterations, no output -- saturated.
  */
 
 
