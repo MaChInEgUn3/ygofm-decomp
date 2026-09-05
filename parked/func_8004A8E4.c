@@ -33,7 +33,18 @@
  * into $a2 and reuses it, which is what that arm gives) is -2 at 21/23 in
  * eight spellings: the 0x180 folds into the lbu displacement whatever the
  * base/offset naming, pinning or two-statement split, and the copy of v that
- * feeds the *24 never appears. The aggregate arm at 11 stays installed. */
+ * feeds the *24 never appears. The aggregate arm at 11 stays installed.
+ * 2026-09-05, second pass, twelve more on the aggregate arm: a base local
+ * `b = D_8009B458[0]` (which is what retail's single $a2 load says) is -2
+ * whatever surrounds it -- `e = b + off` plain, pinned, with `off` pinned,
+ * `e = b; e = e + off;`, the integer sum `(u8 *)((s32)b + off)`, and a
+ * fresh `s32 c = e[3]` for the compare with `v = c` inside the arm. The
+ * fold is combine substituting the single-use `off` def into `e = b + off`
+ * and the 384 into the lbu; only the symbol form's self-referencing
+ * `e = e + off` on the loaded pointer blocks it. The double read
+ * `if (e[3] != 0x63) { v = e[3]; ...` does NOT give retail's delay-slot
+ * copy `addu $v0,$v1,$zero` -- CSE folds it with no copy on either arm
+ * (symbol form 17, base-local form -2). Permuter: never run from this base. */
 #define D_8009B458_IS_AGGREGATE
 #include "common.h"
 
