@@ -1,3 +1,11 @@
+/* 29 differing at 158/158 with an EMPTY opcode census (2026-09-05); the
+ * previous 27 carried `addiu +1, addu -1`, so by the (length, census,
+ * differences) rule this is the closer candidate even though the count is
+ * two higher. One edit: `e = f;` before `t[16] = f[6];` and the read through
+ * `e` -- a borrowed name whose live range resumes later. Found by
+ * score_permuter_outputs.py in a stored output. Stream alignment 156/158
+ * against 157/158, so it is a trade, and it is written down as one.
+ */
 #include "common.h"
 
 void func_80021598(void) {
@@ -54,7 +62,8 @@ void func_80021598(void) {
         t[14] = v;
         *(s32 *)(p + 0x2C) = *(s32 *)(p + 0x2C) + func_80021558(2, v);
 
-        t[16] = f[6];
+        e = f;
+        t[16] = e[6];
 
         v = f[3];
         t[18] = v;

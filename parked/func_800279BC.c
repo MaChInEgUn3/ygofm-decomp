@@ -1,3 +1,10 @@
+/* 12 differing at 271/271 (2026-09-05; was 14). The mask constant 0x90000000
+ * used in the search loop is NAMED, and the name is a BORROW: `r`, the arm's
+ * result variable, assigned right after `n = 0; j = 0;` at the top of the
+ * block. The same assignment just before the loop or inside it is 14 -- the
+ * position is the lever, not the naming. Found by score_permuter_outputs.py
+ * in a stored output; decomposed from the preprocessed source by hand.
+ */
 #include "common.h"
 
 s32 func_800279BC(void) {
@@ -101,10 +108,11 @@ s32 func_800279BC(void) {
                 }
                 n = 0;
                 j = 0;
+                r = 0x90000000;
                 pa = a;
                 h = D_801A7AD8 + 0x8C + (D_8009B1D5 ^ 1) * 0x1A4;
                 do {
-                    if ((*(s32 *)(h + 0x14) & 0x90000000) == 0x90000000) {
+                    if ((*(s32 *)(h + 0x14) & r) == r) {
                         *pa = h;
                         pa++;
                         n++;

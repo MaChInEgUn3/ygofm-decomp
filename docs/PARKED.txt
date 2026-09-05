@@ -4208,6 +4208,7 @@ func_80071700 -- 146 built against 137, and the whole +9 is loop-invariant
   the same class as func_8004A518's hoisted 0x63: retail's build had one more
   pseudo in play and therefore hoisted less.
 
+func_80021598 -- 2026-09-05: 158/158 at 29 with an EMPTY census (was 27 with addiu +1/addu -1), on `e = f;` before one read; parked/ holds it. The entry below is the older history.
 func_80021598 -- 161 built against 158, and the residue is gcc *eliminating
   two induction variables that retail keeps*. The loop walks five cursors: a
   Rec20 record, that record + 1, two into D_801D5608, and the D_8009B1E8
@@ -6581,7 +6582,7 @@ func_800528AC -- 288/288 and 125 differences, `-fno-strength-reduce` (now in
     Handed to the permuter.
 
 # ---
-func_800279BC -- 271/271, 14 differences, empty opcode census. Default flags,
+func_800279BC -- 271/271, 12 differences (2026-09-05; was 14: the 0x90000000 mask named through the borrowed `r` at the block top), empty opcode census. Default flags,
     gp=4 at=0, no jump table. Candidate in parked/func_800279BC.c. This one
     went 161 -> 14 in one session on five source-shape levers and nothing
     else, so the entry is mostly a record of WHICH levers, because every one
