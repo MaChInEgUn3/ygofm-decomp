@@ -2362,6 +2362,18 @@ on a combination that had been in the table for weeks.
   says the attribute is doing the work rather than something else: the same
   source with plain scalars at default flags is **10 instructions against 12**.
 
+  **And it is the BARE form only -- where retail wants cc1psx's OWN split pair
+  beside a gp-relative symbol, `.data` is the wrong arm.** func_80015DFC sat
+  at -1 with D_800E9D98 in `.data`: the assembler expanded it adjacent and
+  self-referencing, and retail has the `lui` at the top of the join block,
+  copied into a branch's delay slot, with the `%lo` load two instructions
+  later. That is the compiler's pair, scheduled apart, and the way to get it
+  next to a one-byte `%gp_rel` flag is the second recipe branch: real scalar
+  declarations and `-G1` at BOTH the compiler and the assembler (2026-09-05,
+  a first-try MATCH once measured). So before converting a symbol to `.data`,
+  read whether retail's pair is adjacent-and-self-referencing (bare) or split
+  through a temp (cc1psx's own).
+
   **Why this matters beyond one function, and where it came from.** It is
   krystalgamer's route, raised as a review objection on our first PR to his
   tree, and the objection is one this file should have made itself. `u8

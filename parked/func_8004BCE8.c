@@ -22,6 +22,14 @@
  *   read-back and base local together                                      +1, 82
  * All at +1, so none of these was measured on a sound instrument; re-try
  * them once the length is right.
+ * 2026-09-05: default -G8 with as -G0, with and without split addresses,
+ * is the same +1/82; every arm writing its own `c = v & 0xFF; goto store;`
+ * tail is +1/81 under both flag rows and also puts the 0x1E arm inline.
+ * Read off the listing: retail's `addu $a0,$s0,$zero` sits in its OWN block
+ * (.L8004BDFC) between the two shift arms and the andi, and the two paths
+ * that skip it carry it in their delay slots -- reorg's copy-the-target-
+ * and-retarget-to-target+4 -- so the copy was a real instruction ahead of
+ * the mask in the source's join, not the call's argument setup.
  */
 #include "common.h"
 
