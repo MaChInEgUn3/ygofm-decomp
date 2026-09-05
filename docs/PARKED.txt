@@ -3235,7 +3235,8 @@ func_8004BCE8 -- the 2026-08-30 "port" was a TRANSCRIPTION (asm block), counted 
     `do { } while (0);` round the seven statements from the +0x7F4 store to
     the func_8004BC2C call, the permuter's find decomposed to that one edit.
     Then two coupled permuter edits (38 -> 22) and no `c` local, the mask
-    inline at the two halfword stores (22 -> 17). What is left is
+    inline at the two halfword stores (22 -> 17). What is left is the prologue
+    order and the reciprocal block's registers; follow-ups in the header.
     Permuter restarted from this base. The history below is the pre-port state.
 func_8004BCE8_WAS -- 82 differences at +1, and the count is badly inflated by the
     shift; the real residue is four instructions. Decode, settled: it resets
