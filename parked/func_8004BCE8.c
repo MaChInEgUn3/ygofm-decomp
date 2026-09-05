@@ -1,5 +1,4 @@
-/* +1 at 98/97, 82 differing (the count is shift-inflated; the park entry
- * names the real residue as four instructions). RECOVERED from git
+/* 38 differing at 97/97 (2026-09-05; was +1 at 98/97 and 82). RECOVERED from git
  * 2026-09-04 (the Unchiga merge deleted it and put a transcription in src/).
  *
  * The +1 is the third `andi $v0,$a1,0xFF`: gcc fills the `m != 0x3C` branch's
@@ -30,6 +29,20 @@
  * that skip it carry it in their delay slots -- reorg's copy-the-target-
  * and-retarget-to-target+4 -- so the copy was a real instruction ahead of
  * the mask in the source's join, not the call's argument setup.
+ *
+ * +1 -> 0/39 (2026-09-05, permuter, decomposed): a `do { } while (0);` round
+ * the seven statements from the +0x7F4 store to the func_8004BC2C call. The
+ * extra andi was not an andi problem at all; with the block pinned the
+ * dispatcher's join comes out with retail's copies and the length is exact.
+ * The permuter's other two edits (`c = m;` for the test, a named address for
+ * the last store) are worth nothing on their own or on top (41).
+ * 39 -> 38: the +0x808 store inside the same pin. Dead at exact length: the
+ * divisor read back (39), `p` pinned alone (+2), a named pointer for the
+ * store block (39), the store pinned alone (+1).
+ * What is left is register allocation throughout: retail loads the base into
+ * $v1 and forms p before the first byte store; the reciprocal block runs in
+ * $v0/$v1 where ours uses $a0/$a1; and the join's copy/andi order. Permuter
+ * restarted from this base.
  */
 #include "common.h"
 
@@ -43,14 +56,16 @@ s32 func_8004BCE8(void) {
     p = D_8009B458 + 0x518;
     D_8009B458[0x801] = 0;
     *(s32 *)(D_8009B458 + 0x7F0) = 0;
-    *(s32 *)(D_8009B458 + 0x7F4) = 0;
-    *(s32 *)(D_8009B458 + 0x518) = 8;
-    *(s16 *)(D_8009B458 + 0x7FC) = func_8004BCA8(p);
-    *(s16 *)(D_8009B458 + 0x7FA) = 1;
-    *(s16 *)(D_8009B458 + 0x7F8) = 0;
-    *(s32 *)(D_8009B458 + 0x7EC) = 0x10000;
-    r = (u32)func_8004BC2C(p) >> 8;
-    *(s32 *)(D_8009B458 + 0x808) = r;
+    do {
+        *(s32 *)(D_8009B458 + 0x7F4) = 0;
+        *(s32 *)(D_8009B458 + 0x518) = 8;
+        *(s16 *)(D_8009B458 + 0x7FC) = func_8004BCA8(p);
+        *(s16 *)(D_8009B458 + 0x7FA) = 1;
+        *(s16 *)(D_8009B458 + 0x7F8) = 0;
+        *(s32 *)(D_8009B458 + 0x7EC) = 0x10000;
+        r = (u32)func_8004BC2C(p) >> 8;
+        *(s32 *)(D_8009B458 + 0x808) = r;
+    } while (0);
 
     v = 60000000 / r * 100 / 115;
     if (v >= 0x100) {
