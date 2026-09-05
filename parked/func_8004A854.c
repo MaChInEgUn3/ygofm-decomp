@@ -24,6 +24,13 @@
  * `i = 0` as the loop guard's delay slot and derives `o = i` after it, where we
  * emit `o = 0` early and derive `i = o`. Writing the pair the other way round
  * in the source (`s32 o = 0; s32 i = o;`) does not swap them back (13).
+ * 2026-09-05, all re-measured under default -G8 with as -G0 (the file's
+ * -G0 -mno-split-addresses row scores the same 11): `u16 bestv = 0xFFFF`
+ * with u16 or s32 v (13, 13), `s32 bestv = 0xFFFF` with an explicit `& 0xFFFF`
+ * in the compare (13) or with s32 v (13), `o = 0; i = o;` (11), a shared
+ * `z = 0` for both (11), and the guard-plus-do/while form for the `i++` in
+ * the lh delay slot (-2). Three faults, each measured alone: the 0xFFFF that
+ * must stay unbounded, the zero pair's direction, and the increment's slot.
  */
 #include "common.h"
 
