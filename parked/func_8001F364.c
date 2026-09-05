@@ -1,3 +1,11 @@
+/* 2026-09-05, still 14: the two dispatcher delay slots. Retail fills the
+ * `v < 2` branch's slot with the >=2 block's own first instruction (addiu 2)
+ * and the `v == 0` branch's slot with the fall-through's `addiu $v0,1`; we
+ * leave the first a nop and hoist m0's `addiu $a0,0x10` into the second, so
+ * gcc predicts the second branch taken where retail's did not. An explicit
+ * `if (v >= 2) goto hi;` with the >=2 block written after the return, and the
+ * nested if/else form, are both 14 -- the layout is already retail's, the
+ * filler's thread choice is what differs. Permuter next. */
 #include "common.h"
 
 s32 func_8001F364(void) {
