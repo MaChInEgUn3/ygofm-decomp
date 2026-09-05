@@ -60,7 +60,18 @@
  * for the record base are both 12, so the negation stays. What is left:
  * k in $a1 where retail has $a3 (and r therefore in $a2 against $a1), and
  * the addu's operand order -- allocation only.
+ *
+ * 9 -> 6 (2026-09-05, permuter iteration ~3800, decomposed): the search
+ * loop's entry pointer is the FIRST loop's cursor `r` (`r = sl[j]`, no `e`
+ * at all) -- the func_800339D0 rule, a second loop's cursor wanting the
+ * first loop's name. Then the plain `r = D_801A7AD8 + k * 28;` is 6 where
+ * the negation is 7, so the negation trick was compensating for the
+ * allocation and is gone. Dead at 6: the loop read inline (10), borrowed
+ * into `j` (12), a fresh `w` (10), k as a ternary (6, same), `s16 k` (69),
+ * k's assignment pinned (15). What is left: k in $a2 where retail has $a3,
+ * and the borrowed read in $a2 where retail's temp is $v0 -- allocation.
  */
+
 
 
 #include "common.h"
@@ -70,7 +81,6 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
     u8 *sl[5];
     u8 *t;
     u8 *r;
-    u8 *e;
     s32 i;
     s32 j;
     s32 n;
@@ -93,7 +103,7 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
         k = 0x14;
     }
 
-    r = D_801A7AD8 - -(k * 28);
+    r = D_801A7AD8 + k * 28;
 
     for (i = 0; i < 5; i++, r += 0x1C) {
         sl[i] = (u8 *)0;
@@ -107,16 +117,16 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
 
     for (n = 0; n < 3; n++) {
         for (j = 0; j < 5; j++) {
-            e = sl[j];
-            if (e != 0) {
-                if (*(s16 *)(e + 0xC) == *(u16 *)(t + n * 2)) {
+            r = sl[j];
+            if (r != 0) {
+                if (*(s16 *)(r + 0xC) == *(u16 *)(t + n * 2)) {
                     goto found;
                 }
             }
         }
         return 0;
     found:
-        out[n] = e;
+        out[n] = r;
         sl[j] = (u8 *)0;
     }
 
