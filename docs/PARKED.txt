@@ -7619,15 +7619,11 @@ func_8002ABB4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED, FIRST TRY. src/
   also a MATCH, so it is not load-bearing; naming all three as initialisers at
   the top is -1, because the batch then crosses the 0x100 store.
 
-func_80015DFC
-    STILL OPEN, but the C is now WRITTEN: parked/func_80015DFC.c, 61/62 and
-    18 differing, 2026-09-04, through the gte_* macros rather than the
-    transcription's raw coprocessor asm. Four levers found (a two-halfword
-    struct for the GTE result, the x read named before the zero store, the
-    D_8009B1D5 read named after the y read, and D_800E9D98 into .data); the
-    residue is a delay-slot fill choice at the join before the func_80016784
-    call, and seven spellings of the join score identically. src/ keeps the
-    transcription. Full notes in the candidate's header.
+func_80015DFC MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
+    The -1 was D_800E9D98 needing cc1psx's OWN pair (lui at the join block's
+    top, copied into the skip branch's slot) while the one-byte D_8009B1D5
+    stays gp-relative: plain scalar declarations, -G1 at both the compiler
+    and the assembler. The .data arm gave the assembler's adjacent expansion.
 
 func_800177C4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED. src/func_800177C4.c is
   real C through the gte_* macros and the build hashes 84747e64; the

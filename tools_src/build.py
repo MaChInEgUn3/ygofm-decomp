@@ -336,7 +336,7 @@ PER_FUNC_FLAGS.update({n: _O1_G0_MACRO for n in _G0_MACRO_FUNCS})
 PORTED_FLAGS = {
     "func_800137E4": ["-quiet", "-O2", "-G0", "-mno-split-addresses"],
     "func_80015D18": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_80015DFC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
+    "func_80015DFC": ['-quiet', '-O2', '-G1', '-msplit-addresses'],
     # func_800177C4: a second giv on the output cursor (dst and dst+2) without it;
     # retail walks one cursor with plain displacements.
     "func_800177C4": _O2_G8_NOSTRENGTH,
@@ -548,6 +548,7 @@ PER_FUNC_AS_FLAGS["func_8004B374"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002C604"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B854"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80070710"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80015DFC"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
