@@ -7666,3 +7666,10 @@ func_80049920
     2026-09-05, from the listing in one tick with none of the transcription's
     aliases or pins. Six levers in the header; the five left are i and mask
     with $s3/$s4 exchanged, a pure allocation tie-break. Permuter running.
+
+func_8004A518
+    STILL OPEN, but the C is now PURE: parked/func_8004A518.c, +2 at 114/112
+    and 99 differing, 2026-09-05, with none of the transcription's reloads,
+    pins or fences. One cursor name per loop fixed the prologue; the +2 is one
+    extra callee-saved register ($s6) whose uses are listed in the header.
+    Explicit top-of-loop reloads are +4 and neither scheduler flag helps.
