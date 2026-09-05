@@ -2415,7 +2415,12 @@ on a combination that had been in the table for weeks.
   been leaning on the inflated arm (`*(s32 *)D_800FE0D0` reading through an
   array's address, a byte store on a `u16`), both fixed as lvalue casts; and
   the `-G0` rows are a different population, with scalar arms rather than
-  sizes, so nothing there converts by this route. Each conversion removes a
+  sizes -- which converts by the same route where the scalar was the ONLY
+  reason for the row: seven units whose one guard was a single `_IS_SCALAR`
+  (func_80070710, func_8003F7D4, func_80030F40 and four D_8009B0D8 users)
+  build byte-identical with the symbol in `.data` at the default threshold,
+  and their `-G0` rows are gone (124 -> 117). The units with several
+  scalar guards, or with `lui $at` stores, are the ones still to measure. Each conversion removes a
   per-function assembler flag *and* an inflated size only when both claims
   hold, and they are separate claims. One
   conversion is measured; 179 are not. Do them a few at a time against the full
