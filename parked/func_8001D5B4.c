@@ -30,6 +30,10 @@
  * No source layout or flag tried keeps it. Also visible: retail duplicates
  * the =3 store (`sb / j epilogue / addiu 1`) where we cross-jump it into the
  * first block's store.
+ * Later the same day: an accumulator return (`ret = 1;` once at the top,
+ * every exit a `goto done; done: return ret;`) is +3; assigned at each exit
+ * instead it is the same -2/35. The return-1 block does not come back that
+ * way either.
  */
 #include "common.h"
 
