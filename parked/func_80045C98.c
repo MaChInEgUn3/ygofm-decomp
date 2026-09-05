@@ -5,7 +5,8 @@
  * load and the +1 inline in the multiply (3), operands swapped (2), a fresh
  * `h2` (3), `h = load; h = h + 1;` (3), `h += 1` (3), and the first block's
  * `h` renamed to `g` (81, a length change). Allocation tie-break in one
- * block -- permuter next. gp=0, at=0, as -G0.
+ * block -- permuter run 2026-09-05: 7500 iterations, no output at all.
+ * gp=0, at=0, as -G0.
  */
 #include "common.h"
 
