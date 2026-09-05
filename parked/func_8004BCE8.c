@@ -81,7 +81,20 @@
  * divu exactly as retail -- but rotates r into $v1 and m into $a0, so it
  * reads 17 by position. The prologue half (p formed and copied before the
  * reload) is untouched by it. `k = 0x3C` is 19; `p = 0x518 + b` is nothing.
+ *
+ * 13 -> 7 (2026-09-05, permuter output-120-1 at ~9000 iterations): the
+ * call result goes through the LATER result name -- `v = (u32)call >> 8;
+ * r = v;` -- the func_8002A4A8 borrow (v's live range resumes at the
+ * division), and the whole reciprocal block then comes out in retail's
+ * order and registers. Chained `r = v = ...` and `v = r = ...` are the same
+ * 7; the two-statement form is installed. On top of it the 0x3C borrow and
+ * `r = 8` are nothing. What is left is the PROLOGUE only: retail forms
+ * `addiu $s0,$v1,1304` before the byte store and copies it into $a0 before
+ * the two word stores; re-measured dead here: `a = p` before or after the
+ * sb (7, 7), p through the symbol before b (7), declaration order (7), the
+ * p assignment pinned (87), the sb through p (88).
  */
+
 
 
 #include "common.h"
@@ -105,7 +118,8 @@ s32 func_8004BCE8(void) {
         *(s16 *)(D_8009B458 + 0x7FA) = 1;
         *(s16 *)(D_8009B458 + 0x7F8) = 0;
         *(s32 *)(D_8009B458 + 0x7EC) = 0x10000;
-        r = (u32)func_8004BC2C(p) >> 8;
+        v = (u32)func_8004BC2C(p) >> 8;
+        r = v;
         k = 60000000;
         *(s32 *)(D_8009B458 + 0x808) = r;
     } while (0);
