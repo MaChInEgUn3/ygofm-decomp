@@ -26,6 +26,14 @@
  *     the next top)
  *   the same with -fno-schedule-insns                         +4
  *   the same with -fno-schedule-insns2                        +4, worse
+ *   the 0x63 as a u8 local assigned INSIDE the loop               +2, 99
+ *   the same as an s32 local inside the loop                       +2, 99
+ *   both loop-2 literals (0x63, second 0x40) as u8 locals inside    +2, 99
+ * So the $s6 is gcc hoisting the invariant literal 0x63 out of a loop that
+ * contains calls, into a callee-saved register; retail materialises it per
+ * iteration as a temp. The same unsolved mechanism as func_8004B374's
+ * per-iteration `andi` (see WORKFLOW, "an invariant retail leaves inside a
+ * call-bearing loop").
  * Also visible: loop 1's `slti` and cursor increment are scheduled early
  * where retail keeps the increment in the loop-back delay slot; that is
  * downstream of the register question and was not attacked separately.

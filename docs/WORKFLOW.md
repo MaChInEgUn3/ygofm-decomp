@@ -1427,6 +1427,24 @@ permuter found the first; the second is the same idea applied by hand.
    retail's single cursor with two plain displacements. All three spellings
    are the same C; only the third reproduces the target.
 
+   **OPEN: an invariant that retail leaves INSIDE a call-bearing loop, and gcc
+   hoists into a callee-saved register.** Two functions, same shape, no
+   source spelling found. func_8004B374: retail keeps `arg1` raw in `$s5` and
+   does `andi $v0,$s5,0xFF` every iteration in a delay slot; gcc hoists the
+   mask into `$s4` once. func_8004A518: retail materialises the literal 0x63
+   with `addiu $v0,$zero,0x63` inside the loop; gcc hoists it into `$s6`,
+   which is the seventh callee-saved register and two instructions of
+   prologue retail does not have. Measured and dead on both: a `u8` or `s32`
+   local for the value assigned inside the loop, the same before the loop, a
+   `u8` PARAMETER (byte-identical output), a `do { } while (0);` pin, the
+   literal instead of a name, `-fno-schedule-insns` and `-fno-schedule-insns2`.
+   The transcriptions reached retail's bytes with an empty asm launder on the
+   register (B374) and register pins (A518) -- i.e. by telling gcc the value
+   changes every iteration. Whatever retail's source did, it made loop.c
+   decline to move an invariant it plainly could; the discriminator is not
+   established, and it is worth one probe on a four-line loop through cc1psx
+   before another function is spent on it.
+
 7. **Then** the flags — `tools_src/sweep_try.py` first, `sweep_flags.py` to
    confirm. Do not leave this to last when the target shows a **loop counting
    the other way**: gcc reverses a counted loop whose counter is dead after it,
