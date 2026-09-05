@@ -51,7 +51,17 @@
  * the whole prologue). What is left: k in $a1 where retail has $a3, the
  * addu's operands (base first here, index first in retail), and both loop
  * counters in $a2 against $a3 -- allocation only, no instruction moved.
+ *
+ * 11 -> 9 (2026-09-05, permuter iteration 65, decomposed): the first loop's
+ * halfword read borrowed into the dead `k` -- `k = *(u16 *)(r + 0x16);
+ * if ((k & 0x8000) != 0)` -- puts BOTH loop counters in retail's $a3. The
+ * embedded `(k = ...) & 0x8000` form is the same 9. Borrowing `j` instead
+ * is 13 and `n` is 22; on this base the plain `+` and the `(s32)` cast sum
+ * for the record base are both 12, so the negation stays. What is left:
+ * k in $a1 where retail has $a3 (and r therefore in $a2 against $a1), and
+ * the addu's operand order -- allocation only.
  */
+
 
 #include "common.h"
 
@@ -87,7 +97,8 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
 
     for (i = 0; i < 5; i++, r += 0x1C) {
         sl[i] = (u8 *)0;
-        if ((*(u16 *)(r + 0x16) & 0x8000) != 0) {
+        k = *(u16 *)(r + 0x16);
+        if ((k & 0x8000) != 0) {
             sl[i] = r;
         }
     }
