@@ -47,7 +47,9 @@
  * 9; `t = sym + arg0`, k after t, v before k all 9; v inline 10; the p load
  * pinned alone inside 10; -mno-split-addresses on it 25). So the pin is a
  * third half-lever; what fixes the prologue store's position is not found.
- * Saturated at 9000 iterations, nothing below its own 130.
+ * Saturated at 9000 iterations, nothing below its own 130. Second run,
+ * same base: 9800 iterations, the same whole-body pin at 130 and nothing
+ * below it.
  */
 #include "common.h"
 
