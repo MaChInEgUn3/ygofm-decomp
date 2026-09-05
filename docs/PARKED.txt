@@ -1095,6 +1095,12 @@ func_8005C388_WAS -- 11 differences, register assignment around the table base.
   it is an s32. Corrected in functions.h.
 
 func_80017F04 -- 12 differences: two registers and the scheduling behind them.
+    MATCHED 2026-09-05. Not the registers: the index. `tbl[idx - 1]` folds the
+    -1 into a -4 displacement where retail keeps the `addiu -1` and loads at
+    0(); a named `k = *(s16 *)(arg0 + 0xC) - 1;` as the first statement after
+    the call, the base local assigned after it, and the +0x68 store between
+    the two zero stores is a MATCH. The same k with the zero stores first is
+    +1 -- the ordering this entry lists as measured was measured without k.
   Creates a sprite for the record at arg0 and fills five bytes at +0x67..+0x6B,
   one of which is the record's index computed as a pointer difference divided
   by 28 (gcc factors that into `srl 2` plus the unsigned magic multiply for 7).
