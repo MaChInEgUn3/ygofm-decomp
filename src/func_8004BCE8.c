@@ -1,140 +1,90 @@
-/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
- * Ordinary MIPS written into an inline asm block to force a match. It is
- * byte-exact and therefore invisible to build.py, which is exactly the
- * problem: the oracle cannot tell transcribed assembly from real C, so
- * nothing but this comment stops it being counted as done.
- * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
- */
-/* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
- * His C, his comments; the identifiers are rewritten to this repo's address
- * form and nothing else was touched. Verified the only way that counts here:
- * tools_src/build.py rebuilds the retail image byte-for-byte with this in it.
+/* MATCH (2026-09-05). Was an ASSEMBLY TRANSCRIPTION (Unchiga's port of
+ * 2026-08-30, an inline asm block) counted as debt in docs/ASM_DEBT.md;
+ * this is the C. Flags: -O2 -G0 -mno-split-addresses, as -G0 (gp == 0, the
+ * scalar D_8009B458 arm). The full history is in docs/PARKED.txt.
  *
- * Self-contained by design -- it keeps his declarations rather than ours,
- * because a declaration is a codegen input and his are what this C matched
- * under. See docs/MERGE_UNCHIGA.md and tools_src/install_ported.py.
+ * Track/tempo-stream setup on D_8009B458: resets the record's stream
+ * fields, reads a halfword through func_8004BCA8 and a word through
+ * func_8004BC2C (its top three bytes are the raw tempo), computes
+ * 60000000 / tempo * 100 / 115, clamps it to 0xFF, halves or quarters it by
+ * mode (0x1E: >> 2; 0x18 and 0x3C: >> 1) and stores the byte into +0x16 and
+ * +0x14 of the record before handing it to func_8004BAE4.
+ *
+ * The shape is the D_8009B0F4-family idiom: a `do { } while (0);` (a macro
+ * in the original) round the eight statements from the +0x7F0 store to the
+ * +0x808 store. The last three levers, in order: a base local `b` loaded
+ * BEFORE the byte store through the pointee, so the +0x518 store goes
+ * through the pre-store base while everything after the `sb` reloads;
+ * the dividend named inside the pin (`k = 60000000;`); the call result
+ * routed through the later result name (`v = call >> 8; r = v;`), which
+ * puts the whole reciprocal block in retail's order; and finally the
+ * +0x7F0 store moved INSIDE the pin, which is what forms `p` and copies it
+ * into $a0 before the two word stores -- the permuter found that last one
+ * at score 0 after 13 -> 7 by hand. Every one of these was measured as
+ * worthless or worse while an earlier fault was still open.
  */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef signed char s8;
-typedef short s16;
-typedef int s32;
-
-/* Track/tempo-stream setup on D_8009B458 (BigState). Resets record0's
-   stream position and the byte-stream func_800738F0 limit, reads a 2-byte
-   "division" field via func_8004BCA8(rec0), reads a 4-byte
-   value via func_8004BC2C(rec0) and keeps its top 3 bytes as the raw
-   tempo (usec/quarter-note), computes the per-tick timer rate as
-   60000000/tempoRaw scaled *100/115 (verified magic-multiply constant --
-   gcc's own division-by-115 idiom reproduces the target's exact
-   instruction sequence, no need to hand-roll it -- but it must stay
-   UNSIGNED (u32), or gcc emits a signed-division overflow guard the
-   target does not have), clamped to 0xFF and right-shifted by 1
-   (division==0x18/0x3C) or 2 (division==0x1E), writes the result into
-   record0's f14/f16 timer fields, then calls func_8004BAE4(rec0)
-   purely for its side effect (return discarded). Finally re-derives
-   D_8009B458->unk804 from tempoDiv (once inside a >=0x60 guard, then
-   again unconditionally -- both stores are present in the target).
-
-   D_8009B458 is re-fetched via a fresh absolute lui+lw at every access
-   site rather than cached across the three calls -- this codebase's
-   documented pattern for this exact global (see init_spu_voices.c,
-   process_timer_burst_records_8004c8c8.c). record0's own pointer is
-   pinned to $s0 (the function's only saved register in the target) so
-   gcc doesn't also spill one of the transient BigState reloads into a
-   second saved register. */
-
-typedef struct {
-    u32 f0;                /* 0x0: stream-func_800738F0 position */
-    u8 pad4[0x14 - 4];
-    u16 f14;                /* 0x14: timer accumulator */
-    u16 f16;                /* 0x16: timer increment */
-} Rec0;
-
-typedef struct {
-    u8 pad0[0x7EC];
-    u32 limit;              /* 0x7EC: byte-stream func_800738F0 limit */
-    u32 unk7F0;              /* 0x7F0 */
-    u32 unk7F4;              /* 0x7F4 */
-    u16 unk7F8;              /* 0x7F8 */
-    u16 unk7FA;              /* 0x7FA */
-    u16 tempoDiv;             /* 0x7FC: PPQN-ish divisor selector */
-    u8 pad7FE[0x801 - 0x7FE];
-    u8 unk801;                /* 0x801 */
-    u8 pad802[0x804 - 0x802];
-    s32 unk804;               /* 0x804 */
-    u32 tempoUsec;             /* 0x808: microseconds per quarter note */
-} BigState;
-
-extern BigState *D_8009B458;
-extern s32 func_8004BCA8(s32 a0);
-extern s32 func_8004BC2C(s32 a0);
-extern s32 func_8004BAE4(s32 a0);
+#include "common.h"
 
 s32 func_8004BCE8(void) {
-    register BigState *rv1 asm("v1");
-    register Rec0 *rec0 asm("s0");
-    register BigState *rv0 asm("v0");
-    register BigState *ra0 asm("a0");
-    s32 division;
-    s32 packed4;
-    u32 tempoUsec;
-    u32 mask;
+    u8 *b;
+    u8 *p;
+    u32 r;
+    u32 v;
+    s32 m;
+    u32 k;
 
-    rv1 = D_8009B458;
-    __asm__ volatile("addiu %0, %1, 0x518" : "=r"(rec0) : "r"(rv1));
-    rv1->unk801 = 0;
+    b = D_8009B458;
+    p = b + 0x518;
+    b[0x801] = 0;
+    do {
+        *(s32 *)(D_8009B458 + 0x7F0) = 0;
+        *(s32 *)(D_8009B458 + 0x7F4) = 0;
+        *(s32 *)(b + 0x518) = 8;
+        *(s16 *)(D_8009B458 + 0x7FC) = func_8004BCA8(p);
+        *(s16 *)(D_8009B458 + 0x7FA) = 1;
+        *(s16 *)(D_8009B458 + 0x7F8) = 0;
+        *(s32 *)(D_8009B458 + 0x7EC) = 0x10000;
+        v = (u32)func_8004BC2C(p) >> 8;
+        r = v;
+        k = 60000000;
+        *(s32 *)(D_8009B458 + 0x808) = r;
+    } while (0);
 
-    __asm__ volatile("lui %0, %%hi(D_8009B458)\n\tlw %0, %%lo(D_8009B458)(%0)" : "=r"(rv0));
-    rv0->unk7F0 = 0;
-    rv0->unk7F4 = 0;
-
-    *(u32 *)((u8 *)rv1 + 0x518) = 8;
-    division = func_8004BCA8((s32)rec0);
-
-    __asm__ volatile("lui %0, %%hi(D_8009B458)\n\tlw %0, %%lo(D_8009B458)(%0)" : "=r"(rv1));
-    rv1->tempoDiv = (u16)division;
-    rv1->unk7FA = 1;
-    rv1->unk7F8 = 0;
-    rv1->limit = 0x10000;
-    packed4 = func_8004BC2C((s32)rec0);
-
-    tempoUsec = (u32)packed4 >> 8;
-
-    ra0 = D_8009B458;
-    ra0->tempoUsec = tempoUsec;
-
-    tempoUsec = 60000000u / tempoUsec;
-    tempoUsec = tempoUsec * 100u / 115u;
-    if (tempoUsec >= 0x100) {
-        tempoUsec = 0xFF;
+    v = k / r;
+    v = v * 100 / 115;
+    if (v >= 0x100) {
+        v = 0xFF;
     }
 
-    switch (ra0->tempoDiv) {
-    case 0x3C:
-    case 0x18:
-        tempoUsec >>= 1;
-        break;
-    case 0x1E:
-        tempoUsec >>= 2;
-        break;
+    m = *(u16 *)(D_8009B458 + 0x7FC);
+    if (m == 0x1E) {
+        goto sh2;
     }
+    if (m < 0x1F) {
+        if (m == 0x18) {
+            goto sh1;
+        }
+        goto store;
+    }
+    if (m != 0x3C) {
+        goto mask;
+    }
+sh1:
+    v >>= 1;
+    goto mask;
+sh2:
+    v >>= 2;
+mask:
+store:
+    *(s16 *)(p + 0x16) = v & 0xFF;
+    *(s16 *)(p + 0x14) = v & 0xFF;
+    func_8004BAE4(p);
 
-    mask = tempoUsec & 0xFF;
-    rec0->f16 = mask;
-    rec0->f14 = mask;
-    func_8004BAE4((s32)rec0);
-
-    __asm__ volatile("lui %0, %%hi(D_8009B458)\n\tlw %0, %%lo(D_8009B458)(%0)" : "=r"(rv1));
-    if (rv1->tempoDiv >= 0x60) {
-        rv1->unk804 = rv1->tempoDiv;
+    if (*(u16 *)(D_8009B458 + 0x7FC) >= 0x60) {
+        *(s32 *)(D_8009B458 + 0x804) = *(u16 *)(D_8009B458 + 0x7FC);
     } else {
-        rv1->unk804 = 0;
+        *(s32 *)(D_8009B458 + 0x804) = 0;
     }
-
-    __asm__ volatile("lui %0, %%hi(D_8009B458)\n\tlw %0, %%lo(D_8009B458)(%0)" : "=r"(rv1));
-    rv1->unk804 = rv1->tempoDiv;
-
+    *(s32 *)(D_8009B458 + 0x804) = *(u16 *)(D_8009B458 + 0x7FC);
     return 1;
 }
