@@ -192,3 +192,27 @@ what became `include/gte.h`, and both now have real C (one retired, one at
 by hand; the frame and the call are the tell, not the mnemonic. Four of the
 18 are matched as C in krystalgamer's tree, which is the next thing to look
 at.
+
+## Paid back on 2026-09-05 (18 -> 8)
+
+Ten transcriptions retired into real, byte-identical C in one day, each by a
+lever that is now written down in WORKFLOW.md. The point of the list is the
+lever, not the name:
+
+| function | insns | what closed it |
+|---|---|---|
+| func_80016DDC, func_8003A198, func_8005C5D4 | 20-60 | krystalgamer's matched C, byte-identical under cc1psx 2.8.1 |
+| func_80049920 | 81 | a named zero compared against in the entry guard: a third pseudo breaks the `$s3/$s4` tie |
+| func_8004B374 | 74 | the call-bearing loop written with `goto` (no loop notes, so gcc hoists nothing), then a `do { } while (0);` round the loop's bottom and two separate zeroings |
+| func_8002C604 | 34 | scalar arm + `as -G0`: the listing has no `%gp_rel`, so the bare form is free |
+| func_8004B854 | 47 | default compiler: cc1psx's own pair for the callback address puts the `%lo` in the jal's slot |
+| func_80070710 | 10 | D_8009B361 on its scalar arm + `as -G0`: bare selector load, table pair straddling it |
+| func_80015DFC | 62 | real scalar declarations and `-G1` at BOTH compiler and assembler: cc1psx's own pair beside a gp-relative flag |
+| func_8004A518 | 112 | the `goto` loop again, one pointer name per loop, the base as loop 2's cursor, then two permuter finds decomposed by hand |
+
+The eight left (func_8001D5B4, func_8002C7E8, func_8002CBF4, func_8004A6F8,
+func_8004A764, func_8004A854, func_8004A8E4, func_8004BCE8) are all pure C at
+exact length except func_8001D5B4 (-2, structural), with residues of 2 to 22
+that are register allocation or scheduling; every one has a header listing what
+was measured and the permuter has been run on each from its best base.
+
