@@ -618,7 +618,6 @@ PER_FUNC_AS_FLAGS["func_8002A2F4"] = "-G0"
 # is reproducible from the repo.
 PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80038530"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020BE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004BBBC"] = "-G0"

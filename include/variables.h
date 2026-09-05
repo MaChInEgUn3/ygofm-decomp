@@ -845,12 +845,10 @@ extern u8 D_8009B144[];
 extern u8 D_8009B144;
 #endif
 /* Data Crystal RAM map, UNVERIFIED: read by the duel-end path (wiki gives a function offset that does not resolve to any boundary in asm/nonmatchings -- unresolved) */
-#ifdef D_8009B360_IS_SCALAR
 #ifdef D_8009B360_IN_DATA
 extern s8 D_8009B360 __attribute__((section(".data")));
-#else
+#elif defined(D_8009B360_IS_SCALAR)
 extern s8 D_8009B360;
-#endif
 #else
 extern s8 D_8009B360[];
 #endif
