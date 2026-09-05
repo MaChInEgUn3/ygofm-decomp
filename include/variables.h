@@ -846,7 +846,11 @@ extern u8 D_8009B144;
 #endif
 /* Data Crystal RAM map, UNVERIFIED: read by the duel-end path (wiki gives a function offset that does not resolve to any boundary in asm/nonmatchings -- unresolved) */
 #ifdef D_8009B360_IS_SCALAR
+#ifdef D_8009B360_IN_DATA
+extern s8 D_8009B360 __attribute__((section(".data")));
+#else
 extern s8 D_8009B360;
+#endif
 #else
 extern s8 D_8009B360[];
 #endif
@@ -1090,7 +1094,9 @@ extern u16 D_8009B124;
 extern s32 D_8009B0E8;
 extern s32 D_8009B130;
 extern s32 D_8009B0FC;
-#ifdef D_8009B374_IS_SCALAR
+#ifdef D_8009B374_IN_DATA
+extern u16 D_8009B374 __attribute__((section(".data")));
+#elif defined(D_8009B374_IS_SCALAR)
 extern u16 D_8009B374;
 #else
 extern u16 D_8009B374[];
@@ -1101,11 +1107,17 @@ extern u16 D_8009B374[];
  * way it hoists half of its own %hi/%lo pair (func_8002CEE8). */
 extern u16 D_8009B370[4];
 #elif defined(D_8009B370_IS_SCALAR)
+#ifdef D_8009B370_IN_DATA
+extern u16 D_8009B370 __attribute__((section(".data")));
+#else
 extern u16 D_8009B370;
+#endif
 #else
 extern u16 D_8009B370[];
 #endif
-#ifdef D_8009B372_IS_SCALAR
+#ifdef D_8009B372_IN_DATA
+extern u16 D_8009B372 __attribute__((section(".data")));
+#elif defined(D_8009B372_IS_SCALAR)
 extern u16 D_8009B372;
 #else
 extern u16 D_8009B372[];
@@ -1711,7 +1723,11 @@ extern s32 D_8009B304;
 extern s32 D_8009B310;
 extern s32 D_8009B314;
 extern s32 D_8009B300;
+#ifdef D_8009B30C_IN_DATA
+extern s32 D_8009B30C __attribute__((section(".data")));
+#else
 extern s32 D_8009B30C;
+#endif
 extern s32 D_8009B308;
 extern s32 D_8009B0B8;
 extern s32 D_8009B0A4;

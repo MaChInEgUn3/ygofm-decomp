@@ -1,4 +1,4 @@
-#define D_8009B3A4_IS_VOLATILE
+#define D_8009B3A4_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_80023FBC(u8 *arg0) {

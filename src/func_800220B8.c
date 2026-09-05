@@ -1,5 +1,7 @@
-#define D_8009B394_IS_VOLATILE
-#define D_8009B3A4_IS_VOLATILE
+#define D_8009B30C_IN_DATA
+#define D_8009B394_IN_DATA_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
+#define D_8009B3A4_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_800220B8(void) {

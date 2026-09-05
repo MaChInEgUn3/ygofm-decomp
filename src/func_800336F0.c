@@ -4,9 +4,11 @@
  * branch's delay slot. Found by sweep_guards.py, whose comment on this
  * symbol -- "func_80023FBC reads it five times in a row and retail reloads
  * each time" -- is the same observation. */
-#define D_8009B3A4_IS_VOLATILE
-#define D_8009B254_IS_SCALAR
-#define D_8009B398_IS_VOLATILE
+#define D_8009B246_IN_DATA
+#define D_8009B254_IN_DATA
+#define D_8009B394_IN_DATA_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
+#define D_8009B3A4_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_800320BC(u8 *arg0, s32 arg1);

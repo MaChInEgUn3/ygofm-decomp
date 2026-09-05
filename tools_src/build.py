@@ -522,7 +522,6 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # gp-relative load. The comment above says the two -G settings must match, and
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
-PER_FUNC_AS_FLAGS["func_8003AD6C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800610E0"] = "-G0"
@@ -598,7 +597,6 @@ PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
 # func_80045C98: gp == 0 and thirteen %hi/%lo reads of D_8009B45C.
 PER_FUNC_AS_FLAGS["func_80045C98"] = "-G0"
-PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004803C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
@@ -678,7 +676,6 @@ PER_FUNC_AS_FLAGS["func_80049BAC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A2F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047AD0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800388D8"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80023FBC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8001755C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80044DA0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CB0"] = "-G0"
@@ -724,7 +721,6 @@ PER_FUNC_AS_FLAGS["func_8003BD14"] = "-G0"
 # gp == 0 in func_80048768; scalar D_8009B45C plus a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_80048768"] = "-G0"
 # gp == 0 in func_8003353C; every global there is %hi/%lo, so -G0 is free.
-PER_FUNC_AS_FLAGS["func_8003353C"] = "-G0"
 # func_8002596C: same pair as func_80025D30 -- D_8009B260 declared [8] must be
 # non-small while D_8009B20C, declared [2] here, stays gp-relative.
 # func_800371A8: every gp-relative symbol here is one byte, so the window
@@ -751,7 +747,6 @@ PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"
 # gp == 0 in func_8004AAFC; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004AAFC"] = "-G0"
 # gp == 0 in func_800336F0; every symbol wants the assembler's bare form.
-PER_FUNC_AS_FLAGS["func_800336F0"] = "-G0"
 # gp == 0 in func_8004A940; scalar D_8009B458 with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_8004A940"] = "-G0"
 # gp == 0 in func_8002C9B4 and it reaches D_8009B1D5 through %hi/%lo, so the
