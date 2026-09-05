@@ -71,6 +71,7 @@
  * k's assignment pinned (15). What is left: k in $a2 where retail has $a3,
  * and the borrowed read in $a2 where retail's temp is $v0 -- allocation.
  * Permuter from this 6-base: 8700 iterations, no output -- saturated.
+ * Second run, same day, same base: 9300 iterations, no output.
  */
 
 
