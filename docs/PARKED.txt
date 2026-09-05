@@ -2654,7 +2654,7 @@ func_8002C7E8_WAS -- (re-read 2026-08-18 against the loop-guard lever: its
     orders, and `c = t + 2` before the advance instead of after.
 
 
-func_800260D0 -- 25 differences, all of them the scheduling of one block:
+func_800260D0 RESOLVED 2026-09-05 -- MATCH in the full build (87/87). The ported
     the one between func_8002C604 returning and func_8003FEE0 being called.
     Retail evaluates every input of that block first -- %hi/%lo(D_80090800),
     `lh D_8009B20C+2`, `lbu D_8009B1D5` -- and only then stores into the
@@ -2678,6 +2678,11 @@ func_800260D0 -- 25 differences, all of them the scheduling of one block:
     store (27) and below it (25, no change), moving the whole `e`
     computation above the +0x1A store (33) and the `m` read alone (32).
     Progression for anyone picking this up: 93, 40, 31, 25.
+    RESOLUTION: the four try_func "differences" were one NAME -- retail addresses
+    the rolling counter as %gp_rel(D_8009B20C+2) and the ported source as the
+    interior halfword D_8009B20E; a D_8009B20E alias in config/symbol_aliases.txt
+    lets it link, and the build is byte-identical. Installed self-contained with
+    its own -G8 -msplit-addresses row (PORTED_FLAGS).
 func_80049920 MATCHED 2026-08-31 (ported; the residue was address SPELLING,
   not code -- see the try_func note in WORKFLOW.md).
 func_80049920_WAS -- 21 differences, 81/81, and they are all the *order* of the

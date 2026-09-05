@@ -108,3 +108,8 @@ Base4_8009B45C = 0x8009B45C;
 # the two-instruction form is only reachable through a symbol. The name is
 # ours; only the value (0) is evidence.
 CtorCount_0 = 0x0;
+
+# func_800260D0 (ported from Unchiga's tree) reads the rolling counter at
+# 0x8009B20E as its own halfword; splat only names D_8009B20C, and the rest of
+# the tree spells it D_8009B20C[1]. Same address, same %gp_rel encoding.
+D_8009B20E = 0x8009B20E;
