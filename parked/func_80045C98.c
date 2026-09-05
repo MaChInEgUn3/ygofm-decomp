@@ -1,3 +1,12 @@
+/* 2 differing at 169/169 (2026-09-05 re-measured; parked 2026-08-29 at 9).
+ * Residue: the second scaling's `+ 1` -- retail `addiu $v0,$v0,1` in place
+ * on the loaded halfword, ours `addiu $v1,$v0,1` into a second register,
+ * and the mult follows it. Measured 2026-09-05, all worse or equal: the
+ * load and the +1 inline in the multiply (3), operands swapped (2), a fresh
+ * `h2` (3), `h = load; h = h + 1;` (3), `h += 1` (3), and the first block's
+ * `h` renamed to `g` (81, a length change). Allocation tie-break in one
+ * block -- permuter next. gp=0, at=0, as -G0.
+ */
 #include "common.h"
 
 void func_80045C98(void) {
