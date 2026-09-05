@@ -1,6 +1,6 @@
 #define D_8009B26C_IS_SCALAR
 #define D_8009B269_IS_SCALAR
-#define D_8009B368_SIZED
+#define D_8009B368_IN_DATA
 #include "common.h"
 
 void func_8002DC38(void) {
@@ -29,7 +29,7 @@ void func_8002DC38(void) {
         func_80181E30();
         if (r == 1) {
             func_80024DC8(-1, -1, 0, 0);
-            D_8009B368[0] = 8;
+            D_8009B368 = 8;
         } else {
             D_8009B26C = D_8009B269;
         }

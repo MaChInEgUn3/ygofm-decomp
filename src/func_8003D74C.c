@@ -1,4 +1,4 @@
-#define D_8009B34D_SIZED
+#define D_8009B34D_IN_DATA
 #include "common.h"
 void func_80042C08(u8 *arg0);
 
@@ -48,9 +48,9 @@ void func_8003D74C(u8 *o) {
         func_80039794();
         if ((*(u16 *)(r + 0x34) & 0x2000) != 0) {
             D_8009B3C1 = D_8009B3C1 | 0x20;
-            if (D_8009B34D[0] == 0) {
+            if (D_8009B34D == 0) {
                 func_8003D46C(0x80D4, 0);
-                D_8009B34D[0] = 0;
+                D_8009B34D = 0;
             }
         }
         return;

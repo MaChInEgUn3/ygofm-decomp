@@ -2374,6 +2374,19 @@ on a combination that had been in the table for weeks.
   read whether retail's pair is adjacent-and-self-referencing (bare) or split
   through a temp (cc1psx's own).
 
+  **The sweep's first three conversions (2026-09-05) took the SIZE out and
+  could not take the FLAG out.** func_8003D74C, func_8002DC38 and
+  func_8003C7A0 each carried one `[N]` inflation and `as -G1`; with the
+  symbol in `.data` and the same `-G1` all three still MATCH, and with the
+  assembler back at `-G8` they are -2, -5 and -4 -- because the `-G1` was
+  also what kept the unit's two-byte scalars (D_8009B234/236/230 in
+  func_8002DC38, rendered `la`) out of small data. So a conversion is two
+  separate claims: the declaration's truth (the attribute buys it) and the
+  flag's redundancy (only when the inflated symbol was the ONLY non-small one
+  the threshold served). Read the unit's other scalars before expecting the
+  `PER_FUNC_AS_FLAGS` line to go; when it cannot, the honest declaration is
+  still the change to make.
+
   **Why this matters beyond one function, and where it came from.** It is
   krystalgamer's route, raised as a review objection on our first PR to his
   tree, and the objection is one this file should have made itself. `u8

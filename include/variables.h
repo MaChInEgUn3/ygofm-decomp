@@ -574,7 +574,9 @@ extern u16 D_8009B36A;
 #else
 extern u16 D_8009B36A[];
 #endif
-#ifdef D_8009B368_SIZED
+#ifdef D_8009B368_IN_DATA
+extern u8 D_8009B368 __attribute__((section(".data")));
+#elif defined(D_8009B368_SIZED)
 /* Two bytes so an assembler at -G1 treats it as non-small and expands the bare
  * store through $at, while the one-byte D_8009B26C beside it keeps %gp_rel.
  * The size is a codegen knob; see DECISIONS.md. */
@@ -591,7 +593,9 @@ extern u16 D_8009B33A;
 #endif
 extern u8 D_8009B327;
 extern u8 D_8009B336;
-#ifdef D_8009B34D_SIZED
+#ifdef D_8009B34D_IN_DATA
+extern s8 D_8009B34D __attribute__((section(".data")));
+#elif defined(D_8009B34D_SIZED)
 extern s8 D_8009B34D[4];
 #elif defined(D_8009B34D_IS_AGGREGATE)
 extern s8 D_8009B34D[];
@@ -1194,7 +1198,9 @@ extern u8 D_80010790[];  /* "SD_se.dat" */
 extern u8 D_8001079C[];  /* "MASTER.XA" */
 extern TickFn D_80090CAC[];
 extern u8 D_80090E58[];
-#ifdef D_8009B408_SIZED
+#ifdef D_8009B408_IN_DATA
+extern s8 D_8009B408 __attribute__((section(".data")));
+#elif defined(D_8009B408_SIZED)
 /* Eight bytes, so any assembler -G below 8 treats it as non-small and expands
  * the bare reference through $at while the narrower symbols in the same unit
  * keep %gp_rel. Two users at different thresholds: func_8003C7A0 at -G1
