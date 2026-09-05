@@ -1,4 +1,5 @@
-#define D_8009B36A_IS_SCALAR
+#define D_8009B36A_IN_DATA
+#define D_8009B368_IN_DATA
 #include "common.h"
 
 void func_80030F40(void) {
