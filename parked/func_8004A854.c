@@ -18,7 +18,8 @@
  * the mask only when a reaching def of bestv is not provably 16-bit; a
  * union `{ s32 w; u16 h; }` does keep it (subreg set) but costs an
  * insertion mask (31), and `v | (bestv & 0xFFFF0000)` is 28. Permuter
- * queued from this base.
+ * run from this base 2026-09-05: 8000 iterations, 19 outputs, none
+ * re-scores below 1 -- saturated.
  *
  * ---- older entry, measured on the cursor form (kept for the record) ----
  * 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
