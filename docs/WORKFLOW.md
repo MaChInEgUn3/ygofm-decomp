@@ -2401,10 +2401,23 @@ on a combination that had been in the table for weeks.
   to write a falsehood, and it was correct only because no alternative had been
   measured).
 
-  **The sweep this opens, and it is not done.** 56 functions carry an
-  intermediate `PER_FUNC_AS_FLAGS` (30 at `-G4`, 17 at `-G1`, 9 at `-G2`) and
-  another 124 carry `-G0`; every one is a candidate for conversion, and each
-  conversion removes a per-function assembler flag *and* an inflated size. One
+  **The sweep this opens -- DONE for the inflated sizes on 2026-09-05.** 56
+  functions carried an intermediate `PER_FUNC_AS_FLAGS` (30 at `-G4`, 17 at
+  `-G1`, 9 at `-G2`) and another 124 carry `-G0`. Every `[N]` inflation in
+  `src/` behind an intermediate row was converted that day in six batches of
+  three to five units against the full build: 27 units, 29 symbols given
+  `_IN_DATA` arms with their real scalar types, and 14 assembler rows deleted
+  (20/17/5 remain). The two `_SIZED` guards left in `src/` are real arrays --
+  D_8009B370 (`u16[]`, indexed by D_8009B362) and D_80010038 (passed by
+  address) -- and are not inflations. Three things the sweep measured:
+  the row goes only when the inflated symbol was the ONLY non-small symbol
+  it served (13 units kept theirs); two conversions exposed source that had
+  been leaning on the inflated arm (`*(s32 *)D_800FE0D0` reading through an
+  array's address, a byte store on a `u16`), both fixed as lvalue casts; and
+  the `-G0` rows are a different population, with scalar arms rather than
+  sizes, so nothing there converts by this route. Each conversion removes a
+  per-function assembler flag *and* an inflated size only when both claims
+  hold, and they are separate claims. One
   conversion is measured; 179 are not. Do them a few at a time against the full
   build, not in a batch -- `-G0` takes every scalar in a unit out of `%gp_rel`
   at once, so those are the ones most likely to need more than a declaration
