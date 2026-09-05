@@ -550,7 +550,6 @@ PER_FUNC_AS_FLAGS["func_80015DFC"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80046768"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800339D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80013154"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"
@@ -713,7 +712,6 @@ PER_FUNC_AS_FLAGS["func_8004BCE8"] = "-G0"
 # wants -G4: there the same guard costs +3. Decide per unit, not by precedent.
 PER_FUNC_AS_FLAGS["func_8003C328"] = "-G0"
 # func_8003C120 is func_8003C328's sibling and wants the same threshold.
-PER_FUNC_AS_FLAGS["func_8003C120"] = "-G4"
 # func_8005C1F4: D_800F5D44 declared [8] must be non-small while the 4-byte
 # D_8009B498 stays gp-relative -- the window is 4 <= G < 8.
 PER_FUNC_AS_FLAGS["func_8005C1F4"] = "-G4"
@@ -748,7 +746,6 @@ PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"
 # D_8009AF76 goes bare at -G1 and the pair stays in one register.
 # func_8002E730: five symbols want the non-small form and the gp-relative ones
 # top out at four bytes, so every bare-wanting symbol is sized into (4, 8].
-PER_FUNC_AS_FLAGS["func_8002E730"] = "-G4"
 # func_800307B8: D_8009B398 inflated to eight bytes goes non-small at -G4
 # while the one- and two-byte gp scalars around it stay %gp_rel.
 # gp == 0 in func_8004AAFC; scalar D_8009B458 with a -G0 assembler.

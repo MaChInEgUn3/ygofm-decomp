@@ -102,7 +102,11 @@ extern u8 D_8009B141;
  * size above that function's `as -G4` and at or below cc's own -G8. */
 extern u8 D_8009B145[8];
 #else
+#ifdef D_8009B145_IN_DATA
+extern u8 D_8009B145 __attribute__((section(".data")));
+#else
 extern u8 D_8009B145;
+#endif
 #endif
 extern s8 D_8009B238;
 extern u16 D_8009B244;
@@ -1020,7 +1024,11 @@ extern u8 D_8009B114;
 #ifdef D_8009B118_SIZED
 extern s32 D_8009B118[2];
 #else
+#ifdef D_8009B118_IN_DATA
+extern s32 D_8009B118 __attribute__((section(".data")));
+#else
 extern s32 D_8009B118;
+#endif
 #endif
 extern u8 *D_800101D8;
 extern u8 D_801AF000[];
@@ -1046,12 +1054,20 @@ extern s32 D_8009B11C;
 #ifdef D_8009B120_SIZED
 extern s32 D_8009B120[2];
 #else
+#ifdef D_8009B120_IN_DATA
+extern s32 D_8009B120 __attribute__((section(".data")));
+#else
 extern s32 D_8009B120;
+#endif
 #endif
 #ifdef D_8009B0F0_SIZED
 extern s32 D_8009B0F0[2];
 #else
+#ifdef D_8009B0F0_IN_DATA
+extern s32 D_8009B0F0 __attribute__((section(".data")));
+#else
 extern s32 D_8009B0F0;
+#endif
 #endif
 extern s32 D_8009B138;
 /* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
@@ -1173,7 +1189,11 @@ extern u8 D_8009B0AC[8];
 #elif defined(D_8009B0AC_IS_AGGREGATE)
 extern u8 D_8009B0AC[];
 #else
+#ifdef D_8009B0AC_IN_DATA
+extern u8 D_8009B0AC __attribute__((section(".data")));
+#else
 extern u8 D_8009B0AC;
+#endif
 #endif
 /* func_80012DB4 reaches this gp-relatively AND re-reads it every iteration of
  * its wait loop, next to the volatile D_8009B0C8 -- without volatile gcc hoists
