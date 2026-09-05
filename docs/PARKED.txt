@@ -3229,8 +3229,13 @@ func_8003C328_WAS -- 21 differences at equal length, and the layout is solved. A
     knows the value it just stored.
 
 
-func_8004BCE8 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
-  the history below is what this tree had reached on its own.
+func_8004BCE8 -- the 2026-08-30 "port" was a TRANSCRIPTION (asm block), counted as
+    assembly debt since. STILL OPEN as pure C at 38 differing, 97/97
+    (2026-09-05; the recovered candidate was +1/82). The +1 closed on a
+    `do { } while (0);` round the seven statements from the +0x7F4 store to
+    the func_8004BC2C call, the permuter's find decomposed to that one edit.
+    The 38 are allocation throughout; follow-ups dead in parked/func_8004BCE8.c.
+    Permuter restarted from this base. The history below is the pre-port state.
 func_8004BCE8_WAS -- 82 differences at +1, and the count is badly inflated by the
     shift; the real residue is four instructions. Decode, settled: it resets
     a block at D_8009B458 (+0x801 byte, +0x7F0/+0x7F4 words, +0x518 = 8),
