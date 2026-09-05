@@ -1,5 +1,5 @@
-#define D_8009B394_SIZED_VOLATILE
-#define D_8009B398_SIZED_VOLATILE
+#define D_8009B394_IN_DATA_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
 #include "common.h"
 
 s32 func_80020988(void) {
@@ -50,19 +50,19 @@ s32 func_80020988(void) {
         return 0;
     }
 
-    if ((D_8009B394[0] & 0xA000) != 0) {
+    if ((D_8009B394 & 0xA000) != 0) {
         *(s16 *)(q + 0x60) = 0x10;
-        if ((D_8009B394[0] & 0x2000) != 0) {
+        if ((D_8009B394 & 0x2000) != 0) {
             *(s16 *)(q + 0x60) = -0x10;
         }
         D_8009B152 = D_8009B152 | 0x40;
         return 0;
     }
 
-    if ((D_8009B398[0] & 0xE0) != 0) {
+    if ((D_8009B398 & 0xE0) != 0) {
         func_8004036C((s32)D_8009B188);
         func_8004036C((s32)D_8009B18C);
-        if ((D_8009B398[0] & 0x20) != 0) {
+        if ((D_8009B398 & 0x20) != 0) {
             return -1;
         }
         if (q[0x21] == 0) {

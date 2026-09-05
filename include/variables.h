@@ -166,7 +166,10 @@ extern u16 D_8009AF96;
  * func_80037A58 needs the same bare form while *other* symbols in the same
  * function stay gp-relative, so it cannot use a -G0 assembler; there the
  * aggregate declaration plus -mno-split-addresses is the only route. */
-#ifdef D_8009B146_SIZED
+#ifdef D_8009B146_IN_DATA
+extern s16 D_8009B146 __attribute__((section(".data")));
+extern s16 D_8009B148 __attribute__((section(".data")));
+#elif defined(D_8009B146_SIZED)
 /* Eight bytes each so an assembler at -G4 treats them as non-small and expands
  * the bare stores through $at, while the four-byte D_8009B290 and the two-byte
  * D_8009B270/D_8009B27C in the same unit keep %gp_rel (func_8002E470). The
@@ -504,7 +507,9 @@ extern u8 D_800F5C83[];
  * store, so a named reload written before a store through a pointer can be
  * hoisted above it the way retail's is -- which was that function's whole
  * length error. */
-#ifdef D_8009B0F4_SIZED_VOLATILE
+#ifdef D_8009B0F4_IN_DATA
+extern s32 D_8009B0F4 __attribute__((section(".data")));
+#elif defined(D_8009B0F4_SIZED_VOLATILE)
 /* The sized arm plus volatile, for a function that needs BOTH the non-small
  * addressing and a reload gcc would otherwise fold into the value it just
  * wrote. */
@@ -886,7 +891,9 @@ extern u16 D_8009B236;
  * assembles at -G1, where a one-byte symbol becomes small data and the `la`
  * collapses from two instructions to one. Declaring the truth here costs that
  * function an instruction. The size is a codegen knob in both arms. */
-#ifdef D_8009B230_SIZED
+#ifdef D_8009B230_IN_DATA
+extern u16 D_8009B230 __attribute__((section(".data")));
+#elif defined(D_8009B230_SIZED)
 extern u8 D_8009B230[8];
 #else
 extern u16 D_8009B230;
@@ -1019,7 +1026,9 @@ extern s32 D_8009B0F0;
 #endif
 extern s32 D_8009B138;
 /* func_8003798C reaches it through %hi/%lo, everyone else gp-relatively. */
-#ifdef D_8009B134_SIZED
+#ifdef D_8009B134_IN_DATA
+extern s32 D_8009B134 __attribute__((section(".data")));
+#elif defined(D_8009B134_SIZED)
 extern s32 D_8009B134[2];
 #elif defined(D_8009B134_IS_AGGREGATE)
 extern s32 D_8009B134[];
@@ -1323,7 +1332,9 @@ extern u16 D_8009B2A4;
  * these shared one #elif ladder. func_8003C7A0 tests five different bits and
  * retail loads it afresh for every one; without volatile gcc commons the lot
  * into a single register. */
-#ifdef D_8009B398_SIZED
+#ifdef D_8009B398_IN_DATA_VOLATILE
+extern volatile u16 D_8009B398 __attribute__((section(".data")));
+#elif defined(D_8009B398_SIZED)
 /* The same eight bytes it does not have, without volatile. Added as the
    non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
    seven instructions short, because retail really does re-read this halfword
@@ -1453,7 +1464,9 @@ extern u8 *D_8009B18C;
 extern u8 *D_8009B1CC;
 extern s32 D_8009B3B0;
 extern s32 D_8009B3B4;
-#ifdef D_8009B394_SIZED
+#ifdef D_8009B394_IN_DATA_VOLATILE
+extern volatile u16 D_8009B394 __attribute__((section(".data")));
+#elif defined(D_8009B394_SIZED)
 /* The same eight bytes it does not have, without volatile. Added as the
    non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
    seven instructions short, because retail really does re-read this halfword
@@ -1845,7 +1858,9 @@ extern u8 D_8009B26D[];
 extern u8 D_800E9DC0[];
 /* Aggregate by default; func_8002D62C reaches it gp-relatively. See the
  * per-file declaration note on D_8009B398. */
-#ifdef D_8009B269_SIZED
+#ifdef D_8009B269_IN_DATA
+extern u8 D_8009B269 __attribute__((section(".data")));
+#elif defined(D_8009B269_SIZED)
 extern u8 D_8009B269[8];
 #elif defined(D_8009B269_IS_SCALAR)
 extern u8 D_8009B269;

@@ -1,4 +1,4 @@
-#define D_8009B398_SIZED_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
 #include "common.h"
 
 void func_80030090(void);
@@ -27,12 +27,12 @@ void func_800307B8(void) {
         return;
     }
 
-    if ((D_8009B398[0] & 0x800) != 0) {
+    if ((D_8009B398 & 0x800) != 0) {
         func_8003FFFC();
         return;
     }
 
-    if ((D_8009B398[0] & 0x100) != 0) {
+    if ((D_8009B398 & 0x100) != 0) {
         func_80014FA4();
         return;
     }
@@ -63,7 +63,7 @@ void func_800307B8(void) {
         return;
     case 2:
         D_8009B2C6 = D_8009B2CC;
-        if ((D_8009B398[0] & 0x80) != 0) {
+        if ((D_8009B398 & 0x80) != 0) {
             func_8003FFB4((u16)D_8009B2CC);
             return;
         }

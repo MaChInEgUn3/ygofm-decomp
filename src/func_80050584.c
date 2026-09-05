@@ -1,5 +1,5 @@
-#define D_8009B0F4_SIZED
-#define D_8009B134_SIZED
+#define D_8009B0F4_IN_DATA
+#define D_8009B134_IN_DATA
 #include "common.h"
 
 void func_80050584(s32 arg0) {
@@ -18,7 +18,7 @@ void func_80050584(s32 arg0) {
     p = b0 + arg0 * 0xE20;
     if (p[0xE1F] == 0) {
         if (p[0xE14] == 0xFF) {
-            if (((D_8009B0F4[0] & 0x2000030) | D_8009B134[0]) == 0) {
+            if (((D_8009B0F4 & 0x2000030) | D_8009B134) == 0) {
                 do {
                     t = func_8008E590() >> 8;
                     v = t % 722;
