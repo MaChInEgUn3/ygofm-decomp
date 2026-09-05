@@ -44,7 +44,9 @@
  * `e = e + off` on the loaded pointer blocks it. The double read
  * `if (e[3] != 0x63) { v = e[3]; ...` does NOT give retail's delay-slot
  * copy `addu $v0,$v1,$zero` -- CSE folds it with no copy on either arm
- * (symbol form 17, base-local form -2). Permuter: never run from this base. */
+ * (symbol form 17, base-local form -2). Permuter from this base, 2026-09-05:
+ * 8700 iterations, one output (270-1: `v = arg0 * 40` through the u8 v,
+ * which adds an andi -- 13), saturated. */
 #define D_8009B458_IS_AGGREGATE
 #include "common.h"
 
