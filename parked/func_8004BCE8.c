@@ -48,6 +48,9 @@
  * alone; together 22. A third edit in the same output, `r = call; r = r >>
  * 8;`, is worth nothing alone or on top. Same class as func_80026D18's
  * pair: each half reads as a regression until the other is in.
+ * Dead at 22: the first byte store and word store moved inside the pin (24),
+ * p as well (27), the dividend named (`k = 60000000;`, 22), a named pointer
+ * for the store block (22), the +0x808 store back outside the pin (39).
  */
 #include "common.h"
 
