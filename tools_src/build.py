@@ -676,7 +676,6 @@ PER_FUNC_AS_FLAGS["func_80025D30"] = "-G4"
 # D_8009B260 bare while the four-byte D_8009B17C beside it keeps %gp_rel:
 # the window is 4 <= G < 8, and the declaration is inflated to eight to open
 # it (func_80025BEC).
-PER_FUNC_AS_FLAGS["func_80025BEC"] = "-G4"
 # Same window as func_80025BEC: D_8009B408 declared eight and bare, the
 # gp-relative neighbours are one and four bytes, so 4 <= G < 8.
 PER_FUNC_AS_FLAGS["func_8003C628"] = "-G4"
@@ -755,7 +754,6 @@ PER_FUNC_AS_FLAGS["func_80048768"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003353C"] = "-G0"
 # func_8002596C: same pair as func_80025D30 -- D_8009B260 declared [8] must be
 # non-small while D_8009B20C, declared [2] here, stays gp-relative.
-PER_FUNC_AS_FLAGS["func_8002596C"] = "-G4"
 # func_800371A8: every gp-relative symbol here is one byte, so the window
 # 1 <= G < 2 exists -- D_8009B398 (u16 scalar) goes bare and stays one
 # instruction to the delay-slot filler, which is retail's nop.
@@ -766,7 +764,6 @@ PER_FUNC_AS_FLAGS["func_800371A8"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8002FD10"] = "-G4"
 # func_800257A0: D_8009B112 inflated to eight bytes goes non-small at -G4
 # while the one- and two-byte gp scalars beside it stay %gp_rel.
-PER_FUNC_AS_FLAGS["func_800257A0"] = "-G4"
 # func_80024E58: D_8009B364 inflated to eight bytes for the $at store, while
 # the four-byte D_8009B17C/D_8009B1C8/D_8009B214 stay %gp_rel.
 PER_FUNC_AS_FLAGS["func_80024E58"] = "-G4"

@@ -1,4 +1,4 @@
-#define D_8009B112_SIZED
+#define D_8009B112_IN_DATA
 #include "common.h"
 
 void func_800257A0(void) {
@@ -17,7 +17,7 @@ void func_800257A0(void) {
     f = D_8009B220;
 
     if ((f & 0x20) == 0) {
-        if ((D_8009B112[0] & 0x4000) == 0) {
+        if ((D_8009B112 & 0x4000) == 0) {
             return;
         }
         D_8009B220 = f | 0x20;
@@ -33,7 +33,7 @@ void func_800257A0(void) {
         return;
     }
 
-    if ((D_8009B112[0] & 0x4000) != 0) {
+    if ((D_8009B112 & 0x4000) != 0) {
         return;
     }
 

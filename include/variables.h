@@ -34,7 +34,9 @@
  * ordinary per-file addressing disagreement: the aggregate arm is not small
  * data, so cc1psx emits its own pair and the scalars beside it stay
  * gp-relative at the default -G8 (func_80037B40). */
-#ifdef D_8009B112_SIZED
+#ifdef D_8009B112_IN_DATA
+extern volatile u16 D_8009B112 __attribute__((section(".data")));
+#elif defined(D_8009B112_SIZED)
 /* Eight bytes it does not have. The gp-relative symbols beside it in
  * func_800257A0 are one and two bytes, so no real threshold separates them;
  * `[4]` clears cc's own -G8 (bare symbol, ONE instruction to the delay-slot
@@ -408,7 +410,9 @@ extern u8 D_800EAE8F[];
 /* Sixteen, for a unit whose gp-relative neighbours include the eight-byte
  * D_8009B20C: the window 8 <= G < size needs a size above eight, and then
  * the default -G8 assembler is already enough (func_80025D30). */
-#ifdef D_8009B260_SIZED16
+#ifdef D_8009B260_IN_DATA
+extern u8 D_8009B260 __attribute__((section(".data")));
+#elif defined(D_8009B260_SIZED16)
 extern u8 D_8009B260[16];
 #elif defined(D_8009B260_SIZED)
 /* Eight, not the four it has: func_80025BEC needs it non-small while a

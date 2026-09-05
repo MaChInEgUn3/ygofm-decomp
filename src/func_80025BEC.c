@@ -1,4 +1,4 @@
-#define D_8009B260_SIZED
+#define D_8009B260_IN_DATA
 #include "common.h"
 
 /* Recipe branch 3, and the widths decide it before any C is written: the
@@ -44,7 +44,7 @@ void func_80025BEC(void) {
         }
     }
 
-    if ((D_8009B260[0] & 1) == 0) {
+    if ((D_8009B260 & 1) == 0) {
         if (func_80042B40(1) == 0) {
             D_8009B220 = 0;
         }

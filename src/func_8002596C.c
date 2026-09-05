@@ -1,4 +1,4 @@
-#define D_8009B260_SIZED
+#define D_8009B260_IN_DATA
 #define D_8009B20C_HALF
 #include "common.h"
 
@@ -31,7 +31,7 @@ void func_8002596C(void) {
         goto call;
     }
 
-    if ((D_8009B260[0] & 1) == 0) {
+    if ((D_8009B260 & 1) == 0) {
         D_8009B220 = 0;
         return;
     }
