@@ -7659,3 +7659,10 @@ func_8004B374
     transcription in src/ carries. The residue is one loop-invariant decision:
     retail keeps arg1 unmasked in $s5 and masks it per iteration, gcc hoists
     the mask. Diagnosis and the register-pressure hypothesis in the header.
+
+func_80049920
+    STILL OPEN, but the C is now PURE and at EXACT LENGTH: parked/func_80049920.c,
+    81/81, 5 differing under -G8/as -G0 (7 under the file's flags),
+    2026-09-05, from the listing in one tick with none of the transcription's
+    aliases or pins. Six levers in the header; the five left are i and mask
+    with $s3/$s4 exchanged, a pure allocation tie-break. Permuter running.
