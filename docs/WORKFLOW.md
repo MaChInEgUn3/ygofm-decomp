@@ -613,6 +613,20 @@ meaningful, and skipping to the last one wastes hours:
    form and still keeps the store first in the byte-address form. So reach for
    this spelling wherever a load is being hoisted past a store, not only where
    something escaped.
+   **Third direction, and it is a STORE-ORDER lever against a scalar
+   global.** func_80013B68 stores three words and three bytes through a
+   record pointer and then does `D_8009B0F4 |= 0x20`; retail has the bytes,
+   then the flag's load, then the words, then the flag's `ori`/`sw` sunk into
+   the epilogue. Written as cast stores, `*(s32 *)(p + 0x24) = arg0`, every
+   store conflicts with the scalar global in gcc 2.8's dependence test, so
+   the emitted order is the source order and no source order reaches retail
+   -- and bytes-first costs the parameters their registers (14). Written as
+   struct members through the same pointer, the flag's load and store are
+   free to move across them, the scheduler puts the load where retail has it,
+   and the words-first source order keeps the parameters in `$s1`-`$s4`.
+   7 differences to a MATCH on the declaration alone. So when a global's
+   read-modify-write sits among stores through a pointer and retail
+   interleaves them, the stores were members.
    **The same marking works in reverse: a cast store loses its struct
    membership and the scheduler moves genuinely aliasing accesses across
    it.** func_800592AC stores two halfwords into a stack packet and then

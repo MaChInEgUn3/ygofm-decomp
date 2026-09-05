@@ -578,6 +578,13 @@ func_80073758
 # 7 either way. Copying the arguments into locals in order is worse (16), and
 # the sweep is flat.
 func_80013B68
+    RESOLVED 2026-09-05 -- src/func_80013B68.c is in the build and the image
+    hashes. Both requirements at once: the six stores as STRUCT MEMBERS. A cast
+    store `*(s32 *)(p + 0x24)` conflicts with the scalar global's read-modify-
+    write in gcc 2.8's dependence test, so the source order is the emitted order;
+    a struct member through a pointer does not, and the scheduler then hoists
+    the D_8009B0F4 load between the bytes and the words and sinks the store into
+    the epilogue by itself. Words-first source keeps the parameter registers.
 # func_8001D5B4 compares two signed bytes against globals and sets a mode. The
 # hard part of its shape is visible and not yet expressed: retail funnels the
 # early `D_8009B160 = -1` and the `= 2` case into ONE store block at
