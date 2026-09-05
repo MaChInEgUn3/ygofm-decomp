@@ -566,7 +566,6 @@ PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 # func_80031084: volatile u16 D_8009B394/D_8009B398 bare beside one-byte gp symbols.
 PER_FUNC_AS_FLAGS["func_80031084"] = "-G1"
 # func_8003D74C: s8 D_8009B34D[4] (sized arm) stored through $at beside one-byte gp symbols.
-PER_FUNC_AS_FLAGS["func_8003D74C"] = "-G1"
 # func_8005B8A0: D_800FE0CC/D0/D4, D_80010000 and the RGB bytes inflated to eight
 # bytes so they leave small data at -G4 while the four-byte gp scalars stay.
 PER_FUNC_AS_FLAGS["func_8005B8A0"] = "-G4"
@@ -598,7 +597,6 @@ PER_FUNC_AS_FLAGS["func_80046294"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 # func_80030998: the gp side is one- and two-byte scalars, and D_8009B2A0
 # (4 bytes), D_8009B26C and D_8009B27A (sized [4]) all want the bare form.
-PER_FUNC_AS_FLAGS["func_80030998"] = "-G2"
 # func_8002BAB4: gp == 0, and the two overlay halfwords D_80181002/D_80181012
 # are reached %hi/%lo.
 PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
@@ -627,7 +625,6 @@ PER_FUNC_AS_FLAGS["func_8002A2F4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80038530"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8003C7A0"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80020BE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004BBBC"] = "-G0"

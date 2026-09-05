@@ -144,7 +144,9 @@ extern u8 D_8009B140;
 #endif
 /* Read as a byte through %hi/%lo by func_8003D518, and gp-relatively as a
  * halfword everywhere else. */
-#ifdef D_8009AF76_IS_AGGREGATE
+#ifdef D_8009AF76_IN_DATA
+extern u16 D_8009AF76 __attribute__((section(".data")));
+#elif defined(D_8009AF76_IS_AGGREGATE)
 extern u8 D_8009AF76[];
 #else
 extern u16 D_8009AF76;
@@ -1352,7 +1354,11 @@ extern void (*D_8009B128)(void);
 extern u16 D_8009B28C;
 /* Set to 0 on entry to func_8002FD10 and to func_8002E3FC's result on the
  * way out, both gp-relative. */
+#ifdef D_8009B2A0_IN_DATA
+extern u8 *D_8009B2A0 __attribute__((section(".data")));
+#else
 extern u8 *D_8009B2A0;
+#endif
 extern u16 D_8009B2A4;
 /* Reached gp-relative in most files but through %hi/%lo in func_8001BD48,
  * which also needs gp-relative access to another symbol -- so -G0 is not an

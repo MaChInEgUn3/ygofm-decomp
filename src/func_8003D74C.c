@@ -1,4 +1,5 @@
 #define D_8009B34D_IN_DATA
+#define D_8009AF76_IN_DATA
 #include "common.h"
 void func_80042C08(u8 *arg0);
 

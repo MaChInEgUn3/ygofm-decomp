@@ -1,6 +1,7 @@
 #define D_8009B26C_IN_DATA
 #define D_8009B27A_IN_DATA
 #define D_8009B398_IS_AGGREGATE
+#define D_8009B2A0_IN_DATA
 #include "common.h"
 
 void func_80030998(void) {

@@ -1,5 +1,5 @@
 #define FUNC_80046FA0_S32
-#define D_8009B398_IS_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
 #define D_8009B408_IN_DATA
 #include "common.h"
 
