@@ -1,3 +1,12 @@
+/* MATCH (2026-09-05), from a park at 5. The one real difference was where
+ * the cursor's initialising copy `p = b` sat: retail emits it AFTER the
+ * loop's entry guard, in the preheader, and a rotated `for` puts it before
+ * the guard's own load. The form that reproduces it is the explicit guard
+ * plus `do { } while` (WORKFLOW's func_80060220 rule) with `i = 0; p = b;`
+ * inside the guard -- in that order; `p = b; i = 0;` is 2 -- and the two
+ * `continue`s rewritten as `goto next;` onto the increments at the bottom
+ * of the body. Flags: -O2 -G8 -fno-strength-reduce, as -G0.
+ */
 #include "common.h"
 
 s32 func_8004C8C8(void) {
@@ -17,15 +26,18 @@ s32 func_8004C8C8(void) {
         return 0;
     }
 
-    for (i = 0, p = b; i < *(u16 *)(b + 0x2E2); p += 0x2C, i++) {
+    if (*(u16 *)(b + 0x2E2) != 0) {
+        i = 0;
+        p = b;
+        do {
         if (p[0x24] != 0) {
-            continue;
+            goto next;
         }
 
         v = *(u16 *)(p + 0x14) + *(u16 *)(p + 0x16);
         *(s16 *)(p + 0x14) = v;
         if ((u16)v < 0x100) {
-            continue;
+            goto next;
         }
         *(s16 *)(p + 0x14) = v & 0xFF;
 
@@ -71,6 +83,10 @@ s32 func_8004C8C8(void) {
                 *(u32 *)(q + 0x80C) = 0;
             }
         }
+    next:
+        p += 0x2C;
+        i++;
+        } while (i < *(u16 *)(b + 0x2E2));
     }
 
     return 0;
