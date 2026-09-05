@@ -674,8 +674,10 @@ func_80045BE8
 # register: retail keeps the object returned by func_8002C5CC in $a0 and we put
 # it in $a1, so every store through it differs. Needs the -G0 assembler entry
 # restored when picked up again.
-func_8002C604
-    STILL OPEN -- src/func_8002C604.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
+func_8002C604 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
+    The last 3 were the 0x80 constant materialised before the D_80010000 load
+    pair rather than between its halves: the bare-symbol form (scalar arm,
+    `as -G0`; the listing has no %gp_rel and no `lui $at`). First try.
 # func_800338E4: the four accesses to D_8009B146 are right (scalar + -G0
 # assembler, no alias) and so is the first half. What is left is a schedule:
 # retail reads D_8009B146, then +0x5AA8, then the counter at +0x5AAC; cc1psx
