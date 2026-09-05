@@ -1,5 +1,5 @@
-#define D_8009B260_SIZED
-#define D_8009B34D_SIZED
+#define D_8009B260_IN_DATA
+#define D_8009B34D_IN_DATA
 #include "common.h"
 
 void func_80024200(void) {
@@ -12,12 +12,12 @@ void func_80024200(void) {
     }
     func_8002C6C8();
 
-    f = D_8009B260[0];
+    f = D_8009B260;
     if (f & 0x80) {
         if (f & 1) {
             return;
         }
-        D_8009B260[0] = f & 0x7F;
+        D_8009B260 = f & 0x7F;
     }
 
     if (func_80026B34() != 0) {
@@ -42,7 +42,7 @@ void func_80024200(void) {
             if (*(u16 *)(e + 0x34) & 0x2000) {
                 func_80035B7C(e);
                 D_8009B164 = 0;
-                if (D_8009B34D[0] != 0) {
+                if (D_8009B34D != 0) {
                     D_8009B16C = D_8009B16C | 0x2000;
                 }
             }

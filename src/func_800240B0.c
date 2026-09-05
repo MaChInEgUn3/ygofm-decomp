@@ -1,5 +1,5 @@
-#define D_8009B246_SIZED
-#define D_8009B254_SIZED
+#define D_8009B246_IN_DATA
+#define D_8009B254_IN_DATA
 #define D_8009B3A4_IS_AGGREGATE
 #include "common.h"
 
@@ -37,9 +37,9 @@ void func_800240B0(u8 *p) {
     i = D_800907D8[*(s8 *)(p + 0x10) * 5 + *(s8 *)(p + 0xF) + D_8009B1D5 * 20];
     r = func_80017034(&D_801A7AD8[i * 28]);
     if (r != 0) {
-        D_8009B246[0] = r;
-        D_8009B24B[0] = 0x14;
-        D_8009B254[0] = 2;
+        D_8009B246 = r;
+        D_8009B24B = 0x14;
+        D_8009B254 = 2;
         return;
     }
 

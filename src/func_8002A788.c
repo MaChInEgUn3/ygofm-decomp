@@ -1,7 +1,7 @@
 #define FUNC_8002A6B8_ARG
 #define D_8009B3A4_IS_VOLATILE
-#define D_8009B26C_SIZED
-#define D_8009B269_SIZED
+#define D_8009B26C_IN_DATA
+#define D_8009B269_IN_DATA
 #include "common.h"
 
 void func_8002A788(u8 *p) {
@@ -21,7 +21,7 @@ void func_8002A788(u8 *p) {
             }
         }
         if ((D_8009B398 & 0x20) != 0) {
-            D_8009B26C[0] = D_8009B269[0];
+            D_8009B26C = D_8009B269;
             return;
         }
         if ((D_8009B3A4 & 0xF00C) != 0) {

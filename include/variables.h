@@ -121,7 +121,9 @@ extern u8 D_80010288[];
 /* Two bytes under the guard so an assembler at -G1 expands the bare reference
  * through the destination register while the one-byte D_8009B428 beside it
  * keeps %gp_rel (func_80043BCC). The size is a codegen knob. */
-#ifdef D_8009B318_SIZED
+#ifdef D_8009B318_IN_DATA
+extern u8 D_8009B318 __attribute__((section(".data")));
+#elif defined(D_8009B318_SIZED)
 extern u8 D_8009B318[2];
 #elif defined(D_8009B318_IS_AGGREGATE)
 extern u8 D_8009B318[];
@@ -563,7 +565,10 @@ extern u16 D_8009B162;
  * keeping %gp_rel on the one- and two-byte symbols beside them, so they carry
  * a declared size of four and the unit assembles at -G2. The size is a codegen
  * knob; see the -G-threshold section of DECISIONS.md. */
-#ifdef D_8009B246_SIZED
+#ifdef D_8009B246_IN_DATA
+extern u16 D_8009B246 __attribute__((section(".data")));
+extern u8 D_8009B24B __attribute__((section(".data")));
+#elif defined(D_8009B246_SIZED)
 extern u16 D_8009B246[2];
 extern u8 D_8009B24B[4];
 #else
@@ -750,7 +755,9 @@ extern s32 D_800E9E90[];
 extern u8 D_80177FE8[];
 /* Aggregate by default; func_8002892C reaches it gp-relatively and defines
  * D_8009B254_IS_SCALAR. */
-#ifdef D_8009B254_SIZED
+#ifdef D_8009B254_IN_DATA
+extern u8 D_8009B254 __attribute__((section(".data")));
+#elif defined(D_8009B254_SIZED)
 extern u8 D_8009B254[4];
 #elif defined(D_8009B254_IS_SCALAR)
 extern u8 D_8009B254;
@@ -780,7 +787,9 @@ extern s16 D_800F2B32[];
 extern s16 D_800F2B3A[];
 extern s16 D_800F2B42[];
 extern s16 D_800F2B4A[];
-#ifdef D_8009B142_SIZED
+#ifdef D_8009B142_IN_DATA
+extern u8 D_8009B142 __attribute__((section(".data")));
+#elif defined(D_8009B142_SIZED)
 extern u8 D_8009B142[2];
 #elif defined(D_8009B142_SIZED8)
 /* Eight bytes it does not have: non-small at as -G4 beside four-byte gp
@@ -791,7 +800,9 @@ extern u8 D_8009B142[];
 #else
 extern u8 D_8009B142;
 #endif
-#ifdef D_8009B143_SIZED
+#ifdef D_8009B143_IN_DATA
+extern u8 D_8009B143 __attribute__((section(".data")));
+#elif defined(D_8009B143_SIZED)
 extern u8 D_8009B143[2];
 #elif defined(D_8009B143_SIZED8)
 /* Eight bytes it does not have: non-small at as -G4 beside four-byte gp
@@ -802,7 +813,9 @@ extern u8 D_8009B143[];
 #else
 extern u8 D_8009B143;
 #endif
-#ifdef D_8009B144_SIZED
+#ifdef D_8009B144_IN_DATA
+extern u8 D_8009B144 __attribute__((section(".data")));
+#elif defined(D_8009B144_SIZED)
 extern u8 D_8009B144[2];
 #elif defined(D_8009B144_SIZED8)
 /* Eight bytes it does not have: non-small at as -G4 beside four-byte gp

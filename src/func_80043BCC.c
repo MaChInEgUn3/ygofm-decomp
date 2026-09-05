@@ -1,7 +1,7 @@
-#define D_8009B142_SIZED
-#define D_8009B143_SIZED
-#define D_8009B144_SIZED
-#define D_8009B318_SIZED
+#define D_8009B142_IN_DATA
+#define D_8009B143_IN_DATA
+#define D_8009B144_IN_DATA
+#define D_8009B318_IN_DATA
 #define D_8009B398_IS_VOLATILE
 #include "common.h"
 
@@ -23,9 +23,9 @@ s32 func_80043BCC(void) {
                     D_8009B428 = f | 0x80;
                     func_8002CD8C();
                     func_8003594C(0);
-                    D_8009B142[0] = 0xFF;
-                    D_8009B143[0] = 0xFF;
-                    D_8009B144[0] = 0xFF;
+                    D_8009B142 = 0xFF;
+                    D_8009B143 = 0xFF;
+                    D_8009B144 = 0xFF;
                     continue;
                 }
                 if (f & 0x40) {
@@ -35,7 +35,7 @@ s32 func_80043BCC(void) {
                     }
                     continue;
                 }
-                g = D_8009B318[0];
+                g = D_8009B318;
                 if (g & 0x80) {
                     continue;
                 }

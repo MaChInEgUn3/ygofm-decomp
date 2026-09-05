@@ -1,6 +1,6 @@
-#define D_8009B142_SIZED
-#define D_8009B143_SIZED
-#define D_8009B144_SIZED
+#define D_8009B142_IN_DATA
+#define D_8009B143_IN_DATA
+#define D_8009B144_IN_DATA
 #include "common.h"
 
 s32 func_8005BB7C(s32 arg0) {
@@ -27,9 +27,9 @@ s32 func_8005BB7C(s32 arg0) {
         m = func_80085320();
         q = buf;
         for (; i < 0x3C0; i += 3) {
-            *q++ = D_8009B144[0];
-            *q++ = D_8009B143[0];
-            *q++ = D_8009B142[0];
+            *q++ = D_8009B144;
+            *q++ = D_8009B143;
+            *q++ = D_8009B142;
         }
         rect[0] = 0;
         i = 0;
@@ -73,7 +73,7 @@ s32 func_8005BB7C(s32 arg0) {
         rect[1] = 0;
         rect[2] = *(s32 *)&D_800FE0D0 * 2;
         rect[3] = *(u16 *)&D_800FE0D4;
-        func_8007F850(rect, D_8009B144[0], D_8009B143[0], D_8009B142[0]);
+        func_8007F850(rect, D_8009B144, D_8009B143, D_8009B142);
         D_8009B060 = 0;
     }
     return 0;
