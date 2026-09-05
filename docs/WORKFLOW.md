@@ -2412,7 +2412,7 @@ on a combination that had been in the table for weeks.
   `src/` behind an intermediate row was converted that day in six batches of
   three to five units against the full build: 27 units, 29 symbols given
   `_IN_DATA` arms with their real scalar types, and 14 assembler rows deleted
-  (20/17/5 remain). The two `_SIZED` guards left in `src/` are real arrays --
+  (20/17/5 remained after that pass). The two `_SIZED` guards left in `src/` are real arrays --
   D_8009B370 (`u16[]`, indexed by D_8009B362) and D_80010038 (passed by
   address) -- and are not inflations. Three things the sweep measured:
   the row goes only when the inflated symbol was the ONLY non-small symbol
@@ -2436,7 +2436,22 @@ on a combination that had been in the table for weeks.
   scalar guards with `_IS_AGGREGATE` or `lui $at` stores and were not
   measured. Each conversion removes a
   per-function assembler flag *and* an inflated size only when both claims
-  hold, and they are separate claims. One
+  hold, and they are separate claims.
+  **The second route, the same afternoon, took the rows the first could not:
+  put the unit's OTHER non-small scalars into `.data` too.** A row that
+  survived the first pass was serving real-width scalars (a `u16` flag, a
+  `volatile u16`, a pointer, an `s32` beside one-byte `%gp_rel` neighbours).
+  With each of those in `.data` under its real type, 21 more units build
+  byte-identical at the default threshold and their rows went: 17/6/1
+  remain, and of those the ones with source in `src/` stay for a measured
+  reason each -- a file-local `extern sym[]` redeclaration (func_800339D0,
+  func_80040588), an array use `D_8009B408[16]` (func_8003C628), a real
+  array on a sized arm (func_8002CEE8, func_800136E4), the compiler's own
+  pair wanted beside a gp flag (func_80015DFC), and one -1 (func_8002DC38).
+  The other 13 rows belong to parked candidates. The recipe for a unit:
+  list every symbol the listing does NOT read `%gp_rel`, and if each is a
+  plain scalar (used without `[i]`, and with `*(T *)sym` rewritten as
+  `*(T *)&sym`), give it an `_IN_DATA` arm and measure at as `-G8`. One
   conversion is measured; 179 are not. Do them a few at a time against the full
   build, not in a batch -- `-G0` takes every scalar in a unit out of `%gp_rel`
   at once, so those are the ones most likely to need more than a declaration
