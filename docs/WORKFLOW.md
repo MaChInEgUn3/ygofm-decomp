@@ -688,6 +688,14 @@ meaningful, and skipping to the last one wastes hours:
    on exactly that, and dropping the local was -1 to 0 and 41. This is the
    mirror of the narrow-local rules above: there a narrow declaration
    *creates* a mask, here reading the global back does.
+   **And the read-back can want its arithmetic in the SAME expression.**
+   func_80024E58 stores a byte global and the next statement masks the value
+   for a decrement: `n = v & 0xFF; call(); n = n - 1;` sinks the `andi` into
+   the call's delay slot, `n = D_8009B364[0]; n = n - 1;` before the call is
+   4, and `n = D_8009B364[0] - 1;` before the call is a MATCH -- the andi is
+   the read-back's zero-extend and retail keeps it in front of the `jal`
+   with the `addiu -1` in the slot. Two statements is not the same as one
+   here, which is the func_80047788 scaled-dividend rule read backwards.
    **A `bgez` / `addiu` / `sra` triple around one value is a signed DIVIDE,
    not a shift, and writing it as a shift costs delay slots.** gcc expands
    `x / (1 << k)` as "if x is negative add (1 << k) - 1, then arithmetic

@@ -3512,7 +3512,7 @@ func_8002FD10 -- 8 differences at equal length (112/112), and all eight are the
     row is best; the permuter's only output is 22 and semantically broken.
 
 
-func_80024E58 -- 2 differences at equal length (116/116), and both are the
+func_80024E58 RESOLVED 2026-09-05 -- MATCH (116/116, full build). The last two were the
     position of one `andi`. A duel-phase step machine: four mutually exclusive
     arms on D_8009B220's 0x40 and 0x20 bits, then a 30-record sweep.
     What paid:
@@ -3546,6 +3546,10 @@ func_80024E58 -- 2 differences at equal length (116/116), and both are the
     (2, 7, 2). `volatile` on D_8009B364 is +2 and 68 -- it forces re-reads at
     the other two sites. The full flag sweep says the current row is best, and
     880 permuter iterations from a base score of 60 produced nothing.
+    RESOLUTION: `n = D_8009B364[0] - 1;` before the call -- the andi is the READ-BACK
+    of the byte global just stored, and the decrement must sit in the same
+    expression: read-back and decrement as two statements is 4, `v & 0xFF` with
+    the decrement before the call is 3, and only the one-expression form matches.
 
 
 func_8004D58C -- 13 differences at equal length (116/116). The sibling of
@@ -4075,7 +4079,7 @@ func_8005A6A8 -- re-examined; still 1 difference, `subu $v1,$zero,$v1` where we
   produced no stored output at all.
 # ---
 
-func_80024E58 -- re-examined; still 2, and the residue is which of
+func_80024E58 -- (RESOLVED 2026-09-05, see the entry above) re-examined; still 2, and the residue is which of
   `andi $s0,$v0,255` and `addiu $s0,$s0,-1` lands in the `jal func_8002C604`
   delay slot. Retail has both before the call and reorg takes the second;
   we compute the decrement after the call, so reorg takes the mask.

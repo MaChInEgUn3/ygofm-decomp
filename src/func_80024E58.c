@@ -1,3 +1,13 @@
+/* MATCH (2026-09-05), from a park at 2 differences. The last two were the
+ * `n = v & 0xFF` that gcc sank into the jal's delay slot where retail keeps
+ * the andi before the call and puts `n - 1` in the slot. The mask is not a
+ * mask: it is the READ-BACK of the byte global just stored, and the
+ * decrement belongs to the same expression -- `n = D_8009B364[0] - 1;`
+ * before the call. Written as the read-back and the decrement in two
+ * statements it is 4, as `v & 0xFF` with the decrement before the call 3.
+ * Flags: default compiler, as -G4 (D_8009B364 sized out of small data, the
+ * D_8009B0F4 / D_8009B134 sized arms).
+ */
 #define D_8009B364_SIZED8
 #define D_8009B0F4_SIZED
 #define D_8009B134_SIZED
@@ -20,9 +30,8 @@ void func_80024E58(void) {
         r[0xA] = r[0xA] + 1;
         v = *(u8 *)&D_8009B1D2 - 0x49;
         D_8009B364[0] = v;
-        n = v & 0xFF;
+        n = D_8009B364[0] - 1;
         e = func_8002C604(0xA);
-        n = n - 1;
         D_8009B17C = e;
         *(s16 *)(e + 0x1A) = n;
         func_8003FEE0(0x13);
