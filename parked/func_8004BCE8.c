@@ -1,4 +1,4 @@
-/* 38 differing at 97/97 (2026-09-05; was +1 at 98/97 and 82). RECOVERED from git
+/* 22 differing at 97/97 (2026-09-05; was +1 at 98/97 and 82, then 38). RECOVERED from git
  * 2026-09-04 (the Unchiga merge deleted it and put a transcription in src/).
  *
  * The +1 is the third `andi $v0,$a1,0xFF`: gcc fills the `m != 0x3C` branch's
@@ -41,8 +41,13 @@
  * store block (39), the store pinned alone (+1).
  * What is left is register allocation throughout: retail loads the base into
  * $v1 and forms p before the first byte store; the reciprocal block runs in
- * $v0/$v1 where ours uses $a0/$a1; and the join's copy/andi order. Permuter
- * restarted from this base.
+ * $v0/$v1 where ours uses $a0/$a1; and the join's copy/andi order.
+ * 38 -> 22 (permuter, decomposed): TWO COUPLED EDITS. `v = 8;` written
+ * before the +0x518 store (borrowing the later result name) is 42 alone;
+ * the clamp value split as `v = 60000000 / r; v = v * 100 / 115;` is 32
+ * alone; together 22. A third edit in the same output, `r = call; r = r >>
+ * 8;`, is worth nothing alone or on top. Same class as func_80026D18's
+ * pair: each half reads as a regression until the other is in.
  */
 #include "common.h"
 
@@ -58,7 +63,8 @@ s32 func_8004BCE8(void) {
     *(s32 *)(D_8009B458 + 0x7F0) = 0;
     do {
         *(s32 *)(D_8009B458 + 0x7F4) = 0;
-        *(s32 *)(D_8009B458 + 0x518) = 8;
+        v = 8;
+        *(s32 *)(D_8009B458 + 0x518) = v;
         *(s16 *)(D_8009B458 + 0x7FC) = func_8004BCA8(p);
         *(s16 *)(D_8009B458 + 0x7FA) = 1;
         *(s16 *)(D_8009B458 + 0x7F8) = 0;
@@ -67,7 +73,8 @@ s32 func_8004BCE8(void) {
         *(s32 *)(D_8009B458 + 0x808) = r;
     } while (0);
 
-    v = 60000000 / r * 100 / 115;
+    v = 60000000 / r;
+    v = v * 100 / 115;
     if (v >= 0x100) {
         v = 0xFF;
     }
