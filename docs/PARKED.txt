@@ -7667,10 +7667,9 @@ func_80049920 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
     Under the file's old -G0 -mno-split-addresses it is still 2, so the
     as -G0 row stays and the cc row is gone. Permuter stopped.
 
-func_8004A518
-    STILL OPEN at 2 differing, 112/112, pure C (2026-09-05; was +2/99, then 11).
-    Goto loop for the call-bearing loop, one pointer name per loop, the base as
-    loop 2's cursor, -G8/as -G0, and the permuter's `do { } while (0);` round
-    loop 2's guarded block (11 -> 2, mask/k40 allocation). The 2 are the
-    func_8004A764 argument copy scheduled after the address add; six
-    spellings dead in the header. Permuter restarted from this base.
+func_8004A518 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
+    +2/99 to 0/0 in one day: goto loop for the call-bearing loop (the hoist
+    mechanism), one pointer name per loop, base as loop 2's cursor, -G8/as
+    -G0, the permuter's pin round loop 2's guarded block (11 -> 2), and the
+    permuter again for the last two: the record address written inline at
+    each store, `(base + off)[k]`, instead of assigned to the cursor first.

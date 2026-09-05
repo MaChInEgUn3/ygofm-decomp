@@ -1,6 +1,6 @@
 # Assembly debt
 
-**9** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (18 when this section was written on 2026-09-04; `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
+**8** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (18 when this section was written on 2026-09-04; `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
 body is the retail instruction stream written out as inline `__asm__`. Every
 one of them is byte-exact, which is precisely why they need a file of their
 own: `build.py` cannot tell transcribed assembly from real C, so nothing
