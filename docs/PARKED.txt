@@ -3230,11 +3230,12 @@ func_8003C328_WAS -- 21 differences at equal length, and the layout is solved. A
 
 
 func_8004BCE8 -- the 2026-08-30 "port" was a TRANSCRIPTION (asm block), counted as
-    assembly debt since. STILL OPEN as pure C at 22 differing, 97/97
+    assembly debt since. STILL OPEN as pure C at 17 differing, 97/97
     (2026-09-05; the recovered candidate was +1/82). The +1 closed on a
     `do { } while (0);` round the seven statements from the +0x7F4 store to
     the func_8004BC2C call, the permuter's find decomposed to that one edit.
-    Then two coupled edits from the permuter (38 -> 22). What is left is
+    Then two coupled permuter edits (38 -> 22) and no `c` local, the mask
+    inline at the two halfword stores (22 -> 17). What is left is
     Permuter restarted from this base. The history below is the pre-port state.
 func_8004BCE8_WAS -- 82 differences at +1, and the count is badly inflated by the
     shift; the real residue is four instructions. Decode, settled: it resets

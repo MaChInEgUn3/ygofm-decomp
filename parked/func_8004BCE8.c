@@ -1,4 +1,4 @@
-/* 22 differing at 97/97 (2026-09-05; was +1 at 98/97 and 82, then 38). RECOVERED from git
+/* 17 differing at 97/97 (2026-09-05; was +1 at 98/97 and 82, then 38, 22). RECOVERED from git
  * 2026-09-04 (the Unchiga merge deleted it and put a transcription in src/).
  *
  * The +1 is the third `andi $v0,$a1,0xFF`: gcc fills the `m != 0x3C` branch's
@@ -51,6 +51,15 @@
  * Dead at 22: the first byte store and word store moved inside the pin (24),
  * p as well (27), the dividend named (`k = 60000000;`, 22), a named pointer
  * for the store block (22), the +0x808 store back outside the pin (39).
+ * 22 -> 17 (permuter, decomposed): NO `c` at all -- the arms only shift,
+ * and the two halfword stores mask inline, `= v & 0xFF`. That closes the
+ * join's copy/andi order entirely (rows 64-74). The output also split the
+ * `>> 8` into `>> 5 >> 3` through a named 5, a passenger worth nothing.
+ * What is left: the prologue (retail forms p = base + 0x518 before the
+ * first byte store and copies it into $a0 before the two word stores; the
+ * 8 in $v0, ours $a1) and the reciprocal block (retail: srl into $a1, lui
+ * 915, base load, ori, sw, divu $v0,$a1; ours: base load, srl, sw, lui/ori,
+ * divu $v1,$v0).
  */
 #include "common.h"
 
@@ -58,7 +67,6 @@ s32 func_8004BCE8(void) {
     u8 *p;
     u32 r;
     u32 v;
-    s32 c;
     s32 m;
 
     p = D_8009B458 + 0x518;
@@ -90,7 +98,6 @@ s32 func_8004BCE8(void) {
         if (m == 0x18) {
             goto sh1;
         }
-        c = v & 0xFF;
         goto store;
     }
     if (m != 0x3C) {
@@ -102,10 +109,9 @@ sh1:
 sh2:
     v >>= 2;
 mask:
-    c = v & 0xFF;
 store:
-    *(s16 *)(p + 0x16) = c;
-    *(s16 *)(p + 0x14) = c;
+    *(s16 *)(p + 0x16) = v & 0xFF;
+    *(s16 *)(p + 0x14) = v & 0xFF;
     func_8004BAE4(p);
 
     if (*(u16 *)(D_8009B458 + 0x7FC) >= 0x60) {
