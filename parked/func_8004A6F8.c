@@ -38,6 +38,15 @@
  * initialiser +1, `v` named before p is +1 with the base pair in $a0,
  * t/p/v split 10 (the two word stores swap), and a do/while pin round the
  * first store +2. func_8004A764 sits on the same wall from the other side.
+ * Permuter from this base (2026-09-05, ~4000 iterations, ten outputs, none
+ * below 8 by position): its best wraps the WHOLE body in `do { } while
+ * (0);`, which gets `lui $a2,6` born first and the sll/addu in retail's
+ * place -- the constant-first half without losing the address-first half
+ * -- at the cost of `sw $ra` moving to the top and the base's `lui` being
+ * hoisted above the table pair (10; with p assigned first inside the pin
+ * 9; `t = sym + arg0`, k after t, v before k all 9; v inline 10; the p load
+ * pinned alone inside 10; -mno-split-addresses on it 25). So the pin is a
+ * third half-lever; what fixes the prologue store's position is not found.
  */
 #include "common.h"
 
