@@ -1,3 +1,12 @@
+/* 3 differing at 130/130. Residue: the main loop's preheader ORDER --
+ * retail: stack-array address, `best = 0` from $zero, `i = 0` copied from
+ * best; ours: `best = 0` copied from k, array address, `i = 0` from $zero.
+ * Measured 2026-09-05 (all 3 or worse): best before k (4), k pinned (3),
+ * best pinned (3), best assigned after the table locals (3), the inner
+ * loop started from best (102). The CSE that copies best from k has to be
+ * broken and best's zero has to be what i copies; no source order tried
+ * does both. Permuter next.
+ */
 #include "common.h"
 
 void func_80071CB0(void) {
