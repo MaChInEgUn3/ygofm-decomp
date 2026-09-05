@@ -1203,6 +1203,13 @@ func_800533D8 -- 7 differences, all of them which caller-saved register the
   sweep: 7 is the floor, at plain -O2 -G8.
 
 func_8003B808 -- 8 differences (was 82). Same levers, including
+    MATCHED 2026-09-05. The remaining 6 were two things and neither was the
+    case-3 constant order this entry names: the D_800101D8 read spelled as
+    `*(s32 *)(D_800100A8 + 0x130)` (splat's interior-symbol rule -- the lui came
+    out one slot early against `%lo(D_800100A8+304)`), which is 6 -> 2, and the
+    last 2 were try_func's `.rodata` name for the jump table. The ported
+    computed goto does not LINK here (`D_80010224` undefined); a `switch` of
+    gotos to the labelled arms is byte-identical and builds.
   func_80020BE4's lever 9. The residue is the shared 4 in case 0 plus 4 in
   case 3, where retail materialises the 0xFFDCFFFF mask before the
   two-instruction 0x18000 and we do it the other way round. A `do { … } while
