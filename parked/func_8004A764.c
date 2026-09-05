@@ -16,7 +16,8 @@
  * D_8009B458 (only _IS_AGGREGATE / _IS_VOLATILE). Permuter has a base dir
  * with one output (build/permuter/func_8004A764) -- re-score before rerun.
  * Permuter re-run from this 6-base (2026-09-05): 11000 iterations, no
- * output at all -- saturated.
+ * output at all -- saturated. Second run, same base: 11300 iterations, no
+ * output either.
  */
 
 #include "common.h"
