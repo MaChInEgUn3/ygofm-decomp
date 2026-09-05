@@ -434,7 +434,6 @@ PORTED_FLAGS = {
     "func_8005C5D4": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8006C120": ['-quiet', '-O2', '-G8', '-fno-schedule-insns'],
     "func_80070650": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_80070710": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80071424": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80071460": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80071924": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -548,6 +547,7 @@ PER_FUNC_AS_FLAGS["func_8004A518"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B374"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002C604"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B854"] = "-G0"
+PER_FUNC_AS_FLAGS["func_80070710"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
