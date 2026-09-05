@@ -626,7 +626,13 @@ meaningful, and skipping to the last one wastes hours:
    and the words-first source order keeps the parameters in `$s1`-`$s4`.
    7 differences to a MATCH on the declaration alone. So when a global's
    read-modify-write sits among stores through a pointer and retail
-   interleaves them, the stores were members.
+   interleaves them, the stores were members. **It does not transfer to the
+   D_8009B0F4 dispatcher family**, whose arms have the same shape on paper:
+   rewriting every `*(T *)(p + K)` there as a member is 14 -> 43 on
+   func_8002BD0C, 26 -> 61 on func_80057544 and 77 -> -2/161 on
+   func_80019608 (a scratch `structify.py` did the rewrite mechanically).
+   Those arms want the cast stores' conflicts, which is what keeps their
+   named reads where they are. Read which way the target wants it.
    **The same marking works in reverse: a cast store loses its struct
    membership and the scheduler moves genuinely aliasing accesses across
    it.** func_800592AC stores two halfwords into a stack packet and then
