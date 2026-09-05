@@ -4,6 +4,11 @@
  * block. The same assignment just before the loop or inside it is 14 -- the
  * position is the lever, not the naming. Found by score_permuter_outputs.py
  * in a stored output; decomposed from the preprocessed source by hand.
+ * The 12: the loop counter i in $a2 (retail) against $a0, the D_800907D8 /
+ * D_801A7AD8 pair rotated behind it, and `r - 4` computed in place ($a1)
+ * where ours takes $a3. Dead at 12: `r -= 4;` (13), both `i = 0xA;` sites
+ * pinned with `do { } while (0);` (12), either alone (12, 12), and a shared
+ * `ten` name for the constant (12). Permuter started from this base.
  */
 #include "common.h"
 
