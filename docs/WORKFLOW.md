@@ -2451,7 +2451,14 @@ on a combination that had been in the table for weeks.
   The other 13 rows belong to parked candidates. The recipe for a unit:
   list every symbol the listing does NOT read `%gp_rel`, and if each is a
   plain scalar (used without `[i]`, and with `*(T *)sym` rewritten as
-  `*(T *)&sym`), give it an `_IN_DATA` arm and measure at as `-G8`. One
+  `*(T *)&sym`), give it an `_IN_DATA` arm and measure at as `-G8`.
+  Six guarded `-G0` units went the same way that afternoon (129 -> 116
+  rows). **One pitfall, hit three times in one hour:** when a symbol's plain
+  `extern T sym;` sits inside an existing `#ifdef sym_IS_SCALAR` chain, a
+  generic wrapper around that line nests the new arm UNDER the scalar guard,
+  and a unit that defines only `sym_IN_DATA` falls through to the aggregate
+  arm -- "has an incomplete type". The `.data` arm has to be the HEAD of the
+  chain (`#ifdef sym_IN_DATA ... #elif defined(sym_IS_SCALAR) ...`). One
   conversion is measured; 179 are not. Do them a few at a time against the full
   build, not in a batch -- `-G0` takes every scalar in a unit out of `%gp_rel`
   at once, so those are the ones most likely to need more than a declaration
