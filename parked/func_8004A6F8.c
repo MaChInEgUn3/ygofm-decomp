@@ -27,6 +27,17 @@
  * 19. What retail does -- `lui $a2,6` right after the frame, `ori` after the
  * table load, the table address before the base pair, `sw $ra` late -- is
  * the same schedule the sibling func_8004A764 sits at 6 on.
+ * (2026-09-05, eight more) The two halves are reachable SEPARATELY and
+ * conflict: with the constant store written first and the table read
+ * inline (`u8 *p = D_8009B458;` initialiser), `lui $a2,6` is born first as
+ * retail has it -- but then the base load is hoisted above the table pair
+ * and a load-delay nop appears (+1: b1, with a named k b4, with `t =
+ * D_80011434 + arg0` before p b5). With the t/p/v split the table address
+ * precedes the base and the constant is born late (8: parked, and 8 with
+ * the constant inline instead of k). Table store first: inline through the
+ * initialiser +1, `v` named before p is +1 with the base pair in $a0,
+ * t/p/v split 10 (the two word stores swap), and a do/while pin round the
+ * first store +2. func_8004A764 sits on the same wall from the other side.
  */
 #include "common.h"
 
