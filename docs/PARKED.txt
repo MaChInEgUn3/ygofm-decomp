@@ -4190,6 +4190,10 @@ func_800339D0 -- 134/134, THREE differences, and all three are one value's
 # ---
 
 func_8001F364 -- 126/126, 14 differences, and the residue is the dispatcher's
+    14 -> 6 on 2026-09-05: the permuter's inner do/while(0) round the region
+    from m0's return to the end of m2 fixes both dispatcher delay slots.
+    Residue now one register pair ($v1/$a1) for the D_8015C424 base and the
+    D_8009B1B8 index; four spellings of that read stay at 6.
   delay slots: retail fills `beq $v0,$zero,L3` from L3's own first instruction
   (`addiu $v0,2`) and the next branch from the fall-through's `return 1`,
   where we leave the first a `nop` and hoist the m0 arm's `addiu $a0,0x10`
