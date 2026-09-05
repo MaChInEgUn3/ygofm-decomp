@@ -7654,11 +7654,14 @@ func_8003A198 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalga
   weeks on. The whole walk is the pointer.
 
 func_8004B374
-    STILL OPEN, but the C is now PURE and at EXACT LENGTH: parked/func_8004B374.c,
-    74/74 and 21 differing, 2026-09-05, with none of the four asm levers the
-    transcription in src/ carries. The residue is one loop-invariant decision:
-    retail keeps arg1 unmasked in $s5 and masks it per iteration, gcc hoists
-    the mask. Diagnosis and the register-pressure hypothesis in the header.
+    STILL OPEN at 13 differing, 74/74 (2026-09-05, was 21). The 21 were ONE
+    mechanism, the OPEN item in WORKFLOW ("an invariant retail leaves inside a
+    call-bearing loop"), and it is closed: a `goto` loop has no loop notes, so
+    gcc never hoists arg1's per-iteration `andi`. Residue is register names
+    only; `a1 = arg1;` at the top and `mask = 0;` before `i = 0;` took it 29
+    -> 11 under the file flags, 13 under -G8/as -G0 where the D_80011434 pair
+    is also right (installed: cc row removed, as -G0 added). What is left is
+    i / mask / off rotated through $s0-$s2. Permuter running.
 
 func_80049920 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
     The five ($s3/$s4 exchanged between i and mask) closed on `z = 0;` with
@@ -7669,8 +7672,12 @@ func_80049920 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
     as -G0 row stays and the cc row is gone. Permuter stopped.
 
 func_8004A518
-    STILL OPEN, but the C is now PURE: parked/func_8004A518.c, +2 at 114/112
-    and 99 differing, 2026-09-05, with none of the transcription's reloads,
-    pins or fences. One cursor name per loop fixed the prologue; the +2 is one
-    extra callee-saved register ($s6) whose uses are listed in the header.
-    Explicit top-of-loop reloads are +4 and neither scheduler flag helps.
+    STILL OPEN at 11 differing, 112/112, pure C (2026-09-05, was +2/99).
+    The +2 was gcc hoisting the literal 0x63 out of the call-bearing loop into
+    $s6; a `goto` loop (no LOOP_BEG/END notes, so no loop pass) keeps it inside
+    and is exact length at once. Then one pointer name per loop (51 -> 27), the
+    base as loop 2's own cursor, the increments after the call, typed loop-3
+    constants and the -G8/as -G0 recipe (cc row removed, as row kept). The 11
+    are mask/k40 exchanged in $s4/$s5 and one call-argument copy scheduled
+    after the address add; eight allocation spellings measured dead in the
+    header. Permuter class.
