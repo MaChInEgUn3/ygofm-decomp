@@ -1,6 +1,11 @@
 /* 12 differing at 84/84 (2026-09-05: the default compiler, cc1psx's own
  * pairs, with the assembler at -G0 -- the file's -mno-split-addresses row is
- * gone; that took the D_801799D8 pair through $v0 and 14 -> 12). Was 14, from 18. RECOVERED from git 2026-09-04 (the Unchiga
+ * measured with `-quiet -O2 -G8` as try_func's trailing flags; the file's
+ * -mno-split-addresses row in build.py STAYS while src/ holds the
+ * transcription -- deleting it made that asm block one instruction short and
+ * the build red, commit 04c466a, restored the next commit. Drop the row when
+ * this C replaces it. That recipe took the D_801799D8 pair through $v0 and
+ * 14 -> 12). Was 14, from 18. RECOVERED from git 2026-09-04 (the Unchiga
  * merge deleted it and put a transcription in src/).
  *
  * One lever, worth two: the record cursor's `r += 0x1C` moved from the end

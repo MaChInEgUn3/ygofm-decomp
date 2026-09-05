@@ -15,6 +15,12 @@ lines of output**. Piping it through `tail -2` reads as green when the build
 died early, because the last thing printed is then the function count. Two
 commits in this project went in red that way, one of them the commit that
 noticed the first.
+**And gate the commit on the exit status with `&&`**, not on reading it: on
+2026-09-05 a build printed `EXIT=1` with 903 differing functions and the
+commit on the next line went out anyway (04c466a), because the two commands
+were merely sequential. A transcription's `__asm__` block is NOT flag-proof,
+which is what that build was saying: func_8002C7E8's needs its
+-mno-split-addresses row until real C replaces it.
 sha1 `84747e64f6da8e764206ec203e489acf8c9dcf7d`. Always the project `.venv`,
 never a bare `pip install` — installing globally once broke another tool's pins.
 
