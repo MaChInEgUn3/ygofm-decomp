@@ -20,7 +20,13 @@
  * order (10), `v` named without `t` (+1), and the two +1 shapes with k.
  * Two of the eight are the D_8009B458 pair self-referencing through $v1 in
  * retail and through $v0 here, which follows from the same allocation.
- * Untried: naming an UNRELATED read in the block (the func_80025F3C rule).
+ * Tried 2026-09-05, the func_80025F3C rule (an UNRELATED read named): the
+ * three arg1 halfwords named at the top (-2), only the first at the top (21),
+ * all three after the base load (-2), the first after the constant (21). All
+ * worse than the 8, and the permuter's nine outputs from this base are 8 to
+ * 19. What retail does -- `lui $a2,6` right after the frame, `ori` after the
+ * table load, the table address before the base pair, `sw $ra` late -- is
+ * the same schedule the sibling func_8004A764 sits at 6 on.
  */
 #include "common.h"
 
