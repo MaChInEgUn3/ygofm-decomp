@@ -6582,7 +6582,7 @@ func_800528AC -- 288/288 and 125 differences, `-fno-strength-reduce` (now in
     Handed to the permuter.
 
 # ---
-func_800279BC -- 271/271, 12 differences (2026-09-05; was 14: the 0x90000000 mask named through the borrowed `r` at the block top), empty opcode census. Default flags,
+func_800279BC -- 271/271, 9 differences (2026-09-05; was 14, then 12: the 0x90000000 mask named through the borrowed `r` at the block top, then the record offset computed into the dead loop counter `i`), empty opcode census. Default flags,
     gp=4 at=0, no jump table. Candidate in parked/func_800279BC.c. This one
     went 161 -> 14 in one session on five source-shape levers and nothing
     else, so the entry is mostly a record of WHICH levers, because every one

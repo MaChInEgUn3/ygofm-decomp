@@ -1,3 +1,22 @@
+/* 9 differing at 271/271 (2026-09-05; was 14, then 12). The mask constant 0x90000000
+ * used in the search loop is NAMED, and the name is a BORROW: `r`, the arm's
+ * result variable, assigned right after `n = 0; j = 0;` at the top of the
+ * block. The same assignment just before the loop or inside it is 14 -- the
+ * position is the lever, not the naming. Found by score_permuter_outputs.py
+ * in a stored output; decomposed from the preprocessed source by hand.
+ * The 12: the loop counter i in $a2 (retail) against $a0, the D_800907D8 /
+ * D_801A7AD8 pair rotated behind it, and `r - 4` computed in place ($a1)
+ * where ours takes $a3. Dead at 12: `r -= 4;` (13), both `i = 0xA;` sites
+ * pinned with `do { } while (0);` (12), either alone (12, 12), and a shared
+ * `ten` name for the constant (12).
+ * 12 -> 9 (permuter): the record offset `(D_8009B1D5 ^ 1) * 0x1A4` computed
+ * into `i` -- the loop counter, dead at that point -- and `h` formed from it.
+ * The permuter's other output borrows `i` for the flag word read instead
+ * (`i = *(s32 *)(h + 0x14); if ((i & r) == r)`), also 9; both together are
+ * -1 and 254, so it is one borrow or the other, not both. The 9 left: the
+ * counter and the 10 in $t0 against $a2, `r - 4` into $a3, and a `sll`/`addu`
+ * pair through $t0. Permuter restarted from this base.
+ */
 /* 12 differing at 271/271 (2026-09-05; was 14). The mask constant 0x90000000
  * used in the search loop is NAMED, and the name is a BORROW: `r`, the arm's
  * result variable, assigned right after `n = 0; j = 0;` at the top of the
@@ -115,7 +134,8 @@ s32 func_800279BC(void) {
                 j = 0;
                 r = 0x90000000;
                 pa = a;
-                h = D_801A7AD8 + 0x8C + (D_8009B1D5 ^ 1) * 0x1A4;
+                i = (D_8009B1D5 ^ 1) * 0x1A4;
+                h = D_801A7AD8 + 0x8C + i;
                 do {
                     if ((*(s32 *)(h + 0x14) & r) == r) {
                         *pa = h;
