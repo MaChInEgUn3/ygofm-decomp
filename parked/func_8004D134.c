@@ -8,7 +8,10 @@
  * Then `(u32)o2 >= 2` on the FIRST test only: the base's census was
  * `slti +1 / sltiu -1`, casting both is the mirror, and one cast is the
  * census retail has for the compares (alignment 274 -> 275/278). Left in
- * the census: `sra +1 / srl -1`, one shift retail does unsigned.
+ * the census: `sra +1 / srl -1` -- `(u32)w >> 7` on the halfword read from
+ * `e + o1` empties it (alignment 276/278); the other shift, `z >> 6`, is the
+ * signed one. The 267 positional differences are register names from the
+ * prologue on ($t7/$t0 for the arg0 copy) and are the permuter's.
  */
 #include "common.h"
 
@@ -75,7 +78,7 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
             w = *(u16 *)(e + o1);
             t = w + bias;
             *(u16 *)(e + o1) = t;
-            b = (w >> 7) & 3;
+            b = ((u32)w >> 7) & 3;
             if (b >= 3) {
                 *(u16 *)(e + o1) = t & 0xFF7F;
             }
