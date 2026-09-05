@@ -5,6 +5,10 @@
  * whose length only just came right and says nothing yet about how far the
  * registers are; the (length, census, differences) rule ranks this above
  * the +2. From the stored permuter output re-score.
+ * Then `(u32)o2 >= 2` on the FIRST test only: the base's census was
+ * `slti +1 / sltiu -1`, casting both is the mirror, and one cast is the
+ * census retail has for the compares (alignment 274 -> 275/278). Left in
+ * the census: `sra +1 / srl -1`, one shift retail does unsigned.
  */
 #include "common.h"
 
@@ -33,7 +37,7 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
     n = *(u16 *)(rec + 2);
     e = (u8 *)(*(s32 *)(arg2 + 0x14) + *(s32 *)(rec + 4) * 4);
     o2 = (u32)arg0;
-    if (o2 >= 2) {
+    if ((u32)o2 >= 2) {
         return 0;
     }
     switch ((u32)*arg1) {
