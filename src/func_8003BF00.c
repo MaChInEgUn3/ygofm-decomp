@@ -1,9 +1,8 @@
-/* PARKED CANDIDATE PORTED from Unchiga's tree (docs/MERGE_UNCHIGA.md).
- * Installed here because HIS base is closer than the one this tree
- * reached: the counts are in PARKED.txt. Measure it with the flags on
- * the next line -- they are his unit's, and try_func's default flags
- * report a different number.
- * FLAGS: -G0 -mno-split-addresses
+/* PORTED from Unchiga's tree (docs/MERGE_UNCHIGA.md) and finished here:
+ * parked at 6 until the D_800101D8 read was written through splat's interior
+ * symbol instead of D_800100A8 + 0x130, and the computed goto was rewritten
+ * as a switch so build.py can place the compiled jump table in splat's rodata
+ * (the raw table symbol does not link). Assembler -G0, default cc flags.
  */
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -75,27 +74,32 @@ extern volatile u32 D_8009B0F4;
 extern s32 D_8009B118;
 extern s32 D_80010000;
 extern u8 D_800100A8[];
-extern u8 D_80010224[];
+extern u8 *D_800101D8;
 extern u8 D_801AF000[];
 extern void func_80081DE8(struct Obj *rect, s32 *data);
 
 void func_8003BF00(struct Obj *obj, s32 sel) {
-    if ((u32)sel >= 6) {
-        return;
+    switch (sel) {
+    case 0:
+        goto L8003BF34;
+    case 1:
+        goto L8003BF5C;
+    case 2:
+        goto L8003BF88;
+    case 3:
+        goto L8003BFC8;
+    case 4:
+        goto L8003C044;
+    case 5:
+        goto L8003C084;
     }
-    {
-        void **table = (void **)(D_80010224 + 0x13C);
-        asm volatile("" ::
-                     "g"(&&L8003BF34), "g"(&&L8003BF5C), "g"(&&L8003BF88),
-                     "g"(&&L8003BFC8), "g"(&&L8003C044), "g"(&&L8003C084));
-        goto *table[sel];
-    }
+    return;
 
 L8003BF34:
     obj->f1C = 0x3000;
     D_8009B0F4 &= 0xFFDCFFFF;
-    obj->fC = *(s32 *)(D_800100A8 + 0x130);
-    obj->f8 = *(s32 *)(D_800100A8 + 0x130);
+    obj->fC = (s32)D_800101D8;
+    obj->f8 = (s32)D_800101D8;
     obj->f46 = 1;
     return;
 

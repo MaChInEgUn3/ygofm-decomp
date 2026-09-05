@@ -3954,6 +3954,11 @@ func_8004A518_WAS -- 113 built against 112, and the single extra instruction is 
   has and we do not is more likely to be somewhere else in the body.
 
 func_8003BF00 -- 111 built against 112, 35 differences (was 42), and the single missing
+    MATCHED 2026-09-05, the same two edits as its sibling func_8003B808 the same
+    hour: the D_800101D8 read through splat's interior symbol instead of
+    `D_800100A8 + 0x130` (6 -> 2, the lui had come out one slot early), and the
+    ported computed goto rewritten as a switch of gotos to the labelled arms so
+    the jump table links. Nothing in this entry's diagnosis was the residue.
   instruction is `addu $a0,$a2,$zero`: retail holds the record pointer in $a2
   and copies it into $a0 for the one call, where we hold it in $a0 and need no
   copy.  Everything else is the two standalone arms' scheduling.
