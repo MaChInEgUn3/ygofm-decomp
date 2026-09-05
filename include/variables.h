@@ -1653,6 +1653,8 @@ extern u8 D_8009B2F8;
 #endif
 extern u8 D_8009B324;
 extern u8 D_8009B325;
+/* Read lb: the slot index the current sound bank occupies (func_8003A560). */
+extern s8 D_8009B326;
 #ifdef D_8009B344_SIZED8_VOLATILE
 /* Sized out of small data AND volatile: func_80023144 stores this byte and
  * then reads it straight back to add to it, which gcc otherwise forwards. */

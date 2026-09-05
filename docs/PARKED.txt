@@ -7762,3 +7762,11 @@ func_8004A518 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
     -G0, the permuter's pin round loop 2's guarded block (11 -> 2), and the
     permuter again for the last two: the record address written inline at
     each store, `(base + off)[k]`, instead of assigned to the cursor first.
+
+func_8003A560 -- 240/240, 50 differences, first written 2026-09-05 from the
+    m2c draft (the smallest never-parked function left in scope). Six source
+    levers took it from -1/116 to 50, all register allocation now: k4 (0x18400)
+    and q (b + 0x18000) exchanged in $s0/$s1, the same pair in the second
+    block, and the second call's a1 copy landing after three stores instead
+    of before them. Diagnosis and the dead spellings are in the candidate's
+    header. Permuter not yet run.
