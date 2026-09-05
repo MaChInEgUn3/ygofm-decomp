@@ -1,4 +1,4 @@
-/* 11 differing at 112/112 under default -O2 -G8 with the assembler at -G0
+/* 2 differing at 112/112 (2026-09-05, was 11) under default -O2 -G8 with the assembler at -G0
  * (PER_FUNC_AS_FLAGS), 2026-09-05. PURE C; src/ holds a transcription with
  * asm reloads, register pins and scheduling fences.
  *
@@ -23,6 +23,20 @@
  * add instead of before it. Dead at 11: `i = 0` for `i = mask`, a shared
  * zero name, k40 assigned first / used for a third store (-1 length), the
  * argument named at the top of the body, `key = *tbl` first, base[0] first.
+ *
+ *   11 ->  2  `do { } while (0);` round loop 2's whole guarded block (the
+ *             base load, the `if (count > 0)`, the goto loop). The permuter
+ *             found it as a pin round the entire middle of the function;
+ *             decomposed, loop 2's block alone is the whole effect (loop 1
+ *             alone 11, loop 3's preheader alone 11, loops 1+2 2). It fixes
+ *             mask/k40's $s4/$s5 at all nine sites -- a register-allocation
+ *             use of the idiom, the func_8005F3B8 class.
+ * The last 2 are `addu $a0,$s1` (the func_8004A764 argument) scheduled
+ * after `base = base + off` where retail has it before. Dead at 2: the
+ * argument named plain or pinned before the address (2, 2), `key = *tbl`
+ * first (2), a pin round the address and the key read (7), a fresh cursor
+ * name for the body (+2), the pin from `top2:` to the back edge only (does
+ * not compile: the label lands inside the block).
  */
 #include "common.h"
 
@@ -74,6 +88,7 @@ void func_8004A518(void) {
         o1 += 0x2C;
     } while (i < 16);
 
+    do {
     base = D_8009B458;
     if (*(s16 *)(base + 0x510) > 0) {
         i = 0;
@@ -100,6 +115,7 @@ void func_8004A518(void) {
             mask |= key;
         if (i < *(s16 *)(base + 0x510)) goto top2;
     }
+    } while (0);
 
     i = 0;
     b40 = 0x40;

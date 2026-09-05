@@ -7668,12 +7668,9 @@ func_80049920 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
     as -G0 row stays and the cc row is gone. Permuter stopped.
 
 func_8004A518
-    STILL OPEN at 11 differing, 112/112, pure C (2026-09-05, was +2/99).
-    The +2 was gcc hoisting the literal 0x63 out of the call-bearing loop into
-    $s6; a `goto` loop (no LOOP_BEG/END notes, so no loop pass) keeps it inside
-    and is exact length at once. Then one pointer name per loop (51 -> 27), the
-    base as loop 2's own cursor, the increments after the call, typed loop-3
-    constants and the -G8/as -G0 recipe (cc row removed, as row kept). The 11
-    are mask/k40 exchanged in $s4/$s5 and one call-argument copy scheduled
-    after the address add; eight allocation spellings measured dead in the
-    header. Permuter class.
+    STILL OPEN at 2 differing, 112/112, pure C (2026-09-05; was +2/99, then 11).
+    Goto loop for the call-bearing loop, one pointer name per loop, the base as
+    loop 2's cursor, -G8/as -G0, and the permuter's `do { } while (0);` round
+    loop 2's guarded block (11 -> 2, mask/k40 allocation). The 2 are the
+    func_8004A764 argument copy scheduled after the address add; six
+    spellings dead in the header. Permuter restarted from this base.
