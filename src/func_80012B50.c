@@ -1,8 +1,8 @@
 #define D_8009B0C0_IS_VOLATILE
 #define D_8009B0CC_IS_VOLATILE
 #define D_8009B0D1_IS_SCALAR
-#define D_8009B230_SIZED
-#define D_8009B269_SIZED
+#define D_8009B230_IN_DATA
+#define D_8009B269_IN_DATA
 #define D_8009B0D8_IS_SCALAR
 #include "common.h"
 
@@ -32,7 +32,7 @@ s32 func_80012B50(void) {
     D_8009B0D8 = 1;
     D_8009B098 = 0x5000;
     D_8009B0D1 = 0;
-    D_8009B230[0] = 1;
+    *(u8 *)&D_8009B230 = 1;
     D_8009B0B4 = (s32)q;
     D_8009B0C4 = v;
 
@@ -58,7 +58,7 @@ s32 func_80012B50(void) {
         func_800137E4();
     }
     func_8002D458(func_80043BCC());
-    D_8009B269[0] = 8;
+    D_8009B269 = 8;
     func_8002DD74();
     return 0;
 }
