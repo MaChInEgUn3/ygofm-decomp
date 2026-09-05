@@ -31,6 +31,10 @@
  * `z = 0` for both (11), and the guard-plus-do/while form for the `i++` in
  * the lh delay slot (-2). Three faults, each measured alone: the 0xFFFF that
  * must stay unbounded, the zero pair's direction, and the increment's slot.
+ * Permuter, 2026-09-05 (930 iterations): its best is 6 by writing
+ * `(u16)(i = bestv) >= v`, which clobbers the loop counter -- the reject
+ * class -- and the legal readings of it (`best = bestv;` before the test)
+ * are +1. `D_8009B458 - (-o)` and `i = 0;` as a statement are 11.
  */
 #include "common.h"
 
