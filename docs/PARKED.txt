@@ -403,13 +403,11 @@ func_80049434
     RESOLVED -- src/func_80049434.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80049AF4
     RESOLVED -- src/func_80049AF4.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
-func_8004B854
-    STILL OPEN, but the C is now WRITTEN: parked/func_8004B854.c, 47/47 and 3
-    differing, 2026-09-04 -- the three the entry above names, and five more
-    spellings plus a temporary LA_CALL_FUNCS entry do not move them; the
-    filler sinks the 0x1000 into the slot so the post-pass never sees a nop.
-    -mno-split-addresses is load-bearing (-2 without it). src/ keeps the
-    transcription. Full notes in the candidate's header.
+func_8004B854 MATCHED 2026-09-05 -- pure C in src/, replacing the transcription.
+    The 3 were the callback `la` under -mno-split-addresses, indivisible, with
+    the 0x1000 sunk into the jal slot. Default cc flags give cc1psx's own pair
+    and reorg puts its %lo half in the slot; gp=0 so `as -G0` keeps D_8009B458
+    bare. First try on the flag recipe alone.
 func_8003D03C
     The stored 9 decomposed 2026-08-11 and installed: the D_8009B408 byte
     read named into an s8 local plus a dead if with identical arms
