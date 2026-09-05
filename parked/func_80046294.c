@@ -1,3 +1,13 @@
+/* 5 differing at 151/151 (2026-09-05). Residue: the loop preheader's
+ * ORDER -- retail hoists the jump-table base (`lui/addiu %lo(.rodata)`)
+ * BEFORE `boff = 0x30` and `off = i`, we emit it after them; plus one
+ * rodata symbol spelling (`.rodata` against `.rodata+168`) that only the
+ * full build can judge. Measured 2026-09-05: the two assignments in the
+ * for-init clause (5), in the other order (5), `for (;;)` for `while (1)`
+ * (5). gcc places a hoisted invariant after the source's preheader
+ * statements; which spelling puts it first is not found. gp=0, at=0,
+ * as -G0.
+ */
 #include "common.h"
 
 void func_80046294(void) {
