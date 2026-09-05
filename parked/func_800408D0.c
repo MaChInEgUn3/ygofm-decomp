@@ -1,3 +1,13 @@
+/* 3 differing at 202/202 (2026-09-05). Residue: the call's third argument
+ * load `lhu $a2,6($s0)` (u6) comes AFTER `addiu $a3,$s2,32` and the
+ * `sw $zero,D_8009B424` store in ours; retail loads it before both. The
+ * source already names u4/k18/u6 ahead of the store. Measured 2026-09-05:
+ * u6 read before k18 (3), a pin round the u6 read (9), a pin round the
+ * store (9), the fourth argument named (3), the +0x1A read named (7), the
+ * D_8009B424_IS_VOLATILE arm (3). Scheduler flags through try_func's
+ * trailing args are not comparable (they replace the default set).
+ * Scheduling in one block -- permuter next.
+ */
 #define D_8009B146_SIZED
 #define D_8009B424_IS_SCALAR
 #include "common.h"
