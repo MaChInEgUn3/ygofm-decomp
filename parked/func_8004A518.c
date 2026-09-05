@@ -12,6 +12,10 @@
  * layout shifts by one slot); retail uses s0..s5 only. The $s6 uses in our
  * output are recorded below so the next attempt starts from the value that
  * took it rather than from a guess:
+ *     row  13  sw $s6,40($sp)
+ *     row  52  addiu $s6,$zero,99
+ *     row  57  sb $s6,3($v1)
+ *     row 105  lw $s6,40($sp)
  *
  * Measured and dead on 2026-09-05, all still +2 unless noted:
  *   loop-1 constants as literals instead of named locals     +2, 103
