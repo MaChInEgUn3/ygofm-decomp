@@ -1382,6 +1382,13 @@ func_8005B4D8 -- 42 differences, right instruction count, and the same class as
   the same problem. Do not spend on it separately.
 
 func_8002EA0C -- 10 differences, load scheduling in one block plus one store's
+    MATCHED 2026-09-05 on the batched-load rule this entry names and stopped
+    short of: all FOUR accumulator loads as named reads in retail's order
+    (a = D_8009B284; b = D_8009B294; c = D_8009B288; d = D_8009B298;) is
+    10 -> 2 -- the two addends alone had been 11. The last two were the
+    order of the second and third loads, which no source order moves; a
+    `do { b = D_8009B294; } while (0);` pin round that one read is the MATCH
+    (round D_8009B288 or the last pair, 17; both scheduler flags worse).
   placement. Same category as func_80031CD4.
   A two-axis smooth-scroll stepper: two `div`s to get per-frame deltas, then a
   16.16 accumulator per axis whose high half is written back to D_8009B146 and
