@@ -34,6 +34,18 @@
  * every exit a `goto done; done: return ret;`) is +3; assigned at each exit
  * instead it is the same -2/35. The return-1 block does not come back that
  * way either.
+ * 2026-09-05, second pass: read off the listing, both `j L4 / addiu $v0,1`
+ * are `j ret1` with ret1's first instruction copied into the slot by reorg,
+ * so the label is the `addiu $v0,1` block that FALLS INTO the epilogue --
+ * i.e. `ret1: return 1;` at the END of the function, reached by `goto ret1`
+ * from the call test, from the slt-fail path and after the =3 store, with
+ * the =2 arm falling through. Written that way (three layouts: the call
+ * test as `!= 0 goto ret1`, as `== 0 { body }` with ret1 after, and with the
+ * =3 arm's own `return 1`) it is still -2/36: gcc inverts the call's branch
+ * and jumps to the epilogue with the 1 in its slot every time. Retail
+ * therefore has THREE copies of the return-1 tail that our jump pass
+ * cross-jumps into one; which source shape stops cross-jumping here is
+ * not established (an accumulator was +3, see above).
  */
 #include "common.h"
 
