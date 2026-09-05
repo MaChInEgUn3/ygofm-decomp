@@ -8,7 +8,7 @@
  * against the pair, which is what puts every register where retail has it.
  * The listing has no %gp_rel, so `as -G0` is free (WORKFLOW step 0).
  */
-#define D_8009B361_IS_SCALAR
+#define D_8009B361_IN_DATA
 #include "common.h"
 
 s8 func_80070710(void) {

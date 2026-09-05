@@ -1,4 +1,4 @@
-#define D_8009B0D8_IS_SCALAR
+#define D_8009B0D8_IN_DATA
 #include "common.h"
 
 /* The scalar declaration plus the as -G0 override (recipe branch 1: no

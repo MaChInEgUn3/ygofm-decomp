@@ -1,4 +1,4 @@
-#define D_8009B0D8_IS_SCALAR
+#define D_8009B0D8_IN_DATA
 #include "common.h"
 
 /* D_8009B0D8 takes the scalar declaration and an assembler -G0: there is no

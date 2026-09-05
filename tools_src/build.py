@@ -522,7 +522,6 @@ PER_FUNC_AS_FLAGS = {n: "-G0" for n in _G0_FUNCS + _G0_MACRO_FUNCS}
 # gp-relative load. The comment above says the two -G settings must match, and
 # that is the usual case -- these are the exceptions, where the mismatch is
 # exactly what reproduces retail.
-PER_FUNC_AS_FLAGS["func_8003AC48"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003AD6C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80061008"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005A53C"] = "-G0"
@@ -547,7 +546,6 @@ PER_FUNC_AS_FLAGS["func_8004A518"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B374"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002C604"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B854"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80070710"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80015DFC"] = "-G1"
 PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
@@ -645,7 +643,6 @@ PER_FUNC_AS_FLAGS["func_800497E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047788"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CF8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A43C"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80039AFC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049010"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049DD8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047CC4"] = "-G0"
@@ -683,7 +680,6 @@ PER_FUNC_AS_FLAGS["func_800289BC"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8005B4D8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DC38"] = "-G1"
-PER_FUNC_AS_FLAGS["func_8003F7D4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003594C"] = "-G2"
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
@@ -818,14 +814,12 @@ PER_FUNC_AS_FLAGS["func_8005A8C4"] = "-G2"
 # in front of them holding a nop. cc1psx's split pair is two instructions to
 # the delay-slot filler, so it hoists the lui; the scalar declaration is one,
 # so the slot stays empty and the assembler expands it after the branch.
-PER_FUNC_AS_FLAGS["func_800151D8"] = "-G0"
 # Recipe branch 1 again, and the same delay-slot use as func_800151D8: no
 # %gp_rel anywhere, so any -G is free, and the scalar declaration makes
 # D_8009B1D5 one instruction to gcc. Under the aggregate arm cc1psx's own
 # %hi/%lo pair is two, and gcc hoists the lui out of the block into the
 # search loop's load delay slot, where retail leaves a nop.
 PER_FUNC_AS_FLAGS["func_8002C7E8"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8003AAE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049920"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A0FC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"

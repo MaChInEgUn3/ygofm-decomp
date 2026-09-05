@@ -1,4 +1,4 @@
-#define D_8009B0D1_IS_SCALAR
+#define D_8009B0D1_IN_DATA
 #include "common.h"
 
 void func_8003F7D4(void) {

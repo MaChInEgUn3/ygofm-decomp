@@ -1,4 +1,4 @@
-#define D_8009B0D8_IS_SCALAR
+#define D_8009B0D8_IN_DATA
 #include "common.h"
 
 /* A fade that walks a 30-byte mirror pair from both ends. Three shapes.

@@ -589,7 +589,9 @@ extern u8 *D_8009B22C;
 /* Two independent symbols; one guard each, because func_80030F40 wants both
  * as scalars and func_8002DC38 wants D_8009B368 sized while leaving
  * D_8009B36A alone. */
-#ifdef D_8009B36A_IS_SCALAR
+#ifdef D_8009B36A_IN_DATA
+extern u16 D_8009B36A __attribute__((section(".data")));
+#elif defined(D_8009B36A_IS_SCALAR)
 extern u16 D_8009B36A;
 #else
 extern u16 D_8009B36A[];
@@ -1752,7 +1754,9 @@ extern u8 D_800F39F0[];
 extern u8 D_800EAF08[];
 extern u8 D_80090D28[];
 extern u8 D_80090D44[];
-#ifdef D_8009B0D8_IS_SCALAR
+#ifdef D_8009B0D8_IN_DATA
+extern s32 D_8009B0D8 __attribute__((section(".data")));
+#elif defined(D_8009B0D8_IS_SCALAR)
 extern s32 D_8009B0D8;
 #elif defined(D_8009B0D8_IS_SIZED)
 /* Eight bytes it does not have: the size is a codegen knob. func_8003CCD8
