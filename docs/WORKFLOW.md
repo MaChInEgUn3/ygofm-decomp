@@ -2645,6 +2645,18 @@ had printed died with the process. Both sweeps now pass `flush=True`. This is
 the same failure as the others in this paragraph wearing different clothes --
 the run happened, the answer did not survive, and nothing said so.
 
+**`pkill -f '[p]attern'` protects the shell only from the PATTERN's own text;
+a plain occurrence of the same word anywhere else in the command kills it.**
+On 2026-09-05 a command that ran `pkill -9 -f '[p]ermute.py'` and, three
+lines later, `nohup ... tools_src/permute.py func_X` killed its own shell
+twice in a row: the regex `[p]ermute.py` matches the literal `permute.py` in
+the nohup line, which sits in the same `bash -c` argv. Put the kill and the
+restart in separate commands, or anchor the pattern to something the restart
+line does not contain (`'tools_src/[p]ermute\.py'` still matched; the kill
+has to run alone). Related: `grep -c` exits 1 on a zero count, so a
+`... ; ps | grep -c pattern` as the LAST command makes a healthy result read
+as a failure.
+
 **Killing a permuter mid-compile can leave the wine prefix in
 `wineboot --init`, and the try_func that was running blocks behind it
 forever.** The tell is that ONE try_func hangs while another, started

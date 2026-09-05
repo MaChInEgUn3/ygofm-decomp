@@ -35,8 +35,9 @@
  * after `base = base + off` where retail has it before. Dead at 2: the
  * argument named plain or pinned before the address (2, 2), `key = *tbl`
  * first (2), a pin round the address and the key read (7), a fresh cursor
- * name for the body (+2), the pin from `top2:` to the back edge only (does
- * not compile: the label lands inside the block).
+ * name for the body (+2), the pin from `top2:` to the back edge only (+2,
+ * 101 -- the first run of it printed nothing because a permuter was
+ * restarting in the same second; re-measured with none running).
  */
 #include "common.h"
 
