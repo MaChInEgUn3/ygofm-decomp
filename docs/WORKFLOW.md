@@ -2419,8 +2419,17 @@ on a combination that had been in the table for weeks.
   reason for the row: seven units whose one guard was a single `_IS_SCALAR`
   (func_80070710, func_8003F7D4, func_80030F40 and four D_8009B0D8 users)
   build byte-identical with the symbol in `.data` at the default threshold,
-  and their `-G0` rows are gone (129 -> 122 by `grep -c` on build.py; the 124 this file used to quote was never re-counted). The units with several
-  scalar guards, or with `lui $at` stores, are the ones still to measure. Each conversion removes a
+  and their `-G0` rows are gone (129 -> 122 by `grep -c` on build.py; the 124
+  this file used to quote was never re-counted). **And that is where this
+  route ends**: of the 122 units left at `-G0`, 93 carry NO guard at all and
+  have no `%gp_rel` in their listings -- the row is the honest statement
+  "nothing in this unit is small data", serving the default scalar arms of
+  every symbol they touch, and there is no inflated size or per-file
+  disagreement to remove. Putting each of those symbols in `.data` would
+  trade one per-function flag for a per-symbol attribute on declarations
+  that are already true, which is not a gain. The remaining handful mix
+  scalar guards with `_IS_AGGREGATE` or `lui $at` stores and were not
+  measured. Each conversion removes a
   per-function assembler flag *and* an inflated size only when both claims
   hold, and they are separate claims. One
   conversion is measured; 179 are not. Do them a few at a time against the full
