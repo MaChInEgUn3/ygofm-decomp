@@ -1,3 +1,12 @@
+/* 5 differing at 102/102 (2026-09-05 re-measured). Residue: the loop
+ * preheader's ORDER -- retail hoists the D_801D5608 base pair BEFORE the
+ * three cursor initialisations (`q = e`, `y = 0` copied from i, `s = p +
+ * 2`); we emit it after them. Same class as func_80046294. Measured
+ * 2026-09-05: the four initialisations pinned (14), two of them pinned
+ * (15), `base` computed after them (34), `y = i` (5). The park entry has
+ * the earlier levers (a base local is 59/22, for-clause and reordering 7,
+ * an index form 55). Flags: -O2 -G8 -fno-strength-reduce, as -G0.
+ */
 #include "common.h"
 
 void func_80060E70(u8 *p, s32 idx, s32 flag) {
