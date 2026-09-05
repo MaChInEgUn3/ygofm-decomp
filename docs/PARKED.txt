@@ -6291,6 +6291,9 @@ func_8005E808 -- 251/251, 77 differences, written 2026-09-04. A geometry
   split, and routing everything through the alias coalesces it away again.
   Which reference stays behind is not derivable; the permuter found it.
   Installed from the readable source, not the permuter's formatting.
+func_8004D134 -- 2026-09-05: 278/278 at 267 on ONE borrow, `o2 = (u32)arg0;` for the two
+    dispatcher tests (o2 is assigned in every arm). Positional count, not yet
+    comparable to the +2/69 below; parked/ holds it. From the stored permuter re-score.
 func_8004D134 -- 280/278 (+2), 69 differences, written 2026-09-04. Walks a
   record array applying a per-format offset table: a switch on *arg1 picks
   four constants, then a loop does halfword bit surgery at two of them and
@@ -7160,6 +7163,10 @@ func_800482B0, follow-up 7 -- the prologue axis is closed by hand. At
     byte-identical, and used for every masked reference it is WORSE
     (`andi +1, nop -1`, alignment 221). The permuter's first stored output
     on the new base is also worse (`addu +1, nop -1`). Left to the permuter.
+func_800482B0, follow-up 8 (2026-09-05) -- 192 -> 189 on `i = 0;` written once at the top
+    of the function (after `sp28 = arg3;`) with the first block's zeroing
+    removed; removing the third block's instead is -1. From the stored permuter
+    output re-score; parked/ holds it.
 
 # ---
 func_80023144 -- step 0 only, 2026-09-04. 210 instructions, gp=5, at=14, no

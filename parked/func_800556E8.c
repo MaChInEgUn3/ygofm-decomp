@@ -1,3 +1,8 @@
+/* 97 differing at 187/187. 2026-09-05: the stored permuter output that
+ * re-reads the +0xE06 field through a volatile cast at the else-arm store
+ * (in place of `v`) is +5; census 8 -> 6 does not survive the length. Not
+ * installed.
+ */
 #include "common.h"
 
 void func_800556E8(s32 idx) {

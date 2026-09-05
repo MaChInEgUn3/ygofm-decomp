@@ -1,3 +1,11 @@
+/* 278/278, 267 differing (2026-09-05); the previous candidate was +2 at 69.
+ * The length closed on ONE borrow: `o2 = (u32)arg0;` before the dispatcher,
+ * with both `>= 2` / `< 2` tests on `o2` -- a name whose real assignments
+ * are the dispatcher arms. The 267 is a positional count on a candidate
+ * whose length only just came right and says nothing yet about how far the
+ * registers are; the (length, census, differences) rule ranks this above
+ * the +2. From the stored permuter output re-score.
+ */
 #include "common.h"
 
 s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
@@ -24,7 +32,8 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
     rec = *(u8 **)arg2;
     n = *(u16 *)(rec + 2);
     e = (u8 *)(*(s32 *)(arg2 + 0x14) + *(s32 *)(rec + 4) * 4);
-    if ((u32)arg0 >= 2) {
+    o2 = (u32)arg0;
+    if (o2 >= 2) {
         return 0;
     }
     switch ((u32)*arg1) {
@@ -58,7 +67,7 @@ s32 func_8004D134(s32 arg0, u16 *arg1, u8 *arg2, s32 *arg3, s32 *arg4) {
     big = arg0 * 16 + 0x3BD8;
     h = e + 0x1C;
     for (i = n - 1; i != -1; i--) {
-        if ((u32)arg0 < 2) {
+        if (o2 < 2) {
             w = *(u16 *)(e + o1);
             t = w + bias;
             *(u16 *)(e + o1) = t;

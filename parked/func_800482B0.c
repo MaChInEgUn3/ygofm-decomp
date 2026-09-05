@@ -1,3 +1,8 @@
+/* 189 differing at 234/234 (2026-09-05; was 192): `i = 0;` written once at the
+ * top of the function, after `sp28 = arg3;`, and the first block's own
+ * `i = 0;` removed -- the assign-before-the-guards lever, found by the stored
+ * permuter output re-score. Removing the third block's zeroing instead is -1.
+ */
 #include "common.h"
 
 void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
@@ -13,6 +18,7 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
 
     sp22 = arg2;
     sp28 = arg3;
+    i = 0;
     if (*(u16 *)(*(s32 *)(D_8009B45C + 0x43C) + (arg0 & 0xFFFF) * 2) != 0xFFFF) {
         if ((arg0 & 0x8000) != 0) {
             func_800451E0(arg0 & 0xFFFF, 0);
@@ -49,7 +55,6 @@ void func_800482B0(s32 arg0, s16 arg1, u8 arg2, u16 arg3, s32 arg4, u8 arg5) {
         if (hi != 0) {
             c = 0;
             n = 0;
-            i = 0;
             do {
                 func_80077C50(i + 0x14, &sp20);
                 if (sp20 != 0 &&

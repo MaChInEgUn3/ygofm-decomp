@@ -1,3 +1,8 @@
+/* 71 differing at 251/251. 2026-09-05: the stored permuter output at 75 with
+ * census 6 -> 4 deletes `w = *(s16 *)(e + 0x20);` and leaves `m = w;` reading
+ * an unassigned name -- the reject class. Both legal readings of it (m from
+ * the load, the test on m or on a second load) are 77 with the base's census.
+ */
 #include "common.h"
 
 void func_8005FB30(u8 *arg0);

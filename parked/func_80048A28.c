@@ -1,3 +1,8 @@
+/* 60 differing at 121/121. 2026-09-05: the stored permuter output that names
+ * the scaled index (`off = i * 2;` for the three address sites) is 60 as
+ * well -- same census, same alignment -- and using it for the call argument
+ * too is -4. Not installed.
+ */
 
 #include "common.h"
 

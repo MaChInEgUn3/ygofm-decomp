@@ -1,3 +1,8 @@
+/* 86 differing at 157/157, census 4. 2026-09-05: the stored permuter output
+ * at 136 with census 2 is a trade the alignment rejects (136/157 against
+ * 138/157); its edit -- the first block's `b` local dropped for the symbol --
+ * is already in this file at the later block. Not installed.
+ */
 #include "common.h"
 
 void func_8004803C(s16 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5,
