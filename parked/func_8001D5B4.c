@@ -18,6 +18,18 @@
  * canonicalises the test either way. What is left to try is the func_8003C328
  * lesson: lay the arms out as `goto` targets in retail's own address order,
  * with an explicit `goto` to the shared store block.
+ * Done 2026-09-05, still -2 in every case (35 or 36): the `!=` arm laid out
+ * first with `goto eq;`, an early `ret1: return 1;` block right after the
+ * call with `goto ret1;` from both slt-fail paths, the =3/=2 arms with and
+ * without their own `return 1;`, the slt tests inverted to `goto`s, and
+ * -fno-thread-jumps / -fno-cse-follow-jumps / -fno-cse-skip-blocks on two
+ * of those. The mechanism, read off the listing: retail's return-1 block
+ * (`j epilogue / addiu $v0,1`) sits right after the call's beq and is the
+ * target of both later beqz's; gcc instead inverts the call's branch to jump
+ * straight to the epilogue with the 1 in its slot, and the block is gone.
+ * No source layout or flag tried keeps it. Also visible: retail duplicates
+ * the =3 store (`sb / j epilogue / addiu 1`) where we cross-jump it into the
+ * first block's store.
  */
 #include "common.h"
 
