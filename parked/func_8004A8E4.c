@@ -29,6 +29,11 @@
  * the byte does not produce the copy (11, two spellings: a fresh local, and
  * `off = v; off = off * 24;`).
  */
+/* 2026-09-05: the scalar arm with `as -G0` (retail loads the pointer ONCE
+ * into $a2 and reuses it, which is what that arm gives) is -2 at 21/23 in
+ * eight spellings: the 0x180 folds into the lbu displacement whatever the
+ * base/offset naming, pinning or two-statement split, and the copy of v that
+ * feeds the *24 never appears. The aggregate arm at 11 stays installed. */
 #define D_8009B458_IS_AGGREGATE
 #include "common.h"
 
