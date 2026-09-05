@@ -15,7 +15,7 @@
  * (`i = *(s32 *)(h + 0x14); if ((i & r) == r)`), also 9; both together are
  * -1 and 254, so it is one borrow or the other, not both. The 9 left: the
  * counter and the 10 in $t0 against $a2, `r - 4` into $a3, and a `sll`/`addu`
- * pair through $t0. Permuter restarted from this base.
+ * pair through $t0. The permuter from this base: 3480 iterations, no output.
  */
 /* 12 differing at 271/271 (2026-09-05; was 14). The mask constant 0x90000000
  * used in the search loop is NAMED, and the name is a BORROW: `r`, the arm's

@@ -18,6 +18,7 @@ installing anything.
 
 Run it after any batch of permuter work, and after picking up an old park.
 """
+import sys
 import subprocess, pathlib, re, json, os, sys, collections
 # Repo root, derived from this file's location -- it was hardcoded to one
 # machine's home directory, which both leaked a username into a public repo
@@ -30,7 +31,13 @@ import subprocess, pathlib, re, json, os, sys, collections
 root=pathlib.Path(__file__).resolve().parent.parent
 os.chdir(root)
 hits=0; checked=0
+# Optional argv: function names to restrict the run to (2026-09-05). A full
+# run over 177 directories was stopped after two hours inside func_80045208's
+# 549 outputs at forty seconds each; the second half had never been read.
+only = set(a for a in sys.argv[1:] if a.startswith('func_'))
 for d in sorted(root.glob('build/permuter/func_*')):
+    if only and d.name not in only:
+        continue
     f=d.name
     outs=sorted(d.glob('output-*/source.c'))
     cand=root/f'parked/{f}.c'
