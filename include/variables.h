@@ -1159,7 +1159,11 @@ extern volatile s32 D_8009B09C;
 extern u8 D_8009B0C3;
 /* Non-volatile in the aggregate form: func_8003D0F4 stores it once and
  * volatile blocks the bare-symbol form the assembler expands through $at. */
-#ifdef D_8009B0C4_SIZED
+#ifdef D_8009B0C4_IN_DATA
+/* The bare form at the compiler (load through the destination register)
+ * beside a four-byte gp-relative neighbour, func_8003D03C. */
+extern volatile s32 D_8009B0C4 __attribute__((section(".data")));
+#elif defined(D_8009B0C4_SIZED)
 /* Eight bytes so that an `as -G4` unit treats it as non-small and expands the
  * bare reference through the destination register, while the four-byte
  * D_8009B3B8 beside it keeps %gp_rel (func_8003D03C). */
