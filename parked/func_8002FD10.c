@@ -1,3 +1,9 @@
+/* 2026-09-05, still 8: retail materialises the D_800EAE98 base into $s0 AFTER
+ * the first call's argument setup (sh D_8009B2A4, a0 = a1 = 0, the func_8002FB78
+ * address) and we do it first. Four placements of `p = D_800EAE98;`: before the
+ * stores (8, installed), after the three stores (8), after the func_80014E1C
+ * call (17), after func_80039E9C (45), between the first two stores (8). The
+ * position of the assignment does not move where gcc materialises it here. */
 #define D_8009B146_SIZED
 #define D_80010000_SIZED
 #define D_800EAE98_SIZED

@@ -1,3 +1,8 @@
+/* 2026-09-05, still 8: retail computes (arg1 & 1) << 2 and the 0xFF FIRST, then
+ * off = 0, then the D_800F2B50 base; we emit the base locals first. Naming the
+ * shifted flag as a first statement (m), with and without off = 0 moved above
+ * the base, and with the 0xFF named as well, are all -3 and 80: the name lets
+ * gcc hoist the OR out of the pin and the h chain shortens. Not that lever. */
 #include "common.h"
 
 typedef struct 

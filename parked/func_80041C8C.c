@@ -1,3 +1,7 @@
+/* 2026-09-05, still 8 ($a0/$a1 for the opcode pointer): while (1) with the
+ * read at the top and break (-7), goto-top unrotated do/while (-12), and
+ * `op = *p; p++;` (8, identical) -- the loop form is right and the residue is
+ * allocation only. Permuter next. */
 #include "common.h"
 
 void func_80041C8C(u8 *arg0) {
