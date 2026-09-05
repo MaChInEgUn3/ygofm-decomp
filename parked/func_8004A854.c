@@ -19,7 +19,14 @@
  * union `{ s32 w; u16 h; }` does keep it (subreg set) but costs an
  * insertion mask (31), and `v | (bestv & 0xFFFF0000)` is 28. Permuter
  * run from this base 2026-09-05: 8000 iterations, 19 outputs, none
- * re-scores below 1 -- saturated.
+ * re-scores below 1 -- saturated. Second run, same day: its best output
+ * (score 10) is `unsigned char bestv = -1`, which gives retail's SHAPE --
+ * a separate `addiu $t0,255` and the mask kept before the compare -- with
+ * the wrong width, and it is semantically wrong (the u16 rate would be
+ * truncated), so it is a diagnosis: the mask survives only when a def of
+ * bestv is wider than the declared type. `u16 bestv = -1` with v as u32,
+ * s32, `(u16)v` on the update, `(s32)v` in the compare, or assigned
+ * rather than initialised, all fold it (2). No legal spelling found.
  *
  * ---- older entry, measured on the cursor form (kept for the record) ----
  * 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
