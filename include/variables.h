@@ -859,7 +859,14 @@ extern u8 D_801B1238[];
 extern u8 D_801D1200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
+#ifdef D_801D0534_IS_AGGREGATE
+/* cc1psx's own %hi/%lo pair through a separate temp, so the delay-slot filler
+ * can take the lui half where the bare form is one indivisible instruction
+ * (func_8002DA1C). */
+extern u32 D_801D0534[];
+#else
 extern u32 D_801D0534;
+#endif
 /* Five pairs of halfwords, indexed by `D_801D0534 % 5` (func_8002DA1C). */
 extern u16 D_80090B50[];
 /* Data Crystal RAM map, UNVERIFIED: selected card ID */

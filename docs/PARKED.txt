@@ -4539,6 +4539,14 @@ func_8004BE88 -- MATCHED 2026-08-21. Kept for the one lever that is new and
   materialisations and the target has one.
 
 func_8002DA1C -- 6 differences, first written 2026-08-21. 135 instructions,
+    MATCHED 2026-09-05. The residue was never a scheduling question: D_801D0534
+    was declared a u32 SCALAR, and at as -G1 the bare symbol expands through the
+    destination register (`lui $v1 / lw $v1,($v1)`) as ONE instruction to gcc, so
+    the delay-slot filler could not take its lui half and took the `addu $a0` instead.
+    Retail's `lui $v0 / lw $v1,($v0)` is a separate temp, i.e. cc1psx's own pair;
+    a D_801D0534_IS_AGGREGATE arm (`u32 []`, read as `[0]`) and nothing else is a
+    MATCH. The tell was in the diff all along: the load's base register equal to
+    its destination. Read that before permuting statements.
   gp=9 at=1. A sibling of func_8002CEE8: the same D_8009B26C / D_8009B26E
   state pair, the same `x & 0xF` goto dispatcher, the same addressing recipe
   (`as -G1` with `D_8009B26C_IS_SCALAR` so the two one-byte flags stay

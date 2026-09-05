@@ -1,5 +1,6 @@
 #define D_8009B26C_IS_SCALAR
 #define D_8009B0C0_SIZED
+#define D_801D0534_IS_AGGREGATE
 #include "common.h"
 
 void func_800878B0(s32 arg0, s32 arg1);
@@ -74,7 +75,7 @@ m0:
 m1:
     if ((f & 0x80) == 0) {
         D_8009B26E = f | 0x80;
-        f = D_801D0534 % 5;
+        f = D_801D0534[0] % 5;
         t = D_80090B50;
         e = &t[f * 2];
         D_801D5608[0] = e[0];
