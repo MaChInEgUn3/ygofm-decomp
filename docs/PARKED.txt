@@ -2214,8 +2214,11 @@ func_80059134_WAS -- 8 differences, 35/35. A straight-line block of eighteen sto
     sweep_try.py run 2026-08-10: best is 8 at -O2 -G0, no better than the base.
 
 
-func_80070710 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
-  the history below is what this tree had reached on its own.
+func_80070710 MATCHED 2026-09-05 as pure C (the 2026-08-30 "port" was a
+    transcription, counted as assembly debt since). D_8009B361 on its scalar
+    arm with `as -G0`, default compiler: the one-byte selector loads bare,
+    self-referencing through $a0, and the table base pair straddles it in $v0.
+    The unsized-array arm had every register wrong (8 of 10) for weeks.
 func_80070710_WAS / func_80071424 / func_80071460 -- 8, 3 and 3 differences, all
     with the right length and instruction sequence.
     The two `D_800F5B98[func_8007058C()] = <global>` functions went 6 -> 3 via

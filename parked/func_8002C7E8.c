@@ -1,4 +1,6 @@
-/* 14 differing at 84/84, from 18. RECOVERED from git 2026-09-04 (the Unchiga
+/* 12 differing at 84/84 (2026-09-05: the default compiler, cc1psx's own
+ * pairs, with the assembler at -G0 -- the file's -mno-split-addresses row is
+ * gone; that took the D_801799D8 pair through $v0 and 14 -> 12). Was 14, from 18. RECOVERED from git 2026-09-04 (the Unchiga
  * merge deleted it and put a transcription in src/).
  *
  * One lever, worth two: the record cursor's `r += 0x1C` moved from the end
@@ -27,6 +29,11 @@
  * `j = k * 28; r = D_801A7AD8 + j;`. The same statement through a fresh name
  * `m` is 16, so it is the borrow of a name whose live range resumes later
  * that does the work (the func_8002A4A8 rule), not the naming of the product.
+ *
+ * 2026-09-05, at 12: the residue is k and both loop counters in $a3 (retail)
+ * against $v1/$a2 (ours). `i = 0;` above the search loop (12), `z = 0;
+ * i = z;` there (12), `i = 0;` after k (14), and k merged into i (24) -- the
+ * merge is 24 under this recipe where it was 28 under the old one.
  */
 #include "common.h"
 
