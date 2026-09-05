@@ -2419,7 +2419,7 @@ on a combination that had been in the table for weeks.
   reason for the row: seven units whose one guard was a single `_IS_SCALAR`
   (func_80070710, func_8003F7D4, func_80030F40 and four D_8009B0D8 users)
   build byte-identical with the symbol in `.data` at the default threshold,
-  and their `-G0` rows are gone (124 -> 117). The units with several
+  and their `-G0` rows are gone (129 -> 122 by `grep -c` on build.py; the 124 this file used to quote was never re-counted). The units with several
   scalar guards, or with `lui $at` stores, are the ones still to measure. Each conversion removes a
   per-function assembler flag *and* an inflated size only when both claims
   hold, and they are separate claims. One
