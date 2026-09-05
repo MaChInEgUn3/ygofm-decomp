@@ -7652,3 +7652,10 @@ func_8003A198 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalga
   `u16 *p` with `if (*p)` at each level and no locals for the offsets -- no
   dead-store hint, no nested-if-with-goto, none of the levers this park spent
   weeks on. The whole walk is the pointer.
+
+func_8004B374
+    STILL OPEN, but the C is now PURE and at EXACT LENGTH: parked/func_8004B374.c,
+    74/74 and 21 differing, 2026-09-05, with none of the four asm levers the
+    transcription in src/ carries. The residue is one loop-invariant decision:
+    retail keeps arg1 unmasked in $s5 and masks it per iteration, gcc hoists
+    the mask. Diagnosis and the register-pressure hypothesis in the header.
