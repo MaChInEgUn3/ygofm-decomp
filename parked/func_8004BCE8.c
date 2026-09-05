@@ -75,7 +75,14 @@
  * and the two word stores (ours after them), and the reciprocal block's
  * order (retail srl into $a1, lui, base load, ori, sw, divu; ours lui/ori
  * first, srl into $v0).
+ * Permuter from the 13-base (2026-09-05, ~4500 iterations, 13 outputs):
+ * its best, `r = 0x3C; if (m != r)` (0x3C borrowed into the dead r), fixes
+ * the reciprocal block's ORDER -- srl first, lui / base load / ori / sw /
+ * divu exactly as retail -- but rotates r into $v1 and m into $a0, so it
+ * reads 17 by position. The prologue half (p formed and copied before the
+ * reload) is untouched by it. `k = 0x3C` is 19; `p = 0x518 + b` is nothing.
  */
+
 
 #include "common.h"
 
