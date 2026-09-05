@@ -39,7 +39,20 @@
  * against $v1/$a2 (ours). `i = 0;` above the search loop (12), `z = 0;
  * i = z;` there (12), `i = 0;` after k (14), and k merged into i (24) -- the
  * merge is 24 under this recipe where it was 28 under the old one.
+ *
+ * 12 -> 11 (2026-09-05, second pass): the record base as a SUBTRACTION OF A
+ * NEGATION, `r = D_801A7AD8 - -(k * 28);`, replacing the borrowed
+ * `j = k * 28; r = D_801A7AD8 + j;`. The product then lands in $v1 as
+ * retail has it (the borrow had put it in $a3, j's register), and the
+ * `(s32)` cast sum is the same 11. Dead on this base: the plain `+` (17),
+ * a fresh `m` (17), borrowing `e` (17), `r = sym; r += k*28` (14), `j =
+ * -(k*28); r = sym - j` (11, same), sharing the outer counter with the
+ * first loop's `i` (20), and `i = 0;` above the search loop (87: it moves
+ * the whole prologue). What is left: k in $a1 where retail has $a3, the
+ * addu's operands (base first here, index first in retail), and both loop
+ * counters in $a2 against $a3 -- allocation only, no instruction moved.
  */
+
 #include "common.h"
 
 s32 func_8002C7E8(s32 arg0, s32 arg1) {
@@ -70,8 +83,7 @@ s32 func_8002C7E8(s32 arg0, s32 arg1) {
         k = 0x14;
     }
 
-    j = k * 28;
-    r = D_801A7AD8 + j;
+    r = D_801A7AD8 - -(k * 28);
 
     for (i = 0; i < 5; i++, r += 0x1C) {
         sl[i] = (u8 *)0;
