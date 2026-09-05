@@ -46,7 +46,12 @@
  * copy `addu $v0,$v1,$zero` -- CSE folds it with no copy on either arm
  * (symbol form 17, base-local form -2). Permuter from this base, 2026-09-05:
  * 8700 iterations, one output (270-1: `v = arg0 * 40` through the u8 v,
- * which adds an andi -- 13), saturated. */
+ * which adds an andi -- 13), saturated. Second run, same base: 10200
+ * iterations; its best (255-1, 7 by position) wraps the second block in
+ * `if (e) { } else { ... }`, which never runs it -- semantically wrong, an
+ * uninitialised-read-class hint that the second block wants a BRANCH in
+ * front of it; the legal half, `off = arg0 * 40; off = off + 0x180;`, is
+ * worth nothing alone (11). */
 #define D_8009B458_IS_AGGREGATE
 #include "common.h"
 
