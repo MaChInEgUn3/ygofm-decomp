@@ -1,6 +1,6 @@
 # Assembly debt
 
-**7** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (18 when this section was written on 2026-09-04; `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
+**6** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (18 when this section was written on 2026-09-04; `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
 body is the retail instruction stream written out as inline `__asm__`. Every
 one of them is byte-exact, which is precisely why they need a file of their
 own: `build.py` cannot tell transcribed assembly from real C, so nothing
@@ -193,9 +193,9 @@ by hand; the frame and the call are the tell, not the mnemonic. Four of the
 18 are matched as C in krystalgamer's tree, which is the next thing to look
 at.
 
-## Paid back on 2026-09-05 (18 -> 7)
+## Paid back on 2026-09-05 (18 -> 6)
 
-Eleven transcriptions retired into real, byte-identical C in one day, each by a
+Twelve transcriptions retired into real, byte-identical C in one day, each by a
 lever that is now written down in WORKFLOW.md. The point of the list is the
 lever, not the name:
 
@@ -210,8 +210,9 @@ lever, not the name:
 | func_80015DFC | 62 | real scalar declarations and `-G1` at BOTH compiler and assembler: cc1psx's own pair beside a gp-relative flag |
 | func_8004A518 | 112 | the `goto` loop again, one pointer name per loop, the base as loop 2's cursor, then two permuter finds decomposed by hand |
 | func_8004BCE8 | 97 | a base local before the byte store, the dividend named in the pin, the call result through the later result name, and the +0x7F0 store moved inside the `do { } while (0);` -- the last one a permuter find at score 0 |
+| func_8002CBF4 | 45 | a base local for the last record read plus a dead conditional assignment inside the `do { } while (0);` pin -- a coupled pair, permuter at score 0 |
 
-The seven left (func_8001D5B4, func_8002C7E8, func_8002CBF4, func_8004A6F8,
+The six left (func_8001D5B4, func_8002C7E8, func_8004A6F8,
 func_8004A764, func_8004A854, func_8004A8E4) are all pure C at
 exact length except func_8001D5B4 (-2, structural), with residues of 1 to 11
 that are register allocation or scheduling; every one has a header listing what

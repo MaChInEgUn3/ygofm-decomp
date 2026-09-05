@@ -624,8 +624,14 @@ func_800208D4
 # base in $v1 and the loaded value back into $v1, we use $v0 for both. Splitting
 # the shift into its own statement is worse (29), and the sweep's best is
 # O1 G0 at 21.
-func_8002CBF4
-    STILL OPEN -- src/func_8002CBF4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
+func_8002CBF4 RESOLVED 2026-09-05 -- ASSEMBLY DEBT RETIRED with pure C (45/45, MATCH,
+    full build). The last three differences were a coupled pair the permuter
+    found at score 0: a base local for the third record read (order right,
+    registers exchanged on its own, 6) plus a dead conditional assignment to
+    the dead `v` inside the `do { } while (0);` pin (`if (!s) { v = !s; }`),
+    which gcc deletes but which tips the allocation. Seventeen hand spellings
+    of the halves had been measured separately (see the old header, kept as
+    func_8002CBF4_WAS below if present).
 # func_80039140 copies and offsets nine halfwords from one object to another.
 # The instruction stream is identical, including the three reloads of +0x30 and
 # +0x32 that the intervening stores force. One register: retail keeps the source
