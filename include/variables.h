@@ -1106,12 +1106,10 @@ extern u16 D_8009B374[];
  * cc1psx will not hoist a bare symbol's memory access into a delay slot the
  * way it hoists half of its own %hi/%lo pair (func_8002CEE8). */
 extern u16 D_8009B370[4];
-#elif defined(D_8009B370_IS_SCALAR)
-#ifdef D_8009B370_IN_DATA
+#elif defined(D_8009B370_IN_DATA)
 extern u16 D_8009B370 __attribute__((section(".data")));
-#else
+#elif defined(D_8009B370_IS_SCALAR)
 extern u16 D_8009B370;
-#endif
 #else
 extern u16 D_8009B370[];
 #endif
