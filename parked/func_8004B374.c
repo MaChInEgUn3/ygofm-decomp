@@ -19,10 +19,18 @@
  * both), because a narrow local is still invariant.
  * The transcription stopped the hoist with an empty asm launder on the copy.
  * The pure-C question is what makes gcc 2.8.1 decline to hoist an invariant
- * mask: the working hypothesis is register pressure -- hoisting arg1's mask
- * needs a callee-saved register of its own, and if the unmasked arg1 is
- * live past the loop in the original (see the $s5 uses recorded below) the
- * count reaches eight and loop.c gives up. Not yet measured.
+ * mask. Two hypotheses measured and DEAD on 2026-09-05:
+ *   - "arg1 is live past the loop, so hoisting would cost an eighth $s":
+ *     the listing uses $s5 exactly once, inside the loop (`andi $v0,$s5`),
+ *     so retail keeps the raw arg1 alive for nothing but that per-iteration
+ *     mask. Pressure is not the reason.
+ *   - "arg1 is a u8 PARAMETER, copied raw and zero-extended at each use":
+ *     `void f(s32 arg0, u8 arg1)` produces BYTE-IDENTICAL output to the s32
+ *     version under both flag sets -- gcc 2.8.1 still hoists the extend.
+ * What is left is whatever made retail's compiler leave an invariant
+ * `andi` inside a loop; the transcription reached it with an empty asm
+ * launder on the copy, which is the mechanism ("this register changes
+ * every iteration") without the spelling.
  */
 #include "common.h"
 
