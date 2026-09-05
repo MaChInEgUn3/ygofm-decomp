@@ -1369,6 +1369,8 @@ extern u16 D_8009B2A4;
  * into a single register. */
 #ifdef D_8009B398_IN_DATA_VOLATILE
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
+#elif defined(D_8009B398_IN_DATA)
+extern u16 D_8009B398 __attribute__((section(".data")));
 #elif defined(D_8009B398_SIZED)
 /* The same eight bytes it does not have, without volatile. Added as the
    non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
@@ -1533,7 +1535,9 @@ extern u8 D_8009B32C;
 extern u16 D_8009B3A0;
 /* func_80023FBC reads it five times in a row and retail reloads each time,
  * which only a volatile does. */
-#ifdef D_8009B3A4_SIZED
+#ifdef D_8009B3A4_IN_DATA_VOLATILE
+extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
+#elif defined(D_8009B3A4_SIZED)
 /* The same eight bytes it does not have, without volatile. Added as the
    non-volatile probe for func_800222F4 and MEASURED WORSE there -- five to
    seven instructions short, because retail really does re-read this halfword

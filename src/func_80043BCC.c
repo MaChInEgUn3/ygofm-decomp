@@ -2,7 +2,7 @@
 #define D_8009B143_IN_DATA
 #define D_8009B144_IN_DATA
 #define D_8009B318_IN_DATA
-#define D_8009B398_IS_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
 #include "common.h"
 
 s32 func_80043BCC(void) {

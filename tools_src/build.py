@@ -563,7 +563,6 @@ PER_FUNC_AS_FLAGS["func_80040588"] = "-G4"
 PER_FUNC_AS_FLAGS["func_800408D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 # func_8005BB7C: s16 D_800FE0CC stored through $at beside one-byte gp symbols.
-PER_FUNC_AS_FLAGS["func_8005BB7C"] = "-G1"
 # func_80031084: volatile u16 D_8009B394/D_8009B398 bare beside one-byte gp symbols.
 PER_FUNC_AS_FLAGS["func_80031084"] = "-G1"
 # func_8003D74C: s8 D_8009B34D[4] (sized arm) stored through $at beside one-byte gp symbols.
@@ -605,7 +604,6 @@ PER_FUNC_AS_FLAGS["func_80030998"] = "-G2"
 PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
 # func_80045C98: gp == 0 and thirteen %hi/%lo reads of D_8009B45C.
 PER_FUNC_AS_FLAGS["func_80045C98"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8002A788"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800220B8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004803C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
@@ -670,7 +668,6 @@ PER_FUNC_AS_FLAGS["func_8003C628"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80060E70"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8002FB78"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80043BCC"] = "-G1"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8003A01C"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.

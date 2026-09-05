@@ -1,6 +1,8 @@
 #define D_8009B142_IN_DATA
 #define D_8009B143_IN_DATA
 #define D_8009B144_IN_DATA
+#define D_800FE0CC_IN_DATA
+#define D_800FE0D0_IN_DATA
 #include "common.h"
 
 s32 func_8005BB7C(s32 arg0) {
