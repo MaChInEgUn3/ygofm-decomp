@@ -60,31 +60,50 @@
  * 8 in $v0, ours $a1) and the reciprocal block (retail: srl into $a1, lui
  * 915, base load, ori, sw, divu $v0,$a1; ours: base load, srl, sw, lui/ori,
  * divu $v1,$v0).
+ * 17 -> 13 (2026-09-05, second pass, three coupled edits): a base local
+ * `b = D_8009B458; p = b + 0x518; b[0x801] = 0;` so the +0x518 store goes
+ * through the base loaded BEFORE the byte store (retail's `sw $v0,1304($v1)`
+ * -- the sb through the pointee forces the reload every other store uses);
+ * the dividend named INSIDE the pin right before the +0x808 store
+ * (`k = 60000000;`, 17 -> 15 on its own; before the call it is 92, i.e. a
+ * length change); and with the base local in, the `v = 8;` borrow that was
+ * worth 20 on the old base is now WORSE -- the 8 written inline in the
+ * store is 15 -> 13. Dead on this base: `a = p;` for the call argument (13),
+ * `r = call; k = ...; r = r >> 8;` (13), p formed after the byte store (13),
+ * k moved above the +0x7EC store (92), the p assignment pinned (87).
+ * What is left: retail forms p and copies it into $a0 BEFORE the reload
+ * and the two word stores (ours after them), and the reciprocal block's
+ * order (retail srl into $a1, lui, base load, ori, sw, divu; ours lui/ori
+ * first, srl into $v0).
  */
+
 #include "common.h"
 
 s32 func_8004BCE8(void) {
+    u8 *b;
     u8 *p;
     u32 r;
     u32 v;
     s32 m;
+    u32 k;
 
-    p = D_8009B458 + 0x518;
-    D_8009B458[0x801] = 0;
+    b = D_8009B458;
+    p = b + 0x518;
+    b[0x801] = 0;
     *(s32 *)(D_8009B458 + 0x7F0) = 0;
     do {
         *(s32 *)(D_8009B458 + 0x7F4) = 0;
-        v = 8;
-        *(s32 *)(D_8009B458 + 0x518) = v;
+        *(s32 *)(b + 0x518) = 8;
         *(s16 *)(D_8009B458 + 0x7FC) = func_8004BCA8(p);
         *(s16 *)(D_8009B458 + 0x7FA) = 1;
         *(s16 *)(D_8009B458 + 0x7F8) = 0;
         *(s32 *)(D_8009B458 + 0x7EC) = 0x10000;
         r = (u32)func_8004BC2C(p) >> 8;
+        k = 60000000;
         *(s32 *)(D_8009B458 + 0x808) = r;
     } while (0);
 
-    v = 60000000 / r;
+    v = k / r;
     v = v * 100 / 115;
     if (v >= 0x100) {
         v = 0xFF;
