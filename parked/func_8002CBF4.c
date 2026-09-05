@@ -36,6 +36,19 @@
  *             k inside the s pin after/before s (6, 10), k above the pin (10),
  *             and both scheduler flags (3, 3) -- so the order is expansion,
  *             not scheduling, and the register pair follows the naming.
+ *             (2026-09-05, second pass, 17 spellings) The two halves are
+ *             REACHABLE SEPARATELY and do not compose: a base local
+ *             `b = D_801D4244;` assigned before `k = arg0 - 1;` gives
+ *             retail's ORDER (base pair first) with the two registers
+ *             exchanged -- 6, and every one of a do/while pin round b, round
+ *             k, round both, four declaration orders of b, `*(b - -k)`, the
+ *             byte-address cast through b, and `b[arg0 - 1]` (-1) stays at
+ *             6; the parked k-only form gives retail's REGISTERS with the
+ *             index first, 3. Without the base local, `*(D_801D4244 - -k)`
+ *             is 4 (the sll moves up too), `(s32)D_801D4244 + k * 4` is 3
+ *             and its negated form 6. Borrowing the dead `v` for the index
+ *             is 12. The permuter has run from this 3-base (build/permuter,
+ *             one output, re-scored: nothing better).
  */
 #include "common.h"
 
