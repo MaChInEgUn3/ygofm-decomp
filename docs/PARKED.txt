@@ -1622,6 +1622,14 @@ func_8003B5C8 -- unfinished, 18 differences and one instruction too many, and
     not this function.
 
 func_8003CCD8 -- unfinished, 6 differences with equal lengths (72/72), and all
+    MATCHED 2026-09-05 on the func_80012B50 rule this entry stopped one step
+    short of: ALL SIX halves volatile. The two low halves alone are byte-
+    identical (as recorded), the three high halves alone are 6, the three low
+    halves alone are 6, and all six together are a MATCH -- gcc keeps volatile
+    stores in source order relative to EACH OTHER, so pinning the order of a
+    run needs every store in the run. Three new _IS_VOLATILE arms (D_8009B3A6,
+    D_8009B39A, D_8009B396); the lo,lo,lo,hi,hi,hi order and per-pair pins
+    were 6 and 34.
     six are the order of the last six stores. The controller decoder: 32 bits
     of held state walked from bit 31 down, an auto-repeat counter per button in
     D_800EF6B0, and the result written out as three 32-bit values in halfword

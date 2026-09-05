@@ -1575,9 +1575,16 @@ extern volatile u16 D_8009B394;
 #else
 extern u16 D_8009B394;
 #endif
+#ifdef D_8009B396_IS_VOLATILE
+/* The high half of a halfword pair; func_8003CCD8's store order. */
+extern volatile u16 D_8009B396;
+#else
 extern u16 D_8009B396;
+#endif
 #ifdef D_8009B39A_IN_DATA
 extern u16 D_8009B39A __attribute__((section(".data")));
+#elif defined(D_8009B39A_IS_VOLATILE)
+extern volatile u16 D_8009B39A;
 #else
 extern u16 D_8009B39A;
 #endif
@@ -1608,7 +1615,12 @@ extern u16 D_8009B3A4[];
 #else
 extern u16 D_8009B3A4;
 #endif
+#ifdef D_8009B3A6_IS_VOLATILE
+/* The high half of a halfword pair; func_8003CCD8's store order. */
+extern volatile u16 D_8009B3A6;
+#else
 extern u16 D_8009B3A6;
+#endif
 extern u16 D_8009B3AC;
 extern u16 D_8009B3FA;
 /* func_8003F454's state machine: the result of func_8008CCE8(1, &D_8009B3F0,
