@@ -32,7 +32,10 @@
  *             then take retail's registers. The remaining 3 are ORDER: retail
  *             forms the base pair before `addiu $v1,$a0,-1`, we form the
  *             index first. Dead at 3: a base local as well (6), the index pinned
- *             with `do { } while (0);` (6), the byte-address cast spelling (3).
+ *             with `do { } while (0);` (6), the byte-address cast spelling (3),
+ *             k inside the s pin after/before s (6, 10), k above the pin (10),
+ *             and both scheduler flags (3, 3) -- so the order is expansion,
+ *             not scheduling, and the register pair follows the naming.
  */
 #include "common.h"
 
