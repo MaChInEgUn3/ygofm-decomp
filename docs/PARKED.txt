@@ -3805,7 +3805,7 @@ func_8005ABA0 -- 175 differences at -2 (178/176). The HSV-to-RGB inverse of
     shift into `r0 = c[0] + 0x800; r0 = r0 >> 12;` (-4).
 
 
-func_8002A9C0 -- 6 differences at equal length (125/125): three scratchpad
+func_8002A9C0 RESOLVED 2026-09-05 -- MATCH (125/125, full build). Was: 6 differences at equal length: three scratchpad
     addresses materialised in the order 310, 308, 318 where retail has 310,
     318, 308. A sprite blit that fills four scratchpad points and calls the
     GTE quad routine twice.
@@ -3830,6 +3830,9 @@ func_8002A9C0 -- 6 differences at equal length (125/125): three scratchpad
     Measured and dead on the last six: all 24 orders of the four base-local
     assignments (best 6, then 8, 8, 10) and all 24 orders of their
     declarations (all 6).
+    RESOLUTION: `m = 0x55555555;` written BETWEEN the base locals, in retail's own
+    materialisation order `b0; m; b2; b3; b1;`. The 24 base-local orders below
+    were all measured with m after them, i.e. with another fault open.
 
 func_80048D08 -- one register-to-register copy, everything else exact.
   131/131 instructions, 59 differences, and the whole residue is two things:

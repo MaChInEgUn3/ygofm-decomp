@@ -1,3 +1,13 @@
+/* MATCH (2026-09-05), from a park at 6. The last six differences were the
+ * materialisation ORDER of five constants: retail forms 0x1F800300, then
+ * the /3 reciprocal 0x55555555, then 0x1F800310, 0x1F800318, 0x1F800308.
+ * The park had measured all 24 orders of the four base locals with the
+ * constant's name assigned AFTER them, and every one was 6 or worse; with
+ * `m = 0x55555555;` written between b0 and b2 -- retail's own order,
+ * `b0; m; b2; b3; b1;` -- it is a MATCH first try, and the other five
+ * placements of m are 4 to 9. A rejected spelling measured while another
+ * fault was open had not been measured at all. Flags: default, as default.
+ */
 #include "common.h"
 
 void func_80041F90(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3);
@@ -37,11 +47,11 @@ void func_8002A9C0(u8 *p, s32 arg1) {
 
     q = (u8 *)0x1F8002A0;
     b0 = (u8 *)0x1F800300;
-    b2 = (u8 *)0x1F800310;
-    b1 = (u8 *)0x1F800308;
-    b3 = (u8 *)0x1F800318;
-
     m = 0x55555555;
+    b2 = (u8 *)0x1F800310;
+    b3 = (u8 *)0x1F800318;
+    b1 = (u8 *)0x1F800308;
+
     z = *(s32 *)(p + 0xC);
     q[3] = 6;
     *(s32 *)(q + 0x18) = m;

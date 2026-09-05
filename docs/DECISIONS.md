@@ -2049,7 +2049,7 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-1092 of 1794 functions decompiled and byte-matching.
+1093 of 1794 functions decompiled and byte-matching.
 
 The 1794 total is misleading as a denominator, though, and so is the file count above it: `src/` holds library and above-scope functions that were matched along the way as well as the in-scope ones. The scoped figures -- in-scope functions and, more usefully, in-scope *instructions* -- live in README.md's Status tables and are derived rather than typed: `.venv/bin/python tools_src/status.py` recomputes them from the tree, importing candidates.py's own scope filters so it cannot drift from what the candidate list believes. Read the instruction column, not the function column: the two disagree sharply because the short bands empty first, and the instruction column is the honest one. For the whole binary, ignoring scope entirely, the listings under `asm/nonmatchings/` total 1,796 functions and 128,950 instructions.
 
