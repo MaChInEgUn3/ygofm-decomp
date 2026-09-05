@@ -11,7 +11,9 @@
  * the census: `sra +1 / srl -1` -- `(u32)w >> 7` on the halfword read from
  * `e + o1` empties it (alignment 276/278); the other shift, `z >> 6`, is the
  * signed one. The 267 positional differences are register names from the
- * prologue on ($t7/$t0 for the arg0 copy) and are the permuter's.
+ * prologue on ($t7/$t0 for the arg0 copy). The permuter from this base ran
+ * 7000 iterations and reached 265 at best (rewrites of the same rotation);
+ * the borrowed copy as the function's first statement is 267 as well.
  */
 #include "common.h"
 
