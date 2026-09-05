@@ -1970,6 +1970,11 @@ candidate references but does not already define, and prints only strict
 improvements on `(abs(length_error), differences)`. First run: **one match** --
 func_8003353C, 2 differences to 0 on `D_8009B3A4_IS_VOLATILE` -- plus three
 park improvements.
+**Third run, 2026-09-05, after the .data sweep added 29 `_IN_DATA` arms to the
+pool: zero hits over the 98 parked candidates at or below 30 differences.**
+A clean negative worth having -- the new arms reach the bare form that the
+inflated sizes already reached, so no park that had the size was waiting
+for the attribute, and no park that lacked it wanted the bare form.
 **Second run, weeks later: another match, on the same guard.** func_800336F0
 was parked at 2 with the residue "retail materialises the 0x2000 it compares
 D_8009B3A4 against inside the test's own block and we hoist it into the
