@@ -7799,3 +7799,9 @@ func_8003EED0 -- 248/248, 14 differences, first written 2026-09-06 from the
     the candidate's header took it from +1/235 to 14; the residue is the
     register of the two named state reads ($a3 against retail's $a0 and $v1),
     which declaration order and type do not move. Permuter not yet run.
+
+func_80032C48 -- 285/285, 34 differences, first written 2026-09-06 from the
+    m2c draft (the card-list sort-key builder, jump table). Seven source levers
+    in the candidate's header took it from -11 to 34; what is left is the order
+    of case 3's two independent key chains and a one-register rotation of case
+    8's preheader pseudos. Permuter not yet run.
