@@ -20,14 +20,23 @@
  *     retail lays it out;
  *   - `q = row * 0x10 + (col * 2 + D_80090DD8);` named, so the `+ 1` stays
  *     the load's displacement instead of folding into %lo(D_80090DD8+1).
- * Residue, three groups: (1) `a` is $v1 where retail has $a0, and `u` takes
- * $a0 -- eight lines, and four read orders at the head all score 17 or much
- * worse; (2) the `if (t < s) s = t;` clamps come out `bne` where retail has
- * `beq` (the else form, the ternary and a goto form are all 20 or 17);
- * (3) the table index reads 0x2D46 before 0x2D47 where retail reads 0x2D47
- * first -- six spellings measured, all 17 or 22. The second `c = -1;` is
- * merged with the first and retail materialises it twice; a `do { } while
- * (0);` round either one is +1. Permuter next. */
+ *   - the second `c = -1;` written as `s = -1; c = s;` -- `s` is dead there
+ *     and reassigned in the arm below, so this is the borrow-a-dead-name
+ *     hint; the permuter found it as `c = (s = -1);` and the plain two
+ *     statements score the same 16. Without it the two -1s are merged and
+ *     retail materialises the constant twice;
+ *   - the table address written FLAT, `q = D_80090DD8 + row * 0x10 +
+ *     col * 2;`, which is 16 -> 12: the parenthesised grouping evaluates the
+ *     col term first and retail reads the row byte first. Six other
+ *     groupings (a named row, two named bytes, `&D_80090DD8[...]`, a
+ *     two-statement base) are all 16 or 17.
+ * Residue, 12 lines in two groups: (1) `a` is $v1 where retail has $a0 while
+ * `u` takes $a0 -- ten lines, and eight read orders at the head are 12, 13 or
+ * much worse (dropping `u` entirely and reading the symbol twice is +5);
+ * (2) the two `if (t < s) s = t;` clamps come out `bne` where retail has
+ * `beq` -- the else form, an empty else, the ternary and a goto form are all
+ * 16 or worse. Permuter run 2026-09-06 from the 17 base: 660 iterations,
+ * three outputs, best re-scores 16 and is the `c = (s = -1)` above. */
 #define D_8009B394_IS_VOLATILE
 #define D_8009B3A4_IS_VOLATILE
 #include "common.h"
@@ -103,7 +112,8 @@ sel:
         }
         return 1;
     }
-    c = -1;
+    s = -1;
+    c = s;
     if (D_8009B394 & 3) {
         s = a;
         if (D_8009B394 & 2) {
@@ -179,7 +189,7 @@ sel:
             }
         }
         func_8003FEE0(0x2F);
-        q = p[0x2D47] * 0x10 + (*(s8 *)(p + 0x2D46) * 2 + D_80090DD8);
+        q = D_80090DD8 + p[0x2D47] * 0x10 + *(s8 *)(p + 0x2D46) * 2;
         p[0x2D45] = q[1] & 0xF;
         func_80032C48(p);
         return 1;
