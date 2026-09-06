@@ -920,6 +920,41 @@ meaningful, and skipping to the last one wastes hours:
    the function from +1 to exact length, and the +1 reading had *fewer*
    differences (134) than the correct one (149), which is the
    never-compare-across-length-errors trap in its purest form.
+   **A giv init that retail emits AFTER the cursor's init, with the counter
+   kept, is a per-iteration TEMPORARY derived from the counter -- and the
+   base of the index form must be an INTEGER so the counter survives.**
+   func_8002BFCC's second loop walks two things off one counter `n` (from
+   1): a record cursor with stores at +0x54/+0x56, and a word table read at
+   `(n-1)*4`. Retail's preheader is the hoisted constants, then `$a0 = r +
+   4`, then `$a1 = 0`, and the loop keeps `slti $s3,0x2D3` on `n`. Three
+   spellings each get one third of it. An explicit `off = 0; ... off += 4;`
+   biv is a source statement and no placement of it (before the stores,
+   after them, in a `for` clause, pinned) moves its `addu $a1,$zero,$zero`
+   below the giv init -- the scheduler puts a source statement first (9
+   differences, six placements identical). `D_801D4244[n - 1]` makes `off`
+   gcc's own giv and lands the init where retail has it, but the array
+   symbol gives the load a known base and gcc hoists it above the `sh
+   $zero,0x54($s5)` that precedes it. `*(s32 *)((u8 *)D_801D4244 + (n - 1)
+   * 4)` folds the -4 into the symbol and reduces the whole address into one
+   register (-3). What matches is `off = n * 4 - 4;` as a statement inside
+   the loop, read through `(u8 *)D_801D4244 + off`: `off` is a DEST_REG giv
+   (init emitted at loop start, after the cursor's), the sum is a pseudo of
+   two registers whose base gcc cannot name, so the store stays first --
+   and `(n - 1) * 4` / `(n - 1) << 2` for the same value are 268 (-1), so
+   the spelling of the subtraction is load-bearing too. The other half:
+   the cursor written `*(s16 *)(r + n * 4 + 0x54)` against the `u8 *r`
+   eliminates the counter (retail's `slti` becomes a giv compare against
+   `r + 0xB4C`), because a giv whose add_val is a POINTER-flagged register
+   is allowed to replace the biv's exit test; against `rb = (s32)r` the same
+   giv is not eligible, `n` survives, and the cursor comes out unbiased
+   (`addiu $a0,$s5,4` with 0x54/0x56 displacements), where an explicit `e
+   += 4` cursor with the same uses is biased to +0x54 (`addiu $a0,$s5,88`).
+   The third loop wants the same index form through the plain `r`, since
+   its counter is a call argument and cannot be eliminated anyway. And the
+   `switch` on the field is a comparison TREE with four cases (gcc 2.8's
+   table threshold is five on this target), whose 0x14/0x17 arm is one
+   shared arm -- that is why 0x170 is hoisted into `$a2` and the other
+   three constants are not.
    **A pointer that walks up while the counter walks down is a real `*q++`.**
    gcc reverses the counter after strength reduction has left it live only in
    the exit test, so the address giv keeps going forward: no index expression

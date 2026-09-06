@@ -2045,3 +2045,5 @@ extern u8 D_800107DC[];
 extern u8 D_800107F4[];
 extern u8 D_800EFBC0[];
 extern s32 D_801D5648[];
+/* The current screen's per-frame handler, set by each screen's init (func_8002BFCC). */
+extern void (*D_800E9DBC[])(void);
