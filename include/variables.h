@@ -857,6 +857,7 @@ extern u8 D_801A8000[];
 extern u8 D_801B122B[];
 extern u8 D_801B1238[];
 extern u8 D_801D1200[];
+extern u8 D_801D2200[];
 extern u8 D_801D160C[];
 extern s32 D_801D5608[];
 #ifdef D_801D0534_IS_AGGREGATE
