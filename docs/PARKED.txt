@@ -2103,6 +2103,10 @@ func_8003CEB8 -- 1 difference, 23/23. CRC-16 CCITT (poly 0x1021) over arg1 bytes
     do { … } while (i < arg1); }` (3, worse).  `s16 i` is +6.
 
 func_8004A8E4 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
+    2026-09-06: re-based on the scalar arm at as -G0 (gp=0): 23/23 and 11, now
+    the right structure -- the base loaded once into e and modified in place
+    (which blocks the 0x180 fold) with a copy b for the second block. Residue
+    is one copy: retail copies the byte v, we copy the base. Permuter next.
   the history below is what this tree had reached on its own.
 func_8004A8E4_WAS -- 17 differences at equal length (23/23), down from 21 at -2.
     Reads a byte at +3 of a 40-byte record, and if it is not 0x63 uses it to

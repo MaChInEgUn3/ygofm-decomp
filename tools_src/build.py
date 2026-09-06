@@ -418,7 +418,6 @@ PORTED_FLAGS = {
     "func_8004A764": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_800260D0": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8004A854": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
-    "func_8004A8E4": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8004BCE8": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004C420": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8004C560": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -633,6 +632,8 @@ PER_FUNC_AS_FLAGS["func_80049CF8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A43C"] = "-G0"
 # gp == 0 in func_8004A27C too; the pointer scalar bare at -G0 (parked, 9).
 PER_FUNC_AS_FLAGS["func_8004A27C"] = "-G0"
+# gp == 0 in func_8004A8E4: the pointer scalar bare at -G0 (parked at 11, exact length).
+PER_FUNC_AS_FLAGS["func_8004A8E4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049010"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049DD8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047CC4"] = "-G0"

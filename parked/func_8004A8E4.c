@@ -1,77 +1,33 @@
-/* 11 differing at 23/23, from 17. RECOVERED from git 2026-09-04 (the Unchiga
- * merge deleted it and put a transcription in src/).
- *
- * TWO COUPLED LEVERS, and the coupling matrix is the finding:
- *
- *     u8 v (narrowing) alone ......................... 16
- *     `off = v;` before the test, alone .............. 17  (nothing)
- *     narrowing + that borrow ........................ 18  (WORSE than either)
- *     narrowing + block-2 split ...................... 11  <- installed
- *     narrowing + borrow + split ..................... 12
- *     borrow + split ................................. 17
- *     block-2 split alone ............................ 17
- *
- * So the pair that works is the narrowing and the split, and adding the third
- * edit COSTS one. The permuter found the three-way version and scored 12; the
- * two-way decomposition is 11 -- reading what it changed beat its own output,
- * which is the first time that has happened here rather than the usual case of
- * a permuter win being implausible.
- *
- * Its `char v` is `u8` under -D__CHAR_UNSIGNED__ and is semantically identical
- * here, because e[3] is a byte and every use of v promotes to int, so the
- * narrowing goes in as written rather than being a width bug.
- *
- * What is left is the pair of trading faults: retail loads D_8009B458 ONCE
- * into $a2 and reuses it for both address computations, spending the
- * instruction it saves on `addu $v0,$v1,$zero`, a copy of the byte it just
- * read. A base local shares the load and costs two instructions to gcc's fold
- * of 0x180 into the load displacement (-2, three spellings). A second name for
- * the byte does not produce the copy (11, two spellings: a fresh local, and
- * `off = v; off = off * 24;`).
- */
-/* 2026-09-05: the scalar arm with `as -G0` (retail loads the pointer ONCE
- * into $a2 and reuses it, which is what that arm gives) is -2 at 21/23 in
- * eight spellings: the 0x180 folds into the lbu displacement whatever the
- * base/offset naming, pinning or two-statement split, and the copy of v that
- * feeds the *24 never appears. The aggregate arm at 11 stays installed.
- * 2026-09-05, second pass, twelve more on the aggregate arm: a base local
- * `b = D_8009B458[0]` (which is what retail's single $a2 load says) is -2
- * whatever surrounds it -- `e = b + off` plain, pinned, with `off` pinned,
- * `e = b; e = e + off;`, the integer sum `(u8 *)((s32)b + off)`, and a
- * fresh `s32 c = e[3]` for the compare with `v = c` inside the arm. The
- * fold is combine substituting the single-use `off` def into `e = b + off`
- * and the 384 into the lbu; only the symbol form's self-referencing
- * `e = e + off` on the loaded pointer blocks it. The double read
- * `if (e[3] != 0x63) { v = e[3]; ...` does NOT give retail's delay-slot
- * copy `addu $v0,$v1,$zero` -- CSE folds it with no copy on either arm
- * (symbol form 17, base-local form -2). Permuter from this base, 2026-09-05:
- * 8700 iterations, one output (270-1: `v = arg0 * 40` through the u8 v,
- * which adds an andi -- 13), saturated. Second run, same base: 10200
- * iterations; its best (255-1, 7 by position) wraps the second block in
- * `if (e) { } else { ... }`, which never runs it -- semantically wrong, an
- * uninitialised-read-class hint that the second block wants a BRANCH in
- * front of it; the legal half, `off = arg0 * 40; off = off + 0x180;`, is
- * worth nothing alone (11). */
-#define D_8009B458_IS_AGGREGATE
+/* 11 differing at 23/23 (2026-09-06; was 11 with the _IS_AGGREGATE arm and
+ * -msplit-addresses, a different 11). gp=0, at=0, so D_8009B458 takes its
+ * real pointer-scalar declaration with the assembler at -G0 (build.py row);
+ * retail loads it bare into $a2 ONCE and keeps it for both blocks. The
+ * exact-length shape: `e = D_8009B458; b = e; e = e + off;` -- the load into
+ * e then modified in place is what stops gcc folding the 0x180 into the lbu
+ * displacement (a base local with `e = b + off`, `e = b; e = e + off;`, a
+ * two-statement off, the one-expression sums and an (s32) cast sum are all
+ * -2, the fold plus the lost copy), and b carries the base into block 2.
+ * Residue: retail has no base copy (the load lands in $a2 directly) and
+ * instead copies the byte v into $v0 before the *24 chain; ours copies the
+ * base (`addu $a2,$a1`) and multiplies v in place. `off = v;` then
+ * `b + off * 24`, `e = b; e = e + off * 24;`, `off = v; off = off * 24;`
+ * and a fresh s32 name for the byte are all 11. Permuter next. */
 #include "common.h"
 
 s32 func_8004A8E4(s32 arg0) {
     u8 *e;
     s32 off;
     u8 v;
+    u8 *b;
 
     off = arg0 * 40 + 0x180;
-    /* Two statements against one name. As `e = D_8009B458[0] + off;` gcc folds
-     * the 0x180 into the load displacement (`lbu ...,387`) and flips the
-     * addu's operands; the split keeps retail's `addiu $v0,$v0,384` and
-     * `addu $a1,$a2,$v0`. A base local re-enables the fold -- four spellings
-     * with one all came out -2. */
-    e = D_8009B458[0];
+    e = D_8009B458;
+    b = e;
     e = e + off;
     v = e[3];
     if (v != 0x63) {
         off = v * 24;
-        e = D_8009B458[0];
+        e = b;
         e = e + off;
         v = e[6];
         if ((v & 0xF) != 0) {
