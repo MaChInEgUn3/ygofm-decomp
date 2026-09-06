@@ -470,8 +470,10 @@ void func_8007B1F4(s32 arg0, void *arg1, void (*arg2)(u8), s32 arg3);
 void func_80014220(u8 arg0);
 void func_800141A8(u8 arg0);
 void func_8007DE38(s32 arg0);
-void func_8007DD50(void (*arg0)(void), s32 arg1);
-void func_80013C28(void);
+void func_8007DD50(void (*arg0)(), s32 arg1);
+/* The DMA callback takes the channel word in $a0; func_800140A0 registers it
+ * through func_8007DD50, whose parameter is unprototyped so both agree. */
+void func_80013C28(s32 arg0);
 void func_800140A0(u8 arg0);
 void func_80014308(u8 arg0);
 s32 func_8004006C(void);
