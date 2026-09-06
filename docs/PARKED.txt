@@ -4190,6 +4190,13 @@ func_800339D0 -- 134/134, THREE differences, and all three are one value's
 # ---
 
 func_8001F364 -- 126/126, 14 differences, and the residue is the dispatcher's
+    MATCHED 2026-09-06 (permuter, twice in one evening). 14 -> 6 was the inner
+    do/while(0) round m0's return through m2; 6 -> 0 was the +4 halfword copy
+    written as `*(d = (u16 *)(e + 4)) = *(u16 *)q34;` with q34 = p + 0x34 named
+    above it, and the OUTER pin round all the arms removed -- with both pins it
+    is 6, and the same statement as two plain assignments is 6. The embedded
+    store-address assignment is the func_80045C98 class: the parenthesisation
+    is the finding.
     14 -> 6 on 2026-09-05: the permuter's inner do/while(0) round the region
     from m0's return to the end of m2 fixes both dispatcher delay slots.
     Residue now one register pair ($v1/$a1) for the D_8015C424 base and the

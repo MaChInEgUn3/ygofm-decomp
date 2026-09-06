@@ -1,17 +1,13 @@
-/* 14 -> 6 (2026-09-05, permuter, 5275 iterations): a second do/while(0)
- * nested inside the arm pin, round the `return 1;` after m0 through the end
- * of m2 -- semantically nothing, and both dispatcher delay slots come right.
- * The 6 left: the D_8015C424 base local and the D_8009B1B8 index exchanged
- * in $v1/$a1; the index named before or after the base, the sum regrouped,
- * and the scaled index named (+1) all stay at 6.
- * 2026-09-05, still 14: the two dispatcher delay slots. Retail fills the
- * `v < 2` branch's slot with the >=2 block's own first instruction (addiu 2)
- * and the `v == 0` branch's slot with the fall-through's `addiu $v0,1`; we
- * leave the first a nop and hoist m0's `addiu $a0,0x10` into the second, so
- * gcc predicts the second branch taken where retail's did not. An explicit
- * `if (v >= 2) goto hi;` with the >=2 block written after the return, and the
- * nested if/else form, are both 14 -- the layout is already retail's, the
- * filler's thread choice is what differs. Permuter next. */
+/* MATCH 2026-09-06. Parked at 14, then 6, both times as the dispatcher's
+ * delay slots and one register pair; the permuter closed both. The arms sit
+ * inside ONE do/while(0) pin round the region from m0's return through m2
+ * (an outer pin round all the arms as well is 6, not a match), and the +4
+ * halfword copy in m1 is written with the store address assigned INSIDE the
+ * expression, `*(d = (u16 *)(e + 4)) = *(u16 *)q34;` with q34 = p + 0x34
+ * named on the line above -- the same statement as two plain assignments is
+ * 6. The 0x48000 base split (r local, then g = r + idx * 0x1C + 0x48000)
+ * and the nested if in m1 rather than an early return are load-bearing too.
+ */
 #include "common.h"
 
 s32 func_8001F364(void) {
@@ -23,6 +19,8 @@ s32 func_8001F364(void) {
     s32 one;
     s32 v;
     u16 t;
+    u8 *q34;
+    u16 *d;
 
     if (D_8009B162 != 0) {
         return 1;
@@ -47,7 +45,6 @@ s32 func_8001F364(void) {
         goto m3;
     }
 
-    do {
     return 1;
 
 m0:
@@ -69,7 +66,8 @@ m1:
     e = func_8002C68C(8);
     *(u16 *)(e + 0) = *(u16 *)(p + 0x30);
     *(u16 *)(e + 2) = *(u16 *)(p + 0x32);
-    *(u16 *)(e + 4) = *(u16 *)(p + 0x34);
+    q34 = p + 0x34;
+    *(d = (u16 *)(e + 4)) = *(u16 *)q34;
     func_80024954(D_801A7AD8 + p[0x6A] * 0x1C);
     func_8003FEE0(0x17);
     D_8009B210 = 2;
@@ -81,7 +79,6 @@ m2:
     D_8009B162 = 0x10;
     D_8009B210 = 3;
     D_8009B1D0 = 0x14;
-    } while (0);
     } while (0);
     return 1;
 
