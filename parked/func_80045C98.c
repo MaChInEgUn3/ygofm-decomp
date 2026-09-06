@@ -1,3 +1,8 @@
+/* 2026-09-06, still 2: a do/while(0) pin round the +1, `1 + load`,
+ * `load - -1`, a fresh name for the load (k) then h = k + 1 -- all 2;
+ * `h = load; h = 1 + h;` 3; h as s16 +2/60, as u16 10. The +1's register
+ * is a global-allocation choice for h (shared by both blocks) and nothing
+ * local to the block moves it. */
 /* 2 differing at 169/169 (2026-09-05 re-measured; parked 2026-08-29 at 9).
  * Residue: the second scaling's `+ 1` -- retail `addiu $v0,$v0,1` in place
  * on the loaded halfword, ours `addiu $v1,$v0,1` into a second register,

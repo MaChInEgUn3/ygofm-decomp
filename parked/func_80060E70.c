@@ -1,3 +1,7 @@
+/* 2026-09-06: a named base `t = D_801D5608;` at any of four positions (first
+ * statement, after the e store, before base, before i = 0) is -1 and ~60: the
+ * pair folds into one addiu and the loop loses its hoisted invariant. Not
+ * that lever; the preheader order stays open. */
 /* 5 differing at 102/102 (2026-09-05 re-measured). Residue: the loop
  * preheader's ORDER -- retail hoists the D_801D5608 base pair BEFORE the
  * three cursor initialisations (`q = e`, `y = 0` copied from i, `s = p +
