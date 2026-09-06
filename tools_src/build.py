@@ -631,6 +631,8 @@ PER_FUNC_AS_FLAGS["func_800497E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047788"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CF8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A43C"] = "-G0"
+# gp == 0 in func_8004A27C too; the pointer scalar bare at -G0 (parked, 9).
+PER_FUNC_AS_FLAGS["func_8004A27C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049010"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049DD8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047CC4"] = "-G0"

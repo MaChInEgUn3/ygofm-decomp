@@ -324,6 +324,9 @@
 # --- the mult/div population, opened 2026-07-27 when that drop rule was
 # retracted. Both of these are ordinary C; neither needs an idiom.
 # func_8004A27C is 11: the two multiplies, the two zero stores and the call all
+    2026-09-06: 11 -> 9 on the addressing alone -- gp=0, so the pointer scalar
+    arm with as -G0 (build.py row) instead of _IS_AGGREGATE. Residue is the
+    mult's register pair and one store's position; four spellings flat at 9.
 # match, and what is left is the %hi temp register plus where the 0xF store
 # lands relative to the table read. Hoisting the table read into a local took it
 # 16 -> 11; the macro flags make it 25, so this one wants the split pair.
