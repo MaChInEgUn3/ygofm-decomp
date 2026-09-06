@@ -1,3 +1,12 @@
+/* MATCH 2026-09-06. Parked at 1 for weeks on the pan's absolute value:
+ * retail copies the quotient into the result (`addu $v1,$v0`) and negates
+ * the COPY in place; `v = w; if (w < 0) v = -v;` lets copy propagation
+ * negate w into v instead. The sibling func_8005A6A8's spelling is the
+ * fix: `w = v < 0; if (w) v = -v;` -- the condition through the same name
+ * as the quotient, which keeps v its own register. Everything else as the
+ * park had it (the two square roots, the 700 subtracted after the second
+ * call, the named listener fields).
+ */
 #include "common.h"
 
 void func_80058624(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -49,7 +58,8 @@ void func_80058624(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         r = (arg2 * ez + arg3 * ex + n) / dd;
         w = r / 16;
         v = w;
-        if (w < 0) {
+        w = v < 0;
+        if (w) {
             v = -v;
         }
         if (v >= 0x80) {

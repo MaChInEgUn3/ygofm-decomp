@@ -4835,6 +4835,11 @@ func_8005BFC8 -- 139/139, **17** differences (22 by hand; two separate
   pre-biased `bb`, and an `(s32)` cast sum) -- all 22 or worse.
 
 func_80058624 -- 133/133, ONE difference, first written 2026-08-21.
+    MATCHED 2026-09-06 -- src/func_80058624.c is in the build and the image hashes.
+    The last difference was the abs: `w = v < 0; if (w) v = -v;` (func_8005A6A8's
+    spelling) keeps the quotient's copy as the negation's operand where
+    `if (w < 0) v = -v;` lets copy propagation negate w. `if (v < 0)` and `0 - v`
+    stay at 1; the condition through the quotient's own name without the copy is 3.
   A panning/attenuation setter: two `func_80086E50` square roots over the pair
   of 12-byte vectors at D_800F56F0, a distance-derived volume clamped to
   [0x10, 0xFF], and a signed pan clamped to [-0x7F, 0x7F].
