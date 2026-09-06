@@ -30,12 +30,15 @@
  *     col term first and retail reads the row byte first. Six other
  *     groupings (a named row, two named bytes, `&D_80090DD8[...]`, a
  *     two-statement base) are all 16 or 17.
- * Residue, 12 lines in two groups: (1) `a` is $v1 where retail has $a0 while
- * `u` takes $a0 -- ten lines, and eight read orders at the head are 12, 13 or
- * much worse (dropping `u` entirely and reading the symbol twice is +5);
- * (2) the two `if (t < s) s = t;` clamps come out `bne` where retail has
- * `beq` -- the else form, an empty else, the ternary and a goto form are all
- * 16 or worse. Permuter run 2026-09-06 from the 17 base: 660 iterations,
+ *   - and the two `if (s == 0 && p[0x2D48] != 0)` guards really are `!= 0`:
+ *     writing `== 0` there was a reading error of mine, it costs exactly two
+ *     branch polarities, and it read for an hour as a codegen problem with
+ *     the clamp beside it (12 -> 10). The clamps were never wrong.
+ * Residue, 10 lines and all one fault: `a` is $v1 where retail has $a0 while
+ * `u` takes $a0. Measured and worth nothing on that axis (all exactly 10):
+ * five orders of the three head reads, `u` borrowing `s` or `c`, `u` as a
+ * `u16`, a `do { } while (0);` round the three reads or round either one.
+ * Dropping `u` and reading the symbol twice is +5, and borrowing `t` is +2. Permuter run 2026-09-06 from the 17 base: 660 iterations,
  * three outputs, best re-scores 16 and is the `c = (s = -1)` above. */
 #define D_8009B394_IS_VOLATILE
 #define D_8009B3A4_IS_VOLATILE
@@ -90,7 +93,7 @@ top:
             }
         } else {
             if (s == 0) {
-                if (*(s8 *)(p + 0x2D48) == 0) {
+                if (*(s8 *)(p + 0x2D48) != 0) {
                     c = 0;
                 }
             }
@@ -129,7 +132,7 @@ sel:
             }
         } else {
             if (s == 0) {
-                if (*(s8 *)(p + 0x2D48) == 0) {
+                if (*(s8 *)(p + 0x2D48) != 0) {
                     c = 0;
                 }
             }
