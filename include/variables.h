@@ -1057,7 +1057,19 @@ extern u8 D_8009B110;
 extern volatile u16 D_8009B100;
 extern s32 D_8009B104;
 extern u8 D_8009B108;
+/* The play-position countdown, in frames. */
+extern u16 D_8009B0EC;
 extern s32 D_8009B11C;
+/* The second byte of the two-byte CD location argument, and the name the
+ * source used as its base: func_8001455C forms &D_8009B11D and reaches the
+ * first byte as -1 off it, which is what the relocation says. */
+#ifdef D_8009B11D_SIZED1
+extern u8 D_8009B11D[1];
+#elif defined(D_8009B11D_IS_AGGREGATE)
+extern u8 D_8009B11D[];
+#else
+extern u8 D_8009B11D;
+#endif
 /* func_80046768 stores both through `lui $at` while the four-byte pointers
  * beside them keep %gp_rel, and the widths are equal, so no real threshold
  * separates them: the SIZED arms declare eight bytes, which still clears

@@ -464,9 +464,19 @@ s32 func_80049138(s16 arg0, s32 arg1);
 s32 func_8007058C(void);
 void func_80013940(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_80014134(u8 arg0);
+#ifdef LIBCD_CALLS_RETURN_S32
+/* func_8001455C tests the result of every one of these calls, so in that
+ * translation unit they were declared with a return value. */
+s32 func_8007B468(s32 arg0, void *arg1, s32 arg2, void (*arg3)(u8), s32 arg4);
+#else
 void func_8007B468(s32 arg0, void *arg1, s32 arg2, void (*arg3)(u8), s32 arg4);
+#endif
 void func_80014294(u8 arg0);
+#ifdef LIBCD_CALLS_RETURN_S32
+s32 func_8007B1F4(s32 arg0, void *arg1, void (*arg2)(u8), s32 arg3);
+#else
 void func_8007B1F4(s32 arg0, void *arg1, void (*arg2)(u8), s32 arg3);
+#endif
 void func_80014220(u8 arg0);
 void func_800141A8(u8 arg0);
 void func_8007DE38(s32 arg0);
