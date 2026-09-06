@@ -7793,3 +7793,9 @@ func_8003A560 -- 240/240, 50 differences, first written 2026-09-05 from the
     block, and the second call's a1 copy landing after three stores instead
     of before them. Diagnosis and the dead spellings are in the candidate's
     header. Permuter not yet run.
+
+func_8003EED0 -- 248/248, 14 differences, first written 2026-09-06 from the
+    m2c draft (memory-card state machine, jump table). Eight source levers in
+    the candidate's header took it from +1/235 to 14; the residue is the
+    register of the two named state reads ($a3 against retail's $a0 and $v1),
+    which declaration order and type do not move. Permuter not yet run.

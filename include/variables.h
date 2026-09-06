@@ -389,6 +389,7 @@ extern s32 D_8009B404;
 #endif
 extern u8 D_8009B3EF;
 extern u8 D_8009B3EB;
+extern u8 D_8009B3EC;
 extern u8 D_800F5750[];
 extern u8 D_800F5788[];
 extern s32 D_80090E0C[];
@@ -2042,3 +2043,5 @@ extern u8 D_801E8FF8 __attribute__((section(".data")));
 extern u8 D_800107A8[];
 extern u8 D_800107DC[];
 extern u8 D_800107F4[];
+extern u8 D_800EFBC0[];
+extern s32 D_801D5648[];
