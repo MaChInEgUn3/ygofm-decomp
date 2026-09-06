@@ -42,7 +42,9 @@ OUT = os.path.join(ROOT, "build", "m2c")
 # m2c parses the context with pycparser, which is a C99 parser and knows
 # neither of these GNU extensions. Both are noise for type extraction.
 STRIP = (
-    (re.compile(r"__attribute__\s*\(\(.*?\)\)"), ""),
+    # One level of nested parentheses, for section(".data"): the lazy .*?
+    # stopped at the first "))" inside the attribute and left a stray ")".
+    (re.compile(r"__attribute__\s*\(\((?:[^()]|\([^()]*\))*\)\)"), ""),
     (re.compile(r"^\s*__asm__\s*\(.*?\)\s*;\s*$", re.M), ""),
 )
 
