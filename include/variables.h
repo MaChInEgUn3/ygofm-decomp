@@ -2035,3 +2035,10 @@ extern s32 D_800FE430;
 extern s32 D_800FE434;
 
 #endif /* VARIABLES_H */
+/* The two loaded-file signature bytes ("V" at +0x7F8) of the SE and CD
+ * banks, read by the sound loader func_80046A08. */
+extern u8 D_801E27F8 __attribute__((section(".data")));
+extern u8 D_801E8FF8 __attribute__((section(".data")));
+extern u8 D_800107A8[];
+extern u8 D_800107DC[];
+extern u8 D_800107F4[];
