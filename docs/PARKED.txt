@@ -888,7 +888,7 @@ func_80014E1C MATCHED 2026-08-03. The entry that stood here diagnosed it as
   proved the match. A park file left behind after a match is a false failure
   in that sweep -- delete both the file and the entry.
 
-func_80041C8C -- 8 differences, register allocation, one pointer (p in $a0 where retail has $a1, eight sites). 2026-09-07: the permuter's 8 -> 3 output is an uninitialised read and its two halves, measured together for the first time, are 10; an extra parameter is 8 in three shapes and six spellings of the read are 8 or 12. See the park header.
+RESOLVED 2026-09-07 func_80041C8C -- MATCH. The eight differences were all one register (p in $a0 where retail has $a1) and they were a MISSING ARGUMENT, not allocation: the opcode handler table entries take (context, operand pointer), so `D_80090FEC[op ^ 0xFF](arg0, p)` puts the pointer in $a1 because it IS the second argument. Found by reading krystalgamer's one-line description of his own matched func_80041C8C in config/slus_01411/functions.csv -- his C does not port, but a sentence about what the code MEANS does. Every axis measured here that day (duplicated arms, an extra parameter on OUR function, six spellings of the read) was on the wrong side of the call. variables.h carries a D_80090FEC_TAKES_OPERAND guard because func_80023144 calls it with one argument, which is the original build's missing prototype.
   Bytecode interpreter loop: read the opcode at *(u8**)(arg0+0x50) +
   *(u16*)(arg0+0x58), and while it is >= 0xF0 dispatch through
   D_80090FEC[op ^ 0xFF] (which returns -1 to stop). Structure, block layout,

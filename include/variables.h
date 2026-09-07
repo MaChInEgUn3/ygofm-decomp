@@ -695,7 +695,19 @@ typedef struct {
 extern Rec4C D_800EB010[];
 /* Opcode handlers for the 0xF0..0xFF escapes, indexed by op ^ 0xFF; they
  * return -1 to stop the interpreter loop, so they are not ObjFn. */
+/* The script opcode handler table. Its entries take the context AND the
+ * operand pointer -- krystalgamer's matched func_80041C8C says so in one
+ * line ("handler table entries take the context and the operand pointer,
+ * which pins the operand pointer to a1"), and that second argument is the
+ * whole of our residue there: the pointer lands in $a1 because it is an
+ * argument, not because the allocator was talked into it. Guarded per file
+ * because a caller that never saw the real declaration passes one argument
+ * (WORKFLOW's missing-prototype rule) and func_80023144 is one of those. */
+#ifdef D_80090FEC_TAKES_OPERAND
+extern s32 (*D_80090FEC[])(u8 *, u8 *);
+#else
 extern s32 (*D_80090FEC[])(u8 *);
+#endif
 extern ObjFn D_80090F68[];
 /* Dispatch table func_80070650 runs, indexed by the byte reader. */
 extern ObjFn D_800916E0[];
