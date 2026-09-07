@@ -1726,7 +1726,16 @@ extern u8 D_80010074[];
 extern u8 D_80010090[];
 extern u8 D_800100A8[];
 /* Table func_8004A764 indexes by word. */
+/* The voice-id table. A `const` extern is an addressing knob in its own
+ * right: cc1psx puts a const object in .rodata rather than .sdata, so it
+ * leaves the -G8 small-data model without any -G change and its address is
+ * materialised before the neighbouring scalar's load. Lever taken from
+ * krystalgamer's matched func_8004A764/func_8004A6F8 (2026-09-07). */
+#ifdef D_80011434_IS_CONST
+extern const s32 D_80011434[];
+#else
 extern s32 D_80011434[];
+#endif
 /* func_80044278 and func_80044380 write these two gp-relatively before
  * handing off; halfword and word. */
 extern u16 D_8009B44C;

@@ -443,8 +443,18 @@ func_8005C4F0
     RESOLVED -- src/func_8005C4F0.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80047A68
     RESOLVED -- src/func_80047A68.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
-func_8004A764
-    STILL OPEN -- src/func_8004A764.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
+func_8004A764 RESOLVED 2026-09-07 -- MATCH, and the ASSEMBLY DEBT is retired
+    with it. One word: `extern const s32 D_80011434[];`. cc1psx puts a const
+    object in .rodata rather than .sdata, so the table leaves the -G8
+    small-data model with no -G change anywhere and its address is
+    materialised before the D_8009B458 load -- which is exactly the block
+    order the old entry above spent nine differences on, and which
+    -mno-split-addresses could only buy by wrecking the table access.
+    The lever is krystalgamer's, read off his one-line description of the
+    same function in config/slus_01411/functions.csv. It is a SIXTH
+    addressing form for WORKFLOW's list, and the first that costs neither
+    a flag nor a false size. It is worth nothing on the sibling
+    func_8004A6F8 (7, unchanged, at three flag combinations).
 func_8005C5D4 RESOLVED 2026-09-04 -- ASSEMBLY DEBT RETIRED with C from krystalgamer's src/game/func_8005C5D4.c, unchanged but for the include. AND A
   RETRACTION: the 2026-09-04 diagnosis of a maspsx `li` emulation gap was
   WRONG. There is no 0x7FFFFFFF in this function. His source is

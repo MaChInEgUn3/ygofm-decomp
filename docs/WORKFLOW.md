@@ -2349,6 +2349,22 @@ on a combination that had been in the table for weeks.
   - **unsized array + `-mno-split-addresses`** — cc1psx emits the bare symbol and
     the *assembler* expands it: through the destination register for a load,
     through `$at` for a store, which has no spare register.
+  **A SIXTH form, and it is the cheapest of all: `const`.** cc1psx puts a
+  const object in `.rodata`, not `.sdata`, so `extern const s32 sym[];` takes
+  that one symbol out of the small-data model with no `-G` change anywhere, no
+  inflated size, and no per-function assembler row -- the three costs every
+  other route above pays. func_8004A764 was parked at 9 and then 6 on exactly
+  the residue this fixes (gcc hoists `lui %hi(D_8009B458)` to the top and
+  schedules the matching `lw` away from it, where retail keeps the pair
+  adjacent, and `-mno-split-addresses` buys that only by wrecking the table
+  access); `extern const s32 D_80011434[];` behind a per-file guard is a MATCH
+  and retired an assembly-debt transcription with it. The lever came from
+  krystalgamer's one-line description of his own matched copy, not from a
+  sweep here. Try it FIRST when the residue is where a table's address is
+  materialised: it is one word and it disturbs nothing else. It is not
+  universal -- the sibling func_8004A6F8 is 7 with and without it, at three
+  flag combinations.
+
   **A declared size is also a scheduling knob, and it cuts both ways.** A bare
   reference is *one pseudo-instruction* when cc1psx schedules — maspsx expands
   it afterwards — so sizing a symbol out of small data does not only change the
