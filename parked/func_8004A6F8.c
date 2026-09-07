@@ -1,4 +1,4 @@
-/* 8 differing at 27/27. First REAL C written for this function 2026-09-04
+/* 7 differing at 27/27. First REAL C written for this function 2026-09-04
  * (src/ holds Unchiga's transcription). Needs -G0 (PER_FUNC_FLAGS/AS_FLAGS
  * already carry it for the transcription).
  *
@@ -50,7 +50,13 @@
  * Saturated at 9000 iterations, nothing below its own 130. Second run,
  * same base: 9800 iterations, the same whole-body pin at 130 and nothing
  * below it.
- */
+  *
+ * 8 -> 7 (2026-09-07, from a stored permuter output the scorer surfaced): a
+ * bare `do { } while (0);` between `p = D_8009B458;` and `v = *t;`. It pins
+ * the table-value load below the pointer load instead of letting the scheduler
+ * lift it, and reads as the macro boundary the idiom is for. Nothing else in
+ * the source changed.
+*/
 #include "common.h"
 
 void func_8004A6F8(s32 arg0, u8 *arg1) {
@@ -62,6 +68,7 @@ void func_8004A6F8(s32 arg0, u8 *arg1) {
     k = 0x60100;
     t = &D_80011434[arg0];
     p = D_8009B458;
+    do { } while (0);
     v = *t;
     *(s32 *)(p + 0x4C4) = k;
     *(s32 *)(p + 0x4C0) = v;

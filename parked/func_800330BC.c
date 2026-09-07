@@ -1,4 +1,4 @@
-/* 273/273 and 17 differing (2026-09-06, first pass). gp=0 and at=0, so
+/* 273/273 and 9 differing (2026-09-07; was 17 on the first pass 2026-09-06). gp=0 and at=0, so
  * WORKFLOW's first recipe branch: both flag halfwords keep their real scalar
  * declarations and the unit assembles at -G0, which is where retail's
  * %hi/%lo pairs come from (the default -G8 renders them as one bare
@@ -39,7 +39,13 @@
  * five orders of the three head reads, `u` borrowing `s` or `c`, `u` as a
  * `u16`, a `do { } while (0);` round the three reads or round either one.
  * Dropping `u` and reading the symbol twice is +5, and borrowing `t` is +2. Permuter run 2026-09-06 from the 17 base: 660 iterations,
- * three outputs, best re-scores 16 and is the `c = (s = -1)` above. */
+ * three outputs, best re-scores 16 and is the `c = (s = -1)` above.  *
+ * 10 -> 9 (2026-09-07, permuter iteration ~55, decomposed): the `&3` arm's
+ * `s = a;` written through a second name that the `&0x5000` arm then reads --
+ * `u = a; s = u;` in the first, `s = u;` in the second. `u` is the dead
+ * halfword name from the top of the function, so this is the borrow rule and
+ * not a new variable. What is left is one register, as before.
+*/
 #define D_8009B394_IS_VOLATILE
 #define D_8009B3A4_IS_VOLATILE
 #include "common.h"
@@ -118,7 +124,8 @@ sel:
     s = -1;
     c = s;
     if (D_8009B394 & 3) {
-        s = a;
+        u = a;
+        s = u;
         if (D_8009B394 & 2) {
             if (s == *(s16 *)(p + 0x2D40) - 8) {
                 if (*(s8 *)(p + 0x2D48) != 7) {
@@ -151,7 +158,7 @@ sel:
         return 1;
     }
     if (D_8009B394 & 0x5000) {
-        s = a;
+        s = u;
         if (D_8009B394 & 0x4000) {
             t = (p[0x2D48] = p[0x2D48] + 1);
             if ((s8)t >= 8) {

@@ -77,10 +77,23 @@ for d in sorted(root.glob('build/permuter/func_*')):
         n=int(m.group(1)) if m else (0 if 'MATCH' in r.stdout else 999)
         return (le,census(r.stdout),n)
     base=score(cand); checked+=1
+    # Print try_func's own `flags:` line beside the base. WORKFLOW's rule is
+    # "read the flags before the count", and this tool was hiding them: it
+    # calls try_func with no trailing arguments, so try_func falls back to
+    # build.py's PER_FUNC_FLAGS row -- which for a function whose src/ still
+    # holds a TRANSCRIPTION is the transcription's recipe, not the candidate's.
+    # func_8002C7E8 (2026-09-07) reads 16 that way against a park header that
+    # says 6, and every one of its outputs was scored the same wrong way.
+    # There is no way to know from here which of the two the park wants, so
+    # print the flags and let the reader check them against the header.
+    _fl=subprocess.run(['.venv/bin/python','tools_src/try_func.py',f,str(cand)],
+                       capture_output=True,text=True).stdout
+    _m=re.search(r'^flags: (.*)$',_fl,re.M)
     # Progress to stderr: this walks ~1750 outputs across the whole park and
     # takes hours, so a run with no output is indistinguishable from a hung
     # one -- which is the failure mode WORKFLOW records for silent sweeps.
-    print(f'  {f}: base len{base[0]}/cen{base[1]}/{base[2]}, scoring {len(outs)} outputs',
+    print(f'  {f}: base len{base[0]}/cen{base[1]}/{base[2]}, scoring {len(outs)} outputs'
+          f'  [{_m.group(1) if _m else "flags unknown"}]',
           file=sys.stderr, flush=True)
     best=min((score(p),str(p)) for p in outs)
     if os.path.exists('config/flag_overrides.json'): os.remove('config/flag_overrides.json')
