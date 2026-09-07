@@ -1977,6 +1977,20 @@ count read as a win only because it was being compared across a length
 error. Decomposed on its own base, no half of that output moves the parked
 137 at all. Same class as the never-compare-across-length-errors trap in
 try_func, one tool further out.
+**And the scorer measures at BUILD.PY's flags, which for a park whose function
+still has a transcription in `src/` are the TRANSCRIPTION's.** try_func falls
+back to `PER_FUNC_FLAGS` when it is given no trailing arguments, and the
+scorer gives none -- so func_8002C7E8, whose row is `-mno-split-addresses`
+for the `__asm__` block still sitting in src/, was scored at 16 against a
+park header that says **6**, and the output the tool called better re-measures
+at **7** under the park's own recipe, i.e. worse than what is installed. Six
+parks carry both a build.py row and a transcription; the other five say in
+their headers that the row is the candidate's recipe too, so the class is
+narrow -- but it is silent, and a "MELHOR" line is exactly the moment nobody
+re-reads the flags. The tool now prints try_func's `flags:` line beside every
+base (2026-09-07). Check it against the park header before believing either
+number, and pass the trailing flags by hand when they disagree.
+
 **Reconstruct a permuter win from its FULL diff, not from the head of it.**
 func_800222F4's `diff.txt` opens with a duplicated call and a deleted `b = g;`,
 and reconstructing just those two is +2 and 201 -- nowhere near the stored
