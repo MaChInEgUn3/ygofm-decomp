@@ -6037,7 +6037,7 @@ func_8004C114 -- 195/195, 103 differences, written 2026-09-03. The MIDI channel
   argument copies (-5/-6). Also open: retail sinks the halfword store below
   the word loads inside the loops.
 
-func_800222F4 -- 201/201, 25 differences, written 2026-09-03,
+func_800222F4 -- 201/201 and 23 differences (2026-09-07; 24, and 25 when written 2026-09-03). The 24 was UNSOUND: it stored through `g`, a name never assigned anywhere in the function, inherited from the permuter output the park was decomposed from. The call result is the honest reading and is 23, so the uninitialised read was not buying anything either. Residue is retail copying the record pointer into $a1 and running the last three stores through the copy; four placements of a second name were measured and the copy coalesces every time. See the park header.
   improved 2026-09-04. The debug/test
   menu step: it tears the menu down and rebuilds it on D_8009B23A's 0x4000
   bit, then steps a four-entry mode on the pad bits.

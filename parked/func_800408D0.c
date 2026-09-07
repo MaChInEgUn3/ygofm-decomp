@@ -7,6 +7,14 @@
  * D_8009B424_IS_VOLATILE arm (3). Scheduler flags through try_func's
  * trailing args are not comparable (they replace the default set).
  * Scheduling in one block -- permuter next.
+ * 2026-09-07: krystalgamer's description of his matched copy says
+ * "Struct-typed object/primitive/clip state, flags temp before the
+ * texture store, do-while strip loop" -- the struct typing is the
+ * func_80013B68 alias lever and it is the right family for this residue
+ * (retail hoists the argument load above the store to the scalar global,
+ * which cast stores through a u8 * forbid). A MECHANICAL structify of `e`
+ * alone is -6 and 192, so it is not one pointer: his sentence names
+ * three (object, primitive, clip). Worth doing properly, not by script.
  */
 #define D_8009B146_SIZED
 #define D_8009B424_IS_SCALAR
