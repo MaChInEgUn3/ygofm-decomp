@@ -45,6 +45,17 @@
  * `u = a; s = u;` in the first, `s = u;` in the second. `u` is the dead
  * halfword name from the top of the function, so this is the borrow rule and
  * not a new variable. What is left is one register, as before.
+ *
+ * Permuter from the 9-base, 2026-09-07, 131k iterations: one output at 8, and
+ * the whole of its gain is an UNINITIALISED READ -- it deletes `u = a;` from
+ * the `&3` arm and re-inserts it below BOTH arms that read `u`, so `s = u;`
+ * reads a name with no reaching definition. tools_src/uninit_scan.py names it.
+ * Its three legal edits were decomposed and every combination of them is 9,
+ * unchanged: a second name for the OR's left operand (`n2 = a; s = n2 | b;`),
+ * a `s16 *np` hoisted for the +0x2D40 compare in the `&0xC` arm, and the
+ * counter bump inlined into its own test (`if ((s8)(p[0x2D46] = p[0x2D46] + 1)
+ * >= 7)`). Five combinations, all 9. So the base is saturated against this
+ * permuter and the residue is still one variable's register.
 */
 #define D_8009B394_IS_VOLATILE
 #define D_8009B3A4_IS_VOLATILE
