@@ -5407,7 +5407,8 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 226/225 (+1), 134 differences, FIRST C EVER 2026-09-08.
+func_80018608 -- 227/225 (+2), 104 differences, CENSUS = `nop` ONLY.
+  FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
   and git confirms nothing was ever deleted here. Written from the m2c draft
@@ -5439,6 +5440,18 @@ func_80018608 -- 226/225 (+1), 134 differences, FIRST C EVER 2026-09-08.
   the local costs three (+3 for the +2/+4 accesses, +3 scoped to case 2, +3
   scoped to the entry branch); the only one that pays is the one that does
   not read it. Still saving three callee-saved where retail saves four.
+  Then the OPPOSITE, same night. The spelling that USES the local -- rejected
+  at "+3" three times -- has a census of ONE opcode, and it is `nop` (20
+  against 23): the frame, all FOUR callee-saved saves and every real
+  instruction are already right, and the +3 was three load-delay slots. The
+  difference count hid that behind a positional shift. Installed instead, and
+  two more edits take it to +2/104: DROP the named 3 (retail materialises it
+  in the delay slot of the dispatch's own `lbu`, and a hoisted name leaves a
+  `nop` there -- removing it, or assigning it either side of the mode read,
+  are all +2/108), and read `+4` before the `+2` pair in case 2 (108 -> 104).
+  Installed AGAINST the strict ranking key: the +1/134 candidate wins on
+  |length| but its census is four opcodes including `lw -1, sw -1`, a whole
+  register missing, where this one is two load-delay nops and nothing else.
   Candidate in parked/func_80018608.c.
 
 
