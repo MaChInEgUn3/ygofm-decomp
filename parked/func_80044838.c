@@ -43,6 +43,20 @@
  *    predecessor; o tell e o delay slot do `jal` ficar `nop`).
  *
  * MEDIDO E MORTO, COM NUMEROS (nao refazer):
+ *  - **O PERMUTER RODOU AQUI (1253 iteracoes, -j 2) E NAO ACHOU NADA**:
+ *    zero diretorios `output-*` com `--better-only`. Quinta confirmacao de
+ *    que o score dele nao e a contagem, e a primeira vez que ele satura
+ *    numa base de comprimento exato e censo vazio;
+ *  - o `k = 2;` movido para DENTRO do laco do case 7 (primeira e ultima
+ *    instrucao do corpo, com e sem pino): -9, -9, -3, -3. Era a hipotese de
+ *    que o `addiu $s4,2` do retail e uma invariante icada pelo passo de
+ *    laco, e ela esta FALSIFICADA;
+ *  - quatro agrupamentos do `i = 0xA;` com o pino (`do { i = 0xA; k = 2; }`,
+ *    `do { k = 2; i = 0xA; }`, um `do { } while (0);` vazio depois, e os
+ *    dois pinados separados): 11, 11, 11, 11 -- quatro grafias iguais,
+ *    EIXO ERRADO;
+ *  - nomear a sentinela -1 do laco do case 7 antes do pino: 12; nomear a
+ *    base D_800F2B00: +1/45; as duas: -1/162;
  *  - a FORMA do laco 3 (`for`, `while`, `do/while(1)` com goto): 95, 95, 95;
  *  - os tres lacos como `goto` em vez de `do { } while`: -1/135, -4/280,
  *    -5/278 (perdem as notas NOTE_INSN_LOOP e com elas a icagem);
