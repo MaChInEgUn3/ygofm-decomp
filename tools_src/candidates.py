@@ -199,6 +199,12 @@ def has_range_check(body):
         for i in range(len(body)))
 
 
+def is_library_addr(name):
+    """True when a `func_XXXXXXXX` callee sits at or above LIBRARY_REGION."""
+    m = re.fullmatch(r"func_([0-9A-Fa-f]{8})", name)
+    return bool(m) and int(m.group(1), 16) >= LIBRARY_REGION
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     lo = int(args[0]) if args else 16
@@ -222,7 +228,15 @@ def main():
         joined = " ".join(body)
         if HAND_WRITTEN.search(joined):
             continue
+        # A callee ABOVE the library region is a library call even when it
+        # still carries a `func_` name -- docs/LIBRARY_FUNCS.txt lists only
+        # the ones signature-matching identified, and config/sdk_names.txt
+        # names 98 more that were never in it. Without the address test this
+        # tag was silently missing on 27 in-scope functions (measured
+        # 2026-09-08), which is the "prove the filter can say yes" rule: a
+        # test that only ever looked at a name could not see an address.
         libcall = any(c in lib or not c.startswith("func_")
+                      or is_library_addr(c)
                       for c in re.findall(r"jal\s+(\S+)", joined))
         # Neither of the old drop rules is a "cannot match" any more.
         #
