@@ -239,6 +239,19 @@ instructions back for something that *sets* the argument register for an
 unrelated reason. Cheap to check, and it saves adding a guard that is not
 needed.
 
+- **Before writing a call to anything above `0x80073840`, grep
+  `config/sdk_names.txt`.** It maps 355 addresses to the SDK names
+  krystalgamer's tree gives them -- `func_8008BC90` is `MemCardAccept`,
+  `func_8008C638` is `MemCardReadFile`, `func_8008CA78` is
+  `MemCardGetDirentry` -- and the real signature settles the argument count
+  and the types in one command. That is the wall he described on 2026-09-08:
+  his agents re-derive struct and argument types from m2c's guesses and then
+  permute against a shape that cannot match (his example: `func_80085DB0` is
+  `GsClearOt`, the pointer is a `GsOT *`, the record is 0x14 bytes). The
+  name is a pointer, not evidence -- the build still decides -- but it tells
+  you what m2c invented. It also named func_8003E490 as the memory-card
+  state machine and, with it, four globals.
+
 - **`lib-call`** — calls a PsyQ library function. An implicit declaration is
   enough; do not write a prototype unless a float or struct is involved — or
   unless the callee **does not return**. A function whose listing sets up a

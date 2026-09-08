@@ -1,0 +1,387 @@
+# PsyQ SDK and hand-written assembly functions, with the names
+# krystalgamer's tree gives them (config/slus_01411/functions.csv, rows
+# marked sdk_asm or handwritten_asm). Format: func_ADDR<TAB>Name<TAB>kind<TAB>lib
+#
+# Why this file exists: on 2026-09-08 krystalgamer described the wall his
+# agents keep hitting -- they re-derive struct and argument types from m2c's
+# guesses instead of using the real SDK definition, and then permute against
+# a shape that cannot match. His example was func_80085DB0 = GsClearOt, where
+# the pointer is a GsOT * and the record is 0x14 bytes. Reading the real name
+# off this table costs one grep and settles the argument list.
+#
+# It is a POINTER, not evidence: the name is his identification, and what
+# decides a candidate here is still the build. But a named callee tells you
+# the argument count and the types, which is exactly what m2c invents.
+#
+# Our docs/LIBRARY_FUNCS.txt stays as it is -- a bare list of names that four
+# tools parse line by line -- because adding a column to it would break them.
+#
+# WHAT THE IMPORT MEASURED, 2026-09-08 (355 named rows, all sdk_asm):
+#  * 229 of them are already in our docs/LIBRARY_FUNCS.txt;
+#  * 126 are NOT -- and 28 of those 126 are byte-exact C in our src/. So the
+#    two "out of scope" lists disagree, and the disagreement is informative
+#    rather than an error: an sdk_asm row means "he keeps it as assembly",
+#    not "no C reproduces it". 29 of the 355 are matched here in total.
+#  * 98 named functions are still assembly on both sides -- that is the pool
+#    where a name buys the most, because it is where a candidate would
+#    otherwise be written against m2c's invented prototypes.
+#  * exactly ONE function is in both our LIBRARY_FUNCS.txt and our src/
+#    (func_80082780), which is a real contradiction in our own file and is
+#    worth a look before that list is trusted as a filter.
+#  * only 3 of the 355 sit below the 0x80073840 boundary this project uses
+#    to define library code, so the boundary is close to right.
+func_800129D8	entrypoint	sdk_asm	
+func_80058F10	GsGetWorkBase	sdk_asm	
+func_80073830	InitHeap	sdk_asm	LIBAPI
+func_80073840	_bu_init	sdk_asm	LIBAPI
+func_80073850	SetMem	sdk_asm	LIBAPI
+func_80073860	OpenEvent	sdk_asm	LIBAPI
+func_80073870	CloseEvent	sdk_asm	LIBAPI
+func_80073880	TestEvent	sdk_asm	
+func_80073890	EnableEvent	sdk_asm	LIBAPI
+func_800738A0	DisableEvent	sdk_asm	LIBAPI
+func_800738B0	EnterCriticalSection	sdk_asm	LIBAPI
+func_800738C0	ExitCriticalSection	sdk_asm	LIBAPI
+func_800738D0	open	sdk_asm	LIBAPI
+func_800738E0	lseek	sdk_asm	LIBAPI
+func_800738F0	read	sdk_asm	LIBAPI
+func_80073900	write	sdk_asm	LIBAPI
+func_80073910	close	sdk_asm	LIBAPI
+func_80073920	nextfile	sdk_asm	
+func_80073930	Krom2RawAdd	sdk_asm	LIBAPI
+func_80073940	ChangeClearPAD	sdk_asm	LIBAPI
+func_80073950	SetRCnt	sdk_asm	LIBAPI
+func_800739EC	GetRCnt	sdk_asm	LIBAPI
+func_80073A24	StartRCnt	sdk_asm	LIBAPI
+func_80073A54	StopRCnt	sdk_asm	LIBAPI
+func_80073A88	ResetRCnt	sdk_asm	LIBAPI
+func_80073AC0	firstfile	sdk_asm	
+func_80073D60	firstfile2	sdk_asm	LIBAPI
+func_80073D7C	ReadInitPadFlag	sdk_asm	LIBAPI
+func_80073D8C	PAD_init	sdk_asm	LIBAPI
+func_80073E1C	InitPAD	sdk_asm	LIBAPI
+func_80073EAC	StartPAD	sdk_asm	LIBAPI
+func_80074000	InitPAD2	sdk_asm	LIBAPI
+func_80074010	StartPAD2	sdk_asm	LIBAPI
+func_80074020	PAD_init2	sdk_asm	LIBAPI
+func_80074030	SysEnqIntRP	sdk_asm	LIBAPI
+func_80074040	SysDeqIntRP	sdk_asm	LIBAPI
+func_80074050	EnablePAD	sdk_asm	LIBAPI
+func_80074064	DisablePAD	sdk_asm	LIBAPI
+func_80074078	_patch_pad	sdk_asm	LIBAPI
+func_800740F0	FlushCache	sdk_asm	LIBAPI
+func_80074100	_remove_ChgclrPAD	sdk_asm	LIBAPI
+func_80074170	VSync	sdk_asm	LIBETC
+func_80074380	ChangeClearRCnt	sdk_asm	LIBAPI
+func_80074390	ResetCallback	sdk_asm	LIBETC
+func_800743C0	InterruptCallback	sdk_asm	LIBETC
+func_800743F0	DMACallback	sdk_asm	LIBETC
+func_80074420	VSyncCallback	sdk_asm	LIBETC
+func_80074454	VSyncCallbacks	sdk_asm	LIBETC
+func_80074484	StopCallback	sdk_asm	LIBETC
+func_800744B4	RestartCallback	sdk_asm	LIBETC
+func_800744E4	CheckCallback	sdk_asm	LIBETC
+func_800744F4	GetIntrMask	sdk_asm	LIBETC
+func_8007450C	SetIntrMask	sdk_asm	LIBETC
+func_80074A58	_96_remove	sdk_asm	LIBAPI
+func_80074A70	ReturnFromException	sdk_asm	LIBAPI
+func_80074A80	ResetEntryInt	sdk_asm	LIBAPI
+func_80074A90	HookEntryInt	sdk_asm	LIBAPI
+func_80074AA0	startIntrVSync	sdk_asm	LIBETC
+func_80074E80	_SpuInit	sdk_asm	LIBSPU
+func_80074F68	SpuStart	sdk_asm	LIBSPU
+func_80074FE0	_spu_init	sdk_asm	LIBSPU
+func_80075420	_spu_FiDMA	sdk_asm	LIBSPU
+func_800754DC	_spu_Fr_	sdk_asm	LIBSPU
+func_80075584	_spu_t	sdk_asm	LIBSPU
+func_80075804	_spu_Fw	sdk_asm	LIBSPU
+func_80075888	_spu_Fr	sdk_asm	LIBSPU
+func_800758EC	_spu_FsetRXX	sdk_asm	LIBSPU
+func_80075930	_spu_FsetRXXa	sdk_asm	LIBSPU
+func_800759D4	_spu_FgetRXXa	sdk_asm	LIBSPU
+func_80075A10	_spu_FsetPCR	sdk_asm	LIBSPU
+func_80075AB8	_spu_Fw1ts	sdk_asm	LIBSPU
+func_80075B20	DeliverEvent	sdk_asm	LIBAPI
+func_80075B30	_SpuDataCallback	sdk_asm	LIBSPU
+func_80075B60	SpuQuit	sdk_asm	LIBSPU
+func_80075BE0	SpuSetReverb	sdk_asm	LIBSPU
+func_80075CB0	_SpuIsInAllocateArea	sdk_asm	LIBSPU
+func_80075D30	_SpuIsInAllocateArea_	sdk_asm	LIBSPU
+func_80075DC0	SpuGetReverb	sdk_asm	LIBSPU
+func_80075DE0	SpuSetReverbModeParam	sdk_asm	LIBSPU
+func_800762C0	_spu_setReverbAttr	sdk_asm	LIBSPU
+func_80076790	SpuReserveReverbWorkArea	sdk_asm	LIBSPU
+func_800767E0	SpuIsReverbWorkAreaReserved	sdk_asm	LIBSPU
+func_80076820	SpuSetReverbVoice	sdk_asm	LIBSPU
+func_80076850	_SpuSetAnyVoice	sdk_asm	LIBSPU
+func_80076B10	SpuGetReverbVoice	sdk_asm	LIBSPU
+func_80076B40	_SpuGetAnyVoice	sdk_asm	LIBSPU
+func_80076B70	SpuClearReverbWorkArea	sdk_asm	LIBSPU
+func_80076D10	WaitEvent	sdk_asm	LIBAPI
+func_80076D20	SpuReadDecodedData	sdk_asm	LIBSPU
+func_80076D90	SpuSetIRQ	sdk_asm	LIBSPU
+func_80076ED0	SpuSetKey	sdk_asm	LIBSPU
+func_80077090	SpuGetKeyStatus	sdk_asm	LIBSPU
+func_80077120	SpuSetKeyOnWithAttr	sdk_asm	LIBSPU
+func_800771B0	SpuSetTransferStartAddr	sdk_asm	LIBSPU
+func_80077210	SpuSetTransferMode	sdk_asm	LIBSPU
+func_80077240	SpuIsTransferCompleted	sdk_asm	LIBSPU
+func_800772F0	SpuRGetAllKeysStatus	sdk_asm	LIBSPU
+func_800773C4	SpuGetAllKeysStatus	sdk_asm	LIBSPU
+func_80077450	SpuSetVoiceAttr	sdk_asm	LIBSPU
+func_80077A50	_spu_note2pitch	sdk_asm	LIBSPU
+func_80077B20	_spu_pitch2note	sdk_asm	LIBSPU
+func_80077C50	SpuGetVoiceEnvelope	sdk_asm	LIBSPU
+func_80077C70	SpuSetCommonAttr	sdk_asm	LIBSPU
+func_80077FF0	SpuSetReverbModeType	sdk_asm	LIBSPU
+func_800781C0	StSetRing	sdk_asm	LIBCD
+func_800781F0	CdPosToInt	sdk_asm	LIBCD
+func_80078270	StClearRing	sdk_asm	LIBCD
+func_800782D0	StUnSetRing	sdk_asm	LIBCD
+func_800783DC	StGetBackloc	sdk_asm	LIBCD
+func_80078440	StSetStream	sdk_asm	LIBCD
+func_800784D0	StFreeRing	sdk_asm	LIBCD
+func_800785C0	StGetNext	sdk_asm	LIBCD
+func_80078680	StSetMask	sdk_asm	LIBCD
+func_800786A0	StCdInterrupt	sdk_asm	LIBCD
+func_8007A710	CdIntToPos	sdk_asm	LIBCD
+func_8007A860	CdDataCallback	sdk_asm	
+func_8007CDE0	DsRead	sdk_asm	LIBDS
+func_8007D190	DsReadSync	sdk_asm	LIBDS
+func_8007D200	DsReadCallback	sdk_asm	LIBDS
+func_8007D214	DsReadBreak	sdk_asm	LIBDS
+func_8007D2D0	DsReadMode	sdk_asm	LIBDS
+func_8007D2F0	DsRead2	sdk_asm	LIBDS
+func_8007D3F0	DsSearchFile	sdk_asm	LIBDS
+func_8007DD50	DsStartReadySystem	sdk_asm	LIBDS
+func_8007DDD4	DsEndReadySystem	sdk_asm	LIBDS
+func_8007DE38	DsReadySystemMode	sdk_asm	LIBDS
+func_8007E350	CdFlush	sdk_asm	
+func_8007E390	DsFlush	sdk_asm	LIBDS
+func_8007E3D0	CdGetSector	sdk_asm	
+func_8007E4F0	CdGetSector2	sdk_asm	
+func_8007E600	CdIntToPos_8007E600	sdk_asm	LIBCD
+func_8007E710	CdPosToInt_8007E710	sdk_asm	LIBCD
+func_8007E790	DsLastPos	sdk_asm	LIBDS
+func_8007E7F0	CdControlB	sdk_asm	
+func_8007E860	CdReadyCallback	sdk_asm	
+func_8007E880	CdSyncCallback	sdk_asm	
+func_8007E8A0	CdDataCallback_8007E8A0	sdk_asm	
+func_8007E8D0	SetDumpFnt	sdk_asm	
+func_8007E9B0	FntOpen	sdk_asm	
+func_8007EC68	FntFlush	sdk_asm	
+func_8007EF84	FntPrint	sdk_asm	
+func_8007F350	ResetGraph	sdk_asm	LIBGPU
+func_8007F4C4	SetGraphDebug	sdk_asm	LIBGPU
+func_8007F520	SetGraphQueue	sdk_asm	LIBGPU
+func_8007F5C4	GetGraphDebug	sdk_asm	LIBGPU
+func_8007F5D4	DrawSyncCallback	sdk_asm	LIBGPU
+func_8007F634	SetDispMask	sdk_asm	LIBGPU
+func_8007F6CC	DrawSync	sdk_asm	LIBGPU
+func_8007F850	ClearImage	sdk_asm	LIBGPU
+func_8007F8E0	ClearImage2	sdk_asm	LIBGPU
+func_8007F978	LoadImage	sdk_asm	LIBGPU
+func_8007F9D8	StoreImage	sdk_asm	LIBGPU
+func_8007FA38	MoveImage	sdk_asm	LIBGPU
+func_8007FAF0	ClearOTag	sdk_asm	LIBGPU
+func_8007FBB8	ClearOTagR	sdk_asm	LIBGPU
+func_8007FC64	DrawPrim	sdk_asm	LIBGPU
+func_8007FCC0	DrawOTag	sdk_asm	LIBGPU
+func_8007FD30	PutDrawEnv	sdk_asm	LIBGPU
+func_8007FDF0	DrawOTagEnv	sdk_asm	LIBGPU
+func_8007FEC8	GetDrawEnv	sdk_asm	LIBGPU
+func_8007FEFC	PutDispEnv	sdk_asm	LIBGPU
+func_800803F4	GetDispEnv	sdk_asm	LIBGPU
+func_80080428	GetODE	sdk_asm	LIBGPU
+func_80080458	SetDrawArea	sdk_asm	LIBGPU
+func_800804D8	SetDrawOffset	sdk_asm	LIBGPU
+func_80080518	SetDrawEnv	sdk_asm	LIBGPU
+func_80081DE8	LoadImage2	sdk_asm	LIBGPU
+func_80081ED4	StoreImage2	sdk_asm	LIBGPU
+func_80081FC0	MoveImage2	sdk_asm	LIBGPU
+func_80082104	DrawOTag2	sdk_asm	LIBGPU
+func_80082200	_GPU_ResetCallback	sdk_asm	LIBGPU
+func_80082250	GPU_cw	sdk_asm	LIBAPI
+func_80082290	BreakDraw	sdk_asm	LIBGPU
+func_80082324	IsIdleGPU	sdk_asm	LIBGPU
+func_80082384	ContinueDraw	sdk_asm	LIBGPU
+func_80082780	GetTPage	sdk_asm	LIBGPU
+func_800827C0	GetClut	sdk_asm	LIBGPU
+func_800827E0	AddPrim	sdk_asm	LIBGPU
+func_80082820	TermPrim	sdk_asm	LIBGPU
+func_80082840	SetSemiTrans	sdk_asm	LIBGPU
+func_80082870	SetShadeTex	sdk_asm	LIBGPU
+func_800828A0	SetPolyF3	sdk_asm	LIBGPU
+func_800828C0	SetPolyFT3	sdk_asm	LIBGPU
+func_800828E0	SetPolyG3	sdk_asm	LIBGPU
+func_80082900	SetPolyGT3	sdk_asm	LIBGPU
+func_80082920	SetPolyF4	sdk_asm	LIBGPU
+func_80082940	SetPolyFT4	sdk_asm	LIBGPU
+func_80082960	SetPolyG4	sdk_asm	LIBGPU
+func_80082980	SetPolyGT4	sdk_asm	LIBGPU
+func_800829A0	SetSprt8	sdk_asm	LIBGPU
+func_800829C0	SetTile	sdk_asm	LIBGPU
+func_800829E0	SetDrawMode	sdk_asm	LIBGPU
+func_80082A80	OpenTIM	sdk_asm	LIBGPU
+func_80082A90	ReadTIM	sdk_asm	LIBGPU
+func_80084240	GsSortBoxFill	sdk_asm	LIBGS
+func_80084320	GsSortPoly	sdk_asm	LIBGS
+func_800849F0	GsSortFastSprite	sdk_asm	LIBGS
+func_80084DD0	GsInitGraph	sdk_asm	LIBGS
+func_80084F60	GsInitGraph2	sdk_asm	LIBGS
+func_800851E8	GsSortClear	sdk_asm	LIBGS
+func_80085320	GsGetActiveBuff	sdk_asm	LIBSND
+func_80085330	GsSetDrawBuffOffset	sdk_asm	LIBGS
+func_80085440	GsSetDrawBuffClip	sdk_asm	LIBGS
+func_800854C0	GsInitVcount	sdk_asm	LIBGS
+func_80085500	GsSwapDispBuff	sdk_asm	LIBGS
+func_800855B0	GsSetOrign	sdk_asm	LIBGS
+func_800855D0	GsSetLsMatrix	sdk_asm	LIBGS
+func_80085600	GsSetLightMatrix	sdk_asm	LIBGS
+func_800856A0	GsDefDispBuff	sdk_asm	LIBGS
+func_80085740	GsInit3D	sdk_asm	LIBGS
+func_800857E0	GsSetFlatLight	sdk_asm	LIBGS
+func_80085D50	GsSetAmbient	sdk_asm	LIBGS
+func_80085DB0	GsClearOt	sdk_asm	LIBGS
+func_80085E10	GsSortOt	sdk_asm	LIBGS
+func_80085ED0	gte_rotate_z_matrix	sdk_asm	LIBGS
+func_80085F90	gte_scale_matrix	sdk_asm	LIBGS
+func_800860B0	gte_init	sdk_asm	LIBGS
+func_80086100	GsGetTimInfo	sdk_asm	LIBGS
+func_800861F0	Gssub_make_matrix	sdk_asm	LIBGS
+func_800862D0	GsGetLs	sdk_asm	LIBGS
+func_800865A0	GsMulCoord2	sdk_asm	LIBGS
+func_80086620	GsMulCoord3	sdk_asm	LIBGS
+func_800866A0	rsin	sdk_asm	LIBGTE
+func_80086770	rcos	sdk_asm	LIBGTE
+func_80086810	SetFogNearFar	sdk_asm	LIBGTE
+func_80086DC8	InitGeom	sdk_asm	LIBGTE
+func_80086E50	SquareRoot0	sdk_asm	LIBGTE
+func_80086EE0	gteMIMefunc	sdk_asm	LIBGTE
+func_80086F60	MulMatrix0	sdk_asm	LIBGTE
+func_80087070	ApplyMatrixLV	sdk_asm	LIBGTE
+func_800871D0	PushMatrix	sdk_asm	LIBGTE
+func_80087274	PopMatrix	sdk_asm	LIBGTE
+func_80087320	ReadRotMatrix	sdk_asm	LIBGTE
+func_80087370	MulMatrix	sdk_asm	LIBGTE
+func_80087480	MulMatrix2	sdk_asm	LIBGTE
+func_80087590	ApplyMatrix	sdk_asm	LIBGTE
+func_800875E0	ApplyMatrixSV	sdk_asm	LIBGTE
+func_80087640	TransMatrix	sdk_asm	LIBGTE
+func_80087670	ScaleMatrix	sdk_asm	LIBGTE
+func_800877B0	SetRotMatrix	sdk_asm	LIBGTE
+func_800877E0	SetLightMatrix	sdk_asm	LIBGTE
+func_80087810	SetColorMatrix	sdk_asm	LIBGTE
+func_80087840	SetTransMatrix	sdk_asm	LIBGTE
+func_80087860	ReadGeomScreen	sdk_asm	LIBGTE
+func_80087870	SetBackColor	sdk_asm	LIBGTE
+func_80087890	SetFarColor	sdk_asm	LIBGTE
+func_800878B0	SetGeomOffset	sdk_asm	LIBGTE
+func_800878D0	SetGeomScreen	sdk_asm	LIBGTE
+func_80087A50	RotAverage3	sdk_asm	LIBGTE
+func_80087AB0	RotAverage4	sdk_asm	LIBGTE
+func_80089460	ReadSZfifo4	sdk_asm	LIBGTE
+func_800899A0	ratan2	sdk_asm	LIBGTE
+func_80089C00	SetDQA	sdk_asm	LIBGTE
+func_80089C10	SetDQB	sdk_asm	LIBGTE
+func_8008AD50	GsSetRefView2	sdk_asm	LIBGS
+func_8008B2F0	TransposeMatrix	sdk_asm	LIBGTE
+func_8008B330	_card_info	sdk_asm	LIBCARD
+func_8008B340	_card_load	sdk_asm	LIBCARD
+func_8008B350	_card_write	sdk_asm	LIBCARD
+func_8008B360	_card_read	sdk_asm	LIBCARD
+func_8008B370	_new_card	sdk_asm	LIBCARD
+func_8008B380	_card_status	sdk_asm	LIBCARD
+func_8008B390	_card_wait	sdk_asm	LIBCARD
+func_8008B3A0	_card_clear	sdk_asm	LIBCARD
+func_8008B3E0	InitCARD	sdk_asm	LIBCARD
+func_8008B470	StartCARD	sdk_asm	LIBCARD
+func_8008B4B8	StopCARD	sdk_asm	LIBCARD
+func_8008B4E0	InitCARD2	sdk_asm	LIBCARD
+func_8008B4F0	StartCARD2	sdk_asm	LIBCARD
+func_8008B500	StopCARD2	sdk_asm	LIBCARD
+func_8008B510	_patch_card_info	sdk_asm	LIBCARD
+func_8008B5EC	_patch_card	sdk_asm	LIBCARD
+func_8008B680	_patch_card2	sdk_asm	LIBCARD
+func_8008B6F0	_copy_memcard_patch	sdk_asm	LIBCARD
+func_8008B730	_ExitCard	sdk_asm	LIBCARD
+func_8008B7B0	MemCardInit	sdk_asm	LIBMCRD
+func_8008B7E0	MemCardEnd	sdk_asm	LIBMCRD
+func_8008B800	PushCallbackFunc	sdk_asm	LIBMCRD
+func_8008B828	PullCallbackFunc	sdk_asm	LIBMCRD
+func_8008B850	McrdGetGlobalStructure	sdk_asm	LIBMCRD
+func_8008B85C	MemCardStart	sdk_asm	LIBMCRD
+func_8008B8CC	MemCardStop	sdk_asm	LIBMCRD
+func_8008B90C	MemCardExist	sdk_asm	LIBMCRD
+func_8008BC90	MemCardAccept	sdk_asm	LIBMCRD
+func_8008BFA0	MemCardOpen	sdk_asm	LIBMCRD
+func_8008C128	MemCardClose	sdk_asm	LIBMCRD
+func_8008C16C	MemCardReadData	sdk_asm	LIBMCRD
+func_8008C3D4	MemCardWriteData	sdk_asm	LIBMCRD
+func_8008C638	MemCardReadFile	sdk_asm	LIBMCRD
+func_8008C858	MemCardWriteFile	sdk_asm	LIBMCRD
+func_8008CA78	MemCardGetDirentry	sdk_asm	LIBMCRD
+func_8008CCD4	MemCardCallback	sdk_asm	LIBMCRD
+func_8008CCE8	MemCardSync	sdk_asm	LIBMCRD
+func_8008CE04	MemCardCreateFile	sdk_asm	LIBMCRD
+func_8008CF00	MemCardFormat	sdk_asm	LIBMCRD
+func_8008D0D0	UserFuncInit	sdk_asm	LIBMCRD
+func_8008D0E0	UserFuncOpen	sdk_asm	LIBMCRD
+func_8008D15C	UserFuncExecute	sdk_asm	LIBMCRD
+func_8008D1C8	UserFuncComplete	sdk_asm	LIBMCRD
+func_8008D1E0	funcEvSpIOE	sdk_asm	LIBMCRD
+func_8008D1F4	funcEvSpError	sdk_asm	LIBMCRD
+func_8008D208	funcEvSpTimeout	sdk_asm	LIBMCRD
+func_8008D21C	funcEvSpNewcard	sdk_asm	LIBMCRD
+func_8008D230	funcEvSpIOEx	sdk_asm	LIBMCRD
+func_8008D244	funcEvSpErrorx	sdk_asm	LIBMCRD
+func_8008D258	funcEvSpTimeoutx	sdk_asm	LIBMCRD
+func_8008D26C	funcEvSpNewcardx	sdk_asm	LIBMCRD
+func_8008D280	_card_open	sdk_asm	LIBMCRD
+func_8008D2B0	_card_start	sdk_asm	LIBMCRD
+func_8008D48C	_card_close	sdk_asm	LIBMCRD
+func_8008D4AC	_card_stop	sdk_asm	LIBMCRD
+func_8008D560	_clr_card_event	sdk_asm	LIBMCRD
+func_8008D668	_get_card_event	sdk_asm	LIBMCRD
+func_8008D740	_get_card_event_x	sdk_asm	LIBMCRD
+func_8008D818	_chk_card_event	sdk_asm	LIBMCRD
+func_8008D854	_chk_card_event_x	sdk_asm	LIBMCRD
+func_8008D890	_card_format2	sdk_asm	LIBMCRD
+func_8008DC60	_card_create2	sdk_asm	LIBMCRD
+func_8008E320	bcopy	sdk_asm	LIBC2
+func_8008E360	bzero	sdk_asm	LIBC2
+func_8008E390	memcpy	sdk_asm	LIBC2
+func_8008E3D0	memset	sdk_asm	LIBC2
+func_8008E400	qsort	sdk_asm	
+func_8008E590	rand	sdk_asm	
+func_8008E5C0	srand	sdk_asm	
+func_8008E5D0	strcat	sdk_asm	LIBC2
+func_8008E680	strcmp	sdk_asm	LIBC2
+func_8008E6F0	strcpy	sdk_asm	LIBC2
+func_8008E740	strlen	sdk_asm	LIBC2
+func_8008E780	strncmp	sdk_asm	LIBC2
+func_8008E800	strncpy	sdk_asm	LIBC2
+func_8008E870	printf	sdk_asm	LIBC2
+func_8008E8B0	prnt	sdk_asm	LIBC2
+func_8008EF50	memchr	sdk_asm	LIBC2
+func_8008EFA0	_putchar	sdk_asm	LIBC2
+func_8008F09C	_putchar_flash	sdk_asm	LIBC2
+func_8008F0D8	putchar	sdk_asm	LIBC2
+func_8008F200	sprintf	sdk_asm	LIBC2
+func_8008FA80	memmove	sdk_asm	LIBC2
+func_8008FAF0	puts	sdk_asm	LIBC2
+func_8008FB50	setjmp	sdk_asm	LIBC2
+func_8008FB8C	longjmp	sdk_asm	LIBC2
+func_8008FBD0	exit	sdk_asm	LIBC2
+func_8008FBE0	DecDCTReset	sdk_asm	LIBPRESS
+func_8008FC14	DecDCTGetEnv	sdk_asm	LIBPRESS
+func_8008FCA0	DecDCTPutEnv	sdk_asm	LIBPRESS
+func_8008FD38	DecDCTin	sdk_asm	LIBPRESS
+func_8008FDB4	DecDCTout	sdk_asm	LIBPRESS
+func_8008FDD4	DecDCTinSync	sdk_asm	LIBPRESS
+func_8008FE10	DecDCToutSync	sdk_asm	LIBPRESS
+func_8008FE58	DecDCTinCallback	sdk_asm	LIBPRESS
+func_8008FE7C	DecDCToutCallback	sdk_asm	LIBPRESS
+func_80090270	DecDCTvlcSize2	sdk_asm	LIBPRESS
+func_800902A0	DecDCTvlc2	sdk_asm	LIBPRESS
+func_800905F0	DecDCTvlcBuild	sdk_asm	LIBPRESS
