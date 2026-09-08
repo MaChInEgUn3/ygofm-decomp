@@ -37,6 +37,18 @@
  *    callee-saved -- cinco nomes, BYTE-IDENTICO ao inline. O gcc ja as
  *    mantem em registrador;
  *  - `k = 2;` sem o `do { } while (0)`: byte-identico ao literal;
+ *  - os TRES lacos escritos como `goto` em vez de `do { } while`: -1/135
+ *    (laco 3), -4/280 (laco do case 7), -5/278 (os dois). O `do`/`while` e o
+ *    certo: o passo de laco do gcc esta rodando e icando invariantes, e a
+ *    forma `goto` nao tem as notas NOTE_INSN_LOOP e perde a icagem;
+ *  - o `i -= 1;` do laco 3 movido para ANTES do `if`/`else` (-1, 121
+ *    diferencas, magnitude do censo 5) e para DENTRO dos dois bracos
+ *    (-1, 123, magnitude 7). O primeiro TIRA o `addiu` duplicado -- o gcc
+ *    copia a primeira instrucao do bloco de juncao para o delay slot do
+ *    `j` do braco `then` (salto para alvo+4), e o retail deixa esse slot
+ *    `nop` porque no dele a juncao ja comeca pelo `beq`. Fica registrado
+ *    como CANDIDATO A PAR ACOPLADO: tem magnitude menor que a base mas
+ *    perde uma instrucao, entao so vale junto com o que devolver o `nop`;
  *  - a posicao do `i -= 1;` nos lacos 2 e 3 (antes da chamada, depois do
  *    teste, e as duas): 132, 130, 132 contra 130 -- tres grafias, o mesmo
  *    numero, EIXO ERRADO.
