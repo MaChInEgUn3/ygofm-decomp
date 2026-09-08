@@ -190,7 +190,12 @@ func_80082250
 func_80082324
 func_800824B0
 func_80082610
-func_80082780
+# func_80082780 was here and was WRONG: it is GetTPage, the game's own
+# out-of-line copy of the PsyQ macro, and src/func_80082780.c reproduces
+# it byte for byte. The list's own header says "Do not write C for
+# these", so an entry that HAS matching C is a false out-of-scope --
+# found on 2026-09-08 by crossing this file against config/sdk_names.txt
+# and src/, which turned up exactly one such row out of 382.
 func_800827C0
 func_800829E0
 func_80083FB0
