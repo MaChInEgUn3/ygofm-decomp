@@ -37,6 +37,30 @@
  * Residue is register roles only ($a0/$v1 exchanged on the table base and the
  * player byte) plus where the D_80090800 pair sits. Permuter next. The debt
  * is NOT retired until this matches.
+ *
+ * 2026-09-08, nineteen more, all dead, and both position axes are now
+ * EXHAUSTED rather than sampled:
+ *   - the `marker + 2` store swept through ALL EIGHT positions in its block
+ *     (right after the func_8002C604 call, after the 0x1A store, after `c2`,
+ *     after the `*marker = *row` copy, after `v`, after the `+= c2 * 0x3000`,
+ *     after the `+4` store, after the call): 18, 18, 17, 19, 30, 26, 26, 27.
+ *     The installed position is 16 and is the optimum, so the rule-11 sweep
+ *     that paid on func_80048F14 pays nothing here -- worth the two minutes
+ *     to know, because retail emits `sh $zero,2($s0)` LATE, after the `lhu`,
+ *     and every source position that looks like it should reach that is
+ *     worse.
+ *   - the `c2`/`row` pair moved earlier so D_80090800's pair is born before
+ *     the 0x1A store, which is where retail materialises it: 18 above the
+ *     0x1A store, 83 above the call, +1/66 split, 18 with only `row` moved,
+ *     +1/66 with only `c2` moved.
+ *   - and the first cluster's spellings: `n` before `tbl` (+2/61), the symbol
+ *     inline with no `tbl` local (+2/61), `n` split at the load (18) or with
+ *     `tbl` kept (18), `tbl[n + counter]` (17), `n` split at the `+ 10` (16,
+ *     ties).
+ * The residue is unchanged and is two register pairs: retail holds the
+ * D_800907D8 base in $a0 and the D_8009B1D5 byte in $v1 and we have them
+ * exchanged, and it materialises D_80090800 before the 0x1A store where we
+ * materialise it after. No source position reaches either.
  */
 #include "common.h"
 
