@@ -1889,6 +1889,15 @@ func_8005B36C -- unfinished, **two instructions short**, and it is
 
 func_80048F14 MATCHED 2026-08-30 by PORTING Unchiga's C (docs/MERGE_UNCHIGA.md);
   the history below is what this tree had reached on its own.
+func_80048F14 -- RECONSTRUCTED 2026-09-08 as parked/func_80048F14.c, 63/63 and
+    the same 15, in real C with no asm and no register pins. The C below was
+    never saved when Unchiga's port replaced it; it was rebuilt from the
+    listing and from this entry. Three things had to hold at once: the reverb
+    struct is 24 bytes and not the twelve its four written fields need (the
+    frame was -40 against retail's -48 until then, 33 -> 29), the 0xFFFF store
+    must be `*(u16 *)`, and the base's three reads want THREE NAMES -- one
+    reassigned name is 29 and three is 15. The transcription's `move` block is
+    the read-back rule spelled as asm.
 func_80048F14_WAS -- unfinished, 15 differences with equal lengths (63/63), all
     in one block. Tenth from the dup-%hi class: three bare reads of
     D_8009B45C, no %gp_rel, scalar arm plus `as -G0`. An init routine --
