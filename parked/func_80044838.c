@@ -55,6 +55,9 @@
  *    `do { k = 2; i = 0xA; }`, um `do { } while (0);` vazio depois, e os
  *    dois pinados separados): 11, 11, 11, 11 -- quatro grafias iguais,
  *    EIXO ERRADO;
+ *  - o valor 2 vindo do contador em vez de um literal -- na saida do laco
+ *    `i` vale exatamente -1, entao `D_8009B450 = i + 3;` e o mesmo valor --
+ *    com e sem o pino: -7 os dois. A cadeia de cross-jump volta a se formar;
  *  - nomear a sentinela -1 do laco do case 7 antes do pino: 12; nomear a
  *    base D_800F2B00: +1/45; as duas: -1/162;
  *  - a FORMA do laco 3 (`for`, `while`, `do/while(1)` com goto): 95, 95, 95;
@@ -69,18 +72,19 @@
  *  - `do { k = 2; } while (0);` ANTES de `i = 0xA;`: 13.
  *
  * O QUE FALTA (11 diferencas, censo VAZIO):
- *  a) SEIS sao numeracao de rotulo: um `beq` do `case 2` aponta para um
- *     rotulo nosso que o try_func numera 26 onde o retail numera 5, e dai
- *     para frente todos os numeros andam um. Provavelmente o MESMO endereco
- *     com um rotulo a mais no nosso lado -- mas a build completa ainda
- *     acusa diferenca, entao NAO e so o renderizador;
- *  b) tres sao a ordem do preheader do case 7: o retail tem
+ *  a) UMA delas e estrutural e AINDA NAO IDENTIFICADA: o `break` do
+ *     `case 2` sai para um rotulo que o try_func numera 26 e que aparece
+ *     **uma unica vez** no nosso listing, enquanto o do retail vai para o
+ *     tail (numerado 5 e usado doze vezes). Como o proprio `bltz` duas
+ *     linhas abaixo vai para L5 nos DOIS lados, nao e renumeracao: e um
+ *     bloco distinto de verdade. As outras cinco diferencas de rotulo sao
+ *     o deslocamento que essa causa.
+ *  b) TRES sao a ordem do preheader do case 7: o retail tem
  *     `lui $s3,%hi` / `addiu $s2,-1` / `addiu $s4,2` e nos temos o
- *     `addiu $s4,2` primeiro. Ele vem do pino, e todas as reordenacoes do
- *     pino medidas ate agora sao piores;
- *  c) duas sao os alvos `L31/L32` e `L32/L33` do mesmo laco.
- * A build completa foi rodada com o candidato em src/ e reprovou, entao as
- * onze sao reais ou pelo menos uma delas e.
+ *     `addiu $s4,2` primeiro. Nove grafias medidas, todas piores ou iguais.
+ *  c) DUAS sao alvos do mesmo laco, deslocados junto com (a).
+ * A build completa foi rodada com o candidato em src/ e REPROVOU, o que e
+ * consistente com (a) e (b) serem reais.
  */
 #define D_8009B450_IS_SCALAR
 #include "common.h"
