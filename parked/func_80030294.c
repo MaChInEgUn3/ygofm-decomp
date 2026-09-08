@@ -133,6 +133,19 @@
  *    tambem aparece quando o eixo esta certo e as grafias e que sao
  *    fracas. Classe do permuter.
  *
+ * MEDIDO E MORTO NA BASE DE QUATRO LINHAS (2026-09-08, segunda volta):
+ * usar um nome JA VIVO nos dois bracos como temporario do indice, para
+ * conseguir a ordem sem criar um pseudo (`i`, que e o contador dos outros
+ * tres lacos, e `val`, que os dois bracos ja usam): 103, 103, 29, 29, 80
+ * e 103 em seis colocacoes -- nenhuma reproduz o efeito do `ix`
+ * partilhado, logo NAO e so "um pseudo vivo entre os bracos"; a forma
+ * INDEXADA de antes da alavanca 10 re-medida aqui (nos dois bracos, num
+ * so, e com e sem o `r` a mediar): 29, 28, 52, 30, 32 e 6; e o permuter
+ * a partir do candidato de struct=0 achou duas saidas em duas rodadas
+ * (1990 -> 1750 e 1825) e as duas sao 314/329 -- a melhor troca
+ * `val = *p;` por `e = *p; val = e;`, que CLOBBERA o `e` que a linha
+ * seguinte le. Classe rejeitada de sempre.
+ *
  * MEDIDO E MORTO NESTA BASE, com numeros: cinco grafias de `q = &b[e]`
  * (`(s32)b + e*4`, `e*4 + (s32)b`, `b + e`, `&b[0] + e`, e a posicao da
  * atribuicao) -- as cinco identicas, eixo errado; `dc = (s8)D_8009B2DC;`
