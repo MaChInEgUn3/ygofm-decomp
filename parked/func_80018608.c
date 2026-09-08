@@ -1,4 +1,4 @@
-/* 225/225, CENSO VAZIO, 41 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* 225/225, CENSO VAZIO, 35 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -125,9 +125,19 @@
  * The loop body's temporaries want to be SHARED between the two loops:
  * giving the second loop its own `w`/`x` is the same 41, and its own
  * cursor, counter and index as well is -1/100.
- * Residue: 41, all register allocation, and by the aligned diff it is now
- * sixteen blocks -- mostly the position of the two `lui`/`addiu` pairs
- * around the divisions.
+ * 41 -> 35, and it is rule 4 (the counterweight) at preheader scale: THE
+ * TWO PREHEADERS WANT OPPOSITE ORDERS. `tb = D_801D4244;` written LAST in
+ * the first loop's preheader and FIRST in the second's is 35; first in both
+ * is 41, last in both is 52. Sweeping only the first preheader gives 35
+ * (last), 37 (before `i`), 39 (before `g`), 40 (after `sa`), so it is a real
+ * knob there; sweeping only the second from the 35 base gives 52 for four
+ * orders and 48 for retail's own emitted order, so `tb` first is forced
+ * there. Two identical loops, opposite spellings, measured rather than
+ * reasoned -- which is the third instance of that pattern today.
+ * The between-loops block was also swept as a whole (six orders of `sa`,
+ * `sb`, `g`, `i`, `tb`, `r`, including retail's emitted order): 41, 50, 50,
+ * 50, 54.
+ * Residue: 35, all register allocation.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -197,11 +207,11 @@ void func_80018608(void) {
         if (((D_8009B0F4 & 0x2000030) | D_8009B134) == 0) {
             func_8003FF08(D_8009B36A);
             func_80024824();
-            tb = D_801D4244;
             sa = 0;
             sb = 0;
             g = D_801A7E20;
             i = 0;
+            tb = D_801D4244;
             do {
                 i += 1;
                 j = *(s16 *)g;

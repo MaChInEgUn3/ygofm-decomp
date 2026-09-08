@@ -5407,7 +5407,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 225/225, CENSO VAZIO, 41 differences.
+func_80018608 -- 225/225, CENSO VAZIO, 35 differences.
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
@@ -5470,6 +5470,10 @@ func_80018608 -- 225/225, CENSO VAZIO, 41 differences.
   the listing: retail emits the pair LAST and writing it last is 52, first is
   41, between g and i is 53. The body temporaries want to be SHARED between
   the loops (own w/x is the same 41, own cursor/counter/index is -1/100).
+  41 -> 35: THE TWO PREHEADERS WANT OPPOSITE ORDERS. `tb = D_801D4244;` LAST
+  in the first loop's preheader and FIRST in the second's is 35; first in both
+  is 41, last in both is 52. The first preheader alone sweeps 35/37/39/40; the
+  second from that base sweeps 52/52/52/52/48. Rule 4 at preheader scale.
   Residue: all register allocation in the two loops.
   Candidate in parked/func_80018608.c.
 
