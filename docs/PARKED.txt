@@ -8393,3 +8393,47 @@ curto, entao nao instalado. E SETE grafias do bloco `fill` estao mortas, todas
 `&D_800EAED8[0x27]` direto, a ordem `ch`/`i`/`r`, e tres versoes pinadas com
 `do { } while (0);`. O `lui` que o retail poe no delay slot de cada desvio que
 salta para o `fill` nao vem da forma do bloco.
+
+QUINTA RODADA (2026-09-08) -- 327/329 e 268 diferencas, censo de magnitude DEZ
+(`nop -3, addu -2, sw +1, lw +1, addiu +1, beq +1, bne -1`). Quatro alavancas,
+e a primeira RETRATA o paragrafo acima:
+ - **o bloco `fill` TEM QUE COMECAR PELO ENDERECO DO BUFFER, e isso vale os
+   SETE `lui`** (censo `lui -7` -> 0). O retail copia o `lui %hi` da primeira
+   instrucao do `fill` para o delay slot de cada um dos sete desvios que
+   saltam para la, e desvia para o rotulo+4 (regra 31). Enquanto o endereco
+   estava num local atribuido no TOPO da funcao o bloco comecava por
+   `addiu $s0,$zero,39` e nao havia nada para copiar. As "SETE grafias
+   mortas" do paragrafo anterior foram todas medidas COM o local do topo
+   ainda no lugar, isto e, com outra falta aberta -- regra 3, e o custo dela
+   foi um paragrafo que dizia o contrario do que e verdade. A grafia que
+   ganha e `r = D_800EAED8; i = 0x27; r = r + i;`; um SEGUNDO nome para a
+   base (`z = D_800EAED8; r = z + i;`) e -5/310 e `r[i] = 0x20;` e -6/310;
+ - `val` E `mask` como `s32`: censo de 19 para 10, com `andi +3`, `lhu +2`,
+   `lw -2` e `or +1` todos zerados. Um sozinho nao chega (`val` 12, `mask`
+   18). Na base de -1/307 os dois juntos eram -4/323, "muito pior" -- regra 3
+   pela segunda vez na mesma funcao;
+ - a POLARIDADE do teste de sinal no laco de carry: escrito
+   `if (step >= 0) { if (car < *q) goto joined; } else { ... }` da o `bltz`
+   do retail, e `if (step < 0) { ... } else if (...)` da `bgez` e desloca o
+   bloco inteiro. Censo de 10 para 7. A forma com `goto neg;`/`goto zero;` da
+   exatamente o mesmo numero;
+ - **`cb = c;` e `db = d;` como ponteiros de base**: o retail carrega
+   `addiu $t3,$sp,0x38` e `addiu $t4,$sp,0x50` (bases de `c` e `d`) do topo
+   da funcao ate o braco de EDICAO, e computa as bases de `a` e `b` DENTRO do
+   braco que as usa. Sem os dois locais o gcc faz o inverso. Com eles,
+   -5/309 -> -2/268. A POSICAO da atribuicao nao importa (topo, cabeca do
+   braco, cabeca do sub-braco: identicos, regra 7) e a ordem `db`/`cb`
+   tambem nao. So `cb` e -3/324, so `db` e -4/316.
+Falta: tres `nop` de delay slot, o `addu $t0,$v0,$zero` que o retail usa para
+COPIAR o ponteiro do halfword antes de o ler e gravar, o `addu $v1,$t1,$v0` da
+base de `b`, e o $s3 a mais (moldura 112 contra 104) usado como temporario das
+copias de struct.
+IRMAO MAIS LIMPO, guardado no cabecalho do parked: sem `cb`/`db` o candidato e
+324/329 e 309 com censo de magnitude SETE e so QUATRO opcodes (`nop -3,
+addu -2, beq +1, bne -1`) -- sem o $s3 extra. As cinco instrucoes que faltam
+la sao exatamente os tres `nop` e os dois `addu`.
+Mortos nesta rodada, com numeros: forma indexada `a[i]` no laco de entrada
+identica (307); `b[i]` no laco de carry -3/278; `q = (s32 *)(i * 4 + (s32)a)`,
+`q = a + i` e um local de base `ab` os TRES identicos a `&a[i]` (309), eixo
+errado; um `p2` proprio no braco de entrada e `p2` copiado para `p` tambem
+identicos -- o gcc coalesce a copia (regra 20).
