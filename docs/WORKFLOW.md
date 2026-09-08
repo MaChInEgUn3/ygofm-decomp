@@ -335,6 +335,26 @@ meaningful, and skipping to the last one wastes hours:
    plus `0x3D0C` in the load — gcc splitting the constant because the base is
    now a register. func_80024734, 40 differences to 4, and the local is the
    same one the function stores at the end anyway.
+   **A `la` followed by a displacement is an address assigned in a DIFFERENT
+   BASIC BLOCK.** Where retail reads a global at a constant offset with
+   *three* instructions -- `lui %hi(sym)` / `addiu $v0,$v0,%lo(sym)` /
+   `lb $v0,-1($v0)`, the whole address in a register and the offset on the
+   load -- cc1psx folds the offset into the `%lo` and emits two from every
+   spelling written in the same block. Eight were measured on func_800179F4
+   (`(&sym)[-1]`, `*(&sym - 1)`, `*((s8 *)&sym - 1)`, the `(s32)` cast sum,
+   the same with `+ -1`, a local pointer beside the load and above the
+   preceding stores, borrowing another live pointer as the base, and
+   declaring the byte below as its own symbol in `.data`) and all eight give
+   the identical count, which is the wrong-axis tell. A six-line probe
+   through cc1psx gives the mechanism in one command: gcc 2.8 has no global
+   CSE, so `p = &sym;` in one block and `p[-1]` in another cannot be folded
+   together and come out `la` + `lb -1($2)`. Assigning the pointer **above
+   the branch** was 38 differences to 9 and put the length back to exact;
+   the three positions measured (function top, mid-block, immediately before
+   the `if`) all give 9, so what matters is only that it is a different
+   block. The same probe shows the later plain read of the same symbol still
+   comes out as its own bare reference, which is what retail has.
+
    **A chain of pointer steps wants one name per step, not one cursor.**
    Where the target walks a table by re-reading a 16-bit offset at each stage
    — `q = t + rd16(q + p[k] * 2)` three times over — writing it against a

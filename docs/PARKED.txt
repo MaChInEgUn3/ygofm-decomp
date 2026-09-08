@@ -8126,43 +8126,48 @@ nas quatro -- eixo errado. E o mesmo estado
 inicial do func_800577B0, onde a alavanca foi um nome para duas constantes
 sequenciais.
 
-func_800179F4 -- 239/240, UMA instrucao a menos, 38 diferencas, censo
-`addiu -1`, UM UNICO opcode divergente. Veio de 240/240 com 199 no mesmo dia.
-Flags padrao (passo 0: gp=27, at=0, sem jump table). Rotina de setup de tela:
-32 chamadas a 25 callees, nove globais zerados, dois objetos criados e
+func_800179F4 -- 240/240, comprimento EXATO, 9 diferencas em DOIS grupos,
+so alocacao e escalonamento. Veio de 199 -> 38 -> 9 no mesmo dia. Flags
+padrao (passo 0: gp=27, at=0, sem jump table). Rotina de setup de tela: 32
+chamadas a 25 callees, nove globais zerados, dois objetos criados e
 configurados, e um bloco final que escolhe um par de buffers.
-Quatro alavancas, nesta ordem, 199 -> 38:
+Cinco alavancas, nesta ordem:
  1. D_8009B361 e D_8009B364 na FORMA NUA (`_IN_DATA`). O retail materializa
     `%hi(D_8009B361)` quatro vezes e `%hi(D_8009B364)` duas, nenhuma
     compartilhada; com o braco de array o gcc faz CSE de um `%hi` para dentro
-    de $s3, salvamos $s0-$s3 contra $s0-$s2 e a moldura ia a 56. A forma nua e
-    UMA pseudo-instrucao, nao ha o que compartilhar. 199 -> 135. Medido: so
+    de $s3, salvavamos $s0-$s3 contra $s0-$s2 e a moldura ia a 56. A forma nua
+    e UMA pseudo-instrucao, nao ha o que compartilhar. 199 -> 135. Varrido: so
     B361 136, B361+B369 136, B361+B364 135, os quatro (com D_8009B360) +1/164.
- 2. `e = D_800EA0E8;` escrito depois de `func_8001352C()`. O par lui/addiu de
-    D_800EA0E8 e partido e cada metade cai no delay slot de uma chamada
-    diferente. Varredura 2D de 20 pontos (5 posicoes de `e` x 4 de `hun`):
-    e0 135, e1 127, e2 127, e3 239/148, e4 238/70 -- e a posicao de `hun` nao
-    vale NADA, as quatro dao o mesmo numero em cada linha (regra 7).
- 3. 0x100 e 0xB em DOIS NOMES, nao um. Contradiz a leitura original (regra
-    25): o retail poe as duas em $s1 e mesmo assim a fonte tinha dois nomes --
-    com um nome so o pseudo de 0x100 rouba $s1 do ponteiro `o` e o 256 e
-    materializado tres chamadas cedo. 70 -> 41 em e4, 148 -> 41 em e3. A regra
-    25 vale quando a segunda constante entra no registrador que a primeira
-    acabou de vagar; aqui as duas vidas nem se tocam.
- 4. D_8009B360 lido como `(&D_8009B361)[-1]`, nao como simbolo proprio.
-    41 -> 38 e -2 -> -1.
-FALTA UMA SO INSTRUCAO, com o mecanismo identificado: o gcc dobra o -1 dentro
-do `%lo` e emite duas instrucoes onde o retail tem tres (`lui %hi` / `addiu
-%lo` / `lb -1($v0)`, o endereco inteiro num registrador). SEIS grafias medidas,
-TODAS exatamente 239/38 -- eixo errado (regra 7): `(&D_8009B361)[-1]`,
-`*(&D_8009B361 - 1)`, `*((s8 *)&D_8009B361 - 1)`, `*(s8 *)((s32)&D_8009B361 -
-1)`, o mesmo com `+ -1`, um ponteiro local `q` (adjacente e acima dos stores) e
-emprestar o proprio `a` como base. Falta fazer o cc1psx emitir um `la` SEPARADO
-do load, e nenhuma grafia em C alcanca isso com o simbolo na forma nua.
-NAO INSTALAR A VERSAO DE COMPRIMENTO EXATO: `e` uma chamada antes (e1/e2) da
-240/240 com 128, e esse zero e FALSO -- censo `nop +1, addiu -1`, o mesmo
-`addiu` que falta aqui cancelado por um `nop` a mais no delay slot de
-func_800176D0. Um censo com um opcode divergente vale mais que um zero de
-comprimento feito de duas faltas que se anulam.
-Reordenar o rabo (`D_800E9DBC[0] = func_800164FC;` antes do store em o+0x50)
-e 40, pior.
+ 2. `e = D_800EA0E8;` depois de `func_8001352C()`. O par lui/addiu e partido e
+    cada metade cai no delay slot de uma chamada diferente. Varredura 2D de 20
+    pontos (5 posicoes de `e` x 4 de `hun`): e0 135, e1 127, e2 127, e3
+    239/148, e4 238/70 -- e a posicao de `hun` nao vale NADA, as quatro dao o
+    mesmo numero em cada linha.
+ 3. 0x100 e 0xB em DOIS NOMES, nao um. Contradiz a regra das duas constantes
+    sequenciais: o retail poe as duas em $s1 e mesmo assim eram dois nomes,
+    porque as duas vidas nem se tocam -- com um nome so o pseudo rouba $s1 do
+    ponteiro `o`. 70 -> 41.
+ 4. D_8009B360 lido como um -1 sobre o ENDERECO de D_8009B361 (41 -> 38).
+ 5. E esse endereco atribuido ANTES DO DESVIO. O retail le com TRES
+    instrucoes (`lui %hi` / `addiu %lo` / `lb -1($v0)`) e o cc1psx dobra o -1
+    dentro do `%lo` em toda grafia escrita no MESMO bloco basico: OITO
+    medidas, todas exatamente 239/38. Uma sonda de seis linhas pelo cc1psx da
+    o mecanismo: o gcc 2.8 nao tem CSE global, entao `p = &A;` num bloco e
+    `p[-1]` em outro nao podem ser dobrados e saem `la` + `lb -1($2)`.
+    `p = &D_8009B361;` acima do `if (D_8009B369[0] != 1)` e 38 -> 9 e devolve
+    o comprimento exato; as tres posicoes medidas (topo da funcao, meio do
+    bloco, colada no `if`) dao 9 -- so importa ser outro bloco.
+FALTAM DOIS GRUPOS, ambos alocacao/escalonamento:
+ - o retail parte o par do endereco de func_800164FC em volta do
+   `lw D_8009B21C` (lui antes, addiu depois) e nos partimos o de D_800E9DBC.
+   Medido e morto: um local `cb` para o ponteiro de funcao antes e depois do
+   store (9 e 9 -- o gcc propaga a constante), um local `w` para a leitura de
+   D_8009B21C (9), trocar as duas linhas (11), `do { } while (0);` em volta do
+   store (+1 e 45);
+ - `lui $a0,%hi(D_801D1200)` / `addiu $a0,$a0,%lo` no retail contra `lui $v0`
+   / `addiu $a0,$v0` nosso: mesmo par, registrador intermediario diferente.
+   Medido e morto: mover o store de D_8009B1D8 para o meio (9), escrever `b` a
+   partir do simbolo em vez de `a` (10), atribuicoes encadeadas (9).
+Varredura de flags (sweep_try, 27 linhas): o melhor e o padrao O2 G8 com 38 na
+base anterior; `-mno-split-addresses` e 166, as G0 233, as G2 167, O1 229 --
+eixo de flags FECHADO.
