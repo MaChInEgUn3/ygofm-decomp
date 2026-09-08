@@ -613,7 +613,18 @@ func_80013B68
 # .L8001D5E8. Two structurings (early returns, and the exit test first with an
 # if/else) both give 35, and the sweep is flat -- so this is a layout question
 # about which stores share a block, not polarity.
-func_8001D5B4
+func_8001D5B4 -- 45/47 (-2), 36 differences. Candidate in parked/, ARMS SWAPPED 2026-09-08.
+    The difflib ALIGNMENT changed this candidate: our `==` arm was emitted as a
+    six-instruction block at the END where retail has it inline, and the positional
+    diff had been charging that as scattered register differences. The header
+    already recorded the swap as "-2, 36" and rejected it on the count; that was
+    wrong. At 36 the arms are in retail order, the block move is gone, and the
+    census magnitudes are smaller (bne 0/1 against 0/2). Installed at 36. The
+    residue is all the return-1 tail: retail has three sites, gcc gives one, and
+    an explicit return in the =3 arm, an early return on the call test, and both
+    together are all -2/36.
+    (The "the C has never been written" line below is STALE -- it predates the
+    2026-09-04 recovery from git.)
     STILL OPEN -- src/func_8001D5B4.c exists but is an ASSEMBLY TRANSCRIPTION (docs/ASM_DEBT.md), not a decompilation. The park stands: the C has never been written. Do not read the build being green as a match here -- a transcription is byte-exact by construction.
 # func_80014EEC dispatches through D_8009B10C if set, otherwise checks the
 # D_8009B0F4/D_8009B134 flag pair and forwards seven arguments to
