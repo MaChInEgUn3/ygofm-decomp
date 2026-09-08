@@ -1,4 +1,4 @@
-/* +2 at 227/225, 104 differing, CENSUS = `nop` ONLY (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* 225/225, CENSO VAZIO, 52 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -90,8 +90,29 @@
  * +1/134 identical, the same reordered +1/134), `f = D_800F2848 + 2;` as
  * the dead one (-1/218), and the full flag sweep from the local-used base,
  * whose best row is `-mno-split-addresses` at -4/177.
- * What is left: TWO load-delay `nop`s. Every other instruction in 225 is
- * accounted for.
+ * THE TWO NOPS ARE CLOSED, and with them the length: 227/225 and 104 to
+ * 225/225, EMPTY CENSUS and 52. Three edits, found by ALIGNING the two
+ * instruction sequences with difflib instead of reading the positional diff
+ * -- the shift had been hiding which blocks actually differ.
+ *   - the two `nop`s sit in the first division's `mult` -> `mfhi` latency,
+ *     and retail fills them with the SECOND loop's initialisations. For the
+ *     scheduler to move them there the division results must not live in the
+ *     accumulators: `q1 = sa / 40; q2 = sb / 40;` into fresh names, then
+ *     `sa = 0; sb = 0; g = ...; i = 0;` BEFORE the two stores. +2/104 to
+ *     0/64. Writing the quotients back into `sa`/`sb` and copying to q1/q2
+ *     afterwards is 0/66, so the fresh name has to be the division's own
+ *     destination.
+ *   - a base local for D_800E9FF0 (`r = (u8 *)D_800E9FF0;`), because retail
+ *     stores at `14($v1)`/`16($v1)` where the symbol form folds to
+ *     `%lo(D_800E9FF0+14)`. 64 to 62.
+ *   - inside the loop body, a name for the low field AND the shift written
+ *     back into `w`: `x = w & 0x1FF; sa += x * 10; w = w >> 9; sb += (w &
+ *     0x1FF) * 10;`. Retail has `andi $a0,$v1,511` into a fresh register and
+ *     `sra $v1,$v1,9` in place, which is the destination rule both ways at
+ *     once. 62 to 52. Either half alone is 64.
+ * Residue: 52, all register allocation inside the two loops -- retail
+ * carries the accumulators in $t0/$t1, the cursor in $a3, the counter in
+ * $a2 and the D_801D4244 base in $a1, and every one of ours is rotated.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -108,7 +129,11 @@ void func_80018608(void) {
     s32 sa;
     s32 sb;
     s32 w;
+    s32 x;
     s32 h;
+    s32 q1;
+    s32 q2;
+    u8 *r;
 
     f = D_800F2848;
     if ((D_8009B23A & 0x8000) == 0) {
@@ -165,27 +190,31 @@ void func_80018608(void) {
                 j = *(s16 *)g;
                 j = j - 1;
                 w = D_801D4244[j];
-                sa += (w & 0x1FF) * 10;
-                sb += ((w >> 9) & 0x1FF) * 10;
+                x = w & 0x1FF;
+                sa += x * 10;
+                w = w >> 9;
+                sb += (w & 0x1FF) * 10;
                 g += 6;
             } while (i < 0x28);
 
-            sa = sa / 40;
-            sb = sb / 40;
-            *(s16 *)((u8 *)D_800E9FF0 + 0xE) = sa;
-            *(s16 *)((u8 *)D_800E9FF0 + 0x10) = sb;
-
+            q1 = sa / 40;
+            q2 = sb / 40;
             sa = 0;
             sb = 0;
             g = D_801A7E20 + 0xF0;
             i = 0;
+            r = (u8 *)D_800E9FF0;
+            *(s16 *)(r + 0xE) = q1;
+            *(s16 *)(r + 0x10) = q2;
             do {
                 i += 1;
                 j = *(s16 *)g;
                 j = j - 1;
                 w = D_801D4244[j];
-                sa += (w & 0x1FF) * 10;
-                sb += ((w >> 9) & 0x1FF) * 10;
+                x = w & 0x1FF;
+                sa += x * 10;
+                w = w >> 9;
+                sb += (w & 0x1FF) * 10;
                 g += 6;
             } while (i < 0x28);
 

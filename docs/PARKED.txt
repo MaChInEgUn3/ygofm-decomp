@@ -5407,7 +5407,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 227/225 (+2), 104 differences, CENSUS = `nop` ONLY.
+func_80018608 -- 225/225, CENSO VAZIO, 52 differences.
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
@@ -5452,6 +5452,17 @@ func_80018608 -- 227/225 (+2), 104 differences, CENSUS = `nop` ONLY.
   Installed AGAINST the strict ranking key: the +1/134 candidate wins on
   |length| but its census is four opcodes including `lw -1, sw -1`, a whole
   register missing, where this one is two load-delay nops and nothing else.
+  THE TWO NOPS ARE CLOSED, 227/225 and 104 to 225/225, empty census and 52.
+  Found by ALIGNING the two instruction sequences with difflib instead of
+  reading the positional diff. Three edits: the two nops sit in the first
+  division's mult->mfhi latency and retail fills them with the SECOND loop's
+  initialisations, which needs `q1 = sa / 40; q2 = sb / 40;` into FRESH names
+  and the inits written before the stores (+2/104 -> 0/64; writing the
+  quotients back into sa/sb and copying afterwards is 0/66); a base local for
+  D_800E9FF0 so the stores stay `14($v1)`/`16($v1)` instead of folding to
+  %lo(sym+14) (64 -> 62); and inside the loop a name for the low field plus
+  the shift written back into `w` (62 -> 52, either half alone 64).
+  Residue: all register allocation in the two loops.
   Candidate in parked/func_80018608.c.
 
 
