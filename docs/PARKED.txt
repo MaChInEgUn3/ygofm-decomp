@@ -8590,3 +8590,27 @@ Medido e morto nesta rodada, tudo sobre a base de 329/329:
    try_func sao 315, 313 e 316 instrucoes (contra 329), isto e o score dele
    e outra medida -- o melhor deles envolve um `goto` num
    `do { } while (0);` que apaga as sete copias de delay slot.
+
+DECIMA PRIMEIRA RODADA (2026-09-08) -- continua 329/329 e 244. Mais quatro
+eixos fechados contra o unico registrador que falta:
+ - locais de base para `a` e `b` atribuidos DENTRO dos bracos (`ab = a;`,
+   `bb = b;`, e os dois): tres medicoes, todas 244. O CSE substitui na
+   mesma;
+ - UM nome COMPARTILHADO pelos dois bracos mutuamente exclusivos
+   (`ap = a;` num, `ap = b;` no outro, com `&ap[i]` e com `ap + i`): duas
+   medicoes, 244. A propagacao de copia desfaz;
+ - um nome para o byte de flags (`ea = D_8009B2EA;`, que o retail le UMA
+   vez e usa em quatro testes): 244 sem flag. E ele reduz o custo do
+   `-fno-cse-follow-jumps` de +4/280 para +2/265, censo de magnitude 4 --
+   e nomear tambem o indice (`ix`/`jx` para D_8009B2DC) nao melhora mais
+   (+3/294 com os dois nomes, +2/265 com um), entao a rota da flag empaca
+   ali;
+ - OITO flags de compilador fora da tabela do sweep
+   (`-fno-expensive-optimizations`, `-fno-thread-jumps`, `-fno-force-mem`,
+   `-fno-caller-saves`, `-fno-peephole`, `-fno-function-cse`,
+   `-fno-inline`, `-fno-defer-pop`): as OITO dao exatamente 244.
+O estado e um candidato de comprimento exato, censo vazio, cujas 244
+diferencas sao uma rotacao de UM registrador em todo o corpo, causada por
+`sp+0x28` ocupar $t5. Reabrir com uma ideia sobre como fazer o pseudo de
+endereco que o expand_block_move cria MORRER antes do braco que usa o
+array -- e nao com mais grafias da indexacao, que estao esgotadas.
