@@ -29,6 +29,30 @@
  * Writing `n` inside the arm that needs it is +2 in three spellings, so the
  * hoist is buying two instructions elsewhere and the axis is not closed.
  * Permuter next. The debt is NOT retired until this matches.
+ *
+ * 2026-09-08, fifteen more, and the +2 in the entry above is MISATTRIBUTED.
+ * It is not the cost of naming the index inside the arm. Reading the built
+ * listing: with per-arm names gcc STILL hoists `sll $s0,3 / addu $s0`
+ * (valA * 9) above the branch -- CSE puts it at the dominator whatever the
+ * source says -- and what actually duplicates is the DESTINATION shift,
+ * `sll $a0,$a0,2`, which appears in both arms plus a copy where retail has
+ * one `sll $a0,$v0,2` in the bnez's own delay slot. Three per-arm spellings
+ * (one shared name, two names, the +1 split in two statements) are all
+ * +2/32, which is rule 7's tell: one regression wearing three hats.
+ * Hoisting only the destination shift as a byte offset -- `off = idxC * 4;`
+ * with the arms storing through `*(s32 *)((u8 *)tbl + off)` -- is +2/30
+ * with per-arm names, +1/31 with both arms inline, and 49/49 and 22 with
+ * the installed hoisted `n`. So it is not the lever either.
+ * And the arm-1 fold is not the lever: `%lo(D_800917F0+1)` against retail's
+ * `%lo(D_800917F0)` plus `lb 1(...)` survives four spellings that should
+ * each break it -- `*(s8 *)((u8 *)D_800917F0 + valA * 9 + 1)`, a `s8 *`
+ * pointer local read as `q[1]`, `((s8 *)D_800917F0)[valA * 9 + 1]`, and
+ * `*(s8 *)(&D_800917F0[valA * 9] + 1)` -- all 49/49 and 19.
+ * The mechanism, stated so the next pass does not re-derive it: retail
+ * computes valA * 9 TWICE, once per arm, and hoists nothing but the
+ * destination shift. gcc computes it once at the dominator from every
+ * source shape tried, so what is needed is something that stops the CSE,
+ * not something that moves the statement.
  */
 #include "common.h"
 
