@@ -88,13 +88,26 @@
  * leitura do diff renderizado nao responderam.
  *
  * O QUE FALTA (3 diferencas, censo VAZIO): so a ordem do preheader do case
- * 7. O retail tem `lui $s3,%hi(D_800F2B00)` / `addiu $s2,-1` /
- * `addiu $s4,2` e nos temos o `addiu $s4,2` primeiro. Doze grafias medidas,
- * todas iguais ou piores, e as sete ultimas RE-MEDIDAS sobre a base
- * volatile (regra 3): `k = 2;` sem pino -9, o pino antes do `i = 0xA;` 5,
- * `k = 2;` como ultima instrucao do laco -3, o literal sem local nenhum -9,
- * a sentinela -1 nomeada antes do pino 5, a base D_800F2B00 nomeada +1/39,
- * as duas juntas 127.
+ * 7. O retail tem `lui $s3,%hi(D_800F2B00)` / `addiu $s2,$zero,-1` /
+ * `addiu $s4,$zero,2`; nos temos o `addiu $s4,2` PRIMEIRO. O mecanismo esta
+ * entendido e e o que fecha o eixo: o gcc emite as instrucoes da FONTE
+ * antes das que ele proprio poe no preheader (a icagem do `%hi` sai
+ * imediatamente antes do laco, e a constante -1 no inicio da sua faixa de
+ * vida), entao um `k = 2;` escrito ali sai sempre primeiro. Para sair por
+ * ultimo o `2` teria que NAO ser uma instrucao da fonte -- e todas as
+ * grafias em que ele nao e refazem a cadeia de cross-jump dos sete
+ * `D_8009B450 = K;` e custam de 3 a 9 instrucoes.
+ * DEZESSEIS grafias medidas neste eixo, as onze ultimas sobre a base
+ * volatile (regra 3): sem pino -9; o pino antes do `i = 0xA;` 5; `k = 2;`
+ * como ultima instrucao do laco -3 e como primeira -9; o literal sem local
+ * -9; `D_8009B450 = i + 3;` (o contador vale -1 na saida) -7 com e sem
+ * pino; a sentinela -1 nomeada antes do pino 5; a base D_800F2B00 nomeada
+ * +1/39; as duas juntas 127; `k` declarado `s16` -3/160 e `u8` -4/160; UM
+ * nome `k` compartilhado pelos QUATRO `D_8009B450 = 2;` da funcao -3/233;
+ * `do { i = 0xA; k = 2; } while (0);` 3, igual a base; e quatro
+ * agrupamentos do `i = 0xA;` com o pino, 11/11/11/11 na base anterior.
+ * O permuter tambem ja rodou aqui (1253 iteracoes, -j 2, zero saidas).
+
  */
 #define D_8009B450_IS_VOLATILE
 #include "common.h"
