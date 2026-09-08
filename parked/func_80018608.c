@@ -156,7 +156,23 @@
  * written as `x * 8 + x * 2` (-2/104). FIVE declaration orders of the
  * fifteen locals are ALL 35, which is expected: nothing here is a stack
  * object, so declaration order buys nothing in this function.
- * Residue: 23, all register allocation.
+ * 2026-09-08, later: the aligned diff at 23 is SEVEN blocks, and both of
+ * them were re-measured on this base per the re-measure rule. Neither pays.
+ *   - the second preheader's order, swept six ways including retail's own
+ *     emitted order (`sa`, `i`, `r`, `sb`, `g`, `tb2`): 41, 45, 45, 41, 45,
+ *     45. `tb2` first stays right, so the fifth instance today of retail's
+ *     emitted order being the wrong source order.
+ *   - the case 5 `+8` fold, three spellings: the record address as a local
+ *     (33), the SYMBOL as a local with the index still inline (30), and the
+ *     whole thing as a byte-address cast (23, ties). So the fold really is
+ *     what retail has and the local really is wrong -- confirmed on the
+ *     corrected base rather than assumed from the 35 one.
+ *   - and the two quotient stores swapped is 49.
+ * Residue: 23, all register allocation. The remaining blocks are the
+ * position of `tb2`'s pair and the second `mult` inside the first division's
+ * latency -- retail issues `mult $t1` five instructions later than we do,
+ * with the preheader assignments in between, and no source order tried
+ * reaches that.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
