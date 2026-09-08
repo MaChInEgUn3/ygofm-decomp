@@ -1,5 +1,6 @@
-/* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e CINCO divergencias
- * estruturais depois de ALINHAR os opcodes (2026-09-08). Compilador e
+/* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e DUAS divergencias
+ * estruturais depois de ALINHAR os opcodes (2026-09-08), com 43 linhas
+ * so-de-registrador contra 284 iguais. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -7,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 264 iguais / 61 so-registrador / 5 estruturais.
+ * candidato e 284 iguais / 43 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -56,25 +57,30 @@
  *     e `i = 0x27;` -- o retail materializa `addiu $a0,$zero,32` antes do
  *     `addiu $s0,$zero,39`. 7 -> 4 estruturais. (Na base velha isto era
  *     "identico", que e a regra 3 outra vez.);
- * 10. `e = i * 4;` NAO existe: e `n << ((i + 1) * 4)` escrito DEPOIS do
- *     `i = i - 1;`. Fecha o comprimento a -G8 (328 -> 329).
- *
- * O QUE FALTA, com os opcodes ALINHADOS -- CINCO instrucoes:
- *  - T[64]/T[68]: o retail poe `lui %hi(D_800EAED8)` no delay slot do
- *    `beq` (a copia de delay slot do bloco `fill`) e nos pomos ali o
- *    `sll $v1,$a0,1` do endereco `&D_8009B2C8[dc]`, que o retail so emite
- *    quatro instrucoes depois;
- *  - T[72]/T[73]: o `addiu $v0,$sp,16` (o giv de `a`) e o `sll` do indice
- *    trocados de lugar;
- *  - T[94]: dentro do laco de entrada o retail poe `sll $a0,$a2,2` na
- *    latencia do `mult` e nos pomos o decremento do giv.
+ * 10. **`r = (u8 *)&D_8009B2C8; r = r + (s8)D_8009B2DC * 2;` EM DUAS
+ *     ATRIBUICOES CONTRA O MESMO NOME.** Vale um `lui` e vinte e c * O QUE FALTA, com os opcodes ALINHADOS -- DUAS instrucoes, as duas um
+ * deslocamento de UMA posicao:
+ *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` e depois
+ *    `la $v1,D_8009B2C8`; nos emitimos o `la` primeiro. E a ordem das
+ *    duas atribuicoes contra `r` -- a base vem escrita antes do indice;
+ *  - T[93]/T[94]: dentro do laco de entrada o retail poe `sll $a0,$a2,2`
+ *    (o `e = i * 4`) na latencia do `mult` e nos pomos ali o decremento
+ *    do giv do cursor de `a`.
  *
  * MEDIDO E MORTO NESTA BASE, com numeros: cinco grafias de `q = &b[e]`
  * (`(s32)b + e*4`, `e*4 + (s32)b`, `b + e`, `&b[0] + e`, e a posicao da
  * atribuicao) -- as cinco identicas, eixo errado; `dc = (s8)D_8009B2DC;`
  * nomeado e identico (e com `*p = val;` junto e -2, porque o retail
  * RECOMPUTA o endereco no store); `ea = D_8009B2EA;` nomeado e identico;
- * `do { i = (s8)t2 - 1; } while (0);` e identico;
+ * `do { i = (s8)t2 - 1; } while (0);` e identico; SEIS ordens do braco de
+ * entrada (r/p/val antes de `i`, `i` partido em duas, `p` como nome
+ * emprestado em vez de `r`, dois `do { } while (0);`) -- todas 4
+ * estruturais na base anterior; `e = i * 4` reescrito como
+ * `n << ((i + 1) * 4)` depois do decremento fecha o comprimento mas CRIA
+ * UM SEGUNDO GIV (dois `addiu -4` no laco) -- era um falso zero, duas
+ * faltas a cancelarem-se; os quatro flags de escalonamento
+ * (`-fno-schedule-insns`, `-fno-schedule-insns2`, os dois, e
+ * `-fno-delayed-branch`) sao 21, 23, 47 e 42 estruturais;
  * `-fno-cse-follow-jumps` poe `&b` no braco mas custa uma releitura de
  * D_8009B2DC (+1 `lb`, -1 `addiu`), e com `dc` nomeado fica 329/329 com
  * censo 2 -- pior que o censo vazio daqui. Assembler: -G0 e 45
@@ -126,15 +132,17 @@ s32 func_80030294(void) {
         D_8009B2EA = D_8009B2EA | 0x80;
         if ((D_8009B2EA & 0x40) != 0) {
             i = (s8)t2 - 1;
-            r = (u8 *)&(&D_8009B2C8)[(s8)D_8009B2DC];
+            r = (u8 *)&D_8009B2C8;
+            r = r + (s8)D_8009B2DC * 2;
             p = (u16 *)r;
             val = *p;
             *p = 0;
             do {
                 k = a[i];
                 n = val / k;
+                e = i * 4;
                 i = i - 1;
-                *p = *p | (n << ((i + 1) * 4));
+                *p = *p | (n << e);
                 val = val - k * n;
             } while (i >= 0);
         }
