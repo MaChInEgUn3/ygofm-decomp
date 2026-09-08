@@ -5418,6 +5418,35 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
+# ============================================================================
+# ALIGNMENT AUDIT of the eleven ASSEMBLY DEBTS, 2026-09-08.
+#
+# Every debt candidate was re-read with a difflib alignment of the two
+# instruction sequences instead of try_func's positional diff. The positional
+# diff charges every line after a displacement as differing, so a single
+# moved block reads as a scattered register problem; the alignment says how
+# many blocks actually differ. Block counts, smallest first:
+#
+#   func_8004A854   1 block   (ori 0xFFFF against a copy -- closed by argument)
+#   func_80040588   2 blocks  (one `lhu $a2,6($s1)` moved three positions)
+#   func_8004A8E4   3 blocks  (base register, one extra addu, the *24 chain)
+#   func_8002C7E8   3 blocks  (pure register naming)
+#   func_800734DC   4 blocks  (we hoist four instructions, retail hoists one)
+#   func_8004A6F8   4 blocks  (the 0x60100 `ori` seven positions early)
+#   func_80048F14   5 blocks  (the stored-value copy against our reload)
+#   func_800260D0   6 blocks  (two register pairs)
+#   func_80018608   7 blocks  (down from 26 -- the audit's biggest win)
+#   func_8001D5B4   7 blocks  (the audit CHANGED this candidate: a whole arm
+#                              was emitted at the end where retail has it
+#                              inline, and the fix had been measured and
+#                              rejected on the count)
+#   func_80027508   8 blocks  (register naming)
+#
+# Two candidates changed as a result (func_80018608, 218 -> 23 over four
+# ticks; func_8001D5B4, arms swapped). The other nine confirmed what their
+# headers already said, with the fault now located rather than described.
+# ============================================================================
+
 func_80018608 -- 225/225, CENSO VAZIO, 23 differences.
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
