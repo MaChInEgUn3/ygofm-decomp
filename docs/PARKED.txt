@@ -8018,17 +8018,36 @@ func_800734DC -- 49/49 and 19 differences (2026-09-08), and it is the FIRST REAL
     Residue is that retail computes nothing before the branch and we hoist the
     name. See the park header. The debt is not retired until this matches.
 
-func_800577B0 -- -3 em 206/209, 171 diferencas. NAO e divida: src/31D8.c
-ainda tem o INCLUDE_ASM, entao um MATCH aqui e funcao NOVA. Despachante da
-familia D_8009B0F4 com jump table real (jtbl_8001179C); gp=0 e seis `lui $at`,
-entao o conserto de enderecamento e `as -G0`, que a jump table sobrevive (com
-`-mno-split-addresses` nao sobreviveria). Nao ha linha em build.py: medir por
-config/flag_overrides.json e APAGAR o arquivo depois.
-Segundo dia: -12 -> -3, 186 -> 171 diferencas, 21 -> 17 blocos no alinhamento.
-As cinco alavancas que valeram, e as oito grafias medidas e mortas, estao no
-cabecalho de parked/func_800577B0.c com numeros. A maior foi um so nome para
-as constantes 0x10 e 0x10000 dos cases 1 e 6 (regra do func_80020BE4: duas
-constantes sequenciais que nunca coexistem sao um nome so) -- 180 -> 164.
-Residuo: sw -3/lw -1/addiu -1 porque o gcc guarda a copia do rabo do m1 do
-CASE 1 e o retail guarda a do CASE 6; lui -1 pelos $s0/$s1 trocados no
-case 10; e o `sh` do p+0x30 uma instrucao adiante do lugar do retail.
+func_800577B0 -- **209/209, comprimento EXATO, 49 diferencas**, censo vazio.
+NAO e divida: src/31D8.c ainda tem o INCLUDE_ASM, entao um MATCH aqui e
+funcao NOVA. Despachante da familia D_8009B0F4 com jump table real
+(jtbl_8001179C); gp=0 e seis `lui $at`, entao o enderecamento se resolve com
+`as -G0`, que a jump table sobrevive (com -mno-split-addresses nao
+sobreviveria). Nao ha linha em build.py: medir por config/flag_overrides.json
+e APAGAR o arquivo depois.
+Dois dias: -12/186 -> -3/171 -> 209/209 e 49 diferencas.
+O COMPRIMENTO FECHOU COM UM MECANISMO SO, EM TRES INSTANCIAS. A funcao tem
+quatro rabos com as mesmas instrucoes (o grupo de stores do m1 nos cases 1, 6
+e 8; o par `sw 0xC`/`sw 8` no case 2 e no m3). O gcc funde os que TERMINAM
+identicos e o retail nao funde nenhum; o que decide e a ultima instrucao
+antes do salto. `do { w = 0x1000; } while (0);` no case 2 e `do { w = 0x800;
+} while (0);` no m3 sozinhos levaram de -3/160 para 209/209 e 53 diferencas,
+porque sem o pino o agendador sobe a constante do `w` para cobrir o
+load-delay do D_8009B0F4 e os dois bracos passam a terminar em
+[sw 0xC][sw 8][lui/lw b0f4]. Mesma coisa um nivel acima com
+`do { d = D_8009B118; } while (0);` nos cases 1 e 6, e pelo lado da alocacao
+com um nome PROPRIO (`e`) para o D_8009B118 do case 8 -- o rabo do case 8 e
+instrucao-por-instrucao igual ao do m1 e so os registradores o separam no
+retail.
+Duas alavancas de emprestimo no mesmo tick: o 0x19000 do case 8 usa o nome
+`m` da mascara (bracos mutuamente exclusivos) e poe a constante em $a0 como o
+retail; e um nome proprio `g` para o ponteiro do m3, que o retail carrega em
+$v0 enquanto o `b` do m0 vive em $v1.
+Uma grafia foi RETRATADA por este tick: `do { *(s16 *)(p + 0x30) = 0; }
+while (0);` antes do `|=` era a melhor enquanto o comprimento estava errado e
+agora e +2 -- a regra "grafia rejeitada com outra falta aberta nao foi
+medida" lida ao contrario.
+Residuo: ~30 diferencas no case 10 ($s0/$s1 trocados e os 4+3 loads
+intercalados com os stores, onde o retail agrupa 4/4 e 3/3), o `sh` de
+p+0x30 e p+0x32 cinco instrucoes adiante, e tres instrucoes uma posicao fora.
+As grafias medidas e mortas estao com numeros no cabecalho do parked/.
