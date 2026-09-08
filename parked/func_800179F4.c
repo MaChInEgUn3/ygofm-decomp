@@ -64,6 +64,28 @@
  *    D_8009B1D8 para o meio (9), escrever `b` a partir do simbolo em vez
  *    de `a` (10), e atribuicoes encadeadas (9).
  *
+ * MAIS OITO NEGATIVOS, 2026-09-08 (segunda rodada):
+ *  - `cb = func_800164FC;` atribuido num BLOCO ANTERIOR, tres posicoes: 19,
+ *    -1/45 e -1/45. A regra do `la` em outro bloco vale para um endereco que
+ *    sera DEREFERENCIADO; um endereco constante que sera ARMAZENADO vai para
+ *    um callee-saved e piora;
+ *  - D_801D1200 com braco `_IN_DATA` de TIPO COMPLETO: 9, sem mover uma
+ *    instrucao. Uma sonda pelo cc1psx explica e CORRIGE a leitura: para um
+ *    ENDERECO USADO COMO VALOR o cc1psx emite sempre o par proprio dele, e
+ *    com as duas metades NO MESMO REGISTRADOR, com ou sem o atributo de
+ *    secao. Entao `lui $r,%hi` / `addiu $r,$r,%lo` no mesmo registrador NAO
+ *    e assinatura de forma nua neste caso, e o par de D_801D1200 e apenas
+ *    alocacao: o gcc reaproveita o $v0 morto que o delay slot do `bgez`
+ *    acabou de escrever, e o retail usa $a0 nas duas metades;
+ *  - quatro grafias no mesmo braco: nome proprio para o ponteiro (+1/29),
+ *    escrever `b` a partir do simbolo antes de `a` (12), e duas atribuicoes
+ *    encadeadas (9 e 9);
+ *  - o PERMUTER, duas corridas. Com -j2 rodou uns cinco minutos e foi MORTO
+ *    POR MEMORIA (caixa de 3,4 GB); a unica saida que deixou tem score
+ *    proprio 930 e e semanticamente ERRADA -- apaga `D_8009B21C = o;` e
+ *    guarda `o` no lugar -- e re-pontuada por try_func da -8 e 216. Com -j1
+ *    por 110 s nao produziu saida nenhuma.
+ *
  * DUAS LEITURAS DO LISTING QUE O RASCUNHO DO M2C NAO DAVA (ainda validas):
  *  - **`sllv $a2,$v0,$s0` prova que o deslocamento e uma VARIAVEL.** O
  *    retail poe 1 em $s0 e o usa DUAS vezes: na comparacao

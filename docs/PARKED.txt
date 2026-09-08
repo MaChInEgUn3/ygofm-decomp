@@ -8168,6 +8168,20 @@ FALTAM DOIS GRUPOS, ambos alocacao/escalonamento:
    / `addiu $a0,$v0` nosso: mesmo par, registrador intermediario diferente.
    Medido e morto: mover o store de D_8009B1D8 para o meio (9), escrever `b` a
    partir do simbolo em vez de `a` (10), atribuicoes encadeadas (9).
+Mais oito negativos na segunda rodada: `cb = func_800164FC;` num BLOCO
+ANTERIOR em tres posicoes (19, -1/45, -1/45) -- a regra do `la` em outro bloco
+vale para um endereco que sera DEREFERENCIADO, e um endereco constante que sera
+ARMAZENADO vai para um callee-saved e piora; D_801D1200 com braco `_IN_DATA` de
+TIPO COMPLETO (9, sem mover uma instrucao), o que CORRIGE a leitura -- uma sonda
+pelo cc1psx mostra que para um ENDERECO USADO COMO VALOR ele emite sempre o par
+proprio, com as duas metades NO MESMO REGISTRADOR, com ou sem atributo de secao,
+entao registrador unico nao e assinatura de forma nua neste caso e o residuo e
+so alocacao (o gcc reaproveita o $v0 morto que o delay slot do `bgez` escreveu,
+o retail usa $a0 nas duas metades); e quatro grafias no mesmo braco (+1/29, 12,
+9, 9). O PERMUTER rodou duas vezes: com -j2 foi MORTO POR MEMORIA depois de uns
+cinco minutos e a unica saida (score proprio 930) e semanticamente errada --
+apaga `D_8009B21C = o;` e guarda `o` -- re-pontuando -8 e 216; com -j1 por 110 s
+nao produziu saida.
 Varredura de flags (sweep_try, 27 linhas): o melhor e o padrao O2 G8 com 38 na
 base anterior; `-mno-split-addresses` e 166, as G0 233, as G2 167, O1 229 --
 eixo de flags FECHADO.
