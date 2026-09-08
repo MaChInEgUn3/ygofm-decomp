@@ -69,10 +69,41 @@ BANNER = """/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
 
 
 def templates(text):
-    """The instruction template of each `__asm__` -- strings before the first
-    `:` at depth one. Constraints and clobbers are strings too, and reading
-    them as instructions is how the second miscount happened."""
-    for m in re.finditer(r"__asm__\s*(?:volatile\s*)?\(", text):
+    """The instruction template of each asm statement -- strings before the
+    first `:` at depth one. Constraints and clobbers are strings too, and
+    reading them as instructions is how the second miscount happened.
+
+    FOUR SPELLINGS, and this matched one of them until 2026-09-08. GCC takes
+    `asm` and `__asm__`, each with `volatile` or `__volatile__`; the pattern
+    here was `__asm__ \\s* (?:volatile \\s*)? \\(`, so it saw `__asm__(` and
+    `__asm__ volatile(` and MISSED `__asm__ __volatile__(` -- the commonest
+    spelling of all -- along with every bare `asm`. Two blind spots stacked,
+    both silent, and the debt count they produced (6) was the number this
+    project reported for weeks.
+
+    What was hiding in them: func_80040588 transcribes three whole blocks of
+    `lw`/`lbu`/`sw`, func_80048F14 a `move`, func_80027508 an `addiu`,
+    func_800734DC an `addiu`, and func_80018608 writes its instructions as
+    `.word 0x24130003` inside an `asm volatile(`. Every one was counted as
+    real C. Found while screening candidates to send upstream: a hand grep for
+    `__asm__` called func_80018608 clean and the port probe called it asm, and
+    only one of them could be right.
+
+    Same class as the `lui $at` pattern WORKFLOW records: a filter that
+    silently matches nothing reads exactly like a filter with nothing to
+    match. When you change this regex, prove it can still say yes -- there is
+    one of each spelling in src/ to test against."""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"//[^\n]*", "", text)
+    for m in re.finditer(r"(?:__asm__|(?<![_A-Za-z0-9])asm)\s*"
+                         r"(?:volatile\s*|__volatile__\s*)?\(", text):
+        # `register s32 v0 asm("v0");` is a REGISTER PIN, not an asm
+        # statement: the string names a register, and reading it as an
+        # instruction template makes every pinned file read as debt. That
+        # was the miscount this very fix introduced on its first run -- 45
+        # files, spotted only by opening four of them.
+        if "register" in text[text.rfind("\n", 0, m.start()) + 1:m.start()]:
+            continue
         i, depth, instr, out = m.end(), 1, True, []
         while i < len(text) and depth:
             c = text[i]

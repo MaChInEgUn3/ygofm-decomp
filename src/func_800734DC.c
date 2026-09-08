@@ -1,3 +1,10 @@
+/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
+ * Ordinary MIPS written into an inline asm block to force a match. It is
+ * byte-exact and therefore invisible to build.py, which is exactly the
+ * problem: the oracle cannot tell transcribed assembly from real C, so
+ * nothing but this comment stops it being counted as done.
+ * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
+ */
 /* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
  * His C, his comments; the identifiers are rewritten to this repo's address
  * form and nothing else was touched. Verified the only way that counts here:

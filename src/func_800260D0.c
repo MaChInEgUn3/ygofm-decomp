@@ -1,3 +1,10 @@
+/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
+ * Ordinary MIPS written into an inline asm block to force a match. It is
+ * byte-exact and therefore invisible to build.py, which is exactly the
+ * problem: the oracle cannot tell transcribed assembly from real C, so
+ * nothing but this comment stops it being counted as done.
+ * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
+ */
 /* MATCH (2026-09-05, full build). try_func reports 4 differences on this
  * file and every one is a NAME: retail addresses the rolling counter as
  * `%gp_rel(D_8009B20C+2)` and this source as the interior symbol
