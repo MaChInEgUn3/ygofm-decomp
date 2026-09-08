@@ -35,7 +35,36 @@
  * `d - d / 5 * 5`, `t` assigned after `i`, `t` or `o` hoisted above the four
  * entry guards, four declaration orders, `w` dropped for `t[j]` inline, and
  * one name for the raw byte and its sign extension (38).
- * Permuter next.
+ *
+ * SECOND HAND PASS, 2026-09-08, ~50 more measurements and the axis is CLOSED.
+ * All 14 unless noted:
+ *   - per-block names: `c` alone, `r` alone (both 14); `c`+`d` together, `d`
+ *     alone (26); `o` alone (24). Sharing across the two blocks is right.
+ *   - borrowing a dead name for the byte or its sign extension: `d` as `i`
+ *     (19), `d` as `w` (16), `c` as `i` (19), `c` as `w` (16). This is the
+ *     lever that closed func_8002E128 and it is worthless here.
+ *   - a dead `i = 0;` at the top of each block.
+ *   - the symbol written inline for ONE store while the rest go through the
+ *     local: offset 0 (14), offset 1 (14), the shared offset 8 (+1/24).
+ *   - the shared `o[8] = 1;` written out in both blocks instead of the
+ *     `goto` (+3/72), which confirms the goto.
+ *   - `do { } while (0);` round the byte read (+5), the base assignment
+ *     (+6), the sign extension (+6) or the modulo (55). The pin that fixed
+ *     func_8005F3B8's identical $s1/$s2 residue does not transfer: this
+ *     block is crossed by a `goto` into the tail and the loop node breaks
+ *     the layout.
+ *   - `s16 d` (+2/89); the stores as `*(u8 *)(o + K)` casts (14).
+ *   - the FULL flag sweep through sweep_try.py: default `O2 G8` is the best
+ *     row at 14; `as -G2` and `as -G4` tie it and every other row is 115 or
+ *     worse.
+ *   - `r %= 5; r += 1;` -- the EXACT spelling that took `d` from 26 to 14 --
+ *     is 30 on `r`. The two modulos in one function want opposite forms,
+ *     because retail writes `d`'s result into `d`'s own register and `r`'s
+ *     into a fresh $v0. Third time an idiom has wanted opposite spellings at
+ *     two sites of one function (func_80026DC8, func_80036C14 are the
+ *     others).
+ * Permuter ran to 2763 iterations from this base and produced no output at
+ * all, i.e. it never beat 14 either.
  */
 #include "common.h"
 
