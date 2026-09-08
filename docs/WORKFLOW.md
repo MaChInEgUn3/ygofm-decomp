@@ -1117,6 +1117,25 @@ permuter found the first; the second is the same idea applied by hand.
    changes shape.) So read the *pivot*, not the count: if the target tests a
    different case value at the same position, add a case rather than
    re-reading the arms, and write down that its value is a guess.
+   **Two textually identical switch arms are ALWAYS merged into one, at every
+   optimisation level except -O0.** A ten-line probe through cc1psx settles
+   it in one command: a `switch` whose arms 6 and 8 both read
+   `x = 0xD3; goto join;` comes out with a single block, and the earlier
+   arm's jump-table entry is redirected to the later one's label. `-O1`,
+   `-fno-thread-jumps`, `-fno-delayed-branch`,
+   `-fno-expensive-optimizations`, `-fno-cse-follow-jumps` and
+   `-fno-peephole` all give one copy; only `-O0` gives two. Six spellings of
+   one arm (the call written inline, the literal inline, a `goto` into the
+   other arm's block, an extra store in front, the other arm routed through
+   a longer tail) also give one copy, because cross-jumping merges the
+   maximal common **suffix** rather than the whole block. So when the target
+   shows two identical arms -- func_8003E490 has `j .L8003E7B8` +
+   `addiu $a0,0xD3` twice, byte for byte, at 0x8003E770 and 0x8003E7A4 --
+   **the source's two arms cannot have ended the same way**, and the thing
+   to re-read is the case values or how the block is reached, not the body's
+   spelling. Do not spend a round on spellings of the body: that axis is
+   closed by construction.
+
    **And the case order decides *which* of several identical arms gets
    merged.** func_80024C1C's `case 0x14` and `case 0x17` both store 1; retail
    merges 0x14 into the shared block with 0x15 and 0x16 and leaves 0x17

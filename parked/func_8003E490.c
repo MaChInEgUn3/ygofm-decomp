@@ -41,6 +41,25 @@
  * krystalgamer levantou no Discord hoje: um agente que re-deriva os tipos
  * a partir do m2c bate na parede que a definicao verdadeira resolve.
  *
+ * SONDA QUE RESPONDE A PERGUNTA CERTA (2026-09-08, dez linhas pelo
+ * cc1psx): um `switch` de dez casos com DOIS bracos textualmente
+ * identicos e compilado com UMA SO copia a -O1, -O2,
+ * `-fno-thread-jumps`, `-fno-delayed-branch`, `-fno-expensive-
+ * optimizations`, `-fno-cse-follow-jumps` e `-fno-peephole` -- e com
+ * DUAS a -O0. A entrada da tabela do braco mais cedo e REDIRECIONADA
+ * para o bloco do mais tarde. Seis grafias do braco na sonda (chamada
+ * inline, literal inline, um `goto` para dentro do outro braco, um store
+ * extra antes, e o outro braco pelo rabo longo) dao TODAS uma copia,
+ * porque o cross-jumping funde o SUFIXO COMUM MAXIMO, nao o bloco
+ * inteiro.
+ * Consequencia, e e o que reenquadra a busca: **o retail tem duas copias
+ * byte a byte iguais (2EF70 e 2EFA4, ambas `j .L8003E7B8` +
+ * `addiu $a0,0xD3`), logo a fonte original NAO pode ter tido dois bracos
+ * que terminassem da mesma maneira.** Ou uma das duas leituras de `case`
+ * esta errada, ou o bloco e alcancado de um modo que este candidato nao
+ * modela. Nenhum dos dois rotulos e referenciado de mais lado nenhum --
+ * so das entradas 6 e 8 da jtbl_80010410 (verificado com grep em asm/).
+ *
  * O QUE FALTA: os casos 6 e 8 sao IDENTICOS (`a0 = 0xD3; j call18;`) e o
  * retail tem DUAS copias; o gcc funde-as, logo faltam duas instrucoes.
  * Medidas e mortas cinco grafias -- a chamada escrita por extenso num dos
