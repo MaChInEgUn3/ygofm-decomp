@@ -8313,6 +8313,11 @@ Novos em variables.h: D_8009B240, D_8009B24C e D_8009B250, mais os bracos
 Mais tres mortos nesta base: o local para D_8009B24C no braco do 0x20
 RE-MEDIDO (-6 e 74), um nome para D_8009B24B logo apos func_800291E0 (+1 e
 245), e trocar a ordem dos dois primeiros stores no objeto (69, identico).
+O PERMUTER rodou duas fatias de -j1 por 110 s (base 3615) e as duas saidas sao
+inutilizaveis: a primeira (3595) e uma troca de ordem de declaracao mais um
+store redundante, re-pontuando -10/313, e a metade plausivel sozinha e 69
+IDENTICO; a segunda (3105) troca D_8009B24C por `o` em quatro sitios onde `o`
+so e atribuido no OUTRO braco -- leitura NAO INICIALIZADA, -21/316. PARQUEADO.
 Terceira rodada, mais seis negativos: o local de D_8009B24C RE-MEDIDO numa
 TERCEIRA base e com NOME FRESCO da -6 e 78, entao o eixo esta fechado -- a
 leitura unica em $s1 do retail nao vem de um local daquele braco; o rabo com

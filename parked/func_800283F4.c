@@ -64,6 +64,15 @@
  *    de magnitude 7 -- um `andi` a menos que a base, entao a polaridade
  *    invertida acerta ALGUMA coisa e alonga em outra).
  *
+ * O PERMUTER, duas fatias de -j1 por 110 s (base 3615 na metrica dele): as
+ * duas saidas sao inutilizaveis. A primeira (3595) e uma troca de ordem de
+ * declaracao mais um store redundante `D_8009B24C[0x21] = D_8009B24C[0x21];`,
+ * que re-pontua -10 e 313 -- e a metade plausivel, a troca de declaracao
+ * sozinha, e 69 IDENTICO. A segunda (3105) troca D_8009B24C por `o` em
+ * quatro sitios do braco do 0x20 e do rabo, onde `o` so e atribuido no OUTRO
+ * braco da funcao: e a classe da LEITURA NAO INICIALIZADA, re-pontua -21 e
+ * 316. PARQUEADO AQUI.
+ *
  * O QUE FALTA: 69 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
  * andi -2, beq -1` (magnitude 8), em tres grupos:
  *  - a ORDEM do bloco de setup (indices 7 a 42): o retail materializa o 1 de
