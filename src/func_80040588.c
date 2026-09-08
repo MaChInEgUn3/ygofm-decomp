@@ -1,248 +1,124 @@
-/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
- * Ordinary MIPS written into an inline asm block to force a match. It is
- * byte-exact and therefore invisible to build.py, which is exactly the
- * problem: the oracle cannot tell transcribed assembly from real C, so
- * nothing but this comment stops it being counted as done.
- * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
- */
-/* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
- * His C, his comments; the identifiers are rewritten to this repo's address
- * form and nothing else was touched. Verified the only way that counts here:
- * tools_src/build.py rebuilds the retail image byte-for-byte with this in it.
+/* MATCH. Real C -- this retires the ASSEMBLY-DEBT transcription that stood
+ * here. The candidate was written 2026-08-21, taken to 3 differences, DELETED
+ * in 4eb106d when a port replaced the function, and recovered from git on
+ * 2026-09-08; the last three differences closed the same day.
  *
- * Self-contained by design -- it keeps his declarations rather than ours,
- * because a declaration is a codegen input and his are what this C matched
- * under. See docs/MERGE_UNCHIGA.md and tools_src/install_ported.py.
+ * The recipe is in the PARKED.txt entry: `g`/`q`/`h`/`tb` as locals inside the
+ * guard, `goto again;` back into the middle of the body, `idx = e[0x17];` as
+ * the body's first statement, `c66`/`n` named, plus `D_8009B424_IS_VOLATILE`
+ * (see below) and `D_8009B146_SIZED` with `as -G4`.
+ *
+ * THE LAST THREE: retail emits `lhu $a2,6($s1)` BEFORE `sw $zero,D_8009B424`
+ * and we emitted it after. All 24 orderings of the three argument loads and
+ * the store were measured and none moves it, because the two are provably
+ * disjoint -- a gp-relative scalar against a constant scratchpad address --
+ * so gcc is free to order them however its priority computation lands.
+ *
+ * What closes it: **a volatile access is ordered only against OTHER volatile
+ * accesses.** Marking the load alone is 3. Marking the store alone is 3.
+ * Marking the `u4` load and the store is 3. Marking THE LOAD THAT MOVES and
+ * THE STORE together is a MATCH. That is the whole mechanism, and it is why
+ * every single-sided attempt in this park's history read as "volatile does
+ * not help here" -- each one was measured alone.
+ *
+ * Written as the declaration rather than an lvalue cast: `D_8009B424` takes
+ * its `_IS_VOLATILE` arm (the guard already existed, added for another
+ * function) and the scratchpad read is `*(volatile u16 *)(q + 6)`. 0x1F800320
+ * is PSX scratchpad RAM, so a volatile read of it is what the original would
+ * have written. `*(volatile s32 *)&D_8009B424 = 0;` with the scalar arm is
+ * the same MATCH; the guard is the honest spelling.
  */
-/* msearch:winner-begin
-   target      0x80040588
-   sketch      func_80040588.c
-   combo       G8:split
-   ready-flags -G8 -msplit-addresses
-   The flags this source was 0 diffs under. File it with:
-     python3 tools/worklist.py ready 0x80040588 --unit UNIT --name NAME --flags "-G8 -msplit-addresses"
-   msearch:winner-end */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef signed char s8;
-typedef short s16;
-typedef int s32;
-
-/* Fresh untouched target (overseer-assigned). function_ranges.txt truncates
-   this at 159 insns; scout.py dossier confirms the real span is 163 insns,
-   0x80040588..0x80040814, merging 4 F entries (--exclude 0x80040804
-   0x80040808 0x8004080C).
-
-   Walks the D_800EFE48 active-slot chain from head D_800EFE3A (same
-   0x70-stride Slot/f2-chain/f24-callback/f8&0xC0-gate shape as
-   func_80040814.c, func_800400AC.c). For each
-   qualifying slot it builds a GPU sprite packet in scratchpad (0x1F800320,
-   same DigitPacket-style layout as func_80016E70.c, extended with
-   unk18/unk1C/unk20 this function alone uses), optionally repositions it
-   via func_80041F90(slot, x, y, out) -- the same landed func_80041F90.c,
-   called with `slot` itself as its `struct Obj *obj` (confirmed: a0 is set
-   from `addu a0,s0,zero` in the branch's own delay slot, NOT the earlier
-   f14 func_800738F0 visible textually before it, which gets clobbered) -- and
-   dispatches the packet via func_80042188 (asm_allowed, 0-diff
-   hand-transcribed, same 5-arg (packet,target,handler,flags,pos) shape
-   documented in func_80016784.c's header). A retry-in-place loop (goto to
-   the slot's own top) fires when func_80041F90's callback sets D_8009B424
-   nonzero; three different paths compute the final `flags` (a3) argument
-   differently (0x10000|f14 unmodified from early in the slot, vs
-   0xF0000|f14 after a successful reposition, vs 0x30000|f14 on the
-   plain/no-reposition path) before converging on the one shared
-   func_80042188 call site. */
-
-struct Slot {
-    u16 f0;
-    u16 f2;
-    u32 f4;
-    u16 f8;
-    u8 fA;
-    u8 fB;
-    u32 fC;
-    u32 f10;
-    u16 f14;
-    u8 f16;
-    u8 f17;
-    s16 f18;
-    s16 f1A;
-    u8 pad1C[0x22 - 0x1C];
-    u8 f22;
-    u8 pad23[0x24 - 0x23];
-    void (*f24)(void *);
-    u8 pad28[0x30 - 0x28];
-    u32 f30;
-    u8 pad34[0x3C - 0x34];
-    u32 f3C;
-    u32 f40;
-    u32 f44;
-    u32 f48;
-    u8 pad4C[0x5C - 0x4C];
-    u16 f5C;
-    u8 pad5E[0x66 - 0x5E];
-    u8 f66;
-    u8 pad67[0x70 - 0x67];
-};
-
-struct Scratch {
-    u32 unk0;
-    u16 unk4;
-    u16 unk6;
-    u32 unk8;
-    u16 unkC;
-    u16 unkE;
-    u32 unk10;
-    u32 unk14;
-    u16 unk18;
-    u16 unk1A;
-    u32 unk1C;
-    u32 unk20;
-};
-
-extern s16 D_800EFE3A[16];
-extern struct Slot D_800EFE48[];
-extern s32 D_800E9D90[];
-extern u16 D_8009B146[];
-extern u16 D_8009B148[];
-extern s32 D_8009B424;
-
-extern s32 func_80041F90(void *obj, s32 arg1, s32 arg2, void *out);
-extern void func_80042188(void *packet, void *target, s32 handler, s32 flags, void *pos);
-extern void func_80082840(void *a0, s32 a1);
-
-#define SCRATCH ((struct Scratch *) 0x1F800320)
-#define TARGET ((u8 *) 0x1F800344)
-#define POS ((void *) 0x1F800398)
+#define D_8009B146_SIZED
+#define D_8009B424_IS_VOLATILE
+#include "common.h"
 
 void func_80040588(void) {
-    register s32 idx asm("s3") = D_800EFE3A[0];
-    struct Scratch *scratch;
-    u8 *target;
-    u8 *posBase;
-    register s32 *handlerTable asm("s6");
+    u8 *g;
+    u8 *q;
+    u8 *h;
+    u8 *e;
+    u8 *tb;
+    ObjFn fn;
+    s32 t;
+    s32 idx;
+    s32 c66;
+    s32 n;
+    s32 u4;
+    s32 u6;
+    s32 k18;
+    s32 a3;
+    s32 i;
 
-    if (idx < 0) {
-        return;
+    i = D_800EFE3A[0];
+
+    if (i >= 0) {
+        g = (u8 *)0x1F800344;
+        q = (u8 *)0x1F800320;
+        h = (u8 *)0x1F800378;
+        tb = D_800E9D90;
+
+        do {
+            e = (u8 *)D_800EFE48 + i * 0x70;
+            i = *(s16 *)(e + 2);
+        again:
+            fn = *(ObjFn *)(e + 0x24);
+            if (fn != (ObjFn)0) {
+                fn(e);
+            }
+            if (((*(u16 *)(e + 8) & 0xC0) ^ 0xC0) == 0) {
+                *(s32 *)(q + 0) = *(s32 *)(e + 4);
+                idx = e[0x17];
+                *(s32 *)(q + 0x14) = *(s32 *)(e + 0xC);
+                *(s32 *)(q + 4) = *(s32 *)(e + 0x30);
+                *(s32 *)(q + 8) = *(s32 *)(e + 0x3C);
+                *(s32 *)(q + 0x10) = *(s32 *)(e + 0x40);
+                *(u16 *)(q + 0xE) = *(u16 *)(e + 0x5C);
+                c66 = e[0x66];
+                n = *(u16 *)(e + 0x14);
+                t = *(s32 *)(tb + idx * 4);
+                *(u16 *)(q + 0xC) = c66;
+                a3 = n | 0x10000;
+
+                if ((*(u16 *)(e + 8) & 8) == 0) {
+                    *(u16 *)(q + 4) = *(u16 *)(q + 4) - D_8009B146[0];
+                    *(u16 *)(q + 6) = *(u16 *)(q + 6) - D_8009B148[0];
+                }
+
+                if ((*(u16 *)(e + 8) & 4) != 0) {
+                    u4 = *(u16 *)(q + 4);
+                    k18 = *(s16 *)(e + 0x18);
+                    u6 = *(volatile u16 *)(q + 6);
+                    D_8009B424 = 0;
+                    if (func_80041F90(e, (s16)u4 + k18,
+                                      (s16)u6 + *(s16 *)(e + 0x1A),
+                                      h + 0x20) <= 0) {
+                        goto next;
+                    }
+                    if (D_8009B424 != 0) {
+                        goto again;
+                    }
+                    g[3] = 9;
+                    *(s32 *)(g + 4) = *(s32 *)(q + 0x14);
+                    g[7] = 0x2C;
+                    if ((*(s32 *)(q + 0) & 0x40000000) != 0) {
+                        func_80082840(g, 1);
+                    }
+                    a3 = *(u16 *)(e + 0x14) | 0xF0000;
+                } else {
+                    if ((*(s32 *)(q + 0) & 0x8000000) == 0) {
+                        *(s32 *)(q + 0x20) = e[0x22] * 0x1680;
+                        *(s32 *)(q + 0x1C) = *(s32 *)(e + 0x44);
+                        *(s32 *)(q + 0x18) = *(s32 *)(e + 0x48);
+                        *(u16 *)(q + 4) = *(u16 *)(q + 4) + *(u16 *)(q + 0x18);
+                        *(u16 *)(q + 6) = *(u16 *)(q + 6) + *(u16 *)(q + 0x1A);
+                        a3 = *(u16 *)(e + 0x14) | 0x30000;
+                    }
+                }
+
+                func_80042188(q, g, t, a3, h + 0x20);
+            }
+        next:
+            ;
+        } while (i >= 0);
     }
-
-    target = TARGET;
-    scratch = SCRATCH;
-    posBase = (u8 *)0x1F800378;
-    __asm__ __volatile__(
-        "lui $v0, 0x800f\n\taddiu %0, $v0, -25200"
-        : "=r"(handlerTable)
-        :
-        : "v0");
-
-    do {
-        register s32 recOff asm("v1");
-        register struct Slot *recBase asm("v0");
-        struct Slot *rec;
-        s32 handler;
-        s32 flags;
-        register s32 flagRaw asm("a0");
-        register s32 flagMask asm("v1");
-
-        recOff = (idx * 8 - idx) * 16;
-        recBase = D_800EFE48;
-        rec = (struct Slot *)((u8 *)recBase + recOff);
-
-        idx = (s16) rec->f2;
-
-    retry:
-        if (rec->f24) {
-            rec->f24(rec);
-        }
-
-        if (((rec->f8 & 0xC0) ^ 0xC0) != 0) {
-            goto loop_tail;
-        }
-
-        scratch->unk0 = rec->f4;
-        __asm__ __volatile__(
-            "lw $v0, 12(%3)\n\t"
-            "lbu $v1, 23(%3)\n\t"
-            "sw $v0, 20(%4)\n\t"
-            "lw $v0, 48(%3)\n\t"
-            "nop\n\t"
-            "sw $v0, 4(%4)\n\t"
-            "lw $v0, 60(%3)\n\t"
-            "nop\n\t"
-            "sw $v0, 8(%4)\n\t"
-            "lw $v0, 64(%3)\n\t"
-            "sll $v1, $v1, 2\n\t"
-            "sw $v0, 16(%4)\n\t"
-            "lhu $v0, 92(%3)\n\t"
-            "addu $v1, $v1, %5\n\t"
-            "sh $v0, 14(%4)\n\t"
-            "lbu $v0, 102(%3)\n\t"
-            "lhu %1, 20(%3)\n\t"
-            "lw %0, 0($v1)\n\t"
-            "lui %2, 1\n\t"
-            "sh $v0, 12(%4)"
-            : "=r"(handler), "=r"(flagRaw), "=r"(flagMask)
-            : "r"(rec), "r"(scratch), "r"(handlerTable)
-            : "v0", "memory");
-        flags = flagRaw | flagMask;
-
-        if (!(rec->f8 & 8)) {
-            __asm__ __volatile__(
-                "lhu $v0, 4(%0)\n\t"
-                "lui $a0, 0x800a\n\t"
-                "lhu $a0, -20154($a0)\n\t"
-                "lhu $v1, 6(%0)\n\t"
-                "lui $a1, 0x800a\n\t"
-                "lhu $a1, -20152($a1)\n\t"
-                "subu $v0, $v0, $a0\n\t"
-                "subu $v1, $v1, $a1\n\t"
-                "sh $v0, 4(%0)\n\t"
-                "sh $v1, 6(%0)"
-                :
-                : "r"(scratch)
-                : "v0", "v1", "a0", "a1", "memory");
-        }
-
-        if (rec->f8 & 4) {
-            s32 a1 = (s16)scratch->unk4 + rec->f18;
-            s32 a2 = (s16)scratch->unk6 + rec->f1A;
-            s32 ret;
-
-            D_8009B424 = 0;
-            ret = func_80041F90(rec, a1, a2, posBase + 0x20);
-            if (ret <= 0) {
-                goto loop_tail;
-            }
-            if (D_8009B424 != 0) {
-                goto retry;
-            }
-
-            target[3] = 9;
-            *(u32 *) (target + 4) = scratch->unk14;
-            target[7] = 0x2C;
-            if (scratch->unk0 & 0x40000000) {
-                func_80082840(target, 1);
-            }
-
-            flags = rec->f14 | 0xF0000;
-            goto dispatch;
-        }
-
-        if (scratch->unk0 & 0x8000000) {
-            goto dispatch;
-        }
-
-        scratch->unk20 = rec->f22 * 45 * 128;
-        scratch->unk1C = rec->f44;
-        *(u32 *)&scratch->unk18 = rec->f48;
-        scratch->unk4 = scratch->unk4 + scratch->unk18;
-        scratch->unk6 = scratch->unk6 + scratch->unk1A;
-        flags = rec->f14 | 0x30000;
-
-    dispatch:
-        func_80042188(scratch, target, handler, flags, posBase + 0x20);
-
-    loop_tail:;
-    } while (idx >= 0);
 }

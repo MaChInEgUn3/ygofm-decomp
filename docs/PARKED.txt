@@ -4455,6 +4455,18 @@ real one-line lever, and two open.
   * func_8003B744 18 -> 8 -- already recorded as semantically wrong (it casts
     an index the target does not mask).
 
+func_80040588 -- RESOLVED 2026-09-08. MATCH, ASSEMBLY DEBT RETIRED.
+  The last three differences were retail emitting `lhu $a2,6($s1)` before
+  `sw $zero,D_8009B424` where we emitted it after. All 24 source orderings had
+  been exhausted, because the two accesses are provably disjoint and gcc is
+  free. What closes it: A VOLATILE ACCESS IS ORDERED ONLY AGAINST OTHER
+  VOLATILE ACCESSES. The load alone is 3, the store alone is 3, the other load
+  plus the store is 3, and the moving load plus the store is a MATCH. Every
+  single-sided attempt in this park's history read as "volatile does not help"
+  and each was measured alone. Installed as `D_8009B424_IS_VOLATILE` plus
+  `*(volatile u16 *)(q + 6)` -- 0x1F800320 is scratchpad RAM, so the volatile
+  read is what the original would have written.
+  (original entry:)
 func_80040588 -- 163/163, 3 differences. CANDIDATE RECOVERED 2026-09-08 from
   commit 4eb106d, which deleted it; for two weeks the only copy was in git
   history and the prose below. It is back in parked/func_80040588.c with the
