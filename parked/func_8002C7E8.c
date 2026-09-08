@@ -72,6 +72,30 @@
  * and the borrowed read in $a2 where retail's temp is $v0 -- allocation.
  * Permuter from this 6-base: 8700 iterations, no output -- saturated.
  * Second run, same day, same base: 9300 iterations, no output.
+ *
+ * 2026-09-08: THE NUMBER IN EVERY TICK REPORT SINCE WAS 16, AND 16 IS THE
+ * TRANSCRIPTION'S. try_func falls back to build.py's PER_FUNC_FLAGS when
+ * given no trailing arguments, and this function's row is
+ * `-mno-split-addresses` FOR THE `__asm__` BLOCK STILL IN src/ -- so a bare
+ * `try_func func_8002C7E8 parked/func_8002C7E8.c` measures this candidate
+ * under a recipe that is not its own. Under the park's row (trailing
+ * `-quiet -O2 -G8`, with the assembler's -G0 coming from
+ * PER_FUNC_AS_FLAGS) it is 6, which is where the 2026-09-05 pass left it,
+ * and better than the 12 in the heading. try_func now WARNS when a
+ * candidate falls back to a non-default row belonging to an ASSEMBLY-DEBT
+ * transcription; the audit that found it re-measured all ten debt parks
+ * both ways and this is the ONLY one affected, so the class is as narrow
+ * as WORKFLOW says.
+ * Measured and dead at 6, 2026-09-08: the masked read as `k &= 0x8000;`
+ * against one name (16), as `k = ... & 0x8000;` (10), non-compound (16),
+ * `if (k)` (16), and the embedded `if ((k = ...) & 0x8000)` (6, same).
+ * Retail reads it `lhu $v0` and masks `andi $v0,$v0` -- one register -- so
+ * the one-name-across-two-statements family looks right and is not.
+ * The k block moved above the search loop, above `t = D_801799D8;`, and
+ * split with only `k = 5;` hoisted: -1, -1, +1, +1. That axis breaks the
+ * LENGTH, so it is closed rather than merely worse.
+ * What is left is the same two: k in $a2 where retail has $a3, and the
+ * borrowed read in $a2 where retail's temp is $v0.
  */
 
 

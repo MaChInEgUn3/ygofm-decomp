@@ -578,6 +578,25 @@ def main():
     # including any per-function override, not to a guess at the defaults.
     flags = sys.argv[3:] or list(B.PER_FUNC_FLAGS.get(func, B.CC1_FLAGS))
 
+    # A function whose src/ file is still an ASSEMBLY-DEBT transcription has a
+    # build.py flag row that belongs to the TRANSCRIPTION, not to the candidate
+    # in parked/.  Falling back to it measures the candidate under somebody
+    # else's recipe and says nothing, silently: func_8002C7E8 read 16 that way
+    # on 2026-09-08 and 6 under its park's own row, and the 16 had been carried
+    # in three tick reports as if it were the function's distance.  WORKFLOW
+    # names the class; this is the warning that makes it visible.
+    _debt_row = (
+        not sys.argv[3:]
+        and list(B.PER_FUNC_FLAGS.get(func, B.CC1_FLAGS)) != list(B.CC1_FLAGS)
+        and (ROOT / "src" / f"{func}.c").exists()
+        and "ASSEMBLY DEBT" in (ROOT / "src" / f"{func}.c").read_text()
+    )
+    if _debt_row:
+        print(f"WARNING: {func} still has an ASSEMBLY-DEBT transcription in "
+              f"src/, so build.py's flag row is the TRANSCRIPTION's. This run "
+              f"fell back to it. Pass the park header's own recipe as trailing "
+              f"arguments (they REPLACE the flags, so give the whole set).")
+
     want = renumber_labels(target_lines(func))
     got = renumber_labels(built_lines(func, csrc, flags))
 
