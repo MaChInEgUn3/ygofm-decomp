@@ -1,5 +1,5 @@
-/* 326/329 -- TRES instrucoes a menos -- e 314 diferencas, censo de magnitude
- * 29 (2026-09-08). Veio de -23/325 no primeiro C que compilou. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
+/* 328/329 -- UMA instrucao a menos -- e 307 diferencas, censo de magnitude 27
+ * (2026-09-08). Veio de -23/325 -> -3/314 -> -1/307. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -56,6 +56,20 @@
  * Ainda salvamos $s3 alem de $s0-$s2 (moldura 112 contra 104).
  * Seis declaracoes novas em variables.h (D_80010250, D_80010264, D_80010274,
  * D_8009AF4C, D_8009AF58, D_800EAED8) e seis bracos novos.
+ *
+ * MAIS UMA ALAVANCA E OITO NEGATIVOS (terceira rodada):
+ *  - **o endereco de D_800EAED8 num local atribuido ANTES DE TODA a cadeia
+ *    de `if`** (regra 44): -3/314 -> -1/307, censo de 29 para 27 e `lui` de
+ *    -5 para -7... quer dizer, a contagem de `lui` PIOROU e mesmo assim o
+ *    candidato ficou melhor, o que so o comprimento e a contagem mostram.
+ *    Usar o mesmo local tambem no segundo endereco e -4/306: um a menos de
+ *    diferenca mas tres instrucoes mais curto, entao NAO instalado;
+ *  - MEDIDO E MORTO no bloco `fill`, SETE grafias, todas 314 com -3 ou -4:
+ *    laco indexado `D_800EAED8[i] = 0x20;`, ponteiro de base como primeira
+ *    linha, `&D_800EAED8[0x27]` direto, a ordem `ch`/`i`/`r`, e as tres
+ *    versoes pinadas com `do { } while (0);` (base sozinha, base ja somada,
+ *    base mais a constante). O `lui` que o retail poe no delay slot de cada
+ *    desvio que salta para o `fill` NAO vem da forma do bloco.
  */
 #define D_8009B394_IN_DATA_VOLATILE
 #define D_8009B396_IN_DATA_VOLATILE
@@ -88,8 +102,10 @@ s32 func_80030294(void) {
     u8 t2;
     u8 f;
     u8 *r;
+    u8 *z;
 
     ret = 0;
+    z = D_800EAED8;
     *(Blk14 *)a = *(Blk14 *)D_80010250;
     *(Blk10 *)b = *(Blk10 *)D_80010264;
     *(Blk14 *)c = *(Blk14 *)D_80010274;
@@ -198,7 +214,7 @@ s32 func_80030294(void) {
     }
 fill:
     i = 0x27;
-    r = &D_800EAED8[i];
+    r = z + i;
     do {
         *r = 0x20;
         i = i - 1;

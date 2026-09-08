@@ -8327,8 +8327,8 @@ grafias que QUEBRAM a fusao alongam todas -- polaridade invertida com goto no
 nao-zero (+5/89), um nome para o OR (+2/78) e a cadeia testando `!= 0xE`
 primeiro (+1/86, censo de magnitude 7, um `andi` a menos que a base).
 
-func_80030294 -- 326/329, TRES instrucoes a menos, 314 diferencas, censo
-de magnitude 29. Veio de -23/325 no primeiro C que compilou. Flags padrao (passo 0: gp=34, at=0, sem jump table, sem GTE). Editor
+func_80030294 -- 328/329, UMA instrucao a menos, 307 diferencas, censo de
+magnitude 27. Veio de -23/325 -> -3/314 -> -1/307. Flags padrao (passo 0: gp=34, at=0, sem jump table, sem GTE). Editor
 de um valor hexadecimal: um braco de ENTRADA que decompoe o valor em digitos
 por divisoes sucessivas, um braco de EDICAO guiado por D_8009B394/396 e
 D_8009B398/39A, e um rabo que preenche um buffer de 0x28 bytes com espacos,
@@ -8374,3 +8374,12 @@ Faltam TRES instrucoes. Os `lui -5` que sobram sao de D_800EAED8: o retail
 copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta para
 la (regra 31) e o nosso bloco comeca com outra instrucao. E ainda salvamos $s3
 alem de $s0-$s2.
+
+Terceira rodada: o endereco de D_800EAED8 num local atribuido ANTES DE TODA a
+cadeia de `if` (regra 44) e -3/314 -> -1/307. Usar o mesmo local tambem no
+segundo endereco e -4/306, uma diferenca a menos mas tres instrucoes mais
+curto, entao nao instalado. E SETE grafias do bloco `fill` estao mortas, todas
+314 com -3 ou -4: laco indexado, ponteiro de base como primeira linha,
+`&D_800EAED8[0x27]` direto, a ordem `ch`/`i`/`r`, e tres versoes pinadas com
+`do { } while (0);`. O `lui` que o retail poe no delay slot de cada desvio que
+salta para o `fill` nao vem da forma do bloco.
