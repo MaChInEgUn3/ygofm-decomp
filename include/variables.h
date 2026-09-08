@@ -1380,6 +1380,9 @@ extern s32 D_8009B450;
 #else
 extern s32 D_8009B450[];
 #endif
+/* One-byte counter between the u16 D_8009B434 and D_8009B437, read `lbu`
+ * and stored `sb` by func_80044838's retry state machine. */
+extern u8 D_8009B436;
 extern u8 D_8009B437;
 extern u8 D_8009B43C;
 extern u8 D_8009B43D;

@@ -8055,3 +8055,19 @@ O PERMUTER RODOU AQUI (580 iteracoes) E NAO RENDEU: o melhor score dele (880)
 re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
+
+func_80044838 -- -9 em 286/295, 279 diferencas. PRIMEIRO C, escrito num passo
+a partir do rascunho do m2c mais a leitura do listing. Flags padrao (passo 0:
+gp=56, at=0, uma jump table). Maquina de estados de retry: um switch com jump
+table real sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch
+(D_8009B44F)` identicos cujo `case 0` cai no `case 1` -- o retail funde a
+aresta `>= 2` dos dois e compartilha o corpo do case 2, por isso ele esta
+escrito por extenso nos dois bracos.
+Duas faltas identificadas: o retail salva SETE callee-saved ($s0-$s6) e nos
+salvamos seis, entao falta um valor de vida longa (vale 1 sw e 1 lw); e o
+retail tem cinco `sw` em D_8009B450 onde nos temos dois, porque o cross-jump
+fundiu as varias atribuicoes `= 2` que o retail so funde em parte -- a do
+case 7 ele materializa em $s4 antes do laco.
+Medido e morto: um nome por laco para as sentinelas (-1, 4, 2) que o retail
+carrega em callee-saved, cinco nomes, BYTE-IDENTICO ao inline -- o gcc ja as
+mantem em registrador e nomear nao cria o setimo. Eixo errado.
