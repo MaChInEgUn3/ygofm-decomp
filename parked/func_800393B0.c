@@ -1,6 +1,6 @@
-/* 249/249 -- COMPRIMENTO EXATO -- e 23 diferencas, censo `nop -1, lw +1`
+/* 249/249 -- COMPRIMENTO EXATO -- e 18 diferencas, censo `nop -1, lw +1`
  * (2026-09-08, primeiro dia). Flags PADRAO (passo 0:
- * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 -> +1/92 -> 0/23
+ * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 -> +1/92 -> 0/23 -> 0/18
  * no mesmo dia.
  *
  * FORMA: passo de uma maquina de estados de sequenciador. Um braco de
@@ -53,10 +53,24 @@
  *     (+1/92), `*a = &q[1];` (-1/86), `q++; *a = q;` (-1/86), `*a = q + 1;`
  *     seguido de `q = q + 1;` (-1/86) e `D_8009B33A = *(*a)++;` (+1/92).
  *
- * O QUE FALTA: 23 diferencas, censo `nop -1, lw +1` -- a re-leitura do slot
- * custa um `lw` que o retail nao tem, e o `nop` do delay slot do `lbu`
- * ainda falta. Os dois grupos: o bloco de selecao de banco (indices 33 a
- * 67), que e ordem e registrador, e a cabeca do laco (170 a 185).
+ * 10. **A LEITURA DA TABELA DE BANCO E UM NOME, E A MASCARA E APLICADA NA
+ *     PROPRIA BASE.** `v = *(u16 *)(b + (n + d) * 2); b = (u8 *)((s32)b &
+ *     m); v = (s32)b + v;` e 23 -> 18. MEDIDO E MORTO no mesmo bloco: so o
+ *     nome da leitura sem a mascara na base (20), `d` antes de `b` no
+ *     primeiro braco (25 na base antiga, 23 nesta), nomear tambem a leitura
+ *     do TERCEIRO braco (37), as duas juntas (38), `d` antes de `b` nos dois
+ *     bracos (-1 e 215), e acumular o resultado inteiro dentro de `b` com o
+ *     store final em `(s32)b` (36, e 37 com `d` primeiro).
+ *
+ * O QUE FALTA: 18 diferencas, censo `nop -1, lw +1`, em dois grupos.
+ *  - a cabeca do laco (indices 170 a 185): a re-leitura do slot custa um
+ *    `lw` que o retail nao tem e falta o `nop` do delay slot do `lbu`; o
+ *    resto e so o registrador do endereco ($a0 no retail, $v1 aqui);
+ *  - o bloco de selecao de banco (indices 33 a 43, 52, 65 e 67): o retail
+ *    materializa `d` antes da base `b` e acumula em $v1, e nenhuma das seis
+ *    grafias medidas alcanca isso.
+ * EIXO DE FLAGS FECHADO por sweep_try (27 linhas): o padrao O2 G8 e o
+ * melhor com 18; as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265.
  * Novos em variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
  * `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h.
  */
@@ -109,7 +123,9 @@ void func_800393B0(u8 *p) {
             m = 0xFFFF0000;
             d = -0x8000;
         join:
-            v = ((s32)b & m) + *(u16 *)(b + (n + d) * 2);
+            v = *(u16 *)(b + (n + d) * 2);
+            b = (u8 *)((s32)b & m);
+            v = (s32)b + v;
         } else {
             if (n >= 0x500) {
                 n = n - 0x100;
