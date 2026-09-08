@@ -8272,9 +8272,9 @@ variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
 `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h; e
 `func_800393B0` entrou em `SMALL_DATA_NOP_FUNCS` em build.py.
 
-func_800283F4 -- 334/334, comprimento EXATO, 103 diferencas, censo de
+func_800283F4 -- 334/334, comprimento EXATO, 69 diferencas, censo de
 magnitude 8 (`sb -1, lw +2, lbu +1, nop +1, andi -2, beq -1`). Primeiro dia:
--8/272 -> 0/103. Flags padrao (passo 0: gp=30, at=4, sem `break`, sem jump
+-8/272 -> 0/103 -> 0/69. Flags padrao (passo 0: gp=30, at=4, sem `break`, sem jump
 table). Maquina de estados de uma animacao de entrada/saida.
 Quatro leituras:
  1. D_8009B338 e D_8009B140 na FORMA NUA (`_IN_DATA`): o listing grava os dois
@@ -8301,3 +8301,15 @@ Faltam tres grupos: a ORDEM do bloco de setup (indices 7 a 42), o braco do
 de D_8009B26C e D_8009B398 sai com os blocos em outra ordem).
 Novos em variables.h: D_8009B240, D_8009B24C e D_8009B250, mais os bracos
 `D_8009B246_IS_SIGNED`, `D_8009B338_IN_DATA` e `D_8009B140_IN_DATA`.
+
+ 5. O `-0x400` PINADO COM `do { } while (0);` como primeira coisa do bloco de
+    setup: o retail materializa `addiu $s0,$zero,-1024` no delay slot da
+    chamada a func_80029574 e nos o emitiamos trinta instrucoes depois, o que
+    dava $s0 ao endereco de D_800EA0E8 e rodava o bloco inteiro. 103 -> 70 com
+    o pino antes do store em D_8009B0C0, 73 com o pino depois dele, 103 com a
+    atribuicao simples movida para o inicio (sem pino).
+ 6. A leitura de D_8009B246 num NOME antes dos quatro stores: 70 -> 69 (antes
+    ou depois de `e = D_800EA0E8;` da o mesmo).
+Mais tres mortos nesta base: o local para D_8009B24C no braco do 0x20
+RE-MEDIDO (-6 e 74), um nome para D_8009B24B logo apos func_800291E0 (+1 e
+245), e trocar a ordem dos dois primeiros stores no objeto (69, identico).

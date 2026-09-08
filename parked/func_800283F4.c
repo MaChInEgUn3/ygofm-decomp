@@ -1,5 +1,5 @@
-/* 334/334 -- COMPRIMENTO EXATO -- e 103 diferencas, censo de magnitude 8
- * (2026-09-08, primeiro dia). Veio de -8/272. Flags PADRAO (passo 0:
+/* 334/334 -- COMPRIMENTO EXATO -- e 69 diferencas, censo de magnitude 8
+ * (2026-09-08, primeiro dia). Veio de -8/272 -> 0/103 -> 0/69. Flags PADRAO (passo 0:
  * gp=30, at=4, sem `break`, sem jump table).
  *
  * FORMA: maquina de estados de uma animacao de entrada/saida. Um bloco de
@@ -31,11 +31,23 @@
  *  `D_8009B246_IS_SIGNED` move um deles e os outros quatro sairam sozinhos
  *  com a leitura 3.
  *
+ *  5. **O `-0x400` PINADO COM `do { } while (0);` COMO PRIMEIRA COISA DO
+ *     BLOCO.** O retail materializa `addiu $s0,$zero,-1024` no delay slot da
+ *     chamada a func_80029574 e nos o emitiamos trinta instrucoes depois, o
+ *     que dava $s0 ao endereco de D_800EA0E8 e rodava todo o bloco. 103 ->
+ *     70 com o pino antes do store em D_8009B0C0, 73 com o pino depois dele
+ *     e 103 com a atribuicao simples movida para o inicio (sem pino) -- os
+ *     tres medidos.
+ *  6. **A leitura de D_8009B246 num NOME antes dos quatro stores** (70 ->
+ *     69). Antes ou depois de `e = D_800EA0E8;` da o mesmo.
+ *
  * MEDIDO E MORTO: remover o local `e` para D_800EA0E8 e escrever o simbolo
  * inline nos quatro stores (272, censo identico na base antiga); um local
- * para D_8009B24C no braco `(D_8009B248 & 0x20) == 0` (-6 e 107 -- tira SEIS
- * instrucoes, entao a leitura repetida que o retail tem nao e um local
- * daquele braco).
+ * para D_8009B24C no braco `(D_8009B248 & 0x20) == 0`, RE-MEDIDO nesta base
+ * (-6 e 74 -- tira SEIS instrucoes, entao a leitura repetida que o retail
+ * tem nao e um local daquele braco); um nome para D_8009B24B logo apos a
+ * chamada a func_800291E0 (+1 e 245); e trocar a ordem dos dois primeiros
+ * stores no objeto (69, identico).
  *
  * O QUE FALTA: 103 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
  * andi -2, beq -1` (magnitude 8), em tres grupos:
@@ -82,15 +94,16 @@ void func_800283F4(void) {
     s16 v;
 
     if (func_800282E8() == 0) {
+        do { neg = -0x400; } while (0);
         D_8009B0C0 = 1;
-        neg = -0x400;
         func_80029574(3);
+        k = D_8009B246;
         e = D_800EA0E8;
         *(s16 *)(e + 0xEA) = 0x100;
         *(s16 *)(e + 0xE8) = 0;
         *(s16 *)(e + 0xEC) = 0;
         *(s16 *)(e + 0xEE) = 0xFF;
-        func_80029164(3, D_8009B246);
+        func_80029164(3, k);
         o = func_800291E0(3, -1, -1);
         *(s16 *)(o + 0x30) = -0x8C;
         o[0x21] = 0x80;
