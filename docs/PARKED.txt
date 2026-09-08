@@ -8056,18 +8056,35 @@ re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
-func_80044838 -- -9 em 286/295, 279 diferencas. PRIMEIRO C, escrito num passo
-a partir do rascunho do m2c mais a leitura do listing. Flags padrao (passo 0:
+func_80044838 -- **295/295, comprimento EXATO, 95 diferencas**. Primeiro C
+escrito hoje: -9/279 -> +2/130 -> 295/295 e 95, em DUAS edicoes, as duas
+regras que vieram de func_800577B0 no mesmo dia. Flags padrao (passo 0:
 gp=56, at=0, uma jump table). Maquina de estados de retry: um switch com jump
 table real sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch
-(D_8009B44F)` identicos cujo `case 0` cai no `case 1` -- o retail funde a
+(D_8009B44F)` identicos cujo `case 0` cai no `case 1`; o retail funde a
 aresta `>= 2` dos dois e compartilha o corpo do case 2, por isso ele esta
 escrito por extenso nos dois bracos.
-Duas faltas identificadas: o retail salva SETE callee-saved ($s0-$s6) e nos
-salvamos seis, entao falta um valor de vida longa (vale 1 sw e 1 lw); e o
-retail tem cinco `sw` em D_8009B450 onde nos temos dois, porque o cross-jump
-fundiu as varias atribuicoes `= 2` que o retail so funde em parte -- a do
-case 7 ele materializa em $s4 antes do laco.
-Medido e morto: um nome por laco para as sentinelas (-1, 4, 2) que o retail
-carrega em callee-saved, cinco nomes, BYTE-IDENTICO ao inline -- o gcc ja as
-mantem em registrador e nomear nao cria o setimo. Eixo errado.
+A PRIMEIRA EDICAO E A REGRA DO CROSS-JUMP LIDA PELO LADO DA ALOCACAO, e vale
+guardar assim: a funcao tem sete `D_8009B450 = K;` que terminam todas em
+[sw $v0,D_8009B450][j tail]. O cross-jump compara as instrucoes antes de um
+salto com as instrucoes antes do ROTULO do salto, e o bloco que precede o
+rotulo do tail e o fim do laco do case 7 -- no retail esse ultimo store e
+`sw $s4,...`, registrador DIFERENTE porque o 2 esta materializado em $s4
+antes do laco, e isso sozinho quebra a cadeia inteira. O retail tem cinco
+stores, nos tinhamos dois. `do { k = 2; } while (0);` no preheader levou de
+-9/279 a +2/130; o mesmo nome SEM o pino e byte-identico ao literal.
+A segunda: o bloco `func_80073910(h); D_8009B450 = 0;` escrito DENTRO do `if`
+anterior, depois do `break`. O retail o poe entre o `break` do teste do
+func_80044470 e o resto do case 0, com o `beqz` saltando por cima; um rotulo
+dentro de um bloco alcancado por `goto` de fora e a unica grafia que move o
+bloco. +2/130 -> 295/295 e 95.
+Medido e morto com numeros: cinco nomes para as sentinelas de laco (-1, 4, 2)
+sao byte-identicos ao inline -- o gcc ja as mantem em registrador e nomear
+nao cria o callee-saved que faltava (era o pino que criava); e a posicao do
+`i -= 1;` nos lacos 2 e 3 (antes da chamada, depois do teste, e as duas
+juntas) da 132, 130, 132 contra 130, tres grafias e o mesmo numero.
+Residuo: nos tres lacos que ainda diferem o retail poe o ULTIMO ARGUMENTO da
+chamada no delay slot do `jal` e o `addiu $s0,-1` no do `bne`, e nos fazemos
+o contrario -- o laco 1, que tem dois argumentos e nenhum literal, sai exato;
+o laco 3 tem a aresta de volta invertida; e o `addiu $s4,$zero,2` sai duas
+posicoes cedo no preheader.
