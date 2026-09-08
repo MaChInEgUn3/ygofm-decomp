@@ -5407,7 +5407,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 225/225, CENSO VAZIO, 52 differences.
+func_80018608 -- 225/225, CENSO VAZIO, 41 differences.
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
@@ -5462,6 +5462,14 @@ func_80018608 -- 225/225, CENSO VAZIO, 52 differences.
   D_800E9FF0 so the stores stay `14($v1)`/`16($v1)` instead of folding to
   %lo(sym+14) (64 -> 62); and inside the loop a name for the low field plus
   the shift written back into `w` (62 -> 52, either half alone 64).
+  52 -> 41: the D_801D4244 base as a local assigned BEFORE EACH LOOP. Retail
+  hoists it into each preheader and allocates it SECOND, where the inline
+  form creates the pseudo inside the loop and allocates it last -- which
+  rotated every other register in the body. One shared assignment is -2/99,
+  one at the top of case 4 is -4/114. Its position in the preheader inverts
+  the listing: retail emits the pair LAST and writing it last is 52, first is
+  41, between g and i is 53. The body temporaries want to be SHARED between
+  the loops (own w/x is the same 41, own cursor/counter/index is -1/100).
   Residue: all register allocation in the two loops.
   Candidate in parked/func_80018608.c.
 

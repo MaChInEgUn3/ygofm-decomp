@@ -1,4 +1,4 @@
-/* 225/225, CENSO VAZIO, 52 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* 225/225, CENSO VAZIO, 41 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -110,9 +110,24 @@
  *     0x1FF) * 10;`. Retail has `andi $a0,$v1,511` into a fresh register and
  *     `sra $v1,$v1,9` in place, which is the destination rule both ways at
  *     once. 62 to 52. Either half alone is 64.
- * Residue: 52, all register allocation inside the two loops -- retail
- * carries the accumulators in $t0/$t1, the cursor in $a3, the counter in
- * $a2 and the D_801D4244 base in $a1, and every one of ours is rotated.
+ * 52 -> 41: the D_801D4244 base as a local, assigned BEFORE EACH LOOP.
+ * Retail hoists `addiu $a1,%lo(D_801D4244)` into each preheader and
+ * allocates it SECOND ($a1), where the inline `D_801D4244[j]` creates the
+ * pseudo inside the loop and allocates it last -- which is what rotated
+ * every other register in the body. One assignment shared by both loops is
+ * -2/99 and one at the top of case 4 is -4/114, so it has to be one per
+ * loop; this is the phase rule, and the base is the value that crosses no
+ * boundary.
+ * Its POSITION in the preheader is a knob and the obvious reading of the
+ * listing is wrong: retail emits the pair LAST, after the cursor and the
+ * counter, and writing it last in the source is 52. First is 41, and
+ * between `g` and `i` is 53.
+ * The loop body's temporaries want to be SHARED between the two loops:
+ * giving the second loop its own `w`/`x` is the same 41, and its own
+ * cursor, counter and index as well is -1/100.
+ * Residue: 41, all register allocation, and by the aligned diff it is now
+ * sixteen blocks -- mostly the position of the two `lui`/`addiu` pairs
+ * around the divisions.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -129,6 +144,7 @@ void func_80018608(void) {
     s32 sa;
     s32 sb;
     s32 w;
+    s32 *tb;
     s32 x;
     s32 h;
     s32 q1;
@@ -181,6 +197,7 @@ void func_80018608(void) {
         if (((D_8009B0F4 & 0x2000030) | D_8009B134) == 0) {
             func_8003FF08(D_8009B36A);
             func_80024824();
+            tb = D_801D4244;
             sa = 0;
             sb = 0;
             g = D_801A7E20;
@@ -189,7 +206,7 @@ void func_80018608(void) {
                 i += 1;
                 j = *(s16 *)g;
                 j = j - 1;
-                w = D_801D4244[j];
+                w = tb[j];
                 x = w & 0x1FF;
                 sa += x * 10;
                 w = w >> 9;
@@ -199,6 +216,7 @@ void func_80018608(void) {
 
             q1 = sa / 40;
             q2 = sb / 40;
+            tb = D_801D4244;
             sa = 0;
             sb = 0;
             g = D_801A7E20 + 0xF0;
@@ -210,7 +228,7 @@ void func_80018608(void) {
                 i += 1;
                 j = *(s16 *)g;
                 j = j - 1;
-                w = D_801D4244[j];
+                w = tb[j];
                 x = w & 0x1FF;
                 sa += x * 10;
                 w = w >> 9;
