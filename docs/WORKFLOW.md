@@ -2047,6 +2047,22 @@ candidate references but does not already define, and prints only strict
 improvements on `(abs(length_error), differences)`. First run: **one match** --
 func_8003353C, 2 differences to 0 on `D_8009B3A4_IS_VOLATILE` -- plus three
 park improvements.
+**Fourth run, 2026-09-08: zero hits at `<= 8`, and the full run does not fit
+in one sitting.** The eleven assembly-debt candidates are the closest parks in
+the tree now, and the four at or below eight differences -- func_8004A854 (1),
+func_80040588 (3), func_8002C7E8 (6), func_8004A6F8 (7) -- plus every other
+park in that band give nothing. A clean negative on the band that matters
+most.
+**Operationally: `sweep_guards.py` at the default 50 does NOT finish in a
+600-second window, and launching it in the background got it killed by the
+harness for low memory** -- this box has 3.4 GB and each try_func spawns wine.
+The tool is serial (one `subprocess.run` at a time), so the parallelism is not
+the problem; the run is simply long. Pass a low `max_differences` and raise it
+in steps: `8` finishes in well under five minutes, `20` does not. Do not
+background it and walk away -- it produced no output at all before being
+killed, which reads exactly like a clean negative and is not one.
+
+
 **Third run, 2026-09-05, after the .data sweep added 29 `_IN_DATA` arms to the
 pool: zero hits over the 98 parked candidates at or below 30 differences.**
 A clean negative worth having -- the new arms reach the bare form that the
