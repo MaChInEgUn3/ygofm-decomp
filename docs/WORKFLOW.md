@@ -1857,6 +1857,23 @@ score the outputs, read the diff of the best, and then write what it was
 reaching for -- the permuter optimises a weighted diff and will happily reach
 a mechanism by an illegal route, or carry a passenger to get there.
 
+**The uninitialised-read class is not rare and not reproducible: measure the
+legitimate spellings and then STOP.** On func_800171A8 two separate permuter
+runs, from two different bases, both found their best result the same way --
+`if (v) { body } else { body }` with identical arms wrapped round one switch
+arm, where `v` is not assigned at that point. Re-scored at exact length they
+are 102 and 117 against a base of 123, so the pull is real and large. Six
+legitimate spellings were measured against it and none comes close: a
+`do { body } while (0);` round the same body (135), three ways of giving the
+variable a definition before the switch (`= mode` 129, `= (s32)p` 123,
+`= 0` 123), and the same duplicated `if`/`else` under a *defined* condition
+(`if (mode)`, `if (p)`, both 123). Under a second *uninitialised* condition
+(`if (w)`) it is 110 -- which is the control that identifies the lever: it is
+the undefined READ, not the duplication. gcc treats such a read as live-in
+from function entry and the whole allocation shifts. Write it down as a
+mechanism with no known legitimate spelling and move on; do not install it,
+and do not invent a rule from a number you cannot use.
+
 **Read what the permuter actually changed before believing its score.**
 One genuine instance: on func_8005B260 it hoisted `new_var = &*(s32 *)src;`
 out of a copy loop and read `*new_var` inside, so every iteration copies the

@@ -70,6 +70,22 @@
  * Tambem medido e morto: o mesmo envolvimento no rabo do m3EC (123, neutro)
  * e nos quatro bracos do m4B8 (131, pior).
  *
+ * **SEGUNDA CORRIDA DO PERMUTER, da base de 123: cinco saidas, a melhor
+ * re-pontua 102 com comprimento exato -- e e A MESMA FORMA INSTALAVEL
+ * NENHUMA VEZ.** Agora no case 8: `if (v) { corpo } else { corpo }` com
+ * arms identicas, e `v` NAO INICIALIZADA ali. Duas corridas, dois bracos
+ * diferentes, o mesmo mecanismo -- e o que ele faz e estender a faixa de
+ * vida de uma variavel PARA TRAS por meio de um USO, nao de uma definicao.
+ * SEIS grafias legitimas foram medidas tentando reproduzi-lo e nenhuma
+ * chega perto: `do { corpo } while (0);` 135; `v = mode;` antes do switch
+ * 129; `v = (s32)p;` 123; `v = 0;` 123; e o mesmo `if`/`else` duplicado com
+ * uma condicao DEFINIDA (`if (mode)` e `if (p)`) 123 nos dois. Com uma
+ * condicao tambem NAO INICIALIZADA (`if (w)`) da 110, o que confirma que a
+ * alavanca e a leitura indefinida e nao a duplicacao.
+ * Fica escrito como MECANISMO SEM GRAFIA LEGITIMA CONHECIDA. Nao instalar.
+ * Tambem medido e morto: ler D_8009B0F4 antes dos stores no m3EC (125) e
+ * nos tres bracos do m400 (129).
+ *
  * MEDIDO E MORTO NUM SEGUNDO TICK, procurando a outra metade do par:
  *  - tirar os pinos do m480 sobre a base z2: -4/222, +2/206, +2/125 (os
  *    dois, o do case 0, o do case 10). Os pinos continuam load-bearing;
