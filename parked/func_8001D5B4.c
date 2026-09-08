@@ -70,6 +70,27 @@
  * the best at -2/35, `as -G2` and `as -G4` tie it, and every other row is
  * 49 or worse. The three jump-optimisation flags the entry above names
  * were tried on two layouts; the sweep covers the rest.
+ *
+ * 2026-09-08, read with the difflib ALIGNMENT rather than the positional
+ * diff, and the candidate CHANGED as a result. The alignment showed our
+ * `==` arm emitted as a six-instruction block at the END of the function
+ * where retail has it inline -- a whole arm in the wrong place, which the
+ * positional diff had been charging as scattered register differences.
+ * The entry above records "the two arms swapped so `!=` is the fall-through:
+ * -2, 36" and rejected it on the count. That was the wrong call: at 36 the
+ * arms are in RETAIL'S ORDER, the block move is gone, and the census
+ * magnitudes are smaller -- `bne` (0,1) against (0,2) and `beq` (6,5)
+ * against (6,4), i.e. ONE inverted branch instead of two. Same |length|,
+ * same six divergent opcodes, one worse on the count, and structurally much
+ * closer. Installed at 36 for that reason.
+ * With the arms right the residue is seven blocks and all of it is the
+ * return-1 tail: retail has THREE sites (a shared `j`/`addiu 1` reached by
+ * the call's fall-through and both slt-fail paths, the `= 3` arm's own copy,
+ * and the fall-through from the `= 2` arm) and gcc gives us one. Adding an
+ * explicit `return 1;` to the `= 3` arm is -2/36, an early
+ * `if (call != 0) return 1;` is -2/36, and both together are -2/36 -- gcc
+ * cross-jumps them however they are written, which is what the entry above
+ * concluded and is now confirmed on the corrected arm order.
  */
 #include "common.h"
 
@@ -83,7 +104,13 @@ s32 func_8001D5B4(u8 *arg0) {
     if (func_80024088(arg0, D_8009B160) == 0) {
         D_8009B160 = -1;
 
-        if (D_8009B1D7 == *(s8 *)(arg0 + 0x10)) {
+        if (D_8009B1D7 != *(s8 *)(arg0 + 0x10)) {
+            D_8009B160 = 1;
+
+            if (D_8009B1D7 < *(s8 *)(arg0 + 0x10)) {
+                D_8009B160 = 3;
+            }
+        } else {
             if (D_8009B1D6 == *(s8 *)(arg0 + 0xF)) {
                 return 0;
             }
@@ -92,12 +119,6 @@ s32 func_8001D5B4(u8 *arg0) {
 
             if (D_8009B1D6 < *(s8 *)(arg0 + 0xF)) {
                 D_8009B160 = 2;
-            }
-        } else {
-            D_8009B160 = 1;
-
-            if (D_8009B1D7 < *(s8 *)(arg0 + 0x10)) {
-                D_8009B160 = 3;
             }
         }
     }
