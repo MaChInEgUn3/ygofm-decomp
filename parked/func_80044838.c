@@ -1,6 +1,5 @@
-/* 295/295 -- COMPRIMENTO EXATO -- e **11 diferencas**, censo VAZIO, e das
- * onze SEIS sao numeracao de rotulo. 2026-09-08, escrita do zero hoje:
- * -9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 -> 11.
+/* 295/295 -- COMPRIMENTO EXATO -- e **3 diferencas**, censo VAZIO. 2026-09-08, escrita do zero hoje:
+ * -9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 -> 11 -> 3.
  * Flags PADRAO (passo 0: gp=56, at=0, uma jump table jtbl_80010548).
  *
  * FORMA: maquina de estados de retry. `switch ((s8)((u8)D_8009B43E - 1))`
@@ -71,22 +70,33 @@
  *  - `k = 2;` sem o pino, e `k = 2;` antes de `i = 0xA;`: -9 os dois;
  *  - `do { k = 2; } while (0);` ANTES de `i = 0xA;`: 13.
  *
- * O QUE FALTA (11 diferencas, censo VAZIO):
- *  a) UMA delas e estrutural e AINDA NAO IDENTIFICADA: o `break` do
- *     `case 2` sai para um rotulo que o try_func numera 26 e que aparece
- *     **uma unica vez** no nosso listing, enquanto o do retail vai para o
- *     tail (numerado 5 e usado doze vezes). Como o proprio `bltz` duas
- *     linhas abaixo vai para L5 nos DOIS lados, nao e renumeracao: e um
- *     bloco distinto de verdade. As outras cinco diferencas de rotulo sao
- *     o deslocamento que essa causa.
- *  b) TRES sao a ordem do preheader do case 7: o retail tem
- *     `lui $s3,%hi` / `addiu $s2,-1` / `addiu $s4,2` e nos temos o
- *     `addiu $s4,2` primeiro. Nove grafias medidas, todas piores ou iguais.
- *  c) DUAS sao alvos do mesmo laco, deslocados junto com (a).
- * A build completa foi rodada com o candidato em src/ e REPROVOU, o que e
- * consistente com (a) e (b) serem reais.
+ * A ALAVANCA QUE FECHOU OITO DAS ONZE: **`D_8009B450` E VOLATILE.** O
+ * `case 2` testa `if (D_8009B450 != 0)` e o tail, oito instrucoes adiante,
+ * faz `*arg2 = D_8009B450;`. Sem volatile o gcc reaproveita o valor ja em
+ * $v0 e **desvia o `beqz` para o tail + 4**, pulando o `lw`; o retail
+ * desvia para o tail e recarrega. Era essa a diferenca "estrutural nao
+ * identificada" do tick anterior: o objdump cru do objeto mostra
+ * `beqz v0,458` onde o tail comeca em 454, e nenhuma leitura do listing
+ * renderizado podia mostrar isso, porque o try_func imprime ROTULOS e nao
+ * ENDERECOS. As outras cinco diferencas de rotulo eram o deslocamento que
+ * essa causava. 11 -> 3.
+ * **A licao de ferramenta: quando um alvo de desvio difere e o resto casa,
+ * rode o objdump no objeto e compare ENDERECOS.** Promover para src/, deixar
+ * a build falhar e rodar
+ * `$(python -c 'import build;print(build.OBJDUMP)') -dr -z --no-show-raw-insn
+ * build/src/<func>.o` custa dois minutos e responde o que tres ticks de
+ * leitura do diff renderizado nao responderam.
+ *
+ * O QUE FALTA (3 diferencas, censo VAZIO): so a ordem do preheader do case
+ * 7. O retail tem `lui $s3,%hi(D_800F2B00)` / `addiu $s2,-1` /
+ * `addiu $s4,2` e nos temos o `addiu $s4,2` primeiro. Doze grafias medidas,
+ * todas iguais ou piores, e as sete ultimas RE-MEDIDAS sobre a base
+ * volatile (regra 3): `k = 2;` sem pino -9, o pino antes do `i = 0xA;` 5,
+ * `k = 2;` como ultima instrucao do laco -3, o literal sem local nenhum -9,
+ * a sentinela -1 nomeada antes do pino 5, a base D_800F2B00 nomeada +1/39,
+ * as duas juntas 127.
  */
-#define D_8009B450_IS_SCALAR
+#define D_8009B450_IS_VOLATILE
 #include "common.h"
 
 s32 func_80044608(void);

@@ -8056,35 +8056,32 @@ re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
-func_80044838 -- **295/295, comprimento EXATO, 11 diferencas, censo VAZIO**,
-e das onze SEIS sao numeracao de rotulo. Escrita do zero em 2026-09-08:
--9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 -> 11. Flags padrao. Maquina de
-estados de retry com jump table real e dois `switch (D_8009B44F)` internos
-identicos cujo `case 0` cai no `case 1`.
-A ALAVANCA DO DIA, e vale levar para qualquer laco contado: **O DECREMENTO
-DO CONTADOR VAI DEPOIS DO TESTE DE SAIDA, NAO ANTES.** Nos tres lacos o
-retail tem o `bne`/`beq` de saida com `addiu $s0,-1` no DELAY SLOT dessa
-mesma instrucao -- o preenchedor puxa do fio de fall-through, isto e, de
-DEPOIS do desvio. Escrito antes da chamada, antes do teste, ou entre o
-`if`/`else` e o teste, o decremento cai no delay slot do `jal` ou no do `j`
-do braco `then`, onde o gcc ainda o DUPLICA. Escrito depois do
-`if (x) goto ...;` cai onde o retail o tem, e e semanticamente igual porque
-o contador esta morto no caminho do `goto`. Um laco por vez sobre a base de
-88: laco 3 sozinho +1/55, laco 2 sozinho 85, os dois 46, e o do case 7
-fechando 11. O laco 1 nunca precisou -- tem dois argumentos e nenhum
-literal e sai exato desde o primeiro rascunho.
-As outras tres edicoes sao regras de func_800577B0 do mesmo dia: o pino
-`do { k = 2; } while (0);` que quebra a cadeia de cross-jump pelo REGISTRADOR
-do ultimo store antes do rotulo (tira-lo agora ainda e -9); o bloco fora de
-linha escrito dentro do `if` anterior depois do `break`; e a chamada final
-escrita nos tres caminhos em vez de um `rel:` compartilhado.
-Doze grafias medidas e mortas com numeros estao no cabecalho do parked,
-incluindo tres trincas que fecharam eixos (a forma do laco: 95/95/95; os
-nomes dos argumentos: 88/88/88; os tres lacos como `goto`: -1/-4/-5).
-Residuo: seis diferencas sao numeracao de rotulo (um `beq` do `case 2`
-aponta para um rotulo que o try_func numera 26 onde o retail numera 5, e dai
-todos andam um), tres sao a ordem do preheader do case 7 (`addiu $s4,2`
-antes do `lui $s3,%hi` -- vem do pino, e todas as reordenacoes medidas sao
-piores), e duas sao alvos do mesmo laco. **A build completa foi rodada com o
-candidato em src/ e REPROVOU**, entao pelo menos uma das onze e real e nao
-so o renderizador.
+func_80044838 -- **295/295, comprimento EXATO, 3 diferencas, censo VAZIO**.
+Escrita do zero em 2026-09-08: -9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 ->
+11 -> 3. Flags padrao. Maquina de estados de retry com jump table real e
+dois `switch (D_8009B44F)` internos identicos cujo `case 0` cai no `case 1`.
+A ALAVANCA QUE FECHOU OITO DAS ONZE ULTIMAS: **D_8009B450 e VOLATILE.** O
+`case 2` testa `if (D_8009B450 != 0)` e o tail, oito instrucoes adiante, faz
+`*arg2 = D_8009B450;`. Sem volatile o gcc reaproveita o valor ja em $v0 e
+DESVIA O `beqz` PARA O TAIL + 4, pulando o `lw`; o retail desvia para o tail
+e recarrega.
+**A licao de ferramenta vale mais que a alavanca**: eu passei tres ticks
+lendo esse desvio como "numeracao de rotulo" no diff do try_func, ate
+escrever no parque que era um bloco distinto que eu nao sabia qual era. O
+try_func imprime ROTULOS, nao ENDERECOS. Promover para src/, deixar a build
+falhar e rodar o objdump em build/src/<func>.o mostra `beqz v0,458` onde o
+tail comeca em 454 -- dois minutos, e responde o que a leitura do diff
+renderizado nao responde. As outras cinco diferencas de rotulo eram so o
+deslocamento que essa causava.
+As quatro edicoes anteriores estao no cabecalho do parked com numeros: o
+pino `do { k = 2; } while (0);` contra o cross-jump (o `find_cross_jump`
+compara com o bloco que precede FISICAMENTE o rotulo, e o retail muda o
+REGISTRADOR do ultimo store dali); o bloco fora de linha escrito dentro do
+`if` anterior depois do `break`; a chamada final escrita nos tres caminhos
+(regra do func_80030998); e o DECREMENTO DO CONTADOR DEPOIS DO TESTE DE
+SAIDA, que virou regra no WORKFLOW.
+Residuo: as tres sao a ordem do preheader do case 7 -- o retail tem
+`lui $s3,%hi` / `addiu $s2,-1` / `addiu $s4,2` e nos temos o `addiu $s4,2`
+primeiro. Doze grafias medidas, todas iguais ou piores, e as sete ultimas
+re-medidas sobre a base volatile pela regra 3. O permuter ja rodou aqui
+(1253 iteracoes, zero saidas).
