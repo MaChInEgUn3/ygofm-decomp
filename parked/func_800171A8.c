@@ -53,7 +53,18 @@
  * pelo `w` com cast) e **+1 com 123 diferencas**: METADE DE UM PAR, porque
  * cai o numero e sobe uma instrucao. Procurar a outra metade antes de
  * descartar.
- * MEDIDO E MORTO: quatro ordens de declaracao (`v` antes de `b`, `v`/`w`
+ * MEDIDO E MORTO NESTE TICK, todos sobre a base de 135:
+ *  - um nome PROPRIO (`u`) para o valor mascarado do m4B8, separando-o do
+ *    `v` do m400 -- os dois papeis sao diferentes (o do m400 chega CRU e e
+ *    mascarado na juncao, o do m4B8 chega ja mascarado): 135, neutro aqui,
+ *    mas sobre a base y1 (ponteiro e `w` no mesmo nome) e +1 com **118**,
+ *    a melhor contagem ja vista nesta funcao;
+ *  - nos bracos do m400, o ponteiro e o `v` no MESMO nome, porque o retail
+ *    reusa $v0 para os dois ali (o ponteiro morre nos stores antes de o
+ *    valor nascer): **147**, pior. O emparelhamento certo nao e esse;
+ *  - um nome so para o 0x10000 e o `w` dos cases 0 e 10, que o retail
+ *    carrega os dois em $v1: 135, neutro.
+ * MEDIDO E MORTO ANTES: quatro ordens de declaracao (`v` antes de `b`, `v`/`w`
  * antes de `b`, `m` primeiro, `v` e `m` primeiro) dao 135, 135, 135, 135 --
  * quatro grafias iguais, EIXO ERRADO.
 
