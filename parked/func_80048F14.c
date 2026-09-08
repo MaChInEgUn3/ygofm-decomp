@@ -1,4 +1,4 @@
-/* 63/63 and 15 differing (2026-09-08). RECONSTRUCTED: src/ holds an
+/* 63/63 and 14 differing (2026-09-08). RECONSTRUCTED: src/ holds an
  * ASSEMBLY-DEBT transcription (Unchiga's port) with three register pins and
  * two asm blocks, and the 15-difference C this tree had reached on its own in
  * August was never saved -- only its story survived, in the PARKED.txt entry
@@ -31,7 +31,28 @@
  * $v0,$v0,$v1 with the constant 255 in $v1, we get the rotation, and the
  * 0x1582 store schedules before the third read instead of after it. All six
  * orderings of the second group were measured in August -- three give 15 and
- * three are an instruction worse. The debt is NOT retired until this matches.
+ * three are an instruction worse.
+ *
+ * 15 -> 14 (2026-09-08): the `r + 0x1582` store moved OUT of its group and
+ * written after `*(s32 *)(t + 0x1560) = 0x801E2000;` in the third. Six
+ * positions measured -- after the 0x1564 store (19), after 0x1560 (14),
+ * after the first -1 (22), after the last -1 (25), after the 0xFFFF
+ * read-back (27), first in group 2 (15) -- so the position is a real knob
+ * with a sharp optimum, not a flat axis. Retail emits `sh $zero,5506`
+ * between the third base read and the two word stores; writing it THERE
+ * (right after `t = D_8009B45C;`) is 26, and with the two word stores
+ * swapped 25 -- the emitted position and the source position are not the
+ * same thing here.
+ * Also dead: naming the 0x801E2000 constant so its lui/ori pair can split
+ * the way retail splits it is -1/46 at two placements and -1 again with the
+ * 255 named too, because gcc then keeps the value in one register and the
+ * pair stops splitting at all; naming the 255 alone is 15; the four -1
+ * stores hoisted above the two word stores is 26.
+ * The residue is 14: a four-way register rotation ($a1/$a2, $a0/$a1,
+ * $v0/$a0, $v1/$v0) and the 0xFFFF read-back coming out as a real
+ * `lw $a0,5476($v1)` where retail has `addu $a0,$a1,$zero` -- gcc does not
+ * forward the store it has just made. The debt is NOT retired until this
+ * matches.
  */
 #define D_8009B45C_IS_SCALAR
 #include "common.h"
@@ -73,11 +94,11 @@ void func_80048F14(void) {
     r = D_8009B45C;
     *(s16 *)(r + 0x1580) = 0xFF;
     r[0x1584] = 0xFF;
-    *(s16 *)(r + 0x1582) = 0;
 
     t = D_8009B45C;
     *(s32 *)(t + 0x1564) = 0x801EA800;
     *(s32 *)(t + 0x1560) = 0x801E2000;
+    *(s16 *)(r + 0x1582) = 0;
     *(s16 *)(t + 0x1578) = -1;
     *(s16 *)(t + 0x157A) = -1;
     *(s16 *)(t + 0x157C) = -1;
