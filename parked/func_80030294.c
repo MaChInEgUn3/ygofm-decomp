@@ -1,4 +1,4 @@
-/* 328/329 -- UMA instrucao a menos -- e 268 diferencas, censo de magnitude
+/* 328/329 -- UMA instrucao a menos -- e 267 diferencas, censo de magnitude
  * CINCO e so QUATRO opcodes (`addu -2, lui -1, sw +1, lw +1`)
  * (2026-09-08). Veio de -28/325 -> -23/325 -> -3/314 -> -1/307 -> -2/268
  * -> -1/268. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
@@ -116,6 +116,32 @@
  * 104 -- mas custa cinco instrucoes noutro lugar (+2/285, censo `nop +2,
  * lb +2, lbu +1, addu -2, lui -1`), entao NAO e a resposta. Falta a grafia
  * de fonte que faz o mesmo so para `a` e `b`.
+ *
+ * SETIMA RODADA (2026-09-08) -- o eixo do CSE esta FECHADO por medicao, e o
+ * $s3 nao cede por grafia de fonte. Tudo abaixo com o candidato a -1/268:
+ *  - `&a[1] + (i - 1)` e `&b[1] + (e - 1)` (base sp+20/sp+44, um valor que o
+ *    CSE nao tem na tabela): IDENTICO, 268. O gcc reassocia de volta;
+ *  - `a` e `b` declarados como os PROPRIOS structs (`Blk14 av; Blk10 bv;`)
+ *    com `av = *(Blk14 *)D_80010250;` e `&av.w[i]`: IDENTICO, 268;
+ *  - a ORDEM das quatro copias trocada para c, d, a, b: 267, censo igual.
+ *    E a unica que move alguma coisa, e move UMA diferenca. INSTALADA;
+ *  - permuter, 50 iteracoes a `-j 1`: um so output (6545 contra 6575, isto
+ *    e ruido) e ele CLOBBERA `n`, que e o limite do laco -- `n = car < *q;
+ *    if (n)`. As duas metades decompostas e escritas de forma legitima
+ *    (`z = i + r;` e um `lt` novo para a comparacao) sao 267, ou seja
+ *    valem ZERO.
+ * SEM `cb`/`db` o candidato e 325/329 e 316 com censo de magnitude QUATRO e
+ * TRES opcodes (`addu -2, lui -1, addiu -1`) e NENHUMA instrucao a mais --
+ * isto e, quatro faltando e zero sobrando, sem o $s3. Com eles e -1/267 mas
+ * com `sw +1`/`lw +1` de lixo. Os dois sao a mesma funcao vista de dois
+ * lados: -1 = tres faltando mais duas sobrando. Guardado em
+ * scratchpad/30294/z4.c.
+ * O `lui -1` esta localizado: o retail poe `lui %hi(D_800EAED8)` no delay
+ * slot do `beq` que salta para `fill` quando `(D_8009B2EA & 0x40) == 0`, e
+ * nos enchemos esse slot com `sll $v1,$a0,1` (o indice de `p`), porque no
+ * nosso codigo o destino desse shift esta livre e no retail e `$v0`, que a
+ * extensao de sinal de `t2` ja esta usando. E uma consequencia da
+ * alocacao, nao da ordem da fonte.
  */
 #define D_8009B394_IN_DATA_VOLATILE
 #define D_8009B396_IN_DATA_VOLATILE
@@ -154,10 +180,10 @@ s32 func_80030294(void) {
     u8 *r;
 
     ret = 0;
-    *(Blk14 *)a = *(Blk14 *)D_80010250;
-    *(Blk10 *)b = *(Blk10 *)D_80010264;
     *(Blk14 *)c = *(Blk14 *)D_80010274;
     *(Blk8 *)d = *(Blk8 *)D_8009AF4C;
+    *(Blk14 *)a = *(Blk14 *)D_80010250;
+    *(Blk10 *)b = *(Blk10 *)D_80010264;
     cb = c;
     db = d;
     t2 = (&D_8009B2C0)[(s8)D_8009B2DC];

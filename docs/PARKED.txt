@@ -8469,3 +8469,27 @@ retail o tem. E `-fno-cse-follow-jumps` tira o $s3 e a moldura volta a 104,
 mas custa cinco instrucoes noutro lugar (+2/285, censo `nop +2, lb +2,
 lbu +1, addu -2, lui -1`), entao nao e a resposta. FALTA a grafia de fonte
 que faca isso so para `a` e `b`.
+
+SETIMA RODADA (2026-09-08) -- 328/329 e 267. O eixo do CSE esta FECHADO por
+medicao e o $s3 nao cede por grafia de fonte:
+ - `&a[1] + (i - 1)` e `&b[1] + (e - 1)`, isto e uma base (sp+20, sp+44) que
+   o CSE nao tem na tabela: IDENTICO, 268. O gcc reassocia de volta;
+ - `a` e `b` declarados como os PROPRIOS structs (`Blk14 av; Blk10 bv;`) com
+   `av = *(Blk14 *)D_80010250;` e `&av.w[i]`: IDENTICO, 268;
+ - a ORDEM das quatro copias trocada para c, d, a, b: 267. E a unica que move
+   alguma coisa, e move UMA diferenca. Instalada;
+ - permuter, 50 iteracoes a `-j 1`: um so output, 6545 contra 6575 (ruido), e
+   ele CLOBBERA `n`, que e o limite do laco (`n = car < *q; if (n)`). As duas
+   metades escritas de forma legitima (`z = i + r;` e um nome novo para a
+   comparacao) sao 267, isto e valem ZERO.
+SEM `cb`/`db` o candidato e 325/329 e 316 com censo de magnitude QUATRO e
+TRES opcodes (`addu -2, lui -1, addiu -1`) e NENHUMA instrucao a mais: quatro
+faltando, zero sobrando, sem o $s3. Com eles e -1/267 mas com `sw +1`/`lw +1`
+de lixo. Sao a mesma funcao vista de dois lados -- o -1 e tres faltando mais
+duas sobrando, mais uma instancia da regra 19.
+O `lui -1` esta localizado: o retail poe `lui %hi(D_800EAED8)` no delay slot
+do `beq` que salta para `fill` quando `(D_8009B2EA & 0x40) == 0`, e nos
+enchemos esse slot com `sll $v1,$a0,1` (o indice de `p`), porque no nosso
+codigo o destino desse shift esta livre e no retail e `$v0`, que a extensao
+de sinal de `t2` ja esta ocupando. Consequencia da alocacao, nao da ordem da
+fonte.
