@@ -9,7 +9,12 @@
  * and the mult follows it. Measured 2026-09-05, all worse or equal: the
  * load and the +1 inline in the multiply (3), operands swapped (2), a fresh
  * `h2` (3), `h = load; h = h + 1;` (3), `h += 1` (3), and the first block's
- * `h` renamed to `g` (81, a length change). Allocation tie-break in one
+ * `h` renamed to `g` -- recorded as "81, a length change" and THAT WAS A
+ * BROKEN MEASUREMENT: re-done 2026-09-08 at equal length it is 3, in four
+ * spellings (g declared before or after h, with the +1 split in two
+ * statements or as `+=`). The old entry's conclusion was right by accident
+ * -- the shared name IS correct -- but a count taken across a length error
+ * measures nothing, and this one had been sitting as evidence. Allocation tie-break in one
  * block -- permuter run 2026-09-05: 7500 iterations, no output at all.
  * gp=0, at=0, as -G0.
  */

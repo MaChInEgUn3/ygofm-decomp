@@ -7830,3 +7830,16 @@ func_80018FEC -- 280/280 and 131 (2026-09-06). Block 1's cursor `la D_800EA030` 
 func_80013C28 -- 286/286 and 91 truly-different instructions (2026-09-06, positional count 238). The DMA callback: a switch on the mode byte, D_8009AF18 inline at nearly every use, per-arm names where retail refuses to cross-jump. Residue is one fault cascading -- retail masks the argument into $a1 and loads the record into $a0, we do the reverse -- plus the copy loops' schedule. Twelve spellings on the first axis all score exactly 238; see the header in parked/func_80013C28.c.
 func_800330BC -- 273/273 and 9 (2026-09-07; 10 on 2026-09-06). The 10 -> 9 is a permuter output decomposed: `u = a; s = u;` in the &3 arm with `s = u;` in the &0x5000 arm, borrowing the dead halfword name from the top of the function. The card-list scroll handler: scalar arms plus as -G0 (gp=0), both flag halfwords volatile, and the four byte counter updates written as the embedded assignment `t = (p[K] = p[K] + 1);` -- that one spelling is 106 differences to 20. Residue is one variable's register, ten lines and nothing else; the two branch polarities beside it were a misread guard of mine (`== 0` for `!= 0`) and not codegen at all. See the header in parked/func_800330BC.c.
 func_8001455C -- -1 at 319/320 and 17 (2026-09-06). The CD state machine, jump-tabled so not offerable upstream. Needed the LIBCD_CALLS_RETURN_S32 guard (this unit tests the result of calls functions.h declares void), each flag set written as its own read-modify-write rather than a shared store, and the D_8009B120 callback pointer read in both predecessors of the shared call. Residue is three faults that nearly cancel; see the header in parked/func_8001455C.c.
+
+func_800734DC -- 49/49 and 19 differences (2026-09-08), and it is the FIRST REAL C
+    for a function that src/ has been carrying as an assembly transcription. It only
+    became visible as debt that day, when asm_debt.py was taught the three asm
+    spellings it could not see. The transcription's three register pins and its
+    `asm("addiu %0, %1, 0x5b98")` address block are all unnecessary: $s1 is not a
+    dead pin, it is `lookupB`, and the address block is cc1psx's own split pair,
+    which the unsized extern emits by itself at default flags (gp=0, at=0). Levers:
+    the `lb` on D_800917F0, which variables.h declares u8 (lvalue cast, +2/31 to
+    -1/15); and the `+ 1` folding into %lo, which the two arms want spelled
+    DIFFERENTLY -- arm 1 as the load's displacement, arm 2 as a named index.
+    Residue is that retail computes nothing before the branch and we hoist the
+    name. See the park header. The debt is not retired until this matches.
