@@ -956,6 +956,9 @@ extern u8 D_801D07DC[];
 extern u8 D_8009B3D4 __attribute__((section(".data")));
 #elif defined(D_8009B3D4_SIZED)
 extern u8 D_8009B3D4[4];
+#elif defined(D_8009B3D4_IS_SCALAR)
+/* func_8003E490 stores a zero to it %gp_rel, which needs a sized scalar. */
+extern u8 D_8009B3D4;
 #else
 extern u8 D_8009B3D4[];
 #endif
