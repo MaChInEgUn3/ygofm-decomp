@@ -813,12 +813,6 @@ PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"
 # free -- and because the fix is the assembler's threshold rather than
 # -mno-split-addresses, the function's jump table (jtbl_8001179C) survives.
 PER_FUNC_AS_FLAGS["func_800577B0"] = "-G0"
-# func_80030294 (parked): the unit reads one-byte and two-byte gp-relative
-# scalars beside the four-byte D_8009B2EC, and it is the four-byte one that
-# has to leave small data -- at -G2 the `%hi` of D_800EAED8 that retail
-# copies into a branch delay slot comes back, and the candidate goes from
-# 328/329 to exact length with an EMPTY opcode census.
-PER_FUNC_AS_FLAGS["func_80030294"] = "-G2"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
