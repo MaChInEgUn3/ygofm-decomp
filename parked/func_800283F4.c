@@ -1,5 +1,5 @@
-/* 326/334 -- OITO instrucoes a menos -- e 272 diferencas, censo de magnitude
- * 28 (2026-09-08, PRIMEIRO RASCUNHO que compila). Flags PADRAO (passo 0:
+/* 334/334 -- COMPRIMENTO EXATO -- e 103 diferencas, censo de magnitude 8
+ * (2026-09-08, primeiro dia). Veio de -8/272. Flags PADRAO (passo 0:
  * gp=30, at=4, sem `break`, sem jump table).
  *
  * FORMA: maquina de estados de uma animacao de entrada/saida. Um bloco de
@@ -13,24 +13,51 @@
  * D_8009B250, D_8009B254, D_8009B24B e D_8009B246. So D_8009B0C0 esta na
  * forma nua no candidato (`_IN_DATA`); D_8009B338 e D_8009B140 ainda nao.
  *
- * MEDIDO ATE AQUI:
- *  - **D_8009B246 e lido `lh` em cinco sitios e o `u16` da `lhu`.** Tanto um
- *    `(s16)` em dois sitios quanto a declaracao `s16` guardada
- *    (`D_8009B246_IS_SIGNED`) movem UM `lhu` para `lh` -- censo de magnitude
- *    30 para 28 com a contagem parada em 272, que e o caso do WORKFLOW em que
- *    so o censo enxerga o progresso. Faltam QUATRO `lh`;
- *  - remover o local `e` para D_800EA0E8 e escrever o simbolo inline nos
- *    quatro stores nao muda nada (272, censo identico).
+ * AS QUATRO LEITURAS QUE LEVARAM -8/272 A 0/103:
+ *  1. **D_8009B338 e D_8009B140 NA FORMA NUA (`_IN_DATA`).** O listing grava
+ *     os dois com `lui $at`/`sh` e `lui $at`/`sb`, que e a forma nua de um
+ *     STORE; o braco escalar da um `%gp_rel` de UMA instrucao so. Cada um
+ *     vale uma instrucao: -8 -> -7 (so B338, 223; so B140, 256) -> -6 (os
+ *     dois, 228).
+ *  2. **Cinco simbolos lidos `lui %hi` querem sair do small data**:
+ *     D_8009AF76, D_8009B0F4, D_8009B134, D_8009B398 e D_8009B39A, todos com
+ *     `_IN_DATA`. Sao os seis `lui` que faltavam: -6/228 -> 0/109.
+ *  3. **O campo +0x32 e lido `lh`, nao `lhu`** -- quatro sitios, argumento de
+ *     func_80043230.
+ *  4. **O teste do campo +0x60 e `>= 0` sobre um `s16`**, nao
+ *     `(x & 0x8000) == 0`: o retail tem `sll 16`/`bltz` e a mascara da
+ *     `andi`/`bne`. As duas juntas: 109 -> 103.
+ *  E **D_8009B246 e lido `lh` em cinco sitios**: a declaracao guardada
+ *  `D_8009B246_IS_SIGNED` move um deles e os outros quatro sairam sozinhos
+ *  com a leitura 3.
  *
- * O QUE FALTA: `lui -8` domina o censo -- o retail materializa oito enderecos
- * a mais do que nos, o que combina com D_8009B338 e D_8009B140 ainda no braco
- * escalar em vez da forma nua, e com o `-0x400` que o retail carrega em $s0
- * desde o inicio do bloco de setup. Depois disso, `lh -4`, `bne +2`, `lw +2`,
- * `bltz -2`, `sll -2`.
- * Tres declaracoes novas em variables.h (D_8009B240, D_8009B24C e D_8009B250,
- * os ponteiros gp-relativos que a rotina grava) e o braco
- * `D_8009B246_IS_SIGNED`.
+ * MEDIDO E MORTO: remover o local `e` para D_800EA0E8 e escrever o simbolo
+ * inline nos quatro stores (272, censo identico na base antiga); um local
+ * para D_8009B24C no braco `(D_8009B248 & 0x20) == 0` (-6 e 107 -- tira SEIS
+ * instrucoes, entao a leitura repetida que o retail tem nao e um local
+ * daquele braco).
+ *
+ * O QUE FALTA: 103 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
+ * andi -2, beq -1` (magnitude 8), em tres grupos:
+ *  - a ORDEM do bloco de setup (indices 7 a 42): o retail materializa o 1 de
+ *    D_8009B0C0, o argumento 3 e o `lh d_8009b246` antes dos quatro stores em
+ *    D_800EA0E8, e poe o `-0x400` em $s0 mais cedo;
+ *  - o braco `(D_8009B248 & 0x20) == 0` (indices 268 a 290): o retail le
+ *    D_8009B24C uma vez em $s1 e tem um `andi 0xFF` de re-leitura que nos nao
+ *    temos;
+ *  - o rabo (indices 294 a 318): a cadeia `if`/`else if` de D_8009B26C e
+ *    D_8009B398 sai com os blocos em outra ordem.
+ * Tres declaracoes novas em variables.h (D_8009B240, D_8009B24C e D_8009B250)
+ * e tres bracos novos: `D_8009B246_IS_SIGNED`, `D_8009B338_IN_DATA` e
+ * `D_8009B140_IN_DATA`.
  */
+#define D_8009AF76_IN_DATA
+#define D_8009B0F4_IN_DATA
+#define D_8009B134_IN_DATA
+#define D_8009B398_IN_DATA
+#define D_8009B39A_IN_DATA
+#define D_8009B338_IN_DATA
+#define D_8009B140_IN_DATA
 #define D_8009B246_IS_SIGNED
 #define D_8009B0C0_IN_DATA
 #define D_8009B254_IS_SCALAR
@@ -67,7 +94,7 @@ void func_800283F4(void) {
         o = func_800291E0(3, -1, -1);
         *(s16 *)(o + 0x30) = -0x8C;
         o[0x21] = 0x80;
-        *(u16 *)(o + 0x32) = *(u16 *)(o + 0x32) + D_8009B24B;
+        *(s16 *)(o + 0x32) = *(s16 *)(o + 0x32) + D_8009B24B;
         *(u16 *)(o + 8) = *(u16 *)(o + 8) | 4;
         func_80043178(o);
         *(s16 *)(o + 0x60) = neg;
@@ -116,16 +143,16 @@ void func_800283F4(void) {
         v = *(s16 *)(e + 0x60);
         if (v != 0) {
             if ((D_8009B248 & 0x10) != 0) {
-                func_80043230(e, 0x148, *(u16 *)(e + 0x32), v);
+                func_80043230(e, 0x148, *(s16 *)(e + 0x32), v);
                 *(u16 *)(e + 0x60) = *(u16 *)(e + 0x60) - 0x55;
                 if (*(s16 *)(e + 0x60) <= 0) {
                     *(s16 *)(e + 0x30) = 0x400;
                     goto z0;
                 }
             } else {
-                func_80043230(e, 0x94, *(u16 *)(e + 0x32), v);
+                func_80043230(e, 0x94, *(s16 *)(e + 0x32), v);
                 *(u16 *)(e + 0x60) = *(u16 *)(e + 0x60) + 0x55;
-                if ((*(u16 *)(e + 0x60) & 0x8000) == 0) {
+                if (*(s16 *)(e + 0x60) >= 0) {
                     *(s16 *)(e + 0x30) = 0x94;
                 z0:
                     *(u16 *)(e + 0x60) = 0;
@@ -139,17 +166,17 @@ void func_800283F4(void) {
         v = *(s16 *)(o + 0x60);
         if (v != 0) {
             if ((D_8009B248 & 0x10) != 0) {
-                func_80043230(o, -0x8C, *(u16 *)(o + 0x32), v);
+                func_80043230(o, -0x8C, *(s16 *)(o + 0x32), v);
                 *(u16 *)(o + 0x60) = *(u16 *)(o + 0x60) - 0x55;
                 if (*(s16 *)(o + 0x60) <= 0) {
                     k = 0x400;
                     goto z1;
                 }
             } else {
-                func_80043230(o, 2, *(u16 *)(o + 0x32), v);
+                func_80043230(o, 2, *(s16 *)(o + 0x32), v);
                 *(u16 *)(o + 0x60) = *(u16 *)(o + 0x60) + 0x55;
                 k = 2;
-                if ((*(u16 *)(o + 0x60) & 0x8000) == 0) {
+                if (*(s16 *)(o + 0x60) >= 0) {
                 z1:
                     *(s16 *)(o + 0x30) = k;
                     *(u16 *)(o + 0x60) = 0;

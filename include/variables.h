@@ -145,7 +145,11 @@ extern u8 D_8009B428;
 /* func_800339D0 stores it through `lui $at` while the one-byte D_8009B2F8
  * beside it keeps %gp_rel; equal widths, so no real threshold exists and the
  * SIZED8 arm declares eight bytes with the unit at `as -G4`. */
-#ifdef D_8009B140_SIZED8
+#ifdef D_8009B140_IN_DATA
+/* Fora do small data com o tipo verdadeiro: func_800283F4 grava este simbolo
+ * com `lui $at` e o braco escalar da um `%gp_rel` de uma instrucao so. */
+extern u8 D_8009B140 __attribute__((section(".data")));
+#elif defined(D_8009B140_SIZED8)
 extern u8 D_8009B140[8];
 #else
 extern u8 D_8009B140;
@@ -911,7 +915,11 @@ extern u32 D_801D0534;
 /* Five pairs of halfwords, indexed by `D_801D0534 % 5` (func_8002DA1C). */
 extern u16 D_80090B50[];
 /* Data Crystal RAM map, UNVERIFIED: selected card ID */
-#ifdef D_8009B338_SIZED8
+#ifdef D_8009B338_IN_DATA
+/* Fora do small data com o tipo verdadeiro: func_800283F4 grava este simbolo
+ * com `lui $at` e o braco escalar da um `%gp_rel` de uma instrucao so. */
+extern s16 D_8009B338 __attribute__((section(".data")));
+#elif defined(D_8009B338_SIZED8)
 /* Eight bytes it does not have: at -G4 that is non-small, so the bare
  * store goes through $at while the one-byte gp-relative D_8009B1D5
  * beside it keeps %gp_rel (func_80023144). */
