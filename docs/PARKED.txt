@@ -5397,6 +5397,19 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
+func_80027508 -- 161/161, censo VAZIO, 14 differences, REWRITTEN 2026-09-08.
+  Superseded base; parked/func_80027508.c carries the levers and the dead
+  spellings with numbers. Written fresh from the listing and 161/161 on the
+  FIRST draft, so the +1 the entry below spent two sessions on was closed by
+  the two-statement index form that entry itself names. Two further levers:
+  a SECOND NAME for the tail's re-read of the same field (34 -> 26), and
+  `d %= 5; d += 0xB;` as two compound assignments against one name
+  (26 -> 14) -- which on the 34 base was worth exactly nothing. The residue
+  is one register pair repeated in two identical blocks: retail holds the
+  signed byte in $a1 and %hi(D_800EAE88) in $a2 and we have them exchanged.
+  The ASSEMBLY DEBT in src/ (two asm register pins and one __asm__ for the
+  literal 23) is NOT retired until this matches.
+  (original entry:)
 func_80027508 -- 161 target, 162 built (+1), 25 differences, written
     MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   2026-08-29.  A duel-AI move chooser: four guarded calls, each of the form
