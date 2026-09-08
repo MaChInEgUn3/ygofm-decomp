@@ -2047,6 +2047,20 @@ candidate references but does not already define, and prints only strict
 improvements on `(abs(length_error), differences)`. First run: **one match** --
 func_8003353C, 2 differences to 0 on `D_8009B3A4_IS_VOLATILE` -- plus three
 park improvements.
+**Fifth run, 2026-09-08, TARGETED at the eleven assembly debts: 29 guard
+trials across all eleven, ZERO improvements.** The guard axis is closed on
+the debts, which are the closest parks in the tree. Per-function guard counts:
+func_80018608 8, func_8004A854 7, func_80040588 3, func_8004A6F8 3,
+func_8004A8E4 2, func_800260D0 2, func_80027508 2, func_8002C7E8 1,
+func_80048F14 1, and func_800734DC and func_8001D5B4 have no guarded symbol
+at all.
+**And the way to run it is targeted, not by threshold.** `main()` scores
+EVERY parked candidate before it can decide which are under the limit, so a
+run at `12` spends about six minutes on 93 baselines before trying a single
+guard -- which is why `8` finishes and `12` times out at 560 seconds. Import
+the module and drive `guards_by_symbol()`, `score()` and `PROBE` over the
+names you actually care about; the eleven debts took four minutes end to end.
+
 **Fourth run, 2026-09-08: zero hits at `<= 8`, and the full run does not fit
 in one sitting.** The eleven assembly-debt candidates are the closest parks in
 the tree now, and the four at or below eight differences -- func_8004A854 (1),
