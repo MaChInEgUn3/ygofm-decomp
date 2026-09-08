@@ -24,7 +24,33 @@
  * load's OWN pseudo is the long-lived one ($a2, no copy), `off` is $v0 in
  * block 1 and the product is $v1 in block 2 (two pseudos), and the byte is
  * COPIED into $v0 before the *24 chain -- a copy a promoted u8 never
- * produces here. Discriminator not established. */
+ * produces here. Discriminator not established.
+ *
+ * 2026-09-08: THE ADDRESS AXIS IS NOW EXHAUSTED, not merely sampled.
+ * Sixteen spellings of the block-1 address were measured and every one
+ * except the installed `e = D_8009B458; b = e; e = e + off;` is -2:
+ * six more base-local forms (`e = b + 0x180; e = e + arg0 * 40;`,
+ * `b + 0x180 + off`, `&b[off]`, `e = b; e += off;`, the (s32) cast sum,
+ * and the subtraction-of-a-negation `b - -off`), the two-statement
+ * `off = arg0 * 40; off = off + 0x180;` on top of each, and -- the one
+ * that had never been tried -- the POINTER SYMBOL WRITTEN INLINE, both
+ * blocks (v1) or block 1 only (v2). Inline is -2 as well, so gcc commons
+ * the two loads by itself AND still folds. Block 2 alone inline is +1.
+ * The rule that falls out: whenever the base is a value gcc can NAME --
+ * a local, or the pointer symbol -- it reassociates `b + (i * 40 +
+ * 0x180)` and folds the constant into the lbu displacement. The only
+ * thing that stops it is the load's OWN pseudo modified in place, and
+ * that spelling is what costs the base copy retail does not have.
+ * Also dead at 11 (2026-09-08): the product written into the byte's own
+ * name with `off` holding the copy (`off = v; v = off * 24;`, 15), the
+ * same through a separate `e = b; e = e + v;` (15), the multiply hand-
+ * expanded as `(off * 2 + off) * 8` (15), and `v = v * 24;` on one name
+ * (15) -- all four need `v` declared `s32`, and that declaration alone
+ * is worth -4, which is why they read as regressions. `u8 v` is
+ * load-bearing.
+ * The residue is ONE instruction's worth of allocation: retail spends
+ * its 23rd instruction copying the BYTE into $v0 in the beq's delay
+ * slot, and we spend ours copying the BASE before the block. */
 #include "common.h"
 
 s32 func_8004A8E4(s32 arg0) {
