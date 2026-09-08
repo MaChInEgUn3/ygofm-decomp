@@ -8056,45 +8056,35 @@ re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
-func_80044838 -- **295/295, comprimento EXATO, 88 diferencas, censo
-`addiu +1, nop -1`** (magnitude 2, 17 blocos). Escrita do zero em 2026-09-08:
--9/279 -> +2/130 -> 295/295 e 95 -> 89 -> 88. Flags padrao (passo 0: gp=56, at=0,
-uma jump table). Maquina de estados de retry: um switch com jump table real
-sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch (D_8009B44F)`
+func_80044838 -- **295/295, comprimento EXATO, 11 diferencas, censo VAZIO**,
+e das onze SEIS sao numeracao de rotulo. Escrita do zero em 2026-09-08:
+-9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 -> 11. Flags padrao. Maquina de
+estados de retry com jump table real e dois `switch (D_8009B44F)` internos
 identicos cujo `case 0` cai no `case 1`.
-TRES EDICOES a trouxeram ate aqui, e as tres sao regras que vieram de
-func_800577B0 no mesmo dia. (1) `do { k = 2; } while (0);` no preheader do
-laco do case 7: a funcao tem sete `D_8009B450 = K;` que terminam todas em
-[sw][j tail], o find_cross_jump compara com o bloco que PRECEDE FISICAMENTE
-o rotulo, e o retail muda o REGISTRADOR do ultimo store dali -- isso sozinho
-quebra a cadeia inteira (retail cinco stores, nos dois). (2) O bloco fora de
-linha do case 7 escrito DENTRO do `if` anterior, depois do `break`.
-(3) **UM PAR ACOPLADO onde cada metade sozinha e uma REGRESSAO**: escrever
-`func_80073910(h); return 0;` nos TRES caminhos em vez de um `rel:`
-compartilhado (+1/65 sozinho -- o retail compartilha so jal/nop/j/addu e
-DUPLICA o `addu $a0,$s1,$zero` em cada predecessor, regra do func_80030998)
-mais o `i -= 1;` do laco 3 movido para antes do `if`/`else` (-1/121
-sozinho). Juntas: 95 -> 89 com comprimento exato.
-Essa terceira e a licao do dia sobre metodo: a metade (ii) tinha sido medida
-um tick antes dentro de um sweep de "tres posicoes do decremento" que deu
-132, 130, 132, e foi corretamente rejeitada ali -- so que a outra falta
-ainda estava aberta. Um candidato de magnitude MENOR com uma instrucao a
-menos e a assinatura de meia alavanca.
-Medido e morto com numeros: a forma do laco 3 (`for`, `while`,
-`do/while(1)`) da 95, 95, 95, identicos -- a polaridade da aresta de volta
-nao vem dali; os tres lacos como `goto` dao -1/135, -4/280, -5/278 (perdem a
-icagem de invariantes); o corpo compartilhado do `case 2` escrito uma vez
-com `goto` da 99 e 166 contra 95 com ele por extenso nos dois; cinco nomes
-para as sentinelas de laco sao byte-identicos ao inline; `k = 2;` sem o pino
-e byte-identico ao literal.
-Mais quatro negativos com numero no tick seguinte: nomear o terceiro
-argumento (o literal 0) da chamada do laco 2, com e sem pino, e nomear
-tambem o segundo dao 88, 88, 88 -- eixo errado; um pino no
-`D_8009B43C = 0x14` do bloco `ok` da 89. E o decremento do laco do case 7
-movido para antes da chamada e 89 -> 88, enquanto o mesmo movimento no laco
-2 e 91 -- dois sitios da mesma funcao querendo grafias opostas outra vez.
-Residuo: nos lacos 2 e do case 7 o retail poe o ULTIMO ARGUMENTO da chamada
-no delay slot do `jal` e o decremento no do `bne`, e nos fazemos o contrario
-(o laco 1, com dois argumentos e nenhum literal, sai exato); sobra um
-decremento duplicado no laco 3 e falta um `nop`; o `addiu $s4,2` sai duas
-posicoes cedo; e um `beq` do `case 2` vai para um rotulo diferente do tail.
+A ALAVANCA DO DIA, e vale levar para qualquer laco contado: **O DECREMENTO
+DO CONTADOR VAI DEPOIS DO TESTE DE SAIDA, NAO ANTES.** Nos tres lacos o
+retail tem o `bne`/`beq` de saida com `addiu $s0,-1` no DELAY SLOT dessa
+mesma instrucao -- o preenchedor puxa do fio de fall-through, isto e, de
+DEPOIS do desvio. Escrito antes da chamada, antes do teste, ou entre o
+`if`/`else` e o teste, o decremento cai no delay slot do `jal` ou no do `j`
+do braco `then`, onde o gcc ainda o DUPLICA. Escrito depois do
+`if (x) goto ...;` cai onde o retail o tem, e e semanticamente igual porque
+o contador esta morto no caminho do `goto`. Um laco por vez sobre a base de
+88: laco 3 sozinho +1/55, laco 2 sozinho 85, os dois 46, e o do case 7
+fechando 11. O laco 1 nunca precisou -- tem dois argumentos e nenhum
+literal e sai exato desde o primeiro rascunho.
+As outras tres edicoes sao regras de func_800577B0 do mesmo dia: o pino
+`do { k = 2; } while (0);` que quebra a cadeia de cross-jump pelo REGISTRADOR
+do ultimo store antes do rotulo (tira-lo agora ainda e -9); o bloco fora de
+linha escrito dentro do `if` anterior depois do `break`; e a chamada final
+escrita nos tres caminhos em vez de um `rel:` compartilhado.
+Doze grafias medidas e mortas com numeros estao no cabecalho do parked,
+incluindo tres trincas que fecharam eixos (a forma do laco: 95/95/95; os
+nomes dos argumentos: 88/88/88; os tres lacos como `goto`: -1/-4/-5).
+Residuo: seis diferencas sao numeracao de rotulo (um `beq` do `case 2`
+aponta para um rotulo que o try_func numera 26 onde o retail numera 5, e dai
+todos andam um), tres sao a ordem do preheader do case 7 (`addiu $s4,2`
+antes do `lui $s3,%hi` -- vem do pino, e todas as reordenacoes medidas sao
+piores), e duas sao alvos do mesmo laco. **A build completa foi rodada com o
+candidato em src/ e REPROVOU**, entao pelo menos uma das onze e real e nao
+so o renderizador.
