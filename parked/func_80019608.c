@@ -1,3 +1,21 @@
+/* 256/256, 74 differing (2026-09-08; was 77). Recovered by
+ * score_permuter_outputs.py from a stored output nobody had read -- the
+ * permuter directory held it and this park had no header at all.
+ *
+ * The gain is a COUPLED PAIR, which is what the permuter is for: each half
+ * alone is worse than the two together.
+ *   - `nv = D_8009B174;` written one statement EARLIER, right after
+ *     `x = *(u16 *)(p + 8);` and above `p[0x21] = 0;`, with `n = nv;` where
+ *     the read used to be. `nv` is `u8`, the symbol's own type, so the
+ *     narrowing is faithful and the split is only about where the load sits.
+ *     Alone: 75.
+ *   - `case 4`'s `do { ... } while (0);` REMOVED. Alone: 76.
+ *   - Together: 74.
+ * The stored output was the permuter's preprocessed unit, so it needed the
+ * two edits extracting and re-applying to the real source; a whitespace-
+ * normalised statement diff is what made them visible among 150 statements
+ * of reformatting.
+ */
 #define D_800E9EF0_IS_PTR_VOLATILE
 #define D_8009B0F4_IS_AGGREGATE
 #define D_8009B134_IS_AGGREGATE
@@ -22,6 +40,7 @@ void func_80019608(void) {
     s32 c;
     s32 w;
     s32 x;
+    u8 nv;
     s32 mk;
     u16 f;
 
@@ -88,8 +107,9 @@ void func_80019608(void) {
         }
         *(u16 *)(p + 0x60) = 0x1E;
         x = *(u16 *)(p + 8);
+        nv = D_8009B174;
         p[0x21] = 0;
-        n = D_8009B174;
+        n = nv;
         *(u16 *)(p + 8) = x & 0xFFFB;
         D_8009B174 = n | 0x20;
         return;
@@ -155,14 +175,12 @@ void func_80019608(void) {
         D_8009B174 = 4;
         return;
     case 4:
-        do {
-            if ((m & 0x80) != 0) {
-                D_8009B23A = 5;
-                return;
-            }
-            D_8009B174 = m | 0x80;
-            func_80026BA4(D_8009B150, 1);
+        if ((m & 0x80) != 0) {
+            D_8009B23A = 5;
             return;
-        } while (0);
+        }
+        D_8009B174 = m | 0x80;
+        func_80026BA4(D_8009B150, 1);
+        return;
     }
 }
