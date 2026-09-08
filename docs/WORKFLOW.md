@@ -2214,6 +2214,18 @@ on a combination that had been in the table for weeks.
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
   finds the callers that also need updating.
+- **A run of 4 loads, 4 stores, 3 loads, 3 stores IS gcc's block-move
+  expander -- look for a struct copy before you name seven temporaries.**
+  `expand_block_move` issues up to four `lw` and then the matching `sw`, so a
+  28-byte aligned copy comes out 4+4 then 3+3 and nothing else does. Written
+  as seven named pairs, func_800577B0's case 10 needed a
+  `do { ... } while (0);` round each group just to reach the same *grouping*,
+  and even then the four registers came out `$v1/$a0/$a1/$v0` where retail
+  has `$a3/$t0/$t1/$t2` -- the ones the expander picks. One line
+  (`*(Rec28 *)(s + 0xCF8) = *(Rec28 *)(g + 0x100);`, with `s32` members so the
+  alignment is 4) took the function 31 differences to 16, and the register
+  residue with it. The tell is the count itself: any multiple-of-four run of
+  loads followed by the same number of stores.
 - **A struct copy's expansion is decided by the type's *alignment*, and an
   all-`u8` record has alignment 1.** gcc expands `*dst = *src;` with aligned
   `lw`/`sw` only when it can prove alignment 4; otherwise it emits an
