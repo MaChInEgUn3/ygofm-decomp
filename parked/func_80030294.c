@@ -1,6 +1,6 @@
 /* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
- * estrutural depois de ALINHAR os opcodes (2026-09-08): 310 linhas
- * iguais, 18 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 312 linhas
+ * iguais, 16 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 310 iguais / 18 so-registrador / 2 estruturais.
+ * candidato e 312 iguais / 16 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -90,16 +90,20 @@
  *      braco de ENTRADA. 34 linhas de registrador -> 22, e fecha o bloco
  *      inteiro das linhas 150-203, que era um swap $t0 <-> $a3 de catorze
  *      linhas de uma vez;
- *  16. o quociente do braco de entrada chama-se `step` -- o mesmo nome do
- *      passo do braco de EDICAO. 22 -> 18.
+ *  16. o quociente do braco de entrada tem um nome SO DELE, `qq`. Isto e
+ *      uma RETRATACAO dentro do mesmo dia: primeiro emprestou `n` (o
+ *      limite do laco de carry, 22), depois `step` (18), e um nome FRESCO
+ *      e 16. As duas primeiras leituras eram degraus, nao a resposta --
+ *      e a unica forma de saber foi medir as tres.
  * As duas saem de uma VARREDURA, nao de raciocinio: `car` emprestando `k`
  * e 22, `val2` (nome fresco) e 34, `car += step` e 34, e uma atribuicao
  * morta `car = e;` antes do laco e +1 e 92. Depois, sobre a base do 15,
  * `n`->`step` e 18, `k`->`step` 31, `n`->`mask` 37, `i`->`e` 46 e
- * `k`->`mask` 48. E sobre a base do 16 uma varredura 2D de doze
- * emprestimos (`i`, `k` e `val` contra `n`, `mask`, `e` e `sc`) da
- * 20 no melhor (`val`->`sc`) e nada abaixo de 18 -- o eixo esta no
- * optimo local.
+ * `k`->`mask` 48. Uma varredura 2D de doze emprestimos (`i`, `k` e `val`
+ * contra `n`, `mask`, `e` e `sc`) da 20 no melhor. E sobre a base final,
+ * mais oito (nome fresco para `i`, `k` e `val`, e `i`/`k` contra `n`,
+ * `mask` e `sc`): 17, 22, 39, 19, 18, 36, 21 e 16 -- nada abaixo de 16.
+ * O eixo dos nomes esta no optimo local.
  *
  * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
  *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
@@ -176,6 +180,7 @@ s32 func_80030294(void) {
     u8 f;
     u8 *r;
     s32 sc;
+    s32 qq;
 
     ret = 0;
     *(Blk14 *)a = *(Blk14 *)D_80010250;
@@ -195,10 +200,10 @@ s32 func_80030294(void) {
             *p = 0;
             do {
                 k = a[i];
-                step = val / k;
-                *p = *p | (step << (i * 4));
+                qq = val / k;
+                *p = *p | (qq << (i * 4));
                 i = i - 1;
-                val = val - k * step;
+                val = val - k * qq;
             } while (i >= 0);
         }
         goto fill;
