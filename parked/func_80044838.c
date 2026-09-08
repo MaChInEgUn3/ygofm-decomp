@@ -37,6 +37,14 @@
  *    callee-saved -- cinco nomes, BYTE-IDENTICO ao inline. O gcc ja as
  *    mantem em registrador;
  *  - `k = 2;` sem o `do { } while (0)`: byte-identico ao literal;
+ *  - a FORMA do laco 3: `for (i = 0xA; i >= 0; )`, `while (i >= 0)` e
+ *    `do { ... if (i < 0) goto rel; } while (1);` dao 95, 95 e 95 -- os tres
+ *    IDENTICOS a base. A polaridade da aresta de volta NAO e decidida pela
+ *    forma do laco; eixo errado;
+ *  - o corpo do `case 2` escrito UMA vez com `goto` do outro switch: 99 com
+ *    o corpo no segundo braco e 166 com ele no primeiro, contra 95 com ele
+ *    por extenso nos dois. O retail compartilha esse corpo, e a maneira de
+ *    chegar la e deixar o gcc fundir, nao escrever a fusao a mao;
  *  - os TRES lacos escritos como `goto` em vez de `do { } while`: -1/135
  *    (laco 3), -4/280 (laco do case 7), -5/278 (os dois). O `do`/`while` e o
  *    certo: o passo de laco do gcc esta rodando e icando invariantes, e a
