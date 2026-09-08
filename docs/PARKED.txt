@@ -4444,6 +4444,16 @@ real one-line lever, and two open.
   * func_8003B744 18 -> 8 -- already recorded as semantically wrong (it casts
     an index the target does not mask).
 
+func_80040588 -- 163/163, 3 differences. CANDIDATE RECOVERED 2026-09-08 from
+  commit 4eb106d, which deleted it; for two weeks the only copy was in git
+  history and the prose below. It is back in parked/func_80040588.c with the
+  new dead list in its header. The statement-order axis is now PROVED closed:
+  all 24 orderings of the three argument loads and the store were measured and
+  the best is 3, so the scheduler chooses and no source order constrains it.
+  Also dead: naming the fourth argument at three positions (the func_80025F3C
+  rule confirmed), naming the inline `e + 0x1A` read at five positions (3 to 9),
+  a pin on the store (11). The ASSEMBLY DEBT in src/ is not retired until MATCH.
+  (original entry:)
 func_80040588 -- 3 differences, first written 2026-08-21. 163 instructions, the
     MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
   fourth member of the func_80040DD8 sprite-list family (same D_800EFE48 record
