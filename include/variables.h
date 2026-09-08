@@ -659,6 +659,10 @@ extern Slot70 D_800EFE48[];
  * config/symbol_aliases.txt and func_80012AE8. */
 extern s32 D_800906E0;
 extern u8 CtorCount_0[];
+/* Two more pointer-valued globals in the same table as D_80010000, read
+ * `lui %hi` / `lw %lo` by func_800577B0's mode dispatcher. */
+extern u8 *D_80010014;
+extern u8 *D_80010018;
 #ifdef D_80010000_IN_DATA
 extern u8 *D_80010000 __attribute__((section(".data")));
 #elif defined(D_80010000_SIZED)
