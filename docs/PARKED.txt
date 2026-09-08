@@ -8086,7 +8086,7 @@ primeiro. Doze grafias medidas, todas iguais ou piores, e as sete ultimas
 re-medidas sobre a base volatile pela regra 3. O permuter ja rodou aqui
 (1253 iteracoes, zero saidas).
 
-func_800171A8 -- -1 em 236/237, 146 diferencas, censo `sb -1, sw -2, nop +2`.
+func_800171A8 -- **237/237, comprimento EXATO, 135 diferencas**, censo `sb -1, sw -2, nop +2`.
 PRIMEIRO C, escrito num tick a partir do listing e das alavancas do
 func_800577B0, que casou hoje e e a MESMA familia de despachante D_8009B0F4.
 Passo 0: gp=0, at=8 (todos D_8009B0F4), uma jump table -- ramo facil da
@@ -8104,6 +8104,15 @@ m480 e -6 -> -1 (222 -> 146 diferencas). Sem o pino os bracos terminam em
 cada um. Medido e morto: o mesmo pino no `and` dos quatro bracos do m4B8 e
 -9 sozinho e -4 sobre a base atual -- ali o `and` no delay slot nao quer
 pino.
-Residuo: a mascara esta em $a1 e o retail a quer em $a0. E o mesmo estado
+Terceira edicao, e a que fechou o comprimento: um nome PROPRIO para o
+D_8009B118 de uma das juncoes. O retail carrega esse valor em $v1 e o da
+outra juncao em $v0 -- registradores diferentes, logo pseudos diferentes,
+logo dois nomes. 146 -> 135 e -1 -> comprimento exato.
+Residuo: toda a alocacao esta deslocada um registrador -- o retail tem `v` em
+$v0, o ponteiro em $v1 e a mascara em $a0, e nos temos o ponteiro em $v0.
+O retail reusa $v1 para o ponteiro e para a constante `w`, que nunca
+coexistem, entao pela regra 25 sao um nome so; escrito assim e +1 com 123
+diferencas, ou seja METADE DE UM PAR. Quatro ordens de declaracao dao 135
+nas quatro -- eixo errado. E o mesmo estado
 inicial do func_800577B0, onde a alavanca foi um nome para duas constantes
 sequenciais.

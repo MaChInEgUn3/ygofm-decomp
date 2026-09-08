@@ -1,4 +1,5 @@
-/* -1 em 236/237, 146 diferencas, censo `sb -1, sw -2, nop +2` (2026-09-08).
+/* 237/237 -- COMPRIMENTO EXATO -- e 135 diferencas, censo `sb -1, sw -1,
+ * nop +2` (2026-09-08). -17 -> -6 -> -1 -> 237/237 no mesmo dia.
  * PRIMEIRO C, escrito num tick a partir do listing e das alavancas do
  * func_800577B0, que casou hoje e e a MESMA familia de despachante
  * D_8009B0F4.
@@ -35,13 +36,27 @@
  * (cases 1, 5, 7, 11) e -9 sozinho e -4 sobre a base atual -- ali o `and`
  * no delay slot NAO quer pino.
  *
- * O QUE FALTA (146 diferencas, censo `sb -1, sw -2, nop +2`): a mascara `m`
- * esta em $a1 e o retail a quer em $a0, e todo o resto do braco segue. E o
- * mesmo estado inicial do func_800577B0, onde a alavanca foi UM NOME PARA
- * DUAS CONSTANTES SEQUENCIAIS (la, 0x10 e 0x10000). Aqui o candidato ja e
- * o m4F8, onde o retail reusa $a0 para a mascara e para o 0x10000 -- isso
- * ja esta escrito assim. Faltam os cases 0 e 10, que usam $v1 para o
- * 0x10000 e portanto sao nomes separados.
+ * A TERCEIRA EDICAO, e a que fechou o comprimento: **um nome PROPRIO para o
+ * D_8009B118 do m4F8.** O retail carrega esse valor em $v1 e o do m480 em
+ * $v0 -- registradores diferentes, logo pseudos diferentes, logo DOIS
+ * NOMES. Escrito com o mesmo `d` dos dois lados era -1; separado e
+ * 237/237 e 146 -> 135.
+ *
+ * O QUE FALTA (135 diferencas, censo `sb -1, sw -1, nop +2`): TODA a
+ * alocacao esta deslocada um registrador. O retail tem `v` em $v0, o
+ * ponteiro em $v1 e a mascara em $a0; nos temos o ponteiro em $v0, `v` em
+ * $a0 e a mascara em $a1. Ou seja o ponteiro esta tomando o $v0 que devia
+ * ser do `v`.
+ * O retail reusa $v1 para o PONTEIRO e para a constante `w` -- eles nunca
+ * coexistem (o ponteiro morre nos stores de p+0xC/+8 antes de o `w` nascer)
+ * -- entao pela regra 25 sao UM NOME SO. Escrito assim (`b` eliminado, tudo
+ * pelo `w` com cast) e **+1 com 123 diferencas**: METADE DE UM PAR, porque
+ * cai o numero e sobe uma instrucao. Procurar a outra metade antes de
+ * descartar.
+ * MEDIDO E MORTO: quatro ordens de declaracao (`v` antes de `b`, `v`/`w`
+ * antes de `b`, `m` primeiro, `v` e `m` primeiro) dao 135, 135, 135, 135 --
+ * quatro grafias iguais, EIXO ERRADO.
+
  */
 #define D_8009B0F4_IS_SCALAR
 #define FUNC_800171A8_FULL
@@ -54,6 +69,7 @@ void func_800171A8(u8 *p, s32 mode) {
     s32 v;
     s32 w;
     s32 d;
+    s32 e;
     s32 m;
     s32 n;
     s32 hun;
@@ -209,10 +225,10 @@ void func_800171A8(u8 *p, s32 mode) {
         *(s32 *)(p + 0x1C) = m;
         D_8009B0F4 |= m;
         p[0x46] = 2;
-        d = D_8009B118;
+        e = D_8009B118;
         *(s16 *)(p + 6) = 0x10;
-        *(s32 *)(p + 8) = d;
-        *(s32 *)(p + 0xC) = d + 0x800;
+        *(s32 *)(p + 8) = e;
+        *(s32 *)(p + 0xC) = e + 0x800;
         return;
     }
 }
