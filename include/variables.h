@@ -281,7 +281,14 @@ extern s32 D_8009B284;
 extern s32 D_8009B288;
 extern s32 D_8009B294;
 extern s32 D_8009B298;
-#ifdef D_8009B27C_IS_AGGREGATE
+#ifdef D_8009B27C_IN_DATA
+/* Fora do small data com o tipo verdadeiro, entao cada referencia e UMA
+ * pseudo-instrucao e nao ha `%hi` para o gcc partilhar: func_800393B0 le o
+ * byte e o halfword deste simbolo em dois blocos e o retail materializa um
+ * `lui` para cada, onde o braco de array poe um `%hi` num callee-saved a
+ * mais. */
+extern u16 D_8009B27C __attribute__((section(".data")));
+#elif defined(D_8009B27C_IS_AGGREGATE)
 extern u16 D_8009B27C[];
 #else
 extern u16 D_8009B27C;
