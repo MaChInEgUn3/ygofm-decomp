@@ -52,7 +52,16 @@
  *       censo. Um `m` intermediario da o mesmo (244); emprestar `k` ou
  *       `step` e 245.
  *
- * O QUE FALTA: 244 diferencas de REGISTRADOR, com todos os opcodes casando.
+ * O QUE FALTA: 244 diferencas de REGISTRADOR, com todos os opcodes casando,
+ * e esta reduzido a UM registrador. O retail usa $t5-$t8 como temporarios
+ * das copias de struct e nos usamos $t6-$t9, porque `sp+0x28` (a base de
+ * `b`) ocupa $t5. Temos TRES pseudos de endereco de pilha vivos durante as
+ * copias -- sp+0x10 em $a3, sp+0x28 em $t5, sp+0x38 em $t0 -- contra UM no
+ * retail, e so o do meio empurra os temporarios. Medidos e mortos: as
+ * quinze ordens de declaracao (o gcc numera pelo primeiro USO), as quatro
+ * posicoes de `db = d;`, as seis ordens das copias (todas piores), tres
+ * formas de acesso a `b`, os doze variantes dos seis guardas, os dois
+ * flags de CSE, e cinco rodadas do permuter.
  * O padrao e um deslocamento de um: os temporarios das copias de struct sao
  * $t6-$t9 onde o retail usa $t5-$t8, porque ainda içamos uma base de pilha a
  * mais do que ele (o CSE atravessa o desvio e reusa o pseudo que o
@@ -87,10 +96,8 @@ s32 func_80030294(void) {
     s32 step;
     s32 car;
     s32 *q;
-    s32 *cb;
     u8 *db;
     s32 k;
-    s32 ch;
     u8 *z;
     u16 *p;
     s32 val;

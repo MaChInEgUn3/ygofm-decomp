@@ -8554,3 +8554,39 @@ e a primeira e a mais barata que existe:
 Falta so alocacao: os temporarios das copias de struct sao $t6-$t9 onde o
 retail usa $t5-$t8, porque ainda icamos uma base de pilha a mais que ele.
 Classe do permuter.
+
+DECIMA RODADA (2026-09-08) -- continua em 329/329 e 244, censo vazio, e o
+irmao `alt_func_80030294_sem_cb_db.c` foi APAGADO porque o candidato
+principal passou a domina-lo em todas as chaves.
+A falta esta reduzida a UM registrador: o retail usa $t5-$t8 como
+temporarios das copias de struct e nos usamos $t6-$t9, porque `sp+0x28` (a
+base de `b`) ocupa $t5. Sao tres pseudos de endereco de pilha vivos durante
+as copias (sp+0x10 em $a3, sp+0x28 em $t5, sp+0x38 em $t0) contra UM no
+retail; so o do meio empurra os temporarios, e os outros dois caem fora da
+janela. Os pseudos vem do expand_block_move e o CSE atravessa o desvio para
+os reusar nos bracos em vez de recomputar.
+Medido e morto nesta rodada, tudo sobre a base de 329/329:
+ - ORDEM DAS DECLARACOES: cada um dos quinze locais movido para a frente,
+   um de cada vez -- QUINZE medicoes, todas 244. O gcc 2.8 numera os pseudos
+   pelo primeiro USO, nao pela declaracao, entao este eixo nao existe aqui;
+ - declaracoes MORTAS (`cb`, `ch`) removidas: 244, identicas. Uma declaracao
+   sem uso nao cria pseudo;
+ - POSICAO de `db = d;`: antes das copias, depois delas, na cabeca do braco
+   de edicao e na cabeca do sub-braco -- quatro medicoes, todas 244;
+ - ORDEM DAS QUATRO COPIAS: seis permutacoes, todas PIORES (246 a 249);
+ - acesso a `b` por indice (`b[i]`) 269, por endereco de byte -1/316, e
+   `q = b; q = q + e;` 244. Nenhum tira `sp+0x28` de $t5;
+ - `a` e `b` declarados como os PROPRIOS structs: 244, identico;
+ - cada um dos seis guardas `_IN_DATA_VOLATILE` retirado ou trocado por
+   `_IN_DATA` puro: DOZE medicoes, todas piores (284 a 324), exceto
+   D_8009B3A6 sem volatile, que empata em 244. Os seis estao confirmados na
+   base nova, o que era preciso porque foram escolhidos a -G8;
+ - `-fno-cse-follow-jumps` (que e o que de facto poe as bases dentro dos
+   bracos) e +4 e 280 aqui, e com `cb = c;` de volta e +7 e 317: paga com
+   recargas de D_8009B2EA, D_8009B2DC e D_8009B2E9 e com um derrame;
+ - `-fno-cse-skip-blocks`: +4 e 289;
+ - PERMUTER, cinco rodadas de 110 s a `-j 1`: as tres primeiras nao acharam
+   nada; a ultima achou seis outputs, e os tres melhores re-pontuados no
+   try_func sao 315, 313 e 316 instrucoes (contra 329), isto e o score dele
+   e outra medida -- o melhor deles envolve um `goto` num
+   `do { } while (0);` que apaga as sete copias de delay slot.
