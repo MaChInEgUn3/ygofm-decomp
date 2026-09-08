@@ -5407,6 +5407,32 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
+func_80018608 -- 224/225 (-1), 218 differences, FIRST C EVER 2026-09-08.
+  225 instructions, the last of the eleven assembly debts to have no candidate
+  at all: src/ holds a transcription with the instructions written as `.word`,
+  and git confirms nothing was ever deleted here. Written from the m2c draft
+  plus the listing in one pass and landing one instruction short.
+  gp=15, at=0. Three symbols are read %hi/%lo while fifteen gp-relative
+  accesses remain, so `as -G0` is out and the `.data` arms are the only route:
+  D_8009B0F4, D_8009B134, D_8009B36A.
+  Shape: an init guard on D_8009B23A's 0x8000 bit, then a comparison TREE on
+  `D_8009B174 & 0x1F` with cases 2/3/4/5 in address order (four cases, range
+  4, below gcc 2.8's jump-table threshold). Case 4 runs two identical
+  40-iteration loops over D_801A7E20's 6-byte records, the second from +0xF0,
+  summing two 9-bit fields of D_801D4244[rec - 1] times ten and storing each
+  sum / 40.
+  THE CENSUS IS THE DIAGNOSIS: `lw` and `sw` are both -2 and every other
+  opcode is within one. Retail saves FOUR callee-saved registers -- the mode,
+  D_800F2848's full address, its %hi half, and the constant 3 -- and we save
+  two. The named `three = 3;` before the guard buys one of them (-2 to -1).
+  Dead: a base local for D_800F2848 above the guard (+2), with the named 3
+  (+3), scoped to case 2 (+3), scoped to the entry branch (+3). A base local
+  is ONE register and retail wants TWO, with the [0] store through
+  %lo(sym)($s2) and the rest through N($s1). Open question: what makes gcc
+  keep both halves of one address in callee-saved registers.
+  Candidate in parked/func_80018608.c.
+
+
 func_80027508 -- 161/161, censo VAZIO, 14 differences, REWRITTEN 2026-09-08.
   Superseded base; parked/func_80027508.c carries the levers and the dead
   spellings with numbers. Written fresh from the listing and 161/161 on the
