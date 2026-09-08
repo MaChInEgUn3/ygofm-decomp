@@ -64,7 +64,7 @@
  *    de magnitude 7 -- um `andi` a menos que a base, entao a polaridade
  *    invertida acerta ALGUMA coisa e alonga em outra).
  *
- * O QUE FALTA: 103 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
+ * O QUE FALTA: 69 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
  * andi -2, beq -1` (magnitude 8), em tres grupos:
  *  - a ORDEM do bloco de setup (indices 7 a 42): o retail materializa o 1 de
  *    D_8009B0C0, o argumento 3 e o `lh d_8009b246` antes dos quatro stores em
