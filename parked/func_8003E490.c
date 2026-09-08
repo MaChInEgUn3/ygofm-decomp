@@ -23,6 +23,24 @@
  *  - dois rabos de juncao: `.L8003E7B8` poe `a1 = 0x18` e cai em
  *    `.L8003E7BC`, que chama. Sao os rotulos `call18:` e `call:`.
  *
+ * O QUE ESTA FUNCAO E, e veio da functions.csv do krystalgamer, nao do
+ * m2c: os tres callees de biblioteca sao do LIBMCRD --
+ * func_8008BC90 = **MemCardAccept**, func_8008C638 = **MemCardReadFile**,
+ * func_8008CA78 = **MemCardGetDirentry**. Logo isto e a maquina de
+ * estados do CARTAO DE MEMORIA, e as assinaturas reais confirmam os
+ * argumentos que o listing mostra:
+ *   MemCardGetDirentry(chan, name, dir, files, ofs, max)
+ *     -> (D_8009B3F9, D_800EFE18, D_800EFBC0, &sp18, 0, 0xF)
+ *   MemCardReadFile(chan, name, adrs, ofs, bytes)
+ *     -> (D_8009B3F9, D_800EFE18, D_8009B3D0, D_8009B3C4, D_8009B3C2)
+ * ou seja D_800EFE18 e o NOME do ficheiro, D_800EFBC0 e um DIRENTRY,
+ * D_8009B3D0 e o endereco de destino e D_8009B3C4/C2 sao offset e
+ * tamanho. Nao muda o codegen (sao todos inteiros e ponteiros, e o
+ * WORKFLOW ja diz que uma chamada de biblioteca assim nao leva
+ * prototipo), mas muda a leitura -- e e exatamente o ponto que o
+ * krystalgamer levantou no Discord hoje: um agente que re-deriva os tipos
+ * a partir do m2c bate na parede que a definicao verdadeira resolve.
+ *
  * O QUE FALTA: os casos 6 e 8 sao IDENTICOS (`a0 = 0xD3; j call18;`) e o
  * retail tem DUAS copias; o gcc funde-as, logo faltam duas instrucoes.
  * Medidas e mortas cinco grafias -- a chamada escrita por extenso num dos
@@ -32,6 +50,15 @@
  * entradas da tabela apontam para o mesmo rotulo. E a varredura de flags
  * completa (27 linhas do sweep_try.py) tem o padrao como melhor, com o
  * segundo melhor a 143.
+ *
+ * MAIS MEDIDO E MORTO: CINCO ordens de `case` na fonte -- (5,7,6,8,9),
+ * (5,6,8,7,9), (5,7,8,6,9) e (6,5,7,8,9) sao todas identicas ao numerico,
+ * e so (5,6,7,9,8), isto e o `case 8` escrito DEPOIS do `case 9`, muda
+ * alguma coisa: da 209/209 mas e um FALSO ZERO (censo `addiu -1, nop +1`,
+ * 8 instrucoes em 3 grupos estruturais), porque o bloco fundido apenas
+ * MUDA DE SITIO, para depois do rabo, e paga um `j`/`nop`. E o permuter,
+ * duas rodadas de 110s a `-j 1` a partir daqui (score base 415), zero
+ * saidas.
  */
 #define D_8009B34D_IN_DATA
 #define D_8009B3D4_IS_SCALAR
