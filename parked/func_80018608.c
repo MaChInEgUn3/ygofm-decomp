@@ -1,4 +1,4 @@
-/* 225/225, CENSO VAZIO, 35 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* 225/225, CENSO VAZIO, 23 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -137,7 +137,26 @@
  * The between-loops block was also swept as a whole (six orders of `sa`,
  * `sb`, `g`, `i`, `tb`, `r`, including retail's emitted order): 41, 50, 50,
  * 50, 54.
- * Residue: 35, all register allocation.
+ * 35 -> 23, and BOTH halves are the same rule as `tb`: ONE LOCAL PER PHASE.
+ *   - the SECOND pair of stores (+0x2E/+0x30) needs its OWN base local for
+ *     D_800E9FF0. With only the first pair's `r` the second folds to
+ *     `%lo(D_800E9FF0+46)` where retail has `46($a0)`/`48($a0)`. 35 -> 26.
+ *     Its position is flat: assigned before or after `D_8009B174 = 5;` is 26
+ *     either way, and declaring it before `r` is 26.
+ *   - `tb` split into two names, one per loop: 35 -> 32 alone, and 26 -> 23
+ *     on top of the second base local. Retail carries the first loop's table
+ *     base in $a1 and the second's in $t3 -- two registers, so two pseudos,
+ *     which is exactly what the aligned diff showed and what one shared name
+ *     cannot give.
+ * Dead at 35: the record address in case 5 as a local (`e = &D_800E9F10[...]`
+ * so the `+8` stops folding into `%lo`) is 45 alone and 33 combined -- the
+ * fold is right there and the local is not; the index written as
+ * `j = *(s16 *)g - 1;` (35), the counter's `i += 1` moved below the index
+ * read (35), `tb[j - 1]` with no `j` decrement (-2/107), and the `* 10`
+ * written as `x * 8 + x * 2` (-2/104). FIVE declaration orders of the
+ * fifteen locals are ALL 35, which is expected: nothing here is a stack
+ * object, so declaration order buys nothing in this function.
+ * Residue: 23, all register allocation.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -155,11 +174,13 @@ void func_80018608(void) {
     s32 sb;
     s32 w;
     s32 *tb;
+    s32 *tb2;
     s32 x;
     s32 h;
     s32 q1;
     s32 q2;
     u8 *r;
+    u8 *r2;
 
     f = D_800F2848;
     if ((D_8009B23A & 0x8000) == 0) {
@@ -226,7 +247,7 @@ void func_80018608(void) {
 
             q1 = sa / 40;
             q2 = sb / 40;
-            tb = D_801D4244;
+            tb2 = D_801D4244;
             sa = 0;
             sb = 0;
             g = D_801A7E20 + 0xF0;
@@ -238,7 +259,7 @@ void func_80018608(void) {
                 i += 1;
                 j = *(s16 *)g;
                 j = j - 1;
-                w = tb[j];
+                w = tb2[j];
                 x = w & 0x1FF;
                 sa += x * 10;
                 w = w >> 9;
@@ -247,8 +268,9 @@ void func_80018608(void) {
             } while (i < 0x28);
 
             D_8009B174 = 5;
-            *(s16 *)((u8 *)D_800E9FF0 + 0x2E) = sa / 40;
-            *(s16 *)((u8 *)D_800E9FF0 + 0x30) = sb / 40;
+            r2 = (u8 *)D_800E9FF0;
+            *(s16 *)(r2 + 0x2E) = sa / 40;
+            *(s16 *)(r2 + 0x30) = sb / 40;
         }
         return;
 

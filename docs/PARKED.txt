@@ -5407,7 +5407,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 225/225, CENSO VAZIO, 35 differences.
+func_80018608 -- 225/225, CENSO VAZIO, 23 differences.
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
@@ -5474,6 +5474,14 @@ func_80018608 -- 225/225, CENSO VAZIO, 35 differences.
   in the first loop's preheader and FIRST in the second's is 35; first in both
   is 41, last in both is 52. The first preheader alone sweeps 35/37/39/40; the
   second from that base sweeps 52/52/52/52/48. Rule 4 at preheader scale.
+  35 -> 23, both halves the same rule as tb -- ONE LOCAL PER PHASE. The SECOND
+  pair of stores needs its OWN base local for D_800E9FF0 (35 -> 26; with only
+  the first pair's it folds to %lo(sym+46) where retail has 46($a0)), and `tb`
+  split into two names, one per loop, is 35 -> 32 alone and 26 -> 23 on top
+  (retail carries them in $a1 and $t3, two registers). Dead: the case-5 record
+  address as a local (45 alone, 33 combined), three loop-body index spellings
+  (35, 35, -2/107), `x * 8 + x * 2` (-2/104), and FIVE declaration orders all
+  35 -- nothing here is a stack object.
   Residue: all register allocation in the two loops.
   Candidate in parked/func_80018608.c.
 
