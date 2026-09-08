@@ -53,7 +53,21 @@
  * pelo `w` com cast) e **+1 com 123 diferencas**: METADE DE UM PAR, porque
  * cai o numero e sobe uma instrucao. Procurar a outra metade antes de
  * descartar.
- * MEDIDO E MORTO NESTE TICK, todos sobre a base de 135:
+ * MEDIDO E MORTO NUM SEGUNDO TICK, procurando a outra metade do par:
+ *  - tirar os pinos do m480 sobre a base z2: -4/222, +2/206, +2/125 (os
+ *    dois, o do case 0, o do case 10). Os pinos continuam load-bearing;
+ *  - pinar o STORE de p+0x1C do proprio m480: sobre z2 leva +1 para **-1**
+ *    mantendo 118, e sobre a base instalada e -2/146. Tira duas instrucoes
+ *    em vez de uma, entao nao e a metade que falta;
+ *  - o ponteiro junto com o `w` SO nos bracos do m400 (em vez de em todos):
+ *    139 sobre a base instalada e +1/118 sobre a base com `u`. Ou seja o
+ *    ganho de 118 vem da fusao COMPLETA, nao da parcial.
+ * O quadro depois de dois ticks: quatro candidatos empatam em 118
+ * diferencas com |erro| 1 (z2 em +1, ca em -1), e a base instalada e a
+ * unica em comprimento exato, com 135. Nenhuma grafia medida ate agora
+ * junta as duas coisas.
+ *
+ * MEDIDO E MORTO NO PRIMEIRO TICK, todos sobre a base de 135:
  *  - um nome PROPRIO (`u`) para o valor mascarado do m4B8, separando-o do
  *    `v` do m400 -- os dois papeis sao diferentes (o do m400 chega CRU e e
  *    mascarado na juncao, o do m4B8 chega ja mascarado): 135, neutro aqui,
