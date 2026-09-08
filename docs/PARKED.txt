@@ -8688,3 +8688,53 @@ esse `sll` para o delay slot, porque ele cai em $v1 e nao colide com o
 `beqz`. O retail so escapa porque o SEU `sll` escreve $v0. Reabrir com uma
 ideia sobre como fazer o indice cair em $v0 -- e nao com mais grafias do
 endereco, que estao esgotadas por varredura completa.
+
+# --- func_8003E490 (2026-09-08) -- 207/209, UM grupo estrutural
+Maquina de estados do CARTAO DE MEMORIA, com TRES jump tables. Primeiro
+rascunho do dia: 205 linhas iguais depois de alinhar os opcodes, DUAS
+so-de-registrador, UM grupo estrutural. Flags PADRAO. Candidato em
+`parked/func_8003E490.c`, com tudo no cabecalho.
+
+Tres coisas que valem para alem desta funcao:
+
+**O m2c FUNDE varios switches num so quando ha jump tables multiplas** --
+imprime `case 1:` repetido com comentarios `/* switch 1 */`, `/* switch 2 */`.
+Separa-los lendo as tabelas em `asm/data/*.rodata.s` e os `jlabel` do listing
+e o primeiro passo, e depois disso o rascunho sai quase inteiro.
+
+**Um simbolo pode nao ter o braco de que precisas em variables.h.**
+D_8009B3D4 e escrito `%gp_rel` e so tinha os bracos `.data`, `[4]` e o `[]`
+implicito; foi preciso acrescentar `D_8009B3D4_IS_SCALAR`. Verificar a
+cadeia de `#ifdef` antes de concluir que uma forma de enderecamento e
+impossivel.
+
+**E os callees de biblioteca tem NOME REAL na functions.csv do
+krystalgamer** (600 marcados `sdk_asm`): func_8008BC90 = MemCardAccept,
+func_8008C638 = MemCardReadFile, func_8008CA78 = MemCardGetDirentry. As
+assinaturas reais confirmam argumento a argumento o que o listing mostra e
+dizem o que sao quatro globais. E o ponto que ele levantou no Discord no
+mesmo dia -- um agente que re-deriva os tipos a partir do m2c bate numa
+parede que a definicao verdadeira resolve.
+
+O QUE FALTA, e o eixo esta FECHADO POR SONDA: os casos 6 e 8 sao
+identicos (`addiu $a0,0xD3` + `j .L8003E7B8`) e o retail tem DUAS copias
+byte a byte iguais, em 0x8003E770 e 0x8003E7A4. Uma sonda de dez linhas
+pelo cc1psx mostra que dois bracos de `switch` textualmente identicos saem
+com UMA copia a -O1, -O2, `-fno-thread-jumps`, `-fno-delayed-branch`,
+`-fno-expensive-optimizations`, `-fno-cse-follow-jumps` e `-fno-peephole`,
+e so a -O0 saem duas; a entrada da tabela do braco mais cedo e
+redirecionada para o bloco do mais tarde. Seis grafias do corpo na sonda e
+cinco na funcao real dao todas uma copia, porque o cross-jumping funde o
+SUFIXO COMUM MAXIMO -- e ele corre DEPOIS da alocacao de registradores, o
+que fecha tambem a hipotese de os bracos diferirem so no registrador.
+Portanto a fonte original NAO pode ter tido dois bracos a terminar da
+mesma maneira, e o que ha a re-ler sao os VALORES dos cases ou o modo como
+o bloco e alcancado -- nao a grafia do corpo. Nenhum dos dois rotulos e
+referenciado de mais lado nenhum alem das entradas 6 e 8 da jtbl_80010410.
+Mais medido e morto: cinco ordens de `case` (quatro identicas ao numerico,
+e (5,6,7,9,8) da 209/209 mas e FALSO ZERO -- censo `addiu -1, nop +1`, oito
+instrucoes em tres grupos, porque o bloco fundido so muda de sitio e paga
+um `j`/`nop`); varredura de flags completa (27 linhas, o padrao e o melhor,
+o segundo e 143); permuter, duas rodadas de 110s a partir do score 415,
+zero saidas.
+Reabrir com uma leitura NOVA dos valores dos cases, nao com mais grafias.
