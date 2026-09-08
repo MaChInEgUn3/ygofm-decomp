@@ -8493,3 +8493,37 @@ enchemos esse slot com `sll $v1,$a0,1` (o indice de `p`), porque no nosso
 codigo o destino desse shift esta livre e no retail e `$v0`, que a extensao
 de sinal de `t2` ja esta ocupando. Consequencia da alocacao, nao da ordem da
 fonte.
+
+OITAVA RODADA (2026-09-08) -- PARADO em 328/329 e 267, censo de magnitude
+CINCO. Tres eixos fechados e um FALSO ZERO que vale a pena estar escrito:
+ - a COPIA do ponteiro do halfword (`addu $t0,$v0,$zero`, que o retail faz
+   nos DOIS bracos) nao sai de nenhum nome: `p2 = &(...); p = p2;` no braco
+   de entrada, no de edicao, e nos dois, sao os TRES 267, identicos a base.
+   Terceira medicao deste eixo, agora na base final -- o gcc coalesce
+   (regra 20), e nao ha aqui a mudanca de CLASSE de registrador que faz a
+   copia sobreviver noutras funcoes (nao ha chamada nenhuma entre a
+   definicao e os usos);
+ - a ORDEM das quatro linhas do braco de entrada (`p`, `val = *p`,
+   `q = &a[i]`, `*p = 0`): tres permutacoes, uma delas com
+   `do { q = &a[i]; } while (0);`, medidas nos DOIS candidatos vivos --
+   seis medicoes, todas identicas (267 no instalado, 316 no z4). Eixo
+   fechado;
+ - **FALSO ZERO, e e o achado desta rodada**: `parked/alt_func_80030294_sem_cb_db.c` (sem `cb`/`db`) com
+   `-fno-cse-follow-jumps` da **329/329, comprimento EXATO**, 253
+   diferencas -- e o censo e de magnitude DEZ: `addu -2, addiu -2, lui -1`
+   contra `nop +2, lb +2, lbu +1`. Cinco faltando e cinco sobrando que se
+   cancelam. O comprimento exato aqui e a coisa MENOS informativa do
+   candidato, e sem o censo teria sido instalado como o melhor de todos.
+   A flag faz o que se queria (as bases de pilha voltam para dentro dos
+   bracos) e paga com recargas de D_8009B2DC, D_8009B2E9 e D_8009B2EA que
+   o CSE fazia de graca;
+ - e nomear o indice que a flag obriga a recarregar (`ix = (s8)D_8009B2DC;`
+   no topo, usado nos tres sitios anteriores ao rabo) TIRA as recargas
+   (`lb` zerado) mas devolve as duas `addiu` para o topo: -3/284 com os seis
+   sitios e -2/316 com cinco. As duas metades da flag nao se separam.
+Fica parado com dois candidatos vivos, que sao a mesma funcao vista de dois
+lados: o instalado, -1/267, tres faltando (`addu -2`, `lui -1`) e duas
+sobrando (`sw +1`, `lw +1`, isto e o $s3); e `parked/alt_func_80030294_sem_cb_db.c`, -4/316,
+quatro faltando (`addu -2`, `lui -1`, `addiu -1`) e ZERO sobrando. Reabrir so
+com uma ideia nova sobre como fazer o gcc recomputar `sp+0x10` e `sp+0x28`
+dentro dos bracos sem perder o CSE dos globais.
