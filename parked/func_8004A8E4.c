@@ -50,7 +50,27 @@
  * load-bearing.
  * The residue is ONE instruction's worth of allocation: retail spends
  * its 23rd instruction copying the BYTE into $v0 in the beq's delay
- * slot, and we spend ours copying the BASE before the block. */
+ * slot, and we spend ours copying the BASE before the block.
+ *
+ * 2026-09-08, second pass, read with the difflib ALIGNMENT rather than the
+ * positional diff: the residue is exactly THREE blocks -- the base's
+ * register name, our extra `addu $a2,$a1,$zero` where retail has none, and
+ * block 2's chain running `$v0 <- $v1` where retail runs `$v1 <- $v0` after
+ * a copy.
+ *
+ * And the fold's mechanism is now PROVED rather than inferred. `u16 off`
+ * with the derived form (`b = D_8009B458; e = b + off;`, NO base copy at
+ * all) is 23/23 and 12: the truncation stops gcc reassociating
+ * `b + (arg0 * 40 + 0x180)`, so the constant stays in the offset and the
+ * +0x180 is NOT folded into the load -- which every s32 spelling of the
+ * sixteen above does. It costs an `andi $v0,$v0,65535` exactly where retail
+ * has `addiu $v0,$v0,384`, so it trades the base copy for a mask and the
+ * count is one worse; `s16 off` is +1/21. But it settles what sixteen dead
+ * spellings could only suggest: the fold is REASSOCIATION, and the only
+ * things that block it are a value gcc cannot re-derive -- a truncation, or
+ * the load's own pseudo modified in place, which is what costs the copy.
+ * Also re-measured on this base: a dead `e = D_8009B458;` beside the used
+ * `b` (11) and the byte copied into `off` before the multiply (11). */
 #include "common.h"
 
 s32 func_8004A8E4(s32 arg0) {
