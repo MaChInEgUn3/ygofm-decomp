@@ -8375,6 +8375,16 @@ copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta para
 la (regra 31) e o nosso bloco comeca com outra instrucao. E ainda salvamos $s3
 alem de $s0-$s2.
 
+Quarta rodada -- a LARGURA de `val` e `mask`: `val` como `s32` em vez de `u16`
+e -2/286 contra -1/307, censo de magnitude 27 para 22 com `lhu` e `or`
+zerados; `mask` como `s32` da exatamente o mesmo (-2/286) e os DOIS juntos sao
+-4/323. NAO instalado porque a ordenacao poe o comprimento primeiro, mas a
+diferenca e de UMA instrucao e as duas contagens estao infladas por erros de
+comprimento diferentes -- RE-MEDIR assim que o comprimento fechar.
+O alinhamento mostra a raiz do que sobra: com o local do buffer o gcc iça
+`lui`/`addiu %lo(D_800EAED8)` e as duas bases de array da pilha para o topo da
+funcao, quatro instrucoes que o retail nao tem la -- ele computa cada base
+dentro do braco que a usa, e dai vem o $s3 a mais.
 Terceira rodada: o endereco de D_800EAED8 num local atribuido ANTES DE TODA a
 cadeia de `if` (regra 44) e -3/314 -> -1/307. Usar o mesmo local tambem no
 segundo endereco e -4/306, uma diferenca a menos mas tres instrucoes mais

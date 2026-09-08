@@ -48,7 +48,21 @@
  *    `fill` tambem nao muda nada (-3/314), e usa-lo tambem no segundo
  *    endereco e pior (-6/313).
  *
- * O QUE FALTA: TRES instrucoes e censo de magnitude 29 (`nop -5, lui -5,
+ * QUARTA RODADA -- A LARGURA DE `val` E `mask`:
+ *  - `val` declarado `s32` em vez de `u16` e -2/286 (contra -1/307), censo
+ *    de magnitude 27 para 22, com `lhu` e `or` zerados. `mask` como `s32` da
+ *    exatamente o mesmo (-2/286), e os DOIS juntos sao -4/323, muito pior.
+ *    NAO INSTALADO porque a regra de ordenacao poe |erro de comprimento|
+ *    primeiro e a base esta em -1 -- mas a diferenca de comprimento e de UMA
+ *    instrucao e as duas contagens estao infladas por erros de comprimento
+ *    diferentes, entao **RE-MEDIR `s32 val` assim que o comprimento fechar**;
+ *  - o alinhamento mostra a raiz do que sobra: com o local do buffer, o gcc
+ *    iça `lui`/`addiu %lo(D_800EAED8)` e as DUAS bases de array da pilha
+ *    (`addiu $t1,$sp,16` e `addiu $t5,$sp,40`) para o topo da funcao, quatro
+ *    instrucoes que o retail nao tem la -- ele computa cada base dentro do
+ *    braco que a usa. E dai que vem o $s3 a mais.
+ *
+ * O QUE FALTA: UMA instrucao e censo de magnitude 29 (`nop -5, lui -5,
  * addiu +5, andi +3, addu -2, lw -2, lhu +2, or +1, beq +1, bgez +1,
  * bne -1, bltz -1`). Os `lui -5` que sobram sao de D_800EAED8: o retail
  * copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta
