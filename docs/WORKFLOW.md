@@ -363,6 +363,19 @@ meaningful, and skipping to the last one wastes hours:
    the compound assignment is separate from the local: it makes the value its
    own destination, which is what `and $v0,$v0,$a0` shows. func_8003B808 went
    95 differences to 82 and func_80020BE4 74 to 62 on those two together.
+   **The one-name-for-two-sequential-constants rule has a bound, and reading
+   the registers is not enough to tell you which side you are on.**
+   func_800179F4 holds 0x100 and then 0xB in `$s1`, which is the rule's own
+   tell exactly -- and the source has **two** names, not one. With one name
+   the constant's pseudo spans from its assignment to the second use, takes
+   `$s1` away from the record pointer that needs it, and gcc materialises the
+   0x100 three calls early in a delay slot; two names is 70 differences to 41.
+   The rule fires when the target materialises the second constant **into the
+   register the first has just vacated**, with the two live ranges adjacent;
+   here they never touch, and the shared register is only the allocator
+   reusing what is free. Count where each value dies, not which register it
+   is in.
+
    **A literal and a variable holding the same value are two materialisations;
    one variable used twice is one.** `D_8009B408[0] = v; D_8009B37D = 1;`
    matched func_8003C7A0 where `= v; = v` and `= 1; = 1` both gave 54 — the
@@ -2533,6 +2546,21 @@ on a combination that had been in the table for weeks.
   cc1psx's own pair, default flags. func_8003C950 wants `lui/sb` on a one-byte
   symbol and `%gp_rel` on a four-byte one; running that check first made it a
   first-try match with no iteration at all.
+  **And the `.data` arm is the cheapest fix for the extra-callee-saved tell,
+  on a symbol that is already outside small data.** func_800179F4 reads
+  D_8009B361 four times and D_8009B364 twice, and retail materialises a
+  separate `%hi` for every one of them; under the unsized-array arm gcc CSEs
+  one `%hi` into `$s3`, the function saves `$s0`-`$s3` against retail's
+  `$s0`-`$s2` and the frame goes to 56 bytes instead of 48. Two
+  `__attribute__((section(".data")))` declarations -- no inflated size, no
+  `-G` row, no compiler flag -- took it from 199 differences to 135 and made
+  the prologue exact. So when the prologue saves one register too many and
+  the extra one holds a `%hi`, reach for this arm FIRST: it is one word per
+  symbol and it disturbs nothing else. Which symbols is worth sweeping rather
+  than reasoning about -- B361 alone 136, B361+B369 136, B361+B364 **135**,
+  and all four (adding D_8009B360, which retail reaches as an offset off
+  B361) is +1 and 164.
+
   **A FIFTH form, and it is the honest spelling of the third: place the symbol
   in `.data`.** `extern u8 sym __attribute__((section(".data")));` takes the
   symbol out of small data at the **compiler**, with its *true* size and no

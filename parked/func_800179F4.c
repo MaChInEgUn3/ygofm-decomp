@@ -1,39 +1,80 @@
-/* 240/240 -- COMPRIMENTO EXATO -- e 199 diferencas, censo `sw +1, lw +1,
- * nop +1, addiu -1, lui -2` (2026-09-08). PRIMEIRO C, exato no primeiro
- * rascunho que compilou. Flags PADRAO (passo 0: gp=27, at=0, SEM jump
- * table).
+/* 239/240 -- UMA INSTRUCAO A MENOS -- e 38 diferencas, censo `addiu -1`,
+ * UM UNICO opcode divergente (2026-09-08). Flags PADRAO (passo 0: gp=27,
+ * at=0, SEM jump table). Vinha de 240/240 com 199.
  *
  * FORMA: rotina de SETUP de tela -- 32 chamadas a 25 callees distintos,
  * zeragem de nove globais, dois objetos criados por
  * `func_800400AC(func_8004002C(), N)` e configurados, e um bloco final que
  * escolhe um par de buffers.
  *
- * TRES LEITURAS DO LISTING QUE O RASCUNHO DO M2C NAO DAVA:
+ * AS QUATRO ALAVANCAS QUE LEVARAM 199 -> 38, nesta ordem:
+ *
+ * 1. **D_8009B361 e D_8009B364 NA FORMA NUA (`_IN_DATA`), que e o que tira
+ *    o callee-saved a mais.** O retail materializa `%hi(D_8009B361)`
+ *    QUATRO vezes e `%hi(D_8009B364)` DUAS, cada uma no seu registrador e
+ *    nenhuma compartilhada; com o braco de array (o par proprio do cc1psx)
+ *    o gcc faz CSE de um `%hi` para dentro de $s3, a funcao salva $s0-$s3
+ *    contra os $s0-$s2 do retail e a moldura vai a 56 bytes. Com o
+ *    atributo de secao a referencia e UMA pseudo-instrucao, nao ha o que
+ *    compartilhar, o prologo casa exatamente e sao 199 -> 135. Medido:
+ *    so B361 136, B361+B369 136, B361+B364 **135**, os quatro (com
+ *    D_8009B360) +1 e 164. Este e o caso do WORKFLOW "prologo salva um
+ *    registrador a mais e o extra guarda um `%hi`".
+ *
+ * 2. **`e = D_800EA0E8;` escrito DEPOIS de `func_8001352C()`** (135 -> ).
+ *    O par `lui`/`addiu` de D_800EA0E8 e partido pelo escalonador e cada
+ *    metade cai no delay slot de uma chamada DIFERENTE -- `lui` no de
+ *    func_800178BC e `addiu` no de func_800176D0, com func_8001352C no
+ *    meio. Varredura 2D de 20 pontos (5 posicoes de `e` x 4 de `hun`):
+ *    e0 135, e1 127, e2 127, e3 239/148, e4 238/70. **A posicao de `hun`
+ *    nao vale NADA** -- as quatro dao o mesmo numero em cada linha, que e
+ *    a assinatura de eixo errado (regra 7).
+ *
+ * 3. **0x100 e 0xB em DOIS NOMES, nao um.** Isto contradiz a leitura
+ *    original (regra 25, "duas constantes sequenciais no mesmo registrador
+ *    sao um nome so"): o retail POE as duas em $s1, e mesmo assim a fonte
+ *    tinha dois nomes -- com um nome so o pseudo de 0x100 rouba $s1 do
+ *    ponteiro `o` e o 256 e materializado no delay slot de func_800178BC,
+ *    tres chamadas cedo. 70 -> 41 em e4 e 148 -> 41 em e3. A regra 25 vale
+ *    quando o retail materializa a segunda constante NO registrador que a
+ *    primeira acabou de vagar; aqui as duas vidas nem se tocam.
+ *
+ * 4. **D_8009B360 e `(&D_8009B361)[-1]`, nao um simbolo proprio** (41 ->
+ *    38 e -2 -> -1). O retail faz `lui %hi(D_8009B361)` / `addiu
+ *    %lo(D_8009B361)` / `lb -1($v0)`: TRES instrucoes, o endereco inteiro
+ *    num registrador e o -1 como deslocamento do load. Lido como simbolo
+ *    proprio sao duas.
+ *
+ * O QUE FALTA E UMA SO INSTRUCAO, e o mecanismo esta identificado: o gcc
+ * DOBRA o -1 dentro do `%lo` e emite `lui %hi(D_8009B361)` / `lb
+ * %lo(D_8009B361+-1)($v0)`, duas instrucoes onde o retail tem tres. SEIS
+ * grafias medidas e TODAS dao exatamente 239/38, o que e a assinatura de
+ * eixo errado (regra 7): `(&D_8009B361)[-1]`, `*(&D_8009B361 - 1)`,
+ * `*((s8 *)&D_8009B361 - 1)`, `*(s8 *)((s32)&D_8009B361 - 1)`, o mesmo com
+ * `+ -1`, um ponteiro local `q = &D_8009B361;` com `q[-1]` (adjacente e
+ * tambem acima dos dois stores), e emprestar o proprio `a` como base. O
+ * que falta e fazer o cc1psx emitir um `la` SEPARADO do load; nenhuma
+ * grafia em C alcanca isso enquanto o simbolo estiver na forma nua.
+ *
+ * NAO INSTALAR A VERSAO DE COMPRIMENTO EXATO: `e` uma chamada antes (e1/e2)
+ * da 240/240 com 128, e esse zero e FALSO -- o censo e `nop +1, addiu -1`,
+ * isto e, o mesmo `addiu` que falta aqui, cancelado por um `nop` a mais no
+ * delay slot de func_800176D0. O censo desta versao tem UM opcode
+ * divergente; o daquela tem dois que se anulam.
+ *
+ * TRES LEITURAS DO LISTING QUE O RASCUNHO DO M2C NAO DAVA (todas ainda
+ * validas):
  *  - **`sllv $a2,$v0,$s0` prova que o deslocamento e uma VARIAVEL.** O
  *    retail poe 1 em $s0 e o usa DUAS vezes: na comparacao
- *    `D_8009B369 != 1` e como amount do shift que faz `x * 3`. Escrito
- *    `(D_8009B361[0] << one) + D_8009B361[0]` com `one` local, sai `sllv`;
- *    escrito `* 3` sairia `sll 1` fixo;
- *  - `$s1` carrega 0x100 (usado em dois stores) e depois 0xB (usado como
- *    argumento de pilha das duas chamadas a func_800404CC) -- **duas
- *    constantes sequenciais no mesmo registrador, UM NOME** (regra 25);
+ *    `D_8009B369 != 1` e como amount do shift que faz `x * 3`;
  *  - `lb $v0,-0x1($v0)` com `$v0 = %lo(D_8009B361)` e uma leitura de
- *    D_8009B360, nao um campo negativo como o m2c escreveu.
- * E os simbolos `.data` (D_8009B360/361/364/369) sao lidos `lui %hi`/`lbu
- * %lo`, entao usam o BRACO DE ARRAY (`D_8009B364[0]`), nao o escalar
- * gp-relativo -- foi o que o compilador reclamou primeiro.
- *
- * O QUE FALTA (199 diferencas): **salvamos UM callee-saved a mais** ($s0 a
- * $s3 contra $s0 a $s2 do retail), e a moldura vai a 56 bytes em vez de 48.
- * O retail carrega TRES valores em $s0 em sequencia -- o 1, a base
- * D_800EA0E8 e o bit de sinal de D_8009B361 -- e eles nunca coexistem.
- * MEDIDO E MORTO: os tres num nome so da -1 com 209; o 1 com a base num
- * nome e o sinal separado da -1 com 207; a base com o sinal num nome e o 1
- * separado da -1 com 207. As tres fusoes tiram uma instrucao a mais do que
- * deviam, entao falta a outra metade do par (regra 17).
+ *    D_8009B360, nao um campo negativo como o m2c escreveu;
+ *  - D_8009B369, lido `lui %hi`/`lbu %lo`, usa o BRACO DE ARRAY.
  * Tres declaracoes novas em variables.h: D_8009B1D8, D_8009B1DC e
  * D_8009B21C, os tres ponteiros gp-relativos que esta rotina grava.
  */
+#define D_8009B361_IN_DATA
+#define D_8009B364_IN_DATA
 #include "common.h"
 
 void func_800164FC(void);
@@ -44,6 +85,7 @@ void func_800179F4(void) {
     u8 *o;
     s32 one;
     s32 hun;
+    s32 elv;
     s32 sgn;
 
     func_8004763C();
@@ -51,7 +93,7 @@ void func_800179F4(void) {
     func_80012D84(4);
     one = 1;
     func_800137E4();
-    func_80014E1C(0, 0, D_8009B364[0] * 0xEB + 0x16C6, 0xEB, func_800171A8, 0, 0);
+    func_80014E1C(0, 0, D_8009B364 * 0xEB + 0x16C6, 0xEB, func_800171A8, 0, 0);
     func_800137E4();
     D_8009B238 = -1;
     D_8009B23A = 0xB;
@@ -63,8 +105,8 @@ void func_800179F4(void) {
     D_8009B16C = 0;
     D_8009B174 = 0;
     if (D_8009B369[0] != one) {
-        if (D_8009B361[0] >= 0) {
-            func_80014E1C(0, 0, (D_8009B361[0] << one) + D_8009B361[0] + 0x1D33, 3, 0, 0, D_801781D8);
+        if (D_8009B361 >= 0) {
+            func_80014E1C(0, 0, (D_8009B361 << one) + D_8009B361 + 0x1D33, 3, 0, 0, D_801781D8);
         }
         D_8009B1D5 = 0;
         D_8009B23A = one;
@@ -74,12 +116,12 @@ void func_800179F4(void) {
         D_8009B16C |= 0x1000;
     }
     D_8009B1C8 = (u8 *)&D_800E9FF0[D_8009B1D5];
-    e = D_800EA0E8;
     func_800178BC();
     D_800F284A[0] = (D_8009B1D5 << 11) + 0x400;
     func_8001352C();
-    func_800176D0();
+    e = D_800EA0E8;
     hun = 0x100;
+    func_800176D0();
     func_8002C598();
     func_80029574(0);
     *(s16 *)(e + 0x28) = 0;
@@ -92,18 +134,18 @@ void func_800179F4(void) {
     *(s16 *)(e + 0x6C) = 0;
     *(s16 *)(e + 0x6E) = 0xFE;
     func_80035668(0);
-    hun = 0xB;
+    elv = 0xB;
     func_8001755C();
     func_800137E4();
     D_8009B22C = &D_800907D8[D_8009B1D5 * 0x14];
     o = func_800400AC(func_8004002C(), 2);
-    func_800404CC(o, 0xC, 0x18, 4, 2, D_8009B364[0], hun, 0x2DC);
+    func_800404CC(o, 0xC, 0x18, 4, 2, D_8009B364, elv, 0x2DC);
     func_80042918(o);
     *(u16 *)(o + 8) = *(u16 *)(o + 8) | 8;
     D_8009B214 = o;
-    sgn = (u32)D_8009B361[0] >> 31;
+    sgn = (u32)D_8009B361 >> 31;
     o = func_800400AC(func_8004002C(), 2);
-    func_800404CC(o, 0x118, 0x20, 4, sgn, 0, hun, 0x2EC);
+    func_800404CC(o, 0x118, 0x20, 4, sgn, 0, elv, 0x2EC);
     func_80042918(o);
     *(u16 *)(o + 8) = *(u16 *)(o + 8) | 8;
     if (D_8009B1D5 != 0) {
@@ -122,8 +164,8 @@ void func_800179F4(void) {
         D_8009B1DC = (u8 *)0;
         D_8009B1D8 = (u8 *)0;
         a = (u8 *)0;
-        if (D_8009B360[0] < 0) {
-            if (D_8009B361[0] < 0) {
+        if ((&D_8009B361)[-1] < 0) {
+            if (D_8009B361 < 0) {
                 a = D_801D1200;
                 b = a + 0x1000;
                 D_8009B1D8 = a;
@@ -132,7 +174,7 @@ void func_800179F4(void) {
                 a = D_801D0200;
                 D_8009B1D8 = a;
                 b = (u8 *)0;
-                if (D_8009B361[0] >= 0x27) {
+                if (D_8009B361 >= 0x27) {
                     goto join;
                 }
             }
