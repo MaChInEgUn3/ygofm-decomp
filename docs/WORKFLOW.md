@@ -3123,6 +3123,20 @@ the wrong mnemonic to the right one is progress even at an unchanged count,
 and an edit that leaves the census untouched is a passenger however good the
 number looks.
 
+**`tools_src/adiff.py` is the instrument that fixes this, and it is one
+command.** It aligns the two instruction streams with difflib over the
+*opcodes* and then reports four numbers: rows that match exactly after the
+alignment, rows that differ only in register names, how many instructions
+sit in structural blocks, and how many blocks there are. Run it on
+try_func's saved output. On func_80030294, 2026-09-08, it **inverted the
+ranking twice in one afternoon** -- a candidate try_func scored 248 was
+better than one it scored 235 (253/72/7 against 212/112/9), and the
+positional count would have thrown the better one away. Rank by
+`(abs(length error), structural groups, register-only rows)`; the census
+still comes first for opcode faults, and this separates "one instruction
+is in the wrong place" from "one register is wrong", which the positional
+count cannot.
+
 **And never rank candidates by the difference count alone.** The diff is
 positional — line *i* against line *i*, no alignment pass — so one missing
 instruction marks every line after it as differing. A candidate one `nop` short
