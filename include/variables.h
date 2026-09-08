@@ -561,6 +561,11 @@ extern u8 D_8009B1D5[];
 #else
 extern u8 *D_8009B1B4;
 extern u8 *D_8009B1C8;
+/* Three more gp-relative pointer slots, written by func_800179F4's setup:
+ * D_8009B1D8/D_8009B1DC are a buffer pair and D_8009B21C a sprite handle. */
+extern u8 *D_8009B1D8;
+extern u8 *D_8009B1DC;
+extern u8 *D_8009B21C;
 extern u8 *D_8009B1F0[2];
 extern u8 *D_8009B1F8;
 extern u8 D_8009B1D5;

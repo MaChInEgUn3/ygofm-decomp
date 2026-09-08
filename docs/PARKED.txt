@@ -8125,3 +8125,22 @@ diferencas, ou seja METADE DE UM PAR. Quatro ordens de declaracao dao 135
 nas quatro -- eixo errado. E o mesmo estado
 inicial do func_800577B0, onde a alavanca foi um nome para duas constantes
 sequenciais.
+
+func_800179F4 -- 240/240, comprimento EXATO, 199 diferencas. PRIMEIRO C,
+exato no primeiro rascunho que compilou. Flags padrao (passo 0: gp=27, at=0,
+sem jump table). Rotina de setup de tela: 32 chamadas a 25 callees, nove
+globais zerados, dois objetos criados e configurados, e um bloco final que
+escolhe um par de buffers.
+Tres leituras do listing que o m2c nao dava: um `sllv` prova que o
+deslocamento e uma VARIAVEL -- o retail poe 1 em $s0 e o usa na comparacao
+`D_8009B369 != 1` E como amount do shift que faz `x * 3`, entao ha um local
+com esse 1; $s1 carrega 0x100 e depois 0xB, duas constantes sequenciais no
+mesmo registrador, um nome so; e `lb $v0,-1($v0)` com $v0 = %lo(D_8009B361)
+e uma leitura de D_8009B360, nao um campo negativo. Os simbolos `.data` sao
+lidos `lui %hi`/`lbu %lo`, entao usam o braco de ARRAY e nao o escalar.
+Residuo: salvamos um callee-saved a mais ($s0-$s3 contra $s0-$s2) e a
+moldura vai a 56 em vez de 48. O retail carrega TRES valores em $s0 em
+sequencia (o 1, a base D_800EA0E8 e o bit de sinal de D_8009B361) e eles
+nunca coexistem. Medido e morto: os tres num nome so da -1/209; o 1 com a
+base da -1/207; a base com o sinal da -1/207. As tres tiram uma instrucao a
+mais do que deviam, entao falta a outra metade do par.
