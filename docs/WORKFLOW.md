@@ -2214,6 +2214,19 @@ on a combination that had been in the table for weeks.
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
   finds the callers that also need updating.
+- **A counted loop's decrement goes AFTER the exit test, not before it.**
+  Where retail has the loop's exit branch (`bne`/`beq` out of the body) with
+  `addiu $s0,-1` in *that instruction's* delay slot, the filler took it from
+  the fall-through thread -- i.e. from after the branch. Written before the
+  call, before the test, or between an `if`/`else` and the test, the
+  decrement lands in the `jal`'s delay slot instead, or in the `j` of the
+  `if`'s then-arm where gcc also *duplicates* it. Written after the
+  `if (x) goto …;` it lands where retail has it, and it is semantically the
+  same because the counter is dead on the goto path. func_80044838 has four
+  such loops and three wanted it: one at a time from a base of 88 they are
+  +1/55, 85, and then 11 with an empty census. The fourth -- two arguments,
+  no literal -- was exact from the first draft, so check each loop rather
+  than sweeping them together.
 - **A run of 4 loads, 4 stores, 3 loads, 3 stores IS gcc's block-move
   expander -- look for a struct copy before you name seven temporaries.**
   `expand_block_move` issues up to four `lw` and then the matching `sw`, so a
