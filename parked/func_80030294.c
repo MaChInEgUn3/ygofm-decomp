@@ -1,6 +1,6 @@
 /* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
- * estrutural depois de ALINHAR os opcodes (2026-09-08): 294 linhas
- * iguais, 34 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 310 linhas
+ * iguais, 18 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 294 iguais / 34 so-registrador / 2 estruturais.
+ * candidato e 310 iguais / 18 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -82,6 +82,24 @@
  * p = p + (s8)D_8009B2DC;` -- a mesma ideia sem passar por `r` -- e 39,
  * i.e. PIOR que a forma indexada: e o `r` que importa, nao o partir em
  * duas.
+ *
+ * ALAVANCAS 15 e 16 -- DOIS NOMES EMPRESTADOS entre os dois bracos, que
+ * NUNCA correm juntos (o de entrada acaba em `goto fill;`). Sao a maior
+ * alavanca depois da 10, e a forma do func_8002596C:
+ *  15. o `car` do laco de carry chama-se `k` -- o mesmo nome do divisor do
+ *      braco de ENTRADA. 34 linhas de registrador -> 22, e fecha o bloco
+ *      inteiro das linhas 150-203, que era um swap $t0 <-> $a3 de catorze
+ *      linhas de uma vez;
+ *  16. o quociente do braco de entrada chama-se `step` -- o mesmo nome do
+ *      passo do braco de EDICAO. 22 -> 18.
+ * As duas saem de uma VARREDURA, nao de raciocinio: `car` emprestando `k`
+ * e 22, `val2` (nome fresco) e 34, `car += step` e 34, e uma atribuicao
+ * morta `car = e;` antes do laco e +1 e 92. Depois, sobre a base do 15,
+ * `n`->`step` e 18, `k`->`step` 31, `n`->`mask` 37, `i`->`e` 46 e
+ * `k`->`mask` 48. E sobre a base do 16 uma varredura 2D de doze
+ * emprestimos (`i`, `k` e `val` contra `n`, `mask`, `e` e `sc`) da
+ * 20 no melhor (`val`->`sc`) e nada abaixo de 18 -- o eixo esta no
+ * optimo local.
  *
  * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
  *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
@@ -177,10 +195,10 @@ s32 func_80030294(void) {
             *p = 0;
             do {
                 k = a[i];
-                n = val / k;
-                *p = *p | (n << (i * 4));
+                step = val / k;
+                *p = *p | (step << (i * 4));
                 i = i - 1;
-                val = val - k * n;
+                val = val - k * step;
             } while (i >= 0);
         }
         goto fill;
@@ -215,27 +233,27 @@ s32 func_80030294(void) {
             if (i < (s8)t2) {
                 n = (s8)t2;
                 do {
-                    car = val & mask;
+                    k = val & mask;
                     val = val & ~mask;
-                    car = car + step;
+                    k = k + step;
                     if (step >= 0) {
-                        if (car < b[i]) {
+                        if (k < b[i]) {
                             goto joined;
                         }
                     } else {
-                        if (car >= 0) {
+                        if (k >= 0) {
                             goto joined;
                         }
                         val = val | ((b[i] - 1) & mask);
                     }
-                    car = 0;
+                    k = 0;
                     mask = mask * 0x10;
                     step = step * 0x10;
                     i = i + 1;
                 } while (i < n);
             }
         joined:
-            val = val | car;
+            val = val | k;
         } else {
             val = val + step;
             val = val & (c[(s8)t2] - 1);
