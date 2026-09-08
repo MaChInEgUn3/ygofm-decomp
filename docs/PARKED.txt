@@ -8017,3 +8017,18 @@ func_800734DC -- 49/49 and 19 differences (2026-09-08), and it is the FIRST REAL
     DIFFERENTLY -- arm 1 as the load's displacement, arm 2 as a named index.
     Residue is that retail computes nothing before the branch and we hoist the
     name. See the park header. The debt is not retired until this matches.
+
+func_800577B0 -- -3 em 206/209, 171 diferencas. NAO e divida: src/31D8.c
+ainda tem o INCLUDE_ASM, entao um MATCH aqui e funcao NOVA. Despachante da
+familia D_8009B0F4 com jump table real (jtbl_8001179C); gp=0 e seis `lui $at`,
+entao o conserto de enderecamento e `as -G0`, que a jump table sobrevive (com
+`-mno-split-addresses` nao sobreviveria). Nao ha linha em build.py: medir por
+config/flag_overrides.json e APAGAR o arquivo depois.
+Segundo dia: -12 -> -3, 186 -> 171 diferencas, 21 -> 17 blocos no alinhamento.
+As cinco alavancas que valeram, e as oito grafias medidas e mortas, estao no
+cabecalho de parked/func_800577B0.c com numeros. A maior foi um so nome para
+as constantes 0x10 e 0x10000 dos cases 1 e 6 (regra do func_80020BE4: duas
+constantes sequenciais que nunca coexistem sao um nome so) -- 180 -> 164.
+Residuo: sw -3/lw -1/addiu -1 porque o gcc guarda a copia do rabo do m1 do
+CASE 1 e o retail guarda a do CASE 6; lui -1 pelos $s0/$s1 trocados no
+case 10; e o `sh` do p+0x30 uma instrucao adiante do lugar do retail.
