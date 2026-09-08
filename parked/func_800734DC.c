@@ -53,6 +53,18 @@
  * destination shift. gcc computes it once at the dominator from every
  * source shape tried, so what is needed is something that stops the CSE,
  * not something that moves the statement.
+ *
+ * 2026-09-08, with the difflib ALIGNMENT: the residue is FOUR blocks, and
+ * they say it precisely. We compute `valA * 9` and the destination shift
+ * before the branch (`addu $a0,$v0,$zero` / `sll $s0,3` / `addu`) where
+ * retail has only `sll $a0,$v0,2` in the bnez's delay slot, and we fold the
+ * +1 into `%lo(D_800917F0+1)` where retail computes `sll/addu/addiu 1`
+ * inside arm 2. So retail hoists ONE instruction and we hoist four.
+ * The combination rule 17 asks for -- the destination offset hoisted as
+ * `off = idxC * 4;` AND the index written inside each arm, which had never
+ * been measured together -- is +2/30, +2/29 with arm 1 inline, +1/31 with
+ * both arms inline, and +2/32 with the index only in arm 2. All worse than
+ * the installed 49/49 and 19, so the four-block residue stands.
  */
 #include "common.h"
 

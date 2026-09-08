@@ -51,8 +51,18 @@
  * The residue is 14: a four-way register rotation ($a1/$a2, $a0/$a1,
  * $v0/$a0, $v1/$v0) and the 0xFFFF read-back coming out as a real
  * `lw $a0,5476($v1)` where retail has `addu $a0,$a1,$zero` -- gcc does not
- * forward the store it has just made. The debt is NOT retired until this
- * matches.
+ * forward the store it has just made.
+ *
+ * 2026-09-08, with the difflib ALIGNMENT: FIVE blocks, and the last one
+ * names the mechanism. Retail has `sw $a1,5476($v1)` / `sw $a0,5472($v1)` /
+ * `addu $a0,$a1,$zero` -- the copy is of the VALUE IT HAS JUST STORED, not a
+ * reload of the slot. So the obvious edit is to name that constant:
+ * `c = 0x801EA800; *(s32 *)(t + 0x1564) = c;` with the four dereferences
+ * written through `c`. It is -7/42, at both placements: with the address in
+ * a named local gcc constant-folds every derived address and the four
+ * reloads vanish. The read-back spelling is therefore right and the
+ * `lw`-against-`addu` is a scheduling difference, not a missing name.
+ * The debt is NOT retired until this matches.
  */
 #define D_8009B45C_IS_SCALAR
 #include "common.h"
