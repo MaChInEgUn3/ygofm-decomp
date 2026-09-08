@@ -1991,6 +1991,21 @@ re-reads the flags. The tool now prints try_func's `flags:` line beside every
 base (2026-09-07). Check it against the park header before believing either
 number, and pass the trailing flags by hand when they disagree.
 
+**COMPLETE RE-SCORE, 2026-09-08: only 44 of the 181 permuter directories
+have both a live park and stored outputs, and re-scoring the two best of each
+found ONE actionable improvement.** The other 137 directories belong to
+functions that have since matched and moved to `src/`, or that were never
+parked -- so "6611 outputs across 181 directories" reads as hours of work and
+is really 88 try_func runs plus 44 baselines. Count the live set before
+budgeting a sweep.
+The one hit was func_80019608, 77 -> 74, a coupled pair each half of which is
+worse alone (75 and 76). The two other "better" outputs were both re-finds of
+things already written down: func_80021598, whose header explains that its 29
+was chosen over a 27 on census grounds, and func_80029EC4, the byte-store
+false zero this file documents below. Two out of three flagged results being
+already-recorded is the argument FOR writing park headers, not against the
+tool.
+
 **Reconstruct a permuter win from its FULL diff, not from the head of it.**
 func_800222F4's `diff.txt` opens with a duplicated call and a deleted `b = g;`,
 and reconstructing just those two is +2 and 201 -- nowhere near the stored
