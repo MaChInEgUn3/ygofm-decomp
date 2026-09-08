@@ -1,4 +1,4 @@
-/* +1 at 226/225, 134 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* +2 at 227/225, 104 differing, CENSUS = `nop` ONLY (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -55,9 +55,43 @@
  * for D_800E9F10 as well (+1/134, identical -- gcc drops the second one).
  * Every spelling that USES the local costs three, and the only one that pays
  * is the one that does not.
- * Still open: retail saves FOUR callee-saved registers and we now save
- * three. The remaining one is worth `lw -1, sw -1`, and the other two
- * divergences are `addiu +1` and `nop +2`.
+ * AND THEN THE OPPOSITE, same night: the +1/134 candidate above is NOT the
+ * one installed. Reading the built listing of the spelling that USES the
+ * local -- the one rejected at "+3" three times -- its census is ONE opcode
+ * and that opcode is `nop`: 20 against 23, with the frame, all FOUR
+ * callee-saved saves, and every real instruction already correct. The +3 was
+ * three load-delay slots, not three missing instructions, and the
+ * difference count had been hiding that behind a positional shift.
+ *
+ * So the installed candidate reads the local (`u8 *f = D_800F2848;` above
+ * the guard, used for the +2 and +4 accesses, with the [0] accesses left on
+ * the symbol so the `%hi` half stays its own pseudo), and two further edits
+ * take it from +3/224 to +2/104:
+ *   - DROP the named constant 3 entirely. Retail materialises it with
+ *     `addiu $s3,$zero,3` in the DELAY SLOT of the dispatch's own
+ *     `lbu D_8009B174`, and a hoisted `three` is already in a register there
+ *     so the slot takes a `nop`. Removing the name, or assigning it just
+ *     before or just after `mode = D_8009B174 & 0x1F;`, are all +2/108 --
+ *     the same number, so the name is simply not wanted once the local is.
+ *   - the case 2 reads in retail's order: `+4` before the `+2` pair
+ *     (+2/108 -> +2/104). Naming the +4 value instead, either whole or with
+ *     the `- 2` moved to the store, is 108 both ways.
+ *
+ * This is installed AGAINST the strict ranking key, deliberately. By
+ * (|length|, census, differences) the +1/134 candidate wins on the first
+ * term. But its census is four divergent opcodes including `lw -1, sw -1`,
+ * i.e. a whole callee-saved register missing, while this one is two
+ * load-delay `nop`s and nothing else. WORKFLOW's own caveat applies: the
+ * ranking assumes the length error is one fault, and a nearly-empty census
+ * is closer than a small length error with structure behind it.
+ *
+ * Measured and dead on the way: dead-assignment chains to allocate both
+ * address halves (`d2 = f;` +3, `d2 = f + 4;` +3, `d2 = D_800F2848 + 4;`
+ * +1/134 identical, the same reordered +1/134), `f = D_800F2848 + 2;` as
+ * the dead one (-1/218), and the full flag sweep from the local-used base,
+ * whose best row is `-mno-split-addresses` at -4/177.
+ * What is left: TWO load-delay `nop`s. Every other instruction in 225 is
+ * accounted for.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -67,7 +101,6 @@
 void func_80018608(void) {
     s32 mode;
     u8 *f;
-    s32 three;
     u8 *e;
     u8 *g;
     s32 i;
@@ -77,14 +110,13 @@ void func_80018608(void) {
     s32 w;
     s32 h;
 
-    three = 3;
     f = D_800F2848;
     if ((D_8009B23A & 0x8000) == 0) {
         D_8009B23A |= 0x8000;
         func_80024734();
         *(s16 *)D_800F2848 = 0x4B0;
-        *(s16 *)(D_800F2848 + 4) = 0x358;
-        *(s16 *)(D_800F2848 + 2) = 0x16C0;
+        *(s16 *)(f + 4) = 0x358;
+        *(s16 *)(f + 2) = 0x16C0;
         func_8001352C();
         D_8009B174 = 2;
         func_800157DC();
@@ -95,14 +127,14 @@ void func_80018608(void) {
     switch (mode) {
     case 2:
         *(s16 *)D_800F2848 = *(s16 *)D_800F2848 - 2;
-        h = *(u16 *)(D_800F2848 + 2) - 0x10;
-        *(s16 *)(D_800F2848 + 2) = h;
-        *(s16 *)(D_800F2848 + 4) = *(s16 *)(D_800F2848 + 4) - 2;
+        *(s16 *)(f + 4) = *(s16 *)(f + 4) - 2;
+        h = *(u16 *)(f + 2) - 0x10;
+        *(s16 *)(f + 2) = h;
         if ((s16)h < 0x401) {
             *(s16 *)D_800F2848 = 0x258;
-            *(s16 *)(D_800F2848 + 4) = 0x100;
-            *(s16 *)(D_800F2848 + 2) = 0x400;
-            D_8009B174 = three;
+            *(s16 *)(f + 4) = 0x100;
+            *(s16 *)(f + 2) = 0x400;
+            D_8009B174 = 3;
         }
         func_8001352C();
         return;
@@ -166,7 +198,7 @@ void func_80018608(void) {
     case 5:
         func_800176D0();
         D_8009B1EC = mode;
-        D_8009B23A = three;
+        D_8009B23A = 3;
         *(s32 *)(&D_800E9F10[D_8009B1D5 * 0x70] + 8) = (s32)D_800EA030;
         return;
     }
