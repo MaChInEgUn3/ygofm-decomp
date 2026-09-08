@@ -8056,9 +8056,9 @@ re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
-func_80044838 -- **295/295, comprimento EXATO, 89 diferencas, censo
-`addiu +1, nop -1`** (magnitude 2, 18 blocos). Escrita do zero em 2026-09-08:
--9/279 -> +2/130 -> 295/295 e 95 -> 89. Flags padrao (passo 0: gp=56, at=0,
+func_80044838 -- **295/295, comprimento EXATO, 88 diferencas, censo
+`addiu +1, nop -1`** (magnitude 2, 17 blocos). Escrita do zero em 2026-09-08:
+-9/279 -> +2/130 -> 295/295 e 95 -> 89 -> 88. Flags padrao (passo 0: gp=56, at=0,
 uma jump table). Maquina de estados de retry: um switch com jump table real
 sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch (D_8009B44F)`
 identicos cujo `case 0` cai no `case 1`.
@@ -8087,6 +8087,12 @@ icagem de invariantes); o corpo compartilhado do `case 2` escrito uma vez
 com `goto` da 99 e 166 contra 95 com ele por extenso nos dois; cinco nomes
 para as sentinelas de laco sao byte-identicos ao inline; `k = 2;` sem o pino
 e byte-identico ao literal.
+Mais quatro negativos com numero no tick seguinte: nomear o terceiro
+argumento (o literal 0) da chamada do laco 2, com e sem pino, e nomear
+tambem o segundo dao 88, 88, 88 -- eixo errado; um pino no
+`D_8009B43C = 0x14` do bloco `ok` da 89. E o decremento do laco do case 7
+movido para antes da chamada e 89 -> 88, enquanto o mesmo movimento no laco
+2 e 91 -- dois sitios da mesma funcao querendo grafias opostas outra vez.
 Residuo: nos lacos 2 e do case 7 o retail poe o ULTIMO ARGUMENTO da chamada
 no delay slot do `jal` e o decremento no do `bne`, e nos fazemos o contrario
 (o laco 1, com dois argumentos e nenhum literal, sai exato); sobra um

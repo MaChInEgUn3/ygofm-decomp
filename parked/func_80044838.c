@@ -1,6 +1,6 @@
-/* 295/295 -- COMPRIMENTO EXATO -- e 89 diferencas, censo `addiu +1, nop -1`
- * (magnitude 2, 18 blocos). 2026-09-08, escrita do zero hoje:
- * -9/279 -> +2/130 -> 295/295 e 95 -> 89.
+/* 295/295 -- COMPRIMENTO EXATO -- e 88 diferencas, censo `addiu +1, nop -1`
+ * (magnitude 2, 17 blocos). 2026-09-08, escrita do zero hoje:
+ * -9/279 -> +2/130 -> 295/295 e 95 -> 89 -> 88.
  * Flags PADRAO (passo 0: gp=56, at=0, uma jump table jtbl_80010548).
  *
  * FORMA: maquina de estados de retry. `switch ((s8)((u8)D_8009B43E - 1))`
@@ -41,6 +41,19 @@
  *    exato e magnitude 2.
  *
  * MEDIDO E MORTO, COM NUMEROS (nao refazer):
+ *  - nomear o TERCEIRO argumento (o literal 0) da chamada do laco 2, com e
+ *    sem `do { } while (0)`, e nomear tambem o segundo: 88, 88, 88 --
+ *    identicos a base. Eixo errado;
+ *  - `do { D_8009B43C = 0x14; } while (0);` no bloco `ok`, que era a
+ *    tentativa obvia de impedir a constante de subir para o delay slot do
+ *    `beq`: 89, pior;
+ *  - o `i -= 1;` do laco 3 de volta para DEPOIS do `if`/`else` sobre esta
+ *    base: +1 com censo `addiu +2, nop -1` -- a metade (ii) do par continua
+ *    valendo;
+ *  - o `i -= 1;` do laco 2 movido para antes da chamada: 91. So o do laco
+ *    do case 7 valeu (89 -> 88), o que fecha qual dos tres queria a grafia
+ *    e e mais uma instancia de dois sitios da mesma funcao andando em
+ *    direcoes opostas;
  *  - a FORMA do laco 3: `for (i = 0xA; i >= 0; )`, `while (i >= 0)` e
  *    `do { ... if (i < 0) goto rel; } while (1);` dao 95, 95, 95 -- os tres
  *    IDENTICOS a base. A polaridade da aresta de volta nao vem dali;
@@ -243,8 +256,8 @@ s32 func_80044838(s32 arg0, s32 *arg1, s32 *arg2) {
             i = 0xA;
             do { k = 2; } while (0);
             do {
-                h = func_800738D0(D_800F2B00, (D_8009B434 << 16) | 0x200);
                 i -= 1;
+                h = func_800738D0(D_800F2B00, (D_8009B434 << 16) | 0x200);
                 if (h != -1) {
                     goto rel7;
                 }
