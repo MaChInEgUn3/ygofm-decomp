@@ -213,6 +213,11 @@ extern s16 D_8009B20C[2];
 extern s16 D_8009B20C[4];
 #endif
 extern u16 D_8009B1D0;
+extern u16 D_8009B1E0;
+/* Two parallel 7-entry tables of four-byte records, selected by the sign
+ * of D_8009B361 and indexed by D_8009B165 * 28 (func_80020F4C). */
+extern u8 D_80090928[];
+extern u8 D_80090960[];
 extern s16 D_8009B1D2;
 extern s16 D_8009B1AC;
 extern s16 D_8009B1AE;
