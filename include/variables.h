@@ -981,6 +981,11 @@ extern u8 D_801A7AD8[];
  * splat symbol; func_8002C9B4 walks it and D_801A7B64+0x1A4 in lockstep. */
 extern u8 D_801A7B64[];
 /* Ten-byte records: an id halfword, three lookup halfwords and a result. */
+/* Two more pointer/buffer globals in func_800171A8's mode dispatcher:
+ * D_800101DC is read `lui %hi` / `lw %lo` (a pointer in the same table as
+ * D_80010000), D_801A9800 is taken by address. */
+extern u8 *D_800101DC;
+extern u8 D_801A9800[];
 extern u8 D_801799D8[];
 extern u16 D_800F2B22[];
 extern u8 D_800E9EA7[];

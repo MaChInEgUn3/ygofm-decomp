@@ -455,7 +455,14 @@ void func_8005F3B8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_80059590(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_8005F174(void);
 s32 func_8005F18C(void);
+/* Its real signature is (record, mode); func_8001798C takes its ADDRESS as a
+ * `void (*)(void)` callback and must keep seeing the empty declaration, so
+ * only the file that defines it asks for the full one. */
+#ifdef FUNC_800171A8_FULL
+void func_800171A8(u8 *arg0, s32 arg1);
+#else
 void func_800171A8(void);
+#endif
 void func_8003CDF8(void);
 void func_80024200(void);
 void func_8003CE48(void);

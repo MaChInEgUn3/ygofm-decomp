@@ -8085,3 +8085,25 @@ Residuo: as tres sao a ordem do preheader do case 7 -- o retail tem
 primeiro. Doze grafias medidas, todas iguais ou piores, e as sete ultimas
 re-medidas sobre a base volatile pela regra 3. O permuter ja rodou aqui
 (1253 iteracoes, zero saidas).
+
+func_800171A8 -- -1 em 236/237, 146 diferencas, censo `sb -1, sw -2, nop +2`.
+PRIMEIRO C, escrito num tick a partir do listing e das alavancas do
+func_800577B0, que casou hoje e e a MESMA familia de despachante D_8009B0F4.
+Passo 0: gp=0, at=8 (todos D_8009B0F4), uma jump table -- ramo facil da
+receita, `as -G0` por config/flag_overrides.json (nao ha linha em build.py).
+`switch (mode)` com jump table de TREZE entradas e CINCO juncoes alcancadas
+por `goto`, cada uma escrita depois do braco que cai nela.
+A prototipagem precisou de guarda: functions.h declarava `void
+func_800171A8(void);` porque func_8001798C toma o ENDERECO dela como callback
+`void (*)(void)`. A assinatura real e (u8 *p, s32 mode) e so o arquivo que a
+define pede a completa, como no func_80017F04.
+Duas aplicacoes da regra 26 num tick: `do { w = K; } while (0);` nos quatro
+bracos que saltam para o m400 e -17 -> -6, e o mesmo nos dois que caem no
+m480 e -6 -> -1 (222 -> 146 diferencas). Sem o pino os bracos terminam em
+[sw 0xC][sw 8][lui/lw b0f4] identicos e o cross-jump come os dois stores de
+cada um. Medido e morto: o mesmo pino no `and` dos quatro bracos do m4B8 e
+-9 sozinho e -4 sobre a base atual -- ali o `and` no delay slot nao quer
+pino.
+Residuo: a mascara esta em $a1 e o retail a quer em $a0. E o mesmo estado
+inicial do func_800577B0, onde a alavanca foi um nome para duas constantes
+sequenciais.
