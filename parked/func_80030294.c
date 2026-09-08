@@ -1,6 +1,6 @@
-/* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e DUAS divergencias
- * estruturais depois de ALINHAR os opcodes (2026-09-08), com 43 linhas
- * so-de-registrador contra 284 iguais. Compilador e
+/* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 289 linhas
+ * iguais, 39 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 284 iguais / 43 so-registrador / 2 estruturais.
+ * candidato e 289 iguais / 39 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -58,14 +58,21 @@
  *     `addiu $s0,$zero,39`. 7 -> 4 estruturais. (Na base velha isto era
  *     "identico", que e a regra 3 outra vez.);
  * 10. **`r = (u8 *)&D_8009B2C8; r = r + (s8)D_8009B2DC * 2;` EM DUAS
- *     ATRIBUICOES CONTRA O MESMO NOME.** Vale um `lui` e vinte e c * O QUE FALTA, com os opcodes ALINHADOS -- DUAS instrucoes, as duas um
- * deslocamento de UMA posicao:
- *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` e depois
- *    `la $v1,D_8009B2C8`; nos emitimos o `la` primeiro. E a ordem das
- *    duas atribuicoes contra `r` -- a base vem escrita antes do indice;
- *  - T[93]/T[94]: dentro do laco de entrada o retail poe `sll $a0,$a2,2`
- *    (o `e = i * 4`) na latencia do `mult` e nos pomos ali o decremento
- *    do giv do cursor de `a`.
+ *     ATRIBUICOES CONTRA O MESMO NOME.** Vale um `lui` e vinte e c * ALAVANCA 11: dentro do laco de entrada `e` NAO existe -- e
+ * `*p = *p | (n << (i * 4));` escrito ANTES do `i = i - 1;`. Com um `e`
+ * nomeado o `sll` do indice cai na latencia do `mult`, onde o retail poe
+ * o decremento do giv do cursor; escrito inline, os dois trocam. 4
+ * divergencias estruturais -> 2, e 43 linhas de registrador -> 39.
+ *
+ * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
+ *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
+ *    `la $v1,D_8009B2C8` (a base); nos emitimos a base primeiro, que e a
+ *    ordem em que as duas atribuicoes contra `r` estao escritas. Seis
+ *    grafias medidas e TODAS identicas (os tres `do { } while (0);`
+ *    possiveis, `r + dc + dc`, `&r[dc * 2]`, e o cast `(s32)r`), o que e
+ *    o sinal de eixo errado -- mas a alavanca 10 ensinou que esse sinal
+ *    tambem aparece quando o eixo esta certo e as grafias e que sao
+ *    fracas. Classe do permuter.
  *
  * MEDIDO E MORTO NESTA BASE, com numeros: cinco grafias de `q = &b[e]`
  * (`(s32)b + e*4`, `e*4 + (s32)b`, `b + e`, `&b[0] + e`, e a posicao da
@@ -78,7 +85,9 @@
  * estruturais na base anterior; `e = i * 4` reescrito como
  * `n << ((i + 1) * 4)` depois do decremento fecha o comprimento mas CRIA
  * UM SEGUNDO GIV (dois `addiu -4` no laco) -- era um falso zero, duas
- * faltas a cancelarem-se; os quatro flags de escalonamento
+ * faltas a cancelarem-se; tres outras ordens do laco de entrada
+ * (`e = i * 4` acima do `n = val / k`, o `val -= k * n` antes do store, e
+ * um `do { e = i * 4; } while (0);`) sao 4, 4 e 6 estruturais; os quatro flags de escalonamento
  * (`-fno-schedule-insns`, `-fno-schedule-insns2`, os dois, e
  * `-fno-delayed-branch`) sao 21, 23, 47 e 42 estruturais;
  * `-fno-cse-follow-jumps` poe `&b` no braco mas custa uma releitura de
@@ -140,9 +149,8 @@ s32 func_80030294(void) {
             do {
                 k = a[i];
                 n = val / k;
-                e = i * 4;
+                *p = *p | (n << (i * 4));
                 i = i - 1;
-                *p = *p | (n << e);
                 val = val - k * n;
             } while (i >= 0);
         }
