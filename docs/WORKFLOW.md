@@ -2909,6 +2909,24 @@ afterwards, completes normally -- so the toolchain is fine and it is that
 process. `ps | grep wineboot` and kill both. Twenty minutes went into this
 before the second try_func proved the toolchain was up.
 
+**try_func prints LABELS, not ADDRESSES, so a branch that lands one
+instruction past its label reads as a label-naming difference.** On
+func_80044838 a `beqz` went to the epilogue's `lw` **+ 4** because gcc had
+proved `$v0` already held that global's value and skipped the reload; the
+rendered diff showed `beq $v0,$zero,L5` against `beq $v0,$zero,L26` and five
+more label numbers shifted behind it, which read exactly like the renderer
+bug above. It was not: three ticks went into re-reading the source for it,
+and the entry written at the end of the second said "a distinct block, and I
+do not know which". The measurement that answers it in two minutes is the
+**raw objdump of the object**: copy the candidate into `src/`, let the build
+fail, and run
+`$(.venv/bin/python -c "import sys;sys.path.insert(0,'tools_src');import build as B;print(B.OBJDUMP)") -dr -z --no-show-raw-insn build/src/<func>.o`.
+`beqz v0,458` against a tail starting at `454` is unmissable. The fix there
+was `volatile` on the global -- gcc 2.8 will redirect a branch past a load
+it can prove redundant, and only a volatile stops it. **So: when a branch
+target differs and every instruction around it matches, read addresses, not
+labels.**
+
 **try_func OVER-REPORTS a difference when one address is spelled two ways,
 and that hid 59 finished functions.** It compares the rendered text, so
 `lui $v0,%hi(D_80011434)` / `addiu %lo(D_80011434)` and `lui $v0,32769` /
