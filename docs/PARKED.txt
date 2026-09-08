@@ -8018,36 +8018,46 @@ func_800734DC -- 49/49 and 19 differences (2026-09-08), and it is the FIRST REAL
     Residue is that retail computes nothing before the branch and we hoist the
     name. See the park header. The debt is not retired until this matches.
 
-func_800577B0 -- **209/209, comprimento EXATO, 49 diferencas**, censo vazio.
+func_800577B0 -- **209/209, comprimento EXATO, 45 diferencas**, censo vazio.
 NAO e divida: src/31D8.c ainda tem o INCLUDE_ASM, entao um MATCH aqui e
 funcao NOVA. Despachante da familia D_8009B0F4 com jump table real
 (jtbl_8001179C); gp=0 e seis `lui $at`, entao o enderecamento se resolve com
-`as -G0`, que a jump table sobrevive (com -mno-split-addresses nao
-sobreviveria). Nao ha linha em build.py: medir por config/flag_overrides.json
-e APAGAR o arquivo depois.
-Dois dias: -12/186 -> -3/171 -> 209/209 e 49 diferencas.
+`as -G0`, que a jump table sobrevive. Nao ha linha em build.py: medir por
+config/flag_overrides.json e APAGAR o arquivo depois.
+Dois dias: -12/186 -> -3/171 -> 209/209 e 45 diferencas.
 O COMPRIMENTO FECHOU COM UM MECANISMO SO, EM TRES INSTANCIAS. A funcao tem
 quatro rabos com as mesmas instrucoes (o grupo de stores do m1 nos cases 1, 6
 e 8; o par `sw 0xC`/`sw 8` no case 2 e no m3). O gcc funde os que TERMINAM
 identicos e o retail nao funde nenhum; o que decide e a ultima instrucao
 antes do salto. `do { w = 0x1000; } while (0);` no case 2 e `do { w = 0x800;
-} while (0);` no m3 sozinhos levaram de -3/160 para 209/209 e 53 diferencas,
-porque sem o pino o agendador sobe a constante do `w` para cobrir o
-load-delay do D_8009B0F4 e os dois bracos passam a terminar em
-[sw 0xC][sw 8][lui/lw b0f4]. Mesma coisa um nivel acima com
-`do { d = D_8009B118; } while (0);` nos cases 1 e 6, e pelo lado da alocacao
-com um nome PROPRIO (`e`) para o D_8009B118 do case 8 -- o rabo do case 8 e
-instrucao-por-instrucao igual ao do m1 e so os registradores o separam no
-retail.
-Duas alavancas de emprestimo no mesmo tick: o 0x19000 do case 8 usa o nome
-`m` da mascara (bracos mutuamente exclusivos) e poe a constante em $a0 como o
-retail; e um nome proprio `g` para o ponteiro do m3, que o retail carrega em
-$v0 enquanto o `b` do m0 vive em $v1.
+} while (0);` no m3 sozinhos levaram de -3/160 para 209/209 e 53, porque sem
+o pino o agendador sobe a constante do `w` para cobrir o load-delay do
+D_8009B0F4 e os dois bracos passam a terminar em [sw 0xC][sw 8][lui/lw b0f4].
+Mesma coisa um nivel acima com `do { d = D_8009B118; } while (0);` nos cases
+1 e 6, e pelo lado da alocacao com um nome PROPRIO para o D_8009B118 do case
+8 -- o rabo do case 8 e instrucao-por-instrucao igual ao do m1 e so os
+registradores o separam no retail.
+A ALAVANCA MAIS PRODUTIVA DESTA FUNCAO E O EMPRESTIMO DE NOME ENTRE BRACOS
+MUTUAMENTE EXCLUSIVOS, tres vezes: o 0x19000 do case 8 usa o nome da mascara
+e cai em $a0 como no retail; um nome proprio para o ponteiro do m3, que o
+retail carrega em $v0 enquanto o do m0 vive em $v1; e o D_801DD000 do CASE 10
+usando esse mesmo nome do m3, que sozinho troca $s0 e $s1 para os do retail
+(48 -> 45). Esse ultimo e um CONTRAPESO explicito: o preco e que o ponteiro
+do m3 fica callee-saved nos tres bracos onde o retail o quer em $v0, e o
+saldo ainda assim e -3.
+Os quatro `do { ...grupo... } while (0);` do case 10 dao exatamente os
+4 loads / 4 stores / 3 loads / 3 stores do retail; sem eles o agendador
+intercala tudo num pipeline rolante de tres registradores.
 Uma grafia foi RETRATADA por este tick: `do { *(s16 *)(p + 0x30) = 0; }
 while (0);` antes do `|=` era a melhor enquanto o comprimento estava errado e
 agora e +2 -- a regra "grafia rejeitada com outra falta aberta nao foi
-medida" lida ao contrario.
-Residuo: ~30 diferencas no case 10 ($s0/$s1 trocados e os 4+3 loads
-intercalados com os stores, onde o retail agrupa 4/4 e 3/3), o `sh` de
-p+0x30 e p+0x32 cinco instrucoes adiante, e tres instrucoes uma posicao fora.
-As grafias medidas e mortas estao com numeros no cabecalho do parked/.
+medida" vale igual para uma grafia ACEITA.
+Residuo: os quatro registradores dos loads do case 10 ($v1/$a0/$a1/$v0 contra
+$a3/$t0/$t1/$t2 do retail, que poupa $v0 para o -1 vivo desde logo depois do
+`jal`), o contrapeso do ponteiro do m3, o `sh` de p+0x30 e p+0x32 cinco
+instrucoes adiante, e tres instrucoes uma posicao fora. Eixo de ALOCACAO,
+maduro para o permuter, que nunca foi rodado aqui.
+As grafias medidas e mortas -- vinte e uma, com numeros -- estao no cabecalho
+do parked/. Tres delas sao trincas iguais (ordem de declaracao e de
+atribuicao dos dois locais de base do case 10: 48, 48, 48), que e o sinal de
+eixo errado.
