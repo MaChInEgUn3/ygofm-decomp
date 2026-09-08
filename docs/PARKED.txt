@@ -8614,3 +8614,77 @@ diferencas sao uma rotacao de UM registrador em todo o corpo, causada por
 `sp+0x28` ocupar $t5. Reabrir com uma ideia sobre como fazer o pseudo de
 endereco que o expand_block_move cria MORRER antes do braco que usa o
 array -- e nao com mais grafias da indexacao, que estao esgotadas.
+
+# --- func_80030294, DECIMA-SEGUNDA a DECIMA-SETIMA rodadas (2026-09-08 tarde)
+De 244 diferencas posicionais para **QUATRO linhas so-de-registrador**, com
+329/329, censo vazio e UMA divergencia estrutural. Tudo com numeros no
+cabecalho de parked/func_80030294.c; aqui fica so o que muda a forma de
+trabalhar.
+
+**O INSTRUMENTO E NOVO E E METADE DO GANHO: `tools_src/adiff.py`.** Alinha os
+dois fluxos com difflib sobre os OPCODES e reporta `aligned-equal /
+reg-only / struct / groups`. O diff da try_func e posicional e INVERTEU a
+ordenacao duas vezes numa tarde -- um candidato de 248 era melhor que um de
+235 (253/72/7 contra 212/112/9). Ordenar por
+`(|erro de comprimento|, struct groups, reg-only)`. O companheiro e um
+`regs.py` de vinte linhas no scratchpad que LISTA cada linha diferente lado
+a lado: ler nele as que diferem no DESTINO ou na ORDEM DOS OPERANDOS, que
+sao de fonte, e deixar as de nome de registrador para a varredura.
+
+**AS SEIS ALAVANCAS NOVAS**, em ordem de valor:
+ - os dois lacos INDEXAM o array (`k = a[i]`) em vez de andar um cursor de
+   fonte: o gcc cria o giv DENTRO do braco, que e onde o retail materializa
+   `addiu $v1,$sp,16`. A sonda que provou a causa foi apagar o uso e ver o
+   `addiu` do topo desaparecer -- quem cria o pseudo de vida longa e o USO,
+   nao o expand_block_move, e o diagnostico anterior deste park esta
+   RETRATADO;
+ - `r = (u8 *)&D_8009B2C8; r = r + (s8)D_8009B2DC * 2; p = (u16 *)r;` no
+   lugar da forma indexada: vale um `lui` e vinte e cinco linhas. O
+   mecanismo e um DELAY SLOT -- o retail poe la o `lui %hi(D_800EAED8)`
+   (regra 31) porque a primeira instrucao do braco escreve $v0, que e o
+   registrador que o proprio `beqz` le, e o reorg nao pode usa-la;
+ - **O PAR ACOPLADO**, e a maior: o gcc 2.8 NAO parte live ranges, entao um
+   nome que o retail poe em DOIS registradores em regioes DISJUNTAS sao
+   DOIS NOMES, obrigatoriamente. Contador do braco de entrada ($a2) contra
+   o dos outros tres lacos ($s0), e `car` ($a3) contra `k` ($v0). **Cada
+   metade sozinha e +1 e +2; juntas sao -12.** Uma varredura de um lever de
+   cada vez nao pode achar isto, e as vinte e cinco medicoes de emprestimo
+   feitas antes eram todas de metades;
+ - a constante 0x20 do bloco `fill` e um NOME atribuido ENTRE o endereco do
+   buffer e o `i = 0x27;`;
+ - `val = val + step; val = val & (...)` em duas atribuicoes contra `val`;
+ - `mask = *(u16 *)(db - -(e * 2));`, a subtracao de uma negacao para a
+   ordem dos operandos do `addu`.
+
+**E DUAS RETRATACOES NO MESMO DIA, no mesmo eixo, e valem mais que as
+alavancas**: emprestar um nome MELHOROU duas vezes seguidas (o quociente do
+braco de entrada com `n` era 22, com `step` 18) e as DUAS estavam erradas --
+um nome FRESCO e 16. E a alavanca do `car` emprestando `k` (34 -> 22) era um
+degrau para o par acoplado, nao a resposta. **Uma melhoria nao prova que a
+leitura esta certa**; varrer todas as opcoes do eixo, e depois os PARES.
+
+**O QUE FALTA, e o eixo esta FECHADO por varredura completa**: o destino da
+soma do endereco `&D_8009B2C8[dc]`, nos dois bracos, e a ordem `sll`/`la` no
+de entrada. O retail poe o resultado no registrador do INDICE e nos no da
+base. Uma varredura 2D COMPLETA de 5x5 grafias (a atual, a indexada, a
+indexada via `r`, a de uma expressao via `r`, e a do indice como destino com
+`ix`) nas duas posicoes -- vinte e cinco medicoes -- nao passa de 4, e quatro
+celulas empatam la. Tambem mortos: usar um nome ja vivo nos dois bracos como
+temporario do indice (`i`, `val`, seis colocacoes: 103, 103, 29, 29, 80,
+103), o que FALSIFICA a leitura de que bastava um pseudo vivo entre os
+bracos; e as cinco ordens de statements do braco de entrada.
+
+**Permuter: DEZ rodadas de 110s a `-j 1` a partir de tres bases diferentes
+(scores 1770, 1730, 1550), ZERO saidas.** A partir de um candidato com
+struct=0 (a estrutura perfeita e a alocacao rodada) achou duas saidas em
+duas rodadas, 1990 -> 1750 e 1825, e as duas re-pontuam a 314/329: a melhor
+troca `val = *p;` por `e = *p; val = e;`, que clobbera o `e` que a linha
+seguinte le. Uma rodada dirigida com `PERM_GENERAL` sobre as cinco grafias
+em cada braco mais `PERM_RANDOMIZE` no corpo tambem nao deu nada.
+
+A tensao esta isolada e e de ALOCACAO, nao de grafia: escrever o indice
+primeiro DA a ordem do retail, e e exatamente isso que faz o reorg roubar
+esse `sll` para o delay slot, porque ele cai em $v1 e nao colide com o
+`beqz`. O retail so escapa porque o SEU `sll` escreve $v0. Reabrir com uma
+ideia sobre como fazer o indice cair em $v0 -- e nao com mais grafias do
+endereco, que estao esgotadas por varredura completa.

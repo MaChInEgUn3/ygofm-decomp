@@ -133,6 +133,15 @@
  *    tambem aparece quando o eixo esta certo e as grafias e que sao
  *    fracas. Classe do permuter.
  *
+ * VARREDURA 2D COMPLETA DO EIXO QUE SOBRA (2026-09-08): cinco grafias do
+ * endereco (a atual, a indexada, a indexada via `r`, a de uma expressao
+ * via `r`, e a do indice como destino com `ix`) x duas posicoes (braco de
+ * entrada, braco de edicao) = VINTE E CINCO medicoes. Nenhuma passa de 4,
+ * e quatro celulas empatam la (11, 15, 51, 55). O eixo esta fechado.
+ * Permuter: DEZ rodadas de 110s a partir de tres bases (1770/1730/1550),
+ * zero saidas; e uma rodada dirigida com `PERM_GENERAL` sobre as cinco
+ * grafias em cada braco mais `PERM_RANDOMIZE` no corpo, tambem nada.
+ *
  * MEDIDO E MORTO NA BASE DE QUATRO LINHAS (2026-09-08, segunda volta):
  * usar um nome JA VIVO nos dois bracos como temporario do indice, para
  * conseguir a ordem sem criar um pseudo (`i`, que e o contador dos outros
