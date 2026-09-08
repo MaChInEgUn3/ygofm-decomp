@@ -1,0 +1,555 @@
+Field-usage evidence extracted from the 1108 byte-exact functions in src/.
+
+WHY THIS EXISTS. krystalgamer opened issue #2500 on his tree ("derive global
+types and function parameter types from their usage") because the decompiled
+sources are full of `*(s16 *)(var + offset)` and nobody knows the real record
+layouts. His agents guess the layouts back from m2c's output, which is where
+they get stuck. This project has a different asset: every file in `src/` is
+byte-exact against the retail binary, so every cast in it is a MEASUREMENT of
+a field's offset, width and signedness -- not a guess. This tool reads those
+measurements out.
+
+WHAT IT REPORTS, and how strong each row is:
+  * DIRECT   -- `*(T *)(D_XXXXXXXX + K)` or `D_XXXXXXXX[K]` written against
+                the symbol itself. The symbol, the offset, the width and the
+                signedness are all in the source of a function that matches.
+  * ALIAS    -- the same access through a local that the same file assigns
+                from the symbol exactly once (`p = D_XXXXXXXX;`). Same
+                strength in practice, but the resolution is this tool's, so
+                it is labelled separately.
+  * STRIDE   -- an index expression `D_XXXXXXXX + i * S` or `[i * S + K]`.
+                S is the record size, and it is the single most useful number
+                for turning a symbol into an array of structs.
+
+WHAT IT IS NOT. It reports what the matched sources DO, so an offset absent
+here is an offset no matched function touches -- not proof that the field
+does not exist. And a width is the width of the ACCESS: a `u8` read of a
+`u16` field is legal C and shows up as a byte. Read the whole offset set for
+a symbol before declaring a struct, and prefer a layout that explains every
+row rather than one that fits the widest.
+
+Usage:  .venv/bin/python tools_src/field_usage.py [--min N] > docs/FIELD_USAGE.txt
+
+========================================================================
+1108 files scanned, 44 symbols with at least 3 distinct field(s).
+========================================================================
+
+D_8009B45C  --  62 field(s), 41 file(s)
+    declared: extern u8 *D_8009B45C[];
+    stride evidence: 2 (2 file(s)), 48 (1 file(s))
+       +0x0  1 byte(s)  byte-index DIRECT       9 file(s)
+       +0x0  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x2  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x10  1 byte(s)  byte-index DIRECT       2 file(s)
+      +0x3c  4 byte(s)  signed   DIRECT       2 file(s)
+      +0x40  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x40  2 byte(s)  unsigned ALIAS+DIRECT 10 file(s)
+      +0x42  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x42  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x44  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x44  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x48  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+      +0x49  1 byte(s)  byte-index ALIAS        2 file(s)
+      +0x4a  1 byte(s)  byte-index ALIAS+DIRECT 4 file(s)
+      +0x4c  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x4c  2 byte(s)  unsigned ALIAS        2 file(s)
+      +0x4e  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x50  4 byte(s)  unsigned ALIAS        1 file(s)
+      +0x54  4 byte(s)  unsigned ALIAS        1 file(s)
+      +0x58  4 byte(s)  unsigned ALIAS        1 file(s)
+      +0x7c  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x7d  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x7e  1 byte(s)  byte-index ALIAS        1 file(s)
+     +0x388  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x390  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x392  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x394  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x396  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x398  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x39c  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x3a8  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x3ac  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x3b0  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x3b4  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x3b6  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x3b8  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x3ba  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x3bc  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x434  1 byte(s)  byte-index ALIAS+DIRECT 4 file(s)
+     +0x435  1 byte(s)  byte-index DIRECT       3 file(s)
+     +0x438  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x43c  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x440  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x442  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x442  2 byte(s)  unsigned ALIAS        3 file(s)
+     +0x444  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x448  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x510  2 byte(s)  signed   DIRECT       2 file(s)
+     +0x512  2 byte(s)  signed   ALIAS        3 file(s)
+     +0x514  1 byte(s)  byte-index DIRECT       1 file(s)
+     +0x515  1 byte(s)  byte-index DIRECT       1 file(s)
+    +0x1578  2 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+    +0x157a  2 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+    +0x157e  2 byte(s)  signed   DIRECT       1 file(s)
+    +0x1582  2 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+    +0x1582  2 byte(s)  unsigned DIRECT       1 file(s)
+    +0x1584  1 byte(s)  byte-index ALIAS+DIRECT 4 file(s)
+    +0x1588  2 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+    +0x1618  1 byte(s)  byte-index DIRECT       2 file(s)
+    +0x1649  1 byte(s)  byte-index DIRECT       2 file(s)
+    +0x164a  1 byte(s)  byte-index DIRECT       2 file(s)
+    +0x164b  1 byte(s)  byte-index DIRECT       2 file(s)
+
+D_8009B458  --  53 field(s), 48 file(s)
+    declared: extern u8 *volatile D_8009B458[];
+    stride evidence: 24 (1 file(s)), 40 (3 file(s))
+       +0x0  1 byte(s)  byte-index DIRECT       8 file(s)
+       +0x3  1 byte(s)  byte-index DIRECT       1 file(s)
+     +0x4a4  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x4bc  1 byte(s)  byte-index ALIAS        1 file(s)
+     +0x4bf  1 byte(s)  byte-index ALIAS        1 file(s)
+     +0x4c0  4 byte(s)  signed   ALIAS        2 file(s)
+     +0x4c4  4 byte(s)  signed   ALIAS        2 file(s)
+     +0x4d4  2 byte(s)  signed   DIRECT       1 file(s)
+     +0x4e4  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x4fa  2 byte(s)  unsigned ALIAS        1 file(s)
+     +0x4fc  2 byte(s)  unsigned ALIAS        1 file(s)
+     +0x500  1 byte(s)  byte-index ALIAS+DIRECT 9 file(s)
+     +0x501  1 byte(s)  byte-index ALIAS+DIRECT 1 file(s)
+     +0x502  1 byte(s)  byte-index ALIAS        2 file(s)
+     +0x503  1 byte(s)  byte-index ALIAS+DIRECT 1 file(s)
+     +0x504  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x508  1 byte(s)  byte-index DIRECT       1 file(s)
+     +0x509  1 byte(s)  byte-index ALIAS+DIRECT 3 file(s)
+     +0x510  2 byte(s)  signed   ALIAS+DIRECT 8 file(s)
+     +0x510  2 byte(s)  unsigned DIRECT       1 file(s)
+     +0x512  2 byte(s)  signed   ALIAS        2 file(s)
+     +0x512  2 byte(s)  unsigned ALIAS        1 file(s)
+     +0x514  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x516  2 byte(s)  signed   ALIAS        1 file(s)
+     +0x518  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x7dc  4 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+     +0x7dc  4 byte(s)  unsigned ALIAS        1 file(s)
+     +0x7e0  2 byte(s)  signed   ALIAS        4 file(s)
+     +0x7e2  2 byte(s)  signed   ALIAS+DIRECT 9 file(s)
+     +0x7e4  2 byte(s)  signed   ALIAS        4 file(s)
+     +0x7e6  2 byte(s)  signed   ALIAS        4 file(s)
+     +0x7e8  4 byte(s)  signed   ALIAS        1 file(s)
+     +0x7ec  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+     +0x7ec  4 byte(s)  unsigned ALIAS+DIRECT 2 file(s)
+     +0x7f0  4 byte(s)  signed   DIRECT       1 file(s)
+     +0x7f4  4 byte(s)  signed   DIRECT       1 file(s)
+     +0x7f8  2 byte(s)  signed   DIRECT       1 file(s)
+     +0x7fa  2 byte(s)  signed   DIRECT       1 file(s)
+     +0x7fa  2 byte(s)  unsigned ALIAS+DIRECT 3 file(s)
+     +0x7fc  2 byte(s)  signed   DIRECT       1 file(s)
+     +0x7fc  2 byte(s)  unsigned ALIAS+DIRECT 3 file(s)
+     +0x800  1 byte(s)  byte-index DIRECT       1 file(s)
+     +0x801  1 byte(s)  byte-index ALIAS        1 file(s)
+     +0x804  4 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+     +0x808  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+     +0x80c  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+     +0x80c  4 byte(s)  unsigned ALIAS        1 file(s)
+     +0x810  4 byte(s)  unsigned ALIAS        1 file(s)
+     +0x814  1 byte(s)  byte-index ALIAS+DIRECT 3 file(s)
+     +0x815  1 byte(s)  byte-index ALIAS+DIRECT 3 file(s)
+     +0x81c  4 byte(s)  signed   DIRECT       3 file(s)
+     +0x844  1 byte(s)  byte-index DIRECT       1 file(s)
+     +0x845  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800F2848  --  18 field(s), 6 file(s)
+    declared: extern u8 D_800F2848[];
+       +0x0  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x0  2 byte(s)  signed   DIRECT       3 file(s)
+       +0x0  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x2  2 byte(s)  signed   ALIAS        3 file(s)
+       +0x2  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x4  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x4  2 byte(s)  signed   ALIAS        3 file(s)
+       +0x4  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x6  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x8  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0xa  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0xc  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0xe  2 byte(s)  signed   ALIAS        1 file(s)
+       +0xe  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x1c  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x24  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x28  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x2c  4 byte(s)  signed   ALIAS        1 file(s)
+
+D_800F2B20  --  13 field(s), 6 file(s)
+    declared: extern u8 D_800F2B20[];
+       +0x0  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        2 file(s)
+       +0x2  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x4  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x4  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x6  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x6  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x8  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0xa  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x12  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x1a  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x22  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x2a  2 byte(s)  unsigned ALIAS        1 file(s)
+
+D_800F56F0  --  13 field(s), 6 file(s)
+    declared: extern u8 D_800F56F0[];
+       +0x0  4 byte(s)  signed   DIRECT       3 file(s)
+       +0x4  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0x4  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+       +0x8  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0x8  4 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+       +0xc  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0xc  4 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+      +0x10  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x10  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+      +0x14  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x14  4 byte(s)  signed   ALIAS+DIRECT 3 file(s)
+      +0x18  4 byte(s)  signed   DIRECT       1 file(s)
+      +0x1c  4 byte(s)  signed   DIRECT       1 file(s)
+
+D_800EAE88  --  12 field(s), 6 file(s)
+    declared: extern u8 D_800EAE88[8];
+       +0x0  1 byte(s)  byte-index DIRECT       4 file(s)
+       +0x1  1 byte(s)  byte-index DIRECT       5 file(s)
+       +0x2  1 byte(s)  byte-index DIRECT       2 file(s)
+       +0x3  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x4  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x5  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x6  1 byte(s)  byte-index DIRECT       3 file(s)
+       +0x7  1 byte(s)  byte-index DIRECT       3 file(s)
+       +0x8  1 byte(s)  byte-index DIRECT       3 file(s)
+       +0x9  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0xa  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0xb  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_8009B1C8  --  11 field(s), 6 file(s)
+    declared: extern u8 *D_8009B1C8;
+       +0x1  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0xa  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x14  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x14  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x16  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x16  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x18  1 byte(s)  signed   ALIAS+DIRECT 1 file(s)
+      +0x18  1 byte(s)  unsigned DIRECT       1 file(s)
+      +0x19  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x1a  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x1f  1 byte(s)  signed   DIRECT       2 file(s)
+
+D_8009B1B4  --  10 field(s), 2 file(s)
+    declared: extern u8 *D_8009B1B4;
+       +0xc  2 byte(s)  signed   DIRECT       1 file(s)
+       +0xf  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0xf  1 byte(s)  signed   DIRECT       1 file(s)
+      +0x10  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x10  1 byte(s)  signed   DIRECT       2 file(s)
+      +0x11  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x12  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x13  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x18  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x19  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800E9EC8  --  10 field(s), 24 file(s)
+    declared: extern u8 D_800E9EC8[];
+       +0x0  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x0  4 byte(s)  signed   DIRECT       4 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x4  1 byte(s)  byte-index ALIAS+DIRECT 6 file(s)
+       +0x5  1 byte(s)  byte-index ALIAS+DIRECT 5 file(s)
+       +0x6  1 byte(s)  byte-index ALIAS+DIRECT 22 file(s)
+       +0x7  1 byte(s)  byte-index ALIAS+DIRECT 7 file(s)
+       +0x8  2 byte(s)  signed   ALIAS        2 file(s)
+       +0x8  2 byte(s)  unsigned ALIAS        1 file(s)
+
+D_800F5768  --  9 field(s), 1 file(s)
+    declared: extern u8 D_800F5768[];
+       +0x0  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0x2  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0x4  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0x8  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0xa  2 byte(s)  unsigned DIRECT       1 file(s)
+       +0xc  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x10  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x12  2 byte(s)  unsigned DIRECT       1 file(s)
+      +0x14  2 byte(s)  unsigned DIRECT       1 file(s)
+
+D_8009B328  --  8 field(s), 5 file(s)
+    declared: extern u8 *D_8009B328;
+      +0x30  1 byte(s)  signed   ALIAS        1 file(s)
+      +0x32  1 byte(s)  byte-index ALIAS        2 file(s)
+      +0x33  1 byte(s)  byte-index ALIAS+DIRECT 5 file(s)
+      +0x3c  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x40  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x40  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x42  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x44  2 byte(s)  signed   ALIAS        1 file(s)
+
+D_800E9DF0  --  8 field(s), 1 file(s)
+    declared: extern u8 D_800E9DF0[];
+       +0x0  4 byte(s)  signed   DIRECT       1 file(s)
+       +0x4  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x6  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x8  4 byte(s)  signed   ALIAS        1 file(s)
+       +0xc  2 byte(s)  signed   ALIAS        1 file(s)
+       +0xe  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x10  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x14  4 byte(s)  signed   ALIAS        1 file(s)
+
+D_800EF668  --  8 field(s), 1 file(s)
+    declared: extern u8 D_800EF668[];
+       +0x0  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x3  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x22  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x23  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x24  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x25  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800F2AE0  --  8 field(s), 1 file(s)
+    declared: extern s32 D_800F2AE0[];
+       +0x0  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x1  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x2  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x3  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x4  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x5  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x6  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x7  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800F56A0  --  8 field(s), 1 file(s)
+    declared: extern u8 D_800F56A0[];
+       +0x0  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x18  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x1c  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x20  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x44  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x46  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x48  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x4c  4 byte(s)  signed   ALIAS        1 file(s)
+
+D_800F5BE8  --  8 field(s), 17 file(s)
+    declared: extern ByteReader D_800F5BE8[];
+    stride evidence: 2 (1 file(s))
+       +0x0  1 byte(s)  byte-index DIRECT       12 file(s)
+      +0x98  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x9c  1 byte(s)  byte-index ALIAS        2 file(s)
+      +0x9d  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x9e  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0xa0  2 byte(s)  signed   ALIAS        1 file(s)
+      +0xa2  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0xa3  1 byte(s)  byte-index ALIAS+DIRECT 3 file(s)
+
+D_800EA1E8  --  7 field(s), 1 file(s)
+    declared: extern u8 D_800EA1E8[];
+    stride evidence: 4 (1 file(s))
+       +0x0  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x8  2 byte(s)  signed   ALIAS        1 file(s)
+       +0xa  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x12  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x14  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x54  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x56  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_801A8000  --  7 field(s), 1 file(s)
+    declared: extern u8 D_801A8000[];
+    stride evidence: 2 (1 file(s))
+       +0x4  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x4  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x6  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x6  2 byte(s)  unsigned ALIAS        1 file(s)
+       +0x8  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x1c  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x1e  2 byte(s)  signed   ALIAS        1 file(s)
+
+D_8009B1CC  --  6 field(s), 1 file(s)
+    declared: extern u8 *D_8009B1CC;
+       +0x8  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x21  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x30  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x32  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x60  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x60  2 byte(s)  signed   ALIAS        1 file(s)
+
+D_800EAE98  --  6 field(s), 3 file(s)
+    declared: extern u8 *D_800EAE98[];
+       +0x0  1 byte(s)  byte-index DIRECT       2 file(s)
+       +0x5  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x8  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x14  4 byte(s)  signed   DIRECT       1 file(s)
+      +0x28  4 byte(s)  signed   DIRECT       1 file(s)
+      +0x64  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800EB0F8  --  6 field(s), 7 file(s)
+    declared: extern Rec64 D_800EB0F8[];
+    stride evidence: 100 (4 file(s))
+      +0x30  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x34  2 byte(s)  unsigned ALIAS        4 file(s)
+      +0x40  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x59  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0xbe  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0xbf  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800F2C40  --  6 field(s), 1 file(s)
+    declared: extern u8 D_800F2C40[];
+    stride evidence: 3616 (12 file(s))
+     +0xcf8  2 byte(s)  signed   ALIAS        1 file(s)
+     +0xcfa  2 byte(s)  signed   ALIAS        1 file(s)
+     +0xd08  4 byte(s)  signed   ALIAS        1 file(s)
+     +0xd0c  4 byte(s)  signed   ALIAS        1 file(s)
+     +0xd10  4 byte(s)  signed   ALIAS        1 file(s)
+     +0xe14  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_8009B378  --  5 field(s), 1 file(s)
+    declared: extern s32 D_8009B378;
+      +0x30  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x32  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x36  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x5a  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x6c  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800E9D70  --  5 field(s), 3 file(s)
+    declared: extern s16 D_800E9D70[];
+       +0x0  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x3  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x64  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800E9FF0  --  5 field(s), 5 file(s)
+    declared: extern Rec20 D_800E9FF0[];
+       +0x0  1 byte(s)  byte-index DIRECT       2 file(s)
+       +0x1  1 byte(s)  byte-index DIRECT       2 file(s)
+       +0x2  1 byte(s)  byte-index DIRECT       2 file(s)
+      +0x10  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x40  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800EF658  --  5 field(s), 1 file(s)
+    declared: extern u8 D_800EF658[];
+       +0x0  2 byte(s)  signed   DIRECT       1 file(s)
+       +0x2  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x4  2 byte(s)  signed   ALIAS        1 file(s)
+       +0x6  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x7  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_801D5708  --  5 field(s), 2 file(s)
+    declared: extern u8 D_801D5708[];
+       +0x0  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS+DIRECT 2 file(s)
+       +0x3  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x4  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_8009B290  --  4 field(s), 11 file(s)
+    declared: extern u8 *D_8009B290;
+       +0x0  1 byte(s)  byte-index ALIAS        11 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        11 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS        2 file(s)
+       +0x4  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_8009B380  --  4 field(s), 1 file(s)
+    declared: extern u8 *D_8009B380;
+       +0x8  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x30  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x32  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x32  2 byte(s)  unsigned ALIAS        1 file(s)
+
+D_800E9E60  --  4 field(s), 4 file(s)
+    declared: extern u8 D_800E9E60[];
+      +0x24  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x2c  4 byte(s)  signed   ALIAS+DIRECT 2 file(s)
+      +0x46  1 byte(s)  byte-index ALIAS+DIRECT 3 file(s)
+      +0x47  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800EA0E8  --  4 field(s), 1 file(s)
+    declared: extern u8 D_800EA0E8[];
+      +0x28  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x2a  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x2c  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x2e  2 byte(s)  signed   ALIAS        1 file(s)
+
+D_800EAD88  --  4 field(s), 3 file(s)
+    declared: extern u8 D_800EAD88[];
+       +0x0  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x8  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x18  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x1c  1 byte(s)  byte-index ALIAS        2 file(s)
+
+D_800EB184  --  4 field(s), 3 file(s)
+    declared: extern u8 *D_800EB184[];
+       +0x0  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0xc  1 byte(s)  byte-index ALIAS        2 file(s)
+       +0xd  1 byte(s)  byte-index ALIAS        2 file(s)
+       +0xe  1 byte(s)  byte-index ALIAS        2 file(s)
+
+D_801DA000  --  4 field(s), 1 file(s)
+    declared: extern s16 D_801DA000[];
+       +0x0  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x1  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x2  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x3  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_8009B0F4  --  3 field(s), 10 file(s)
+    declared: extern volatile s32 D_8009B0F4 __attribute__((section(".data")));
+       +0x0  1 byte(s)  byte-index DIRECT       10 file(s)
+       +0x4  1 byte(s)  byte-index DIRECT       1 file(s)
+       +0x8  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_8009B17C  --  3 field(s), 5 file(s)
+    declared: extern u8 *D_8009B17C;
+      +0x1a  2 byte(s)  signed   DIRECT       1 file(s)
+      +0x1c  1 byte(s)  byte-index DIRECT       2 file(s)
+      +0x1d  1 byte(s)  byte-index DIRECT       5 file(s)
+
+D_8009B388  --  3 field(s), 1 file(s)
+    declared: extern u8 *D_8009B388;
+      +0x30  2 byte(s)  signed   ALIAS        1 file(s)
+      +0x30  2 byte(s)  unsigned ALIAS        1 file(s)
+      +0x32  2 byte(s)  unsigned ALIAS        1 file(s)
+
+D_800E9EA8  --  3 field(s), 1 file(s)
+    declared: extern s32 D_800E9EA8[];
+       +0x4  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x5  1 byte(s)  byte-index ALIAS        1 file(s)
+       +0x6  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800E9ECE  --  3 field(s), 5 file(s)
+    declared: extern u8 D_800E9ECE[];
+       +0x0  1 byte(s)  byte-index DIRECT       5 file(s)
+      +0x10  1 byte(s)  byte-index DIRECT       1 file(s)
+      +0x64  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_800EA030  --  3 field(s), 1 file(s)
+    declared: extern Rec0C D_800EA030[];
+       +0x0  4 byte(s)  signed   ALIAS        1 file(s)
+       +0x4  4 byte(s)  signed   ALIAS        1 file(s)
+       +0x9  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800EB010  --  3 field(s), 1 file(s)
+    declared: extern Rec4C D_800EB010[];
+      +0x30  1 byte(s)  signed   ALIAS        1 file(s)
+      +0x32  1 byte(s)  byte-index ALIAS        1 file(s)
+      +0x33  1 byte(s)  byte-index ALIAS        1 file(s)
+
+D_800F5918  --  3 field(s), 3 file(s)
+    declared: extern u8 D_800F5918[];
+       +0x0  4 byte(s)  signed   ALIAS        2 file(s)
+       +0x4  4 byte(s)  signed   ALIAS        2 file(s)
+      +0x50  1 byte(s)  byte-index DIRECT       1 file(s)
+
+D_801A7AD8  --  3 field(s), 1 file(s)
+    declared: extern u8 D_801A7AD8[];
+    stride evidence: 28 (7 file(s))
+       +0x0  4 byte(s)  signed   ALIAS        1 file(s)
+       +0x4  4 byte(s)  signed   ALIAS        1 file(s)
+      +0x16  2 byte(s)  signed   ALIAS        1 file(s)
+
+D_801D5608  --  3 field(s), 5 file(s)
+    declared: extern s32 D_801D5608[];
+       +0x0  1 byte(s)  byte-index ALIAS+DIRECT 4 file(s)
+       +0x1  1 byte(s)  byte-index DIRECT       2 file(s)
+      +0x10  1 byte(s)  byte-index ALIAS        1 file(s)
