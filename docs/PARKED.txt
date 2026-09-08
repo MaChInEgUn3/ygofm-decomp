@@ -4552,59 +4552,70 @@ func_800408D0 -- 3 differences. A permuter run from the 3-difference base
   With thirteen locals this function is almost all outer-block pairs.  Do not
   read this as "the borrow lever does not apply here" -- it was not measured.
 
-func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
-    MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
-  gp=0 at=0, default flags, no addressing work at all.
-  A card-artwork setup routine: decodes a BCD card id
-  (`((n >> 4) & 0xF) * 10 + (n & 0xF)`) into an index, then reads a per-card
-  flag byte from one of two tables -- D_80090C00 with six-byte entries for ids
-  >= 0x200 and D_80090BA8 with two-byte entries below -- and calls
-  func_8002E060 for each bit set. Both symbols were added to variables.h.
-  Three things were needed and all three are existing rules:
-  * `s32 arg1`, not `s16`. Retail has `addu $s1,$a1,$zero` with no sign
-    extension, so the `< 0` test is on the raw word; the narrow declaration
-    adds `sll`/`sra` and is +1 and 144 differences.
-  * **the else branch's flag byte needs its own name.** Reusing `n` for
-    `o[0]` there -- which looks right, because retail reuses `$s1` for it --
-    is 49 differences, and a separate `m` is 22. Every one of those 49 is a
-    register, and the split fixes the *whole function's* allocation, not just
-    that block. Note this is the opposite of what the listing's register reuse
-    suggests, which is the standing warning about reading register reuse as
-    name reuse.
-  * `p[0x10] = 1;` written *above* the two read-modify-writes on the object
-    rather than below them (22 -> 19), and a base local for D_80090BA8 in the
-    else branch (19 -> 18).
-  * **the else branch's index wants its own name AND an `s16` declaration**,
-    and the second half is the real lever. The sequence is worth writing out,
-    because the first reading of it was wrong:
-      - inline in the address expression: 18
-      - a fresh `s32 k`: 19 (worse)
-      - borrowing `q`, the mutually exclusive arm's `s32` local: 12
-      - a fresh **`s16 k`**: 8
-    So the borrow was a partial proxy for the narrowing, not the mechanism.
-    The permuter reached 9 by declaring the borrowed `q` itself `short`, which
-    is **not installable** -- `q` also holds `*(s32 *)(p + 0x28)` in the other
-    arm and a 16-bit truncation of that is a wrong address -- and the two
-    plausible spellings that reproduce it, a fresh `s16 k` or `s16 q` with a
-    separate `s32 r` for the pointer, are both 8, i.e. better than what it
-    found. Read a permuter win for its *mechanism*: here the semantically
-    illegal candidate pointed straight at a legal one that is better.
-    The `u16 *` pointer local and the `&=` it also carried are worth nothing.
-    Where the `* 2` sits also matters: inside `q` is 12, moved to the
-    indexing (`&b[q * 2]`) is 19, because retail materialises the table base
-    *before* the scaling.
-  The residue is 8 in one cluster, and it is two instructions' *placement*
-  rather than any instruction being wrong: the RMW block itself is
-  instruction-for-instruction right, but retail materialises the `1` for
-  `p[0x10]` between the `sw 4` and the `sh 8` and does not store it until four
-  instructions later, after the *6 index scaling, while we emit the `addiu`
-  and the `sb` together at whichever end the source puts them. Thirteen
-  placements and spellings were measured -- the statement at five positions
-  among its neighbours, `one` as a local at three positions, the RMWs as
-  compound assignments, a `do { } while (0);` round the pair, and both reads
-  named -- and they are 11, 15, 18, 19, 21, 22, 23 or 30 -- the four placement
-  probes were re-run against the 8 base after the `s16` landed, in case the
-  levers were coupled, and they are not. Permuter rerunning from the 8 base.
+func_8002E128 -- RESOLVED 2026-09-08. MATCH, and the ASSEMBLY DEBT is retired:
+    src/func_8002E128.c is now real C where it held Unchiga's transcription
+    (a 24-instruction __asm__ block with s0/s1 pins). Rebuilt from the m2c
+    draft, 36 differences to 0. The last five were the flag byte reusing `n`:
+    retail reads it `lbu $s1,0($s0)` -- into the register the argument has
+    just vacated, which is ONE pseudo. A separate `m` exchanges $s0/$s1 at
+    all five sites. The full lever list and the dead spellings are in the
+    file's header. The August entry below recorded 8 as this function's
+    floor and its `s16 k` = 8 / `s32 k` = 19 inverted on the corrected base
+    -- every number in it was measured with three other faults open.
+  (original entry:)
+  func_8002E128 -- 8 differences, first written 2026-08-21. 146 instructions,
+      MATCHED 2026-08-31 by PORTING Unchiga's C from his tangos/work branch (docs/MERGE_UNCHIGA.md). It compiled to the retail bytes under cc1psx 2.8.1 unchanged -- the park below records what OUR source shape could not reach, and is kept for that.
+    gp=0 at=0, default flags, no addressing work at all.
+    A card-artwork setup routine: decodes a BCD card id
+    (`((n >> 4) & 0xF) * 10 + (n & 0xF)`) into an index, then reads a per-card
+    flag byte from one of two tables -- D_80090C00 with six-byte entries for ids
+    >= 0x200 and D_80090BA8 with two-byte entries below -- and calls
+    func_8002E060 for each bit set. Both symbols were added to variables.h.
+    Three things were needed and all three are existing rules:
+    * `s32 arg1`, not `s16`. Retail has `addu $s1,$a1,$zero` with no sign
+      extension, so the `< 0` test is on the raw word; the narrow declaration
+      adds `sll`/`sra` and is +1 and 144 differences.
+    * **the else branch's flag byte needs its own name.** Reusing `n` for
+      `o[0]` there -- which looks right, because retail reuses `$s1` for it --
+      is 49 differences, and a separate `m` is 22. Every one of those 49 is a
+      register, and the split fixes the *whole function's* allocation, not just
+      that block. Note this is the opposite of what the listing's register reuse
+      suggests, which is the standing warning about reading register reuse as
+      name reuse.
+    * `p[0x10] = 1;` written *above* the two read-modify-writes on the object
+      rather than below them (22 -> 19), and a base local for D_80090BA8 in the
+      else branch (19 -> 18).
+    * **the else branch's index wants its own name AND an `s16` declaration**,
+      and the second half is the real lever. The sequence is worth writing out,
+      because the first reading of it was wrong:
+        - inline in the address expression: 18
+        - a fresh `s32 k`: 19 (worse)
+        - borrowing `q`, the mutually exclusive arm's `s32` local: 12
+        - a fresh **`s16 k`**: 8
+      So the borrow was a partial proxy for the narrowing, not the mechanism.
+      The permuter reached 9 by declaring the borrowed `q` itself `short`, which
+      is **not installable** -- `q` also holds `*(s32 *)(p + 0x28)` in the other
+      arm and a 16-bit truncation of that is a wrong address -- and the two
+      plausible spellings that reproduce it, a fresh `s16 k` or `s16 q` with a
+      separate `s32 r` for the pointer, are both 8, i.e. better than what it
+      found. Read a permuter win for its *mechanism*: here the semantically
+      illegal candidate pointed straight at a legal one that is better.
+      The `u16 *` pointer local and the `&=` it also carried are worth nothing.
+      Where the `* 2` sits also matters: inside `q` is 12, moved to the
+      indexing (`&b[q * 2]`) is 19, because retail materialises the table base
+      *before* the scaling.
+    The residue is 8 in one cluster, and it is two instructions' *placement*
+    rather than any instruction being wrong: the RMW block itself is
+    instruction-for-instruction right, but retail materialises the `1` for
+    `p[0x10]` between the `sw 4` and the `sh 8` and does not store it until four
+    instructions later, after the *6 index scaling, while we emit the `addiu`
+    and the `sb` together at whichever end the source puts them. Thirteen
+    placements and spellings were measured -- the statement at five positions
+    among its neighbours, `one` as a local at three positions, the RMWs as
+    compound assignments, a `do { } while (0);` round the pair, and both reads
+    named -- and they are 11, 15, 18, 19, 21, 22, 23 or 30 -- the four placement
+    probes were re-run against the 8 base after the `s16` landed, in case the
+    levers were coupled, and they are not. Permuter rerunning from the 8 base.
 
 func_8004BE88 -- MATCHED 2026-08-21. Kept for the one lever that is new and
   general:
