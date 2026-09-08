@@ -82,6 +82,18 @@
  * antes de `b` no primeiro braco (14), acumular o resultado dentro de `b`
  * com o store final em `(s32)b` (27), as duas juntas (28), e `d` antes de
  * `b` nos dois bracos (-1 e 215).
+ * MAIS QUINZE NEGATIVOS NESTA BASE, 2026-09-08: as SEIS permutacoes das
+ * tres atribuicoes do primeiro braco (bdm 9 instalado, bmd 10, mbd 10, dbm
+ * 14, dmb 14, mdb 14 -- o eixo da ORDEM esta fechado); a mascara inline sem
+ * nome (-1/216); a mascara nomeada UMA vez antes da cadeia (-2/215); `d`
+ * declarado `u32` em vez de `s32` (9, identico); um local de base para
+ * D_801C0000 atribuido antes da cadeia (-1/222); e quatro sondas de
+ * desempate de alocacao -- `v = 0;`, `b = (u8 *)0;`, um par
+ * `m = 0xFFFF0000; m = 0;` e um `do { } while (0);` em volta da primeira
+ * atribuicao -- TODAS exatamente 9, que e a assinatura de eixo errado.
+ * O PERMUTER rodou duas fatias de -j1 por 110 s (base 515 na metrica dele)
+ * e nao produziu saida nenhuma.
+ *
  * EIXO DE FLAGS FECHADO por sweep_try na base de 18: o padrao O2 G8 era o
  * melhor; as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265.
  * Novos em variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
