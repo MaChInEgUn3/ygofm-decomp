@@ -1,6 +1,6 @@
 /* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
- * estrutural depois de ALINHAR os opcodes (2026-09-08): 292 linhas
- * iguais, 36 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 294 linhas
+ * iguais, 34 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 292 iguais / 36 so-registrador / 2 estruturais.
+ * candidato e 294 iguais / 34 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -74,6 +74,14 @@
  * negacao, que e a receita do WORKFLOW para trocar a ordem dos operandos
  * de um `addu`. O retail tem `addu $v0,$t4,$v0` (base primeiro) e todas
  * as formas com `+` dao indice primeiro. 37 -> 36, e compoe com a 12.
+ *
+ * ALAVANCA 14: o braco de EDICAO escreve o mesmo endereco da alavanca 10,
+ * `r = (u8 *)&D_8009B2C8; r = r + (s8)D_8009B2DC * 2; p = (u16 *)r;`, no
+ * lugar da forma indexada. Fecha `sll`/`la`/`addu` das linhas 147-148 do
+ * retail. 36 linhas de registrador -> 34. Notar que `p = (u16 *)&D_...;
+ * p = p + (s8)D_8009B2DC;` -- a mesma ideia sem passar por `r` -- e 39,
+ * i.e. PIOR que a forma indexada: e o `r` que importa, nao o partir em
+ * duas.
  *
  * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
  *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
@@ -192,7 +200,9 @@ s32 func_80030294(void) {
         goto out;
     }
     if (((D_8009B394 | D_8009B396) & 0x5000) != 0) {
-        p = &(&D_8009B2C8)[(s8)D_8009B2DC];
+        r = (u8 *)&D_8009B2C8;
+        r = r + (s8)D_8009B2DC * 2;
+        p = (u16 *)r;
         e = (s8)D_8009B2E9;
         val = *p;
         step = c[e];
