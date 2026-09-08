@@ -8313,3 +8313,11 @@ Novos em variables.h: D_8009B240, D_8009B24C e D_8009B250, mais os bracos
 Mais tres mortos nesta base: o local para D_8009B24C no braco do 0x20
 RE-MEDIDO (-6 e 74), um nome para D_8009B24B logo apos func_800291E0 (+1 e
 245), e trocar a ordem dos dois primeiros stores no objeto (69, identico).
+Terceira rodada, mais seis negativos: o local de D_8009B24C RE-MEDIDO numa
+TERCEIRA base e com NOME FRESCO da -6 e 78, entao o eixo esta fechado -- a
+leitura unica em $s1 do retail nao vem de um local daquele braco; o rabo com
+`goto work;` explicito e 69, IDENTICO (o gcc funde os dois rabos `andi
+0x20`/`beq` mesmo com o goto, e o retail mantem as duas copias); e tres
+grafias que QUEBRAM a fusao alongam todas -- polaridade invertida com goto no
+nao-zero (+5/89), um nome para o OR (+2/78) e a cadeia testando `!= 0xE`
+primeiro (+1/86, censo de magnitude 7, um `andi` a menos que a base).

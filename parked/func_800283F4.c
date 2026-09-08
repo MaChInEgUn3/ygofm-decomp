@@ -49,6 +49,21 @@
  * chamada a func_800291E0 (+1 e 245); e trocar a ordem dos dois primeiros
  * stores no objeto (69, identico).
  *
+ * MAIS SEIS NEGATIVOS (2026-09-08, terceira rodada):
+ *  - o local para D_8009B24C no braco do 0x20, RE-MEDIDO em TRES bases e com
+ *    NOME FRESCO na terceira: -6 e 107, -6 e 74, -6 e 78. O eixo esta
+ *    fechado -- a leitura unica que o retail tem em $s1 NAO vem de um local
+ *    daquele braco, e o `andi 0xFF` de re-leitura que ele tem tambem some
+ *    com o local;
+ *  - o rabo com `goto work;` explicito depois do primeiro braco: 69,
+ *    IDENTICO. O gcc funde os dois rabos `andi 0x20`/`beq` mesmo com o
+ *    `goto`, e o retail mantem as duas copias;
+ *  - tres grafias que QUEBRAM a fusao e todas alongam: polaridade invertida
+ *    com `goto work` no nao-zero (+5 e 89), um nome para o OR (+2 e 78), e a
+ *    cadeia escrita ao contrario, testando `!= 0xE` primeiro (+1 e 86, censo
+ *    de magnitude 7 -- um `andi` a menos que a base, entao a polaridade
+ *    invertida acerta ALGUMA coisa e alonga em outra).
+ *
  * O QUE FALTA: 103 diferencas, censo `sb -1, lw +2, lbu +1, nop +1,
  * andi -2, beq -1` (magnitude 8), em tres grupos:
  *  - a ORDEM do bloco de setup (indices 7 a 42): o retail materializa o 1 de
