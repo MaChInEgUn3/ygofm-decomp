@@ -8326,3 +8326,38 @@ leitura unica em $s1 do retail nao vem de um local daquele braco; o rabo com
 grafias que QUEBRAM a fusao alongam todas -- polaridade invertida com goto no
 nao-zero (+5/89), um nome para o OR (+2/78) e a cadeia testando `!= 0xE`
 primeiro (+1/86, censo de magnitude 7, um `andi` a menos que a base).
+
+func_80030294 -- 306/329, VINTE E TRES instrucoes a menos, 325 diferencas,
+censo de magnitude 45 dominado por `lui -14` e `nop -9`. PRIMEIRO C que
+compila. Flags padrao (passo 0: gp=34, at=0, sem jump table, sem GTE). Editor
+de um valor hexadecimal: um braco de ENTRADA que decompoe o valor em digitos
+por divisoes sucessivas, um braco de EDICAO guiado por D_8009B394/396 e
+D_8009B398/39A, e um rabo que preenche um buffer de 0x28 bytes com espacos,
+poe um `*` na posicao do cursor e chama func_8007EF84 tres vezes.
+Leituras do listing, todas confirmadas no candidato:
+ - moldura -0x68 com locais em 0x10 (20), 0x28 (16), 0x38 (20) e 0x50 (8), e
+   BURACOS DE QUATRO BYTES em 0x24 e 0x4C. Os buracos sao o alinhamento de 8
+   que o gcc da a um ARRAY local de oito bytes ou mais: 0x24 sobe para 0x28 e
+   0x4C sobe para 0x50. Os quatro locais sao arrays e a ordem de declaracao e
+   a ordem dos offsets;
+ - os tres primeiros sao copias de struct (expand_block_move) e o quarto e uma
+   copia com lwl/lwr e swl/swr, isto e, um objeto de ALINHAMENTO 1;
+ - os dois `break` sao uma divisao real com divisor VARIAVEL lido de uma
+   tabela percorrida de tras para frente;
+ - o retail LE UM REGISTRADOR NAO INICIALIZADO: `or $a1,$a1,$a3` num caminho
+   em que `$a3` nunca foi escrito naquele braco. A fonte tinha um carry
+   atribuido so dentro do laco e lido depois -- e o unico caso em que essa
+   classe e legitima;
+ - func_8007EF84 e da familia do sprintf e nao leva prototipo.
+Medido: os SEIS halfwords de flags na FORMA NUA (`_IN_DATA`) valem cinco
+instrucoes (-28/325 -> -23/325) porque o retail materializa um `lui %hi` para
+cada uma das 28 referencias, sem CSE. E D_800EAED8 na forma nua com tipo
+completo `[0x28]` NAO muda nada -- o retail materializa o `%hi` treze vezes,
+mas os usos tomam o ENDERECO COMO VALOR e para isso o cc1psx emite o par
+proprio dele com ou sem o atributo, e o gcc faz CSE desse par (regra 45 do
+outro lado).
+Falta: salvamos $s3 alem de $s0-$s2 (moldura 112 contra 104), um callee-saved
+a mais usado como temp do block move, e os `lui -14` que sobram.
+Novos em variables.h: D_80010250, D_80010264, D_80010274, D_8009AF4C,
+D_8009AF58, D_800EAED8 e os bracos `D_8009B396_IN_DATA`, `D_8009B3A6_IN_DATA`
+e `D_800EAED8_IN_DATA`.

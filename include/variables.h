@@ -766,6 +766,22 @@ extern u8 D_80090CB4[];
 extern u16 D_8009B2C4;
 extern u16 D_8009B2C6;
 extern u16 D_8009B2CA;
+/* func_80030294: tres tabelas const copiadas para a pilha por struct copy, o
+ * buffer de texto de 0x28 bytes que ela preenche, e os dois formatos que
+ * passa a func_8007EF84. D_8009AF4C e copiado com lwl/lwr, entao tem
+ * alinhamento 1. */
+extern u8 D_80010250[];
+extern u8 D_80010264[];
+extern u8 D_80010274[];
+extern u8 D_8009AF4C[];
+extern u8 D_8009AF58[];
+#ifdef D_800EAED8_IN_DATA
+/* Fora do small data com tipo COMPLETO: func_80030294 referencia este buffer
+ * treze vezes e o retail materializa um `lui %hi` para cada uma, sem CSE. */
+extern u8 D_800EAED8[0x28] __attribute__((section(".data")));
+#else
+extern u8 D_800EAED8[];
+#endif
 extern u16 D_8009B2CC;
 extern u16 D_8009B2DA;
 extern u8 D_8009B2C1;
@@ -1648,7 +1664,11 @@ extern volatile u16 D_8009B394;
 #else
 extern u16 D_8009B394;
 #endif
-#ifdef D_8009B396_IS_VOLATILE
+#ifdef D_8009B396_IN_DATA
+/* Fora do small data: func_80030294 le este halfword oito vezes e o retail
+ * materializa um `lui %hi` para cada uma, sem CSE. */
+extern u16 D_8009B396 __attribute__((section(".data")));
+#elif defined(D_8009B396_IS_VOLATILE)
 /* The high half of a halfword pair; func_8003CCD8's store order. */
 extern volatile u16 D_8009B396;
 #else
@@ -1688,7 +1708,11 @@ extern u16 D_8009B3A4[];
 #else
 extern u16 D_8009B3A4;
 #endif
-#ifdef D_8009B3A6_IS_VOLATILE
+#ifdef D_8009B3A6_IN_DATA
+/* Fora do small data: func_80030294 le este halfword oito vezes e o retail
+ * materializa um `lui %hi` para cada uma, sem CSE. */
+extern u16 D_8009B3A6 __attribute__((section(".data")));
+#elif defined(D_8009B3A6_IS_VOLATILE)
 /* The high half of a halfword pair; func_8003CCD8's store order. */
 extern volatile u16 D_8009B3A6;
 #else
