@@ -1,7 +1,7 @@
-/* 250/249 -- UMA instrucao a mais -- e 92 diferencas, censo `nop +1`, UM
- * UNICO opcode divergente (2026-09-08, primeiro dia). Flags PADRAO (passo 0:
- * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 ->
- * +1/92 no mesmo dia.
+/* 249/249 -- COMPRIMENTO EXATO -- e 23 diferencas, censo `nop -1, lw +1`
+ * (2026-09-08, primeiro dia). Flags PADRAO (passo 0:
+ * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 -> +1/92 -> 0/23
+ * no mesmo dia.
  *
  * FORMA: passo de uma maquina de estados de sequenciador. Um braco de
  * INICIALIZACAO sob `if ((flags & 0x4000) == 0)` contra um braco de PASSO;
@@ -42,9 +42,21 @@
  *     chamada indireta (`lw`, `bltz`, `nop`, `lw` de novo) e o gcc faz CSE
  *     das duas. -2/80 -> +1/92 e o censo de dois opcodes para UM.
  *
- * O QUE FALTA: UM `nop`. Somos uma instrucao mais longos que o retail e o
- * censo e `nop +1`. Sem medir ainda: onde esse `nop` sobra -- e um delay
- * slot que o retail preenche e nos nao, ou o contrario.
+ *  9. **A LEITURA NOMEADA DO VALOR TESTADO E A RE-LEITURA DO SLOT.** O
+ *     retail poe `sw $v1,0($a0)` no delay slot do `bne` e deixa um `nop`
+ *     no delay slot do `lbu`; com `*a = q + 1;` o gcc emite o store cedo
+ *     demais e o delay slot do `bne` fica vazio. Duas edicoes juntas
+ *     resolvem: `w = (s16)D_8009B33A;` entre o store do global e o
+ *     incremento (+1/92 -> -1/86) e `*a = *a + 1;` em vez de `*a = q + 1;`
+ *     (-1/86 -> 0/23). MEDIDO E MORTO no mesmo eixo: o incremento antes do
+ *     store do global (+1/92), depois do store e antes da leitura nomeada
+ *     (+1/92), `*a = &q[1];` (-1/86), `q++; *a = q;` (-1/86), `*a = q + 1;`
+ *     seguido de `q = q + 1;` (-1/86) e `D_8009B33A = *(*a)++;` (+1/92).
+ *
+ * O QUE FALTA: 23 diferencas, censo `nop -1, lw +1` -- a re-leitura do slot
+ * custa um `lw` que o retail nao tem, e o `nop` do delay slot do `lbu`
+ * ainda falta. Os dois grupos: o bloco de selecao de banco (indices 33 a
+ * 67), que e ordem e registrador, e a cabeca do laco (170 a 185).
  * Novos em variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
  * `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h.
  */
@@ -67,6 +79,7 @@ void func_800393B0(u8 *p) {
     Rec1C *r;
     ObjFn *t;
     s32 c;
+    s32 w;
 
     f = *(u16 *)(p + 0x34);
     if ((f & 0x4000) == 0) {
@@ -148,8 +161,9 @@ top:
     a = (u8 **)(p + (s8)p[0x58] * 4);
     q = *a;
     D_8009B33A = *q;
-    *a = q + 1;
-    if ((s16)D_8009B33A >= 0xF0) {
+    w = (s16)D_8009B33A;
+    *a = *a + 1;
+    if (w >= 0xF0) {
         D_8009B350 = 0;
         t[(s16)D_8009B33A - 0xF0](p);
         if (D_8009B350 >= 0) {

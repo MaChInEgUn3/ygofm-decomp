@@ -8220,8 +8220,20 @@ Oito leituras, na ordem em que foram medidas:
  8. D_8009B350 e VOLATILE: o retail le o simbolo duas vezes depois da chamada
     indireta (`lw`, `bltz`, `nop`, `lw`) e o gcc faz CSE das duas. -2/80 ->
     +1/92 e o censo de dois opcodes para UM.
-FALTA UM `nop`. Ainda nao medido onde ele sobra. Novos em variables.h:
-D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco `D_8009B27C_IN_DATA`;
-func_800391E4 ganhou prototipo em functions.h. Ordem dos dois primeiros bracos
-do banco: `d` antes de `b` da 141 e `b` antes de `d` 139 na base antiga --
-RE-MEDIR na base nova.
+9. A LEITURA NOMEADA DO VALOR TESTADO E A RE-LEITURA DO SLOT. O retail poe
+    `sw $v1,0($a0)` no delay slot do `bne` e deixa um `nop` no delay slot do
+    `lbu`; com `*a = q + 1;` o gcc emite o store cedo demais e o delay slot do
+    `bne` fica vazio. Duas edicoes juntas: `w = (s16)D_8009B33A;` entre o store
+    do global e o incremento (+1/92 -> -1/86) e `*a = *a + 1;` no lugar de
+    `*a = q + 1;` (-1/86 -> 0/23). Medido e morto no mesmo eixo: incremento
+    antes do store do global (+1/92), depois do store e antes da leitura
+    nomeada (+1/92), `*a = &q[1];` (-1/86), `q++; *a = q;` (-1/86),
+    `*a = q + 1;` seguido de `q = q + 1;` (-1/86) e `D_8009B33A = *(*a)++;`
+    (+1/92).
+FALTAM 23 diferencas, censo `nop -1, lw +1`: a re-leitura do slot custa um `lw`
+que o retail nao tem, e o `nop` do delay slot do `lbu` ainda falta. Dois grupos
+-- o bloco de selecao de banco (indices 33 a 67), que e ordem e registrador, e
+a cabeca do laco (170 a 185). Novos em variables.h: D_80090E64 e D_80090F18
+(`ObjFn[]`) e o braco `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em
+functions.h. Ordem dos dois primeiros bracos do banco: `d` antes de `b` deu 141
+e `b` antes de `d` 139 na base antiga -- RE-MEDIR na base nova.
