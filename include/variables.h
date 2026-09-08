@@ -111,6 +111,10 @@ extern u8 D_8009B145;
 extern s8 D_8009B238;
 extern u16 D_8009B244;
 extern u8 D_8009B248;
+/* Tres ponteiros gp-relativos que func_800283F4 grava. */
+extern u8 *D_8009B240;
+extern u8 *D_8009B24C;
+extern u8 *D_8009B250;
 extern u8 D_8009B24A;
 extern u8 D_8009B3C6;
 extern u8 D_8009B2EB;
@@ -594,7 +598,12 @@ extern u16 D_8009B162;
  * keeping %gp_rel on the one- and two-byte symbols beside them, so they carry
  * a declared size of four and the unit assembles at -G2. The size is a codegen
  * knob; see the -G-threshold section of DECISIONS.md. */
-#ifdef D_8009B246_IN_DATA
+#ifdef D_8009B246_IS_SIGNED
+/* func_800283F4 le este halfword com `lh` em cinco sitios; um `(s16)` sobre o
+ * `u16` nao produz o load com sinal, so a declaracao. */
+extern s16 D_8009B246;
+extern u8 D_8009B24B;
+#elif defined(D_8009B246_IN_DATA)
 extern u16 D_8009B246 __attribute__((section(".data")));
 extern u8 D_8009B24B __attribute__((section(".data")));
 #elif defined(D_8009B246_SIZED)

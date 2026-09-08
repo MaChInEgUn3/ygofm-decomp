@@ -8271,3 +8271,26 @@ as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265. Novos em
 variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
 `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h; e
 `func_800393B0` entrou em `SMALL_DATA_NOP_FUNCS` em build.py.
+
+func_800283F4 -- 326/334, OITO instrucoes a menos, 272 diferencas, censo de
+magnitude 28. PRIMEIRO RASCUNHO que compila. Flags padrao (passo 0: gp=30,
+at=4, sem `break`, sem jump table). Maquina de estados de uma animacao de
+entrada/saida: um bloco de SETUP sob `if (func_800282E8() == 0)` que cria dois
+objetos e varre D_800EB0F8 atras de um registro sem o bit 0x8000, contra uma
+cadeia de quatro estados guiada pelos bits de D_8009B248.
+Passo 0: os quatro `lui $at` sao stores nus em D_8009B0C0 (`sb`), D_8009B338
+(`sh`) e D_8009B140 (`sb`); os trinta `%gp_rel` sao D_8009B248, D_8009B24C,
+D_8009B240, D_8009B250, D_8009B254, D_8009B24B e D_8009B246. So D_8009B0C0
+esta na forma nua no candidato.
+Medido: D_8009B246 e lido `lh` em cinco sitios e o `u16` da `lhu` -- tanto um
+`(s16)` em dois sitios quanto a declaracao `s16` guardada
+(`D_8009B246_IS_SIGNED`) movem UM `lhu` para `lh`, censo de 30 para 28 com a
+contagem parada em 272, que e o caso em que so o censo enxerga o progresso;
+faltam quatro. Remover o local para D_800EA0E8 e escrever o simbolo inline nos
+quatro stores nao muda nada (272, censo identico).
+Falta: `lui -8` domina o censo -- o retail materializa oito enderecos a mais,
+o que combina com D_8009B338 e D_8009B140 ainda no braco escalar em vez da
+forma nua, e com o `-0x400` que o retail carrega em $s0 desde o inicio do
+setup. Depois disso, `lh -4`, `bne +2`, `lw +2`, `bltz -2`, `sll -2`.
+Novos em variables.h: D_8009B240, D_8009B24C e D_8009B250 (ponteiros
+gp-relativos que a rotina grava) e o braco `D_8009B246_IS_SIGNED`.
