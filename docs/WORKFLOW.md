@@ -2612,6 +2612,34 @@ on a combination that had been in the table for weeks.
   **same** `$r`; but read it in one direction only — a *separate* temp is always
   cc1psx's own pair, while one register can be either (func_80022618 splits its
   own pair across a delay slot using one register).
+- **A VOLATILE ACCESS IS ORDERED ONLY AGAINST OTHER VOLATILE ACCESSES, so
+  one side is never a measurement of this lever.** func_80040588 sat at three
+  differences for weeks because retail emits `lhu $a2,6($s1)` before
+  `sw $zero,D_8009B424` and we emitted it after; all 24 orderings of the three
+  argument loads and the store had been exhausted, and rightly, because the
+  two accesses are provably disjoint -- a gp-relative scalar against a
+  constant scratchpad address -- so nothing in the source constrains the
+  scheduler. Marking the load alone is 3. Marking the store alone is 3.
+  Marking the OTHER load and the store is 3. Marking **the load that moves and
+  the store** is a MATCH. Every earlier attempt had been one-sided, and each
+  read as "volatile does not help here".
+  The general form is worth more than the instance: **when a lever is a
+  RELATION between two sites, neither end alone is a measurement of it.**
+  Installed as the declaration rather than a cast -- `D_8009B424_IS_VOLATILE`
+  plus `*(volatile u16 *)(q + 6)`, since 0x1F800320 is scratchpad RAM -- and
+  the lvalue-cast spelling is the same MATCH.
+  **And the bound, measured the same hour: this is NOT a general fix for a
+  swapped order.** Eleven two-sided spellings across two other debts move
+  nothing. func_80048F14 (retail stores `sh $zero,5506` before two `sw` and we
+  store it after) is 14 with the halfword and both words volatile, 14 with
+  either word alone, 14 with the words alone, and 14 with the 0x1564 store and
+  its read-backs volatile together. func_800260D0 is 16 with the 0x1A store
+  and the row read volatile, with the second read added, with the store alone,
+  and with the reads alone. The lever works where the reordering is a
+  DEPENDENCE question the scheduler settles by proving disjointness; where the
+  residue is register allocation wearing an order's clothes, volatile is inert.
+
+
 - **`volatile` is also an ordering constraint between stores.** A run of
   stores to unrelated globals that the target keeps in source order and we
   reorder is usually not the scheduler: gcc sinks a non-volatile store past a
