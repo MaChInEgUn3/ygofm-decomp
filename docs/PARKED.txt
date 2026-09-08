@@ -8437,3 +8437,35 @@ identica (307); `b[i]` no laco de carry -3/278; `q = (s32 *)(i * 4 + (s32)a)`,
 `q = a + i` e um local de base `ab` os TRES identicos a `&a[i]` (309), eixo
 errado; um `p2` proprio no braco de entrada e `p2` copiado para `p` tambem
 identicos -- o gcc coalesce a copia (regra 20).
+
+SEXTA RODADA (2026-09-08) -- 328/329 e 268 diferencas, censo de magnitude
+CINCO e so QUATRO opcodes (`addu -2, lui -1, sw +1, lw +1`). Duas alavancas:
+ - a POLARIDADE do wrap do cursor: o retail desvia para FORA na condicao
+   VERDADEIRA (`bne` para o braco `f = (&D_8009B2C0)[...] - 1;`) e cai no
+   wrap. Escrito `if (>=) { wrap; goto fill; } f = ...;` da exatamente isso;
+   escrito `if (<) { f = ...; goto setpos; } wrap;` da a polaridade contraria
+   e troca um bloco inteiro de lugar. Censo 10 -> 8. A forma com `goto lf;`
+   da o mesmo numero;
+ - o CURSOR do laco `fill` e um SEGUNDO nome: o retail guarda a base em `$v1`
+   e o cursor em `$v0` (`addu $v0,$v1,$s0`) e a base sobrevive ao laco. Com um
+   nome so, `r = r + i;` destroi a base e o segundo endereco sai
+   `%lo(D_800EAED8+39)` seguido de `addiu -39`. `r = D_800EAED8; i = 0x27;
+   z = r + i;` com o laco andando em `z` zera os TRES `nop` que faltavam:
+   censo 8 -> 5. A ORDEM importa: a base tem de ser o PRIMEIRO nome (regra
+   31), porque `z = D_800EAED8; r = z + i;` e -2/270 com `lui -4`, e usar `z`
+   tambem no segundo endereco e -2/270. Um nome para a constante 0x20 (com e
+   sem `do { } while (0);`) nao muda nada.
+A CAUSA DO $s3 ESTA MEDIDA e e o expand_block_move: cada copia de struct
+FORCA o endereco do destino num registrador (`addiu $rN,$sp,K`), o CSE
+atravessa o desvio e o braco reusa esse registrador em vez de recomputar, e
+os quatro pseudos ficam vivos a funcao inteira -- um a mais do que cabe nos
+caller-saved, logo $s3 e a moldura de 112. O retail tem SO DOIS (`$t3 =
+sp+0x38` e `$t4 = sp+0x50`, isto e `c` e `d`) e recomputa `sp+0x10` e
+`sp+0x28` dentro dos bracos que os usam, com a copia do ponteiro do halfword
+(`addu $t0,$v0,$zero`) ao lado -- os dois `addu` que faltam.
+SONDA QUE PROVA A CAUSA: trocar a copia de `a` por cinco atribuicoes elemento
+a elemento move o `addiu $v0,$sp,16` para dentro do braco, exatamente onde o
+retail o tem. E `-fno-cse-follow-jumps` tira o $s3 e a moldura volta a 104,
+mas custa cinco instrucoes noutro lugar (+2/285, censo `nop +2, lb +2,
+lbu +1, addu -2, lui -1`), entao nao e a resposta. FALTA a grafia de fonte
+que faca isso so para `a` e `b`.

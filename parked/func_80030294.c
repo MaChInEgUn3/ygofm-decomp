@@ -1,7 +1,7 @@
-/* 327/329 -- DUAS instrucoes a menos -- e 268 diferencas, censo de
- * magnitude 10 (`nop -3, addu -2, sw +1, lw +1, addiu +1, beq +1, bne -1`)
- * (2026-09-08). Veio de -28/325 -> -23/325 -> -3/314 -> -1/307 -> -2/268.
- * Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
+/* 328/329 -- UMA instrucao a menos -- e 268 diferencas, censo de magnitude
+ * CINCO e so QUATRO opcodes (`addu -2, lui -1, sw +1, lw +1`)
+ * (2026-09-08). Veio de -28/325 -> -23/325 -> -3/314 -> -1/307 -> -2/268
+ * -> -1/268. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -86,6 +86,36 @@
  *  - `q = (s32 *)(i * 4 + (s32)a)`, `q = a + i` e um local de base `ab`:
  *    os TRES identicos a `&a[i]` (309) -- eixo errado (regra 7);
  *  - `p2` proprio no braco de entrada, e `p2` copiado para `p`: identicos.
+ *
+ * SEXTA RODADA (2026-09-08) -- de -2/268 para -1/268, censo de 10 para 5:
+ *  - **a polaridade do wrap do cursor**: o retail desvia para FORA na
+ *    condicao VERDADEIRA (`bne` para o braco `f = (&D_8009B2C0)[...] - 1;`)
+ *    e cai no wrap. Escrito `if (>=) { wrap; goto fill; } f = ...;` da
+ *    exatamente isso; escrito `if (<) { f = ...; goto setpos; } wrap;` da a
+ *    polaridade contraria e um bloco inteiro trocado de lugar. Censo de 10
+ *    para 8, `beq +1`/`bne -1` zerados. A forma com `goto lf;` da o mesmo;
+ *  - **o cursor do laco `fill` e um SEGUNDO nome**: o retail guarda a base
+ *    em `$v1` e o cursor em `$v0` (`addu $v0,$v1,$s0`), e a base sobrevive
+ *    ao laco. Com um nome so, `r = r + i;` destroi a base e o segundo
+ *    endereco sai como `%lo(D_800EAED8+39)` seguido de `addiu -39`.
+ *    `r = D_800EAED8; i = 0x27; z = r + i;` com o laco andando em `z` zera
+ *    os TRES `nop` que faltavam: censo de 8 para 5. A ORDEM importa -- a
+ *    base tem de ser o PRIMEIRO nome (regra 31), porque `z = D_800EAED8;
+ *    r = z + i;` (base no segundo nome) e -2/270 com `lui -4`, e usar `z`
+ *    tambem no segundo endereco e -2/270.
+ *
+ * A CAUSA DO $s3 ESTA MEDIDA, e e o expand_block_move: cada copia de
+ * struct FORCA o endereco do destino num registrador (`addiu $rN,$sp,K`), o
+ * CSE atravessa o desvio e o braco reusa esse registrador em vez de
+ * recomputar, e os quatro pseudos ficam vivos a funcao inteira. O retail
+ * tem SO DOIS (`$t3 = sp+0x38` e `$t4 = sp+0x50`, isto e `c` e `d`) e
+ * recomputa `sp+0x10` e `sp+0x28` dentro dos bracos que os usam.
+ * SONDA QUE PROVA: trocar a copia de `a` por cinco atribuicoes elemento a
+ * elemento move o `addiu $v0,$sp,16` para dentro do braco, exatamente onde
+ * o retail o tem. E `-fno-cse-follow-jumps` tira o $s3 e a moldura volta a
+ * 104 -- mas custa cinco instrucoes noutro lugar (+2/285, censo `nop +2,
+ * lb +2, lbu +1, addu -2, lui -1`), entao NAO e a resposta. Falta a grafia
+ * de fonte que faz o mesmo so para `a` e `b`.
  */
 #define D_8009B394_IN_DATA_VOLATILE
 #define D_8009B396_IN_DATA_VOLATILE
@@ -114,6 +144,8 @@ s32 func_80030294(void) {
     s32 *cb;
     u8 *db;
     s32 k;
+    s32 ch;
+    u8 *z;
     u16 *p;
     s32 val;
     s32 mask;
@@ -212,12 +244,13 @@ s32 func_80030294(void) {
         D_8009B2E9 = D_8009B2E9 - 1;
         if ((s8)D_8009B2E9 < 0) {
             D_8009B2DC = D_8009B2DC + 1;
-            if ((s8)D_8009B2DC < (s8)D_8009B2E0) {
-                f = (&D_8009B2C0)[(s8)D_8009B2DC] - 1;
-                goto setpos;
+            if ((s8)D_8009B2DC >= (s8)D_8009B2E0) {
+                D_8009B2DC = D_8009B2E0 - 1;
+                D_8009B2E9 = 0;
+                goto fill;
             }
-            D_8009B2DC = D_8009B2E0 - 1;
-            D_8009B2E9 = 0;
+            f = (&D_8009B2C0)[(s8)D_8009B2DC] - 1;
+            goto setpos;
         }
     } else {
         D_8009B2E9 = D_8009B2E9 + 1;
@@ -235,11 +268,11 @@ s32 func_80030294(void) {
 fill:
     r = D_800EAED8;
     i = 0x27;
-    r = r + i;
+    z = r + i;
     do {
-        *r = 0x20;
+        *z = 0x20;
         i = i - 1;
-        r = r - 1;
+        z = z - 1;
     } while (i >= 0);
     r = &D_800EAED8[(s8)(&D_8009B2B4)[(s8)D_8009B2DC] - (s8)D_8009B2E9];
     r[0] = 0x2A;
