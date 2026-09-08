@@ -30,6 +30,26 @@
  * That second run saturated at 10500 iterations; its other score-10 output
  * sets `best` to 0xFFFF (wrong return value) -- the two constants swapped.
  *
+ * 2026-09-08, ten more spellings, ALL dead, and one of them narrows the
+ * mechanism. Pins first: `do { bestv = -1; } while (0);`, the same on
+ * `best`, and both together are +1/36 -- the constant pin that works in
+ * the D_8009B0F4 family costs an instruction here. Both constants as
+ * plain statements rather than initialisers is 1 with `best` first and 2
+ * with `bestv` first, so the initialiser is not the lever either.
+ * `v <= (u16)bestv` (the untried side of the comparison) is 1 with -1 and
+ * 2 with 0xFFFF; `!(v > (u16)bestv)` is 2.
+ * The narrowing one: with `bestv = 0xFFFF` and the loop's update read as a
+ * SIGNED halfword -- a reaching def that genuinely can be negative and is
+ * NOT provably sixteen-bit -- the mask STILL folds (2). So the entry above
+ * has the mechanism slightly wrong: combine is not reasoning about the
+ * update's range at all. What decides it is the INITIALISER, and `-1` is
+ * the only constant that keeps the mask because it is the only one whose
+ * (u16) cast is not a no-op on its own value. That closes the search this
+ * park has been running: there is no `0xFFFF` spelling that keeps the
+ * mask, because the mask exists only when the constant is NOT 0xFFFF.
+ * The one remaining shape would be two constants that are the same value
+ * to the source and different to gcc, and nothing in C provides one.
+ *
  * ---- older entry, measured on the cursor form (kept for the record) ----
  * 11 differing at 36/36. Needs a -G8 compiler with a -G0 assembler.
  *
