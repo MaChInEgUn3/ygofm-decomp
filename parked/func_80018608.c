@@ -172,7 +172,11 @@
  * position of `tb2`'s pair and the second `mult` inside the first division's
  * latency -- retail issues `mult $t1` five instructions later than we do,
  * with the preheader assignments in between, and no source order tried
- * reaches that.
+ * reaches that. Four INTERLEAVINGS of the preheader assignments between the
+ * two divisions -- the structural reading of the aligned diff, and untried
+ * until now -- are 41, 43, 39 and 33, so the two divisions adjacent at the
+ * top is right and that axis is closed too. The permuter from this base
+ * reached 1578 iterations with base score 1090 and ZERO outputs.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
