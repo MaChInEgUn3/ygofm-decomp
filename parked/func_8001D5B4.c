@@ -46,6 +46,30 @@
  * therefore has THREE copies of the return-1 tail that our jump pass
  * cross-jumps into one; which source shape stops cross-jumping here is
  * not established (an accumulator was +3, see above).
+ *
+ * 2026-09-08, and this LOCATES the -2 instead of calling it structural.
+ * Count the byte stores: the target has FIVE and our build has FOUR. The
+ * source has SIX (`D_8009B160 = -1;` in the entry branch and again after
+ * the call, then 1, 3, 0, 2), so gcc cross-jumps two of ours into one and
+ * retail cross-jumps none -- the -2 is one lost store plus the `j` that
+ * would have reached it, not a missing return-1 block in the abstract.
+ *
+ * And the entry branch's store is LOAD-BEARING even though retail does
+ * not execute one there. Retail's entry path is `j` to the return-1 tail
+ * with a DEAD `addiu $v0,-1` in the slot and no `sb` at all, so the
+ * semantically faithful reading is `if (D_8009B162 == 0) { ... } return
+ * 1;` with five stores. Written that way it is -4, not -3: the entry
+ * branch inverts AND the `addu $a0,$s0,$zero` in the jal's delay slot
+ * becomes a `nop`, because with nothing between the prologue and the call
+ * gcc no longer needs to restore the parameter. Two spellings measured
+ * (the `== 0` nest and an early `!= 0` return), both -4/41. So the
+ * sixth store is what forces the parameter copy retail has, and the
+ * source really did contain a store whose output gcc merges away.
+ *
+ * Full flag sweep through sweep_try.py, 2026-09-08: the installed row is
+ * the best at -2/35, `as -G2` and `as -G4` tie it, and every other row is
+ * 49 or worse. The three jump-optimisation flags the entry above names
+ * were tried on two layouts; the sweep covers the rest.
  */
 #include "common.h"
 
