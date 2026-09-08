@@ -8178,10 +8178,14 @@ proprio, com as duas metades NO MESMO REGISTRADOR, com ou sem atributo de secao,
 entao registrador unico nao e assinatura de forma nua neste caso e o residuo e
 so alocacao (o gcc reaproveita o $v0 morto que o delay slot do `bgez` escreveu,
 o retail usa $a0 nas duas metades); e quatro grafias no mesmo braco (+1/29, 12,
-9, 9). O PERMUTER rodou duas vezes: com -j2 foi MORTO POR MEMORIA depois de uns
-cinco minutos e a unica saida (score proprio 930) e semanticamente errada --
-apaga `D_8009B21C = o;` e guarda `o` -- re-pontuando -8 e 216; com -j1 por 110 s
-nao produziu saida.
+9, 9). Tres ordens novas no bloco do rabo: o store de D_800E9DBC entre os dois stores
+do objeto (11), antes dos dois (+1/48), pinado em `do { } while (0);` (+1/45).
+O PERMUTER rodou TRES vezes e nao deu nada. Com -j2 foi MORTO POR MEMORIA
+depois de uns cinco minutos e a unica saida (score proprio 930 contra a base de
+945) e semanticamente errada -- apaga `D_8009B21C = o;` e guarda `o` --
+re-pontuando -8 e 216. Duas fatias de -j1 por 110 s: a primeira sem saida, a
+segunda 51 iteracoes sem melhora. PARQUEADO: os dois grupos sao empate de
+alocador e o permuter nao os move.
 Varredura de flags (sweep_try, 27 linhas): o melhor e o padrao O2 G8 com 38 na
 base anterior; `-mno-split-addresses` e 166, as G0 233, as G2 167, O1 229 --
 eixo de flags FECHADO.

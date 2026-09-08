@@ -80,11 +80,16 @@
  *  - quatro grafias no mesmo braco: nome proprio para o ponteiro (+1/29),
  *    escrever `b` a partir do simbolo antes de `a` (12), e duas atribuicoes
  *    encadeadas (9 e 9);
- *  - o PERMUTER, duas corridas. Com -j2 rodou uns cinco minutos e foi MORTO
- *    POR MEMORIA (caixa de 3,4 GB); a unica saida que deixou tem score
- *    proprio 930 e e semanticamente ERRADA -- apaga `D_8009B21C = o;` e
- *    guarda `o` no lugar -- e re-pontuada por try_func da -8 e 216. Com -j1
- *    por 110 s nao produziu saida nenhuma.
+ *  - tres ordens novas no bloco do rabo: o store de D_800E9DBC entre os
+ *    dois stores do objeto (11), antes dos dois (+1/48), e pinado em
+ *    `do { } while (0);` (+1/45);
+ *  - o PERMUTER, TRES corridas, NADA. Com -j2 rodou uns cinco minutos e foi
+ *    MORTO POR MEMORIA (caixa de 3,4 GB); a unica saida que deixou tem score
+ *    proprio 930 contra a base de 945 e e semanticamente ERRADA -- apaga
+ *    `D_8009B21C = o;` e guarda `o` no lugar -- re-pontuando -8 e 216 por
+ *    try_func. Duas fatias de -j1 por 110 s depois: a primeira sem saida, a
+ *    segunda 51 iteracoes com a base em 945 e nenhuma melhora. PARQUEADO
+ *    AQUI: os dois grupos sao empate de alocador e o permuter nao os move.
  *
  * DUAS LEITURAS DO LISTING QUE O RASCUNHO DO M2C NAO DAVA (ainda validas):
  *  - **`sllv $a2,$v0,$s0` prova que o deslocamento e uma VARIAVEL.** O
