@@ -8237,11 +8237,28 @@ Oito leituras, na ordem em que foram medidas:
     tambem a leitura do terceiro braco (37), as duas juntas (38), `d` antes de
     `b` nos dois bracos (-1/215) e acumular o resultado inteiro dentro de `b`
     com o store final em `(s32)b` (36, e 37 com `d` primeiro).
-FALTAM 18 diferencas, censo `nop -1, lw +1`, em dois grupos: a cabeca do laco
-(170 a 185), onde a re-leitura do slot custa um `lw` que o retail nao tem e
-falta o `nop` do delay slot do `lbu`, e o bloco de selecao de banco (33 a 43,
-52, 65, 67), onde o retail materializa `d` antes da base e acumula em $v1.
-EIXO DE FLAGS FECHADO por sweep_try (27 linhas): o padrao O2 G8 e o melhor com
-18; as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265. Novos em
+11. O `nop` QUE FALTAVA ERA UMA FALHA DE FERRAMENTA, NAO DE CODIGO. Emitiamos
+    `lbu $v0,0($v0)` colado num `sh $v0,%gp_rel(D_8009B33A)`, e uma varredura
+    das 1799 listagens (128834 instrucoes) acha ZERO pares
+    load-seguido-de-store-do-mesmo-registrador no retail: a sequencia nao e
+    producivel pela toolchain original. E a classe que `SMALL_DATA_NOP_FUNCS`
+    ja existe para -- o maspsx supoe que a instrucao apos um load expande por
+    `$at` e preenche o slot, o que e falso quando o simbolo e small data. A
+    varredura ANTERIOR desta mesma hipotese deu 577 falsos positivos porque a
+    regex pegava o registrador de BASE do store; a correta compara o DESTINO
+    do load com o VALOR do store. Com `func_800393B0` no conjunto, as grafias
+    do incremento rejeitadas enquanto essa falta estava aberta voltam a ser
+    corretas (regra 3): `*a = q + 1;`, `q = q + 1; *a = q;` e `*a = &q[1];`
+    dao TODAS 249/249 com 9, e a re-leitura `*a = *a + 1;` que estava
+    instalada passa a +1 e 85.
+FALTAM 9 diferencas, CENSO VAZIO, todas no bloco de selecao de banco (indices
+33 a 43, 52, 65, 67): o retail materializa `d` antes da base `b`, usa o mesmo
+registrador nas duas metades do par de `b` e acumula a soma em $v1. Medido e
+morto NESTA base: `d` antes de `b` no primeiro braco (14), acumular o resultado
+dentro de `b` com o store final em `(s32)b` (27), as duas juntas (28), `d`
+antes de `b` nos dois bracos (-1/215).
+EIXO DE FLAGS FECHADO por sweep_try na base de 18: o padrao O2 G8 era o melhor;
+as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265. Novos em
 variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
-`D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h.
+`D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h; e
+`func_800393B0` entrou em `SMALL_DATA_NOP_FUNCS` em build.py.
