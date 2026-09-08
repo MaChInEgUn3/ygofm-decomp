@@ -1,6 +1,6 @@
 /* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
- * estrutural depois de ALINHAR os opcodes (2026-09-08): 312 linhas
- * iguais, 16 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 324 linhas
+ * iguais, QUATRO so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 312 iguais / 16 so-registrador / 2 estruturais.
+ * candidato e 324 iguais / 4 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -86,10 +86,11 @@
  * ALAVANCAS 15 e 16 -- DOIS NOMES EMPRESTADOS entre os dois bracos, que
  * NUNCA correm juntos (o de entrada acaba em `goto fill;`). Sao a maior
  * alavanca depois da 10, e a forma do func_8002596C:
- *  15. o `car` do laco de carry chama-se `k` -- o mesmo nome do divisor do
- *      braco de ENTRADA. 34 linhas de registrador -> 22, e fecha o bloco
- *      inteiro das linhas 150-203, que era um swap $t0 <-> $a3 de catorze
- *      linhas de uma vez;
+ *  15. RETRATADA pela alavanca 17, e a leitura errada custou tres bases:
+ *      o `car` do laco de carry emprestando `k` (o divisor do braco de
+ *      ENTRADA) e 34 -> 22, e parecia a resposta. NAO era: o que aquilo
+ *      comprava era um NUMERO DE PSEUDO cedo para o `car`, nao uma
+ *      alocacao partilhada, e desfaze-lo e metade da alavanca 17;
  *  16. o quociente do braco de entrada tem um nome SO DELE, `qq`. Isto e
  *      uma RETRATACAO dentro do mesmo dia: primeiro emprestou `n` (o
  *      limite do laco de carry, 22), depois `step` (18), e um nome FRESCO
@@ -105,7 +106,24 @@
  * `mask` e `sc`): 17, 22, 39, 19, 18, 36, 21 e 16 -- nada abaixo de 16.
  * O eixo dos nomes esta no optimo local.
  *
- * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
+ * ALAVANCA 17 -- O PAR ACOPLADO, e a maior de todas depois da 10.
+ * O gcc 2.8 NAO parte live ranges: um pseudo tem UM registrador
+ * durante toda a sua vida. Logo, quando o retail poe o que escrevemos
+ * como UM nome em DOIS registradores em regioes disjuntas, isso nao e
+ * ruido de alocacao -- sao DOIS NOMES, obrigatoriamente. O listing diz
+ * duas coisas assim:
+ *  - o contador do braco de ENTRADA e $a2 e o dos lacos de EDICAO,
+ *    `fill` e `out` e $s0 (callee-saved, porque o `out` tem chamadas);
+ *  - o `car` e $a3 e o divisor `k` e $v0.
+ * Portanto: `jj` proprio para o contador do braco de entrada, E `cc`
+ * proprio para o `car`. **Cada metade sozinha e 17 e 18 contra 16, isto e
+ * as duas parecem regressoes**; juntas sao 4. Uma varredura de um lever
+ * de cada vez nao pode achar isto por construcao, e as vinte e cinco
+ * medicoes de emprestimo que este cabecalho lista sao todas de metades.
+ *
+ * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao e QUATRO
+ * linhas, e as quatro sao a mesma coisa duas vezes (o destino da soma do
+ * endereco, em cada braco):
  *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
  *    `la $v1,D_8009B2C8` (a base); nos emitimos a base primeiro, que e a
  *    ordem em que as duas atribuicoes contra `r` estao escritas. Seis
@@ -180,6 +198,8 @@ s32 func_80030294(void) {
     u8 f;
     u8 *r;
     s32 sc;
+    s32 jj;
+    s32 cc;
     s32 qq;
 
     ret = 0;
@@ -192,19 +212,19 @@ s32 func_80030294(void) {
     if ((D_8009B2EA & 0x80) == 0) {
         D_8009B2EA = D_8009B2EA | 0x80;
         if ((D_8009B2EA & 0x40) != 0) {
-            i = (s8)t2 - 1;
+            jj = (s8)t2 - 1;
             r = (u8 *)&D_8009B2C8;
             r = r + (s8)D_8009B2DC * 2;
             p = (u16 *)r;
             val = *p;
             *p = 0;
             do {
-                k = a[i];
+                k = a[jj];
                 qq = val / k;
-                *p = *p | (qq << (i * 4));
-                i = i - 1;
+                *p = *p | (qq << (jj * 4));
+                jj = jj - 1;
                 val = val - k * qq;
-            } while (i >= 0);
+            } while (jj >= 0);
         }
         goto fill;
     }
@@ -238,27 +258,27 @@ s32 func_80030294(void) {
             if (i < (s8)t2) {
                 n = (s8)t2;
                 do {
-                    k = val & mask;
+                    cc = val & mask;
                     val = val & ~mask;
-                    k = k + step;
+                    cc = cc + step;
                     if (step >= 0) {
-                        if (k < b[i]) {
+                        if (cc < b[i]) {
                             goto joined;
                         }
                     } else {
-                        if (k >= 0) {
+                        if (cc >= 0) {
                             goto joined;
                         }
                         val = val | ((b[i] - 1) & mask);
                     }
-                    k = 0;
+                    cc = 0;
                     mask = mask * 0x10;
                     step = step * 0x10;
                     i = i + 1;
                 } while (i < n);
             }
         joined:
-            val = val | k;
+            val = val | cc;
         } else {
             val = val + step;
             val = val & (c[(s8)t2] - 1);
