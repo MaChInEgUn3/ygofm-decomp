@@ -8086,7 +8086,7 @@ primeiro. Doze grafias medidas, todas iguais ou piores, e as sete ultimas
 re-medidas sobre a base volatile pela regra 3. O permuter ja rodou aqui
 (1253 iteracoes, zero saidas).
 
-func_800171A8 -- **237/237, comprimento EXATO, 135 diferencas**, censo `sb -1, sw -2, nop +2`.
+func_800171A8 -- **237/237, comprimento EXATO, 123 diferencas**, censo `sb -1, sw -2, nop +2`.
 PRIMEIRO C, escrito num tick a partir do listing e das alavancas do
 func_800577B0, que casou hoje e e a MESMA familia de despachante D_8009B0F4.
 Passo 0: gp=0, at=8 (todos D_8009B0F4), uma jump table -- ramo facil da
@@ -8108,6 +8108,15 @@ Terceira edicao, e a que fechou o comprimento: um nome PROPRIO para o
 D_8009B118 de uma das juncoes. O retail carrega esse valor em $v1 e o da
 outra juncao em $v0 -- registradores diferentes, logo pseudos diferentes,
 logo dois nomes. 146 -> 135 e -1 -> comprimento exato.
+O PERMUTER RENDEU AQUI, primeira vez em tres funcoes: 480 segundos com -j 2,
+doze diretorios, e o melhor LEGITIMO (output-2165-1) envolve o rabo de um
+braco em `do { } while (0);` -- 135 -> 131, e estendido a mao aos tres bracos
+daquela juncao da 123 com comprimento exato. O idioma le como MACRO, que e o
+que estes bracos de despachante sao. O melhor por contagem (117) nao e
+instalavel: duplica um corpo nos dois bracos de um `if` cuja condicao le uma
+variavel NAO INICIALIZADA, e a grafia plausivel equivalente (`do`/`while` em
+torno do mesmo corpo) da 135, ou seja nao reproduz o efeito -- o que o output
+faz e estender a faixa de vida daquela variavel para tras.
 Residuo: toda a alocacao esta deslocada um registrador -- o retail tem `v` em
 $v0, o ponteiro em $v1 e a mascara em $a0, e nos temos o ponteiro em $v0.
 O retail reusa $v1 para o ponteiro e para a constante `w`, que nunca

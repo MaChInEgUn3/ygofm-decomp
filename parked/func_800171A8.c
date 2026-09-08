@@ -1,5 +1,5 @@
-/* 237/237 -- COMPRIMENTO EXATO -- e 135 diferencas, censo `sb -1, sw -1,
- * nop +2` (2026-09-08). -17 -> -6 -> -1 -> 237/237 no mesmo dia.
+/* 237/237 -- COMPRIMENTO EXATO -- e 123 diferencas, censo `sb -1, sw -1,
+ * nop +2` (2026-09-08). -17 -> -6 -> -1 -> 237/237, e 146 -> 135 -> 123.
  * PRIMEIRO C, escrito num tick a partir do listing e das alavancas do
  * func_800577B0, que casou hoje e e a MESMA familia de despachante
  * D_8009B0F4.
@@ -53,6 +53,23 @@
  * pelo `w` com cast) e **+1 com 123 diferencas**: METADE DE UM PAR, porque
  * cai o numero e sobe uma instrucao. Procurar a outra metade antes de
  * descartar.
+ * **O PERMUTER RENDEU AQUI, e e a primeira vez em tres funcoes.** 480
+ * segundos com -j 2 produziram DOZE diretorios; re-pontuados pelo try_func
+ * (o score dele nao e a contagem), o melhor legitimo foi o output-2165-1,
+ * que envolve o rabo de UM braco do m400 em `do { ... } while (0);` --
+ * 135 -> 131. Estendido a mao aos TRES bracos do m400: **123**, com
+ * comprimento exato. O idioma le como MACRO, que e exatamente o que estes
+ * bracos de despachante sao.
+ * O melhor por contagem (output-1725-1, 117 e comprimento exato) NAO e
+ * instalavel: duplica o corpo do case 11 nos dois bracos de um `if (v)`
+ * cujas arms sao identicas, e `v` esta NAO INICIALIZADA ali -- a classe de
+ * rejeicao conhecida. A grafia plausivel equivalente, `do { corpo do case
+ * 11 } while (0);`, e 135, ou seja NAO reproduz o efeito: o que o output
+ * faz e estender a faixa de vida de `v` para tras, e o `do`/`while` nao faz
+ * isso. Fica escrito como mecanismo sem grafia legitima conhecida.
+ * Tambem medido e morto: o mesmo envolvimento no rabo do m3EC (123, neutro)
+ * e nos quatro bracos do m4B8 (131, pior).
+ *
  * MEDIDO E MORTO NUM SEGUNDO TICK, procurando a outra metade do par:
  *  - tirar os pinos do m480 sobre a base z2: -4/222, +2/206, +2/125 (os
  *    dois, o do case 0, o do case 10). Os pinos continuam load-bearing;
@@ -131,28 +148,34 @@ void func_800171A8(u8 *p, s32 mode) {
         func_80081DE8(D_800E9D70, D_8009B118);
         m = 0xFFDCFFFF;
         b = D_8017A1D8;
-        *(s32 *)(p + 0xC) = (s32)b;
-        *(s32 *)(p + 8) = (s32)b;
-        v = D_8009B0F4;
-        do { w = 0x2800; } while (0);
+        do {
+            *(s32 *)(p + 0xC) = (s32)b;
+            *(s32 *)(p + 8) = (s32)b;
+            v = D_8009B0F4;
+            do { w = 0x2800; } while (0);
+        } while (0);
         goto m400;
 
     case 3:
         m = 0xFFDCFFFF;
         b = (u8 *)D_8017C2D8;
-        *(s32 *)(p + 0xC) = (s32)b;
-        *(s32 *)(p + 8) = (s32)b;
-        v = D_8009B0F4;
-        do { w = 0x10000; } while (0);
+        do {
+            *(s32 *)(p + 0xC) = (s32)b;
+            *(s32 *)(p + 8) = (s32)b;
+            v = D_8009B0F4;
+            do { w = 0x10000; } while (0);
+        } while (0);
         goto m400;
 
     case 4:
         m = 0xFFDCFFFF;
         b = D_801799D8;
-        *(s32 *)(p + 0xC) = (s32)b;
-        *(s32 *)(p + 8) = (s32)b;
-        v = D_8009B0F4;
-        do { w = 0x800; } while (0);
+        do {
+            *(s32 *)(p + 0xC) = (s32)b;
+            *(s32 *)(p + 8) = (s32)b;
+            v = D_8009B0F4;
+            do { w = 0x800; } while (0);
+        } while (0);
         goto m400;
 
     case 5:
