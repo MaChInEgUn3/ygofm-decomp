@@ -56,6 +56,33 @@
  * the table-value load below the pointer load instead of letting the scheduler
  * lift it, and reads as the macro boundary the idiom is for. Nothing else in
  * the source changed.
+ *
+ * 2026-09-08: the eleven spellings the entry above records as dead were
+ * all measured on the 8-difference base, so WORKFLOW's standing rule says
+ * to re-measure them here. Done, and the rule DID NOT PAY: fourteen
+ * spellings on the 7 base and not one improves. Declaration order is flat
+ * (k first, k last, t/p swapped, and `k = 0x60100;` written after `t` are
+ * all 7, which is the usual wrong-axis tell); the constant inline instead
+ * of `k` is 10; the two word stores swapped is +1; the do/while moved
+ * above `p` is +1 and below `v = *t;` is 8. Six pins on the table address
+ * -- `do { t = &D_80011434[arg0]; } while (0);` alone, with `p` pinned
+ * too, with `t = D_80011434 + arg0`, an extra pin after `k`, and the pin
+ * without the existing one -- are 8, +1, 8, 8, 8. `v = *t;` before `p` is
+ * +1.
+ * Worth writing down as a bound on the re-measure rule: a spelling
+ * rejected on a broken base has not been measured, but re-measuring is a
+ * lottery ticket, not a lever. It paid on func_80027508 (0 -> 12) and it
+ * pays nothing here.
+ * The residue is one schedule and it is legible: retail forms the whole
+ * table address (lui/addiu, sll, addu) BEFORE the base pointer's load, so
+ * `lw $v0,0($a0)` issues early and the 0x60100's `ori` falls into its
+ * load-delay slot eight instructions after its `lui`. We emit the `addu`
+ * after the base load, so the `ori` has nothing to fill and sits next to
+ * its own `lui`. Source order is already t, p, v -- retail's order -- and
+ * the scheduler is what moves it.
+ * The permuter was rerun from this 7 base (2026-09-08): 851 iterations,
+ * 102 outputs, best dirname score 130 against a base of 240, and all
+ * three 130s re-score at 10 by try_func. Third saturated run.
 */
 #include "common.h"
 
