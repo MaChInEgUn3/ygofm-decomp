@@ -1,6 +1,6 @@
 /* 329/329 -- COMPRIMENTO EXATO, CENSO VAZIO -- e UMA UNICA divergencia
- * estrutural depois de ALINHAR os opcodes (2026-09-08): 289 linhas
- * iguais, 39 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
+ * estrutural depois de ALINHAR os opcodes (2026-09-08): 292 linhas
+ * iguais, 36 so-de-registrador, e DUAS instrucoes trocadas de lugar. Compilador e
  * assembler PADRAO: a linha `as -G2` que este park carregava foi APAGADA
  * de build.py, porque a -G2 o D_8009B2EC (4 bytes) sai do small data e o
  * retail o le `%gp_rel` -- a -G8 essa divergencia some sozinha.
@@ -8,7 +8,7 @@
  * LEIA A CONTAGEM ALINHADA, NAO A DA try_func. O diff da try_func e
  * POSICIONAL e ja INVERTEU a ordenacao aqui uma vez (um candidato de 248
  * era melhor que um de 235). Use `tools_src/adiff.py <saida>`: este
- * candidato e 289 iguais / 39 so-registrador / 2 estruturais.
+ * candidato e 292 iguais / 36 so-registrador / 2 estruturais.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -64,6 +64,17 @@
  * o decremento do giv do cursor; escrito inline, os dois trocam. 4
  * divergencias estruturais -> 2, e 43 linhas de registrador -> 39.
  *
+ * ALAVANCA 12: `val = val + step; val = val & (c[(s8)t2] - 1);` em duas
+ * atribuicoes contra `val`, nao `val = (val + step) & (...)` numa so. O
+ * retail poe o resultado em $a1, que e o registrador do proprio `val`;
+ * numa expressao o gcc usa um temporario. `+=`/`&=` da o mesmo. 39
+ * linhas de registrador -> 37.
+ *
+ * ALAVANCA 13: `mask = *(u16 *)(db - -(e * 2));` -- a subtracao de uma
+ * negacao, que e a receita do WORKFLOW para trocar a ordem dos operandos
+ * de um `addu`. O retail tem `addu $v0,$t4,$v0` (base primeiro) e todas
+ * as formas com `+` dao indice primeiro. 37 -> 36, e compoe com a 12.
+ *
  * O QUE FALTA, com os opcodes ALINHADOS -- UMA troca de posicao:
  *  - T[68]/T[69]: o retail emite `sll $v0,$a0,1` (o indice) e depois
  *    `la $v1,D_8009B2C8` (a base); nos emitimos a base primeiro, que e a
@@ -87,7 +98,17 @@
  * UM SEGUNDO GIV (dois `addiu -4` no laco) -- era um falso zero, duas
  * faltas a cancelarem-se; tres outras ordens do laco de entrada
  * (`e = i * 4` acima do `n = val / k`, o `val -= k * n` antes do store, e
- * um `do { e = i * 4; } while (0);`) sao 4, 4 e 6 estruturais; os quatro flags de escalonamento
+ * um `do { e = i * 4; } while (0);`) sao 4, 4 e 6 estruturais;
+ * CINCO grafias que poem o INDICE como destino da soma do endereco do
+ * braco de entrada (`ix` nomeado em tres posicoes, o cast `(s32)` inline,
+ * e a cadeia `ix = ix + (s32)r; r = (u8 *)ix;`) sao -1 e 3 estruturais ou
+ * identicas -- as que fecham a ordem matam a COPIA emprestada da alavanca
+ * 7, que e o `addu $t0,$v0,$zero`; cinco grafias do mesmo endereco no
+ * braco de EDICAO sao identicas ou piores; e QUATRO separacoes de nome
+ * (`n` do braco de edicao, `i` do braco de edicao, `i` do `fill`, `i` do
+ * `out`) sao 74, 47, 42 e 61 linhas de registrador contra 36 -- os nomes
+ * partilhados entre fases estao CERTOS aqui, que e a regra 16 ao
+ * contrario; os quatro flags de escalonamento
  * (`-fno-schedule-insns`, `-fno-schedule-insns2`, os dois, e
  * `-fno-delayed-branch`) sao 21, 23, 47 e 42 estruturais;
  * `-fno-cse-follow-jumps` poe `&b` no braco mas custa uma releitura de
@@ -179,7 +200,7 @@ s32 func_80030294(void) {
             step = -step;
         }
         if ((D_8009B2EA & 0x40) != 0) {
-            mask = *(u16 *)(db + e * 2);
+            mask = *(u16 *)(db - -(e * 2));
             i = e;
             if (i < (s8)t2) {
                 n = (s8)t2;
@@ -206,7 +227,8 @@ s32 func_80030294(void) {
         joined:
             val = val | car;
         } else {
-            val = (val + step) & (c[(s8)t2] - 1);
+            val = val + step;
+            val = val & (c[(s8)t2] - 1);
         }
         (&D_8009B2C8)[(s8)D_8009B2DC] = val;
     }
