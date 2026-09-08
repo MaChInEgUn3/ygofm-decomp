@@ -62,9 +62,9 @@
  *    instrucoes que o retail nao tem la -- ele computa cada base dentro do
  *    braco que a usa. E dai que vem o $s3 a mais.
  *
- * O QUE FALTA: UMA instrucao e censo de magnitude 29 (`nop -5, lui -5,
- * addiu +5, andi +3, addu -2, lw -2, lhu +2, or +1, beq +1, bgez +1,
- * bne -1, bltz -1`). Os `lui -5` que sobram sao de D_800EAED8: o retail
+ * O QUE FALTA: UMA instrucao e censo de magnitude 27 (`lui -7, addiu +4,
+ * andi +3, nop -3, lhu +2, lw -1, addu -1, bne -1, bltz -1, or +1, beq +1,
+ * bgez +1, sw +1`). Os `lui -5` que sobram sao de D_800EAED8: o retail
  * copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta
  * para la (regra 31), e o nosso bloco `fill` comeca com outra instrucao.
  * Ainda salvamos $s3 alem de $s0-$s2 (moldura 112 contra 104).
