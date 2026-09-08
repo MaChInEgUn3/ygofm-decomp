@@ -8189,3 +8189,29 @@ alocador e o permuter nao os move.
 Varredura de flags (sweep_try, 27 linhas): o melhor e o padrao O2 G8 com 38 na
 base anterior; `-mno-split-addresses` e 166, as G0 233, as G2 167, O1 229 --
 eixo de flags FECHADO.
+
+func_800393B0 -- 249/249, comprimento EXATO, 139 diferencas, censo `lb +1,
+addu +1, sll +1` (tres opcodes). Primeiro dia. Flags padrao (passo 0: gp=13,
+at=0, sem `break`, sem jump table). Passo de uma maquina de estados de
+sequenciador: um braco de INICIALIZACAO sob `if ((flags & 0x4000) == 0)`
+contra um braco de PASSO; tres tabelas de ponteiro de funcao chamadas
+indiretamente (D_80090C50 por D_8009B27C, D_80090E64 por `unk51 & 0x1F`,
+D_80090F18 por `(s16)D_8009B33A - 0xF0`) e um `while (1)` com tres saidas.
+Quatro leituras levaram -7/203 a 0/139:
+ 1. D_8009B33A e VOLATILE -- o retail faz `sh` e logo em seguida `lhu` do
+    mesmo simbolo no MESMO bloco (o gcc encaminharia) e le `lhu` + `sll 16` +
+    `sra 16` onde um u16 normal daria um `lh` so. -7 -> 0 e 203 -> 157.
+ 2. A largura do banco e u16, nao s32: sozinha a troca para s32 e -9, e junto
+    com o volatile -2. As comparacoes do retail sao `slt` com sinal sobre o
+    valor ja estendido pelo `lhu`.
+ 3. A mascara 0xFFFF0000 tem UM NOME ATRIBUIDO EM CADA BRACO -- o retail
+    materializa `lui $a0,0xFFFF` duas vezes, uma no delay slot do `j` do
+    primeiro braco e outra dentro do segundo. Inline na juncao ela sai uma vez
+    so. -2 -> -1 e 201 -> 159.
+ 4. D_8009B27C usa o braco de ARRAY: o retail le o byte com `lui %hi`/`lbu
+    %lo` e o halfword com outro par, e o braco escalar da um `lbu` gp-relativo
+    numa instrucao so. -1 -> 0 e 159 -> 139.
+Novos em variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`); func_800391E4
+ganhou prototipo em functions.h. Ordem dos dois primeiros bracos do banco: `d`
+antes de `b` da 141, `b` antes de `d` da 139 (instalado), embora o retail
+materialize `d` primeiro -- re-medir quando o resto fechar.
