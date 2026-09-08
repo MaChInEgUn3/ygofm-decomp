@@ -8056,35 +8056,39 @@ re-mede 58 com -1 de comprimento e o melhor por try_func e 49, pior que a
 base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
-func_80044838 -- **295/295, comprimento EXATO, 95 diferencas**. Primeiro C
-escrito hoje: -9/279 -> +2/130 -> 295/295 e 95, em DUAS edicoes, as duas
-regras que vieram de func_800577B0 no mesmo dia. Flags padrao (passo 0:
-gp=56, at=0, uma jump table). Maquina de estados de retry: um switch com jump
-table real sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch
-(D_8009B44F)` identicos cujo `case 0` cai no `case 1`; o retail funde a
-aresta `>= 2` dos dois e compartilha o corpo do case 2, por isso ele esta
-escrito por extenso nos dois bracos.
-A PRIMEIRA EDICAO E A REGRA DO CROSS-JUMP LIDA PELO LADO DA ALOCACAO, e vale
-guardar assim: a funcao tem sete `D_8009B450 = K;` que terminam todas em
-[sw $v0,D_8009B450][j tail]. O cross-jump compara as instrucoes antes de um
-salto com as instrucoes antes do ROTULO do salto, e o bloco que precede o
-rotulo do tail e o fim do laco do case 7 -- no retail esse ultimo store e
-`sw $s4,...`, registrador DIFERENTE porque o 2 esta materializado em $s4
-antes do laco, e isso sozinho quebra a cadeia inteira. O retail tem cinco
-stores, nos tinhamos dois. `do { k = 2; } while (0);` no preheader levou de
--9/279 a +2/130; o mesmo nome SEM o pino e byte-identico ao literal.
-A segunda: o bloco `func_80073910(h); D_8009B450 = 0;` escrito DENTRO do `if`
-anterior, depois do `break`. O retail o poe entre o `break` do teste do
-func_80044470 e o resto do case 0, com o `beqz` saltando por cima; um rotulo
-dentro de um bloco alcancado por `goto` de fora e a unica grafia que move o
-bloco. +2/130 -> 295/295 e 95.
-Medido e morto com numeros: cinco nomes para as sentinelas de laco (-1, 4, 2)
-sao byte-identicos ao inline -- o gcc ja as mantem em registrador e nomear
-nao cria o callee-saved que faltava (era o pino que criava); e a posicao do
-`i -= 1;` nos lacos 2 e 3 (antes da chamada, depois do teste, e as duas
-juntas) da 132, 130, 132 contra 130, tres grafias e o mesmo numero.
-Residuo: nos tres lacos que ainda diferem o retail poe o ULTIMO ARGUMENTO da
-chamada no delay slot do `jal` e o `addiu $s0,-1` no do `bne`, e nos fazemos
-o contrario -- o laco 1, que tem dois argumentos e nenhum literal, sai exato;
-o laco 3 tem a aresta de volta invertida; e o `addiu $s4,$zero,2` sai duas
-posicoes cedo no preheader.
+func_80044838 -- **295/295, comprimento EXATO, 89 diferencas, censo
+`addiu +1, nop -1`** (magnitude 2, 18 blocos). Escrita do zero em 2026-09-08:
+-9/279 -> +2/130 -> 295/295 e 95 -> 89. Flags padrao (passo 0: gp=56, at=0,
+uma jump table). Maquina de estados de retry: um switch com jump table real
+sobre `(s8)((u8)D_8009B43E - 1)` e, dentro, dois `switch (D_8009B44F)`
+identicos cujo `case 0` cai no `case 1`.
+TRES EDICOES a trouxeram ate aqui, e as tres sao regras que vieram de
+func_800577B0 no mesmo dia. (1) `do { k = 2; } while (0);` no preheader do
+laco do case 7: a funcao tem sete `D_8009B450 = K;` que terminam todas em
+[sw][j tail], o find_cross_jump compara com o bloco que PRECEDE FISICAMENTE
+o rotulo, e o retail muda o REGISTRADOR do ultimo store dali -- isso sozinho
+quebra a cadeia inteira (retail cinco stores, nos dois). (2) O bloco fora de
+linha do case 7 escrito DENTRO do `if` anterior, depois do `break`.
+(3) **UM PAR ACOPLADO onde cada metade sozinha e uma REGRESSAO**: escrever
+`func_80073910(h); return 0;` nos TRES caminhos em vez de um `rel:`
+compartilhado (+1/65 sozinho -- o retail compartilha so jal/nop/j/addu e
+DUPLICA o `addu $a0,$s1,$zero` em cada predecessor, regra do func_80030998)
+mais o `i -= 1;` do laco 3 movido para antes do `if`/`else` (-1/121
+sozinho). Juntas: 95 -> 89 com comprimento exato.
+Essa terceira e a licao do dia sobre metodo: a metade (ii) tinha sido medida
+um tick antes dentro de um sweep de "tres posicoes do decremento" que deu
+132, 130, 132, e foi corretamente rejeitada ali -- so que a outra falta
+ainda estava aberta. Um candidato de magnitude MENOR com uma instrucao a
+menos e a assinatura de meia alavanca.
+Medido e morto com numeros: a forma do laco 3 (`for`, `while`,
+`do/while(1)`) da 95, 95, 95, identicos -- a polaridade da aresta de volta
+nao vem dali; os tres lacos como `goto` dao -1/135, -4/280, -5/278 (perdem a
+icagem de invariantes); o corpo compartilhado do `case 2` escrito uma vez
+com `goto` da 99 e 166 contra 95 com ele por extenso nos dois; cinco nomes
+para as sentinelas de laco sao byte-identicos ao inline; `k = 2;` sem o pino
+e byte-identico ao literal.
+Residuo: nos lacos 2 e do case 7 o retail poe o ULTIMO ARGUMENTO da chamada
+no delay slot do `jal` e o decremento no do `bne`, e nos fazemos o contrario
+(o laco 1, com dois argumentos e nenhum literal, sai exato); sobra um
+decremento duplicado no laco 3 e falta um `nop`; o `addiu $s4,2` sai duas
+posicoes cedo; e um `beq` do `case 2` vai para um rotulo diferente do tail.
