@@ -475,6 +475,11 @@ SMALL_DATA_NOP_FUNCS = {
     "func_8002D370",
     "func_8002D730",
     "func_80012DB4",
+    # `lbu` of the sequence byte followed by a gp-relative `sh` of it into
+    # D_8009B33A. A scan of all 1799 listings finds ZERO adjacent
+    # load-then-store-of-the-same-register pairs in retail, so the sequence
+    # we emit without this is not something the original toolchain produced.
+    "func_800393B0",
 }
 
 # Functions where an address computation, not a memory op, is split across a

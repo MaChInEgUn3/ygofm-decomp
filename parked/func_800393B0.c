@@ -1,6 +1,6 @@
-/* 249/249 -- COMPRIMENTO EXATO -- e 18 diferencas, censo `nop -1, lw +1`
+/* 249/249 -- COMPRIMENTO EXATO -- e 9 diferencas, CENSO VAZIO
  * (2026-09-08, primeiro dia). Flags PADRAO (passo 0:
- * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 -> +1/92 -> 0/23 -> 0/18
+ * gp=13, at=0, sem `break`, sem jump table). Veio de -7/203 -> 0/139 -> +1/92 -> 0/23 -> 0/18 -> 0/9
  * no mesmo dia.
  *
  * FORMA: passo de uma maquina de estados de sequenciador. Um braco de
@@ -62,17 +62,31 @@
  *     bracos (-1 e 215), e acumular o resultado inteiro dentro de `b` com o
  *     store final em `(s32)b` (36, e 37 com `d` primeiro).
  *
- * O QUE FALTA: 18 diferencas, censo `nop -1, lw +1`, em dois grupos.
- *  - a cabeca do laco (indices 170 a 185): a re-leitura do slot custa um
- *    `lw` que o retail nao tem e falta o `nop` do delay slot do `lbu`; o
- *    resto e so o registrador do endereco ($a0 no retail, $v1 aqui);
- *  - o bloco de selecao de banco (indices 33 a 43, 52, 65 e 67): o retail
- *    materializa `d` antes da base `b` e acumula em $v1, e nenhuma das seis
- *    grafias medidas alcanca isso.
- * EIXO DE FLAGS FECHADO por sweep_try (27 linhas): o padrao O2 G8 e o
- * melhor com 18; as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265.
+ * 11. **O `nop` QUE FALTAVA ERA UMA FALHA DE FERRAMENTA, NAO DE CODIGO.**
+ *     Emitiamos `lbu $v0,0($v0)` colado num `sh $v0,%gp_rel(D_8009B33A)`, e
+ *     uma varredura das 1799 listagens (128834 instrucoes) acha ZERO pares
+ *     load-seguido-de-store-do-mesmo-registrador no retail -- a sequencia
+ *     nao e producivel pela toolchain original. E a classe que
+ *     `SMALL_DATA_NOP_FUNCS` ja existe para: o maspsx supoe que a instrucao
+ *     seguinte a um load expande por `$at` e preenche o slot, o que e falso
+ *     quando o simbolo e small data. Com `func_800393B0` no conjunto, as
+ *     grafias do incremento REJEITADAS enquanto essa falta estava aberta
+ *     voltam a ser corretas (regra 3): `*a = q + 1;`, `q = q + 1; *a = q;`
+ *     e `*a = &q[1];` dao TODAS 249/249 com 9, e a re-leitura
+ *     `*a = *a + 1;` que estava instalada passa a ser +1 e 85.
+ *
+ * O QUE FALTA: 9 diferencas, CENSO VAZIO, todas no bloco de selecao de
+ * banco (indices 33 a 43, 52, 65 e 67). O retail materializa `d`
+ * (0xFFFF3000) ANTES da base `b`, usa o mesmo registrador nas duas metades
+ * do par de `b` e acumula a soma em $v1. MEDIDO E MORTO nesta base: `d`
+ * antes de `b` no primeiro braco (14), acumular o resultado dentro de `b`
+ * com o store final em `(s32)b` (27), as duas juntas (28), e `d` antes de
+ * `b` nos dois bracos (-1 e 215).
+ * EIXO DE FLAGS FECHADO por sweep_try na base de 18: o padrao O2 G8 era o
+ * melhor; as G0 231, as G2 226, `-mno-split-addresses` 252, O1 265.
  * Novos em variables.h: D_80090E64 e D_80090F18 (`ObjFn[]`) e o braco
- * `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h.
+ * `D_8009B27C_IN_DATA`; func_800391E4 ganhou prototipo em functions.h; e
+ * `func_800393B0` entrou em `SMALL_DATA_NOP_FUNCS` em build.py.
  */
 #define D_8009B27C_IN_DATA
 #define D_8009B350_IS_VOLATILE
@@ -178,7 +192,7 @@ top:
     q = *a;
     D_8009B33A = *q;
     w = (s16)D_8009B33A;
-    *a = *a + 1;
+    *a = q + 1;
     if (w >= 0xF0) {
         D_8009B350 = 0;
         t[(s16)D_8009B33A - 0xF0](p);
