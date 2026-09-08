@@ -8527,3 +8527,30 @@ sobrando (`sw +1`, `lw +1`, isto e o $s3); e `parked/alt_func_80030294_sem_cb_db
 quatro faltando (`addu -2`, `lui -1`, `addiu -1`) e ZERO sobrando. Reabrir so
 com uma ideia nova sobre como fazer o gcc recomputar `sp+0x10` e `sp+0x28`
 dentro dos bracos sem perder o CSE dos globais.
+
+NONA RODADA (2026-09-08) -- **329/329, COMPRIMENTO EXATO, CENSO VAZIO**, 244
+diferencas, todas de registrador. Compilador padrao, `as -G2`. Tres alavancas,
+e a primeira e a mais barata que existe:
+ - **`tools_src/sweep_try.py` nunca tinha sido rodado nesta funcao.** Vinte e
+   sete combinacoes em poucos minutos e a melhor e `as -G2`: 267 -> 263 e o
+   comprimento fecha (o `%hi(D_800EAED8)` que o retail copia para o delay
+   slot volta, `lui -1` zerado). `-G1` e +6, `-G4` e -1, `-G0` nao muda.
+   Oito rodadas de leitura de listing antes de rodar a varredura de flags que
+   o proprio WORKFLOW manda rodar ANTES de parquear;
+ - **`db = d;` sozinho** (sem `cb = c;`): censo 4 -> 2. Com os dois o gcc iça
+   uma base de pilha a mais e derrama $s3; sem nenhum falta uma `addiu`;
+ - **as duas copias de registrador sao dois NOMES EMPRESTADOS**, e cada uma
+   apareceu numa varredura de cinco candidatos:
+   * o ponteiro do halfword no braco de entrada: `r = (u8 *)&(&D_8009B2C8)
+     [(s8)D_8009B2DC]; p = (u16 *)r;`, com `r` o ponteiro do buffer do `fill`,
+     morto naquele ponto. `q` da o mesmo, `z` e -1, `db`/`cb` nao mudam nada.
+     Um `p2` PROPRIO nao produz copia nenhuma -- tres medicoes deste eixo, o
+     gcc coalesce sempre (regra 20). O que produz a copia e o nome cuja
+     LIVE RANGE recomeca depois, exatamente o mecanismo do func_8002596C;
+   * o limite do laco de carry: o retail compara contra `$v1` e copia `$v1`
+     para `$t0` NO DELAY SLOT do `beqz`, isto e o guarda e o laco usam nomes
+     diferentes. `if (i < (s8)t2) { n = (s8)t2; ... }` fecha o censo. Um
+     intermediario `m` da o mesmo (244), emprestar `k` ou `step` da 245.
+Falta so alocacao: os temporarios das copias de struct sao $t6-$t9 onde o
+retail usa $t5-$t8, porque ainda icamos uma base de pilha a mais que ele.
+Classe do permuter.

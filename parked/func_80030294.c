@@ -1,7 +1,8 @@
-/* 328/329 -- UMA instrucao a menos -- e 267 diferencas, censo de magnitude
- * CINCO e so QUATRO opcodes (`addu -2, lui -1, sw +1, lw +1`)
+/* 329/329 -- COMPRIMENTO EXATO -- e 244 diferencas, CENSO VAZIO
  * (2026-09-08). Veio de -28/325 -> -23/325 -> -3/314 -> -1/307 -> -2/268
- * -> -1/268. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
+ * -> -1/268 -> -1/267 -> 0/244. Compilador PADRAO, assembler `as -G2`
+ * (linha em build.py). O que sobra e SO alocacao de registrador: nenhum
+ * opcode difere em contagem.
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -10,138 +11,57 @@
  * 0x28 bytes com espacos, poe um `*` na posicao do cursor e chama
  * func_8007EF84 tres vezes.
  *
- * O QUE A LEITURA DO LISTING ESTABELECEU (tudo confirmado no candidato):
- *  - **moldura -0x68**, com locais em 0x10 (20 bytes), 0x28 (16), 0x38 (20)
- *    e 0x50 (8), e BURACOS DE QUATRO BYTES em 0x24 e 0x4C. Os buracos sao o
- *    alinhamento de 8 que o gcc da a um ARRAY local de oito bytes ou mais;
- *  - os tres primeiros sao COPIAS DE STRUCT de D_80010250 (5 palavras),
- *    D_80010264 (4) e D_80010274 (5) -- o padrao do expand_block_move. O
- *    quarto e uma copia com `lwl`/`lwr` e `swl`/`swr` de D_8009AF4C, isto e,
- *    um objeto de ALINHAMENTO 1 (typedef com `u8 b[8]`);
- *  - `break 7` e `break 6` sao uma DIVISAO REAL com divisor VARIAVEL;
- *  - **o retail LE UM REGISTRADOR NAO INICIALIZADO**: em `.L800305BC` faz
- *    `or $a1,$a1,$a3` e, no caminho em que o laco nunca roda, `$a3` nunca
- *    foi escrito naquele braco. A fonte tinha um carry atribuido so dentro
- *    do laco e lido depois;
+ * LEITURAS DO LISTING, todas confirmadas:
+ *  - moldura -0x68, locais em 0x10 (20), 0x28 (16), 0x38 (20) e 0x50 (8),
+ *    com BURACOS DE QUATRO BYTES em 0x24 e 0x4C -- o alinhamento de oito
+ *    que o gcc da a um array local de oito bytes ou mais;
+ *  - as tres primeiras copias sao expand_block_move (3+3 / 2+2) e a quarta
+ *    e `lwl`/`lwr` + `swl`/`swr`, isto e um objeto de ALINHAMENTO 1;
+ *  - `break 7`/`break 6` sao divisao REAL com divisor VARIAVEL;
+ *  - o retail LE UM REGISTRADOR NAO INICIALIZADO em `.L800305BC`
+ *    (`or $a1,$a1,$a3` com `$a3` nunca escrito naquele caminho): o carry e
+ *    atribuido so dentro do laco e lido depois;
  *  - `func_8007EF84` e da familia do sprintf e nao leva prototipo.
  *
- * ALAVANCAS INSTALADAS, COM NUMEROS:
- *  - os SEIS halfwords de flags (D_8009B394, 396, 398, 39A, 3A4, 3A6) na
- *    FORMA NUA (`_IN_DATA`) valem cinco instrucoes; **e os mesmos seis
- *    tambem VOLATILE valem VINTE** (-23/325 -> -3/314). Sao as duas metades
- *    de uma alavanca so e nenhuma sozinha chega la;
- *  - **O BLOCO `fill` TEM QUE COMECAR PELO ENDERECO DO BUFFER, e isso vale
- *    SETE `lui`** (censo `lui -7` -> 0). O retail copia o `lui %hi` da
- *    primeira instrucao do bloco `fill` para o delay slot de cada um dos
- *    sete desvios que saltam para la, e desvia para o rotulo+4 (regra 31).
- *    Enquanto o endereco estava num local atribuido no TOPO da funcao, o
- *    bloco comecava por `addiu $s0,$zero,39` e nao havia nada para copiar.
- *    **ISTO RETRATA a linha "SETE grafias, todas 314, o `lui` NAO vem da
- *    forma do bloco" que estava aqui**: as sete grafias foram medidas com o
- *    local do topo ainda no lugar, isto e, com outra falta aberta (regra 3).
- *    A grafia que ganha e `r = D_800EAED8; i = 0x27; r = r + i;`; um SEGUNDO
- *    nome para a base (`z = D_800EAED8; r = z + i;`) e -5/310 e a forma
- *    indexada `r[i] = 0x20;` e -6/310;
- *  - `val` E `mask` declarados `s32` em vez de `u16`: censo de 19 para 10,
- *    `andi +3`, `lhu +2`, `lw -2` e `or +1` todos zerados. Um sozinho nao
- *    chega (`val` da 12, `mask` da 18) -- as duas metades sao a mesma
- *    alavanca. **Isto so pode ser medido depois do bloco `fill`**: na base
- *    de -1/307 os dois juntos eram -4/323, "muito pior" (regra 3 de novo);
- *  - **a polaridade do teste de sinal no laco de carry**: escrito
- *    `if (step >= 0) { if (car < *q) goto joined; } else { ... }` da o
- *    `bltz` do retail; escrito `if (step < 0) { ... } else if (...)` da
- *    `bgez` e desloca o bloco inteiro. Censo de 10 para 7, +1 instrucao.
- *    A forma com `goto neg;`/`goto zero;` da exatamente o mesmo;
- *  - **`cb = c;` e `db = d;` como ponteiros de base**: o retail carrega
- *    `addiu $t3,$sp,0x38` e `addiu $t4,$sp,0x50` (as bases de `c` e `d`)
- *    do topo da funcao ate o braco de EDICAO, e computa as bases de `a` e
- *    `b` DENTRO do braco que as usa (`addu $a3,$v0,$v1` com o indice
- *    primeiro). Sem os dois locais o gcc faz o inverso: iça `a` e `b` e
- *    computa `c` no delay slot. Com eles, -5/309 -> -2/268. A posicao da
- *    atribuicao NAO importa (topo, cabeca do braco, cabeca do sub-braco:
- *    identicos, regra 7), e a ordem `db`/`cb` tambem nao.
+ * AS ALAVANCAS, EM ORDEM, COM NUMEROS:
+ *  1. os SEIS halfwords de flags na forma nua (`_IN_DATA`) valem cinco
+ *     instrucoes, e os mesmos seis TAMBEM VOLATILE valem vinte;
+ *  2. o bloco `fill` tem de COMECAR pelo endereco do buffer: vale SETE
+ *     `lui`, porque o retail copia esse `lui` para o delay slot de cada um
+ *     dos sete desvios que saltam para la (regra 31);
+ *  3. `val` e `mask` como `s32` (nao `u16`): censo 19 -> 10;
+ *  4. a polaridade do wrap do cursor e a do teste de sinal do laco de carry;
+ *  5. o CURSOR do `fill` e um SEGUNDO nome, e a BASE vem primeiro;
+ *  6. **`as -G2`**: a unica linha de assembler que serve. O `-G1` e +6 e o
+ *     `-G4` e -1; a -G2 o `%hi(D_800EAED8)` do delay slot volta e o censo
+ *     perde o `lui -1`. Achado pelo `sweep_try.py`, que nunca tinha sido
+ *     rodado nesta funcao;
+ *  7. **`db = d;`** como ponteiro de base -- e SO ele. Com `cb = c;` junto,
+ *     o gcc iça uma base de pilha a mais e derrama $s3 (+4 e +2 `sw`/`lw`);
+ *     sem nenhum dos dois falta uma `addiu` (-1). Censo 4 -> 2;
+ *  8. **as DUAS copias de registrador que faltavam, cada uma um NOME
+ *     EMPRESTADO** (regra 16, a forma do func_8002596C):
+ *     - o ponteiro do halfword no braco de entrada: `r = (u8 *)&(&D_8009B2C8)
+ *       [(s8)D_8009B2DC]; p = (u16 *)r;`, onde `r` e o ponteiro do buffer do
+ *       `fill`, morto naquele ponto. Emprestar `q` da o mesmo; `z` e -1 e um
+ *       `nop`, `db` e `cb` nao mudam nada. Um `p2` PROPRIO nao produz copia
+ *       nenhuma (tres medicoes, o gcc coalesce);
+ *     - o limite do laco de carry: o retail compara contra `$v1` e COPIA
+ *       `$v1` para `$t0` no delay slot do `beqz`, isto e o guarda e o laco
+ *       usam nomes diferentes. `if (i < (s8)t2) { n = (s8)t2; ... }` fecha o
+ *       censo. Um `m` intermediario da o mesmo (244); emprestar `k` ou
+ *       `step` e 245.
  *
- * O QUE FALTA -- DUAS instrucoes, censo de magnitude 10:
- *  - `nop -3`: tres delay slots que o retail deixa vazios e nos enchemos;
- *  - `addu -2`: o retail COPIA o ponteiro do halfword (`addu $t0,$v0,$zero`)
- *    antes de o usar em `lhu`/`sh`, e computa `addu $v1,$t1,$v0` para a base
- *    de `b` dentro do braco. Um segundo nome para o ponteiro NAO produz a
- *    copia (duas grafias, `p2` proprio e `p = p2;`, ambas identicas -- o gcc
- *    coalesce, regra 20);
- *  - `sw +1`/`lw +1`: salvamos $s3 alem de $s0-$s2 (moldura 112 contra 104).
- *    O $s3 e usado como TEMPORARIO das copias de struct, onde o retail usa
- *    $t5-$t8 -- isto e, temos um pseudo de vida longa a mais do que ele;
- *  - `addiu +1`: uma base de pilha computada duas vezes;
- *  - `beq +1`/`bne -1`: uma polaridade no rabo, sem efeito no comprimento.
+ * O QUE FALTA: 244 diferencas de REGISTRADOR, com todos os opcodes casando.
+ * O padrao e um deslocamento de um: os temporarios das copias de struct sao
+ * $t6-$t9 onde o retail usa $t5-$t8, porque ainda içamos uma base de pilha a
+ * mais do que ele (o CSE atravessa o desvio e reusa o pseudo que o
+ * expand_block_move forcou). Classe do permuter.
  *
- * IRMAO MAIS LIMPO, GUARDADO: sem `cb`/`db` o candidato e 324/329 e 309,
- * com censo de magnitude SETE e so QUATRO opcodes (`nop -3, addu -2,
- * beq +1, bne -1`) -- nenhum `sw`/`lw`/`addiu` a mais, isto e, sem o $s3
- * extra. As cinco instrucoes que faltam la sao exatamente os tres `nop` e
- * os dois `addu`. Vale voltar a ele se o $s3 nao ceder.
- *
- * MEDIDO E MORTO (com NUMEROS, sobre a base de -1/307 ou -5/309):
- *  - forma indexada `a[i]` no laco de entrada: identico (307);
- *  - forma indexada `b[i]` no laco de carry: -3/278, censo igual;
- *  - `q = (s32 *)(i * 4 + (s32)a)`, `q = a + i` e um local de base `ab`:
- *    os TRES identicos a `&a[i]` (309) -- eixo errado (regra 7);
- *  - `p2` proprio no braco de entrada, e `p2` copiado para `p`: identicos.
- *
- * SEXTA RODADA (2026-09-08) -- de -2/268 para -1/268, censo de 10 para 5:
- *  - **a polaridade do wrap do cursor**: o retail desvia para FORA na
- *    condicao VERDADEIRA (`bne` para o braco `f = (&D_8009B2C0)[...] - 1;`)
- *    e cai no wrap. Escrito `if (>=) { wrap; goto fill; } f = ...;` da
- *    exatamente isso; escrito `if (<) { f = ...; goto setpos; } wrap;` da a
- *    polaridade contraria e um bloco inteiro trocado de lugar. Censo de 10
- *    para 8, `beq +1`/`bne -1` zerados. A forma com `goto lf;` da o mesmo;
- *  - **o cursor do laco `fill` e um SEGUNDO nome**: o retail guarda a base
- *    em `$v1` e o cursor em `$v0` (`addu $v0,$v1,$s0`), e a base sobrevive
- *    ao laco. Com um nome so, `r = r + i;` destroi a base e o segundo
- *    endereco sai como `%lo(D_800EAED8+39)` seguido de `addiu -39`.
- *    `r = D_800EAED8; i = 0x27; z = r + i;` com o laco andando em `z` zera
- *    os TRES `nop` que faltavam: censo de 8 para 5. A ORDEM importa -- a
- *    base tem de ser o PRIMEIRO nome (regra 31), porque `z = D_800EAED8;
- *    r = z + i;` (base no segundo nome) e -2/270 com `lui -4`, e usar `z`
- *    tambem no segundo endereco e -2/270.
- *
- * A CAUSA DO $s3 ESTA MEDIDA, e e o expand_block_move: cada copia de
- * struct FORCA o endereco do destino num registrador (`addiu $rN,$sp,K`), o
- * CSE atravessa o desvio e o braco reusa esse registrador em vez de
- * recomputar, e os quatro pseudos ficam vivos a funcao inteira. O retail
- * tem SO DOIS (`$t3 = sp+0x38` e `$t4 = sp+0x50`, isto e `c` e `d`) e
- * recomputa `sp+0x10` e `sp+0x28` dentro dos bracos que os usam.
- * SONDA QUE PROVA: trocar a copia de `a` por cinco atribuicoes elemento a
- * elemento move o `addiu $v0,$sp,16` para dentro do braco, exatamente onde
- * o retail o tem. E `-fno-cse-follow-jumps` tira o $s3 e a moldura volta a
- * 104 -- mas custa cinco instrucoes noutro lugar (+2/285, censo `nop +2,
- * lb +2, lbu +1, addu -2, lui -1`), entao NAO e a resposta. Falta a grafia
- * de fonte que faz o mesmo so para `a` e `b`.
- *
- * SETIMA RODADA (2026-09-08) -- o eixo do CSE esta FECHADO por medicao, e o
- * $s3 nao cede por grafia de fonte. Tudo abaixo com o candidato a -1/268:
- *  - `&a[1] + (i - 1)` e `&b[1] + (e - 1)` (base sp+20/sp+44, um valor que o
- *    CSE nao tem na tabela): IDENTICO, 268. O gcc reassocia de volta;
- *  - `a` e `b` declarados como os PROPRIOS structs (`Blk14 av; Blk10 bv;`)
- *    com `av = *(Blk14 *)D_80010250;` e `&av.w[i]`: IDENTICO, 268;
- *  - a ORDEM das quatro copias trocada para c, d, a, b: 267, censo igual.
- *    E a unica que move alguma coisa, e move UMA diferenca. INSTALADA;
- *  - permuter, 50 iteracoes a `-j 1`: um so output (6545 contra 6575, isto
- *    e ruido) e ele CLOBBERA `n`, que e o limite do laco -- `n = car < *q;
- *    if (n)`. As duas metades decompostas e escritas de forma legitima
- *    (`z = i + r;` e um `lt` novo para a comparacao) sao 267, ou seja
- *    valem ZERO.
- * SEM `cb`/`db` o candidato e 325/329 e 316 com censo de magnitude QUATRO e
- * TRES opcodes (`addu -2, lui -1, addiu -1`) e NENHUMA instrucao a mais --
- * isto e, quatro faltando e zero sobrando, sem o $s3. Com eles e -1/267 mas
- * com `sw +1`/`lw +1` de lixo. Os dois sao a mesma funcao vista de dois
- * lados: -1 = tres faltando mais duas sobrando. Guardado em
- * scratchpad/30294/z4.c.
- * O `lui -1` esta localizado: o retail poe `lui %hi(D_800EAED8)` no delay
- * slot do `beq` que salta para `fill` quando `(D_8009B2EA & 0x40) == 0`, e
- * nos enchemos esse slot com `sll $v1,$a0,1` (o indice de `p`), porque no
- * nosso codigo o destino desse shift esta livre e no retail e `$v0`, que a
- * extensao de sinal de `t2` ja esta usando. E uma consequencia da
- * alocacao, nao da ordem da fonte.
+ * MEDIDO E MORTO, com numeros: `-fno-cse-follow-jumps` poe as bases dentro
+ * dos bracos mas paga com recargas (+2/225 aqui, censo de magnitude 8);
+ * `&a[1] + (i - 1)`, `a`/`b` como os proprios structs, e todas as ordens do
+ * braco de entrada: identicos.
  */
 #define D_8009B394_IN_DATA_VOLATILE
 #define D_8009B396_IN_DATA_VOLATILE
@@ -180,18 +100,18 @@ s32 func_80030294(void) {
     u8 *r;
 
     ret = 0;
-    *(Blk14 *)c = *(Blk14 *)D_80010274;
-    *(Blk8 *)d = *(Blk8 *)D_8009AF4C;
     *(Blk14 *)a = *(Blk14 *)D_80010250;
     *(Blk10 *)b = *(Blk10 *)D_80010264;
-    cb = c;
+    *(Blk14 *)c = *(Blk14 *)D_80010274;
+    *(Blk8 *)d = *(Blk8 *)D_8009AF4C;
     db = d;
     t2 = (&D_8009B2C0)[(s8)D_8009B2DC];
     if ((D_8009B2EA & 0x80) == 0) {
         D_8009B2EA = D_8009B2EA | 0x80;
         if ((D_8009B2EA & 0x40) != 0) {
             i = (s8)t2 - 1;
-            p = &(&D_8009B2C8)[(s8)D_8009B2DC];
+            r = (u8 *)&(&D_8009B2C8)[(s8)D_8009B2DC];
+            p = (u16 *)r;
             val = *p;
             q = &a[i];
             *p = 0;
@@ -225,15 +145,15 @@ s32 func_80030294(void) {
         p = &(&D_8009B2C8)[(s8)D_8009B2DC];
         e = (s8)D_8009B2E9;
         val = *p;
-        step = cb[e];
+        step = c[e];
         if (((D_8009B394 | D_8009B396) & 0x4000) != 0) {
             step = -step;
         }
         if ((D_8009B2EA & 0x40) != 0) {
             mask = *(u16 *)(db + e * 2);
             i = e;
-            n = (s8)t2;
-            if (i < n) {
+            if (i < (s8)t2) {
+                n = (s8)t2;
                 q = &b[e];
                 do {
                     car = val & mask;
@@ -259,7 +179,7 @@ s32 func_80030294(void) {
         joined:
             val = val | car;
         } else {
-            val = (val + step) & (cb[(s8)t2] - 1);
+            val = (val + step) & (c[(s8)t2] - 1);
         }
         (&D_8009B2C8)[(s8)D_8009B2DC] = val;
     }
