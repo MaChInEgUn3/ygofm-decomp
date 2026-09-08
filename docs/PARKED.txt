@@ -2935,9 +2935,18 @@ func_800478EC_WAS -- 16 differences, 95/95, and the real edits are about eight
     round. Measured and not it: `acc |= mask` in all three positions in that
     block and a named local for the call's argument.
 
-func_80053248 -- 45 differences at 100/100, and the open half is register
-    allocation around a parameter-homing shape I do not have a clean
-    explanation for. Six parameters; retail homes the first four into the
+func_80053248 -- 100/100 and 46 differences (2026-09-08; 45 before, and the
+    46 is the BETTER candidate). THE FUNCTION IS VARIADIC:
+    `void func_80053248(s32 a, ...)`, with `b` read always and `c`..`f` only
+    inside the `a < 2` arm. Retail's prologue is a varargs register save area
+    and the six-fixed-parameter spelling reads arguments five and six from
+    16($sp)/20($sp), which retail never touches. The old entry's
+    "parameter-homing shape I do not have a clean explanation for" was that.
+    The count rose and the CENSUS is the arbiter: six parameters censuses
+    `lw +3, sw -3` and the variadic one censuses EMPTY, with the whole
+    prologue instruction-for-instruction right where all five of its
+    instructions were wrong before. Lever taken from krystalgamer's one-line
+    description of his matched copy. Residue is allocation. See the header.
     incoming argument area and re-reads them, which costs about seventeen
     instructions that no plain-parameter spelling produces (85 built against
     100). Declaring `a` and `b` `volatile` reproduces the homing and the
