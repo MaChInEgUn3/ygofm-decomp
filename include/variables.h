@@ -1664,7 +1664,11 @@ extern volatile u16 D_8009B394;
 #else
 extern u16 D_8009B394;
 #endif
-#ifdef D_8009B396_IN_DATA
+#ifdef D_8009B396_IN_DATA_VOLATILE
+/* Fora do small data E volatile: func_80030294 le este halfword em varios
+ * `if` seguidos e o retail nao faz CSE de nenhuma das leituras. */
+extern volatile u16 D_8009B396 __attribute__((section(".data")));
+#elif defined(D_8009B396_IN_DATA)
 /* Fora do small data: func_80030294 le este halfword oito vezes e o retail
  * materializa um `lui %hi` para cada uma, sem CSE. */
 extern u16 D_8009B396 __attribute__((section(".data")));
@@ -1674,7 +1678,11 @@ extern volatile u16 D_8009B396;
 #else
 extern u16 D_8009B396;
 #endif
-#ifdef D_8009B39A_IN_DATA
+#ifdef D_8009B39A_IN_DATA_VOLATILE
+/* Fora do small data E volatile: func_80030294 le este halfword em varios
+ * `if` seguidos e o retail nao faz CSE de nenhuma das leituras. */
+extern volatile u16 D_8009B39A __attribute__((section(".data")));
+#elif defined(D_8009B39A_IN_DATA)
 extern u16 D_8009B39A __attribute__((section(".data")));
 #elif defined(D_8009B39A_IS_VOLATILE)
 extern volatile u16 D_8009B39A;
@@ -1708,7 +1716,11 @@ extern u16 D_8009B3A4[];
 #else
 extern u16 D_8009B3A4;
 #endif
-#ifdef D_8009B3A6_IN_DATA
+#ifdef D_8009B3A6_IN_DATA_VOLATILE
+/* Fora do small data E volatile: func_80030294 le este halfword em varios
+ * `if` seguidos e o retail nao faz CSE de nenhuma das leituras. */
+extern volatile u16 D_8009B3A6 __attribute__((section(".data")));
+#elif defined(D_8009B3A6_IN_DATA)
 /* Fora do small data: func_80030294 le este halfword oito vezes e o retail
  * materializa um `lui %hi` para cada uma, sem CSE. */
 extern u16 D_8009B3A6 __attribute__((section(".data")));

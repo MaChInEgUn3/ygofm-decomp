@@ -8327,9 +8327,8 @@ grafias que QUEBRAM a fusao alongam todas -- polaridade invertida com goto no
 nao-zero (+5/89), um nome para o OR (+2/78) e a cadeia testando `!= 0xE`
 primeiro (+1/86, censo de magnitude 7, um `andi` a menos que a base).
 
-func_80030294 -- 306/329, VINTE E TRES instrucoes a menos, 325 diferencas,
-censo de magnitude 45 dominado por `lui -14` e `nop -9`. PRIMEIRO C que
-compila. Flags padrao (passo 0: gp=34, at=0, sem jump table, sem GTE). Editor
+func_80030294 -- 326/329, TRES instrucoes a menos, 314 diferencas, censo
+de magnitude 29. Veio de -23/325 no primeiro C que compilou. Flags padrao (passo 0: gp=34, at=0, sem jump table, sem GTE). Editor
 de um valor hexadecimal: um braco de ENTRADA que decompoe o valor em digitos
 por divisoes sucessivas, um braco de EDICAO guiado por D_8009B394/396 e
 D_8009B398/39A, e um rabo que preenche um buffer de 0x28 bytes com espacos,
@@ -8361,3 +8360,17 @@ a mais usado como temp do block move, e os `lui -14` que sobram.
 Novos em variables.h: D_80010250, D_80010264, D_80010274, D_8009AF4C,
 D_8009AF58, D_800EAED8 e os bracos `D_8009B396_IN_DATA`, `D_8009B3A6_IN_DATA`
 e `D_800EAED8_IN_DATA`.
+
+E os MESMOS SEIS tambem VOLATILE (`_IN_DATA_VOLATILE`) valem VINTE: -23/325 ->
+-3/314, censo de 45 para 29. A forma nua separa os `lui` mas nao impede o gcc
+de fazer CSE do VALOR carregado entre dois `if` seguidos, e o retail re-le o
+halfword em cada teste -- sao as duas metades de uma alavanca so e nenhuma
+sozinha chega la. Tres bracos novos (B396, B39A, B3A6 em `_IN_DATA_VOLATILE`);
+B394, B398 e B3A4 ja tinham o seu.
+Mais dois negativos: um ponteiro de base nomeado como PRIMEIRA coisa do bloco
+`fill` nao muda nada (-3/314) e usa-lo tambem no segundo endereco e pior
+(-6/313).
+Faltam TRES instrucoes. Os `lui -5` que sobram sao de D_800EAED8: o retail
+copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta para
+la (regra 31) e o nosso bloco comeca com outra instrucao. E ainda salvamos $s3
+alem de $s0-$s2.

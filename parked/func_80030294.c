@@ -1,6 +1,5 @@
-/* 306/329 -- VINTE E TRES instrucoes a menos -- e 325 diferencas, censo de
- * magnitude 45 dominado por `lui -14` e `nop -9` (2026-09-08, PRIMEIRO C que
- * compila). Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
+/* 326/329 -- TRES instrucoes a menos -- e 314 diferencas, censo de magnitude
+ * 29 (2026-09-08). Veio de -23/325 no primeiro C que compilou. Flags PADRAO (passo 0: gp=34, at=0, sem jump table, sem GTE).
  *
  * FORMA: editor de um valor hexadecimal na tela. Um braco de ENTRADA
  * (primeiro `D_8009B2EA & 0x80`) que decompoe o valor em digitos por
@@ -32,30 +31,38 @@
  *
  * MEDIDO:
  *  - os SEIS halfwords de flags (D_8009B394, 396, 398, 39A, 3A4, 3A6) na
- *    FORMA NUA (`_IN_DATA`): o retail materializa um `lui %hi` para cada uma
- *    das 28 referencias, sem CSE. -28/325 -> -23/325, e o `lui` do censo de
- *    -19 para -14. Dois bracos novos em variables.h (B396 e B3A6);
- *  - D_800EAED8 tambem na forma nua, com tipo COMPLETO `[0x28]`: NAO muda
- *    nada (-23/325, censo identico). O retail materializa `%hi(D_800EAED8)`
- *    treze vezes, mas os usos tomam o ENDERECO COMO VALOR, e para isso o
- *    cc1psx emite o par proprio dele com ou sem o atributo de secao -- e o
- *    gcc faz CSE desse par. E a regra 45 mordendo do outro lado.
+ *    FORMA NUA (`_IN_DATA`) valem cinco instrucoes: o retail materializa um
+ *    `lui %hi` para cada uma das 28 referencias, sem CSE. -28/325 -> -23/325;
+ *  - **e os mesmos seis tambem VOLATILE (`_IN_DATA_VOLATILE`) valem VINTE**:
+ *    -23/325 -> -3/314, censo de magnitude 45 para 29. A forma nua separa os
+ *    `lui`, mas nao impede o gcc de fazer CSE do VALOR carregado entre dois
+ *    `if` seguidos -- o retail re-le o halfword em cada teste. Sao as duas
+ *    metades de uma alavanca so, e nenhuma sozinha chega la. Tres bracos
+ *    novos (`D_8009B396_IN_DATA_VOLATILE`, `D_8009B39A_IN_DATA_VOLATILE`,
+ *    `D_8009B3A6_IN_DATA_VOLATILE`); B394, B398 e B3A4 ja tinham o seu;
+ *  - D_800EAED8 na forma nua com tipo COMPLETO `[0x28]`: NAO muda nada. O
+ *    retail materializa `%hi(D_800EAED8)` treze vezes, mas os usos tomam o
+ *    ENDERECO COMO VALOR, e para isso o cc1psx emite o par proprio dele com
+ *    ou sem o atributo de secao, e o gcc faz CSE desse par (regra 45 do
+ *    outro lado). Um ponteiro de base nomeado como PRIMEIRA coisa do bloco
+ *    `fill` tambem nao muda nada (-3/314), e usa-lo tambem no segundo
+ *    endereco e pior (-6/313).
  *
- * O QUE FALTA: 23 instrucoes e o censo `lui -14, nop -9, addiu +5, andi +3,
- * lhu -4, addu -2, or -2, lw -1, bne -1, bltz -1, bgez +1, sw +1, beq +1`.
- * O prologo ja bate no bloco de copias, mas salvamos $s3 alem de $s0-$s2 e a
- * moldura vai a 112 em vez de 104: UM callee-saved a mais, usado como temp
- * do block move. Os `lui -14` que sobram sao os treze de D_800EAED8 mais um.
+ * O QUE FALTA: TRES instrucoes e censo de magnitude 29 (`nop -5, lui -5,
+ * addiu +5, andi +3, addu -2, lw -2, lhu +2, or +1, beq +1, bgez +1,
+ * bne -1, bltz -1`). Os `lui -5` que sobram sao de D_800EAED8: o retail
+ * copia o `lui` do bloco `fill` para o delay slot de cada desvio que salta
+ * para la (regra 31), e o nosso bloco `fill` comeca com outra instrucao.
+ * Ainda salvamos $s3 alem de $s0-$s2 (moldura 112 contra 104).
  * Seis declaracoes novas em variables.h (D_80010250, D_80010264, D_80010274,
- * D_8009AF4C, D_8009AF58, D_800EAED8) e tres bracos (`D_8009B396_IN_DATA`,
- * `D_8009B3A6_IN_DATA`, `D_800EAED8_IN_DATA`).
+ * D_8009AF4C, D_8009AF58, D_800EAED8) e seis bracos novos.
  */
-#define D_8009B394_IN_DATA
-#define D_8009B396_IN_DATA
-#define D_8009B398_IN_DATA
-#define D_8009B39A_IN_DATA
-#define D_8009B3A4_IN_DATA
-#define D_8009B3A6_IN_DATA
+#define D_8009B394_IN_DATA_VOLATILE
+#define D_8009B396_IN_DATA_VOLATILE
+#define D_8009B398_IN_DATA_VOLATILE
+#define D_8009B39A_IN_DATA_VOLATILE
+#define D_8009B3A4_IN_DATA_VOLATILE
+#define D_8009B3A6_IN_DATA_VOLATILE
 #include "common.h"
 
 typedef struct { s32 w[5]; } Blk14;
