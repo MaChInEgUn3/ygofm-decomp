@@ -1,4 +1,4 @@
-/* -1 at 224/225 (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
+/* +1 at 226/225, 134 differing (2026-09-08). THE FIRST REAL C THIS FUNCTION HAS EVER HAD.
  * src/func_80018608.c is an ASSEMBLY-DEBT transcription whose instructions
  * are written as `.word`, and `git log --all -- parked/func_80018608.c` is
  * empty, so nothing was thrown away here -- it had simply never been
@@ -34,8 +34,30 @@
  * `[0]` store going through `%lo(D_800F2848)($s2)` and the others through
  * `N($s1)`. No source spelling tried produces that pair, and the local
  * overshoots by three where the gap is one.
- * That is the open question: what makes gcc keep BOTH halves of one
- * address in callee-saved registers across a function.
+ * -1/218 -> +1/134, and the lever is a DEAD ASSIGNMENT: `f = D_800F2848;`
+ * written above the entry guard and never read, with every reference to the
+ * symbol left inline. That buys one of the two missing registers -- the
+ * census goes from five divergent opcodes to four, `lui` comes right, and
+ * `lw`/`sw` improve from -2 to -1. The mechanism is func_80031574's rule at
+ * function scope: gcc emits `lui %hi` / `addiu %lo` for the assignment,
+ * cannot fold it away because the pseudo is allocated, and then reuses the
+ * `lui` half for every `%lo(D_800F2848)($r)` reference in both arms -- which
+ * is exactly retail's $s2, with $s1 the full address.
+ * The candidate is now +1 rather than -1, so it swapped sides of exact
+ * length; it wins on every other key (census 4 against 5, and 134 against
+ * 218), which is what the ranking says to prefer.
+ *
+ * Measured and DEAD from the -1 base: a base local USED for the +2/+4
+ * accesses with the symbol kept for [0] (+3/224, and +3 with the assignment
+ * moved above `three`), the local used only in case 2 (+3/224), used only in
+ * the entry branch (+3/224), a second dead local derived from it (`g = f +
+ * 2;`, does not compile as written and is not the axis), and a dead local
+ * for D_800E9F10 as well (+1/134, identical -- gcc drops the second one).
+ * Every spelling that USES the local costs three, and the only one that pays
+ * is the one that does not.
+ * Still open: retail saves FOUR callee-saved registers and we now save
+ * three. The remaining one is worth `lw -1, sw -1`, and the other two
+ * divergences are `addiu +1` and `nop +2`.
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
@@ -44,6 +66,7 @@
 
 void func_80018608(void) {
     s32 mode;
+    u8 *f;
     s32 three;
     u8 *e;
     u8 *g;
@@ -55,6 +78,7 @@ void func_80018608(void) {
     s32 h;
 
     three = 3;
+    f = D_800F2848;
     if ((D_8009B23A & 0x8000) == 0) {
         D_8009B23A |= 0x8000;
         func_80024734();

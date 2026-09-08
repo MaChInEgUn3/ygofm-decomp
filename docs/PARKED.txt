@@ -5407,7 +5407,7 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
   `p`/`one` assignments.
 
 
-func_80018608 -- 224/225 (-1), 218 differences, FIRST C EVER 2026-09-08.
+func_80018608 -- 226/225 (+1), 134 differences, FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
   and git confirms nothing was ever deleted here. Written from the m2c draft
@@ -5430,6 +5430,15 @@ func_80018608 -- 224/225 (-1), 218 differences, FIRST C EVER 2026-09-08.
   is ONE register and retail wants TWO, with the [0] store through
   %lo(sym)($s2) and the rest through N($s1). Open question: what makes gcc
   keep both halves of one address in callee-saved registers.
+  Then -1/218 -> +1/134 on a DEAD ASSIGNMENT: `f = D_800F2848;` above the
+  entry guard, never read, every reference to the symbol left inline. Census
+  five divergent opcodes to four, `lui` comes right, `lw`/`sw` from -2 to -1.
+  gcc emits the pair for the assignment, cannot fold it (the pseudo is
+  allocated), and then reuses the `lui` half for every `%lo(sym)($r)` in both
+  arms -- retail's $s2, with $s1 the full address. Every spelling that USES
+  the local costs three (+3 for the +2/+4 accesses, +3 scoped to case 2, +3
+  scoped to the entry branch); the only one that pays is the one that does
+  not read it. Still saving three callee-saved where retail saves four.
   Candidate in parked/func_80018608.c.
 
 
