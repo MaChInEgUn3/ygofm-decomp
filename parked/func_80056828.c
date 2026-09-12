@@ -86,6 +86,16 @@
  * lever e o `while`, nao so a comparacao.
  * CENSO ATUAL, nove opcodes e -8: addiu -2, bne -1, sh -1, j -1, addu -1,
  * sw -1, slt -1, nop -1, e um unico sll +1.
+ *
+ * MEDIDO E MORTO, a copia do valor do switch: o alvo tem
+ * `addu $v0,$v1,$zero` antes do `addiu $v1,$v0,-1`, ou seja copia o estado
+ * para outro registador antes de subtrair um, e nos nao temos essa copia.
+ * Copia a mais no alvo costuma ser NOME a mais na fonte, mas nao aqui:
+ * quatro grafias empatam em -8 -- um segundo local atribuido do primeiro, o
+ * switch a reler `rec[0xE14]`, os dois testes de saida partidos em dois
+ * ifs, e o nome novo a receber a leitura com o antigo copiado dele. O gcc
+ * coalesce toda copia de nivel de fonte; so um valor DERIVADO a produz, e
+ * um derivado aqui mudaria o valor do switch.
  * NAO MEDIDO: permuter.
  */
 #define D_80010000_IS_AGGREGATE
