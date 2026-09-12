@@ -78,8 +78,14 @@
  * D_8009AFA0. Nenhum simbolo divergente sobra, e `lui` saiu do censo.
  * CENSO ATUAL, dez opcodes e comprimento -9: addiu -2, nop -1, sw -1,
  * bne -1, slt -1, beq -1, sh -1, j -1, addu -1, e um blez +1. O par
- * blez +1 / slt -1 cheira a uma comparacao escrita como `<= 0` onde o alvo
- * tem `<` contra outra coisa; e o proximo a olhar.
+ * blez +1 / slt -1 era a GUARDA do laco do case 4, e o alvo compara contra
+ * o CONTADOR e nao contra zero: `slt $v0,$a2,$v1` sobre i e n, onde nos
+ * tinhamos `blez` sobre n. Escrito `while (i < n)` em vez de `if (n > 0)`
+ * com do/while, o par desaparece: -9 -> -8 e o censo de dez para NOVE
+ * opcodes. A forma `if (i < n)` mantendo o do/while empata em -9, entao o
+ * lever e o `while`, nao so a comparacao.
+ * CENSO ATUAL, nove opcodes e -8: addiu -2, bne -1, sh -1, j -1, addu -1,
+ * sw -1, slt -1, nop -1, e um unico sll +1.
  * NAO MEDIDO: permuter.
  */
 #define D_80010000_IS_AGGREGATE
@@ -146,7 +152,7 @@ void func_80056828(s32 arg0) {
         if (arg0 < 2) {
             n = p[0xE1B];
             i = 0;
-            if (n > 0) {
+            while (i < n) {
                 do {
                     if (*(u16 *)(p + i * 8 + 0x33C) != 0xFFFF) {
                         d = i / 8;
