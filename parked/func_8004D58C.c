@@ -22,6 +22,7 @@ void func_8004D58C(s32 arg0, u8 *arg1) {
     s32 b;
     s32 w;
     s32 d;
+    s32 r;
     s32 x;
     s32 y;
 
@@ -100,9 +101,10 @@ void func_8004D58C(s32 arg0, u8 *arg1) {
             do {
                 d = i / 8;
                 s = t + d;
+                r = i % 8;
                 y = s[0xBEC];
                 if ((*(s32 *)(g + 4) & 0x100) != 0) {
-                    x = y | (one << (i % 8));
+                    x = y | (one << r);
                 } else {
                     x = y;
                 }
