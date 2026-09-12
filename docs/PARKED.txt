@@ -7198,6 +7198,22 @@ Permuter-output sweep, 2026-09-04, the remaining four flagged rows. One win
 
 # ---
 func_80045F3C -- NEW 2026-09-04, written from scratch, 214/214 with a
+  2026-09-12: 215 contra 214, +1, e o CENSO DE OPCODES diz que a instrucao
+  a mais e um `nop` e SO isso -- nenhum outro opcode diverge em contagem.
+  O mecanismo esta localizado: no laco de copia final o retail
+  RE-MATERIALIZA `lui/lw` de D_8009B45C a cada iteracao e nos emitimos uma
+  vez so, antes do laco, em $a1. A fonte JA rele (`b = D_8009B45C;` e a
+  primeira linha do corpo), entao o ganho nao esta em escrever a releitura.
+  LACO EM GOTO MEDIDO E MORTO, seis formas: o `goto` puro (identico a base,
+  215/63), o `goto` com a condicao lendo o simbolo em vez de `b` (+3), o
+  `do/while` com a condicao lendo o simbolo (+3), `while (1)` com `break`
+  (identico), o `goto` com o `s += 0x30` externo movido para depois do teste
+  (identico), e o `b` atribuido no fim do corpo (+3 e 215 diferencas).
+  Isso FALSIFICA a leitura obvia: nao e o passe de laco icando invariante,
+  porque a forma goto -- que nao tem as notas de laco e portanto nao corre o
+  passe -- da codigo identico. O que sobra como hipotese e partilha com o
+  teste `*(s16 *)(D_8009B45C + 0x4C) > 0` que precede o laco no mesmo bloco
+  estendido, e as duas grafias que tentam separa-los custam +3.
     TWO-opcode census (see the follow-up below; this paragraph records the
     +8 state it started from). Candidate in parked/func_80045F3C.c. NEEDS
     `as -G0` (not yet in build.py's PER_FUNC_AS_FLAGS -- add it when this
