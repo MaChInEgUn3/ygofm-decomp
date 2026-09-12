@@ -2203,6 +2203,20 @@ weeks apart, in two files nobody read together. Run it after any batch of park
 work, and read a hit as a lead: a guard changes what the symbol *is*, so check
 its comment against the listing before installing it.
 
+**A FLAG ROW THAT REACHES EXACT LENGTH CAN BE YOUR OWN DEFICIT BEING
+MASKED, AND THE CONTROL FOR THAT IS TWO COMMANDS.** A lower `-O` emits more
+instructions for the same C, so a source that is N short at `-O2` can land
+on the target's count at `-O1` without being any closer. Measured on
+func_80056828 (2026-09-12): the source is 331 against 341 at `-O2 -G8` and
+exactly 341 at `-O1 -G0`, which reads as a find and is not one. The control
+is to recompile functions that ALREADY MATCH at the same flags and read the
+systematic shift -- func_80050584 goes 147 to 148, func_80056250 173 to 178
+and func_8005611C 77 to 79, i.e. `-O1 -G0` adds about 3%. Three per cent of
+331 is ten, which is exactly the deficit, so the zero is two faults
+cancelling. Run that control before believing any flag row that fixes a
+length, and note it cuts the other way too: if the shift on known-good
+functions is ~0 and the row still fixes your length, the row is real.
+
 **The permuter is the lever for the register-allocation class, and it works.**
 `python tools_src/permute.py <func>` sets up `build/permuter/<func>/` from
 `parked/<func>.c` and runs it; func_800135FC took 66 iterations, about ninety

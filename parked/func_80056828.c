@@ -36,7 +36,16 @@
  *
  * CENSO ATUAL: lui -5, beq -3, addu -3, addiu -2, j -2, sh -1, slt -1,
  * bne +1, blez +1, lw +1, andi +3.
- * NAO MEDIDO: flags, permuter.
+ * FLAGS MEDIDAS (2026-09-12): sweep_try, 29 linhas. A melhor por CONTAGEM
+ * e -O1 -G0 com 304, e ela chega a 341/341, COMPRIMENTO EXATO -- o que
+ * parece um achado e NAO e. Controle: tres funcoes que JA CASAM em -O2,
+ * recompiladas em -O1 -G0, ficam mais longas (147->148, 173->178, 77->79),
+ * ou seja o -O1 acrescenta cerca de 3%. Tres por cento de 331 e DEZ, que e
+ * exatamente o deficit -- o zero sao duas faltas a cancelar-se. A base
+ * continua em -O2 -G8 e o trabalho continua na FONTE.
+ * Nenhuma outra linha da varredura acerta o comprimento: -O1 -G8 e -4,
+ * -O2 -G0 e -6, -O2 -G0 -fno-strength-reduce e -6.
+ * NAO MEDIDO: permuter.
  */
 #include "common.h"
 
