@@ -1473,6 +1473,11 @@ func_80060E70 -- 4 differences (2026-09-12; was 5, was 7): the preheader
   pass emits a hoisted invariant at the END of it, after every source
   statement. No source ORDER reaches that -- eight measured -- because the
   position belongs to the loop pass, not to the source.
+  PERMUTER SATURATED on this base (2026-09-12): 43615 iterations, four
+  stored outputs, and re-scored through try_func the best of them TIES the
+  base at 4 (the others are 5, 6 and 12). Its own ranking disagrees with
+  try_func here in both directions, which is why every output is re-scored:
+  its 90 is a 5 and its 150 was the 4 that is now installed.
   A seven-iteration loop that builds sprite entries from a pair of parallel
   arrays. Three levers took it from 58 to 7, and the second is new:
   - a named local for `*(u16 *)s`, read where retail reads it (between the
@@ -2452,6 +2457,15 @@ func_8004B374_WAS -- 63 differences and TWO INSTRUCTIONS LONG, 76 against 74, wh
     this one decision now; it is not reachable from the source.
 
 func_80058938 -- 8 differences at 81/81, register/schedule class, first user
+  2026-09-12, still 8 at 81/81; adiff says 77 aligned-equal, 1 register-only,
+  6 structural in 2 groups, and all six are the PROLOGUE in one block: retail
+  emits the argument mask and the 0xFF constant BEFORE the D_800F2B50 base
+  and cursor setup, and we emit them after.
+  PERMUTER RUN FOR THE FIRST TIME AND SATURATED: 44262 iterations, two stored
+  outputs, re-scored at 8 (ties) and 9 (worse). So the class is not reachable
+  from this base by mutation either, and the park note's own lever (naming
+  the shifted flag as a first statement, -3 and 80) stays the only thing
+  measured on the axis.
     of _O2_G8_NOSTRENGTH after func_80017708. The free-slot allocator over
     the 10-record table at D_800F2B50 (stride 0x18) that func_80058838 and
     func_80059AF8 feed. Candidate in parked/, flag in PER_FUNC_FLAGS.
