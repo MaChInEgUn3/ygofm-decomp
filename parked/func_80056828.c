@@ -1,4 +1,4 @@
-/* -4 (337/341), 2026-09-12. Flags PADRAO. Escrita do zero; menor funcao
+/* -8 (333/341), 2026-09-12. Flags PADRAO. Escrita do zero; e a menor funcao
  * limpa do pool desde que o piso subiu para 250 instrucoes.
  *
  * FORMA: maquina de estados no byte +0xE14 de um registo de 0xE20 indexado
@@ -6,45 +6,41 @@
  * rotulos de saida decidem tudo: .L80056D54 e o EPILOGO, para onde 0 e 0xFF
  * saltam sem fazer nada, e .L80056D18 e a CAUDA COMUM de 1..0xB. A cauda e a
  * regra do delay slot -- `addiu $v0,$zero,0xFF` no slot do `bnez` com o
- * fall-through a sobrepor, logo atribuicao incondicional seguida de
- * condicional.
+ * fall-through a sobrepor.
  *
- * TRAJETO: -17 -> -10 -> -6 -> -10 (recuo deliberado) -> -9 -> -8 -> -4.
- *
- * OS LEVERS, por ordem de ganho:
+ * LEVERS INSTALADOS:
  *  1. o case 7 e um SWITCH de tres casos e nao uma cadeia if/else-if; o
  *     retail tem a arvore que o gcc gera para tres casos (pivo 0x3C, depois
  *     `< 0x3D`, depois 0x23 ou 0x3E). Sete instrucoes;
- *  2. os TRES bracos desse switch interno alcancam a cauda com `goto`
- *     explicito e nao com `break`. Quatro instrucoes. O permuter chegou ao
- *     mesmo numero por um `if (arg0)` com os dois bracos IDENTICOS, que e
- *     grafia que ninguem escreve; o `goto` da o mesmo e le-se como fonte.
- *     Medido por partes: so o 0x23 e -6, o 0x23 mais o 0x3E e -5, so o 0x3C
- *     e -6, e os tres e -4;
- *  3. os cinco ponteiros D_80010000/04/08/0C/10 precisam do braco AGREGADO:
- *     o escalar simples e small data a -G8 e sai `lw` gp-relativo, onde o
- *     retail tem `lui %hi`/`lw %lo`. Quatro instrucoes ao todo, e depois
- *     disso a contagem de %hi por simbolo bate EXATAMENTE em todos;
- *  4. a guarda do laco do case 4 compara contra o CONTADOR: `while (i < n)`
- *     e nao `if (n > 0)` com do/while. Uma instrucao, e tira o par
- *     blez/slt do censo.
+ *  2. os cinco ponteiros D_80010000/04/08/0C/10 querem o braco AGREGADO: o
+ *     escalar simples e small data a -G8 e sai `lw` gp-relativo onde o retail
+ *     tem `lui %hi`/`lw %lo`. Quatro instrucoes, e depois disso a contagem de
+ *     %hi por simbolo bate EXATAMENTE em todos;
+ *  3. a guarda do laco do case 4 compara contra o CONTADOR: `while (i < n)`,
+ *     nao `if (n > 0)` com do/while.
  *
- * MEDIDO E MORTO:
- *  - largura dos locais: 22 combinacoes, quatro chegam a comprimento EXATO e
- *    NENHUMA foi instalada, porque cada estreitamento acrescenta `andi` e a
- *    serie e +3 -> +6 -> +8 -> +9. O zero e comprado com nove mascaras que o
- *    alvo nao tem. Todos os locais em s32 e a forma honesta;
- *  - flags: sweep_try, 29 linhas. -O1 -G0 chega a 341/341 e e FALSO -- tres
- *    funcoes que ja casam em -O2 ficam 1, 5 e 2 instrucoes mais longas em
- *    -O1 -G0, ou seja ~3%, e 3% de 331 e exatamente o deficit de entao;
- *  - a copia do valor do switch (`addu $v0,$v1,$zero` no alvo): quatro
- *    grafias empatam, o gcc coalesce toda copia de nivel de fonte;
- *  - o endereco do registo: um local por caso e -11, a expressao inline nos
- *    quatro casos e +45, um local so para o deslocamento e +5. O alvo
- *    partilha a multiplicacao e nao partilha o simbolo.
+ * TRES FALSOS GANHOS APANHADOS NESTA FUNCAO, e todos pelo mesmo mecanismo --
+ * comprar comprimento com instrucoes que o alvo NAO TEM. O teste que os
+ * apanha e o EXCESSO do censo, nao o comprimento:
+ *  - largura dos locais: 22 combinacoes, quatro chegam a comprimento EXATO,
+ *    com `andi` a subir +3 -> +6 -> +8 -> +9. Nove mascaras compram o zero;
+ *  - flags: -O1 -G0 chega a 341/341, e o controle mostra que tres funcoes que
+ *    JA CASAM ficam ~3% mais longas em -O1 -G0, que e exatamente o deficit;
+ *  - `goto` para a cauda nos tres bracos do switch interno: da -4 e mantem
+ *    TRES `jal func_8005A468` onde o alvo tem UM. Com `break` o gcc faz o
+ *    cross-jump para um so `jal`, como o retail, e o comprimento volta a -8
+ *    com o excesso do censo a cair de 4 para 1. A forma com `break` e a certa
+ *    e o -4 era mentira. (A ORDEM dos tres casos nao entra: 0x23/0x3E/0x3C e
+ *    0x3C/0x3E/0x23 dao o mesmo censo, e 0x3E/0x23/0x3C e -10.)
  *
- * CENSO ATUAL: ver o commit; sao quatro instrucoes em falta e o excesso e
- * pequeno. NAO MEDIDO ainda: o permuter a partir DESTA base.
+ * TAMBEM MEDIDO E MORTO: a copia do valor do switch (`addu $v0,$v1,$zero` no
+ * alvo) -- quatro grafias empatam, o gcc coalesce toda copia de fonte; e o
+ * endereco do registo -- um local por caso -11, inline nos quatro casos +45,
+ * um local so para o deslocamento +5.
+ *
+ * CENSO ATUAL: nove opcodes e EXCESSO TOTAL DE UM. addiu -2, bne -1, sh -1,
+ * nop -1, slt -1, j -1, addu -1, sw -1, e um unico sll +1. As chamadas batem
+ * uma a uma com o alvo.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
@@ -156,15 +152,15 @@ void func_80056828(s32 arg0) {
         c = p[0xE16];
         n = *(u8 *)(p + 0xE0D) * 2;
         switch (c) {
-        case 0x3C:
-            func_8005A468(arg0, -n);
-            goto tail56828;
         case 0x23:
             func_8005A468(arg0, 0);
-            goto tail56828;
+            break;
         case 0x3E:
             func_8005A468(arg0, n);
-            goto tail56828;
+            break;
+        case 0x3C:
+            func_8005A468(arg0, -n);
+            break;
         }
         if (arg0 >= 2) {
             rec[0xE1F] = 1;

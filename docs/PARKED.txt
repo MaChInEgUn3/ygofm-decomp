@@ -1,5 +1,5 @@
-func_80056828 -- -4 (337/341), 2026-09-12. Trajeto do dia: -17 -> -10 -> -6
-  -> -10 (recuo deliberado) -> -9 -> -8 -> -4. Escrita do
+func_80056828 -- -8 (333/341) com EXCESSO DE CENSO IGUAL A UM, 2026-09-12.
+  O -4 anterior era falso: mantinha tres `jal func_8005A468` onde o alvo tem um. Escrita do
   zero: e a menor funcao limpa que o pool ainda tem, agora que o piso subiu
   para 250 instrucoes. Maquina de estados com jump table real sobre
   `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,
