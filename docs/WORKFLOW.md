@@ -2572,7 +2572,17 @@ on a combination that had been in the table for weeks.
   to gcc, so there is nothing to hoist, split or schedule. So when a function
   greps `gp=0` and the remaining differences are about where the halves of an
   address sit, reach for the scalar arm plus `as -G0` before re-reading the
-  source — it is two lines and it has never yet been wrong in that state.
+  source — it is two lines, and it was right every time until 2026-09-12.
+  **It has a counterexample now, and the tell is the LENGTH rather than the
+  addressing.** func_80045208 greps `gp=0, at=0` and its residue is exactly
+  this shape — retail loads D_8009B45C through the register its `%hi` went
+  into and we go through a temp. The scalar arm misses the instruction
+  count in BOTH directions: +1 against the target at `as -G0`, `-G1` and
+  `-G2`, and -2 at `-G4` and at the default. No threshold gives 75/75; only
+  the `_IS_AGGREGATE` arm does. So read the branch as the first thing to
+  try, not as a rule that cannot fail, and check the LENGTH before reading
+  the difference count — a scalar arm that is one instruction out is not a
+  near miss on the addressing, it is the wrong form.
   **When every gp-relative symbol in the function is one byte, the window is
   as wide as it gets and the *real* declarations fit.** func_800371A8 reads
   four one-byte scalars gp-relatively and needs D_8009B398 -- a real `u16` --
