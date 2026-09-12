@@ -1,10 +1,22 @@
-func_80056828 -- PRIMEIRO RASCUNHO, -17 (324/341), 2026-09-12. Escrita do
+func_80056828 -- -10 (331/341), 2026-09-12, segunda volta. Escrita do
   zero: e a menor funcao limpa que o pool ainda tem, agora que o piso subiu
   para 250 instrucoes. Maquina de estados com jump table real sobre
   `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,
   cauda comum para 1..0xB). Censo: beq -7 / bne +4 (polaridade, o case 7
   que eu achatei numa cadeia e o retail tem como arvore), lui -5, j -4,
   slti -2, slt -1, andi +3. Nada de flags nem permuter ainda.
+  GANHO: o case 7 e um SWITCH de tres casos, nao uma cadeia if/else-if --
+  o retail tem a arvore que o gcc gera para tres casos (pivo 0x3C, depois
+  `< 0x3D`, depois 0x23 ou 0x3E) e nenhuma cadeia a produz. Sete
+  instrucoes. As tres ordens de caso dao o mesmo.
+  BUG: o case 8 usava um ponteiro sem o atribuir. A correcao custa ZERO
+  instrucoes, e por isso passou despercebida -- a contagem nao ve erro de
+  leitura.
+  MEDIDO E MORTO sobre o lui -5 (o alvo materializa %hi(D_800F2C40) cinco
+  vezes e nos uma): um local por caso e -11, a expressao inline nos quatro
+  casos e +45 (recomputa a multiplicacao), e um local so para o
+  deslocamento com o simbolo inline e +5. O alvo partilha a multiplicacao e
+  NAO partilha o simbolo, e nenhuma das tres formas obvias faz as duas.
 
 # Functions attempted and parked, with the class of difference. Read by
 # tools_src/candidates.py so they are not offered again. See docs/DECISIONS.md

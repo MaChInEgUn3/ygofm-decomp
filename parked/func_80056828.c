@@ -1,36 +1,42 @@
-/* PRIMEIRO RASCUNHO, 2026-09-12: 324 contra 341 (-17), 320 diferencas
- * posicionais (infladas pelo deslocamento -- ler o censo, nao a contagem).
- * Flags PADRAO. Escrita do zero a partir do rascunho do m2c; e a menor
- * funcao limpa que sobrou no pool, agora que o piso e 250 instrucoes.
+/* 331 contra 341 (-10), 2026-09-12. Segunda volta. Flags PADRAO.
+ * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
+ * para 250 instrucoes.
  *
- * FORMA, lida da listagem e nao do m2c: maquina de estados que despacha no
- * byte +0xE14 de um registo de 0xE20 indexado por arg0. Dois rotulos
- * distintos e isso decide a estrutura -- .L80056D54 e o EPILOGO (estados 0 e
- * 0xFF retornam sem fazer nada) e .L80056D18 e a CAUDA COMUM, que toda a
- * gama 1..0xB alcanca e que faz o log e o avanco de estado. Ha jump table
- * real (jtbl_8001170C) com `sltiu $v0,$v1,0xB` sobre `state - 1`, logo o
- * `switch` e sobre os casos 1..0xB e os dois testes de saida sao escritos a
- * mao antes dele.
+ * FORMA, lida da listagem: maquina de estados no byte +0xE14 de um registo
+ * de 0xE20 indexado por arg0. Dois rotulos de saida distintos e sao eles que
+ * decidem a estrutura -- .L80056D54 e o EPILOGO (estados 0 e 0xFF retornam
+ * sem fazer nada) e .L80056D18 e a CAUDA COMUM de toda a gama 1..0xB, com o
+ * log e o avanco de estado. Jump table real, jtbl_8001170C, com
+ * `sltiu $v0,$v1,0xB` sobre `state - 1`.
  *
- * A cauda e a regra do delay slot: `addiu $v0,$zero,0xFF` esta no slot do
- * `bnez` e o fall-through sobrepoe com `rec[0xE14] + 1`, o que em C e uma
- * atribuicao incondicional seguida de uma condicional, nao dois bracos.
+ * A cauda e a regra do delay slot: `addiu $v0,$zero,0xFF` no slot do `bnez`
+ * com o fall-through a sobrepor -- atribuicao incondicional seguida de
+ * condicional, nao dois bracos.
  *
- * CENSO DESTE RASCUNHO, que e o mapa do que falta:
- *   beq -7, bne +4  -> polaridade de ramo, provavelmente a arvore do case 7,
- *                      que eu achatei numa cadeia if/else-if e o retail tem
- *                      como arvore aninhada (!= 0x3C, < 0x3D, != 0x23,
- *                      != 0x3E);
- *   lui -5          -> cinco materializacoes de endereco a menos;
- *   j -4            -> quatro saltos incondicionais a menos, ou seja casos
- *                      que deviam saltar para a cauda e estao a cair nela;
- *   slti -2, slt -1 -> comparacoes em falta;
- *   andi +3         -> tres mascaras a mais, leituras de byte que o retail
- *                      nao mascara.
+ * GANHO DESTA VOLTA (-17 -> -10): o case 7 e um SWITCH de tres casos, nao a
+ * cadeia if/else-if que eu tinha escrito. O retail tem a arvore de
+ * comparacao que o gcc gera para tres casos -- pivo em 0x3C, depois
+ * `< 0x3D` a escolher a subarvore, depois 0x23 ou 0x3E -- e nenhuma cadeia
+ * a produz. Vale SETE instrucoes. As tres ordens de caso dao o mesmo, entao
+ * a ordem nao entra.
  *
- * NAO MEDIDO AINDA: nada de flags, nada de permuter. O proximo passo e a
- * arvore do case 7 e depois os `j`, por essa ordem, porque o censo diz que
- * sao os dois maiores blocos.
+ * BUG CORRIGIDO, e o modo como aparece e a licao: o case 8 usava `p` sem o
+ * atribuir, herdando o que o case 7 tivesse deixado. A correcao custa
+ * EXATAMENTE ZERO instrucoes (331 com e sem), e e por isso que passou
+ * despercebida -- a contagem nao ve erro de leitura, so o m2c e a listagem.
+ *
+ * MEDIDO E MORTO nesta volta, sobre o `lui -5`: o alvo materializa
+ * %hi(D_800F2C40) CINCO vezes e nos uma. Tres tentativas, todas piores --
+ * um local por caso (-11, uma pior), a expressao inteira inline nos quatro
+ * casos (+45, porque recomputa a cadeia sll/subu/sll/addu/sll da
+ * multiplicacao), e um local so para o deslocamento com o simbolo inline
+ * (+5, e o censo passa a sll -12 / addu +11). O alvo partilha a
+ * multiplicacao e NAO partilha o simbolo, e nenhuma das tres formas obvias
+ * faz as duas coisas.
+ *
+ * CENSO ATUAL: lui -5, beq -3, addu -3, addiu -2, j -2, sh -1, slt -1,
+ * bne +1, blez +1, lw +1, andi +3.
+ * NAO MEDIDO: flags, permuter.
  */
 #include "common.h"
 
@@ -136,19 +142,23 @@ void func_80056828(s32 arg0) {
         p = arg0 * 0xE20 + D_800F2C40;
         c = p[0xE16];
         n = *(u8 *)(p + 0xE0D) * 2;
-        if (c == 0x3C) {
+        switch (c) {
+        case 0x3C:
             func_8005A468(arg0, -n);
-        } else if (c == 0x23) {
+            break;
+        case 0x23:
             func_8005A468(arg0, 0);
-        } else if (c == 0x3E) {
+            break;
+        case 0x3E:
             func_8005A468(arg0, n);
+            break;
         }
         if (arg0 >= 2) {
             rec[0xE1F] = 1;
         }
         break;
     case 8:
-        func_800582C0(arg0, p[0xE0C], *(u16 *)(p + 0xE0A));
+        func_800582C0(arg0, rec[0xE0C], *(u16 *)(rec + 0xE0A));
         break;
     case 9:
         p = arg0 * 0xE20 + D_800F2C40;
