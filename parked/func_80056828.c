@@ -1,102 +1,50 @@
-/* 331 contra 341 (-10), 2026-09-12. Segunda volta. Flags PADRAO.
- * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
- * para 250 instrucoes.
+/* -4 (337/341), 2026-09-12. Flags PADRAO. Escrita do zero; menor funcao
+ * limpa do pool desde que o piso subiu para 250 instrucoes.
  *
- * FORMA, lida da listagem: maquina de estados no byte +0xE14 de um registo
- * de 0xE20 indexado por arg0. Dois rotulos de saida distintos e sao eles que
- * decidem a estrutura -- .L80056D54 e o EPILOGO (estados 0 e 0xFF retornam
- * sem fazer nada) e .L80056D18 e a CAUDA COMUM de toda a gama 1..0xB, com o
- * log e o avanco de estado. Jump table real, jtbl_8001170C, com
- * `sltiu $v0,$v1,0xB` sobre `state - 1`.
+ * FORMA: maquina de estados no byte +0xE14 de um registo de 0xE20 indexado
+ * por arg0, com jump table real (jtbl_8001170C) sobre `state - 1`. Dois
+ * rotulos de saida decidem tudo: .L80056D54 e o EPILOGO, para onde 0 e 0xFF
+ * saltam sem fazer nada, e .L80056D18 e a CAUDA COMUM de 1..0xB. A cauda e a
+ * regra do delay slot -- `addiu $v0,$zero,0xFF` no slot do `bnez` com o
+ * fall-through a sobrepor, logo atribuicao incondicional seguida de
+ * condicional.
  *
- * A cauda e a regra do delay slot: `addiu $v0,$zero,0xFF` no slot do `bnez`
- * com o fall-through a sobrepor -- atribuicao incondicional seguida de
- * condicional, nao dois bracos.
+ * TRAJETO: -17 -> -10 -> -6 -> -10 (recuo deliberado) -> -9 -> -8 -> -4.
  *
- * GANHO DESTA VOLTA (-17 -> -10): o case 7 e um SWITCH de tres casos, nao a
- * cadeia if/else-if que eu tinha escrito. O retail tem a arvore de
- * comparacao que o gcc gera para tres casos -- pivo em 0x3C, depois
- * `< 0x3D` a escolher a subarvore, depois 0x23 ou 0x3E -- e nenhuma cadeia
- * a produz. Vale SETE instrucoes. As tres ordens de caso dao o mesmo, entao
- * a ordem nao entra.
+ * OS LEVERS, por ordem de ganho:
+ *  1. o case 7 e um SWITCH de tres casos e nao uma cadeia if/else-if; o
+ *     retail tem a arvore que o gcc gera para tres casos (pivo 0x3C, depois
+ *     `< 0x3D`, depois 0x23 ou 0x3E). Sete instrucoes;
+ *  2. os TRES bracos desse switch interno alcancam a cauda com `goto`
+ *     explicito e nao com `break`. Quatro instrucoes. O permuter chegou ao
+ *     mesmo numero por um `if (arg0)` com os dois bracos IDENTICOS, que e
+ *     grafia que ninguem escreve; o `goto` da o mesmo e le-se como fonte.
+ *     Medido por partes: so o 0x23 e -6, o 0x23 mais o 0x3E e -5, so o 0x3C
+ *     e -6, e os tres e -4;
+ *  3. os cinco ponteiros D_80010000/04/08/0C/10 precisam do braco AGREGADO:
+ *     o escalar simples e small data a -G8 e sai `lw` gp-relativo, onde o
+ *     retail tem `lui %hi`/`lw %lo`. Quatro instrucoes ao todo, e depois
+ *     disso a contagem de %hi por simbolo bate EXATAMENTE em todos;
+ *  4. a guarda do laco do case 4 compara contra o CONTADOR: `while (i < n)`
+ *     e nao `if (n > 0)` com do/while. Uma instrucao, e tira o par
+ *     blez/slt do censo.
  *
- * BUG CORRIGIDO, e o modo como aparece e a licao: o case 8 usava `p` sem o
- * atribuir, herdando o que o case 7 tivesse deixado. A correcao custa
- * EXATAMENTE ZERO instrucoes (331 com e sem), e e por isso que passou
- * despercebida -- a contagem nao ve erro de leitura, so o m2c e a listagem.
+ * MEDIDO E MORTO:
+ *  - largura dos locais: 22 combinacoes, quatro chegam a comprimento EXATO e
+ *    NENHUMA foi instalada, porque cada estreitamento acrescenta `andi` e a
+ *    serie e +3 -> +6 -> +8 -> +9. O zero e comprado com nove mascaras que o
+ *    alvo nao tem. Todos os locais em s32 e a forma honesta;
+ *  - flags: sweep_try, 29 linhas. -O1 -G0 chega a 341/341 e e FALSO -- tres
+ *    funcoes que ja casam em -O2 ficam 1, 5 e 2 instrucoes mais longas em
+ *    -O1 -G0, ou seja ~3%, e 3% de 331 e exatamente o deficit de entao;
+ *  - a copia do valor do switch (`addu $v0,$v1,$zero` no alvo): quatro
+ *    grafias empatam, o gcc coalesce toda copia de nivel de fonte;
+ *  - o endereco do registo: um local por caso e -11, a expressao inline nos
+ *    quatro casos e +45, um local so para o deslocamento e +5. O alvo
+ *    partilha a multiplicacao e nao partilha o simbolo.
  *
- * MEDIDO E MORTO nesta volta, sobre o `lui -5`: o alvo materializa
- * %hi(D_800F2C40) CINCO vezes e nos uma. Tres tentativas, todas piores --
- * um local por caso (-11, uma pior), a expressao inteira inline nos quatro
- * casos (+45, porque recomputa a cadeia sll/subu/sll/addu/sll da
- * multiplicacao), e um local so para o deslocamento com o simbolo inline
- * (+5, e o censo passa a sll -12 / addu +11). O alvo partilha a
- * multiplicacao e NAO partilha o simbolo, e nenhuma das tres formas obvias
- * faz as duas coisas.
- *
- * CENSO ATUAL: lui -5, beq -3, addu -3, addiu -2, j -2, sh -1, slt -1,
- * bne +1, blez +1, lw +1, andi +3.
- * FLAGS MEDIDAS (2026-09-12): sweep_try, 29 linhas. A melhor por CONTAGEM
- * e -O1 -G0 com 304, e ela chega a 341/341, COMPRIMENTO EXATO -- o que
- * parece um achado e NAO e. Controle: tres funcoes que JA CASAM em -O2,
- * recompiladas em -O1 -G0, ficam mais longas (147->148, 173->178, 77->79),
- * ou seja o -O1 acrescenta cerca de 3%. Tres por cento de 331 e DEZ, que e
- * exatamente o deficit -- o zero sao duas faltas a cancelar-se. A base
- * continua em -O2 -G8 e o trabalho continua na FONTE.
- * Nenhuma outra linha da varredura acerta o comprimento: -O1 -G8 e -4,
- * -O2 -G0 e -6, -O2 -G0 -fno-strength-reduce e -6.
- * TERCEIRA VOLTA (-10 -> -6), duas coisas e ambas lidas do alinhamento:
- *  1. o despacho INTERNO do case 1 tambem e um `switch (arg0)` e nao a
- *     cadeia if/else-if -- o alvo tem `beq $s0,$zero` e nos tinhamos
- *     `bne`, que e a polaridade que uma cadeia produz. Vale duas
- *     instrucoes;
- *  2. D_80010000, D_80010004 e D_80010008 saem no alvo com `lui %hi` /
- *     `lw %lo` e em nos saiam `lw` GP-RELATIVO, porque o escalar simples e
- *     small data a -G8. Com o braco agregado nos tres, mais duas.
- *     D_80010004 nao estava declarado em variables.h e D_80010008 so tinha
- *     a forma escalar; os dois ganharam braco _IS_AGGREGATE guardado, e o
- *     build completo continua a fechar, logo nenhum outro consumidor mexe.
- * QUARTA VOLTA, E E UM RECUO DELIBERADO DE -6 PARA -10.
- * A largura dos locais foi varrida -- 22 combinacoes -- e QUATRO chegam a
- * 341/341, comprimento EXATO. Nenhuma foi instalada, porque o censo diz o
- * que elas sao: cada estreitamento acrescenta `andi`, e a serie e
- * +3 (base) -> +6 -> +8 -> +9 nas de comprimento exato. Ou seja, o zero e
- * comprado com NOVE mascaras que o alvo nao tem. E o mesmo falso zero do
- * -O1 -G0 que este ficheiro ja documenta, por outro caminho.
- * A direcao honesta e a oposta: com TODOS os locais em s32 as mascaras
- * desaparecem (andi 0) e sobram DEZ opcodes, todos em DEFICIT e nenhum em
- * excesso -- addiu -2, lui -2, sh -1, j -1, sw -1, slt -1, addu -1, beq -1,
- * bne -1, e um unico blez +1. Isso e uma lista de compras, e e melhor estado
- * de diagnostico do que -6 com tres mascaras espurias a mascarar parte do
- * deficit.
- * QUINTA VOLTA (-10 -> -9), e fecha o eixo dos simbolos: D_8001000C e
- * D_80010010 tambem saiam GP-RELATIVOS em nos e com `lui %hi` no alvo,
- * pelo mesmo motivo dos outros tres. Com os bracos agregados, a contagem
- * de %hi por simbolo passa a bater EXATAMENTE em todos -- D_800F2C40 cinco
- * vezes, e uma vez cada para D_80010000, D_80010004, D_80010008,
- * D_8001000C, D_80010010, D_80011594 e D_801A8000, mais o gp-relativo de
- * D_8009AFA0. Nenhum simbolo divergente sobra, e `lui` saiu do censo.
- * CENSO ATUAL, dez opcodes e comprimento -9: addiu -2, nop -1, sw -1,
- * bne -1, slt -1, beq -1, sh -1, j -1, addu -1, e um blez +1. O par
- * blez +1 / slt -1 era a GUARDA do laco do case 4, e o alvo compara contra
- * o CONTADOR e nao contra zero: `slt $v0,$a2,$v1` sobre i e n, onde nos
- * tinhamos `blez` sobre n. Escrito `while (i < n)` em vez de `if (n > 0)`
- * com do/while, o par desaparece: -9 -> -8 e o censo de dez para NOVE
- * opcodes. A forma `if (i < n)` mantendo o do/while empata em -9, entao o
- * lever e o `while`, nao so a comparacao.
- * CENSO ATUAL, nove opcodes e -8: addiu -2, bne -1, sh -1, j -1, addu -1,
- * sw -1, slt -1, nop -1, e um unico sll +1.
- *
- * MEDIDO E MORTO, a copia do valor do switch: o alvo tem
- * `addu $v0,$v1,$zero` antes do `addiu $v1,$v0,-1`, ou seja copia o estado
- * para outro registador antes de subtrair um, e nos nao temos essa copia.
- * Copia a mais no alvo costuma ser NOME a mais na fonte, mas nao aqui:
- * quatro grafias empatam em -8 -- um segundo local atribuido do primeiro, o
- * switch a reler `rec[0xE14]`, os dois testes de saida partidos em dois
- * ifs, e o nome novo a receber a leitura com o antigo copiado dele. O gcc
- * coalesce toda copia de nivel de fonte; so um valor DERIVADO a produz, e
- * um derivado aqui mudaria o valor do switch.
- * NAO MEDIDO: permuter.
+ * CENSO ATUAL: ver o commit; sao quatro instrucoes em falta e o excesso e
+ * pequeno. NAO MEDIDO ainda: o permuter a partir DESTA base.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
@@ -210,13 +158,13 @@ void func_80056828(s32 arg0) {
         switch (c) {
         case 0x3C:
             func_8005A468(arg0, -n);
-            break;
+            goto tail56828;
         case 0x23:
             func_8005A468(arg0, 0);
-            break;
+            goto tail56828;
         case 0x3E:
             func_8005A468(arg0, n);
-            break;
+            goto tail56828;
         }
         if (arg0 >= 2) {
             rec[0xE1F] = 1;
@@ -271,6 +219,7 @@ void func_80056828(s32 arg0) {
         break;
     }
 
+tail56828:
     func_8008E870(D_80011594, rec[0xE14], func_80074170(1) - t0);
     v = 0xFF;
     if (rec[0xE1F] == 0) {
