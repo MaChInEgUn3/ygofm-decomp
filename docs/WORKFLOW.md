@@ -2203,6 +2203,25 @@ weeks apart, in two files nobody read together. Run it after any batch of park
 work, and read a hit as a lead: a guard changes what the symbol *is*, so check
 its comment against the listing before installing it.
 
+**READ THE CENSUS SURPLUS, NOT THE LENGTH: A GAIN THAT ADDS INSTRUCTIONS
+THE TARGET DOES NOT HAVE IS NOT A GAIN.** Three separate false gains on one
+function in one afternoon (func_80056828, 2026-09-12), all the same shape --
+the length improves because something is being ADDED, not because the source
+got closer. Narrowing locals bought exact length with `andi` rising +3 -> +6
+-> +8 -> +9, nine masks the target has none of. `-O1 -G0` bought exact
+length because a lower -O emits ~3% more instructions. And writing three
+switch arms with `goto tail` instead of `break` bought four instructions by
+keeping THREE `jal func_8005A468` where the target has ONE -- `break` lets
+gcc cross-jump them into one call, which costs four instructions back and is
+structurally right.
+The test that catches all three costs nothing: sum the POSITIVE deltas of the
+opcode census. On that function it went 1 -> 4 on the `goto` change and the
+length went -8 -> -4; the honest state is the one with surplus 1. Rank by
+(abs length error, TOTAL SURPLUS, number of non-zero opcodes, differences),
+and treat any length gain that raises the surplus as a trade to be undone.
+Counting one opcode directly in both listings -- `grep -c "jal +name"` on the
+.s against the same count in try_func output -- settles it in one command.
+
 **A FLAG ROW THAT REACHES EXACT LENGTH CAN BE YOUR OWN DEFICIT BEING
 MASKED, AND THE CONTROL FOR THAT IS TWO COMMANDS.** A lower `-O` emits more
 instructions for the same C, so a source that is N short at `-O2` can land
