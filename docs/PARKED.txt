@@ -3700,6 +3700,21 @@ func_80024E58 RESOLVED 2026-09-05 -- MATCH (116/116, full build). The last two w
 
 
 func_8004D58C -- 13 differences at equal length (116/116). The sibling of
+  2026-09-12: 116/116, 12 differing, and adiff reads 105 aligned-equal,
+  10 register-only and 2 structural in 2 groups -- so this is the
+  permuter's class, not a source-shape one.
+  STORED PERMUTER OUTPUTS DRAINED: all 27 in build/permuter/ re-scored
+  through try_func, and the best of them TIES the base at 12 (next are 13,
+  13, 16, and the rest 21 or worse; nine carry a length error). A directory
+  with 27 outputs in it is not evidence anyone read them.
+  QUOTIENT/MODULO AXIS DEAD, eight spellings of `d = i / 8` and
+  `one << (i % 8)`: `i - d * 8`, `i & 7` (-1), `i >> 3` (+2),
+  `i - (d << 3)`, one name reused for quotient then remainder (15), a named
+  remainder, an (s32) cast on the dividend, and `i >> 3` with the
+  subtraction (-3). Four tie at 12 and four are worse.
+  The residue is two clusters: five register copies in the preamble that
+  retail sources from $t3 and we source from $t5, and a sra/sll pair where
+  retail keeps the quotient in the register the index arrived in.
     func_8004D75C: same 0xE20 record, same 0x2C8/0x750/0x7C4/0xBEC fields,
     and it is the *reset* pass where func_8004D75C is the accumulate pass.
     What paid:
