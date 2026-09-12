@@ -8193,6 +8193,14 @@ base de 45 que recebeu. As quatro alavancas que fecharam a funcao vieram de
 leitura do listing, nao dele.
 
 func_80044838 -- **295/295, comprimento EXATO, 3 diferencas, censo VAZIO**.
+  2026-09-12: o permuter foi relancado com -j 4 a partir da base de 3 e
+  correu 7022 iteracoes com ZERO saidas. Somando a corrida registada no
+  cabecalho do candidato (1253 iteracoes, -j 2), sao mais de oito mil sem
+  nada. Combinado com as dezesseis grafias ja medidas e com o mecanismo
+  escrito la -- o gcc emite as instrucoes da FONTE antes das que ele proprio
+  poe no preheader, entao um `k = 2;` escrito ali sai sempre primeiro -- o
+  eixo esta fechado pelos dois lados. CPU realocada para a func_80048A28,
+  que tem 60 diferencas e portanto espaco.
 Escrita do zero em 2026-09-08: -9/279 -> +2/130 -> 95 -> 89 -> 88 -> 46 ->
 11 -> 3. Flags padrao. Maquina de estados de retry com jump table real e
 dois `switch (D_8009B44F)` internos identicos cujo `case 0` cai no `case 1`.
