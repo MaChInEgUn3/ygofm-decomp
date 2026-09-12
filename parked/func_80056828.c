@@ -69,17 +69,27 @@
  * bne -1, e um unico blez +1. Isso e uma lista de compras, e e melhor estado
  * de diagnostico do que -6 com tres mascaras espurias a mascarar parte do
  * deficit.
- * CENSO ATUAL: o de cima, com comprimento -10.
+ * QUINTA VOLTA (-10 -> -9), e fecha o eixo dos simbolos: D_8001000C e
+ * D_80010010 tambem saiam GP-RELATIVOS em nos e com `lui %hi` no alvo,
+ * pelo mesmo motivo dos outros tres. Com os bracos agregados, a contagem
+ * de %hi por simbolo passa a bater EXATAMENTE em todos -- D_800F2C40 cinco
+ * vezes, e uma vez cada para D_80010000, D_80010004, D_80010008,
+ * D_8001000C, D_80010010, D_80011594 e D_801A8000, mais o gp-relativo de
+ * D_8009AFA0. Nenhum simbolo divergente sobra, e `lui` saiu do censo.
+ * CENSO ATUAL, dez opcodes e comprimento -9: addiu -2, nop -1, sw -1,
+ * bne -1, slt -1, beq -1, sh -1, j -1, addu -1, e um blez +1. O par
+ * blez +1 / slt -1 cheira a uma comparacao escrita como `<= 0` onde o alvo
+ * tem `<` contra outra coisa; e o proximo a olhar.
  * NAO MEDIDO: permuter.
  */
 #define D_80010000_IS_AGGREGATE
+#define D_8001000C_IS_AGGREGATE
+#define D_80010010_IS_AGGREGATE
 #define D_80010004_IS_AGGREGATE
 #define D_80010008_IS_AGGREGATE
 #include "common.h"
 
 extern u8 D_80011594[];
-extern s32 D_8001000C;
-extern s32 D_80010010;
 
 void func_8005A468(s32, s32);
 void func_8004DC38(u8 *, s32, s32, s32);
@@ -205,9 +215,9 @@ void func_80056828(s32 arg0) {
         D_8009AFA0 = arg0;
         if (*(s32 *)(p + 0xD10) >= 0) {
             if (arg0 != 0) {
-                fp = (void (*)(s32, s32, s32))(D_80010010 + 4);
+                fp = (void (*)(s32, s32, s32))(D_80010010[0] + 4);
             } else {
-                fp = (void (*)(s32, s32, s32))(D_8001000C + 4);
+                fp = (void (*)(s32, s32, s32))(D_8001000C[0] + 4);
             }
             func_8005F198(1);
             fp(v, *(s32 *)(p + 0xD10) % 1000, *(s32 *)(p + 0xD10));

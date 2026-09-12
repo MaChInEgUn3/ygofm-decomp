@@ -1133,6 +1133,16 @@ extern u8 *D_80010004[];
 #else
 extern u8 *D_80010004;
 #endif
+#ifdef D_8001000C_IS_AGGREGATE
+extern s32 D_8001000C[];
+#else
+extern s32 D_8001000C;
+#endif
+#ifdef D_80010010_IS_AGGREGATE
+extern s32 D_80010010[];
+#else
+extern s32 D_80010010;
+#endif
 #ifdef D_80010008_IS_AGGREGATE
 extern s32 D_80010008[];
 #else
