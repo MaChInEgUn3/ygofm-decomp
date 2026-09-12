@@ -2571,6 +2571,21 @@ func_8003CA5C -- 4 differences at 72/72, a $v0/$v1 swap in one basic block:
     register. First user of D_8009B398_IS_AGGREGATE outside its own note.
 
 func_80045208 -- 25 differences at 75/75, register-allocation class. The
+  2026-09-12: 75/75, 16 differing, adiff 60 iguais / 10 so-registrador /
+  6 estruturais em 4 grupos. Flags PADRAO.
+  FLAGS MORTAS: sweep_try, 20 linhas, e a melhor e 16 (O2 G0 e as tres
+  linhas de as -G empatam); todo o resto e 42 ou pior.
+  BRACO DE DECLARACAO MEDIDO E MORTO: a listagem tem gp=0 e at=0, que pela
+  receita do WORKFLOW e o ramo 1 (qualquer -G livre, braco escalar). NAO se
+  aplica aqui: o braco escalar erra o COMPRIMENTO nos dois sentidos -- +1
+  com o assembler em -G0, -G1 e -G2, e -2 em -G4 e no padrao. O braco
+  _IS_AGGREGATE instalado e o unico que da 75/75.
+  ORDEM DAS LOJAS DO BUFFER MEDIDA E MORTA, sete ordens mais o controle: o
+  retail afunda a loja de buf+8 no delay slot do jal e nos afundamos a de
+  buf+4. Mover buf+8 para o fim e 25; trocar buf+2 com buf+4, pos o 0xC
+  antes, comecar pelo 0x24 ou pelo w, e o 0x4 por ultimo sao todos 25 ou 26.
+  So uma ordem empata em 16. O controle (a propria ordem instalada) devolve
+  16, entao o instrumento esta sao.
     command builder that fills the 0x24 packet from the a & 0xF000 switch
     (the addu with the mask register in case 0x8000 is w = a + m against
     the named switch value; the default arm re-reads D_8009B45C inline
