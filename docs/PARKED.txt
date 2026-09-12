@@ -2002,6 +2002,23 @@ func_8003700C -- unfinished, 26 differences and one instruction short, and
     discriminator is not established.
 
 func_80013360 -- unfinished, 7 differences with equal lengths (85/85), and
+  2026-09-12: 85/85, 7 -> 6 differing. O ganho e um PINO: envolver a
+  primeira loja, `do { D_800E9D28[0] = 0; } while (0);`, poe as duas
+  lojas do preambulo na ordem do retail. adiff 80/3/3 depois dele.
+  ORDEM DO PREAMBULO MEDIDA E MORTA, oito grafias: p atribuido primeiro,
+  as duas lojas pelo simbolo com p por ultimo (8), o OR movido para o
+  topo, o pino, a troca de p[1] com o OR, o OR entre as duas lojas, um
+  pino em volta da loja E da atribuicao de p (+1), e p atribuido antes da
+  loja. So o pino desce.
+  COMPOSICAO MEDIDA E MORTA, mais oito sobre o pino: o OR antes, o OR no
+  meio (9), a leitura de D_8009B098 nomeada no topo (9), nomeada depois de
+  p (6, empata), um pino em volta da atribuicao de p (+1), um pino em
+  volta das tres (+1), a leitura nomeada e consumida no topo (-1), e a
+  leitura nomeada no fim (6, empata). Nada passa de 6.
+  FLAGS MORTAS: sweep_try, 23 linhas, e a instalada (O2 G8 com as -G4) e a
+  melhor; -G2 empata e todo o resto e 68 ou pior.
+  O que sobra: o retail emite `lhu d_8009b098` ANTES do addiu $sp, e poe o
+  %hi de D_800E9D28 direto em $s0 onde nos passamos por $v0.
     like func_8003700C it is here to record that a recipe branch worked.
     This is the **third** branch, used for the first time on a fresh
     function: D_8009B3A4 wants the bare form for its six reads and
