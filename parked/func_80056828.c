@@ -56,8 +56,20 @@
  *     D_80010004 nao estava declarado em variables.h e D_80010008 so tinha
  *     a forma escalar; os dois ganharam braco _IS_AGGREGATE guardado, e o
  *     build completo continua a fechar, logo nenhum outro consumidor mexe.
- * CENSO AGORA: lui -2, addu -2, addiu -2, sh -1, beq -1, slt -1, j -1,
- * bne -1, lw +1, blez +1, andi +3.
+ * QUARTA VOLTA, E E UM RECUO DELIBERADO DE -6 PARA -10.
+ * A largura dos locais foi varrida -- 22 combinacoes -- e QUATRO chegam a
+ * 341/341, comprimento EXATO. Nenhuma foi instalada, porque o censo diz o
+ * que elas sao: cada estreitamento acrescenta `andi`, e a serie e
+ * +3 (base) -> +6 -> +8 -> +9 nas de comprimento exato. Ou seja, o zero e
+ * comprado com NOVE mascaras que o alvo nao tem. E o mesmo falso zero do
+ * -O1 -G0 que este ficheiro ja documenta, por outro caminho.
+ * A direcao honesta e a oposta: com TODOS os locais em s32 as mascaras
+ * desaparecem (andi 0) e sobram DEZ opcodes, todos em DEFICIT e nenhum em
+ * excesso -- addiu -2, lui -2, sh -1, j -1, sw -1, slt -1, addu -1, beq -1,
+ * bne -1, e um unico blez +1. Isso e uma lista de compras, e e melhor estado
+ * de diagnostico do que -6 com tres mascaras espurias a mascarar parte do
+ * deficit.
+ * CENSO ATUAL: o de cima, com comprimento -10.
  * NAO MEDIDO: permuter.
  */
 #define D_80010000_IS_AGGREGATE
@@ -84,8 +96,8 @@ void func_80056828(s32 arg0) {
     s32 d;
     s32 v;
     s32 a;
-    u8 c;
-    u16 w;
+    s32 c;
+    s32 w;
     void (*fp)(s32, s32, s32);
 
     rec = arg0 * 0xE20 + D_800F2C40;
