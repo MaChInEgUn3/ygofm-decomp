@@ -3523,6 +3523,24 @@ func_8003C120_WAS -- 101/101, 75 differences (was 102/101, +1 and 80)
   well (+4), a `do { w = 0x8000; } while (0);` in m3 (+2), and a named local
   for m3's two 0x80140000 stores (75, no change).
 func_8005C1F4 -- 70 differences at -2. Decode settled, and it was the lowest
+  2026-09-12: 94 contra 96 (-2) passou a 96/96, COMPRIMENTO EXATO. O censo
+  na base dizia exatamente o que faltava -- um `sll` e um `addu`, mais nada
+  -- e o ponto era que o retail computa `D_8009B498 + i * 8 + 0x42400` DUAS
+  vezes, no destino da copia de Blk8 e no primeiro argumento de
+  func_8007F978, enquanto o gcc as comparte por estarem no mesmo bloco.
+  O que fecha e a SUBTRACAO DE UMA NEGACAO na LOJA (nao na chamada):
+  `*(Blk8 *)((D_8009B498 + 0x42400) - -(i * 8))`. Na chamada a mesma coisa
+  e -1 e nas duas juntas e -3, entao o sitio importa.
+  OITO grafias medidas antes dessa, todas a -2: `&D_8009B498[...]`, a
+  constante antes do produto, `i << 3`, o produto entre parenteses, um cast
+  (s32) na base, e as mesmas trocas aplicadas a loja.
+  CAVEAT HONESTO: o censo NAO fica limpo. A base tinha dois opcodes em
+  falta (sll -1, addu -1) e agora sao cinco divergentes (addu -3, subu +2,
+  lui +1, sll -1, ori +1) -- a negacao troca `addu` por `subu`, que o alvo
+  nao tem. Instalado porque comprimento exato e a chave primaria e porque
+  so com ele as 43 diferencas passam a ser mediveis, mas a leitura de que
+  falta uma forma que produza `addu` em vez de `subu` continua aberta.
+  adiff depois: 62 iguais, 30 so-registrador, 6 estruturais em 2 grupos.
     unclaimed function in the tree. It flushes a pending job if D_8009B060 and
     D_800F5D44 are both set, copies an EIGHT-BYTE UNALIGNED record from
     D_8009B498+0x42428 to +0x42400 indexed by D_8009B067 * 8 (that is the
