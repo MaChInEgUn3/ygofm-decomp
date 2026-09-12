@@ -1124,7 +1124,20 @@ extern u8 D_801DD000[];
 extern u8 D_801DD800[];
 /* 0x80180000 -- the address of the overlay region func_80057544 hands to
  * the display list; see docs/DISC.txt.  Read with `lw`, so a word. */
+/* Two more pointer-valued globals in the same table as D_80010000, and the
+ * same reason for the arms: func_80056828 reads all three with `lui %hi` /
+ * `lw %lo`, which the plain scalar form does not give at -G8 -- there the
+ * symbol is small data and the load comes out %gp_rel. */
+#ifdef D_80010004_IS_AGGREGATE
+extern u8 *D_80010004[];
+#else
+extern u8 *D_80010004;
+#endif
+#ifdef D_80010008_IS_AGGREGATE
+extern s32 D_80010008[];
+#else
 extern s32 D_80010008;
+#endif
 extern u8 D_800F5694[];
 extern u8 *D_8001002C;
 /* An eight-byte record func_8005B64C copies onto its stack by value. */

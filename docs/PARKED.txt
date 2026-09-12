@@ -1,4 +1,4 @@
-func_80056828 -- -10 (331/341), 2026-09-12, segunda volta. Escrita do
+func_80056828 -- -6 (335/341), 2026-09-12, terceira volta. Escrita do
   zero: e a menor funcao limpa que o pool ainda tem, agora que o piso subiu
   para 250 instrucoes. Maquina de estados com jump table real sobre
   `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,

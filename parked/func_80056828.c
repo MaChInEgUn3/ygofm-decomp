@@ -45,12 +45,27 @@
  * continua em -O2 -G8 e o trabalho continua na FONTE.
  * Nenhuma outra linha da varredura acerta o comprimento: -O1 -G8 e -4,
  * -O2 -G0 e -6, -O2 -G0 -fno-strength-reduce e -6.
+ * TERCEIRA VOLTA (-10 -> -6), duas coisas e ambas lidas do alinhamento:
+ *  1. o despacho INTERNO do case 1 tambem e um `switch (arg0)` e nao a
+ *     cadeia if/else-if -- o alvo tem `beq $s0,$zero` e nos tinhamos
+ *     `bne`, que e a polaridade que uma cadeia produz. Vale duas
+ *     instrucoes;
+ *  2. D_80010000, D_80010004 e D_80010008 saem no alvo com `lui %hi` /
+ *     `lw %lo` e em nos saiam `lw` GP-RELATIVO, porque o escalar simples e
+ *     small data a -G8. Com o braco agregado nos tres, mais duas.
+ *     D_80010004 nao estava declarado em variables.h e D_80010008 so tinha
+ *     a forma escalar; os dois ganharam braco _IS_AGGREGATE guardado, e o
+ *     build completo continua a fechar, logo nenhum outro consumidor mexe.
+ * CENSO AGORA: lui -2, addu -2, addiu -2, sh -1, beq -1, slt -1, j -1,
+ * bne -1, lw +1, blez +1, andi +3.
  * NAO MEDIDO: permuter.
  */
+#define D_80010000_IS_AGGREGATE
+#define D_80010004_IS_AGGREGATE
+#define D_80010008_IS_AGGREGATE
 #include "common.h"
 
 extern u8 D_80011594[];
-extern u8 *D_80010004;
 extern s32 D_8001000C;
 extern s32 D_80010010;
 
@@ -82,12 +97,15 @@ void func_80056828(s32 arg0) {
 
     switch (st) {
     case 1:
-        a = D_80010008;
+        a = D_80010008[0];
         v = 0xC000;
-        if (arg0 == 0) {
-            a = (s32)D_80010000;
-        } else if (arg0 == 1) {
-            a = (s32)D_80010004;
+        switch (arg0) {
+        case 0:
+            a = (s32)D_80010000[0];
+            break;
+        case 1:
+            a = (s32)D_80010004[0];
+            break;
         }
         if (*(s32 *)a != 0) {
             v = *(s32 *)a;
