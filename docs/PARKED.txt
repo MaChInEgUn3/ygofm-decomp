@@ -397,6 +397,26 @@ func_80033CF8
 func_80047864
     RESOLVED -- src/func_80047864.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_8004A27C
+    31/31, 6 differing (2026-09-12; was 9, was 11). PER_FUNC_AS_FLAGS -G0,
+    real pointer-scalar declaration for D_8009B458 (gp=0, at=0).
+    9 -> 6 is ONE LINE MOVED, found by the permuter and plain C: the table
+    read `t = D_80011434[arg0];` sits BETWEEN the two zero stores rather
+    than after them. With it after both, gcc emits the lui/addiu pair late
+    and the first product's mflo lands ahead of the stores.
+    NAMING AXIS DEAD, eight spellings, seven flat at 9 and one at 20:
+    borrowing arg1 for the second halfword; that plus a named first
+    product; the products above the zero stores; borrowing arg0 for the
+    first product; both products in fresh names; the table read hoisted to
+    the top (20); borrowing arg2 for the second product; arg1 and arg2
+    together. FLAG AXIS DEAD: sweep_try over 23 rows, the installed
+    O2 G8 / as G0 is the best of them.
+    ZERO-STORE POSITION AXIS DEAD, eight more: three do/while(0) pins all
+    cost an instruction (+1, +2, +1), three placements are 16/16/20, and
+    only writing the first product between the read and the store ties at
+    6. So the do/while idiom of the D_8009B0F4 family does NOT transfer.
+    The 6 left are one BLOCK ORDER: retail emits `sh $zero,0x4CE` before
+    the lui/addiu/addu/lw that materialises D_80011434[arg0], and we emit
+    it after. Everything before and after those six lines is identical.
 func_8004A3BC
     RESOLVED -- src/func_8004A3BC.c is in the build and the image hashes. Entry kept for its diagnosis, which is the record of what the lever turned out to be.
 func_80044E90
