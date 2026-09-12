@@ -3794,6 +3794,12 @@ func_8004D58C -- 13 differences at equal length (116/116). The sibling of
   The residue is two clusters: five register copies in the preamble that
   retail sources from $t3 and we source from $t5, and a sra/sll pair where
   retail keeps the quotient in the register the index arrived in.
+  2026-09-12, SEGUNDA CORRIDA DO PERMUTER A PARTIR DA BASE DE 5: 21411
+  iteracoes, ZERO saidas. A primeira corrida, a partir da base de 12, tinha
+  achado o ganho na iteracao ~5000; desta vez nada. Somando as 27 saidas
+  guardadas que repontuei (todas a empatar em 12), o permuter esta esgotado
+  nesta funcao e as 5 que sobram sao as cinco copias de registador do
+  preambulo, com o desempate ja medido em oito grafias.
   2026-09-12, MAIS TARDE NO MESMO DIA: 12 -> 5. O permuter, relancado com
   -j 4 a partir desta base, achou na iteracao ~5000 o que a mao nao achou:
   `r = i % 8;` NOMEADO, e a POSICAO e o lever inteiro -- entre `s = t + d;`
