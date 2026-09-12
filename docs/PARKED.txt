@@ -2480,6 +2480,15 @@ func_80058938 -- 8 differences at 81/81, register/schedule class, first user
   and cursor setup, and we emit them after.
   PERMUTER RUN FOR THE FIRST TIME AND SATURATED: 44262 iterations, two stored
   outputs, re-scored at 8 (ties) and 9 (worse). So the class is not reachable
+  PINO do{}while(0) MEDIDO E MORTO AQUI (2026-09-12), e a comparacao e que
+  vale: o MESMO idioma ganhou 7->6 na func_80013360 no mesmo dia, sobre o
+  mesmo sintoma (ordem do preambulo). Aqui os CINCO pinos custam TRES
+  instrucoes (78 contra 81): em volta de `base =`, de `off = 0`, das duas
+  atribuicoes de base e tbl, de `new_var =`, e do par r/end. Das tres
+  reordenacoes, `off = 0` primeiro e 18, a flag e o off acima da base e 43,
+  e so trocar tbl com base empata em 8. Entao o idioma NAO transfere por
+  semelhanca de sintoma -- na func_80013360 o pino separa duas lojas ao
+  mesmo simbolo, e aqui ele quebra a cadeia que encurta o h.
   from this base by mutation either, and the park note's own lever (naming
   the shifted flag as a first statement, -3 and 80) stays the only thing
   measured on the axis.
