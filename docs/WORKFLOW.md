@@ -106,6 +106,17 @@ psyq46 and psyq47 side by side, so the comparison above costs one command.
 
 ## Adding a function
 
+**THE CANDIDATE POOL HAS A FLOOR NOW, AND IT IS 250 INSTRUCTIONS**
+(measured 2026-09-12). `candidates.py` returns ZERO clean candidates in
+16-40, 40-80, 80-140 and 140-250 instructions, and 17 in 250-600 plus 8
+above 600 -- so the zeros are real and not a filter that cannot match; the
+wide band is the positive control. Every unattempted function below 250 is
+gone: matched, parked, GTE (the `HAND_WRITTEN` regex `wc2|rtps|mfc2|mtc2`),
+or library. The smallest clean candidate left is func_80056828 at 341.
+This changes what "pick a new function" costs: there is no warm-up band any
+more, and the prose below about a 26-instruction sweet spot describes a
+pool that no longer exists.
+
 **Start with the m2c draft.** `tools_src/m2c_draft.py func_XXXXXXXX` prints
 structurally-correct C for the listing in about a second: loop and switch
 shapes, case groupings, reciprocal multiplies read back as `/ 3`, field
