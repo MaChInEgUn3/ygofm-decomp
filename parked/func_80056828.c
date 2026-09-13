@@ -1,4 +1,4 @@
-/* -2 (339/341) com EXCESSO DE CENSO ZERO, 2026-09-13. Flags PADRAO.
+/* 341/341 com CENSO VAZIO, 2026-09-13. Flags PADRAO.
  * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
  * para 250 instrucoes.
  *
@@ -86,23 +86,40 @@
  * gcc coalesce toda copia de fonte. Reler o campo no teste do `while` e
  * `lbu +1`. Quatro grafias empatadas e o sinal de eixo errado.
  *
- * MEDIDO E MORTO sobre o `nop` que falta (grupos 2 e 3 do alinhamento: o
- * alvo tem DOIS `lui %hi(D_80010004)` e deixa um `nop` no slot do `beq`,
- * onde nos fazemos CSE de um so e enfiamos o `lui` no slot): dar a
- * D_80010004 um braco `.data` -- a forma NUA, uma pseudo-instrucao para o
- * preenchedor de slot -- chega a 341/341 EXATO e e falso. O excesso sobe de
- * 0 para 2: `lbu +1` e `nop +1`, ou seja passa de um `nop` a menos para um
- * a mais. Combinado com o lever 4 e +1 e o mesmo excesso. O braco foi
- * removido de variables.h outra vez; nao fica guarda que ninguem usa.
+ * O `nop` QUE FALTAVA ERA O BRACO `.data` DE D_80010004, e a primeira
+ * medicao disso estava errada por uma razao que nao era o braco. O alvo poe
+ * um `nop` no slot do `beq $s0,$v0,L4` e nos enfiavamos la a metade `lui`
+ * do par `%hi`/`%lo` do braco AGREGADO -- e a regra do WORKFLOW: a forma
+ * NUA e uma pseudo-instrucao, e o preenchedor nao pode levar metade dela.
+ * O que enganou foi a INDEXACAO: com o braco agregado o simbolo e
+ * `u8 *D_80010004[]` e `[0]` da o ponteiro; com o braco `.data` e
+ * `u8 *D_80010004` e `[0]` passa a indexar um BYTE, o que mete um `lbu` e
+ * um `nop` novos e faz a medicao ler como falso ganho (+2, `lbu +1`,
+ * `nop +1`). Tirando o `[0]`, o censo fica VAZIO.
  *
- * CENSO ATUAL: duas familias, EXCESSO ZERO e DEFICIT DE DOIS.
- * addu -1, nop -1. As chamadas batem uma a uma com o alvo, e tudo o que
- * emitimos o alvo tambem tem.
+ * SEGUNDO NOME PARA arg0 (m), atribuido no TOPO da funcao e usado nos cases
+ * 9 e 0xA e no braco 0x3E do case 7: e o `addu` que faltava. O permuter
+ * achou isto como uma leitura NAO INICIALIZADA (`sum = arg0;` dentro do
+ * case 7, com os cases 9 e 0xA a ler `sum`), que sao bracos mutuamente
+ * exclusivos e portanto impossivel de instalar. A grafia honesta vale o
+ * mesmo censo. A POSICAO importa e a honesta nao e a melhor: no topo da
+ * funcao da 17 grupos estruturais, dentro do case 7 (a forma ilegal) da 15,
+ * e um `m = arg0;` por braco -- que tambem e legal -- da -4 e tres
+ * familias. Mecanismo sem grafia legitima conhecida para a posicao.
+ *
+ * MEDIDO E MORTO: o ponteiro nomeado `e = (s32 *)(p + 0xD10)` no case 9,
+ * que veio na mesma saida do permuter, vale EXATAMENTE zero -- sozinho e
+ * com o segundo nome junto. O `m` e o lever inteiro.
+ *
+ * CENSO ATUAL: VAZIO. Comprimento exato, multiset de opcodes exato, zero
+ * excesso e zero deficit. O que sobra sao 234 diferencas posicionais, todas
+ * de alocacao de registo e ordem de operando -- que e exatamente o estado
+ * em que o permuter e a ferramenta certa.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
 #define D_80010010_IS_AGGREGATE
-#define D_80010004_IS_AGGREGATE
+#define D_80010004_IN_DATA
 #define D_80010008_IS_AGGREGATE
 #include "common.h"
 
@@ -126,7 +143,9 @@ void func_80056828(s32 arg0) {
     s32 c;
     s32 w;
     void (*fp)(s32, s32, s32);
+    s32 m;
 
+    m = arg0;
     rec = arg0 * 0xE20 + D_800F2C40;
     t0 = func_80074170(1);
     st = rec[0xE14];
@@ -143,7 +162,7 @@ void func_80056828(s32 arg0) {
             a = (s32)D_80010000[0];
             break;
         case 1:
-            a = (s32)D_80010004[0];
+            a = (s32)D_80010004;
             break;
         }
         if (*(s32 *)a != 0) {
@@ -213,7 +232,7 @@ void func_80056828(s32 arg0) {
             func_8005A468(arg0, 0);
             break;
         case 0x3E:
-            func_8005A468(arg0, n);
+            func_8005A468(m, n);
             break;
         case 0x3C:
             func_8005A468(arg0, -n);
@@ -227,9 +246,9 @@ void func_80056828(s32 arg0) {
         func_800582C0(arg0, rec[0xE0C], *(u16 *)(rec + 0xE0A));
         break;
     case 9:
-        p = arg0 * 0xE20 + D_800F2C40;
+        p = m * 0xE20 + D_800F2C40;
         v = *(s32 *)(p + 0xDE8);
-        D_8009AFA0 = arg0;
+        D_8009AFA0 = m;
         if (*(s32 *)(p + 0xD10) >= 0) {
             if (arg0 != 0) {
                 fp = (void (*)(s32, s32, s32))(D_80010010[0] + 4);
@@ -261,7 +280,7 @@ void func_80056828(s32 arg0) {
         break;
     case 0xA:
         if (rec[0xE1D] == 0) {
-            func_80048D08(arg0, (arg0 << 0xB) + D_801A8000);
+            func_80048D08(m, (arg0 << 0xB) + D_801A8000);
         }
         break;
     case 0xB:

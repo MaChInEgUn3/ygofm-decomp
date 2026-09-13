@@ -2717,6 +2717,21 @@ on a combination that had been in the table for weeks.
   says the attribute is doing the work rather than something else: the same
   source with plain scalars at default flags is **10 instructions against 12**.
 
+  **When you move a symbol between the aggregate and scalar arms, the
+  source's INDEXING has to move with it -- and when it does not, you measure
+  the wrong arm and reject it for a reason that is not the arm.** Under
+  `_IS_AGGREGATE` a pointer table is `u8 *sym[]`, so `sym[0]` is the
+  pointer; under the `.data` or plain-scalar arm it is `u8 *sym`, and the
+  same `sym[0]` indexes a BYTE. The build still compiles, the semantics
+  change, and the census gains an `lbu` and a `nop` that read exactly like
+  the false-zero signature this file warns about -- so the arm gets thrown
+  away on a +2 that belongs to the subscript. func_80056828 lost the arm
+  twice that way before the `[0]` came off with it; with the subscript
+  removed the same arm takes the function from one missing `nop` to an
+  EMPTY census, exact length and exact opcode multiset. The check costs one
+  grep: after changing an arm, `grep -n '<sym>\[' ` the source and confirm
+  every subscript still means what it did.
+
   **And it is the BARE form only -- where retail wants cc1psx's OWN split pair
   beside a gp-relative symbol, `.data` is the wrong arm.** func_80015DFC sat
   at -1 with D_800E9D98 in `.data`: the assembler expanded it adjacent and

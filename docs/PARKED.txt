@@ -1,5 +1,30 @@
-func_80056828 -- -2 (339/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
-  Censo: addu -1, nop -1 -- excesso ZERO, deficit de dois.
+func_80056828 -- 341/341 com CENSO VAZIO, 2026-09-13.
+  Censo: VAZIO -- comprimento exato, multiset de opcodes exato, zero
+  excesso e zero deficit. Sobram 234 diferencas posicionais, todas de
+  alocacao de registo e ordem de operando. Estado de permuter.
+  O `nop` QUE FALTAVA era o braco `.data` de D_80010004, e a primeira
+  medicao disso estava errada por uma razao que nao era o braco. O alvo poe
+  um `nop` no slot do `beq $s0,$v0,L4`; nos enfiavamos la a metade `lui` do
+  par `%hi`/`%lo` do braco AGREGADO, e a forma NUA e uma pseudo-instrucao,
+  que o preenchedor nao pode partir. O que enganou foi a INDEXACAO: com o
+  braco agregado o simbolo e `u8 *D_80010004[]` e `[0]` da o ponteiro; com o
+  braco `.data` e `u8 *D_80010004` e `[0]` passa a indexar um BYTE, o que
+  acrescenta um `lbu` e um `nop` e faz a medicao ler como falso ganho (+2,
+  `lbu +1`, `nop +1`). Tirando o `[0]`, o censo fica vazio. LICAO: ao trocar
+  um simbolo de braco agregado para escalar, a indexacao no fonte tem de
+  trocar junto, e quem nao troca mede o braco errado.
+  SEGUNDO NOME PARA arg0 (`m`), atribuido no topo da funcao e usado nos
+  cases 9 e 0xA e no braco 0x3E do case 7: e o `addu` que faltava. O
+  permuter achou isto como leitura NAO INICIALIZADA (`sum = arg0;` dentro do
+  case 7 com os cases 9 e 0xA a ler `sum`, bracos mutuamente exclusivos),
+  impossivel de instalar; a grafia honesta vale o mesmo censo. A POSICAO
+  importa e a honesta nao e a melhor: no topo da funcao da 17 grupos
+  estruturais, a forma ilegal da 15, e um `m = arg0;` por braco -- tambem
+  legal -- da -4 e tres familias. Mecanismo sem grafia legitima conhecida
+  para a posicao.
+  MEDIDO E MORTO: o ponteiro nomeado `e = (s32 *)(p + 0xD10)` no case 9, que
+  veio na mesma saida do permuter, vale exatamente zero, sozinho e junto com
+  o segundo nome. O `m` e o lever inteiro.
   `i = 0;` FICA ACIMA DO `if (arg0 < 2)`, noutro bloco basico. O gcc 2.8 nao
   tem CSE global, entao a comparacao no bloco de baixo nao consegue dobrar
   `0 < n` em `n != 0`, e sai o `slt $v0,$a2,$v1` do alvo com o

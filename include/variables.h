@@ -1128,7 +1128,9 @@ extern u8 D_801DD800[];
  * same reason for the arms: func_80056828 reads all three with `lui %hi` /
  * `lw %lo`, which the plain scalar form does not give at -G8 -- there the
  * symbol is small data and the load comes out %gp_rel. */
-#ifdef D_80010004_IS_AGGREGATE
+#ifdef D_80010004_IN_DATA
+extern u8 *D_80010004 __attribute__((section(".data")));
+#elif defined(D_80010004_IS_AGGREGATE)
 extern u8 *D_80010004[];
 #else
 extern u8 *D_80010004;
