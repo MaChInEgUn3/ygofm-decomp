@@ -1,5 +1,5 @@
 /* MAIS PERTO, 2026-09-13. Escrita do zero; flags padrao (sem linha em
- * build.py). 494/498, excesso de censo 1 (lui +1; nop -3, lw -2), 22 blocos
+ * build.py). 496/498, excesso de censo 1 (lui +1; nop -3), 20 blocos
  * estruturais. Tela de resultado do duelo: cria os objetos da pontuacao e
  * atualiza os contadores de vitoria em D_8009B1D8.
  *
@@ -14,12 +14,15 @@
  *     0xF423F deixa de ocupar os slots de leitura (492 -> 494).
  *  3. `do { } while (0);` em volta de `D_8009B1E8 = D_801799D8;`: o `lui` de
  *     D_801D5708 volta para depois do store (blocos -2).
+ *  5. O teto 0xF423F relido por lvalues volateis, o ponteiro
+ *     `*(u8 *volatile *)&D_8009B1D8` e o `*(volatile u32 *)` de +0x5E0: o
+ *     alvo recarrega os dois depois do store (494 -> 495 -> 496). Volatil
+ *     tambem no `+=` chega a 498 com lw +1 e foi rejeitado.
  *  4. A divisao por 10 sobre um nome (`v = v - 0x32; ... v / 10`), c10 e tex
  *     atribuidos depois da criacao do objeto, e o elemento de D_8009B1D8
  *     lido antes do `|= 0x2000` de D_8009B16C.
  *
- * RESIDUO: duas releituras de D_8009B1E8 nos blocos de objeto que o alvo faz
- * antes dos argumentos, tres `nop` de leitura, a ordem de x/j no laco das
+ * RESIDUO: tres `nop` de leitura, um `lui` copiado para slot, a ordem de x/j no laco das
  * fichas e os registradores dos incrementos de +0x518/+0x51A.
  * MEDIDO E PIOR (troca de comprimento por excesso): nome novo para o valor
  * dos incrementos (+2 com addiu +1), leituras nomeadas de +0x39/+0x38 nos
@@ -71,6 +74,7 @@ void func_800218F0(void)
     s32 ix;
     s32 w;
     u8 **b1d8;
+    u8 **pp2;
 
     p = D_800F2848;
     *(u16 *)(p + 2) += 2;
@@ -218,7 +222,7 @@ void func_800218F0(void)
         if (D_8009B360[0] < 0 && D_8009B361[0] >= 0) {
             *(u32 *)(D_8009B1D8 + 0x5E0) += D_8009B1E8[0x3A];
             do {
-                if (*(u32 *)(D_8009B1D8 + 0x5E0) > 0xF423F) {
+                if (*(volatile u32 *)(*(u8 *volatile *)&D_8009B1D8 + 0x5E0) > 0xF423F) {
                     *(u32 *)(D_8009B1D8 + 0x5E0) = 0xF423F;
                 }
             } while (0);
