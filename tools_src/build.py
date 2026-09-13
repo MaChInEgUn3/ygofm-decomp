@@ -814,6 +814,10 @@ PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"
 # free -- and because the fix is the assembler's threshold rather than
 # -mno-split-addresses, the function's jump table (jtbl_8001179C) survives.
 PER_FUNC_AS_FLAGS["func_800577B0"] = "-G0"
+# func_8004FE2C: gp=23 (two one-byte flags) beside D_80010014/D_80010018, two
+# plain four-byte pointers it reads bare; -G1 keeps the flags gp-relative and
+# the pointers out of small data, and the jump table survives.
+PER_FUNC_AS_FLAGS["func_8004FE2C"] = "-G1"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

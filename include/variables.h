@@ -695,6 +695,16 @@ extern u8 CtorCount_0[];
  * `lui %hi` / `lw %lo` by func_800577B0's mode dispatcher. */
 extern u8 *D_80010014;
 extern u8 *D_80010018;
+/* The two arguments func_8004FE2C passes to the callbacks at D_80010014 + 4
+ * and D_80010018 + 4, read bare. */
+extern s32 D_80010024 __attribute__((section(".data")));
+extern s32 D_80010028 __attribute__((section(".data")));
+/* Eight bytes func_8004FE2C copies onto its stack with lwl/lwr; unsized, so
+ * cc1psx splits the address through a temp the way retail does. */
+extern u8 D_8009AFFC[];
+/* One-byte flags func_8004FE2C tests through cc1psx's own %hi/%lo pair. */
+extern u8 D_800F3A54[];
+extern u8 D_800F4875[];
 #ifdef D_80010000_IN_DATA
 extern u8 *D_80010000 __attribute__((section(".data")));
 #elif defined(D_80010000_SIZED)
