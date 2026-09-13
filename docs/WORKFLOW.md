@@ -2462,6 +2462,19 @@ on a combination that had been in the table for weeks.
   pseudo born before the load's own. **When the only difference left is that a
   whole block's registers are shifted by one, look for a pseudo that should not
   exist**; a cast that changes no instruction is the commonest source.
+- **And a local's WIDTH can decide the ORDER of two independent instructions,
+  with the count, the census and every register already right.** func_8004158C
+  sat at three differences that were only two `andi` swapped -- retail does
+  `srl`/`andi 7`, loads `h+0x18`, then `andi 0x300` on `ta`; we did the
+  `andi 0x300` first. Seven spellings of that one statement (moved before the
+  store, the store split in two, embedded in the next store, `ta = ta & 0x300`,
+  a `do { } while (0)`, named reads around it, the neighbour `+=` moved after
+  it) all gave the SAME three differences, and `-fno-schedule-insns` /
+  `-fno-schedule-insns2` added 11 and 6 instructions. Declaring `ta` as `u16`
+  instead of `s32` -- the width of the `*(u16 *)(h + 0xC)` it holds -- is a
+  MATCH, and `s16` is the same MATCH. The permuter found it as `short ta` in
+  twenty minutes. Identical results across many spellings is the usual
+  wrong-axis tell, and here the axis was the declaration, not the statement.
 - **A symbol read at one width in one file and another width elsewhere** takes
   the same per-file guard as an addressing disagreement: D_8009AF76 is a
   halfword read gp-relatively almost everywhere and a *byte* read through
