@@ -4989,6 +4989,22 @@ func_80048A28 -- 65 differences at the right length (121/121), first written
   test and not the pair. Every instruction is in the right place; the whole residue is
   one register rotation across the function, which is why the count is so
   high against so little wrong.
+  2026-09-13, PERMUTER SATURADO em 448 saidas, e a melhor e INSTALAVEL PELA
+  METADE. O scorer diz len0/cen4/60 -> len0/cen2/60: mesmo comprimento,
+  mesmas 60 diferencas, duas familias de censo a menos. Sao duas edicoes e
+  so uma e legitima. A legitima -- `nm = arg0 & 0x1F;` separado do `* 2` --
+  vale EXATAMENTE ZERO: com um nome, com dois nomes, e com o nome declarado
+  `int` como o permuter o escreveu, as tres dao 60 diferencas e o censo
+  identico ao instalado (addiu +2, nop -2, sll -1, addu +1). Logo o ganho
+  todo esta na outra edicao, que e `if (t || b) { i = 0; } else { i = 0; }`
+  com `t` e `b` ainda por atribuir -- a classe de leitura NAO INICIALIZADA
+  que este repositorio ja documenta e nao instala.
+  QUATRO GRAFIAS LEGITIMAS MEDIDAS CONTRA ELA, nenhuma chega perto: `i = 0;`
+  acima da guarda de saida e +1 de censo (84 diferencas), o mesmo dentro de
+  um `do { } while (0);` idem, o `do { } while (0);` sozinho no sitio e
+  identico ao instalado, e um terceiro pseudo zero (`z = 0;` antes da guarda
+  com `i = z;`) tambem identico. Mecanismo sem grafia legitima conhecida;
+  escrito aqui para ninguem repetir as seis medicoes.
   What is right: `D_8009B45C` as the **scalar** arm plus `as -G0` (gp=0, so
   any -G is free). Under the aggregate arm cc1psx emits a `%hi`/`%lo` pair,
   gcc hoists the `%hi` out of the loop into a callee-saved register and every
