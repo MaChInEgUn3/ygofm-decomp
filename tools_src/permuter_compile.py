@@ -6,6 +6,7 @@ nothing left to do; everything after it is build.py's own pipeline, imported
 rather than restated so the two cannot drift.
 """
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -34,7 +35,42 @@ def main():
                 pass
 
 
+def with_prelude(src, scratch):
+    """Put back the declarations permute.py had to strip for pycparser.
+
+    base.c is preprocessed with -D__attribute__(x)=, which also deletes every
+    section(".data") arm, so the permuter would score a different program:
+    func_8003DC1C's base built 519/532 against the parked 532/532. The
+    attributed declarations are saved in PERMUTER_PRELUDE and re-inserted
+    just before the function, after the typedefs they need; a later
+    attributed redeclaration of a plain extern keeps its section.
+    """
+    prelude = os.environ.get("PERMUTER_PRELUDE")
+    if not prelude or not FUNC:
+        return src
+    text = src.read_text()
+    m = re.search(r"^[^\n;]*\b%s\s*\(" % re.escape(FUNC), text, re.M)
+    if not m:
+        return src
+    merged = scratch / (src.stem + ".prelude.c")
+    merged.write_text(text[:m.start()] + Path(prelude).read_text()
+                      + text[m.start():])
+    return merged
+
+
 def _compile(src, out, asm, masm):
+    merged = with_prelude(src, out.parent)
+    try:
+        return _compile_one(merged, out, asm, masm)
+    finally:
+        if merged != src:
+            try:
+                merged.unlink()
+            except OSError:
+                pass
+
+
+def _compile_one(src, out, asm, masm):
 
     # PERMUTER_CC_FLAGS overrides build.py's row for this run only. Needed when
     # the parked candidate is measured at flags the row does not carry -- e.g.
