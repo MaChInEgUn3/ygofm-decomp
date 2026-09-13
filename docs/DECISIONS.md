@@ -4242,3 +4242,50 @@ Coverage measured on a random 60 of the open in-scope functions: 60/60 with
 the rodata passed, 55/60 without -- the five are `jr $v0` jump-table switches,
 which emit nothing at all unless m2c can read the table. The wrapper therefore
 always appends `asm/data/*.rodata.s`.
+
+## Levers measured on krystalgamer's tree (2026-09-13)
+
+Found while matching func_8006C37C (#4404 upstream, byte-exact) and working on
+func_8006F1B4, both handlers of the `D_800114E8` table, pure C under
+`gcc_2_8_1_g8_split`. Counts are instructions/opcode-census excess/operand
+differences from `km_diff`, which ignores branch labels and symbol spelling.
+None of these were written down anywhere before, which is why the RAG could not
+find them.
+
+- **A maximum of three halfwords whose retail re-reads them `lh` for the test and
+  `lhu` for the value, and tests `m == z`, is the value picked inside each arm.**
+  `if (y < z) v = z; else v = y; if (v == z) { u = z; if (v < x) u = x; } else
+  { u = y; if (y < x) u = x; } v = (s16)u;` -- with `v` the one long-lived local
+  that later holds the radius and the scale. Every `MAX()` macro spelling (16
+  measured) was 634 or 640-642; the per-arm form took the function from 637/exc3
+  to 638/exc1 and three blocks.
+- **An unused aggregate still reserves its frame slot in GCC 2.8.1.** The retail
+  frame had 0x18 bytes at `sp+0xC8` that nothing reads; `u8 unused_c8[0x18];`
+  after the local that precedes it fixed the frame size (0x3A8 to 0x3C0) and took
+  operand differences 209 to 170. krystalgamer's reconstruction reaches the same
+  frame with a 0x20-byte union around the 8-byte out-parameter.
+- **A register copy from a table address stored into a struct is a read-back.**
+  `e->table = D_80091604; t = e->table;` gives retail's `addu $fp,$v0,$zero`;
+  assigning `t` first and storing it gives no copy.
+- **A clamp that wants its value in a caller-saved register must not reuse the
+  function's long-lived local.** Borrowing an already-dead name (`s`, `lv`, `sc`,
+  `cnd`) was 1 difference; a fresh name was 20; the long-lived `v` was 9.
+- **The delay slot of the clamp's `j` stays empty with the clamp written as one
+  nested conditional stored after the unclamped sum**:
+  `s = e->scale + d; e->scale = s; s = s < 0 ? 0 : (s > max ? max : s); e->scale = s;`
+  (krystalgamer's formulation). The same logic as `if`/`else if` is 8
+  differences, and a `volatile` store also works but is the worse spelling.
+- **Colour channels computed first and stored together**: three temporaries
+  after all three `mul`/`div` chains, then the three `sb`, as retail orders them.
+- **A fade written `c = c >= K ? c - D : 0;` compiles branch-free; retail's
+  `bnez`/`j`/two `sb` is `if (c >= K) c = c - D; else c = 0;`.** On
+  func_8006F1B4 this alone took 1226 to 1252 of 1270 and removed twelve missing
+  `j` and thirteen missing `sb`.
+- **A zero test on two adjacent colour bytes that retail loads `lhu` is
+  `*(u16 *)&c->r == 0`**, not two byte tests.
+- **`& 1` and `>> 1` on a `u16` field let GCC narrow the load to `lbu`; `% 2`
+  and `/ 2` keep retail's `lhu` on every use.** Excess 10 to 6, and the four
+  extra `lbu` / four missing `lhu` disappeared.
+- **Guard plus `do`/`while` for a counted draw loop** (`if (n != 0) { i = 0; do
+  { ... } while (i < n); }`) removed a stray `nop` where the `for` spelling
+  rotated the test.
