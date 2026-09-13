@@ -1,3 +1,11 @@
+func_800323F8 -- 464/464 com CENSO VAZIO, 26 diferencas, 2026-09-13.
+  Escrita do zero no mesmo dia. FLAGS -quiet -O2 -G8 -fno-strength-reduce
+  (sem linha em build.py ainda) e D_8009B146_IN_DATA. Inicializa os dois
+  registros de 0x6344 bytes e cria onze objetos de tela. Os seis levers e
+  o que foi medido estao no cabecalho de parked/func_800323F8.c. O resto e
+  so registrador: a ordem de dois invariantes hoistados ($fp/$s7) e trocas
+  de $t/$a nos dois primeiros blocos. Proximo passo: permuter com as flags.
+
 func_8005C7BC -- 461/461 com CENSO VAZIO, 23 diferencas, 2026-09-13.
   Escrita do zero no mesmo dia; flags padrao. Sequenciador de animacao do
   arquivo original S3000000.C: a busca de chave com `_assert` aparece quatro
