@@ -693,8 +693,15 @@ extern s32 D_800906E0;
 extern u8 CtorCount_0[];
 /* Two more pointer-valued globals in the same table as D_80010000, read
  * `lui %hi` / `lw %lo` by func_800577B0's mode dispatcher. */
+#ifdef D_80010014_IN_DATA
+/* func_8004FE2C reads both bare beside one-byte %gp_rel flags; in .data they
+ * are non-small with their real size and no assembler -G. */
+extern u8 *D_80010014 __attribute__((section(".data")));
+extern u8 *D_80010018 __attribute__((section(".data")));
+#else
 extern u8 *D_80010014;
 extern u8 *D_80010018;
+#endif
 /* The two arguments func_8004FE2C passes to the callbacks at D_80010014 + 4
  * and D_80010018 + 4, read bare. */
 extern s32 D_80010024 __attribute__((section(".data")));

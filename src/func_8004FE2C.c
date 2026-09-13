@@ -1,9 +1,11 @@
 /* MATCH, 2026-09-13. Escrita do zero. duel_action_resolution_dispatch no
- * transplante do Unchiga (STUB la). FLAGS: cc padrao, as -G1 (linha em
- * build.py): os dois flags de um byte ficam %gp_rel e D_80010014/18 saem
- * bare. Jump table de 17 casos sobre (s8)(D_8009AF9A + 1).
+ * transplante do Unchiga (STUB la). FLAGS: padrao, sem linha em build.py.
+ * Jump table de 17 casos sobre (s8)(D_8009AF9A + 1).
  *
  * LEVERS, medidos um sobre o outro com try_func:
+ *  0. D_80010014/18 no arm .data (D_80010014_IN_DATA): saem bare ao lado
+ *     dos dois flags de um byte em %gp_rel. Um `as -G1` da o mesmo MATCH;
+ *     o arm diz a verdade sobre os objetos e dispensa a flag.
  *  1. D_800F4875 e D_800F3A54 como arrays sem tamanho: o alvo poe o `lui` do
  *     primeiro no slot do bnez (par proprio do cc1psx). No arm .data o slot
  *     fica nop e sobra +1.
@@ -22,6 +24,7 @@
  */
 #define D_8009B0F4_IN_DATA
 #define D_8009B134_IN_DATA
+#define D_80010014_IN_DATA
 #include "common.h"
 
 typedef struct {
