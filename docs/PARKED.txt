@@ -1671,6 +1671,25 @@ func_80014B30_WAS -- 50 differences, and an **unfinished** park rather than a ne
   Also tried, no change: an extra name for the `p` argument (retail copies $a0
   to $a2 in a branch delay slot), with and without the per-case `e`.
 
+func_80048658, UPDATE 2026-09-13 -- 65 -> 10 on krystalgamer's source shape,
+  unpinned. His tree had this function byte-exact with seven hard-register
+  pins (#3859 reclassified it). With the pins deleted it is 66/68; the
+  argument-copy question below is answered by passing arg0 through a name
+  that is live again later, in both initialisation blocks:
+  `t2 = arg0; id = t2; pan = arg2; stop_arg = id; idc = id; vol = arg1;`.
+  `t2` is load-bearing: a fresh name, `lo`, `hi` or `n` in the same place
+  are 66-67. The duplicated `if (arg0 & 0x8000)` init blocks are load-bearing
+  too (flattened is +1). parked/func_80048658.c is that shape translated to
+  this tree's casts; try_func at build.py's flags gives 10, and the same C
+  in his tree (gcc_2_8_1_g0, or gcc_2_8_1_g8 with G_SDVALUE_IN_DATA) leaves
+  the same registers. The 10: the idc copy lands in $t2 where retail has
+  $t1 (and the else arm's table pointer the other way round), and
+  `andi 0x100` is emitted before `andi 0x1F`. Dead on those two: the table
+  pointer as one function-scope local, its declaration first or last, the
+  global read inline; lo computed after hi, lo in two statements,
+  `hi = t2 != 0; hi <<= 6`, `hi = t2 = id & 0x100`, the mask read before lo,
+  the mask read from idc -- all 10 or worse.
+
 func_80048658 -- 65 differences, an **unfinished** park: the body is the same
   D_8009B45C table walk as func_80048920 (parked at 20) and the same
   `f = x & 0x100; f = f != 0;` split is needed, but the *call setup* has a

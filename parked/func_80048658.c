@@ -1,35 +1,74 @@
 #include "common.h"
 
-void func_80048658(s32 arg0, s32 arg1, s32 arg2) {
+void func_80048658(s32 arg0, s32 arg1, s32 arg2)
+{
+    s32 id;
+    s32 idc;
+    s32 vol;
+    s32 pan;
+    u16 stop_arg;
+    u8 last_arg;
+    u16 stop_value;
+    s32 lo;
+    s32 hi;
     s32 n;
-    s32 f;
-    s32 v;
     u8 *e;
+    s32 t2;
 
     if (arg0 & 0x8000) {
-        func_800451E0(arg0 & 0xFFFF, 0);
+        t2 = arg0;
+        id = t2;
+        pan = arg2;
+        stop_arg = id;
+        idc = id;
+        vol = arg1;
+        stop_value = stop_arg;
+    } else {
+        t2 = arg0;
+        id = t2;
+        pan = arg2;
+        stop_arg = id;
+        idc = id;
+        vol = arg1;
+        stop_value = stop_arg;
+    }
+    if (id & 0x8000) {
+        func_800451E0(stop_value & 0xFFFF, 0);
         return;
     }
+    if ((id & 0xF000) == 0x4000) {
+        u8 *a = D_8009B45C;
+        u16 v;
+        s32 n;
 
-    if ((arg0 & 0xF000) == 0x4000) {
-        f = arg0 & 0x100;
-        f = f != 0;
-        n = *(u16 *)(D_8009B45C + ((arg0 & 0x1F) * 2 + (f << 6)) + 0x44C);
+        lo = (id & 0x1F) << 1;
+        t2 = id & 0x100;
+        hi = t2;
+        hi = (hi != 0) << 6;
+        v = *(u16 *)(a + (lo + hi) + 0x44C);
+        if (v == 0xFFFF) {
+            return;
+        }
+        n = (*(u16 **)(a + 0x43C))[v];
         if (n == 0xFFFF) {
             return;
         }
-        v = *(u16 *)(*(u8 **)(D_8009B45C + 0x43C) + n * 2);
-        if (v == 0xFFFF) {
-            return;
-        }
-        e = *(u8 **)(D_8009B45C + 0x444) + v * 8;
+        e = (u8 *)(n * 8 + (u32)*(u8 **)(a + 0x444));
+        t2 = e[2];
+        last_arg = t2;
+        vol &= 0xFF;
+        func_800482B0(v, 0, vol, (s16)pan, e[3], last_arg & 0xFF);
     } else {
-        v = *(u16 *)(*(u8 **)(D_8009B45C + 0x43C) + (arg0 & 0xFFFF) * 2);
-        if (v == 0xFFFF) {
+        u8 *b = D_8009B45C;
+
+        n = (*(u16 **)(b + 0x43C))[idc & 0xFFFF];
+        if (n == 0xFFFF) {
             return;
         }
-        e = *(u8 **)(D_8009B45C + 0x444) + v * 8;
+        e = (u8 *)(n * 8 + (u32)*(u8 **)(b + 0x444));
+        t2 = e[2];
+        last_arg = t2;
+        vol &= 0xFF;
+        func_800482B0(idc & 0xFFFF, 0, vol, (s16)pan, e[3], last_arg & 0xFF);
     }
-
-    func_800482B0(arg0 & 0xFFFF, 0, arg1 & 0xFF, (s16)arg2, e[3], e[2] & 0xFF);
 }
