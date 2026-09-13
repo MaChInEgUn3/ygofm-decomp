@@ -1,3 +1,11 @@
+func_8003DC1C -- 532/532 com CENSO VAZIO, 5 diferencas, 2026-09-13.
+  Escrita do zero no mesmo dia, flags padrao. Maquina de estados do cartao
+  de memoria sobre D_8009B3CF & 0xF. Os dez levers estao no cabecalho de
+  parked/func_8003DC1C.c. Das 5, uma e o renderer da tabela
+  (%lo(.rodata+48)); as outras sao o agrupamento de g + 0x1C antes do
+  indice e a ordem do `lui` de D_8009AF6C contra `off = z`. Proximo passo:
+  permuter.
+
 func_800262D4 -- 474/474 com CENSO VAZIO, 56 diferencas, 2026-09-13.
   Escrita do zero no mesmo dia, flags padrao. Maquina de estados de seis
   passos sobre D_8009B210 & 0xF. Os sete levers e o que foi medido estao no
