@@ -1,3 +1,10 @@
+func_800235C0 -- 466/466 com excesso de 1 no censo (j +1, nop -1), 2026-09-13.
+  Escrita do zero no mesmo dia, flags padrao. Os dois lacos `% 15` casam
+  (giv por indice e o 0x48000 num segundo nome), o epilogo e um so e a
+  leitura dupla de D_8009B204 sai com um cast volatile; os sete levers e o
+  residuo estao no cabecalho de parked/func_800235C0.c. O resto: um `j` a
+  mais, a copia de `moving` e a ordem dos argumentos da func_80040410.
+
 func_800323F8 -- 464/464 com CENSO VAZIO, 26 diferencas, 2026-09-13.
   Escrita do zero no mesmo dia. FLAGS -quiet -O2 -G8 -fno-strength-reduce
   (sem linha em build.py ainda) e D_8009B146_IN_DATA. Inicializa os dois
