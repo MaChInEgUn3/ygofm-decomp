@@ -1,4 +1,4 @@
-/* 461/461 com CENSO VAZIO e 24 diferencas, 2026-09-13. Escrita do zero.
+/* 461/461 com CENSO VAZIO e 23 diferencas, 2026-09-13. Escrita do zero.
  * FLAGS: padrao (-quiet -O2 -G8). Listagem gp=0, at=0.
  *
  * Sequenciador de animacao por chaves: percorre os registros de arg0[0],
@@ -27,13 +27,23 @@
  *  7. nomes proprios `t16` e `t14` para as duas leituras antes da segunda
  *     busca, em vez do `t` compartilhado (38 -> 24). Um nome proprio no
  *     bloco do `t -= rec10` e neutro.
+ *  8. o endereco do callback somado como inteiro, `(u8 *)((idx << 2) +
+ *     (s32)table)`: o alvo tem `addu $v0,$v0,$t3`, indice primeiro
+ *     (24 -> 23). Com o `+ 4` dentro do cast volta a 24.
  *
- * MEDIDO E NEUTRO: ordem dos parametros da inline.
+ * MEDIDO E NEUTRO: ordem dos parametros da inline. Sobre o 8, todas em 23:
+ * `i = 0` no topo ou fora do `for`, `(u16)-1` no teste do contador, um
+ * local `a` para arg0 so no calculo de `out`, `*arg0` sem cast no retorno
+ * ou no `cur`, `fn((u8 **)((u8 *)arg0))`, `(u16)v == 0xFFFF`. A constante
+ * 0xFFFF num local `m` e +2. Sete grafias iguais: eixo errado.
+ * Saidas do permuter (base 23765) aplicadas ao parked: atribuicao encadeada
+ * no retorno da busca +9, leitura nomeada de arg0+0x14 -4, local para
+ * `cur + 0x10` neutro.
  *
- * RESIDUO (24): 8 sao so nome -- `jal func_8008e870` contra `jal printf` e
+ * RESIDUO (23): 8 sao so nome -- `jal func_8008e870` contra `jal printf` e
  * `jal func_8008fbd0` contra `jal exit`, mesmo endereco (sdk_names.txt); o
- * build completo decide. O resto e registrador: arg0 e a constante 0xFFFF
- * com $t1/$t0 trocados e o bloco do `t -= rec10`.
+ * build completo decide. Os outros 15 sao UMA troca: a copia de arg0 e a
+ * constante 0xFFFF com $t1/$t0 trocados em toda a funcao.
  */
 #include "common.h"
 
@@ -167,7 +177,7 @@ u8 *func_8005C7BC(u8 **arg0)
                 *(u16 *)(rec + 0x12) = ((u8 *)&keys[*(u16 *)(rec + 0x16)])[2] << 4;
             }
         }
-        fn = *(s32 (**)(u8 **))(table + ((((u8 *)&keys[*(u16 *)(rec + 0x16)])[3] & 0x7F) << 2) + 4);
+        fn = *(s32 (**)(u8 **))((u8 *)(((((u8 *)&keys[*(u16 *)(rec + 0x16)])[3] & 0x7F) << 2) + (s32)table) + 4);
         out = (s32 *)(((u8 *)arg0) + (*(s32 *)(((u8 *)arg0) + 0x14) * 4 + 0x14));
         out[0] = (s32)cur;
         out[1] = (s32)(base + *(u16 *)&keys[*(u16 *)(rec + 0x14)] * 4);

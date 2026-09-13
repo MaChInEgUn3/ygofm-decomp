@@ -1,10 +1,12 @@
-func_8005C7BC -- 461/461 com CENSO VAZIO, 24 diferencas, 2026-09-13.
+func_8005C7BC -- 461/461 com CENSO VAZIO, 23 diferencas, 2026-09-13.
   Escrita do zero no mesmo dia; flags padrao. Sequenciador de animacao do
   arquivo original S3000000.C: a busca de chave com `_assert` aparece quatro
-  vezes e esta escrita como static inline. Os sete levers estao no
-  cabecalho de parked/func_8005C7BC.c. Das 24, oito sao so o nome do jal
-  (func_8008e870/printf, func_8008fbd0/exit, mesmo endereco); o resto e
-  registrador. Estado de permuter.
+  vezes e esta escrita como static inline. Os oito levers estao no
+  cabecalho de parked/func_8005C7BC.c. Das 23, oito sao so o nome do jal
+  (func_8008e870/printf, func_8008fbd0/exit, mesmo endereco); os outros 15
+  sao UMA troca de registrador: a copia de arg0 e a constante 0xFFFF com
+  $t1/$t0 trocados. Sete grafias sobre isso empatam (eixo errado); permuter
+  relancado sobre a base de 23.
 
 func_80056828 -- 341/341 com CENSO VAZIO, 2026-09-13.
   Censo: VAZIO -- comprimento exato, multiset de opcodes exato, zero
