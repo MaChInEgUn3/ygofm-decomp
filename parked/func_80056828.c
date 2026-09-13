@@ -1,4 +1,4 @@
-/* -8 (333/341), 2026-09-12. Flags PADRAO. Escrita do zero; e a menor funcao
+/* -2 (339/341), 2026-09-13. Flags PADRAO. Escrita do zero; e a menor funcao
  * limpa do pool desde que o piso subiu para 250 instrucoes.
  *
  * FORMA: maquina de estados no byte +0xE14 de um registo de 0xE20 indexado
@@ -38,9 +38,31 @@
  * endereco do registo -- um local por caso -11, inline nos quatro casos +45,
  * um local so para o deslocamento +5.
  *
- * CENSO ATUAL: nove opcodes e EXCESSO TOTAL DE UM. addiu -2, bne -1, sh -1,
- * nop -1, slt -1, j -1, addu -1, sw -1, e um unico sll +1. As chamadas batem
- * uma a uma com o alvo.
+ * 13/09, -8 -> -2 e 309 -> 270 diferencas, em dois levers que o censo
+ * separou e a contagem posicional nao separava:
+ *  4. func_8005A4C4 leva CINCO argumentos e este sitio passava quatro. Nao
+ *     foi deducao: src/func_80056250.c JA CASA e chama
+ *     `func_8005A4C4(p, 0, 0, 0, arg0 == 1 ? 0x800 : 0);`. O alvo mostra a
+ *     mesma forma -- `addiu $v0,$zero,1` / `bne $s0,$v0,L12` com
+ *     `addiu $v0,$zero,2048` no slot, `j L13` com `sw $v0,16($sp)` no slot,
+ *     e `sw $zero,16($sp)` no outro braco. Os dois sitios escritos a mao
+ *     (um por braco do `if`) dao EXATAMENTE o mesmo que o ternario, 270 e
+ *     o mesmo censo, entao fica o ternario, que e a grafia do irmao;
+ *  5. `*(s32 *)(q[0] + 0x10) = 0;` no case 5 e um `sw` onde o alvo tem
+ *     `sh $zero,16($v0)`. Sozinho vale ZERO diferencas e ZERO comprimento
+ *     -- 309 antes e 309 depois -- e o censo diz que esta certo: leva `sh`
+ *     de -1 a 0, e junto com o lever 4 as duas familias `sw`/`sh` somem.
+ *     E o caso da regra "uma edicao que vale zero diferencas ainda pode ser
+ *     a edicao certa; le o censo, nao o total".
+ *
+ * QUARTO FALSO GANHO, 13/09: o permuter (output-3710-5, score 3710) chega a
+ * -4 com `unsigned long long nv = *(u8 *)(p + 0xE0D) * 2; n = nv;`. Compra 4
+ * instrucoes de comprimento com TRES `addu` a mais -- o par de registos do
+ * inteiro de 64 bits -- e o EXCESSO do censo sobe de 1 para 4. Rejeitado
+ * pelo mesmo teste que apanhou os outros tres.
+ *
+ * CENSO ATUAL: quatro familias, EXCESSO DE UM e DEFICIT DE TRES.
+ * addu -1, slt -1, nop -1, sll +1. As chamadas batem uma a uma com o alvo.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
@@ -123,7 +145,7 @@ void func_80056828(s32 arg0) {
         v = *(s32 *)(p + 0xDE0) + sum;
         *(s32 *)(p + 0xDF0) = v;
         *(s32 *)(p + 0xDF4) = v + *(u16 *)(p + 0xE02) * 4;
-        func_8005A4C4(p, 0, 0, 0);
+        func_8005A4C4(p, 0, 0, 0, arg0 == 1 ? 0x800 : 0);
         break;
     case 5:
         p = arg0 * 0xE20 + D_800F2C40;
@@ -135,7 +157,7 @@ void func_80056828(s32 arg0) {
                 *(u16 *)(q[0] + 0x16) = *(u16 *)(q[0] + 0x18);
                 *(u16 *)(q[0] + 0xA) = 0xFFFF;
                 q[0][0xC] = q[0][0x1A];
-                *(s32 *)(q[0] + 0x10) = 0;
+                *(s16 *)(q[0] + 0x10) = 0;
                 i++;
                 q[0][0xD] = 0x10;
                 q += 4;

@@ -1,23 +1,40 @@
-func_80056828 -- -8 (333/341) com EXCESSO DE CENSO IGUAL A UM, 2026-09-12.
-  O -4 anterior era falso: mantinha tres `jal func_8005A468` onde o alvo tem um. Escrita do
-  zero: e a menor funcao limpa que o pool ainda tem, agora que o piso subiu
-  para 250 instrucoes. Maquina de estados com jump table real sobre
-  `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,
-  cauda comum para 1..0xB). Censo: beq -7 / bne +4 (polaridade, o case 7
-  que eu achatei numa cadeia e o retail tem como arvore), lui -5, j -4,
-  slti -2, slt -1, andi +3. Nada de flags nem permuter ainda.
-  GANHO: o case 7 e um SWITCH de tres casos, nao uma cadeia if/else-if --
-  o retail tem a arvore que o gcc gera para tres casos (pivo 0x3C, depois
-  `< 0x3D`, depois 0x23 ou 0x3E) e nenhuma cadeia a produz. Sete
-  instrucoes. As tres ordens de caso dao o mesmo.
+func_80056828 -- -2 (339/341) com CENSO DE QUATRO FAMILIAS, 2026-09-13.
+  Censo: addu -1, slt -1, nop -1, sll +1 -- excesso de um, deficit de tres.
+  Escrita do zero: e a menor funcao limpa que o pool ainda tem, agora que o
+  piso subiu para 250 instrucoes. Maquina de estados com jump table real
+  sobre `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,
+  cauda comum para 1..0xB).
+  GANHO 13/09, -8 -> -2 e 309 -> 270: func_8005A4C4 leva CINCO argumentos e
+  este sitio passava quatro. Nao foi deducao -- src/func_80056250.c JA CASA
+  e chama `func_8005A4C4(p, 0, 0, 0, arg0 == 1 ? 0x800 : 0);`. O alvo tem a
+  mesma forma, com `sw $v0,16($sp)` e `sw $zero,16($sp)` em bracos opostos e
+  UM so `jal`. Escrever os dois sitios a mao da exatamente o mesmo numero e
+  o mesmo censo, entao fica o ternario, que e a grafia do irmao que casa.
+  E a regra "conta os argumentos do callee contra um caller que JA CASA" a
+  pagar-se pela quarta vez.
+  GANHO 13/09, vale ZERO diferencas e esta certo: `*(s32 *)(q[0] + 0x10)` no
+  case 5 e um `sw` onde o alvo tem `sh $zero,16($v0)`. Sozinho, 309 antes e
+  309 depois; o censo leva `sh` de -1 a 0 e, com o lever acima, as familias
+  `sw` e `sh` desaparecem as duas.
+  GANHO anterior: o case 7 e um SWITCH de tres casos, nao uma cadeia
+  if/else-if -- o retail tem a arvore que o gcc gera para tres casos (pivo
+  0x3C, depois `< 0x3D`, depois 0x23 ou 0x3E). Sete instrucoes. As tres
+  ordens de caso dao o mesmo.
   BUG: o case 8 usava um ponteiro sem o atribuir. A correcao custa ZERO
   instrucoes, e por isso passou despercebida -- a contagem nao ve erro de
   leitura.
-  MEDIDO E MORTO sobre o lui -5 (o alvo materializa %hi(D_800F2C40) cinco
-  vezes e nos uma): um local por caso e -11, a expressao inline nos quatro
-  casos e +45 (recomputa a multiplicacao), e um local so para o
-  deslocamento com o simbolo inline e +5. O alvo partilha a multiplicacao e
-  NAO partilha o simbolo, e nenhuma das tres formas obvias faz as duas.
+  QUATRO FALSOS GANHOS, todos pelo mesmo mecanismo (comprar comprimento com
+  instrucoes que o alvo nao tem) e todos apanhados pelo EXCESSO do censo e
+  nao pelo comprimento: a largura dos locais (nove mascaras `andi`), as
+  flags -O1 -G0 (tres funcoes que JA CASAM ficam ~3% mais longas la), o
+  `goto` para a cauda nos tres bracos (tres `jal func_8005A468` onde o alvo
+  tem um), e o `unsigned long long` que o permuter propos a 13/09
+  (output-3710-5): -4 comprado com TRES `addu` a mais, excesso de 1 para 4.
+  MEDIDO E MORTO sobre o lui (o alvo materializa %hi(D_800F2C40) cinco vezes
+  e nos uma): um local por caso e -11, a expressao inline nos quatro casos e
+  +45 (recomputa a multiplicacao), e um local so para o deslocamento com o
+  simbolo inline e +5. O alvo partilha a multiplicacao e NAO partilha o
+  simbolo, e nenhuma das tres formas obvias faz as duas.
 
 # Functions attempted and parked, with the class of difference. Read by
 # tools_src/candidates.py so they are not offered again. See docs/DECISIONS.md

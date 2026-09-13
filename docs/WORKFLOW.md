@@ -2336,6 +2336,22 @@ on a combination that had been in the table for weeks.
   compensate for them. **A permuter hint that has to be explained in a
   comment is a sign the source around it is wrong**; delete it and re-measure
   before writing it down as load-bearing.
+  **Third instance, and the first where the argument was MISSING rather than
+  invented, which is the expensive direction.** func_80056828 called
+  `func_8005A4C4(p, 0, 0, 0)`; the callee takes five, and the already-matched
+  `src/func_80056250.c` calls it
+  `func_8005A4C4(p, 0, 0, 0, arg0 == 1 ? 0x800 : 0);` -- the whole spelling,
+  ternary included, sitting in a sibling. Six instructions and 38
+  differences, -8 to -2. An invented argument is free often enough to hide;
+  a missing one takes the fifth-argument stack store, its two
+  materialisations, the branch between them and the `j` out of the arm, so
+  it reads as a missing BLOCK rather than a missing argument. The tell is in
+  the listing and costs one grep: **two `sw ...,16($sp)` against one `jal`**
+  is the five-argument call written in both arms of an `if` and cross-jumped,
+  which is the same count WORKFLOW already tells you to run on func_80016784.
+  So when a length deficit looks like a whole missing basic block --
+  `addiu` twice, a `bne`, a `j`, an `sw` -- count the stack stores before
+  reading the source.
 - **Before adding a prototype, `ls src/<callee>.c`.** Three times in one session
   a callee was already decompiled with a different signature, and the added
   prototype made the *existing* file stop compiling. `grep -rn <callee> src/`
