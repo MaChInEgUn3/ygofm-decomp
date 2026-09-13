@@ -8512,6 +8512,11 @@ depois de uns cinco minutos e a unica saida (score proprio 930 contra a base de
 re-pontuando -8 e 216. Duas fatias de -j1 por 110 s: a primeira sem saida, a
 segunda 51 iteracoes sem melhora. PARQUEADO: os dois grupos sao empate de
 alocador e o permuter nao os move.
+  RETRATADO 2026-09-13: essas rodadas nao valem. tools_src/permute.py apagava
+  todo __attribute__ da base (e com ele os bracos `_IN_DATA` desta candidata);
+  a base.c antiga compila 234/240 com lui -6, la +1, addiu -1, contra 240/240
+  com censo vazio do parked. O permuter pontuou outro programa. Conserto em
+  16c8470; rodar de novo antes de concluir qualquer coisa sobre o permuter.
 Varredura de flags (sweep_try, 27 linhas): o melhor e o padrao O2 G8 com 38 na
 base anterior; `-mno-split-addresses` e 166, as G0 233, as G2 167, O1 229 --
 eixo de flags FECHADO.
