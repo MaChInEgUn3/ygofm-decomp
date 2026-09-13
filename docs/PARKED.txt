@@ -1,6 +1,8 @@
-func_8004158C -- 448/448 com CENSO VAZIO, 10 diferencas, 2026-09-13.
+func_8004158C -- 448/448 com CENSO VAZIO, 3 diferencas, 2026-09-13.
   (eram 21 ate o `do { n--; pb += 6; } while (0);` que o permuter achou
-  escrito como if/else de bracos identicos; ver o lever 13 no cabecalho.)
+  escrito como if/else de bracos identicos, lever 13, e 10 ate trocar os
+  papeis na soma com e[0x66] com um nome proprio para fr[2], lever 14.
+  Sobra so a ordem de dois `andi` independentes no braco h+0x1C == 0.)
   Escrita do zero no mesmo dia. FLAGS: cc -quiet -O2 -G8
   -fno-strength-reduce, assembler padrao. Os doze levers e as medicoes
   estao no cabecalho de parked/func_8004158C.c. O maior foi a flag: sem ela

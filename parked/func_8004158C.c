@@ -1,4 +1,4 @@
-/* 448/448 com CENSO VAZIO e 10 diferencas, 2026-09-13. Escrita do zero.
+/* 448/448 com CENSO VAZIO e 3 diferencas, 2026-09-13. Escrita do zero.
  * FLAGS: cc "-quiet -O2 -G8 -fno-strength-reduce", assembler padrao.
  *
  * Desenhador de sprite sobre a memoria de rascunho: 0x1F800320 (pacote),
@@ -41,18 +41,28 @@
  *     sozinha 21 -> 12, mas junto com o 13 volta a 12, entao nao entra;
  *     o `h - -0xE` dela vale zero.
  *
+ * 14. na soma com e[0x66], os PAPEIS trocados e um nome proprio para fr[2]:
+ *     `m` guarda e[0x66] e e o destino (`m = m + xx`), `xx` guarda fr[2].
+ *     O alvo soma com `addu $v1,$v1,$v0`, destino = registrador de e[0x66],
+ *     e carrega fr[2] no proprio registrador do ponteiro. So a troca de
+ *     papeis e 10 -> 9 (acerta o destino); com o nome `xx` e 3 (acerta a
+ *     carga), declarado primeiro ou por ultimo da o mesmo. Emprestar `a2`
+ *     e 7, e `ta = fr[2] << 1` num statement so e 8.
+ *
  * MEDIDOS E NEUTROS: `n` declarado primeiro (21, igual), `ta = ta + m` na
  * soma com e[0x66] (igual), operandos de q[0xF] trocados ou nomeados
  * (pior, traz `sra`), `c16` com o `do { } while (0)` ainda presente.
  *
- * RESIDUO (10, tudo registrador): o destino da soma com e[0x66] (5 linhas)
- * e a posicao do `ta &= 0x300` (5).
+ * RESIDUO (3): no braco h+0x1C == 0 o alvo faz `srl`, `andi 7`, carrega
+ * h+0x18 e so entao `andi 0x300`; nos adiantamos o `andi 0x300` para antes
+ * do `srl`. Mesmas instrucoes, ordem diferente.
  */
 #define D_8009B146_IN_DATA
 #define D_8009B424_IS_VOLATILE
 #include "common.h"
 
 void func_8004158C(u8 *e, s32 arg1, s32 arg2) {
+    s32 xx;
     u8 *k;
     u8 *h;
     u8 *q;
@@ -101,15 +111,15 @@ again:
     *(s32 *)(k + 0x10) = (*(u8 **)(e + 0x4C))[1];
     if (*(s32 *)(h + 4) & 0x1000000) {
         *(s32 *)(h + 0x1C) = 1;
-        m = (*(u8 **)(e + 0x4C))[2];
-        ta = e[0x66];
-        m = m * 2;
+        xx = (*(u8 **)(e + 0x4C))[2];
+        m = e[0x66];
+        xx = xx * 2;
     } else {
         *(s32 *)(h + 0x1C) = 0;
-        ta = e[0x66];
-        m = (*(u8 **)(e + 0x4C))[2];
+        m = e[0x66];
+        xx = (*(u8 **)(e + 0x4C))[2];
     }
-    m = ta + m;
+    m = m + xx;
     *(u16 *)(h + 0x18) = m;
     *(u16 *)(q + 0xC) = m;
     *(u16 *)(h + 0xC) = *(u16 *)(e + 0x40);
