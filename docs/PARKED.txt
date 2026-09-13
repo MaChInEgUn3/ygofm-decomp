@@ -1,3 +1,10 @@
+func_800218F0 -- 494/498 com excesso de censo 1, 22 blocos, 2026-09-13.
+  Escrita do zero no mesmo dia, flags padrao. Tela de resultado do duelo.
+  Os quatro levers e o que foi medido estao no cabecalho de
+  parked/func_800218F0.c. O resto: duas releituras de D_8009B1E8 nos blocos
+  de objeto, tres `nop` de leitura e registradores no laco das fichas e nos
+  incrementos de +0x518/+0x51A.
+
 func_8003DC1C -- 532/532 com CENSO VAZIO, 5 diferencas, 2026-09-13.
   Escrita do zero no mesmo dia, flags padrao. Maquina de estados do cartao
   de memoria sobre D_8009B3CF & 0xF. Os dez levers estao no cabecalho de
