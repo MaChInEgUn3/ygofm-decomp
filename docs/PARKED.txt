@@ -1,3 +1,11 @@
+func_800262D4 -- 474/474 com CENSO VAZIO, 56 diferencas, 2026-09-13.
+  Escrita do zero no mesmo dia, flags padrao. Maquina de estados de seis
+  passos sobre D_8009B210 & 0xF. Os sete levers e o que foi medido estao no
+  cabecalho de parked/func_800262D4.c. O resto: ordem de materializacao no
+  caso 3 (D_801A7AD8 / D_800EA128, +0x2A antes do byte +3), a ordem
+  indice/base de D_8009B360 e trocas de registrador nos casos 1 e 2.
+  Proximo passo: permuter.
+
 func_800235C0 -- 466/466 com excesso de 1 no censo (j +1, nop -1), 2026-09-13.
   Escrita do zero no mesmo dia, flags padrao. Os dois lacos `% 15` casam
   (giv por indice e o 0x48000 num segundo nome), o epilogo e um so e a
