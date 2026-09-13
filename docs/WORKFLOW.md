@@ -1837,6 +1837,26 @@ tie-break falls the other way. The permuter found it as an uninitialised
 identically, and that is the general move for that reject class -- read what
 the uninitialised name is *compared against* and give the constant a name.
 
+**And the same move has a second, entirely different symptom: it decides
+whether a counter's guard is a COMPARE or a test against zero.** Where
+retail opens a loop with `slt $v0,$a2,$v1` -- a register-against-register
+compare of the counter and the bound -- and you emit `beq $a1,$zero` on the
+bound alone, the difference is not the loop's spelling. It is that gcc
+folded `0 < n` into `n != 0`, which it can only do while the zero and the
+compare are in the SAME basic block. `i = 0;` written above the enclosing
+`if` puts them in different blocks, gcc 2.8 has no global CSE, the fold
+cannot fire, and reorg then hoists the `addu $a2,$zero,$zero` into the
+enclosing branch's own delay slot -- which is exactly where retail has it.
+func_80056828, one census family and one instruction, and the three
+positions above the `if` all score the same, so what matters is only that it
+is a different block. The tell that you are on this axis and not on the
+loop's: every spelling that keeps the zero *inside* the block ties, however
+many names it uses. Three were measured there -- a second name for the
+bound, a third name for the zero, and the guard reading the field directly
+-- and all three give the identical census, because the fold happens before
+any of them can matter. Same family as the rule above, read for the
+combiner rather than for the allocator.
+
 **Two more instances the same hour, and it is now the first thing to try
 when a residue is nothing but register names.** func_800727C0 sat at 16
 differences that were entirely the prologue -- retail copies the parameter

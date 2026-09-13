@@ -1,4 +1,4 @@
-/* -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13. Flags PADRAO.
+/* -2 (339/341) com EXCESSO DE CENSO ZERO, 2026-09-13. Flags PADRAO.
  * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
  * para 250 instrucoes.
  *
@@ -17,12 +17,20 @@
  *     escalar simples e small data a -G8 e sai `lw` gp-relativo onde o retail
  *     tem `lui %hi`/`lw %lo`. Quatro instrucoes, e depois disso a contagem de
  *     %hi por simbolo bate EXATAMENTE em todos;
- *  3. a guarda do laco do case 4 compara contra o CONTADOR: `while (i < n)`,
- *     nao `if (n > 0)` com do/while.
+ *  3. a guarda do laco do case 4 compara contra o CONTADOR e nao contra
+ *     zero, e e um `if` com do/while por dentro, nao um `while`;
+ *  4. `i = 0;` fica ACIMA do `if (arg0 < 2)`, noutro bloco basico. O gcc 2.8
+ *     nao tem CSE global, entao a comparacao no bloco de baixo nao consegue
+ *     dobrar `0 < n` em `n != 0` e sai o `slt $v0,$a2,$v1` do alvo, com o
+ *     `addu $a2,$zero,$zero` no slot do `beq` de cima. Dentro do mesmo bloco
+ *     -- que foi onde as primeiras tentativas puseram o zero -- o gcc dobra
+ *     sempre, e por isso tres grafias com um segundo nome para o zero deram
+ *     todas o mesmo. Uma familia de censo, e as tres posicoes acima do `if`
+ *     (junto a `sum = 0`, antes dele, e antes do `p =`) dao o mesmo.
  *
  * TRES FALSOS GANHOS APANHADOS NESTA FUNCAO, e todos pelo mesmo mecanismo --
  * comprar comprimento com instrucoes que o alvo NAO TEM. O teste que os
- * apanha e o EXCESSO do censo, nao o comprimento:
+ * pega e o EXCESSO do censo, nao o comprimento:
  *  - largura dos locais: 22 combinacoes, quatro chegam a comprimento EXATO,
  *    com `andi` a subir +3 -> +6 -> +8 -> +9. Nove mascaras compram o zero;
  *  - flags: -O1 -G0 chega a 341/341, e o controle mostra que tres funcoes que
@@ -60,7 +68,7 @@
  * -4 com `unsigned long long nv = *(u8 *)(p + 0xE0D) * 2; n = nv;`. Compra 4
  * instrucoes de comprimento com TRES `addu` a mais -- o par de registos do
  * inteiro de 64 bits -- e o EXCESSO do censo sobe de 1 para 4. Rejeitado
- * pelo mesmo teste que apanhou os outros tres.
+ * pelo mesmo teste que pegou os outros tres.
  *
  * A GUARDA EXTERNA DO CASE 4 E UM `if`, NAO UM `while`. As duas sao
  * identicas em semantica -- o `do/while` interno ja volta a testar -- e a
@@ -72,15 +80,24 @@
  * reler isto tem os dois numeros para julgar de novo.
  *
  * MEDIDO E MORTO, o segundo nome para o limite do laco (o alvo tem
- * `addu $t0,$v1,$zero`, uma copia de n, a seguir a guarda): `m = n;` dentro
+ * `addu $t0,$v1,$zero`, uma copia de n logo depois da guarda): `m = n;` dentro
  * do `if`, o mesmo com um `k` para o zero, e a guarda a ler o campo com o
  * corpo a ler `n` dao os TRES o mesmo censo que nao ter copia nenhuma -- o
  * gcc coalesce toda copia de fonte. Reler o campo no teste do `while` e
  * `lbu +1`. Quatro grafias empatadas e o sinal de eixo errado.
  *
- * CENSO ATUAL: tres familias, EXCESSO ZERO e DEFICIT DE TRES.
- * addu -1, slt -1, nop -1. As chamadas batem uma a uma com o alvo, e todas
- * as instrucoes que emitimos o alvo tambem tem.
+ * MEDIDO E MORTO sobre o `nop` que falta (grupos 2 e 3 do alinhamento: o
+ * alvo tem DOIS `lui %hi(D_80010004)` e deixa um `nop` no slot do `beq`,
+ * onde nos fazemos CSE de um so e enfiamos o `lui` no slot): dar a
+ * D_80010004 um braco `.data` -- a forma NUA, uma pseudo-instrucao para o
+ * preenchedor de slot -- chega a 341/341 EXATO e e falso. O excesso sobe de
+ * 0 para 2: `lbu +1` e `nop +1`, ou seja passa de um `nop` a menos para um
+ * a mais. Combinado com o lever 4 e +1 e o mesmo excesso. O braco foi
+ * removido de variables.h outra vez; nao fica guarda que ninguem usa.
+ *
+ * CENSO ATUAL: duas familias, EXCESSO ZERO e DEFICIT DE DOIS.
+ * addu -1, nop -1. As chamadas batem uma a uma com o alvo, e tudo o que
+ * emitimos o alvo tambem tem.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
@@ -143,9 +160,9 @@ void func_80056828(s32 arg0) {
     case 4:
         p = arg0 * 0xE20 + D_800F2C40;
         sum = 0;
+        i = 0;
         if (arg0 < 2) {
             n = p[0xE1B];
-            i = 0;
             if (i < n) {
                 do {
                     if (*(u16 *)(p + i * 8 + 0x33C) != 0xFFFF) {

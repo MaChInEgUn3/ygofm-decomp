@@ -1,5 +1,19 @@
-func_80056828 -- -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
-  Censo: addu -1, slt -1, nop -1 -- excesso ZERO, deficit de tres.
+func_80056828 -- -2 (339/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
+  Censo: addu -1, nop -1 -- excesso ZERO, deficit de dois.
+  `i = 0;` FICA ACIMA DO `if (arg0 < 2)`, noutro bloco basico. O gcc 2.8 nao
+  tem CSE global, entao a comparacao no bloco de baixo nao consegue dobrar
+  `0 < n` em `n != 0`, e sai o `slt $v0,$a2,$v1` do alvo com o
+  `addu $a2,$zero,$zero` no slot do `beq` de cima. Dentro do mesmo bloco o
+  gcc dobra sempre -- que e por que tres grafias com um segundo nome para o
+  zero deram todas o mesmo censo. Uma familia a menos, e as tres posicoes
+  acima do `if` dao o mesmo resultado.
+  MEDIDO E MORTO sobre o `nop` que falta (o alvo tem DOIS
+  `lui %hi(D_80010004)` e deixa um `nop` no slot do `beq`; nos fazemos CSE
+  de um so e enfiamos o `lui` no slot): um braco `.data` para D_80010004
+  chega a 341/341 EXATO e e FALSO -- o excesso sobe de 0 para 2, `lbu +1` e
+  `nop +1`, isto e, passa de um `nop` a menos para um a mais. Com o lever do
+  `i = 0` junto e +1 e o mesmo excesso. O braco saiu de variables.h; nao
+  fica guarda que ninguem usa.
   GUARDA EXTERNA DO CASE 4: um `if`, nao um `while`. As duas sao identicas
   em semantica, porque o `do/while` interno ja volta a testar, e a forma com
   `while` emite um `sll` que o alvo NAO TEM. Trocar por `if` tira esse `sll`
@@ -8,7 +22,7 @@ func_80056828 -- -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
   o excesso e uma troca a desfazer. Os dois numeros ficam escritos para quem
   reler poder julgar outra vez.
   MEDIDO E MORTO, o segundo nome para o limite do laco (o alvo copia n com
-  `addu $t0,$v1,$zero` logo a seguir a guarda): `m = n;` dentro do `if`, o
+  `addu $t0,$v1,$zero` logo depois da guarda): `m = n;` dentro do `if`, o
   mesmo com um `k` para o zero, e a guarda a ler o campo com o corpo a ler
   `n` dao os TRES o mesmo censo que nao ter copia nenhuma -- o gcc coalesce
   toda copia de fonte. Reler o campo no teste do `while` e `lbu +1`. Quatro
@@ -37,7 +51,7 @@ func_80056828 -- -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
   instrucoes, e por isso passou despercebida -- a contagem nao ve erro de
   leitura.
   QUATRO FALSOS GANHOS, todos pelo mesmo mecanismo (comprar comprimento com
-  instrucoes que o alvo nao tem) e todos apanhados pelo EXCESSO do censo e
+  instrucoes que o alvo nao tem) e todos detectados pelo EXCESSO do censo e
   nao pelo comprimento: a largura dos locais (nove mascaras `andi`), as
   flags -O1 -G0 (tres funcoes que JA CASAM ficam ~3% mais longas la), o
   `goto` para a cauda nos tres bracos (tres `jal func_8005A468` onde o alvo
@@ -46,7 +60,7 @@ func_80056828 -- -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
   MEDIDO E MORTO sobre o lui (o alvo materializa %hi(D_800F2C40) cinco vezes
   e nos uma): um local por caso e -11, a expressao inline nos quatro casos e
   +45 (recomputa a multiplicacao), e um local so para o deslocamento com o
-  simbolo inline e +5. O alvo partilha a multiplicacao e NAO partilha o
+  simbolo inline e +5. O alvo compartilha a multiplicacao e NAO compartilha o
   simbolo, e nenhuma das tres formas obvias faz as duas.
 
 # Functions attempted and parked, with the class of difference. Read by
