@@ -74,6 +74,18 @@
  *     duas ordens (A1/A2 = 234, AB1 = AB2 = B = 219). A saida crua e 340/341
  *     porque nao parte desta base, e por isso o scorer a rejeitou com razao.
  *
+ * PERMUTER SATURADO NESTA BASE, 13/09: 1h57 a partir dos 219, 498 saidas, a
+ * melhor com score 2060 contra 2560 -- e o scorer nao acha nenhuma melhor que
+ * o instalado. As duas melhores (output-2060-1 e 2140-1) juntam tres metades
+ * instalaveis e medidas uma a uma sobre esta base, todas com comprimento
+ * exato e censo VAZIO: `z = st == 0; if (z || st == 0xFF)` 219, `p - -0xE02`
+ * 219, e um `do { } while (0);` em volta das tres chamadas do case 8/9 224
+ * (pior); as combinacoes seguem as partes. O que resta nelas e um `if (v)` /
+ * `if (i)` com os DOIS bracos identicos sob uma variavel que nesse caminho
+ * pode nao ter valor (`i` nao e atribuido no case 8/9) -- a classe de leitura
+ * nao inicializada da func_800171A8, nao instalavel. Nao relancar o permuter
+ * nesta base sem uma alavanca nova a mao.
+ *
  * QUARTO FALSO GANHO, 13/09: o permuter (output-3710-5, score 3710) chega a
  * -4 com `unsigned long long nv = *(u8 *)(p + 0xE0D) * 2; n = nv;`. Compra 4
  * instrucoes de comprimento com TRES `addu` a mais -- o par de registos do
