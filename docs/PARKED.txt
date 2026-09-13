@@ -1,17 +1,3 @@
-func_8004158C -- 448/448 com CENSO VAZIO, 3 diferencas, 2026-09-13.
-  (eram 21 ate o `do { n--; pb += 6; } while (0);` que o permuter achou
-  escrito como if/else de bracos identicos, lever 13, e 10 ate trocar os
-  papeis na soma com e[0x66] com um nome proprio para fr[2], lever 14.
-  Sobra so a ordem de dois `andi` independentes no braco h+0x1C == 0.)
-  Escrita do zero no mesmo dia. FLAGS: cc -quiet -O2 -G8
-  -fno-strength-reduce, assembler padrao. Os doze levers e as medicoes
-  estao no cabecalho de parked/func_8004158C.c. O maior foi a flag: sem ela
-  o gcc cria uma terceira variavel de inducao para `r[-1]`, o `g` vai para
-  a pilha e o frame passa de 72 para 80. Duas vezes o comprimento exato era
-  falso (um lhu ou um nop sobrando cancelava outro que faltava), e o censo
-  por coluna inteira foi o que mostrou. Sobram so registradores: o destino
-  da soma com e[0x66] e a posicao do `ta &= 0x300`. Estado de permuter.
-
 func_80056828 -- 341/341 com CENSO VAZIO, 2026-09-13.
   Censo: VAZIO -- comprimento exato, multiset de opcodes exato, zero
   excesso e zero deficit. Sobram 219 diferencas posicionais (eram 234 ate

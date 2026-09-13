@@ -384,6 +384,7 @@ PORTED_FLAGS = {
     "func_80040390": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80040510": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80040588": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
+    "func_8004158C": ['-quiet', '-O2', '-G8', '-fno-strength-reduce'],
     "func_80043328": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_80044608": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80044E90": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
