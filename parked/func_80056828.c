@@ -1,4 +1,4 @@
-/* 341/341 com CENSO VAZIO, 2026-09-13. Flags PADRAO.
+/* 341/341 com CENSO VAZIO e 219 diferencas, 2026-09-13. Flags PADRAO.
  * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
  * para 250 instrucoes.
  *
@@ -63,6 +63,16 @@
  *     de -1 a 0, e junto com o lever 4 as duas familias `sw`/`sh` somem.
  *     E o caso da regra "uma edicao que vale zero diferencas ainda pode ser
  *     a edicao certa; le o censo, nao o total".
+ *  6. no laco do case 5, `v = 0x10;` logo depois do store de 0xFFFF em +8,
+ *     e o mesmo `v` como deslocamento (`q[0] + v`) e como valor
+ *     (`q[0][0xD] = v`). `v` e o nome do case 4 e ninguem o le depois do
+ *     laco, entao a semantica nao muda. 234 -> 219, mesmo comprimento, censo
+ *     VAZIO antes e depois, e o adiff diz que e so registrador: exatas
+ *     191 -> 206, so-registrador 140 -> 125, estruturais 18/15 -> 18/15.
+ *     Veio do permuter (output-2155-1). A outra metade daquela saida, a
+ *     atribuicao encadeada `v = (*(s32 *)(p + 0xDF0) = ...)`, vale ZERO nas
+ *     duas ordens (A1/A2 = 234, AB1 = AB2 = B = 219). A saida crua e 340/341
+ *     porque nao parte desta base, e por isso o scorer a rejeitou com razao.
  *
  * QUARTO FALSO GANHO, 13/09: o permuter (output-3710-5, score 3710) chega a
  * -4 com `unsigned long long nv = *(u8 *)(p + 0xE0D) * 2; n = nv;`. Compra 4
@@ -208,12 +218,13 @@ void func_80056828(s32 arg0) {
         if (p[0xE1B] != 0) {
             do {
                 *(u16 *)(q[0] + 8) = 0xFFFF;
+                v = 0x10;
                 *(u16 *)(q[0] + 0x16) = *(u16 *)(q[0] + 0x18);
                 *(u16 *)(q[0] + 0xA) = 0xFFFF;
                 q[0][0xC] = q[0][0x1A];
-                *(s16 *)(q[0] + 0x10) = 0;
+                *(s16 *)(q[0] + v) = 0;
                 i++;
-                q[0][0xD] = 0x10;
+                q[0][0xD] = v;
                 q += 4;
             } while (i < (s32)p[0xE1B]);
         }
