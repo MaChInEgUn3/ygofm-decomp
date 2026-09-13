@@ -1,4 +1,4 @@
-/* 448/448 com CENSO VAZIO e 21 diferencas, 2026-09-13. Escrita do zero.
+/* 448/448 com CENSO VAZIO e 10 diferencas, 2026-09-13. Escrita do zero.
  * FLAGS: cc "-quiet -O2 -G8 -fno-strength-reduce", assembler padrao.
  *
  * Desenhador de sprite sobre a memoria de rascunho: 0x1F800320 (pacote),
@@ -33,12 +33,20 @@
  * 12. no braco h+0x1C == 0: `t0 = ta & 0xFF;` e `t0 += ...` separados, e
  *     `ta &= 0x300;` como statement (29 -> 23, com o 5: 21).
  *
+ * 13. `do { n--; pb += 6; } while (0);` no fim do laco (21 -> 10). Veio do
+ *     permuter (output-345-1), que escreveu o mesmo par em `if (h) {..}
+ *     else {..}` com bracos identicos; o do/while tem o mesmo efeito e e o
+ *     que alguem escreveria. Resolve toda a troca $s5/$s6 entre arg2 e n.
+ *     A outra saida boa (355-1) fazia `*(u16 *)(h + 0x10) = (n = e[0x5E])`:
+ *     sozinha 21 -> 12, mas junto com o 13 volta a 12, entao nao entra;
+ *     o `h - -0xE` dela vale zero.
+ *
  * MEDIDOS E NEUTROS: `n` declarado primeiro (21, igual), `ta = ta + m` na
  * soma com e[0x66] (igual), operandos de q[0xF] trocados ou nomeados
  * (pior, traz `sra`), `c16` com o `do { } while (0)` ainda presente.
  *
- * RESIDUO (21, tudo registrador): arg2 e n com $s6/$s5 trocados (11 linhas),
- * o destino da soma com e[0x66] (5) e a posicao do `ta &= 0x300` (5).
+ * RESIDUO (10, tudo registrador): o destino da soma com e[0x66] (5 linhas)
+ * e a posicao do `ta &= 0x300` (5).
  */
 #define D_8009B146_IN_DATA
 #define D_8009B424_IS_VOLATILE
@@ -253,8 +261,10 @@ again:
         func_80042188(q, g, arg1, t0 | *(s32 *)(h + 0x28), h + 0x20);
     next:
         r += 6;
-        n--;
-        pb += 6;
+        do {
+            n--;
+            pb += 6;
+        } while (0);
     } while (n != 0);
 end:
     ;
