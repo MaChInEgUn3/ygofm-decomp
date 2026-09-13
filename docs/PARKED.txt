@@ -56,6 +56,9 @@ func_80056828 -- 341/341 com CENSO VAZIO, 2026-09-13.
   excesso e zero deficit. Sobram 219 diferencas posicionais (eram 234 ate
   o nome emprestado `v = 0x10;` no laco do case 5, be713f6), todas de
   alocacao de registrador e ordem de operando. Estado de permuter.
+  Permuter com a base CORRIGIDA (16c8470, pontuacao base 2320): cerca de 14
+  mil iteracoes sem saida melhor, 2026-09-13. A base antiga perdia o braco
+  .data (340/341, lui -1) e as rodadas anteriores nao contam.
   O `nop` QUE FALTAVA era o braco `.data` de D_80010004, e a primeira
   medicao disso estava errada por uma razao que nao era o braco. O alvo poe
   um `nop` no slot do `beq $s0,$v0,L4`; nos enfiavamos la a metade `lui` do
@@ -5768,6 +5771,9 @@ func_8002BAB4 -- 150/150, 25 differences, written 2026-08-29
 # ============================================================================
 
 func_80018608 -- 225/225, CENSO VAZIO, 23 differences.
+  Permuter com a base CORRIGIDA (16c8470, flags -msplit-addresses da linha
+  do build.py, pontuacao base 775): cerca de 11 mil iteracoes sem saida
+  melhor, 2026-09-13. A base antiga perdia os bracos .data (222/225, lui -3).
   FIRST C EVER 2026-09-08.
   225 instructions, the last of the eleven assembly debts to have no candidate
   at all: src/ holds a transcription with the instructions written as `.word`,
