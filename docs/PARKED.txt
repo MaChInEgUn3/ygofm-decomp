@@ -2661,6 +2661,10 @@ func_8003CA5C -- 4 differences at 72/72, a $v0/$v1 swap in one basic block:
     register. First user of D_8009B398_IS_AGGREGATE outside its own note.
 
 func_80045208 -- 25 differences at 75/75, register-allocation class. The
+  2026-09-13: MATCHED UPSTREAM in krystalgamer/memories-decomp #4310
+  ("Match func_80045208 without register pins"), now src/game/func_80045208.c
+  in that tree. C does not port between the trees, so this park stays as
+  reference only: do not spend permuter or sweep time on it here.
   2026-09-12: 75/75, 16 differing, adiff 60 iguais / 10 so-registrador /
   6 estruturais em 4 grupos. Flags PADRAO.
   FLAGS MORTAS: sweep_try, 20 linhas, e a melhor e 16 (O2 G0 e as tres
