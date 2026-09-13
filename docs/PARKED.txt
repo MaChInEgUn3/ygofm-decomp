@@ -1,7 +1,8 @@
 func_80056828 -- 341/341 com CENSO VAZIO, 2026-09-13.
   Censo: VAZIO -- comprimento exato, multiset de opcodes exato, zero
-  excesso e zero deficit. Sobram 234 diferencas posicionais, todas de
-  alocacao de registo e ordem de operando. Estado de permuter.
+  excesso e zero deficit. Sobram 219 diferencas posicionais (eram 234 ate
+  o nome emprestado `v = 0x10;` no laco do case 5, be713f6), todas de
+  alocacao de registrador e ordem de operando. Estado de permuter.
   O `nop` QUE FALTAVA era o braco `.data` de D_80010004, e a primeira
   medicao disso estava errada por uma razao que nao era o braco. O alvo poe
   um `nop` no slot do `beq $s0,$v0,L4`; nos enfiavamos la a metade `lui` do
