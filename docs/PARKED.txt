@@ -1689,6 +1689,11 @@ func_80048658, UPDATE 2026-09-13 -- 65 -> 10 on krystalgamer's source shape,
   global read inline; lo computed after hi, lo in two statements,
   `hi = t2 != 0; hi <<= 6`, `hi = t2 = id & 0x100`, the mask read before lo,
   the mask read from idc -- all 10 or worse.
+  Permuter from that 10-difference base, 10.5k iterations: every improvement
+  it stored (85, 90, 100) is an uninitialised read (`if (pan)`,
+  `if (last_arg)`, `if (e)` wrapped round identical arms); the legitimate
+  halves of those outputs (`stop_arg = 0x44C`, a named 0xFF mask in either
+  arm or both) are each 10. Stopped there.
 
 func_80048658 -- 65 differences, an **unfinished** park: the body is the same
   D_8009B45C table walk as func_80048920 (parked at 20) and the same
