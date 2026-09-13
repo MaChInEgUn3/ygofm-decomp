@@ -1,5 +1,6 @@
-/* -2 (339/341), 2026-09-13. Flags PADRAO. Escrita do zero; e a menor funcao
- * limpa do pool desde que o piso subiu para 250 instrucoes.
+/* -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13. Flags PADRAO.
+ * Escrita do zero; e a menor funcao limpa do pool desde que o piso subiu
+ * para 250 instrucoes.
  *
  * FORMA: maquina de estados no byte +0xE14 de um registo de 0xE20 indexado
  * por arg0, com jump table real (jtbl_8001170C) sobre `state - 1`. Dois
@@ -61,8 +62,25 @@
  * inteiro de 64 bits -- e o EXCESSO do censo sobe de 1 para 4. Rejeitado
  * pelo mesmo teste que apanhou os outros tres.
  *
- * CENSO ATUAL: quatro familias, EXCESSO DE UM e DEFICIT DE TRES.
- * addu -1, slt -1, nop -1, sll +1. As chamadas batem uma a uma com o alvo.
+ * A GUARDA EXTERNA DO CASE 4 E UM `if`, NAO UM `while`. As duas sao
+ * identicas em semantica -- o `do/while` interno ja volta a testar -- e a
+ * forma com `while` emite um `sll` a mais, que o alvo NAO TEM. Trocar por
+ * `if` tira esse `sll` e custa uma instrucao de comprimento: -2 com excesso
+ * de um passa a -3 com excesso ZERO. Fica o `if`, pela regra desta propria
+ * funcao: todo ganho de comprimento que SOBE o excesso e uma troca a
+ * desfazer, e ja foram quatro falsos ganhos aqui por esse mecanismo. Quem
+ * reler isto tem os dois numeros para julgar de novo.
+ *
+ * MEDIDO E MORTO, o segundo nome para o limite do laco (o alvo tem
+ * `addu $t0,$v1,$zero`, uma copia de n, a seguir a guarda): `m = n;` dentro
+ * do `if`, o mesmo com um `k` para o zero, e a guarda a ler o campo com o
+ * corpo a ler `n` dao os TRES o mesmo censo que nao ter copia nenhuma -- o
+ * gcc coalesce toda copia de fonte. Reler o campo no teste do `while` e
+ * `lbu +1`. Quatro grafias empatadas e o sinal de eixo errado.
+ *
+ * CENSO ATUAL: tres familias, EXCESSO ZERO e DEFICIT DE TRES.
+ * addu -1, slt -1, nop -1. As chamadas batem uma a uma com o alvo, e todas
+ * as instrucoes que emitimos o alvo tambem tem.
  */
 #define D_80010000_IS_AGGREGATE
 #define D_8001000C_IS_AGGREGATE
@@ -128,7 +146,7 @@ void func_80056828(s32 arg0) {
         if (arg0 < 2) {
             n = p[0xE1B];
             i = 0;
-            while (i < n) {
+            if (i < n) {
                 do {
                     if (*(u16 *)(p + i * 8 + 0x33C) != 0xFFFF) {
                         d = i / 8;

@@ -1,5 +1,18 @@
-func_80056828 -- -2 (339/341) com CENSO DE QUATRO FAMILIAS, 2026-09-13.
-  Censo: addu -1, slt -1, nop -1, sll +1 -- excesso de um, deficit de tres.
+func_80056828 -- -3 (338/341) com EXCESSO DE CENSO ZERO, 2026-09-13.
+  Censo: addu -1, slt -1, nop -1 -- excesso ZERO, deficit de tres.
+  GUARDA EXTERNA DO CASE 4: um `if`, nao um `while`. As duas sao identicas
+  em semantica, porque o `do/while` interno ja volta a testar, e a forma com
+  `while` emite um `sll` que o alvo NAO TEM. Trocar por `if` tira esse `sll`
+  e custa uma instrucao: -2 com excesso de um passa a -3 com excesso ZERO.
+  Fica o `if`, pela regra desta funcao -- todo ganho de comprimento que SOBE
+  o excesso e uma troca a desfazer. Os dois numeros ficam escritos para quem
+  reler poder julgar outra vez.
+  MEDIDO E MORTO, o segundo nome para o limite do laco (o alvo copia n com
+  `addu $t0,$v1,$zero` logo a seguir a guarda): `m = n;` dentro do `if`, o
+  mesmo com um `k` para o zero, e a guarda a ler o campo com o corpo a ler
+  `n` dao os TRES o mesmo censo que nao ter copia nenhuma -- o gcc coalesce
+  toda copia de fonte. Reler o campo no teste do `while` e `lbu +1`. Quatro
+  grafias empatadas e o sinal de eixo errado.
   Escrita do zero: e a menor funcao limpa que o pool ainda tem, agora que o
   piso subiu para 250 instrucoes. Maquina de estados com jump table real
   sobre `state - 1`, dois rotulos de saida distintos (epilogo para 0 e 0xFF,
