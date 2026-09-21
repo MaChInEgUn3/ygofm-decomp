@@ -12,173 +12,24 @@
  * keeps source order. The byte-address cast is unmarked in both. Measured 2026-09-21:
  * 20 differences with his spelling, byte-identical with this one; load alone at each site
  * is 10 and 16, both sites 6 (all six the renderer's `sym+2` spelling), volatile untried. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 extern int func_8008E870(const char *fmt, ...);
 extern s16 D_8009B19E;
 extern u8 D_8009B1E2;
 extern u16 D_8009B1E4;
 extern const char D_80010060[];
-typedef struct {
-    u8 pad_00[8];
-    u16 flags;                   
-    u8 pad_0A[2];
-    u32 color;                   
-    u8 pad_10[6];
-    u8 depth;                    
-    u8 pad_17[0xA];
-    u8 face;                     
-    u8 pad_22[2];
-    void (*update)();            
-    union { struct { s16 x, y; } xy; s32 word; } target;   
-    union { struct { u16 x, y; } xy; s32 word; } saved;    
-    union { struct { u16 x, y; } xy; s32 word; } pos;      
-    u8 pad_34[2];
-    u16 home_x;                  
-    u16 home_y;                  
-    u8 pad_3A[0x22];
-    u8 icon_state;               
-    u8 pad_5D[3];
-    s16 step;                    
-    u8 pad_62[6];
-    u8 kind;                     
-    u8 pad_69;
-    u8 card_index;               
-    u8 pad_6B;
-    u8 field_6C;                 
-} HandCardObject;
 void func_8001BD88(void);
 extern u16 D_8009B23A;
 extern s8 D_8009B208[8];
-typedef struct {
-    u8 pad_00[0xF];
-    s8 col;
-    s8 row;
-} DuelFieldCursor;
 extern u8 D_800907D8[];
 extern u8 D_800907CC[];
-union DuelSideLifePoints {
-    u16 unsigned_value;
-    s16 signed_value;
-};
-typedef struct {
-    s8 result_adjustment;
-    u8 turns_taken;
-    u8 effective_attacks;
-    u8 defensive_wins;
-    u8 face_down_plays;
-    u8 pure_magic_used;
-    u8 traps_triggered;
-    u8 field_07;
-    u8 fusions_initiated;
-    u8 equips_used;
-    u8 field_0A;
-    u8 field_0B;
-    u8 field_0C;
-} DuelRankStatistics;
-typedef struct {
-    DuelRankStatistics rank;
-    u8 field_0D;
-    s16 field_0E;
-    s16 field_10;
-     
-
-
-
-    s16 displayed_life_points;
-    union DuelSideLifePoints life_points;
-    s16 max_life_points;
-     
-
-    s8 deck_draw_cursor;
-    s8 swords_turns_remaining;
-     
-
-
-    s8 hand[5 ];
-     
-
-    s8 card_view_mode;
-} DuelSideState;
 extern u8 D_8009B1D5;
 extern u8 D_8009B19C;
 extern DuelSideState *D_8009B1C8;
 extern s8 D_8009B360[2 ] __attribute__((section(".data")));
-typedef struct {
-    u8 pad_00[0x0C];
-    s16 field_0C;
-    u8 pad_0E;
-    s8 col;
-    s8 row;
-    u8 field_11;
-    u8 field_12;
-    u8 field_13;
-    u8 pad_14[4];
-    u8 field_18;
-    u8 status;
-} DuelCardPickCursor;
 extern u8 D_8009B1D4;
 void func_800240B0(DuelCardPickCursor *cursor);
-struct DisplayObject;
-typedef struct {
-    u8 *object;
-    u8 *child;
-    u8 pad_08;
-    u8 active_09;
-    u8 pad_0A[2];
-} DuelHandSlot;
 extern DuelHandSlot D_800EA030[5 ];
-typedef struct {
-    u8 pad_00[4];
-    struct DisplayObject *position_object;
-    u8 pad_08[6];
-    s8 slot_index;
-    u8 pad_0F[6];
-    u8 count;
-    u8 pad_16[2];
-} DuelHandStackState;
-typedef struct {
-    u32 field_00;
-     
-
-
-    struct DisplayObject *cursor_object;
-    DuelHandSlot *hand;
-     
-    s16 field_0C;
-     
-
-
-
-    u8 field_0E;
-     
-
-    s8 col;
-    s8 row;
-    u8 field_11;
-    u8 field_12;
-    u8 field_13;
-    u8 field_14;
-     
-
-    u8 field_15;
-    u8 pad_16;
-    u8 field_17;
-    u8 field_18;
-     
-    u8 status;
-    u8 pad_1A[2];
-} DuelSelectionRecord;
-typedef struct {
-    u8 pad_00[2 * 0x1C ];
-    DuelCardPickCursor field;
-    u8 pad_52[(4  * 0x1C )  - 2 * 0x1C  -
-              sizeof(DuelCardPickCursor)];
-} DuelSelectionSideCursors;
 extern u8 D_800E9F10[];
 extern u8 D_800E9F2C[];
 extern u8 D_800E9F48[];
@@ -186,409 +37,20 @@ extern DuelCardPickCursor *D_8009B1B4;
 void func_8001B938(DuelSelectionRecord *selection);
 void func_8001BAF0(void);
 void func_8001B8B8(DuelSelectionRecord *side);
-typedef struct {
-    void *object;
-    void *data;
-    u8 pad_08[4];
-    s16 card_id;
-    s16 attack;
-    s16 defense;
-    s16 stat_modifier;
-    s16 terrain_modifier;
-    u16 flags;
-    u8 table_index;
-    u8 pad_19[3];
-} DuelCardRecord;
 extern DuelCardRecord D_801A7AD8[];
 extern s32 D_801D4244[];
-typedef struct {
-    s16 id;
-     
-
-    s8 deck_index;
-    u8 data_block_index;
-    u8 flags_04;
-    u8 unk_05;
-} DuelDeckCardRecord;
-typedef struct {
-    u8 pad_00000[0x4B6B4];
-    DuelCardRecord field_cards[30 ];
-    DuelDeckCardRecord cards[(40  * 2) ];
-} DuelCardStagingDeckView;
 extern u8 D_8015C424[];
 u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
 void func_80024914(DuelCardRecord *object);
-typedef struct {
-    u8 pad_00[0x19];
-    u8 status;
-} DuelCursorStatus;
 extern s8 D_8009B160;
 s32 func_80024060(DuelCursorStatus *object);
 s32 func_80024088(DuelFieldCursor *cursor, s8 dir);
-typedef void (*DisplayObjectCallback)(u8 *);
-typedef struct DisplayObject {
-    s16 previous;                   
-    s16 next;                       
-    u32 attribute;                  
-    u16 flags;                      
-    u8 field_0A;                    
-    u8 field_0B;                    
-    u32 field_0C;                   
-    u32 field_10;                   
-     
-
-
-
-
-
-
-
-
-
-    u16 field_14;                   
-    s8 field_16;                    
-     
-
-
-
-
-
-
-
-
-
-    u8 ot_index;                    
-    u16 field_18;                   
-    u16 field_1A;                   
-    u16 field_1C;                   
-    s16 field_1E;                   
-     
-
-
-
-     
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            u16 field_20;
-            u8 field_22;
-            u8 field_23;
-        } h;
-        struct {
-            u8 field_20;
-            u8 field_21;
-            u8 field_22;
-            u8 field_23;
-        } b;
-    } field_20;                     
-    DisplayObjectCallback update;   
-     
-
-
-
-    union {
-        struct {
-            u16 field_28;
-            u16 field_2A;
-        } h;
-        s32 word;
-    } position;                     
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            u16 field_2C;
-            s16 field_2E;
-        } h;
-    } field_2C;                     
-    union {
-        struct {
-            u16 field_30;
-            u16 field_32;
-        } h;
-        s32 word;
-    } field_30;                     
-     
-
-
-
-
-
-
-
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            s16 field_34;
-            s16 field_36;
-        } h;
-    } field_34;                     
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            s16 field_38;
-            s16 field_3A;
-        } h;
-    } field_38;                     
-     
-
-    union {
-        s32 word;
-        struct {
-            u16 field_3C;
-            u16 field_3E;
-        } h;
-    } field_3C;                     
-     
-
-
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            s16 field_40;
-            s16 field_42;
-        } h;
-    } field_40;                     
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    union {
-        u32 word;
-        struct {
-            s16 field_44;
-            s16 field_46;
-        } h;
-    } field_44;                     
-    union {
-        u32 word;
-        struct {
-            s16 field_48;
-            s16 field_4A;
-        } h;
-    } field_48;                     
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    s32 field_4C;                   
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-     
-
-
-
-
-
-
-
-    union {
-        s32 word;
-        struct {
-            s16 field_50;
-            s16 field_52;
-        } h;
-    } field_50;                     
-    void *field_54;                 
-     
-
-
-
-
-
-
-    s16 field_58;                   
-    s16 field_5A;                   
-    u16 field_5C;                   
-    u16 field_5E;                   
-     
-
-
-
-
-
-
-
-    s16 field_60;                   
-    u8 pad_62[2];                   
-     
-
-
-
-
-    u8 field_64;                    
-    u8 field_65;                    
-    u8 field_66;                    
-     
-
-
-    u8 field_67;                    
-     
-
-
-
-
-
-
-
-
-    u8 field_68;                    
-     
-
-
-    u8 field_69;                    
-     
-
-
-    u8 field_6A;                    
-     
-
-
-
-    u8 field_6B;                    
-    u8 field_6C;                    
-    u8 pad_6D[0x70  - 0x6D];
-} DisplayObject;
-typedef struct DisplayLinkEntry {
-    DisplayObject *object;
-    DisplayObject *field_04;
-    u8 pad_08[4];
-} DisplayLinkEntry;
-typedef struct {
-    DisplayObject *field_00;
-    DisplayObject *object;
-    DisplayLinkEntry *entries;
-    s16 field_0C;
-    u8 pad_0E[1];
-    s8 x;
-    s8 y;
-    u8 pad_11[2];
-    u8 field_13;
-    u8 field_14;
-    u8 pad_15[1];
-    s8 field_16;
-    u8 table_index;
-    u8 field_18;
-} DuelFieldDisplaySource;
 void func_80023144(DuelFieldDisplaySource *source, s32 index);
 extern s16 D_8009B20C[2];
 extern u16 D_8009B210;
-struct DisplayObject;
 extern u8 D_8009B254 __attribute__((section(".data")));
 extern u16 D_8009B246 __attribute__((section(".data")));
 extern u8 D_8009B24B __attribute__((section(".data")));
-struct DisplayObject;
 s32 func_8004002C(void);
 void *func_800400AC(s32 index, s32 key);
 void func_8004036C(void *object);
@@ -596,28 +58,11 @@ void func_800404CC(
     void *object, s32 x, s32 y, s32 field_67, s32 field_68,
     s32 field_69, s32 color, s32 texture
 );
-struct DisplayObject;
 void *func_80040468(struct DisplayObject *object, s32 field_67,
                     s32 field_68, s32 field_69, s32 color, s32 texture);
 void *func_80042B40(s32 value);
 s32 func_800428EC(DisplayObject *object, s8 value);
 void func_80042918(DisplayObject *object);
-typedef struct {
-    u8 pad_00[0x30];
-    u16 field_30;
-    u16 field_32;
-    u8 pad_34[2];
-    u16 field_36;
-    u16 field_38;
-} DisplayObjectSnapshot;
-typedef struct {
-    u8 pad_00[0x30];
-    s16 out_x;
-    s16 out_y;
-    u8 pad_34[0x02];
-    s16 x;
-    s16 y;
-} DisplayObjectPosition;
 void func_80043178(DisplayObjectSnapshot *object);
 void func_8004318C(
     DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
@@ -633,7 +78,6 @@ extern volatile u16 D_8009B394 __attribute__((section(".data")));
 void func_800705D8(u8 *script);
 s32 func_80070650(void);
 extern u8 D_801A8000[];
-struct DisplayObject;
 void func_8003FEE0(u32);
 void func_80028220(void);
 extern u16 D_8009B162;

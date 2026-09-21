@@ -4,98 +4,16 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 extern int  func_8008E590(void);
 extern u8 D_800907D8[];
-typedef struct {
-    s8 result;       
-    s8 field1;       
-     
-
-    s8 field_02;     
-    char pad_03[3];  
-    s8 value;        
-    s8 zero;         
-    s8 random;       
-    s8 field_09;     
-    s8 field_0A;     
-    s8 field_0B;     
-} AiSelection;
-typedef struct {
-    void *object;
-    void *data;
-    u8 pad_08[4];
-    s16 card_id;
-    s16 attack;
-    s16 defense;
-    s16 stat_modifier;
-    s16 terrain_modifier;
-    u16 flags;
-    u8 table_index;
-    u8 pad_19[3];
-} DuelCardRecord;
 extern DuelCardRecord D_801A7AD8[];
-union DuelSideLifePoints {
-    u16 unsigned_value;
-    s16 signed_value;
-};
-typedef struct {
-    s8 result_adjustment;
-    u8 turns_taken;
-    u8 effective_attacks;
-    u8 defensive_wins;
-    u8 face_down_plays;
-    u8 pure_magic_used;
-    u8 traps_triggered;
-    u8 field_07;
-    u8 fusions_initiated;
-    u8 equips_used;
-    u8 field_0A;
-    u8 field_0B;
-    u8 field_0C;
-} DuelRankStatistics;
-typedef struct {
-    DuelRankStatistics rank;
-    u8 field_0D;
-    s16 field_0E;
-    s16 field_10;
-     
-
-
-
-    s16 displayed_life_points;
-    union DuelSideLifePoints life_points;
-    s16 max_life_points;
-     
-
-    s8 deck_draw_cursor;
-    s8 swords_turns_remaining;
-     
-
-
-    s8 hand[5 ];
-     
-
-    s8 card_view_mode;
-} DuelSideState;
 extern u8 D_8009B1D5;
 extern DuelSideState *D_8009B1C8;
 s32 func_800358FC(s32 divisor);
 s32 func_80026D18(DuelCardRecord **out, s32 arg1, s32 arg2);
 s32 func_80019A08(s32 equipment, s32 monster);
 extern u16 D_8009B16C;
-typedef struct {
-    char pad[0x6A];
-    u8 index;
-} DuelSelectionObject;
-typedef struct {
-    DuelSelectionObject *ptr;
-} DuelSelectionSource;
 int func_8002778C(DuelSelectionSource *source);
 s32 func_800278A0(DuelSelectionSource *source);
 extern AiSelection D_800EAE88;

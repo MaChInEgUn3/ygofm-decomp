@@ -4,23 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    u8 bytes[8];
-} ModelBytes8;
-typedef struct {
-    u8 pad_00[0xA4];
-    u16 stage_height;
-    u16 texture_width;
-     
-    u16 field_A8;
-     
-    u16 field_AA;
-    u8 pad_AC[0x06];
-} ModelBackgroundRecord;
+#include "kg_types.h"
 extern u8 *D_8009AF88;
 extern s16 D_8009AF8E;
 extern s16 D_8009AF90;

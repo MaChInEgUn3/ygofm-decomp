@@ -4,124 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef void (*ScriptCommandHandler)(void);
-typedef struct {
-    u16 code_00;
-    u16 pad_02;
-    s32 field_04;
-    s32 field_08;
-    s16 x_0C;
-    s16 y_0E;
-    u8 field_10;
-    u8 flags_11;
-    u8 field_12;
-    u8 field_13;
-    u8 pad_14;
-    u8 field_15;
-     
-    u8 field_16;
-    u8 field_17;
-    u8 field_18;
-    u8 pad_19[3];
-} DuelEffectEntry;
-typedef struct {
-    u8 *streams[22 ];
-    s8 stream_index;
-} TextStreamOwner;
-struct DuelEffectChannel;
-typedef void (*TextBoxStateCallback)(struct DuelEffectChannel *);
-struct DisplayObject;
-typedef struct DuelEffectChannel {
-    u8 *text_00;
-     
-
-
-
-
-
-
-
-
-
-
-    u8 field_04;
-    u8 field_05;
-    u8 field_06;
-    u8 field_07;
-    u8 field_08;
-    u8 field_09;
-    u8 field_0A;
-    u8 pad_0B;
-    u16 field_0C;
-    u16 field_0E;
-     
-
-
-
-    u8 field_10;
-    u8 field_11;
-    u8 pad_12;
-    u8 field_13;
-    u8 field_14;
-    u8 field_15;
-    u8 pad_16[10];
-    DuelEffectEntry *entry_end_20;
-    DuelEffectEntry *entry_head_24;
-     
-
-
-
-    struct DisplayObject *field_28;
-     
-
-
-
-    struct DisplayObject *field_2C;
-    struct DisplayObject *field_30;
-    u16 flags_34;
-    u16 field_36;
-    u16 field_38;
-    u16 field_3A;
-    s16 field_3C;
-    s16 field_3E;
-    s16 field_40;
-    s16 field_42;
-     
-
-    u8 text_44[0x0D];
-     
-
-    u8 state_51;
-     
-
-    u8 delay_52;
-    u8 field_53;
-    u8 field_54;
-    u8 pad_55;
-    u8 field_56;
-    u8 index_57;
-     
-
-    s8 stream_58;
-    u8 field_59;
-    u8 field_5A;
-    u8 field_5B;
-    u16 range_start_5C;
-    u16 range_count_5E;
-    u8 field_60;
-    u8 field_61;
-     
-
-
-    u8 field_62;
-    u8 pad_63;
-} DuelEffectChannel;
+#include "kg_types.h"
 extern DuelEffectEntry D_800EB288[620 ];
 extern volatile s32 D_8009B350;
 s32 func_80037C74(DuelEffectChannel *object);
@@ -135,9 +18,7 @@ extern u16 D_801B0000[];
 extern u16 D_801C0000[];
 extern u16 D_801D5800[];
 extern u32 D_801D9000[];
-struct DisplayObject;
 void func_8004036C(void *object);
-struct DuelEffectChannel;
 void func_800393B0(struct DuelEffectChannel *object);
 extern s16 D_8009B35A;
 void func_800391E4(struct DuelEffectChannel *record);
@@ -146,7 +27,6 @@ extern
 s8 *func_80039E9C(void);
 extern ScriptCommandHandler D_80090C50[];
 extern u16 D_8009B27C __attribute__((section(".data")));
-struct DisplayObject;
 extern TextBoxStateCallback D_80090E64[];
 extern void (*D_8009B340)(volatile DuelEffectChannel *object);
 extern void (*D_80090F18[])(u8 *);

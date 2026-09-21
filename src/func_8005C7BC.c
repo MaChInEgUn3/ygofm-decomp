@@ -4,72 +4,11 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef unsigned char PACKET;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
-typedef struct {
-	unsigned long	*primp;
-	GsOT		*tagp;
-	int		shift;
-	int		offset;
-	PACKET		*out_packetp;
-	long		header_size;
-	unsigned long	*htop;
-	unsigned long	*ctop;
-	unsigned long	*ptop;
-} GsARGUNIT_ANIM;
-typedef struct {
-	short		idx;
-	u8		sid;
-	u8		pad;
-} GsSEH;
-typedef struct {
-	u32		rewrite_idx;
-	u16		size, num;
-	u16		ii;
-	u16		aframe;
-	u8		sid;
-	signed char	speed;
-	u16		srcii;
-	short		rframe;
-	u16		tframe;
-	u16		ci, ti;
-	u16		start;
-	u8		start_sid;
-	u8		traveling;
-} GsSEQ;
+#include "kg_types.h"
 extern int func_8008E870(const char *fmt, ...);
 extern void func_8008FBD0(s32 status) __attribute__((noreturn));
 extern char D_800117EC[];
 extern char D_80011814[];
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 rx;
-    s16 ry;
-    s16 rz;
-} ModelKeyframe;
-typedef struct {
-    GsSEQ *seq;
-    ModelKeyframe *source;
-    ModelKeyframe *target;
-    ModelKeyframe *out;
-} ModelAnimParams;
 u32 *func_8005C7BC(GsARGUNIT_ANIM *ctx);
 static __inline__ u32 scan_command(GsSEQ *track, u32 *commands, u32 index)
 {

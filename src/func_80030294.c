@@ -4,23 +4,10 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    u8 b[8];
-} Bytes8;
+#include "kg_types.h"
 extern int func_8007EF84();
 extern char D_8009AF54[];
 extern char D_8009AF58[];
-enum { FRONTEND_DEBUG_ROW_COUNT = 3 };
-typedef s8 FrontendDebugColumns[FRONTEND_DEBUG_ROW_COUNT];
-typedef u8 FrontendDebugDigitCounts[FRONTEND_DEBUG_ROW_COUNT];
-typedef union {
-    u8 *bytes;
-    u16 *words;
-} FrontendDebugRowPointer;
 s32 func_80030294(void);
 extern FrontendDebugColumns D_8009B2B4;
 extern FrontendDebugDigitCounts D_8009B2C0;

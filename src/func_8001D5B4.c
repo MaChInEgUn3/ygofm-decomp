@@ -4,15 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    u8 pad_00[0xF];
-    s8 col;
-    s8 row;
-} DuelFieldCursor;
+#include "kg_types.h"
 extern s8 D_8009B160;
 extern s8 D_8009B1D6;
 extern s8 D_8009B1D7;

@@ -4,46 +4,9 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
+#include "kg_types.h"
 int func_80058DD8(int index);
-typedef struct {
-	VECTOR  scale;
-	SVECTOR rotate;
-	VECTOR  trans;
-}       GsCOORD2PARAM;
-typedef struct _GsCOORDINATE2 {
-	unsigned long flg;
-	MATRIX  coord;
-	MATRIX  workm;
-	GsCOORD2PARAM *param;
-	struct _GsCOORDINATE2 *super;
-	struct _GsCOORDINATE2 *sub;
-}       GsCOORDINATE2;
-typedef struct {
-	long    vpx, vpy, vpz;
-	long    vrx, vry, vrz;
-	long    rz;
-	GsCOORDINATE2 *super;
-}       GsRVIEW2;
 void *func_800591FC(void);
-typedef struct {
-    s32 values[4];
-} LibraryViewQuad;
 extern u8 D_800EA1E8[];
 extern s16 D_80181002 __attribute__((section(".data")));
 extern s16 D_80181012 __attribute__((section(".data")));
@@ -53,17 +16,6 @@ void func_8002BAAC(u8 *state);
 void func_8002BAB4(void);
 void func_80058FB0(s32 idx, u16 *out);
 void func_80057F38(u8 *view);
-typedef struct {
-    s16 field_00;
-    s16 angle;
-    s16 field_04;
-    s16 field_06;
-    s16 field_08;
-    s16 field_0A;
-    s16 field_0C;
-    s16 projection;
-    GsRVIEW2 view;
-} ViewState;
 extern ViewState D_800F2848;
 void func_8001352C(void);
 void func_8001352C(void);

@@ -4,12 +4,8 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef signed int s32;
+#include "kg_types.h"
 extern s32 D_800F5B98[20 ];
-typedef struct {
-    s8 values[9 ];
-} AiOpponentData;
 extern AiOpponentData D_800917F0[40 ];
 void func_800734DC(void);
 s32 func_8007058C(void);

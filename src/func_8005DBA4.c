@@ -4,45 +4,11 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
+#include "kg_types.h"
 extern int func_80086770(int a);
 extern int func_800866A0(int a);
 extern SVECTOR D_800F5768[3 ];
 void *func_800591FC(void);
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 kind;
-} __attribute__((packed)) ModelEffectEndpoint;
-typedef struct {
-    u16 field_0;
-    u16 field_2;
-    u16 field_4;
-    u16 field_6;
-} ModelEffectResolvedValues;
-typedef struct ModelEffectKey {
-    ModelEffectEndpoint requested[2];
-    ModelEffectResolvedValues resolved[2];
-    s16 magnitude;
-     
-
-
-
-    u16 duration;
-    u16 progress;
-    u8 ready;
-    u8 pad_27;
-} Key;
 extern Key D_800F5788[10];
 void func_8005EBF4(Key *cur, s32 k, s32 scale, s32 den, s16 *out);
 void func_8005E808(Key *key);

@@ -4,36 +4,13 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-struct DIRENTRY {
-	char name[20];
-	long attr;
-	long size;
-	struct DIRENTRY *next;
-	long head;
-	char system[4];
-};
+#include "kg_types.h"
 long func_8008BC90( long chan );
 long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
 long func_8008C858( long chan, char* file, unsigned long* adrs, long ofs ,long bytes );
 long func_8008CE04( long chan, char* file, long blocks );
 long func_8008CF00( long chan );
 long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );
-typedef union {
-    struct {
-        u16 wins;
-        u16 losses;
-    } result;
-    u16 counts[2];
-} SaveDataDuelistRecord;
-typedef struct {
-    u32 lo;
-    u32 hi;
-} Pair;
 extern u8 D_801DC000[];
 extern u8 D_800EFE18[];
 void func_8003E46C(s32 value, s32 bits);
@@ -51,78 +28,11 @@ extern long func_80073900(long, void *, long);
 s32 func_80044544(struct DIRENTRY *entry, s32 count);
 s32 func_80044598(u8 *name, struct DIRENTRY *entry, s32 count);
 extern u8 D_8009AF70[];
-typedef struct {
-    u16 player_deck[40 ];
-    u8 card_quantities[722 ];
-    u8 pad_322[
-        0x334  -
-        (40  * sizeof(u16) + 722 )
-    ];
-    s32 duelist_code;
-    u8 pad_338[0x3DE  -
-        (0x334  + sizeof(s32))];
-     
-
-    u8 field_3DE;
-    u8 pad_3DF[
-        0x400  -
-        (0x3DE  + sizeof(u8))
-    ];
-     
-
-    s32 field_400;
-    u32 save_sequence;
-    u32 vblank_counter;
-    u8 player_name_sjis[(6  * sizeof(u16)) ];
-    u8 campaign_flags[
-        (0x7FF  + 1) >> 3 
-    ];
-    u16 duel_wins;
-    u16 duel_losses;
-    SaveDataDuelistRecord duelist_records[(5  * 8 ) ];
-    u8 pad_5BC[
-        0x5DC  -
-        (0x51C + sizeof(SaveDataDuelistRecord) * (5  * 8 ) )
-    ];
-    u8 campaign_scene_index;
-    u8 field_5DD;
-    u8 output_type;
-    u8 pad_5DF;
-    u32 starchips;
-} SaveDataState;
 extern s32 D_8009B3B8;
 s32 func_8003D2B8(
     SaveDataState *left,
     SaveDataState *right
 );
-typedef union {
-    struct {
-        s32 attack;
-        s32 defense;
-        s32 rank;
-    } card_stats;
-    struct {
-        s32 card_id;
-        s32 count;
-    } card;
-    struct {
-        s32 chest;
-        s32 deck;
-    } build_deck;
-    struct {
-        s32 used;
-        s32 needed;
-    } blocks;
-    struct {
-        s32 field_00[16];
-        s32 invalid_side;
-    } deck_validation;
-    s32 library_count;
-     
-    s32 starchips;
-    s32 rank_rows[16][2 ];
-    Pair pair;
-} TextStagingValues;
 extern TextStagingValues D_801D5608[];
 extern s8 D_8009B34D __attribute__((section(".data")));
 extern u8 D_8009B3F9;

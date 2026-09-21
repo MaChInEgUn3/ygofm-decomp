@@ -4,26 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
-typedef struct {		 
-	short vx, vy;
-} DVECTOR;
+#include "kg_types.h"
 extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
 extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
 extern void func_800871D0();
@@ -34,72 +15,13 @@ extern void func_80087CC0(SVECTOR *v0,DVECTOR *v1,u16 *sz,u16 *p,
 			u16 *flag,long n);
 extern int func_80086920(int a);
 extern int func_80086BB0(int a);
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-} POLY_G3;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-	u8	r3, g3, b3, pad3;
-	short	x3,	y3;
-} POLY_G4;
 extern void func_800828E0(POLY_G3 *p) ;
 extern void func_80082960(POLY_G4 *p) ;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
 void    func_800855D0(MATRIX * mp);
 extern void *func_8008E3D0 ( );
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 pad_03;
-    s16 min_radius;
-    s16 full_level;
-    s16 full_scale;
-    u16 pad_0A;
-} ModelDiscEffectConfig;
 extern ModelDiscEffectConfig D_80091604;
-typedef struct {
-    ModelDiscEffectConfig *table;
-    SVECTOR points[67];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 pad21F;
-    s32 unk220;
-    s32 level;
-    s32 scale;
-    u8 frame;
-} ModelDiscEffectState;
 extern VECTOR D_8001187C;
 s32 func_8006C37C(ModelDiscEffectState *arg0, s32 arg1);
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 max;
-} ModelEffectAdjustment;
 void func_80057E20(s32 index, ModelEffectAdjustment *out);
 s32 func_80058E1C(void);
 s32 func_80058DCC(void);

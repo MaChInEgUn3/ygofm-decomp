@@ -4,21 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {
-	short x, y;		 
-	short w, h;		 
-} RECT;
-typedef struct {
-	RECT	disp;		 
-	RECT	screen;		 
-	u8	isinter;	 
-	u8	isrgb24;	 
-	u8	pad0, pad1;	 
-} DISPENV;
+#include "kg_types.h"
 extern u32 *func_8007EC68(int id);
 extern u16 D_8009B098;
 extern DISPENV D_800E9D28;

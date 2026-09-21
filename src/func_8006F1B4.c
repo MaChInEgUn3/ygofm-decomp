@@ -4,23 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
+#include "kg_types.h"
 extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
 extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
 extern void func_800871D0();
@@ -29,45 +13,6 @@ extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
 extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
 			long *p,long *flag);
-typedef struct {
-	unsigned	addr: 24;
-	unsigned 	len:   8;
-	u8		r0, g0, b0, code;
-} P_TAG;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	u0, v0;	u16	clut;
-	short	x1,	y1;
-	u8	u1, v1;	u16	tpage;
-	short	x2,	y2;
-	u8	u2, v2;	u16	pad1;
-	short	x3,	y3;
-	u8	u3, v3;	u16	pad2;
-} POLY_FT4;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-	u8	r3, g3, b3, pad3;
-	short	x3,	y3;
-} POLY_G4;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
 void    func_800855D0(MATRIX * mp);
 extern void *func_8008E3D0 ( );
 extern int  func_8008E590(void);
@@ -83,37 +28,6 @@ void func_80059590(
     s32 target1,
     s32 target2
 );
-typedef struct {
-    u16 size;
-    u16 grow;
-} ModelSparkSize;
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 pad;
-} ModelSparkColor;
-typedef struct {
-    SVECTOR sparks[32];
-    ModelSparkSize sizes[32];
-    SVECTOR flashes[32];
-    SVECTOR dust[64];
-    SVECTOR dust_speed[64];
-    u16 dust_frame[64];
-    u16 spark_count;
-    u16 flash_count;
-    u16 frame;
-    u16 mode;
-    u8 fade;
-    u8 pad709;
-    u16 tpage;
-    u16 clut;
-    ModelSparkColor spark_colors[32];
-    ModelSparkColor flash_colors[32];
-    u8 dust_r;
-    u8 dust_g;
-    u8 dust_b;
-} ModelSparkEffect;
 s32 func_8006F1B4(void *data, s32 arg1);
 extern VECTOR D_8001189C;
 void func_80059AEC(s32 value);

@@ -4,31 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    s16 start_x;
-    s16 start_y;
-    s16 start_z;
-    s16 pair_slot;
-    s16 end_x;
-    s16 end_y;
-    s16 end_z;
-    s16 slot;
-} ModelCameraLeg;
-typedef struct {
-    u8 mode;
-    u8 flags;
-    u16 field_02;
-    u16 field_04;
-    u16 field_06;
-    u16 elapsed;
-    u16 duration;
-    ModelCameraLeg eye;
-    ModelCameraLeg target;
-} ModelCameraMove;
+#include "kg_types.h"
 extern u16 D_800F3A10[];
 extern ModelCameraMove D_800F2B20;
 void func_80052D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -36,37 +12,6 @@ s32 func_8005F174(void);
 s32 func_8005F18C(void);
 void func_80057F38(u8 *view);
 extern u8 D_8009AF98;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
-typedef struct {
-	VECTOR  scale;
-	SVECTOR rotate;
-	VECTOR  trans;
-}       GsCOORD2PARAM;
-typedef struct _GsCOORDINATE2 {
-	unsigned long flg;
-	MATRIX  coord;
-	MATRIX  workm;
-	GsCOORD2PARAM *param;
-	struct _GsCOORDINATE2 *super;
-	struct _GsCOORDINATE2 *sub;
-}       GsCOORDINATE2;
-typedef struct {
-	long    vpx, vpy, vpz;
-	long    vrx, vry, vrz;
-	long    rz;
-	GsCOORDINATE2 *super;
-}       GsRVIEW2;
 extern GsRVIEW2 D_800F56F0;
 extern void *func_8008E3D0 ( );
 void func_80052D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3)

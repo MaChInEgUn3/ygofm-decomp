@@ -4,30 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {
-	short x, y;		 
-	short w, h;		 
-} RECT;
-typedef struct {
-	u32	tag;
-	u32	code[15];
-} DR_ENV;
-typedef struct {
-	RECT	clip;		 
-	short	ofs[2];		 
-	RECT	tw;		 
-	u16 tpage;		 
-	u8	dtd;		 
-	u8	dfe;		 
-	u8	isbg;		 
-	u8	r0, g0, b0;	 
-	DR_ENV	dr_env;		 
-} DRAWENV;
+#include "kg_types.h"
 extern DRAWENV *func_8007FEC8(DRAWENV *env);
 s32 func_8005BE3C(void);
 s32 func_8005BFC8(s32 resync);
@@ -38,12 +15,6 @@ extern u8 D_8009B064;
 extern u8 D_8009B065;
 extern u8 D_8009B066;
 extern u8 D_8009B067;
-typedef struct {
-    u8 head[0x2400];
-    RECT slots[4];
-    RECT frame;
-    RECT strip;
-} MovieWorkArea;
 extern u8 *D_8009B498;
 extern void func_8008FD38(u32 *buf, int mode);
 extern void func_8008FDB4(u32 *buf, int size);

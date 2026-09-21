@@ -4,29 +4,11 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-struct DIRENTRY {
-	char name[20];
-	long attr;
-	long size;
-	struct DIRENTRY *next;
-	long head;
-	char system[4];
-};
+#include "kg_types.h"
 long func_8008BC90( long chan );
 long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
 long func_8008C858( long chan, char* file, unsigned long* adrs, long ofs ,long bytes );
 long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );
-typedef union {
-    struct {
-        u16 wins;
-        u16 losses;
-    } result;
-    u16 counts[2];
-} SaveDataDuelistRecord;
 extern u8 D_8009B3C1;
 extern u8 D_800EFE18[];
 void func_8003E46C(s32 value, s32 bits);
@@ -37,45 +19,6 @@ extern u8 *D_8009B3E0;
 extern u8 D_8009B3EC;
 extern u8 D_800EFBC0[];
 extern s32 D_801D5648[];
-typedef struct {
-    u16 player_deck[40 ];
-    u8 card_quantities[722 ];
-    u8 pad_322[
-        0x334  -
-        (40  * sizeof(u16) + 722 )
-    ];
-    s32 duelist_code;
-    u8 pad_338[0x3DE  -
-        (0x334  + sizeof(s32))];
-     
-
-    u8 field_3DE;
-    u8 pad_3DF[
-        0x400  -
-        (0x3DE  + sizeof(u8))
-    ];
-     
-
-    s32 field_400;
-    u32 save_sequence;
-    u32 vblank_counter;
-    u8 player_name_sjis[(6  * sizeof(u16)) ];
-    u8 campaign_flags[
-        (0x7FF  + 1) >> 3 
-    ];
-    u16 duel_wins;
-    u16 duel_losses;
-    SaveDataDuelistRecord duelist_records[(5  * 8 ) ];
-    u8 pad_5BC[
-        0x5DC  -
-        (0x51C + sizeof(SaveDataDuelistRecord) * (5  * 8 ) )
-    ];
-    u8 campaign_scene_index;
-    u8 field_5DD;
-    u8 output_type;
-    u8 pad_5DF;
-    u32 starchips;
-} SaveDataState;
 s32 func_8003D288(
     SaveDataState *left,
     SaveDataState *right

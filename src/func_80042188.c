@@ -4,107 +4,11 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
-typedef struct {		 
-	u8	r, g, b, cd;
-} CVECTOR;
-typedef struct {		 
-	short vx, vy;
-} DVECTOR;
-typedef struct {
-	SVECTOR v;
-	u8 uv[2]; u16 pad;	 
-	CVECTOR c;
-	DVECTOR sxy;
-	u32  sz;		 
-} RVECTOR;
-typedef struct {
-	RVECTOR r01,r02,r31,r32,rc;
-	RVECTOR	*r0,*r1,*r2,*r3;
-	u32 *rtn;
-} CRVECTOR4;
-typedef struct {
-	u32 	ndiv;		 
-	u32 	pih,piv;	 
-	u16 clut,tpage;
-	CVECTOR	rgbc;
-	u32	*ot;
-	RVECTOR r0,r1,r2,r3;
-	CRVECTOR4 cr[5];
-} DIVPOLYGON4;
+#include "kg_types.h"
 extern long func_80087BC0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
 			long *p,long *otz,long *flag);
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	u0, v0;	u16	clut;
-	short	x1,	y1;
-	u8	u1, v1;	u16	tpage;
-	short	x2,	y2;
-	u8	u2, v2;	u16	pad1;
-	short	x3,	y3;
-	u8	u3, v3;	u16	pad2;
-} POLY_FT4;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-	u8	r3, g3, b3, pad3;
-	short	x3,	y3;
-} POLY_G4;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	u0, v0;	u16	clut;
-	u8	r1, g1, b1, p1;
-	short	x1,	y1;
-	u8	u1, v1;	u16	tpage;
-	u8	r2, g2, b2, p2;
-	short	x2,	y2;
-	u8	u2, v2;	u16	pad2;
-	u8	r3, g3, b3, p3;
-	short	x3,	y3;
-	u8	u3, v3;	u16	pad3;
-} POLY_GT4;
 extern void func_80082840(void *p, int abe) ;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
-typedef struct {
-	unsigned long attribute;
-	short   x, y;
-	unsigned short w, h;
-	unsigned short tpage;
-	unsigned char u, v;
-	short   cx, cy;
-	unsigned char r, g, b;
-	short   mx, my;
-	short   scalex, scaley;
-	long    rotate;
-}       GsSPRITE;
 void    func_800844F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
 void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
 void    func_80084B70(GsSPRITE * sp, GsOT * ot, unsigned short pri);
@@ -114,49 +18,6 @@ POLY_FT4 *func_80089260(SVECTOR *v0, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3,
 			CVECTOR *rgbc, POLY_FT4 *s, u32 *ot, DIVPOLYGON4 *divp);
 extern u32 *D_800FE240 __attribute__((section(".data")));
 void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
-typedef union {
-    s32 word;
-    struct {
-        u16 x;
-        u16 y;
-    } h;
-} SpritePos;
-typedef union {
-    u16 word;
-    struct {
-        u8 lo;
-        u8 hi;
-    } b;
-} SpriteHalf;
-typedef struct {
-    u32 attribute;
-    SpritePos xy;
-    union {
-        u32 word;
-        struct {
-            SpriteHalf w;
-            u16 h;
-        } wh;
-    } extent;
-    u16 tpage;
-    SpriteHalf uv;
-    union {
-        u32 word;
-        struct {
-            u16 cx;
-            u16 cy;
-        } h;
-    } cxcy;
-    u32 rgb;
-    SpritePos mxmy;
-    u32 scale;
-    s32 rotate;
-} SpritePrim;
-typedef struct {
-    s16 x;
-    s16 y;
-    s32 divisions;
-} DisplayObjectPacketOrigin;
 void func_80042188(SpritePrim *sprite, u8 *packet, s32 ot, s32 mode, u8 *extra);
 void func_80042188(SpritePrim *sprite, u8 *packet, s32 ot, s32 mode, u8 *extra)
 {

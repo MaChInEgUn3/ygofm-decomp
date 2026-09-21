@@ -4,19 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} Color;
-typedef struct {
-    s32 h;
-    u16 s;
-    u16 v;
-} HsvT;
+#include "kg_types.h"
 HsvT *func_8005A98C(HsvT *out, u8 r, u8 g, u8 b, u8 lim);
 Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim);
 s32 func_8005AE68(u16 color, s32 flags, u16 scale);

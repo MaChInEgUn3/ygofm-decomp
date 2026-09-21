@@ -4,23 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
+#include "kg_types.h"
 extern MATRIX *func_80087480(MATRIX *m0,MATRIX *m1);
 extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
 extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
@@ -30,85 +14,19 @@ extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
 extern long func_80087B30(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
 			long *sxy0,long *sxy1,long *sxy2,
 			long *p,long *otz,long *flag);
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-} POLY_G3;
-typedef struct {
-	u32	tag;
-	u8	r0, g0, b0, code;
-	short	x0, 	y0;
-	u8	r1, g1, b1, pad1;
-	short	x1,	y1;
-	u8	r2, g2, b2, pad2;
-	short	x2,	y2;
-	u8	r3, g3, b3, pad3;
-	short	x3,	y3;
-} POLY_G4;
 extern void func_800828E0(POLY_G3 *p) ;
 extern void func_80082960(POLY_G4 *p) ;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
-typedef struct {
-	unsigned long attribute;
-	short   x0, y0;
-	short   x1, y1;
-	unsigned char r, g, b;
-}       GsLINE;
 void    func_80083FB0(GsLINE * lp, GsOT * ot, unsigned short pri);
 void    func_800855D0(MATRIX * mp);
 extern void *func_8008E3D0 ( );
 extern char *index  (const char *, char);
 extern int func_8008E870(const char *fmt, ...);
 extern u32 D_800915E8[];
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 max;
-} ModelEffectAdjustment;
-typedef u8 Triplet[4];
 void func_80057E20(s32 index, ModelEffectAdjustment *out);
 s32 func_80058E1C(void);
 void func_80058FB0(s32 idx, u16 *out);
 GsOT *func_80058F10(void);
 void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
-typedef struct {
-    u8 colors[3][6];
-    s16 minimum_height;
-    s16 minimum_radius;
-    s16 growth_duration;
-    s16 fade_duration;
-    s16 pad;
-} ModelSubdividedEffectConfig;
-typedef struct {
-    ModelSubdividedEffectConfig *config;
-    SVECTOR vertices[6];
-    SVECTOR *vertex_links[24];
-    SVECTOR subdivided_vertices[384];
-    Triplet colors[6];
-    u8 *color_links[24];
-    Triplet subdivided_colors[384];
-    u8 field_130C;
-    u8 field_130D;
-    u8 pad_130E[2];
-    s32 elapsed;
-    s32 remaining;
-} ModelSubdividedEffect;
 extern VECTOR D_8001185C;
 extern char D_8001186C[];
 s32 func_8006AF74(ModelSubdividedEffect *data, s32 mode);

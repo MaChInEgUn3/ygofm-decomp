@@ -4,30 +4,10 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct DuelRitualResult {
-    void *tribute_objects[3 ];
-    s32 field_0C;
-} DuelRitualResult;
+#include "kg_types.h"
 extern u16 D_801799D8[];
 s32 func_8002C7E8(DuelRitualResult *out, s32 ritual_id);
 extern u8 D_8009B1D5 __attribute__((section(".data")));
-typedef struct {
-    void *object;
-    void *data;
-    u8 pad_08[4];
-    s16 card_id;
-    s16 attack;
-    s16 defense;
-    s16 stat_modifier;
-    s16 terrain_modifier;
-    u16 flags;
-    u8 table_index;
-    u8 pad_19[3];
-} DuelCardRecord;
 extern DuelCardRecord D_801A7AD8[];
 s32 func_8002C7E8(DuelRitualResult *out, s32 ritualId)
 {

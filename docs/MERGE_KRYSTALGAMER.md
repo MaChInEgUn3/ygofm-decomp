@@ -407,6 +407,36 @@ did NOT move: a named read of the copy's source before the flag store
 measured: `volatile` on either side, his compiler as a knob. Every ported
 function is in; `parked/` holds the two SDK stubs only.
 
+**The declarations fold, step one: types (2026-09-21).** The 139 ported
+files carried 1851 typedefs, 43 tag definitions and 138 forward declarations
+at file scope, one copy per unit (`tools_src/kg_decls.py census`). Folding
+them is mechanical only if no name has two definition texts, and the census
+says 240 names, 0 conflicts -- his per-TU guards change no struct's shape in
+the units this tree took. `kg_decls.py fold-types` writes
+`include/kg_types.h` (236 units, first-seen order over the sorted file
+names, the six fixed-width names from types.h) and replaces each file's
+inline copies with one `#include`; only the ported units include it, so a
+non-ported unit cannot have changed, and the build stayed at 84747e64 for
+the ported ones. Two things the first run taught: an anonymous
+`enum { K = 3 };` is a type unit too (it was classified "other" and the
+header lost the constant two array typedefs need, 278 errors), and a
+`#include` line has no `;`, so the census has to split directives out
+before counting or it loses one declaration per file (139 short, exactly
+the file count, which is what made it visible).
+
+**Step two, the externs, is per-symbol and is not started.** Same census:
+451 extern symbols, 46 declared two ways across the ported units (volatile
+or not, `u8[4]` against `volatile u8`, a typed struct against `u16[]`), 109
+absent from variables.h and 157 declared with a type variables.h does not
+have; 612 prototypes, 14 disagreeing. Two shapes are possible and the choice
+is the user's: arms in variables.h/functions.h selected by a per-unit define
+(one declaration world, WORKFLOW's "every global once", ~200 arms to write
+and each ported unit then includes common.h), or a `kg_variables.h` /
+`kg_functions.h` pair included only by the ported units, arms only for the
+46 + 14 internal disagreements (isolated by construction, two declaration
+worlds for one binary). Either way the build is the gate per batch and the
+census line is the definition of done.
+
 **The four GTE functions: his assembly filter, ported as a per-function pass
 (1232 -> 1236, and the 34 are done: 31 in, 3 parked on the compiler).**
 Psy-Q's `inline_c.h` is written for DMPSX and its GTE macros emit marker

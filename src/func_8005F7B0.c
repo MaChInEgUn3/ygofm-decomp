@@ -4,16 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef signed int s32;
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 kind;
-} __attribute__((packed)) ModelEffectEndpoint;
+#include "kg_types.h"
 void func_8005F7B0(s32 value, s32 arg);
 void func_8005F91C(
     s32 mode,

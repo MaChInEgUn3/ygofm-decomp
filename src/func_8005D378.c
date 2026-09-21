@@ -4,87 +4,9 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct  {
-	short	m[3][3];	 
-        long    t[3];		 
-} MATRIX;
-typedef struct {		 
-	long	vx, vy;
-	long	vz, pad;
-} VECTOR;
-typedef struct {		 
-	short	vx, vy;
-	short	vz, pad;
-} SVECTOR;
+#include "kg_types.h"
 extern MATRIX *func_80089060(SVECTOR *r,MATRIX *m);
 extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
-typedef unsigned char PACKET;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
-typedef struct _GsCOORDUNIT {
-	unsigned long		flg;
-	MATRIX			matrix;
-	MATRIX			workm;
-	SVECTOR			rot;
-	struct _GsCOORDUNIT	*super;
-}	GsCOORDUNIT;
-typedef struct {
-	unsigned long	*primp;
-	GsOT		*tagp;
-	int		shift;
-	int		offset;
-	PACKET		*out_packetp;
-	long		header_size;
-	unsigned long	*htop;
-	unsigned long	*ctop;
-	unsigned long	*ptop;
-} GsARGUNIT_ANIM;
-typedef struct {
-	u32		rewrite_idx;
-	u16		size, num;
-	u16		ii;
-	u16		aframe;
-	u8		sid;
-	signed char	speed;
-	u16		srcii;
-	short		rframe;
-	u16		tframe;
-	u16		ci, ti;
-	u16		start;
-	u8		start_sid;
-	u8		traveling;
-} GsSEQ;
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    u16 rotation_x;
-    u16 rotation_y;
-    u16 rotation_z;
-    s16 scale_x;
-    s16 scale_y;
-    s16 scale_z;
-} ModelAnimationSample;
-typedef struct {
-    GsSEQ *track;
-    ModelAnimationSample *sample_1;
-    ModelAnimationSample *sample_2;
-    u16 *output;
-} ModelAnimationInterpolationSlots;
 s32 func_8005D378(GsARGUNIT_ANIM *ctx);
 s32 func_8005D378(GsARGUNIT_ANIM *ctx)
 {

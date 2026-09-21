@@ -4,10 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total);
 s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total)
 {

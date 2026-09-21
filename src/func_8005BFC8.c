@@ -4,34 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {
-	short x, y;		 
-	short w, h;		 
-} RECT;
-typedef struct {
-	u8 minute;		 
-	u8 second;		 
-	u8 sector;		 
-	u8 track;		 
-} CdlLOC;
-typedef struct {
-    u16 id;
-    u16 type;
-    u16 secCount;
-    u16 nSectors;
-    u32  frameCount;
-    u32  frameSize;
-
-    u16 width;
-    u16 height;
-    u32  dummy1;
-    u32  dummy2;
-    CdlLOC  loc;
-} StHEADER;
+#include "kg_types.h"
 u32	func_800784D0(u32 *base);
 u32	func_800785C0(u32 **addr,u32 **header);
 int     func_800783DC(CdlLOC *loc);
@@ -44,15 +17,8 @@ extern u8 D_8009B066;
 extern u32 D_8009B068;
 extern u32 D_8009B06C;
 extern u32 D_8009B070;
-typedef struct {
-    u8 head[0x2400];
-    RECT slots[4];
-    RECT frame;
-    RECT strip;
-} MovieWorkArea;
 extern u8 *D_8009B498;
 extern CdlLOC D_8009B49C;
-typedef	u16 DECDCTTAB[34816];
 extern int func_800902A0(u32 *bs, u32 *buf, DECDCTTAB table);
 void func_8005C62C(CdlLOC *loc);
 int func_80074170(int mode);

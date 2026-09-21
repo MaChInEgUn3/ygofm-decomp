@@ -4,28 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {
-	unsigned	addr: 24;
-	unsigned 	len:   8;
-	u8		r0, g0, b0, code;
-} P_TAG;
-typedef struct {
-	u8	r0, g0, b0, code;
-} P_CODE;
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
+#include "kg_types.h"
 extern u32 *D_800FE240 __attribute__((section(".data")));
 void func_8005B4D8(u32 *src, GsOT *ot, s32 idx, s32 flags);
 void func_8005B4D8(u32 *src, GsOT *ot, s32 idx, s32 flags)

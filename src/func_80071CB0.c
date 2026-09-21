@@ -4,24 +4,8 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
+#include "kg_types.h"
 s32 func_8007058C(void);
-typedef struct {
-    s16 card_id;
-    s16 attack;
-    s16 defense;
-    u16 flags;
-    s8 card_type;
-     
-
-    s8 guardian_star;
-    s8 guardian_star_2;
-    u8 deck_index;
-} AiActiveCard;
 extern s32 D_800F5B98[20 ];
 extern AiActiveCard D_801AB000[];
 void func_80071CB0(void);

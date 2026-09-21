@@ -4,94 +4,10 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef struct {
-    short left;	        
-    short right;        
-} SpuVolume;
-typedef struct {
-    unsigned long	voice;		 
-
-
-
-    unsigned long	mask;		 
-    SpuVolume		volume;		 
-    SpuVolume		volmode;	 
-    SpuVolume		volumex;	 
-    unsigned short	pitch;		 
-    unsigned short	note;		 
-    unsigned short	sample_note;	 
-    short		envx;		 
-    unsigned long	addr;		 
-    unsigned long	loop_addr;	 
-    long		a_mode;		 
-    long		s_mode;		 
-    long		r_mode;		 
-    unsigned short	ar;		 
-    unsigned short	dr;		 
-    unsigned short	sr;		 
-    unsigned short	rr;		 
-    unsigned short	sl;		 
-    unsigned short	adsr1;		 
-    unsigned short	adsr2;		 
-} SpuVoiceAttr;
+#include "kg_types.h"
 extern unsigned long func_80076820 (long on_off, unsigned long voice_bit);
 extern unsigned long func_80076B10 (void);
 extern void func_80077120 (SpuVoiceAttr *attr);
-typedef struct {
-    u8 program;
-    u8 pan;
-    u8 pad0002;
-    u8 volume;
-    u8 field_0004;
-    u8 expression;
-    u8 field_0006;
-    u8 pitch_bend_msb;
-    s32 field_0008;
-    s32 field_000C;
-    u8 field_0010;
-    u8 parameter_selector;
-    u8 control_mode;
-    u8 control_value;
-    s16 field_0014;
-    u8 pad0016[2];
-} SDSecondaryRecord;
-typedef struct {
-    u8 voice_index;
-    u8 pad0001[2];
-    u8 channel_index;
-    u8 pad0004;
-    u8 field_0005;
-    u8 note;
-    u8 pad0007;
-    u8 field_0008;
-    u8 field_0009;
-    u8 field_000A;
-    u8 field_000B;
-     
-
-    u8 pan;
-    u8 field_000D;
-    u8 field_000E;
-    u8 field_000F;
-    u8 pitch_bend_positive_scale;
-    u8 pitch_bend_negative_scale;
-    u8 field_0012;
-    u8 field_0013;
-     
-
-    u16 level_left;
-    u16 level_right;
-    u8 pad0018[2];
-    s16 cached_pitch_bend;
-    s16 field_001C;
-    u16 field_001E;
-    u8 pad0020[8];
-} SDSecondaryObject;
 extern u8 *D_8009B458;
 extern s32 D_80011434[20];
 s32 func_8004A854(s32 value);

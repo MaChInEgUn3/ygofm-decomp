@@ -4,46 +4,12 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 extern s32 D_8009B09C __attribute__((section(".data")));
 extern s16 D_8009B146 __attribute__((section(".data")));
 extern s16 D_8009B148 __attribute__((section(".data")));
 extern u8 D_800EA1E8[];
 unsigned int func_80029EB0(unsigned char *base, int index);
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
-typedef struct {
-	unsigned long attribute;
-	short   x, y;
-	unsigned short w, h;
-	unsigned short tpage;
-	unsigned char u, v;
-	short   cx, cy;
-	unsigned char r, g, b;
-	short   mx, my;
-	short   scalex, scaley;
-	long    rotate;
-}       GsSPRITE;
-typedef struct {
-	unsigned long attribute;
-	short   x0, y0;
-	short   x1, y1;
-	unsigned char r0, g0, b0;
-	unsigned char r1, g1, b1;
-}       GsGLINE;
 void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
 void    func_80084130(GsGLINE * lp, GsOT * ot, unsigned short pri);
 extern GsOT *D_800E9D90[4];

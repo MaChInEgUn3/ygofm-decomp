@@ -4,65 +4,16 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 extern s16 D_800907AC[2 ][2][4];
-typedef struct {
-    s16 x;
-    s16 y;
-} DuelFieldPosition;
 extern DuelFieldPosition
     D_80090800[2 ][20 ];
 extern u8 D_8009B1D5;
 void func_8003FEE0(u32);
-typedef struct {
-    u8 pad_00[0x30];
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 velocity_x;
-    s16 velocity_y;
-    s16 velocity_z;
-    u8 pad_3C[0x26];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-} DisplayObjectVelocity;
 void func_800429D8(DisplayObjectVelocity *object);
 extern u16 D_8009AF20[2];
 void func_80022D94(s32 frames, s32 x, s32 z, s32 y, s32 value);
 extern u16 D_8009B162;
-typedef struct {
-    u8 pad00[0x28];
-    s16 x;
-    s16 y;
-    s16 target_x;
-    s16 target_y;
-    u8 pad30[6];
-    u16 step_x;
-    u8 pad38[2];
-    u16 step_y;
-    u8 pad3C[0x24];
-    u16 steps;
-    u8 pad62[0xA];
-    u8 moving;
-} DuelFieldCursorObject;
-typedef struct {
-    u8 pad00[4];
-    DuelFieldCursorObject *object;
-    u8 pad08[7];
-    s8 col;
-    s8 row;
-    s8 min_row;
-    s8 max_row;
-    u8 pad13[5];
-    u8 page;
-    u8 flags;
-} GridCursor;
 void func_80023D08(GridCursor *o, s32 dir);
 void func_8002348C(void);
 void func_80023D08(GridCursor *o, s32 dir) {

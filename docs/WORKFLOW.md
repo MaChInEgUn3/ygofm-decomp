@@ -16,8 +16,9 @@ with. The last 139 files are krystalgamer's matched C ported through this
 tree's own pipeline (`docs/MERGE_KRYSTALGAMER.md`, `tools_src/port_kg.py`):
 each carries its declarations inline, typed his way, and says so in its
 header. The open work is style, not matching: folding those declarations
-into `include/` with the build as the arbiter (typedefs are one header, the
-externs are per-symbol arms; MERGE_KRYSTALGAMER.md has the census), and the
+into `include/` with the build as the arbiter (the types are folded into
+`include/kg_types.h`, which only ported units include; the externs are
+per-symbol arms and a decision; MERGE_KRYSTALGAMER.md has the census), and the
 Japanese build (SLPM-86398), which lives in his repo.
 
 ## Verify everything with the build

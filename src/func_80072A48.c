@@ -4,61 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef struct {
-    s16 card_id;
-    s16 attack;
-    s16 defense;
-    u16 flags;
-    s8 card_type;
-     
-
-    s8 guardian_star;
-    s8 guardian_star_2;
-    u8 deck_index;
-} AiActiveCard;
-typedef struct {
-    u8 enabled;
-    u8 pad01[3];
-    u8 *script_base;
-    u8 *script_cursor;
-    u8 *previous_cursor;
-    u8 pad10[4];
-    u8 return_depth;
-    u8 pad15[3];
-     
-
-
-    u8 *return_stack[8 ];
-    u8 combo_cards[6 ];
-    u16 card_set[32 ];
-    u8 type_set[25 ];
-     
-
-
-
-    u8 field_97;
-     
-
-
-
-    u16 attack_best_stat;
-    s8 attack_best_slot;
-    s8 attack_best_target;
-    u8 fusion_count;
-    u8 fusion_limit;
-    u8 fusion_set;
-    u8 pad9F;
-    u16 fusion_best_stat;
-    u8 fusion_depth;
-    u8 fusion_best_depth;
-    u8 fusion_path[6];
-    u8 fusion_used[0x2A];
-} AiScriptState;
+#include "kg_types.h"
 extern AiScriptState D_800F5BE8;
 extern s32 D_800F5B98[20 ];
 extern AiActiveCard D_801AB000[];

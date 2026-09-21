@@ -4,50 +4,10 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
+#include "kg_types.h"
 extern void func_80086DC8();
 extern void func_800878D0(long h);
-typedef struct {
-	short x, y;		 
-	short w, h;		 
-} RECT;
-typedef struct {
-	u32	tag;
-	u32	code[15];
-} DR_ENV;
-typedef struct {
-	RECT	clip;		 
-	short	ofs[2];		 
-	RECT	tw;		 
-	u16 tpage;		 
-	u8	dtd;		 
-	u8	dfe;		 
-	u8	isbg;		 
-	u8	r0, g0, b0;	 
-	DR_ENV	dr_env;		 
-} DRAWENV;
-typedef struct {
-	RECT	disp;		 
-	RECT	screen;		 
-	u8	isinter;	 
-	u8	isrgb24;	 
-	u8	pad0, pad1;	 
-} DISPENV;
 extern int func_8007F350(int mode);
-typedef struct {
-	unsigned p:24;
-	unsigned char num:8;
-}       GsOT_TAG;
-typedef struct {
-	unsigned long length;
-	GsOT_TAG *org;
-	unsigned long offset;
-	unsigned long point;
-	GsOT_TAG *tag;
-}       GsOT;
 void    func_80084DD0(unsigned short x, unsigned short y, unsigned short intmode,
 		              unsigned short dith, unsigned short varmmode);
 void    func_80085740(void);
@@ -66,20 +26,14 @@ extern DISPENV D_800FE0A8;
 extern volatile u8 D_8009B142 __attribute__((section(".data")));
 extern volatile u8 D_8009B143 __attribute__((section(".data")));
 extern volatile u8 D_8009B144 __attribute__((section(".data")));
-typedef struct GraphicsFrameBuffer GraphicsFrameBuffer;
 extern u8 D_8009B0AD;
 extern u8 D_8009B0D0;
 extern u8 D_8009B0A8;
 extern volatile u8 D_8009B0A0;
 extern volatile u8 D_8009B0A1;
 extern volatile u8 D_8009B0A2;
-struct GraphicsFrameBuffer {
-    u8 ordering_table_tags[0x5110];
-    GsOT ordering_tables[4];
-};
 void func_8003CBE8(void);
 extern volatile u8 D_8009B0A3;
-struct GraphicsFrameBuffer;
 void func_80013154(struct GraphicsFrameBuffer *base);
 void func_80013154(GraphicsFrameBuffer *base)
 {

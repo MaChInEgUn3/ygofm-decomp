@@ -4,80 +4,13 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef unsigned char u8;
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
-typedef unsigned int u32;
-typedef void (*CdlCB)(u8,u8 *);
-typedef struct {
-	u8 minute;		 
-	u8 second;		 
-	u8 sector;		 
-	u8 track;		 
-} CdlLOC;
+#include "kg_types.h"
 CdlCB func_8007E860(CdlCB func);
-typedef void ( *DslCB )( u8, u8* );
-typedef struct {
-	u8 minute;		 
-	u8 second;		 
-	u8 sector;		 
-	u8 track;		 
-} DslLOC;
 int func_8007B1F4( u8 com, u8* param, DslCB cbsync, int count );
 int func_8007B468( u8 mode, DslLOC* pos, u8 com, DslCB func, int count );
 void func_8007DDD4( void );
 extern long func_80077240 (long flag);
 CdlLOC *func_8007E600(s32 sector, CdlLOC *position);
-typedef struct FileTransferDescriptor FileTransferDescriptor;
-typedef void (*FileTransferCallback)();
-struct FileTransferDescriptor {
-    s16 x;
-    s16 y;
-    s16 w;
-    s16 h;
-    u32 value_08;
-    u32 value_0C;
-     
-
-    s32 total_bytes;
-    s32 file_bytes;
-    u8 *loader_argument;
-     
-
-    u32 phase_size;
-    FileTransferCallback phase_callback;
-    s32 absolute_lba;
-    s32 phase_remaining;
-    u32 status_flags;
-     
-
-
-
-
-
-
-
-
-
-
-
-
-    union {
-        struct {
-            u16 counter;
-            u16 field_32;
-        } h;
-        u32 word;
-    } field_30;
-    s32 direct_destination;
-    void *callback_data;
-    u32 position;
-    u32 result;
-    u16 buffer_index;
-    u8 done;
-    u8 substate;
-};
 extern u16 D_8009B0EC;
 void func_800140A0(u8 event);
 void func_80014134(u8 event);

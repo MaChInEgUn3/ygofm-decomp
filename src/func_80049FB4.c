@@ -4,9 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed short s16;
-typedef unsigned short u16;
-typedef signed int s32;
+#include "kg_types.h"
 s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset);
 extern u16 D_80010834[12][128];
 s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset)

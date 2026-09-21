@@ -4,18 +4,7 @@
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
-typedef signed char s8;
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef signed int s32;
-struct DIRENTRY {
-	char name[20];
-	long attr;
-	long size;
-	struct DIRENTRY *next;
-	long head;
-	char system[4];
-};
+#include "kg_types.h"
 extern long func_800738D0(char *, unsigned long);
 extern long func_80073910(long);
 extern long func_800738E0(long, long, long);
