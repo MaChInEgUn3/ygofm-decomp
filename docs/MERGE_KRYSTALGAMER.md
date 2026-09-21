@@ -335,3 +335,13 @@ stale flag row, which is why the table is a tuple of pairs. Every parked
 function his tree has as C is now in `src/`; the two parks left,
 func_80012AE8 (`__do_global_dtors`) and func_80073758 (`PCread`), are
 `sdk_asm` in his tree and library code by this tree's own scope rule.
+
+**Beyond the parks: the 34 functions his tree matches that this tree never
+attempted are the same route, and 15 of them went in on the first sweep
+(1205 -> 1220).** They are the big ones this tree's candidate pool had left
+(348 to 2319 instructions, 25.6k in total): `port_sweep.py` takes explicit
+names, so the queue is `matching_c` in his tree minus `src/func_*.c` here.
+First pass: func_8001B170, func_8002ACA4, func_80042188, func_80042C08, func_80045514, func_8004ADE8, func_8004CB0C, func_80051350, func_800559D4, func_80056D7C, func_8005D378, func_8006AF74, func_8006C37C, func_8006CD78, func_8006F1B4. The 19 others read as the known residues
+(jump-table labels, interior symbols, rodata blocks to own) plus a pruner
+gap on one typedef, one transient wine failure and a handful with real
+differences to read.

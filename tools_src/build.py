@@ -918,6 +918,25 @@ PER_FUNC_FLAGS["func_8004E7B0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 # profiles in this table's terms, measured through try_func and the build.
 PER_FUNC_FLAGS["func_80030294"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_8001B170"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8002ACA4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80042188"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80042C08"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80045514"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004ADE8"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8004ADE8"] = "-G0"
+PER_FUNC_FLAGS["func_8004CB0C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80051350"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800559D4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80056D7C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8005D378"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8006AF74"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8006C37C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8006CD78"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8006F1B4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a
