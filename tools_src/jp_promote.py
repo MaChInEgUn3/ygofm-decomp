@@ -56,6 +56,18 @@ def load_all():
     # table placed too; the word comparison covers .text only, so those are
     # flagged rather than applied (3 of the 81 clean units on 2026-09-21)
     US_RODATA = set(re.findall(r"\.rodata, (game/\S+)\]", us_split))
+    global JPVRAM, JP_AUTO
+    JPVRAM = {a: n for n, a in jpsyms.items()}       # JP address -> the name JP already gives it
+    # default names JP splat generated for ITS OWN addresses (from the last
+    # japanese-split): a US `D_8009B314` mapped to another JP address collides
+    # with them, and the linker then takes splat's definition (measured:
+    # sorted_entry_relink, built lo 0xB314 where JP has 0xB204)
+    JP_AUTO = set()
+    for p in list((KG / "tmp/splat/slpm_86398/asm").rglob("*.s")) + [KG / "tmp/splat/slpm_86398/undefined_syms_auto.txt", KG / "tmp/splat/slpm_86398/undefined_funcs_auto.txt", KG / "tmp/splat/slpm_86398/slpm_86398.ld"]:
+        if p.exists():
+            JP_AUTO.update(re.findall(r"\b(?:D|func)_[0-9A-Fa-f]{8}\b", p.read_text(errors="replace")))
+    if not JP_AUTO: sys.exit("no tmp/splat/slpm_86398 output: run `make japanese-split` in his tree first")
+    JP_AUTO -= set(jpsyms)      # a D_ name symbols.txt gave a JP address is a user name, not a collision
     return us, jp, pairs, names, jpsyms
 
 def usname(names, addr, func=False):
@@ -76,12 +88,31 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
             eq[n] = jaddr; return True
         if syms.get(n, jaddr) != jaddr: return False
         syms[n] = jaddr; return True
+    pending = None    # register written by the previous word, dropped from lui before this one
     for i, (u, j) in enumerate(zip(uw, jw)):
         op, rs, rt = u >> 26, (u >> 21) & 31, (u >> 16) & 31
+        # the register a word writes: a stale lui entry for it would pair a
+        # later displacement off a LOADED pointer as a symbol half (first
+        # seen as a bogus `D_FFFF0058` line splat could place nowhere). The
+        # drop is deferred one word because `lw $v0, lo($v0)` reads rs first.
+        if pending is not None: lui.pop(pending, None)
+        if op == 0: dst = (u >> 11) & 31
+        elif op == 0x03: dst = 31
+        elif op in (0x01, 0x02, 0x04, 0x05, 0x06, 0x07) or op in (0x28, 0x29, 0x2A, 0x2B, 0x2E) or op >= 0x38: dst = None
+        else: dst = rt
+        pending = dst if (dst and op != 0x0F) else None
         if op == 0x0F and (j >> 26) == 0x0F and ((u ^ j) & 0xFFFF0000) == 0:
             lui[rt] = (u & 0xFFFF, j & 0xFFFF)
         if u == j:
-            if op in LOADSTORE and rs in lui and lui[rs][0] != lui[rs][1]:
+            # an equal word still names a symbol: through gp it is the SAME
+            # offset from a DIFFERENT gp (US 0x8009AF08, JP 0x8009AE48, so the
+            # symbol moved by -0xC0 and needs its line); through a lui pair
+            # with equal halves it is an equal address, recorded for the named
+            # case (first seen as `undefined reference to gDuel_awPlayerDeck`)
+            if op in LOADSTORE and rs == 28:
+                ua, ja = (GP_US + sx16(u & 0xFFFF)) & 0xFFFFFFFF, (GP_JP + sx16(j & 0xFFFF)) & 0xFFFFFFFF
+                if not put(ua, ja): return False, {}, f"word {i}: gp symbol conflict"
+            elif op in LOADSTORE and rs in lui:
                 ua = ((lui[rs][0] << 16) + sx16(u & 0xFFFF)) & 0xFFFFFFFF
                 ja = ((lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
                 if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
@@ -137,10 +168,26 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
     ok, syms, why = pair_words(uw, jw, names, pairs, (fns[0], jps[0]))
     if not ok: return dict(ok=False, src=src, why=why)
+    fnames = [usname(names, a, True) for a in fns]
+    # aliases: US name -> the name the JP build must use (a wrapper's #define
+    # lines, upstream's "regional alias"); lines: symbols.txt lines to add
+    aliases, lines = {}, {}
     for n, a in syms.items():
-        if n in jpsyms and jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
-    return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms,
-                profile=us[fns[0]]["profile"], names=[usname(names, a, True) for a in fns])
+        if n in fnames: continue                          # on the function line already
+        if a in JPVRAM:                                   # JP already names that address
+            if JPVRAM[a] != n: aliases[n] = JPVRAM[a]
+            continue
+        if n in jpsyms:
+            if jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
+            continue
+        m = re.match(r"(D|func)_([0-9A-Fa-f]{8})$", n)
+        if m and n in JP_AUTO and int(m.group(2), 16) != a:
+            jn = ("gJapanese_" if m.group(1) == "D" else "Japanese_") + n
+            aliases[n] = jn; lines[jn] = a
+        else:
+            lines[n] = a
+    return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
+                profile=us[fns[0]]["profile"], names=fnames)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -162,6 +209,25 @@ def apply(addr):
     r = analyze(us, jp, pairs, names, jpsyms, addr)
     if not r["ok"]: sys.exit(f"cannot apply {r['src']}: {r['why']}")
     unit = r["src"][len("src/"):-2]
+    wrapper = None
+    if r["aliases"]:
+        # upstream's regional-alias wrapper (src/game/japanese/*.c): the US
+        # names the JP build cannot use are #defined to JP names before the
+        # headers are seen; the US source is included rather than copied
+        base = unit[len("game/"):]
+        wrapper = KG / "src/game/japanese" / (base + ".c")
+        if wrapper.exists(): sys.exit(f"{wrapper} exists")
+        # `make basic-types` wants types.h included first in every source file
+        body = ['#include "../../types.h"', "",
+                f"/* SLPM-86398 build of {r['src']}: the symbols below sit at other addresses in the",
+                " * Japanese executable and their US names are taken there, so they are aliased",
+                " * (config/slpm_86398/symbols.txt has the addresses). The US source is included",
+                " * unchanged. */"]
+        body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
+        body += ["", f'#include "../{base}.c"', ""]
+        wrapper.write_text("\n".join(body))
+        unit = "game/japanese/" + base
+        r["src"] = "src/" + unit + ".c"
     start, end = r["jps"][0] - LOAD + HDR, r["jps"][0] + sum(r["sizes"]) - LOAD + HDR
     # split.yaml: the main segment's subsegment list
     sp = KG / "config/slpm_86398/split.yaml"; text = sp.read_text()
@@ -197,10 +263,15 @@ def apply(addr):
     # data symbols; the existing lines and the trailing newline are kept as is
     st = KG / "config/slpm_86398/symbols.txt"; old = st.read_text()
     add = [f"{n} = 0x{j:08X};" for n, j in zip(r["names"], r["jps"])]
-    add += [f"{n} = 0x{a:08X};" for n, a in sorted(r["syms"].items(), key=lambda kv: kv[1]) if n not in jpsyms]
+    # a unit's own function reached by `jal` at an equal address is in syms
+    # too (named, equal-address): it is already on the function line above,
+    # and splat rejects the duplicate ("Duplicate symbol detected")
+    add += [f"{n} = 0x{a:08X};" for n, a in sorted(r["lines"].items(), key=lambda kv: kv[1])]
     body = old if old.endswith("\n") else old + "\n"
     st.write_text(body + "\n".join(add) + ("\n" if old.endswith("\n") else ""))
-    print(f"applied {unit}: {len(r['fns'])} fn at {r['jps'][0]:#x}..{r['jps'][0] + sum(r['sizes']):#x}, {len(r['syms'])} symbols: {r['syms']}")
+    print(f"applied {unit}: {len(r['fns'])} fn at {r['jps'][0]:#x}..{r['jps'][0] + sum(r['sizes']):#x}, "
+          f"{len(r['lines'])} symbol lines, {len(r['aliases'])} aliases {r['aliases']}"
+          + (f", wrapper {wrapper.relative_to(KG)}" if wrapper else ""))
 
 if __name__ == "__main__":
     if sys.argv[1] == "scan": scan()
