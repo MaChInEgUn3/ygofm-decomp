@@ -56,7 +56,10 @@ def main():
           f"{m_i} ({100.0*m_i/tot_i:.1f}%)")
     print(f"  remaining: {r_f} ({100.0*r_f/tot_f:.1f}%)  "
           f"{r_i} ({100.0*r_i/tot_i:.1f}%)")
-    print(f"  averages : matched {m_i//m_f}, remaining {r_i//r_f}")
+    # r_f is 0 since 2026-09-21 (every in-scope function matches); the
+    # average of an empty set is printed as a dash, not a crash.
+    print(f"  averages : matched {m_i//m_f}, remaining "
+          f"{r_i//r_f if r_f else '-'}")
     print(f"src/ holds {len(glob.glob(os.path.join(ROOT, 'src', 'func_*.c')))} files")
 
     rows = []
@@ -89,11 +92,11 @@ def main():
             continue
         t2 += (f"| {label} | {rem} | {p} | "
                f"{'**0**' if un == 0 else un} |\n")
+    if all(rem == 0 for _, rem, _, _ in rows):
+        t2 += "| (none) | 0 | 0 | **0** |\n"
     text = re.sub(r"\| size \(instructions\) \| remaining \| parked \| unclaimed \|\n"
                   r"\|---\|---\|---\|---\|\n(?:\|[^\n]*\n)+", t2, text, count=1)
-    text = re.sub(r"average 29 instructions and the ones\nremaining average \d+",
-                  f"average {m_i//m_f} instructions and the ones\n"
-                  f"remaining average {r_i//r_f}", text, count=1)
+    # The averages sentence left README.md on 2026-09-21 (nothing remains).
     text = re.sub(r"`src/` holds \d+ files; \d+ of them are in scope",
                   f"`src/` holds {len(glob.glob(os.path.join(ROOT, 'src', 'func_*.c')))}"
                   f" files; {m_f} of them are in scope", text, count=1)

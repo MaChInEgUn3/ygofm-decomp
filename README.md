@@ -13,68 +13,44 @@ retail bytes.
 
 | | functions | instructions |
 |---|---|---|
-| decompiled and matching | **959** (85.5%) | **37,834** (46.2%) |
-| remaining | 163 (14.5%) | 44,044 (53.8%) |
+| decompiled and matching | **1120** (100.0%) | **81,804** (100.0%) |
+| remaining | 0 (0.0%) | 0 (0.0%) |
 
-Both columns are worth reading, because they disagree sharply. Function count
-is well past halfway; **instruction count is not, and it is the honest
-number.** The functions matched so far average 32 instructions and the ones
-remaining average 173 — the short bands get emptied first and refill only when
-a rule is retracted. Scope is the 1,122 game functions below `0x80073840`,
-excluding PsyQ library code (`docs/LIBRARY_FUNCS.txt`) and hand-written
-assembly (77 GTE-block functions, filtered by `candidates.HAND_WRITTEN`). An
-earlier revision of this table said 1,198: that number excluded the library
-list but not the hand-written block its own caption claimed to exclude — the
-same skipped-filter class `docs/WORKFLOW.md` documents for the `lui $at` pool
-miscounts.
+**Every in-scope function is decompiled and byte-matching (2026-09-21).**
+Scope is the 1,120 game functions below `0x80073840`, excluding PsyQ library
+code (`docs/LIBRARY_FUNCS.txt`) and hand-written assembly (the GTE
+ordering-table inserters and the crt stubs, filtered by
+`candidates.HAND_WRITTEN`), which no compiler produced and which stays as
+assembly. The last 139 came in as a port of krystalgamer's matched C through
+this tree's own pipeline (`docs/MERGE_KRYSTALGAMER.md`); those files carry
+their declarations inline and say so in their headers. Assembly debt --
+compiler output transcribed as `__asm__` instead of decompiled -- is **0**,
+counted by `.venv/bin/python tools_src/asm_debt.py` and tracked in
+`docs/ASM_DEBT.md`; the 82 files that still carry an `__asm__` body are
+hand-written assembly or GTE sequences by that tool's classification.
 
-**15 of these are assembly transcriptions of compiler output, not
-decompilations** — ordinary MIPS in inline `__asm__` bodies, byte-exact and
-therefore invisible to the build's own check. A further **52** are transcriptions
-of code the original shipped as **hand-written assembly** (the GTE ordering-table
-inserters: no stack frame, no `jal`, callee-saved registers parked in the
-caller's structure), which no compiler ever produced and which are therefore
-finished as asm, not owed as C. Both populations came in with a port from a
-second decompilation and are tracked in `docs/ASM_DEBT.md`; the honest count of
-decompiled functions is **1074**, and the 15 are the debt. Count it yourself with
-`.venv/bin/python tools_src/asm_debt.py`. A further 5 files reach the GTE,
-which is not transcription — C has no operators for coprocessor 2. Those were
-hand-rolled asm until 2026-08-31 and now call the PsyQ `gte_*` macros through
-`include/gte.h`, after krystalgamer pointed out that the SDK ships them.
-
-`src/` holds 1071 files; 959 of them are in scope and the rest are library or
+`src/` holds 1239 files; 1120 of them are in scope and the rest are library or
 above-scope functions matched along the way.
 
 ### Where the remaining work is
 
 | size (instructions) | remaining | parked | unclaimed |
 |---|---|---|---|
-| 26–50 | 7 | 7 | **0** |
-| 51–100 | 22 | 22 | **0** |
-| 101–200 | 53 | 44 | 9 |
-| 201–400 | 54 | 1 | 53 |
-| > 400 | 27 | 0 | 27 |
+| (none) | 0 | 0 | **0** |
 
-**The short bands are exhausted.** Every remaining function up to 50
-instructions is already parked, which is why `tools_src/candidates.py` reports
-zero clean candidates in its default band — that is the tool being correct, not
-broken. As of this revision the lowest unclaimed function is **165**
-instructions: everything shorter is either matched or parked, and the bulk of
-what is left is the 101–200 band.
-
-"Parked" means a candidate is known to be close but not exact, with a
-per-function diagnosis in `docs/PARKED.txt` and, for 201 of them, the actual
-candidate in `parked/`. These are a source of matches rather than a graveyard:
-a park records that a shape was not found, not that none exists, and re-reading
-them whenever a new lever is measured has repeatedly produced matches years
-into the same file.
+Nothing is parked: `parked/` is empty and every entry in `docs/PARKED.txt`
+ends in a `MATCH`, `RESOLVED` or `LIBRARY` line. The file stays as the record
+of what each lever turned out to be. What is left is not matching work: folding
+the ported files' inline declarations into `include/` (style, measured by the
+build staying byte-identical), and the Japanese build (SLPM-86398), which lives
+in krystalgamer's tree.
 
 Every number in this section is derived, not typed:
 `.venv/bin/python tools_src/status.py` prints them and `--write` rewrites the
-two tables in place. Run it in the same batch as `tools_src/sync_count.py`
-before committing. It imports candidates.py's scope filters rather than
-restating them, because both of the past miscounts in this repo came from an
-ad-hoc scan that skipped a filter the tool already applied.
+two tables and the `src/` line in place. Run it in the same batch as
+`tools_src/sync_count.py` before committing. It imports candidates.py's scope
+filters rather than restating them, because both of the past miscounts in this
+repo came from an ad-hoc scan that skipped a filter the tool already applied.
 
 ## What is and is not committed
 

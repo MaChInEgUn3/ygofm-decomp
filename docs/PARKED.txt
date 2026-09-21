@@ -900,7 +900,7 @@ func_80025B28
 # loop-back delay slot and `total += got` in the branch delay slot. Five
 # callee-saved registers are rotated: retail has handle/buffer/total/0x8000/-1
 # in $s4/$s3/$s2/$s6/$s5, we get $s6/$s2/$s3/$s5/$s4. Sweep flat at 23.
-func_80073758
+func_80073758 -- LIBRARY 2026-09-21: sdk_asm no functions.csv do krystalgamer; entrou em docs/LIBRARY_FUNCS.txt, o parked/func_80073758.c foi apagado (historia: commit d00f998 e anteriores).
 # func_80013B68 has two requirements that pull against each other. Retail
 # assigns the four parameters to $s1-$s4 in declaration order, which cc1psx only
 # does when they are *used* in that order (14 differences otherwise); and retail
@@ -1061,7 +1061,7 @@ func_800338E4
 # hand-written assembly or a different toolchain's object, most likely the
 # PsyQ startup's constructor walker, and it should be left as assembly.
 # The candidate is kept in parked/ as the record of how far C gets.
-func_80012AE8
+func_80012AE8 -- LIBRARY 2026-09-21: sdk_asm no functions.csv do krystalgamer; entrou em docs/LIBRARY_FUNCS.txt, o parked/func_80012AE8.c foi apagado (historia: commit d00f998 e anteriores).
 # func_8004C560: retail copies p[0] into a third register and adds there,
 # keeping p[0] live until after the sum so it can store it to p[4]. Re-tried
 # 2026-07-31 with the "an extra copy is an extra name" lever from

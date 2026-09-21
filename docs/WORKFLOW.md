@@ -5,6 +5,21 @@ function must assemble to the retail bytes. `DECISIONS.md` in this directory is 
 full reference and is long; this file is the operational minimum — read it
 first, then reach for DECISIONS.md when you need the reasoning behind a rule.
 
+## State on 2026-09-21
+
+**Every in-scope function matches**: `status.py` prints 1120 of 1120 and
+`asm_debt.py` prints 0; `src/` holds 1239 files and `parked/` is empty. The
+"Adding a function" section below describes a candidate pool that no
+longer exists -- keep reading it, because its levers are the record of how
+each function was reached and they are what a regression gets debugged
+with. The last 139 files are krystalgamer's matched C ported through this
+tree's own pipeline (`docs/MERGE_KRYSTALGAMER.md`, `tools_src/port_kg.py`):
+each carries its declarations inline, typed his way, and says so in its
+header. The open work is style, not matching: folding those declarations
+into `include/` with the build as the arbiter (typedefs are one header, the
+externs are per-symbol arms; MERGE_KRYSTALGAMER.md has the census), and the
+Japanese build (SLPM-86398), which lives in his repo.
+
 ## Verify everything with the build
 
 ```

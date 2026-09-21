@@ -385,3 +385,12 @@ func_80075CB0
 # still treats it as in scope. Whoever settles it should say which library it
 # is in, not which side of an address it sits on.
 # ---------------------------------------------------------------------------
+# Psy-Q crt and libsn entries that krystalgamer's tree classifies `sdk_asm`
+# (config/slus_01411/functions.csv): the C runtime entry stub (`or $sp`,
+# `break 0,1`), `__do_global_dtors` (the constructor walker; parked as C at 23
+# differences and rotated callee-saved registers, i.e. not gcc 2.8.1 output of
+# any C) and PCread (libsn's host-file read; same story at 23). Added
+# 2026-09-21 so status.py stops counting the two parks as remaining.
+func_800129D8
+func_80012AE8
+func_80073758
