@@ -489,7 +489,32 @@ is a silent codegen change. (The suspicion that the census's non-greedy
 `__attribute__\s*\(\(.*?\)\)` was inflating the count was checked with a
 balanced-paren stripper and four controls, and it was **unfounded**: both
 give 46 and 13. The instrument was right; the reading of its output was
-the thing at fault.) WORKFLOW's "every global once" exists
+the thing at fault.)
+
+**DONE, 2026-09-21, in three batches against the full build.**
+`kg_decls.py fold-externs [N]` folds the first N agreed symbols, so each
+batch is measurable; 100, then 400, then the remaining 501, and the build
+hashed `84747e64` after every one. `include/kg_variables.h` ends at 422
+lines and `include/kg_functions.h` at 706, included only by the ported
+units exactly as `kg_types.h` is. The census went 450 extern symbols
+inline to **47** and 612 prototypes to **14**, against 46 and 13
+disagreements -- and the one extra of each is not a leftover: a unit is
+folded only when EVERY name it declares agrees, so a symbol that agrees
+but shares its declaration with a disagreeing neighbour rides along
+inline. That was checked rather than assumed: **zero** inline units
+declare only agreeing names.
+Two things worth keeping from the doing of it. The header write has to be
+**additive** -- a later batch only sees what is still inline, so
+rewriting the header from that deletes every declaration an earlier batch
+moved there and leaves those symbols undeclared; the control is that the
+files grow (56 and 76 lines, then 221 and 354, then 422 and 706) instead
+of shrinking. And the hazard to measure BEFORE folding prototypes is a
+unit that calls a function it deliberately does not declare, which is
+WORKFLOW's missing-prototype case: of 1061 names, six were mentioned by a
+unit that declares nothing for them, and five of those were prose in a
+provenance header or a `goto` label the name regex matched, the sixth an
+`asm()`-labelled view of a symbol that disagrees anyway. No new case, so
+the fold could go in batches at all. WORKFLOW's "every global once" exists
 to stop silent codegen drift between files, and for the ported units that
 hazard is closed by the build gate rather than by header unity; the ported
 units are his type world and the header says so, the way `kg_types.h`

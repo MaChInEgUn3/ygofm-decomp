@@ -7,15 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern MATRIX *func_80087370(MATRIX *m0,MATRIX *m1);
-extern MATRIX *func_800889C0(SVECTOR *r,MATRIX *m);
-extern MATRIX *func_80088E50(SVECTOR *r,MATRIX *m);
-extern void func_8008A4A0(GsCOORDUNIT *, MATRIX *);
 extern u16 D_8009B47A;
 extern u16 D_8009B47C;
-void func_800580D4(s32 index, s32 arg1, u8 *arg2, struct _GsCOORDUNIT *arg3);
-extern void *func_8008E3D0 ( );
-extern ModelSlot D_800F2C40[3 ];
 static __inline__ void setup_rotation(
     SVECTOR *source,
     SVECTOR *copy,

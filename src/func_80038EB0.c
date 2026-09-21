@@ -7,12 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern volatile s32 D_8009B350;
-extern MenuRecord D_800EB010[];
-extern MenuRecord *D_8009B328;
-void func_80039F44(DisplayEffectState *object);
-void func_80039FD4(MenuRecord *record);
-void func_80038EB0(EffectObject *object);
 void func_80038EB0(EffectObject *o) {
     MenuRecord *e;
     s32 id;

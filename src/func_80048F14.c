@@ -7,14 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_80075BE0 (long on_off);
-extern long func_80075DE0 (SpuReverbAttr *attr);
-extern long func_80076790 (long on_off);
 extern SDValue *D_8009B45C;
-s32 func_80049600(u32 count);
-void func_80048F14(void);
-void func_80049544(void);
-void func_80049594(s32 value);
 void func_80048F14(void)
 {
     SpuReverbAttr packet;

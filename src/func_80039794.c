@@ -7,15 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_8009B0C1 __attribute__((section(".data")));
 extern u16 D_8009B398 __attribute__((section(".data")));
-void func_8003B50C(s32 value);
-void func_80039D64(DuelEffectChannel *);
-extern u8 D_8009B356;
-void func_800393B0(struct DuelEffectChannel *object);
-extern s16 D_8009B35A;
-struct DisplayObject *func_800374F4(DuelEffectChannel *record);
-extern u32 D_801D9000[];
 void func_80039794(void)
 {
     DuelEffectChannel *p;

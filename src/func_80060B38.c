@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_80060B38(DisplayObject *obj, GsOT *ot);
 extern CardListRowSet D_801A8000[];
 void func_80060B38(DisplayObject *obj, GsOT *ot) {
     u8 atk[8];

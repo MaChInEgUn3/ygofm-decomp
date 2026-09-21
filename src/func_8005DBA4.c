@@ -7,20 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern SVECTOR D_800F5768[3 ];
-extern Key D_800F5788[10];
-void func_8005EBF4(Key *cur, s32 k, s32 scale, s32 den, s16 *out);
-void func_8005E808(Key *key);
-void func_8005F070(s32 enabled);
-extern Key *D_8009B074;
-extern u8 D_8009B078;
-extern u8 D_8009B079;
-extern s8 D_8009B07A;
-extern u8 D_8009B07B;
-extern u8 D_8009B07C;
-void func_8005DBA4(void);
-s32 func_80058E1C(void);
-void func_80058434(s32 direction, s32 yaw, s32 pitch, s32 distance, s32 unused);
 static inline s32 Keyframe_ApplyDeadzone(s16 *axis, s32 amount)
 {
     s32 value = *axis;

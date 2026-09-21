@@ -7,26 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
-extern void func_800871D0();
-extern void func_80087274();
-extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
-extern long func_80089C70(long sz0,long sz1,long sz2);
-extern void func_80087CC0(SVECTOR *v0,DVECTOR *v1,u16 *sz,u16 *p,
-			u16 *flag,long n);
-extern int func_80086920(int a);
-extern int func_80086BB0(int a);
-extern void func_800828E0(POLY_G3 *p) ;
-extern void func_80082960(POLY_G4 *p) ;
-extern void *func_8008E3D0 ( );
-extern ModelDiscEffectConfig D_80091604;
-extern VECTOR D_8001187C;
-s32 func_8006C37C(ModelDiscEffectState *arg0, s32 arg1);
-void func_80057E20(s32 index, ModelEffectAdjustment *out);
-s32 func_80058E1C(void);
-s32 func_80058DCC(void);
-void *func_80059220(void);
-GsOT *func_80058F10(void);
 s32 func_8006C37C(ModelDiscEffectState *arg0, s32 arg1)
 {
     ModelDiscEffectState *e;

@@ -8,7 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern CardListRowSet D_801A8000[];
-void func_80060E70(u16 *entries, s32 side, s32 flag, s32 ignored);
 extern s16 D_8009B338 __attribute__((section(".data")));
 void func_80060E70(u16 *e, s32 idx, s32 flag, s32 ignored)
 {

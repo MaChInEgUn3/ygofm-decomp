@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset);
-extern u16 D_80010834[12][128];
 s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset)
 {
     s16 fine;

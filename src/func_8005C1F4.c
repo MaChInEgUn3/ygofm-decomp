@@ -7,15 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8007F978(RECT *rect, u32 *p);
-void	func_800786A0(void);
-void func_8005C1F4(void);
-extern u8 D_8009B060;
-extern u8 D_8009B062;
-extern u8 D_8009B067;
-extern s32 D_800F5D44 __attribute__((section(".data")));
-extern u8 *D_8009B498;
-extern void func_8008FDB4(u32 *buf, int size);
 void func_8005C1F4(void) {
     u8 *src;
     u8 *dst;

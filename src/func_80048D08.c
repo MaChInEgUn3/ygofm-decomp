@@ -8,7 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern SDValue *D_8009B45C;
-void func_80048C70(u32 *dst, u32 *src);
 void func_80048D08(s32 side, u32 *src)
 {
     SDSeqBlock *blk;

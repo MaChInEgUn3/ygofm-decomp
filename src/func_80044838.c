@@ -7,39 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_800738D0(char *, unsigned long);
-extern long func_80073910(long);
-extern long func_800738E0(long, long, long);
-extern long func_800738F0(long, void *, long);
-extern long func_80073900(long, void *, long);
-extern void func_8008B370(void);
-extern long func_8008B380(long drv);
-extern long func_8008B390(long drv);
-extern long func_8008B350(long chan, long block, unsigned char *buf);
-extern long func_8008B360(long chan, long block, unsigned char *buf);
-s32 func_80044838(s32 mode, s32 *request, s32 *result);
-extern long D_800F2AE0[];
-extern volatile s32 D_8009B450;
-extern u8 D_8009B437;
-extern long D_800F2AF0[];
-extern s8 D_8009B43E;
-extern u8 D_8009B44F;
-extern u16 D_8009B44C;
-extern u16 D_8009B434;
-extern char D_800F2B00[];
-extern s32 D_8009B430;
-extern u8 D_8009B436;
-extern u8 D_8009B43C;
-s32 func_80044470(s32 chan, const char *pattern, struct DIRENTRY *cursor,
-                     s32 *out_count);
-s32 func_80044608(void);
 extern struct DIRENTRY *D_8009B444;
 extern s32 D_8009B438;
-void func_80043D48(long *handles);
-void func_80043D48(long *handles);
-s32 func_80044470(s32 chan, const char *pattern, struct DIRENTRY *cursor,
-                      s32 *out_count);
-s32 func_80044608(void);
 s32 func_80044838(s32 arg0, s32 *out_state, s32 *out_result)
 {
     s32 r;

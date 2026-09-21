@@ -7,10 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80077450 (SpuVoiceAttr *arg);
 extern SDSecondaryState *D_8009B458 __attribute__((section(".data")));
 extern const s32 D_80011434[20];
-void func_8004A6F8(s32 index, SDToneEnvelopeView *tone);
 void func_8004A6F8(s32 index, SDToneEnvelopeView *tone)
 {
     SDSecondaryState *p = D_8009B458;

@@ -7,10 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8007058C(void);
-extern s32 D_800F5B98[20 ];
-void func_800707C4(s32 kind, s32 *low, s32 *high);
-void func_8007214C(void);
 void func_8007214C(void)
 {
     s32 wanted;

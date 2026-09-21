@@ -7,20 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80089C20(SVECTOR *v0,CVECTOR *v1,CVECTOR *v2);
-extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
-			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
-			long *p,long *flag);
-int     func_800857E0(int id, GsF_LIGHT * lt);
-void    func_80085D50(long r, long g, long b);
-extern ModelSlot D_800F2C40[3 ];
-void func_8004DE24(void);
-void *func_80059220(void);
-extern u8 *D_8009AF88;
-extern s16 D_8009AF8E;
-extern s16 D_8009AF90;
-void func_8004E7B0(s32 force);
-extern GsCOORDUNIT D_800F56A0;
 void func_8004DE24(void)
 {
     CVECTOR colors[5] = {

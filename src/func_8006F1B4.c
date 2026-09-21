@@ -7,29 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
-extern void func_800871D0();
-extern void func_80087274();
-extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
-extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
-			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
-			long *p,long *flag);
-extern void *func_8008E3D0 ( );
-s32 func_80058E1C(void);
-GsOT *func_80058F10(void);
-s32 func_80058DCC(void);
-void func_80059590(
-    s32 slot,
-    s32 mode,
-    s32 target0,
-    s32 target1,
-    s32 target2
-);
-s32 func_8006F1B4(void *data, s32 arg1);
-extern VECTOR D_8001189C;
-void func_80059AEC(s32 value);
-void *func_80059220(void);
-void func_80048658(s32 id, s32 volume, s32 pan);
 s32 func_8006F1B4(void *data, s32 arg1)
 {
     MATRIX ls;

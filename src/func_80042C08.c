@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_80042C08(DisplayObject *object, GsOT *ot);
 void func_80042C08(DisplayObject *object, GsOT *ot)
 {
     s32 depth;

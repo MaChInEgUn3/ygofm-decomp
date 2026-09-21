@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total);
 s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total)
 {
     u8 *hdr;

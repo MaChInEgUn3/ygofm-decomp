@@ -7,18 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_801DD000[];
-extern u8 D_801DE000[];
-extern ModelSlot D_800F2C40[3 ];
-void func_80059284(s32 index, s32 value);
-void func_8005B620(s32 *destination, const s32 *source, u32 count);
-extern u8 *D_80010004 __attribute__((section(".data")));
-extern u8 *D_8001000C __attribute__((section(".data")));
-extern u8 *D_80010010 __attribute__((section(".data")));
-extern s32 D_80010014 __attribute__((section(".data")));
-extern s32 D_80010018 __attribute__((section(".data")));
 extern u8 *D_8009B118 __attribute__((section(".data")));
-void func_80056D7C(FileTransferDescriptor *object, s32 mode);
 extern u8 D_801A8000[];
 void func_80056D7C(FileTransferDescriptor *d, s32 stage)
 {

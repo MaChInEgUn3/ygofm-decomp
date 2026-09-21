@@ -7,23 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-u32	func_800784D0(u32 *base);
-u32	func_800785C0(u32 **addr,u32 **header);
-int     func_800783DC(CdlLOC *loc);
-int func_800781F0(CdlLOC *p);
-s32 func_8005BFC8(s32 resync);
-extern u8 D_8009B060;
-extern u8 D_8009B063;
-extern u8 D_8009B064;
-extern u8 D_8009B066;
-extern u32 D_8009B068;
-extern u32 D_8009B06C;
-extern u32 D_8009B070;
-extern u8 *D_8009B498;
-extern CdlLOC D_8009B49C;
-extern int func_800902A0(u32 *bs, u32 *buf, DECDCTTAB table);
-void func_8005C62C(CdlLOC *loc);
-int func_80074170(int mode);
 s32 func_8005BFC8(s32 resync) {
     u32 *ring;
     StHEADER *hdr;

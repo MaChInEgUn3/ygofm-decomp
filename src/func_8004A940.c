@@ -8,8 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern SDSecondaryState *D_8009B458;
-s32 func_8004A8E4(s32 index, s32 value);
-s32 func_8004A940(s32 value, s32 variant);
 s32 func_8004A940(s32 value, s32 variant)
 {
     SDSecondaryState *state = D_8009B458;

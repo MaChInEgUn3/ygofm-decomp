@@ -7,13 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern AiScriptState D_800F5BE8;
-extern s32 D_800F5B98[20 ];
-s32 func_80070920(s32 mode, s32 index);
-s8 func_80070710(void);
 void func_800727C0(s32 card_id);
-s32 func_8007058C(void);
-void func_80072A48(void);
 void func_800727C0(s32 arg0);
 void func_80072A48(void)
 {

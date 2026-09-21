@@ -7,11 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_80087BC0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
-			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
-			long *p,long *otz,long *flag);
-extern void func_80082980(POLY_GT4 *p) ;
-void func_80035E20(DisplayObject *obj, GsOT *ot);
 void func_80035E20(DisplayObject *obj, GsOT *ot)
 {
     s32 x;

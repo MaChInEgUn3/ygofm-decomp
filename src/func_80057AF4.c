@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_8005B620(s32 *destination, const s32 *source, u32 count);
-extern ModelSlot D_800F2C40[3 ];
 void func_80057AF4(s32 index, s32 anim, s32 flag) {
     ModelSlot *m;
     ModelSlotPart **parts;

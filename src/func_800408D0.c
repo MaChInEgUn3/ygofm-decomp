@@ -7,9 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s32 D_8009B424;
 void func_80042188(SpritePrim *sprite, u8 *packet, s32 ot, s32 mode, u8 *extra);
-void func_800408D0(DisplayObject *e, s32 tex, s32 mode_arg);
 void func_800408D0(DisplayObject *e, s32 tex, s32 mode_arg) {
     u16 mode16 = mode_arg;
     SpritePrim *p;

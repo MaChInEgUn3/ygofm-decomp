@@ -7,31 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-extern s8 D_8009AF9A;
-extern u8 D_8009AFA4[4];
-extern ModelDebugState D_8009B004;
-void func_80059590(
-    s32 slot,
-    s32 mode,
-    s32 target0,
-    s32 target1,
-    s32 target2
-);
-void func_80047314(u32 value);
-void func_80059F18(s32 first, s32 second, s32 third, s32 fourth);
-void func_80050584(s32 index);
-void func_800507D0(void);
-void func_80059AEC(s32 value);
-extern s32 D_80010030 __attribute__((section(".data")));
-extern void *D_80010034 __attribute__((section(".data")));
 extern ;
-void func_801807B0(void);
-void func_80181C4C(s32 value);
-s32 func_80180A24(void);
-extern u8 D_800114F8[];
-void func_80049394(u16 *track);
-void func_800493F8(void);
 void func_800507D0(void)
 {
   s8 phase_value;

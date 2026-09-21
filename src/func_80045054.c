@@ -7,10 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_80076D20 (SpuDecodedData *d_data, long flag);
 extern SDValue *D_8009B45C;
-s32 func_80045054(void);
-extern SDValue *volatile g_SDValue_output_level asm("D_8009B45C");
 s32 func_80045054(void)
 {
     s32 select = func_80076D20(

@@ -18,7 +18,11 @@ each carries its declarations inline, typed his way, and says so in its
 header. The open work is style, not matching: folding those declarations
 into `include/` with the build as the arbiter (the types are folded into
 `include/kg_types.h`, which only ported units include; the externs are
-per-symbol arms and a decision; MERGE_KRYSTALGAMER.md has the census), and the
+folded the same way into `include/kg_variables.h` and
+`include/kg_functions.h`, and what is left inline is exactly the measured
+disagreements, 46 extern symbols and 13 prototypes, because every one of
+those is a codegen knob rather than untidiness; MERGE_KRYSTALGAMER.md has the
+census and the axes), and the
 Japanese build (SLPM-86398), which lives in his repo.
 
 ## Verify everything with the build

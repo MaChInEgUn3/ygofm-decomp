@@ -7,31 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern MATRIX *func_80087480(MATRIX *m0,MATRIX *m1);
-extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
-extern void func_800871D0();
-extern void func_80087274();
-extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
-extern long func_80087B30(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
-			long *sxy0,long *sxy1,long *sxy2,
-			long *p,long *otz,long *flag);
-extern void func_800828E0(POLY_G3 *p) ;
-extern void func_80082960(POLY_G4 *p) ;
-void    func_80083FB0(GsLINE * lp, GsOT * ot, unsigned short pri);
-extern void *func_8008E3D0 ( );
-extern char *index  (const char *, char);
-extern u32 D_800915E8[];
-void func_80057E20(s32 index, ModelEffectAdjustment *out);
-s32 func_80058E1C(void);
-GsOT *func_80058F10(void);
-extern VECTOR D_8001185C;
-extern char D_8001186C[];
-s32 func_8006AF74(ModelSubdividedEffect *data, s32 mode);
-s16 *func_8006BCA4(s16 *a, s16 *b, s16 *c, s16 *out, s32 depth);
-Triplet *func_8006C120(u8 *a, u8 *b, u8 *c, Triplet *out, s32 depth);
-void func_8006C2FC(u8 *output, s32 first, s32 second, s32 third);
-s32 func_80058DCC(void);
-void *func_80059220(void);
 s32 func_8006AF74(ModelSubdividedEffect *data, s32 mode)
 {
     MATRIX base;

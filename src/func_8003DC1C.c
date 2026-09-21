@@ -7,47 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8004413C(s32 channel);
-s32 func_800441DC(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
-s32 func_800442E4(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
-s32 func_80044278(s32 channel, s32 buffer, s32 sector);
-s32 func_80044380(s32 channel, s32 buffer, s32 sector);
-s32 func_800443EC(s32 channel, s32 name, s32 blocks);
-s32 func_80044838(s32 mode, s32 *request, s32 *result);
-extern u8 D_80010384[];
-s32 func_80044CD4(u8 *name);
 extern struct DIRENTRY *D_8009B444 __attribute__((section(".data")));
-extern s32 D_8009B440 __attribute__((section(".data")));
 extern s32 D_8009B438 __attribute__((section(".data")));
-extern MemCardWorkArea D_800EF6D0;
-extern u16 D_8009B3CC;
-extern u8 D_8009B3CF;
-extern u8 D_8009B3DD;
-extern u8 D_8009B3D5;
-extern s32 D_8009B3C8;
-extern s32 D_8009B3E4;
-extern void (*D_80090F88[5 ])(
-    MemCardWorkRoot *root, MemCardWorkSlot *slot
-);
-extern u8 D_8021007A __attribute__((section(".data")));
-extern u8 D_8021007B __attribute__((section(".data")));
-extern u8 D_8021007C __attribute__((section(".data")));
-extern u8 D_8021007D __attribute__((section(".data")));
-extern u8 D_8021007E __attribute__((section(".data")));
-extern u8 D_8021007F __attribute__((section(".data")));
-extern char D_8009AF6C[];
-extern char D_80010378[];
-extern char D_80010398[];
-extern char D_800103A4[];
-void func_8003DC1C(void);
-void func_80043E30(long val);
-void func_80043EBC(void);
-extern u8 D_8009B3C1;
-extern u8 D_8009B3C7;
-DuelEffectChannel *func_8003D46C(s32 value, s32 set_flags);
 extern s8 D_8009B34D __attribute__((section(".data")));
-void func_80035748(u8 *destination, s32 value, u32 length);
-extern u8 D_801D4000[];
 void func_8003DC1C(void)
 {
     MemCardWorkRoot *root = &D_800EF6D0.root;

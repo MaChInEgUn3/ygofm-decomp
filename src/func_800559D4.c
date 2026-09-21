@@ -7,25 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-extern ModelSlotCF8TailView D_800F3938;
-extern u8 D_8009AF94;
-extern u8 D_8009AFA0;
-extern char D_8009AFF4[];
-extern char D_8009B030[];
-extern char D_8009B038[];
-extern char D_8009B040[];
-extern char D_8009B048[];
-extern char D_8009B050[];
-extern char D_80011574[];
-void func_8005F198(s32 value);
-extern u8 *D_8001000C __attribute__((section(".data")));
-extern u8 *D_80010010 __attribute__((section(".data")));
-extern s32 D_80010014 __attribute__((section(".data")));
-extern s32 D_80010018 __attribute__((section(".data")));
-s32 func_80058E1C(void);
-void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
-void func_80048658(s32 id, s32 volume, s32 pan);
 void func_800559D4(s32 index)
 {
     ModelSlot *slot = &D_800F2C40[index];

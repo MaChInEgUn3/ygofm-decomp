@@ -8,12 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern SDSecondaryState *D_8009B458;
-void func_8004B374(s32 channel, s32 value, s32 unused);
-void func_8004B49C(s32 arg0, s32 arg1, u8 arg2);
-void func_8004B6E8(u8 index, s32 value);
-void func_8004B70C(u8 index, s32 unused, s32 value);
-void func_8004C114(SDSequenceTrack *p, s32 status, u8 d1, u8 d2);
-void func_8004ADE8(s32 channel, s32 note, s32 velocity);
 void func_8004C114(SDSequenceTrack *p, s32 status, u8 d1, u8 d2) {
     SDSequenceTrack *t;
     u8 ch;

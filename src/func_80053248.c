@@ -7,15 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-extern u8 D_80091008[];
-extern s16 D_8009B488[3 ];
-extern u8 D_8009B48E[2];
-extern u8 D_8009B490[2];
-void func_80053248(s32 idx, ...);
-extern u8 *D_8009AF88;
-extern u8 D_8009AF94;
-extern u16 D_800F5678[];
 void func_80053248(s32 idx, ...)
 {
     va_list ap;

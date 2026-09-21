@@ -7,24 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-int func_80074170(int mode);
-extern ModelSlot D_800F2C40[3 ];
-extern u8 D_8009AFA0;
-extern u8 *D_80010004 __attribute__((section(".data")));
-extern s32 D_80010008 __attribute__((section(".data")));
-extern u8 *D_8001000C __attribute__((section(".data")));
-extern u8 *D_80010010 __attribute__((section(".data")));
-void func_8004CB0C(s32 slot, u8 *hmd, s32 size, s32 flags);
-void func_8004D75C(s32 slot);
-void func_8004D914(s32 slot);
-void func_800590DC(s32 index);
-void func_8005A468(s32 index, s32 speed);
-void func_8005A4C4(ModelSlot *record, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_800582C0(s32 side, s32 tint, s32 level);
-void func_8005F198(s32 value);
-void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
 extern u8 D_801A8000[];
-extern char D_80011594[];
 static inline s16 load_phase(ModelSlot *slot)
 {
     return slot->field_E14;

@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-void func_8004D58C(s32 slot, u8 *commands);
 void func_8004D58C(s32 arg0, u8 *arg1)
 {
     ModelSlot *ch;

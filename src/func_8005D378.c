@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern MATRIX *func_80089060(SVECTOR *r,MATRIX *m);
-s32 func_8005D378(GsARGUNIT_ANIM *ctx);
 s32 func_8005D378(GsARGUNIT_ANIM *ctx)
 {
     GsSEQ *track;

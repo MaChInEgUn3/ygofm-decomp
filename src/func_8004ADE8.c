@@ -7,18 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern unsigned long func_80076820 (long on_off, unsigned long voice_bit);
-extern unsigned long func_80076B10 (void);
-extern void func_80077120 (SpuVoiceAttr *attr);
 extern u8 *D_8009B458;
 extern s32 D_80011434[20];
-s32 func_8004A854(s32 value);
-s32 func_8004A940(s32 value, s32 variant);
-s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset);
-void func_8004A0FC(SDSecondaryObject *object,
-                                 SDSecondaryRecord *channel);
-s32 func_8004A3BC(SDSecondaryObject *entry, s32 value);
-void func_8004ADE8(s32 channel, s32 note, s32 velocity);
 void func_8004ADE8(arg0, arg1, velocity)
 s32 arg0;
 s32 arg1;

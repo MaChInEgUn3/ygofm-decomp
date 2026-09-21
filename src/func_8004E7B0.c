@@ -7,19 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 *D_8009AF88;
-extern s16 D_8009AF8E;
-extern s16 D_8009AF90;
-void func_8004E7B0(s32 force);
-extern u8 *D_8009AF88;
-extern s16 D_8009AF8E;
-extern s16 D_8009AF90;
 extern ModelBytes8 D_8009B478;
 extern s16 D_8009B47A;
 extern s16 D_8009B47C;
-extern ModelBytes8 D_8009B480;
-extern s16 D_8009B482;
-extern s16 D_8009B484;
 void func_8004E7B0(s32 force)
 {
     s32 dy;

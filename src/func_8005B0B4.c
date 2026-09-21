@@ -7,18 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-HsvT *func_8005A98C(HsvT *out, u8 r, u8 g, u8 b, u8 lim);
-Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim);
-extern void Color_RgbToHsl_void(
-    HsvT *out, u8 r, u8 g, u8 b, u8 lim
-) asm("func_8005A98C");
-extern void Color_HslToRgb_wide(
-    Color *out, s32 h, u32 s, u32 v, s32 lim
-) asm("func_8005ABA0");
-Color *func_8005B0B4(
-    Color *out, u8 r, u8 g, u8 b, s32 flags, u16 scale, u8 lim);
-HsvT *func_8005A98C(HsvT *out, u8 r, u8 g, u8 b, u8 lim);
-Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim);
 Color *func_8005B0B4(
     Color *out, u8 r, u8 g, u8 b, s32 flags, u16 scale, u8 lim
 )

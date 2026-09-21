@@ -7,31 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-long func_8008BC90( long chan );
-long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
-long func_8008C858( long chan, char* file, unsigned long* adrs, long ofs ,long bytes );
-long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );
-extern u8 D_8009B3C1;
-extern u8 D_800EFE18[];
-void func_8003E46C(s32 value, s32 bits);
-extern u16 D_8009B3FA;
-extern u8 D_8009B3EF;
-extern u8 *D_8009B3D0;
-extern u8 *D_8009B3E0;
-extern u8 D_8009B3EC;
-extern u8 D_800EFBC0[];
-extern s32 D_801D5648[];
-s32 func_8003D288(
-    SaveDataState *left,
-    SaveDataState *right
-);
-extern u8 D_801DC000[];
-extern u8 D_8009B3F9;
-extern u8 D_8009B3EB;
-extern u16 D_8009B3C2;
-extern u16 D_8009B3C4;
-extern s32 D_8009B3F4;
-void func_8003EED0(void);
 void func_8003EED0(void)
 {
     s32 files;

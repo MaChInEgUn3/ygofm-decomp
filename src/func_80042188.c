@@ -7,15 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_80087BC0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
-			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
-			long *p,long *otz,long *flag);
-void    func_800844F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-void    func_80084B70(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-POLY_FT4 *func_80089260(SVECTOR *v0, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3,
-			u32 *uv0, u32 *uv1, u32 *uv2, u32 *uv3,
-			CVECTOR *rgbc, POLY_FT4 *s, u32 *ot, DIVPOLYGON4 *divp);
-extern u32 *D_800FE240 __attribute__((section(".data")));
 void func_80042188(SpritePrim *sprite, u8 *packet, s32 ot, s32 mode, u8 *extra);
 void func_80042188(SpritePrim *sprite, u8 *packet, s32 ot, s32 mode, u8 *extra)
 {

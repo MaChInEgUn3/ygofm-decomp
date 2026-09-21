@@ -7,19 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8007F978(RECT *rect, u32 *p);
-s32 func_80039F1C(DisplayEffectState *object);
-FileTransferDescriptor *func_80014EEC(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-void func_8003A01C(
-    FileTransferDescriptor *descriptor, s32 mode);
-s32 func_8003A1EC(
-    MenuRecord *record, DisplayObject **out, s32 resource_index);
-extern s8 D_8009B326;
-extern s8 D_8015C410[];
-void func_8003A560(DisplayEffectVramState *state);
-extern u8 D_801AF800[];
 void func_8003A560(DisplayEffectVramState *a)
 {
     DisplayEffectVramSlot *slots;

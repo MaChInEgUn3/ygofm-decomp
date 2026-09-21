@@ -8,9 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern SDValue *D_8009B45C __attribute__((section(".data")));
-void func_80046294(void);
-s16 func_80049F50(void);
-void func_80049C40(s32 value);
 void func_80046294(void)
 {
     s32 i;

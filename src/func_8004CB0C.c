@@ -7,24 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s32 D_8001001C __attribute__((section(".data")));
-extern s32 D_80010020 __attribute__((section(".data")));
-extern s32 D_80010024 __attribute__((section(".data")));
-extern s32 D_80010028 __attribute__((section(".data")));
-extern ModelSlot D_800F2C40[3 ];
-extern u32 *func_80089E20(GsARGUNIT *);
-extern GsCOORDUNIT *func_8008A420(u32 *, u32 *);
-extern int func_80089F80(u32 *, GsTYPEUNIT *, GsOT *, u32 *);
-extern void func_8008A280(u32 *);
-s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total);
-void func_8004D58C(s32 slot, u8 *commands);
-void func_8006086C(ModelHandlerObject *object);
-void func_80060AEC(ModelHandlerObject *object);
-void func_80060220(
-    s32 model_index, ModelTypeUnit *unit, u8 *scratch);
-void func_8005C6A0(s32 *object, ModelSlot *entry);
-s32 func_8005A3D0(ModelSlot *model, GsCOORDUNIT *parent);
-void func_8004CB0C(s32 slot, u8 *hmd, s32 size, s32 flags);
 void func_8004CB0C(s32 index, u8 *hmd, s32 size, s32 flags)
 {
     ModelSlot *base;

@@ -7,14 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8005A8C4(s32 index, s32 type);
-extern ModelSlot D_800F2C40[3 ];
-extern ModelTintRequest D_800F2B50[10 ];
-void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
-s32 func_80058E1C(void);
-void func_800528AC(void);
-extern u8 D_8009AF9B;
-extern s32 D_8009AF9C;
 void func_800528AC(void)
 {
     ModelTintColor save;

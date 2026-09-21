@@ -7,16 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u32 *D_800FE240 __attribute__((section(".data")));
-void func_8005B36C(
-    u32 *src,
-    GsOT *ot,
-    s32 idx,
-    s32 offx,
-    s32 offy,
-    s32 maskx,
-    s32 masky
-);
 void func_8005B36C(
     u32 *src,
     GsOT *ot,

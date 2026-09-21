@@ -7,29 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern DuelEffectEntry D_800EB288[620 ];
-extern volatile s32 D_8009B350;
-s32 func_80037C74(DuelEffectChannel *object);
 extern u16 D_8009B398 __attribute__((section(".data")));
 extern u16 D_8009B3A4 __attribute__((section(".data")));
-extern u8 D_8009B357;
-void func_800373C8(DuelEffectChannel *channel, u8 a1, u8 a2);
-void func_80035CA8(s32 value);
-void func_80035DB8(s32 value);
-extern u16 D_801B0000[];
-extern u16 D_801C0000[];
-extern u16 D_801D5800[];
-extern u32 D_801D9000[];
-void func_800393B0(struct DuelEffectChannel *object);
-extern s16 D_8009B35A;
-void func_800391E4(struct DuelEffectChannel *record);
-void func_80036C14(DuelEffectChannel *channel, s32 tagged_value);
-extern ScriptCommandHandler D_80090C50[];
 extern u16 D_8009B27C __attribute__((section(".data")));
-extern TextBoxStateCallback D_80090E64[];
-extern void (*D_8009B340)(volatile DuelEffectChannel *object);
-extern void (*D_80090F18[])(u8 *);
-extern volatile u16 D_8009B33A;
 void func_800393B0(DuelEffectChannel *object)
 {
     u16 flags;

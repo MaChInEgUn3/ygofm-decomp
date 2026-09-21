@@ -7,40 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-long func_8008BC90( long chan );
-long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
-long func_8008C858( long chan, char* file, unsigned long* adrs, long ofs ,long bytes );
-long func_8008CE04( long chan, char* file, long blocks );
-long func_8008CF00( long chan );
-long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );
-extern u8 D_801DC000[];
-extern u8 D_800EFE18[];
-void func_8003E46C(s32 value, s32 bits);
-extern u16 D_8009B3FA;
-extern u8 D_8009B3EF;
-extern u8 D_8009B3D4;
-extern u8 *D_8009B3D0;
-extern u8 D_8009B3DC;
-extern u8 D_8009B3EC;
-extern s32 D_8009B3F0;
-extern u8 D_800EFBC0[];
-extern s32 D_801D5648[];
-void func_8003E854(void);
-extern long func_80073900(long, void *, long);
-s32 func_80044544(struct DIRENTRY *entry, s32 count);
-s32 func_80044598(u8 *name, struct DIRENTRY *entry, s32 count);
-extern u8 D_8009AF70[];
-extern s32 D_8009B3B8;
-s32 func_8003D2B8(
-    SaveDataState *left,
-    SaveDataState *right
-);
 extern s8 D_8009B34D __attribute__((section(".data")));
-extern u8 D_8009B3F9;
-extern u8 D_8009B3EB;
-extern u16 D_8009B3C2;
-extern u16 D_8009B3C4;
-extern s32 D_8009B3F4;
 extern ;
 void func_8003E854(void)
 {

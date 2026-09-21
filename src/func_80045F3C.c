@@ -7,14 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80076ED0 (long on_off, unsigned long voice_bit);
-extern void func_800773C4 (char *status);
 extern SDValue *D_8009B45C;
-void func_80045C98(void);
-void func_80045F3C(void);
-void func_80045514(void);
-s16 func_80049F50(void);
-void func_80049C40(s32 value);
 void func_80045F3C(void)
 {
     SDValue *p;

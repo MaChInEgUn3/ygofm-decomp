@@ -7,17 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_80091008[];
-extern ModelSlot D_800F2C40[3 ];
-extern u8 D_800114F8[];
-extern u8 D_80011580[];
-FileTransferDescriptor *func_80014EEC(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-void func_80056D7C(FileTransferDescriptor *object, s32 mode);
-void func_80057544(FileTransferDescriptor *object, s32 mode);
-void func_800577B0(FileTransferDescriptor *object, s32 mode);
-void func_8004CB0C(s32 slot, u8 *hmd, s32 size, s32 flags);
 s32 func_80056504(s32 slot, s32 model, s32 p2, s32 p3, s32 p4,
                            s32 p5, s32 arg6)
 {

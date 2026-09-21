@@ -7,19 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern FileRequestSlot *D_8009B460 __attribute__((section(".data")));
-s32 func_800496C4(SDVabHeader *vab, s16 vab_id, s32 spu_addr);
-s32 func_80014C40(FileRequestSlot *request, u8 *source);
 extern SDValue *D_8009B45C __attribute__((section(".data")));
-s32 func_80045484(void);
-void func_80045514(void);
-s32 func_80049A64(u8 *input, s16 vab_id);
-void func_80049C40(s32 value);
-void func_80049CB0(s32 value);
-void func_80049F10(s16 left, s16 right);
-void func_800476B4(SDSeqBlock *input, u32 rate);
-void func_8004545C(void);
-void func_80049AF4(s32 start, s32 ambient);
 void func_80045514(void)
 {
     SDValue *entry_state;

@@ -7,14 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-extern ModelTintRequest D_800F2B50[10 ];
-void func_80058938(
-    s32 slot, s32 selection, ModelTintColor start, ModelTintColor end,
-    s32 duration, const u8 *part_mask);
-void func_80058938(
-    s32 slot, s32 selection, ModelTintColor start, ModelTintColor end,
-    s32 duration, const u8 *part_mask);
 void func_80058938(
     s32 a0, s32 a1, ModelTintColor a2, ModelTintColor a3, s32 a4,
     const u8 *bits)

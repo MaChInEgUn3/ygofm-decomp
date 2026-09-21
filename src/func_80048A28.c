@@ -7,11 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80077C50 (int vNum, short *envx);
 extern SDValue *D_8009B45C;
-void func_80044E90(s32 pan);
-void func_80047864(s32 index);
-void func_80048A28(s32 arg0, s32 arg1, s32 arg2);
 void func_80048A28(id, value, word)
     u16 id;
     u8 value;

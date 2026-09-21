@@ -7,17 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelSlot D_800F2C40[3 ];
-extern ModelCameraMove D_800F2B20;
-extern GsRVIEW2 D_800F56F0;
-void func_80051A48(void);
-extern s8 D_8009AF99;
-s32 func_8005FB08(void);
-s32 func_8005FB14(void);
-void func_80052694(s32 arg0);
-void func_80059EBC(s32 value);
-void func_80058434(s32 direction, s32 yaw, s32 pitch, s32 distance, s32 unused);
-s32 func_80058E1C(void);
 void func_80051A48(void)
 {
     s32 eye_slots[2] = {D_800F2B20.eye.pair_slot, D_800F2B20.eye.slot};

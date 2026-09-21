@@ -7,13 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80077C50 (int vNum, short *envx);
 extern SDValue *D_8009B45C __attribute__((section(".data")));
-s16 func_800451E0(u16 value, s32 unused);
-s32 func_80047F38(u8 value);
-void func_8004803C(u16 id, u8 voice, s32 pitch_add, u8 volume,
-                   s16 pan, u8 flags, u8 value);
-void func_800482B0(s32 id, s16 pitch, u8 volume, s16 pan, u32 mode, u8 value);
 void func_800482B0(s32 id, s16 pitch, u8 volume, s16 pan, u32 mode, u8 value)
 {
     u16 sound_id = id;

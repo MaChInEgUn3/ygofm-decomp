@@ -7,10 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_80044DC0(s16 a0);
 extern SDValue *D_8009B45C;
-void func_80045C98(void);
-void func_80049F10(s16 left, s16 right);
 void func_80045C98(void) {
     u8 changed;
     s16 y;

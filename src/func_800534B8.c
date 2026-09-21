@@ -7,34 +7,10 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern ModelDebugState D_8009B004;
-extern ModelDebugDisplayState D_8009B008;
-extern char D_8009B00C[];
-extern char D_8009B014[];
-extern char D_8009B01C[];
-extern char D_8009B024[];
-extern char D_8009B02C[];
-s32 func_800534B8(void);
-extern char D_80011518[];
-extern char D_8001152C[];
-extern char D_80011540[];
-extern char D_80011554[];
-extern char D_80011564[];
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
 extern u16 D_8009B39A __attribute__((section(".data")));
-extern ModelSlot D_800F2C40[3 ];
-extern u8 *D_8009AF88;
-extern s8 D_8009AF9A;
-extern u8 D_8009AFA1;
-extern s16 D_8009B488[3 ];
-extern u8 D_8009B48E[2];
-extern u8 D_8009B490[2];
-void func_80053248(s32 idx, ...);
-void func_80059AEC(s32 value);
-void func_8005922C(struct _GsCOORDUNIT *unit, VECTOR *scale);
-extern ModelDebugState D_8009B004;
 s32 func_800534B8(void)
 {
     s32 reload = 0;

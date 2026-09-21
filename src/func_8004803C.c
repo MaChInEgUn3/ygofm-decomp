@@ -7,11 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_80076ED0 (long on_off, unsigned long voice_bit);
-extern void func_80077120 (SpuVoiceAttr *attr);
 extern SDValue *D_8009B45C;
-void func_8004803C(u16 id, u8 voice, s32 pitch_add, u8 volume,
-                   s16 pan, u8 flags, u8 value);
 void func_8004803C(u16 id, u8 voice, s32 pitch_add, u8 volume, s16 pan, u8 flags, u8 value) {
     u16 idx;
 

@@ -7,22 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern DRAWENV *func_8007FEC8(DRAWENV *env);
-s32 func_8005BE3C(void);
-s32 func_8005BFC8(s32 resync);
-extern u8 D_8009B060;
-extern u8 D_8009B062;
-extern u8 D_8009B063;
-extern u8 D_8009B064;
-extern u8 D_8009B065;
-extern u8 D_8009B066;
-extern u8 D_8009B067;
-extern u8 *D_8009B498;
-extern void func_8008FD38(u32 *buf, int mode);
-extern void func_8008FDB4(u32 *buf, int size);
-s32 func_8005C5D4(void);
-void func_80044F58(s32 value);
-s32 func_8005BFC8(s32 resync);
 s32 func_8005BE3C(void) {
     DRAWENV env;
     s32 fade;

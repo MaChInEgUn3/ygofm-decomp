@@ -7,10 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s32 D_800F5B98[20 ];
-extern AiOpponentData D_800917F0[40 ];
-void func_800734DC(void);
-s32 func_8007058C(void);
 void func_800734DC(void)
 {
     s32 index;

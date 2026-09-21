@@ -350,5 +350,357 @@ void func_800323F8(u8 *base, void *deck, s32 other, s32 flags);
 extern void func_8008E400(void *, size_t, size_t, int (*)());
 void func_80031E04(CardList *list, s32 count);
 s32 func_800330BC(CardList *list);
+void func_80033CF8(s32 dx, s32 dy, s32 dz);
+u32 *func_80033DB0(GsARGUNIT_NORMAL *arg);
+u32 *func_8006151C(GsARGUNIT_NORMAL *arg);
+u32 *func_80034830(GsARGUNIT_NORMAL *arg);
+u32 *func_80061A84(GsARGUNIT_NORMAL *arg);
+extern long func_80087BC0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
+			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
+			long *p,long *otz,long *flag);
+extern void func_80082980(POLY_GT4 *p) ;
+void func_80035E20(DisplayObject *obj, GsOT *ot);
+void func_80036C14(DuelEffectChannel *channel, s32 tagged_value);
+void func_80037DA4(DuelEffectChannel *object);
+void func_80039F44(DisplayEffectState *object);
+void func_80039FD4(MenuRecord *record);
+void func_80038EB0(EffectObject *object);
+s32 func_80037C74(DuelEffectChannel *object);
+void func_800373C8(DuelEffectChannel *channel, u8 a1, u8 a2);
+void func_80035CA8(s32 value);
+void func_80035DB8(s32 value);
+void func_800393B0(struct DuelEffectChannel *object);
+void func_800391E4(struct DuelEffectChannel *record);
+extern void (*D_8009B340)(volatile DuelEffectChannel *object);
+extern void (*D_80090F18[])(u8 *);
+void func_8003B50C(s32 value);
+void func_80039D64(DuelEffectChannel *);
+struct DisplayObject *func_800374F4(DuelEffectChannel *record);
+extern int func_8007F978(RECT *rect, u32 *p);
+s32 func_80039F1C(DisplayEffectState *object);
+FileTransferDescriptor *func_80014EEC(
+    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
+);
+void func_8003A01C(
+    FileTransferDescriptor *descriptor, s32 mode);
+s32 func_8003A1EC(
+    MenuRecord *record, DisplayObject **out, s32 resource_index);
+void func_8003A560(DisplayEffectVramState *state);
+s32 func_8004413C(s32 channel);
+s32 func_800441DC(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
+s32 func_800442E4(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
+s32 func_80044278(s32 channel, s32 buffer, s32 sector);
+s32 func_80044380(s32 channel, s32 buffer, s32 sector);
+s32 func_800443EC(s32 channel, s32 name, s32 blocks);
+s32 func_80044838(s32 mode, s32 *request, s32 *result);
+s32 func_80044CD4(u8 *name);
+extern void (*D_80090F88[5 ])(
+    MemCardWorkRoot *root, MemCardWorkSlot *slot
+);
+void func_8003DC1C(void);
+void func_80043E30(long val);
+void func_80043EBC(void);
+DuelEffectChannel *func_8003D46C(s32 value, s32 set_flags);
+void func_80035748(u8 *destination, s32 value, u32 length);
+long func_8008BC90( long chan );
+long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
+long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );
+void func_8003E46C(s32 value, s32 bits);
+void func_8003E490(void);
+s32 func_8003D174(u8 *);
+long func_8008C858( long chan, char* file, unsigned long* adrs, long ofs ,long bytes );
+long func_8008CE04( long chan, char* file, long blocks );
+long func_8008CF00( long chan );
+void func_8003E854(void);
+extern long func_80073900(long, void *, long);
+s32 func_80044544(struct DIRENTRY *entry, s32 count);
+s32 func_80044598(u8 *name, struct DIRENTRY *entry, s32 count);
+s32 func_8003D2B8(
+    SaveDataState *left,
+    SaveDataState *right
+);
+s32 func_8003D288(
+    SaveDataState *left,
+    SaveDataState *right
+);
+void func_8003EED0(void);
+void func_800408D0(DisplayObject *e, s32 tex, s32 mode_arg);
+void    func_800844F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
+void    func_80084B70(GsSPRITE * sp, GsOT * ot, unsigned short pri);
+POLY_FT4 *func_80089260(SVECTOR *v0, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3,
+			u32 *uv0, u32 *uv1, u32 *uv2, u32 *uv3,
+			CVECTOR *rgbc, POLY_FT4 *s, u32 *ot, DIVPOLYGON4 *divp);
+void func_80042C08(DisplayObject *object, GsOT *ot);
+extern long func_800738D0(char *, unsigned long);
+extern long func_80073910(long);
+extern long func_800738E0(long, long, long);
+extern long func_800738F0(long, void *, long);
+extern void func_8008B370(void);
+extern long func_8008B380(long drv);
+extern long func_8008B390(long drv);
+extern long func_8008B350(long chan, long block, unsigned char *buf);
+extern long func_8008B360(long chan, long block, unsigned char *buf);
+s32 func_80044470(s32 chan, const char *pattern, struct DIRENTRY *cursor,
+                     s32 *out_count);
+s32 func_80044608(void);
+void func_80043D48(long *handles);
+extern long func_80076D20 (SpuDecodedData *d_data, long flag);
+s32 func_80045054(void);
+extern SDValue *volatile g_SDValue_output_level asm("D_8009B45C");
+s32 func_80045BE8(SDCommand *);
+void func_800464F0(void);
+s32 func_80045208(u16 code, s32 unused);
+void func_80044DA0(void);
+s32 func_800496C4(SDVabHeader *vab, s16 vab_id, s32 spu_addr);
+s32 func_80014C40(FileRequestSlot *request, u8 *source);
+s32 func_80045484(void);
+void func_80045514(void);
+s32 func_80049A64(u8 *input, s16 vab_id);
+void func_80049C40(s32 value);
+void func_80049CB0(s32 value);
+void func_80049F10(s16 left, s16 right);
+void func_800476B4(SDSeqBlock *input, u32 rate);
+void func_8004545C(void);
+void func_80049AF4(s32 start, s32 ambient);
+void func_80044DC0(s16 a0);
+void func_80045C98(void);
+extern void func_80076ED0 (long on_off, unsigned long voice_bit);
+extern void func_800773C4 (char *status);
+void func_80045F3C(void);
+s16 func_80049F50(void);
+void func_80046294(void);
+extern void func_80077120 (SpuVoiceAttr *attr);
+void func_8004803C(u16 id, u8 voice, s32 pitch_add, u8 volume,
+                   s16 pan, u8 flags, u8 value);
+extern void func_80077C50 (int vNum, short *envx);
+s16 func_800451E0(u16 value, s32 unused);
+s32 func_80047F38(u8 value);
+void func_800482B0(s32 id, s16 pitch, u8 volume, s16 pan, u32 mode, u8 value);
+void func_80048658(s32 id, s32 volume, s32 pan);
+void func_80044E90(s32 pan);
+void func_80047864(s32 index);
+void func_80048A28(s32 arg0, s32 arg1, s32 arg2);
+void func_80048C70(u32 *dst, u32 *src);
+extern long func_80075BE0 (long on_off);
+extern long func_80075DE0 (SpuReverbAttr *attr);
+extern long func_80076790 (long on_off);
+s32 func_80049600(u32 count);
+void func_80048F14(void);
+void func_80049544(void);
+void func_80049594(s32 value);
+s32 func_80049FB4(s32 note_high, s32 note_low, s32 base, s32 offset);
+extern void func_80077450 (SpuVoiceAttr *arg);
+void func_8004A27C(s32 voice, s32 left, s32 right);
+void func_8004A6F8(s32 index, SDToneEnvelopeView *tone);
+s32 func_8004A854(s32 value);
+s32 func_8004A8E4(s32 index, s32 value);
+s32 func_8004A940(s32 value, s32 variant);
+extern unsigned long func_80076820 (long on_off, unsigned long voice_bit);
+extern unsigned long func_80076B10 (void);
+void func_8004A0FC(SDSecondaryObject *object,
+                                 SDSecondaryRecord *channel);
+s32 func_8004A3BC(SDSecondaryObject *entry, s32 value);
+void func_8004ADE8(s32 channel, s32 note, s32 velocity);
+void func_8004B374(s32 channel, s32 value, s32 unused);
+void func_8004B49C(s32 arg0, s32 arg1, u8 arg2);
+void func_8004B6E8(u8 index, s32 value);
+void func_8004B70C(u8 index, s32 unused, s32 value);
+void func_8004C114(SDSequenceTrack *p, s32 status, u8 d1, u8 d2);
+extern u32 *func_80089E20(GsARGUNIT *);
+extern GsCOORDUNIT *func_8008A420(u32 *, u32 *);
+extern int func_80089F80(u32 *, GsTYPEUNIT *, GsOT *, u32 *);
+extern void func_8008A280(u32 *);
+s32 func_8004D134(s32 mode, u16 *kind, u8 *ctx, s32 *best, s32 *total);
+void func_8004D58C(s32 slot, u8 *commands);
+void func_8006086C(ModelHandlerObject *object);
+void func_80060AEC(ModelHandlerObject *object);
+void func_80060220(
+    s32 model_index, ModelTypeUnit *unit, u8 *scratch);
+void func_8005C6A0(s32 *object, ModelSlot *entry);
+s32 func_8005A3D0(ModelSlot *model, GsCOORDUNIT *parent);
+void func_8004CB0C(s32 slot, u8 *hmd, s32 size, s32 flags);
+void func_8004D75C(s32 slot);
+void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
+extern void func_80089C20(SVECTOR *v0,CVECTOR *v1,CVECTOR *v2);
+extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
+			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
+			long *p,long *flag);
+int     func_800857E0(int id, GsF_LIGHT * lt);
+void    func_80085D50(long r, long g, long b);
+void func_8004DE24(void);
+void *func_80059220(void);
+void func_8004E7B0(s32 force);
+extern s32 (*D_800114E8[4])(s32, s32);
+void func_80059284(s32 index, s32 value);
+void func_80059590(
+    s32 slot,
+    s32 mode,
+    s32 target0,
+    s32 target1,
+    s32 target2
+);
+void func_80047314(u32 value);
+void func_8005F27C(s32 mode, s32 coefficient, SVECTOR *offset);
+void func_8005F3B8(s32 mode, s32 y, s32 a, s32 b, SVECTOR *offset);
+void func_8005F588(s32 value);
+void func_8005F5C8(s32 mode, s32 coefficient, SVECTOR *offset, s32 arg);
+void func_8005F714(s32 first, s32 second, s32 arg);
+ModelEffectCoefficient *func_8005F1A4(s32 index);
+void func_8005A188(int value);
+int func_8005A878(int arg);
+s32 func_8005A618(s32 index);
+s32 func_8005FB08(void);
+s32 func_8005FB14(void);
+s32 func_8005F174(void);
+void func_8005F180(s32 value);
+s32 func_80058E1C(void);
+void func_80050F24(s32 index);
+void func_80059EBC(s32 value);
+void func_80059F18(s32 first, s32 second, s32 third, s32 fourth);
+void func_8005A010(s32 first, s32 second);
+void func_8005A0DC(s32 value);
+s32 func_8005A2E0(s32 index);
+void func_8004EB00(void);
+void func_80050584(s32 index);
+void func_800507D0(void);
+void func_80059AEC(s32 value);
+void func_801807B0(void);
+void func_80181C4C(s32 value);
+s32 func_80180A24(void);
+void func_80049394(u16 *track);
+void func_800493F8(void);
+s32 func_80051350(s32 mode, s32 min_extent, s32 depth);
+extern long func_80086E50(long a);
+void func_80051A48(void);
+void func_80052694(s32 arg0);
+void func_80058434(s32 direction, s32 yaw, s32 pitch, s32 distance, s32 unused);
+s32 func_8005A8C4(s32 index, s32 type);
+void func_800528AC(void);
+void func_80052D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_8005F18C(void);
+extern void *func_8008E3D0 ( );
+void func_80053248(s32 idx, ...);
+void func_8005611C(s32 arg0);
+s32 func_800534B8(void);
+void func_8005922C(struct _GsCOORDUNIT *unit, VECTOR *scale);
+extern long func_80087A50(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
+			long *sxy0,long *sxy1,long *sxy2,long *p,long *flag);
+extern void func_8008A150(GsUNIT *, GsOT *, u32 *);
+extern void func_8008A760(GsCOORDUNIT *, MATRIX *);
+extern void func_8008AA30(GsCOORDUNIT *, MATRIX *, MATRIX *);
+void func_80057E20(s32 index, ModelEffectAdjustment *out);
+void func_80059700(s32 index, s32 sign);
+void func_8005A53C(
+    s32 (*fn)(s32),
+    ModelHandlerRunEntry *entry,
+    s32 arg2,
+    s32 count
+);
+s32 func_8005AE68(u16 color, s32 flags, u16 scale);
+s32 func_8005FE44(s32 arg0);
+void func_8005106C(s32 index);
+void func_8005F198(s32 value);
+void func_80056D7C(FileTransferDescriptor *object, s32 mode);
+void func_80057544(FileTransferDescriptor *object, s32 mode);
+void func_800577B0(FileTransferDescriptor *object, s32 mode);
+int func_80074170(int mode);
+void func_8004D914(s32 slot);
+void func_800590DC(s32 index);
+void func_8005A468(s32 index, s32 speed);
+void func_8005A4C4(ModelSlot *record, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_800582C0(s32 side, s32 tint, s32 level);
+void func_8005B620(s32 *destination, const s32 *source, u32 count);
+extern MATRIX *func_80087370(MATRIX *m0,MATRIX *m1);
+extern MATRIX *func_800889C0(SVECTOR *r,MATRIX *m);
+extern MATRIX *func_80088E50(SVECTOR *r,MATRIX *m);
+extern void func_8008A4A0(GsCOORDUNIT *, MATRIX *);
+void func_800580D4(s32 index, s32 arg1, u8 *arg2, struct _GsCOORDUNIT *arg3);
+void func_80058938(
+    s32 slot, s32 selection, ModelTintColor start, ModelTintColor end,
+    s32 duration, const u8 *part_mask);
+Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim);
+HsvT *func_8005A98C(HsvT *out, u8 r, u8 g, u8 b, u8 lim);
+extern void Color_RgbToHsl_void(
+    HsvT *out, u8 r, u8 g, u8 b, u8 lim
+) asm("func_8005A98C");
+extern void Color_HslToRgb_wide(
+    Color *out, s32 h, u32 s, u32 v, s32 lim
+) asm("func_8005ABA0");
+Color *func_8005B0B4(
+    Color *out, u8 r, u8 g, u8 b, s32 flags, u16 scale, u8 lim);
+void func_8005B36C(
+    u32 *src,
+    GsOT *ot,
+    s32 idx,
+    s32 offx,
+    s32 offy,
+    s32 maskx,
+    s32 masky
+);
+void func_8005B4D8(u32 *src, GsOT *ot, s32 idx, s32 flags);
+extern DRAWENV *func_8007FEC8(DRAWENV *env);
+s32 func_8005BE3C(void);
+s32 func_8005BFC8(s32 resync);
+extern void func_8008FD38(u32 *buf, int mode);
+extern void func_8008FDB4(u32 *buf, int size);
+s32 func_8005C5D4(void);
+void func_80044F58(s32 value);
+u32	func_800784D0(u32 *base);
+u32	func_800785C0(u32 **addr,u32 **header);
+int     func_800783DC(CdlLOC *loc);
+int func_800781F0(CdlLOC *p);
+extern int func_800902A0(u32 *bs, u32 *buf, DECDCTTAB table);
+void func_8005C62C(CdlLOC *loc);
+void	func_800786A0(void);
+void func_8005C1F4(void);
+extern void func_8008FBD0(s32 status) __attribute__((noreturn));
+u32 *func_8005C7BC(GsARGUNIT_ANIM *ctx);
+extern MATRIX *func_80089060(SVECTOR *r,MATRIX *m);
+s32 func_8005D378(GsARGUNIT_ANIM *ctx);
+void func_8005EBF4(Key *cur, s32 k, s32 scale, s32 den, s16 *out);
+void func_8005E808(Key *key);
+void func_8005F070(s32 enabled);
+void func_8005DBA4(void);
+void func_8005FB30(Key *key);
+void func_8005F7B0(s32 value, s32 arg);
+void func_80060B38(DisplayObject *obj, GsOT *ot);
+void func_80060E70(u16 *entries, s32 side, s32 flag, s32 ignored);
+extern MATRIX *func_80087480(MATRIX *m0,MATRIX *m1);
+extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
+extern void func_800871D0();
+extern void func_80087274();
+extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
+extern long func_80087B30(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
+			long *sxy0,long *sxy1,long *sxy2,
+			long *p,long *otz,long *flag);
+extern void func_800828E0(POLY_G3 *p) ;
+extern void func_80082960(POLY_G4 *p) ;
+void    func_80083FB0(GsLINE * lp, GsOT * ot, unsigned short pri);
+extern char *index  (const char *, char);
+GsOT *func_80058F10(void);
+s32 func_8006AF74(ModelSubdividedEffect *data, s32 mode);
+s16 *func_8006BCA4(s16 *a, s16 *b, s16 *c, s16 *out, s32 depth);
+Triplet *func_8006C120(u8 *a, u8 *b, u8 *c, Triplet *out, s32 depth);
+void func_8006C2FC(u8 *output, s32 first, s32 second, s32 third);
+s32 func_80058DCC(void);
+extern long func_80089C70(long sz0,long sz1,long sz2);
+extern void func_80087CC0(SVECTOR *v0,DVECTOR *v1,u16 *sz,u16 *p,
+			u16 *flag,long n);
+extern int func_80086920(int a);
+extern int func_80086BB0(int a);
+s32 func_8006C37C(ModelDiscEffectState *arg0, s32 arg1);
+s32 func_8006CD78(void *data, s32 arg1);
+s32 func_8006F1B4(void *data, s32 arg1);
+s32 func_80070920(s32 mode, s32 index);
+void func_80070738(s32 kind, s32 *low, s32 *high);
+s32 func_8007058C(void);
+void func_80071700(void);
+void func_80071CB0(void);
+void func_800707C4(s32 kind, s32 *low, s32 *high);
+void func_80071FC8(void);
+void func_8007214C(void);
+s8 func_80070710(void);
+void func_80072A48(void);
+void func_800734DC(void);
 
 #endif /* KG_FUNCTIONS_H */

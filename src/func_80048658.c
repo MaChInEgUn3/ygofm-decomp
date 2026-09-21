@@ -7,10 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s16 func_800451E0(u16 value, s32 unused);
 extern SDValue *D_8009B45C;
-void func_80048658(s32 id, s32 volume, s32 pan);
-void func_800482B0(s32 id, s16 pitch, u8 volume, s16 pan, u32 mode, u8 value);
 void func_80048658(s32 arg0, s32 arg1, s32 arg2)
 {
     SDSEPlayIdPair tags;

@@ -7,16 +7,12 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_8005F7B0(s32 value, s32 arg);
 void func_8005F91C(
     s32 mode,
     ModelEffectEndpoint *first,
     ModelEffectEndpoint *second,
     s32 arg
 );
-extern s8 D_8009B07A;
-extern u8 D_8009B07B;
-extern u8 D_8009B07C;
 void func_8005F91C(
     s32 arg0,
     ModelEffectEndpoint *arg1,

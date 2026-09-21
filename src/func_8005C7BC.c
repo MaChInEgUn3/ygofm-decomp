@@ -7,10 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_8008FBD0(s32 status) __attribute__((noreturn));
-extern char D_800117EC[];
-extern char D_80011814[];
-u32 *func_8005C7BC(GsARGUNIT_ANIM *ctx);
 static __inline__ u32 scan_command(GsSEQ *track, u32 *commands, u32 index)
 {
     s32 step;

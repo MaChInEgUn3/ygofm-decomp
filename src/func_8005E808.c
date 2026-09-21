@@ -7,12 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern long func_80086E50(long a);
-extern SVECTOR D_800F5768[3 ];
-void func_8005EBF4(Key *cur, s32 k, s32 scale, s32 den, s16 *out);
-void func_8005E808(Key *key);
-void func_8005FB30(Key *key);
-extern Key *D_8009B074;
 void func_8005E808(Key *state)
 {
      
