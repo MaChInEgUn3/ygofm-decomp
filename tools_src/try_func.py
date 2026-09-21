@@ -149,8 +149,24 @@ def _addr_of(sym):
     return int(m.group(1), 16) if m else None
 
 
-def canon_addr(line):
+_BARE_SYM = re.compile(r"(?<![\w(.])((?:d|func)_[0-9a-f]{6,8})(?:\+(\d+))?(?![\w(])")
+
+
+def canon_addr(line, rodata_syms=frozenset()):
     """Resolve %hi/%lo of a known symbol to the immediate it assembles to.
+
+    Three more spellings of one word, found on 2026-09-21 when every ported
+    file was run through this after the type fold (16 of 139 read as
+    differing while the build was byte-identical):
+      * a BARE gp-relative operand names an interior symbol on one side and
+        `base+N` on the other (`sh $v1,d_8009b2a6` against
+        `sh $v1,d_8009b2a4+2`): both resolve to one address, so resolve them;
+      * the object's own `.rodata+N` against the target's `.rodata`: the
+        offset inside the section is what only the link can check (the
+        jump-table note below), so the offset is dropped on both sides;
+      * a RODATA_OWNED block (build.py) is `%hi(d_80010250)` in the target
+        and `%hi(.rodata)` in the object: the caller passes the function's
+        owned names and they are read as `.rodata` too.
 
     ONE ADDRESS HAS SEVERAL SPELLINGS AND THEY ARE THE SAME TWO WORDS. This
     file used to compare the rendered text, so
@@ -177,7 +193,19 @@ def canon_addr(line):
             return str(((a + 0x8000) >> 16) & 0xFFFF)
         lo = a & 0xFFFF
         return str(lo - 0x10000 if lo >= 0x8000 else lo)
-    return GTE_OPS.get(line.strip(), _RELOC.sub(sub, line))
+    def bare(m):
+        a = _addr_of(m.group(1))
+        if a is None:
+            return m.group(0)
+        return str((a + (int(m.group(2)) if m.group(2) else 0)) & 0xFFFFFFFF)
+    s = line
+    if rodata_syms:
+        s = re.sub(r"%(hi|lo)\((" + "|".join(map(re.escape, rodata_syms)) + r")\)",
+                   r"%\1(.rodata)", s)
+    s = re.sub(r"\.rodata\+\d+", ".rodata", s)
+    s = _RELOC.sub(sub, s)
+    s = _BARE_SYM.sub(bare, s)
+    return GTE_OPS.get(line.strip(), s)
 
 
 def _gte_ops():
@@ -620,10 +648,11 @@ def main():
     print(f"{'TARGET':<44} {'BUILT'}")
     print("-" * 90)
     bad = 0
+    ro = frozenset(n.lower() for f, names in B.RODATA_OWNED if f == func for n in names)
     for i in range(max(len(w), len(g))):
         a = w[i] if i < len(w) else ""
         b = g[i] if i < len(g) else ""
-        same = a == b or (a and b and canon_addr(a) == canon_addr(b))
+        same = a == b or (a and b and canon_addr(a, ro) == canon_addr(b, ro))
         mark = "  " if same else "<<"
         if not same:
             bad += 1

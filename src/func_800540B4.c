@@ -62,8 +62,8 @@ void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
 void *func_80059220(void);
 s32 func_8005FE44(s32 arg0);
 void func_800540B4(s32 index);
-extern u32 D_8009AFE0;;
-extern u8 D_8009AFE4;;
+extern u32 D_8009AFE0;
+extern u8 D_8009AFE4;
 static inline s32 Model_MirrorOffset(s32 index, s32 value, s32 offset)
 {
     if (index > 0) {

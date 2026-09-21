@@ -87,8 +87,8 @@ extern u16 D_8009B1D0;
 extern u8 D_8009B1B8;
 extern u16 D_8009B374 __attribute__((section(".data")));
 extern u8 D_800E9ECE[];
-extern s8 D_8009B208;;
-extern s8 D_8009B209;;
+extern s8 D_8009B208;
+extern s8 D_8009B209;
 void func_8001F55C(void)
 {
     DisplayObject *o;

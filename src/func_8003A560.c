@@ -18,7 +18,6 @@ extern u32 D_8009B134_abs __attribute__((section(".data")));
 void func_800356A0(u8 *destination, u8 *source, u32 length);
 void func_8003A01C(
     FileTransferDescriptor *descriptor, s32 mode);
-extern 
 s32 func_8003A1EC(
     MenuRecord *record, DisplayObject **out, s32 resource_index);
 extern s8 D_8009B326;
@@ -26,7 +25,6 @@ extern s8 D_8015C410[];
 void func_8003A560(DisplayEffectVramState *state);
 extern u8 D_801AF800[];
 extern u8 *D_80010000 __attribute__((section(".data")));
-extern 
 void func_8003A560(DisplayEffectVramState *a)
 {
     DisplayEffectVramSlot *slots;

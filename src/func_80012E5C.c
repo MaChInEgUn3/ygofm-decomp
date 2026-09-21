@@ -13,7 +13,6 @@ void    func_80085DB0(unsigned short offset, unsigned short point, GsOT * otp);
 GsOT   *func_80085E10(GsOT * ot_src, GsOT * ot_dest);
 void    func_80085500(void);
 int     func_80085320(void);
-extern 
 extern u8 D_8009B318 __attribute__((section(".data")));
 extern u16 D_8009B098;
 extern DISPENV D_800E9D28;

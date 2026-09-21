@@ -76,11 +76,11 @@ extern u8 D_8009B152;
 extern DisplayObject *D_8009B1CC;
 extern DisplayObject *D_8009B1F8;
 extern u8 D_800EAE88[];
-extern u16 D_8009B170;;
-extern u16 D_8009B172;;
-extern u16 D_8009B178;;
-extern u16 D_8009B17A;;
-extern u8 D_8009B19C;;
+extern u16 D_8009B170;
+extern u16 D_8009B172;
+extern u16 D_8009B178;
+extern u16 D_8009B17A;
+extern u8 D_8009B19C;
 void func_8001D670(void)
 {
     DuelSelectionRecord *side;

@@ -13,7 +13,6 @@ void func_80045F3C(void);
 void func_80045514(void);
 s16 func_80049F50(void);
 void func_80049C40(s32 value);
-extern 
 void func_80045F3C(void)
 {
     SDValue *p;

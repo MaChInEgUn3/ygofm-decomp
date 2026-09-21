@@ -3218,6 +3218,18 @@ encodings out of `include/gte_macros.inc` so the two cannot drift.
 `check_try_func` went from 141/150 to **145/150** on the src direction and
 stayed at **93/93** on the parked direction -- the loosening ate nothing,
 which is the half that matters.
+**Three more spellings, 2026-09-21, found by running every ported file
+through try_func after the type fold: 16 of 139 read as differing while the
+build was byte-identical.** A bare gp-relative operand naming an interior
+symbol against `base+N` (`sh $v1,d_8009b2a6` / `sh $v1,d_8009b2a4+2`), the
+object's `.rodata+N` against the target's `.rodata`, and a `RODATA_OWNED`
+block spelled by splat's name in the target and as `.rodata` in the object.
+`canon_addr` resolves the first, drops the section offset for the second
+(the offset is what only the link checks, as the jump-table note says) and
+takes the function's owned names from build.py for the third. Controls in
+the same run: four candidates with real residues still report 4, 10, 5 and
+333, and a stride-7 sample of src is 173/177 with the four misses all the
+GTE label-offset class above (`j L3` against `j L4`), unchanged.
 **Five are still wrong and it is a fourth instance of the same class**:
 `renumber_labels` numbers the two sides differently on GTE-heavy functions,
 so every branch reads as a difference at a constant offset (`j L3` against

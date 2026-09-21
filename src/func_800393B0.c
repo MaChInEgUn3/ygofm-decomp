@@ -23,7 +23,6 @@ void func_800393B0(struct DuelEffectChannel *object);
 extern s16 D_8009B35A;
 void func_800391E4(struct DuelEffectChannel *record);
 void func_80036C14(DuelEffectChannel *channel, s32 tagged_value);
-extern 
 s8 *func_80039E9C(void);
 extern ScriptCommandHandler D_80090C50[];
 extern u16 D_8009B27C __attribute__((section(".data")));

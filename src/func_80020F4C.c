@@ -54,8 +54,6 @@ extern u16 D_8009B162;
 extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern u16 D_8009B1D0;
-extern 
-extern 
 void func_80020F4C(void)
 {
     DuelResultSpriteSlot *slots;

@@ -15,7 +15,6 @@ s32 func_800428EC(DisplayObject *object, s8 value);
 extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
 extern u32 D_8009B134_abs __attribute__((section(".data")));
 void func_8001944C(DisplayObject *object);
-extern 
 struct DisplayObject;
 DisplayObject *func_80019564(DisplayObjectConfigView *source);
 void func_80026BA4(s32 value, s32 flag);

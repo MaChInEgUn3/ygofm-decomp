@@ -64,7 +64,7 @@ extern s16 D_8009B206;
 extern s8 D_8009B218;
 void func_80019D18(void);
 void func_80019BD0(DisplayObject *object);
-extern s16 D_8009B206;;
+extern s16 D_8009B206;
 static __inline__ s32 placement_velocity(s32 distance)
 {
     return distance / 8;
