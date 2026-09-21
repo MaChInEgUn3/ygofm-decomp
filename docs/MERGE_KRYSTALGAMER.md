@@ -259,3 +259,19 @@ profile, or a guard his unit had that the pruner cannot see). The 26 larger
 ones are the parks where his source uses a structure this tree's symbol map
 renames badly, or where his unit needs a `static inline` this tree does not
 have; each is a port question first and a matching question second.
+
+**Second batch, same afternoon: the 12 at 1 to 6 differences were all NAMES,
+and the build takes every one of them (79 of 105).** Three residues, none of
+them codegen: symbols his `c_symbols.ld` names but his `symbols.txt` does
+not (`gBuildDeck_pState`, `gDuel_wBgmId` -- the port now reads all three of
+his symbol files, and keeps a second name for an address that already has
+its `D_` name as an alias to add to `config/symbol_aliases.txt`, which is
+what `D_800E9EC8_arr` and the two `_abs` are); splat's interior symbol
+against his array index (`D_8009B11C+1` for `D_8009B11D`, the same word);
+and `%lo(.rodata+N)` on a jump-table load, which is try_func's renderer
+(WORKFLOW already says a jump-table function has to be proven by the
+build). So a port that try_func leaves at a handful of differences whose
+rows are all symbol names is a MATCH until the build says otherwise, and
+the build said 84747e64 with all twelve installed. `tools_src/port_install.py`
+does the install; the count went 1171 -> 1182 (one of the twelve,
+func_80018608, replaced a transcription, so the debt is 3).

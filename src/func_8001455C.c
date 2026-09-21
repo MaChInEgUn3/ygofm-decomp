@@ -1,0 +1,267 @@
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/func_80014294.c (File_StepActiveTransfer), profile gcc_2_8_1_g8_split.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py. */
+typedef unsigned char u8;
+typedef signed short s16;
+typedef unsigned short u16;
+typedef signed int s32;
+typedef unsigned int u32;
+typedef void (*CdlCB)(u8,u8 *);
+typedef struct {
+	u8 minute;		 
+	u8 second;		 
+	u8 sector;		 
+	u8 track;		 
+} CdlLOC;
+CdlCB func_8007E860(CdlCB func);
+typedef void ( *DslCB )( u8, u8* );
+typedef struct {
+	u8 minute;		 
+	u8 second;		 
+	u8 sector;		 
+	u8 track;		 
+} DslLOC;
+int func_8007B1F4( u8 com, u8* param, DslCB cbsync, int count );
+int func_8007B468( u8 mode, DslLOC* pos, u8 com, DslCB func, int count );
+void func_8007DDD4( void );
+extern long func_80077240 (long flag);
+CdlLOC *func_8007E600(s32 sector, CdlLOC *position);
+typedef struct FileTransferDescriptor FileTransferDescriptor;
+typedef void (*FileTransferCallback)();
+struct FileTransferDescriptor {
+    s16 x;
+    s16 y;
+    s16 w;
+    s16 h;
+    u32 value_08;
+    u32 value_0C;
+     
+
+    s32 total_bytes;
+    s32 file_bytes;
+    u8 *loader_argument;
+     
+
+    u32 phase_size;
+    FileTransferCallback phase_callback;
+    s32 absolute_lba;
+    s32 phase_remaining;
+    u32 status_flags;
+     
+
+
+
+
+
+
+
+
+
+
+
+
+    union {
+        struct {
+            u16 counter;
+            u16 field_32;
+        } h;
+        u32 word;
+    } field_30;
+    s32 direct_destination;
+    void *callback_data;
+    u32 position;
+    u32 result;
+    u16 buffer_index;
+    u8 done;
+    u8 substate;
+};
+extern u16 D_8009B0EC;
+void func_800140A0(u8 event);
+void func_80014134(u8 event);
+void func_800141A8(u8 event);
+void func_80014220(s32 event);
+void func_8001455C(void);
+extern volatile u32 D_8009B0F4;
+extern volatile u16 D_8009B112;
+extern FileTransferDescriptor D_800E9E60;
+extern char D_8009B11C[1];
+extern u8 D_8009B11C_byte asm("D_8009B11C");
+extern volatile u16 D_8009B100;
+extern char D_8009B104[1];
+extern void (*D_8009B0F0)(void);
+extern void (*D_8009B120)(void);
+void func_80014294(u8 event);
+void func_80014308(u8 event);
+void func_80014390(u8 event, u8 *result);
+void func_800144B8(void);
+void func_8001455C(void)
+{
+    FileTransferDescriptor *p;
+    void (*cb)(void);
+    void (*cb2)(void);
+    u8 *q;
+    s32 n;
+    s32 m;
+
+    p = &D_800E9E60;
+    if (D_8009B0F4 & 0x1000 ) {
+        if (!(D_8009B0F4 & 0x800 )) {
+            if (func_8007B1F4(0x10, 0, (DslCB)func_80014390, 0) > 0) {
+                D_8009B0F4 =
+                    D_8009B0F4 | 0x800 ;
+            }
+        }
+    }
+    if (D_8009B0F4 & 0x400 ) {
+        return;
+    }
+    if (D_8009B0F4 & 0x80000 ) {
+        if (!(D_8009B112 & 0x8000)) {
+            D_8009B112 = D_8009B112 | 0x8000;
+            if ((D_8009B112 & 3) == 0) {
+                D_8009B112 = 0;
+                goto call_144B8;
+            }
+            if (!(D_8009B112 & 0x2000)) {
+                D_8009B100 = 0;
+            }
+            if (D_8009B112 & 2) {
+                D_8009B112 = D_8009B112 & 0xFFFE;
+            } else {
+                p->field_30.word = 0;
+            }
+        }
+        switch (D_8009B100) {
+        case 0:
+            D_8009B112 = D_8009B112 | 0x2000;
+            D_8009B100 = 1;
+        case 1:
+            if (func_8007B1F4(9, 0, (DslCB)func_80014220, -1) <= 0) {
+                return;
+            }
+            D_8009B0F4 = D_8009B0F4 | 0x400 ;
+            cb = D_8009B120;
+            goto call_back;
+        case 2:
+            D_8009B112 = D_8009B112 & 0xDFFF;
+            if (D_8009B112 & 1) {
+                goto set_state3;
+            }
+            D_8009B112 = 0;
+call_144B8:
+            func_800144B8();
+            return;
+set_state3:
+            D_8009B100 = 3;
+        case 3:
+            D_8009B112 = D_8009B112 | 0x1000;
+            q = &D_8009B11C_byte + 1;
+             
+
+            *q = ((u8 *)&p->callback_data)[0];
+            q[-1] = ((u8 *)&p->callback_data)[1];
+            if (func_8007B1F4(0xD, (u8 *)(q - 1), (DslCB)func_80014294, -1) <= 0) {
+                return;
+            }
+            D_8009B0F4 = D_8009B0F4 | 0x400 ;
+            return;
+        case 4:
+            func_8007E600(
+                p->absolute_lba, ((CdlLOC *)( D_8009B104 )) 
+            );
+            if (func_8007B468(
+                    0x4A, ((DslLOC *)( D_8009B104 )) , 0x1B,
+                    (DslCB)func_80014308, -1) <= 0) {
+                return;
+            }
+            D_8009B0F4 = D_8009B0F4 | 0x400 ;
+            return;
+        case 5:
+            D_8009B100 = 6;
+            D_8009B0EC = 0x258;
+            D_8009B112 = D_8009B112 & 0xEFFF;
+            D_8009B112 = D_8009B112 | 0x4000;
+            cb2 = D_8009B0F0;
+            if (cb2 != 0) {
+                cb2();
+            }
+        case 6:
+            D_8009B0EC = D_8009B0EC - 1;
+            if ((s16)D_8009B0EC > 0) {
+                if ((s32)p->field_30.word < p->direct_destination) {
+                    return;
+                }
+            }
+            D_8009B112 = D_8009B112 & 0x3FFC;
+            cb = D_8009B120;
+            D_8009B112 = D_8009B112 | 2;
+call_back:
+            if (cb != 0) {
+                cb();
+            }
+        }
+        return;
+    }
+    if (p->done == 5) {
+        switch (p->substate) {
+        case 0:
+            func_8007DDD4();
+            func_8007E860(0);
+            if (func_8007B1F4(9, 0, (DslCB)func_800141A8, -1) <= 0) {
+                return;
+            }
+            D_8009B0F4 = D_8009B0F4 | 0x400 ;
+            return;
+        case 1:
+            func_8007DDD4();
+            func_8007E860(0);
+            goto call_144B8;
+        }
+        return;
+    }
+    if (D_8009B0F4 & 0x80) {
+        if (D_8009B0F4 & 0x100) {
+            return;
+        }
+        goto call_144B8;
+    }
+    func_8007E600(p->absolute_lba, ((CdlLOC *)( D_8009B104 )) );
+    if (D_8009B0F4 & 0x100000) {
+        if ((s32)D_8009B0F4 < 0) {
+            goto call_144B8;
+        }
+        if (func_8007B468(
+                0xA0, ((DslLOC *)( D_8009B104 )) , 0x15,
+                (DslCB)func_80014134, -1) <= 0) {
+            return;
+        }
+        D_8009B0F4 = D_8009B0F4 | 0x480;
+        return;
+    }
+    if (!(D_8009B0F4 & 0x800000)) {
+        D_8009B0F4 = D_8009B0F4 | 0x800000;
+        if (p->phase_callback != 0) {
+            p->phase_callback(p, p->result++);
+        }
+        p->phase_remaining = p->phase_size;
+        return;
+    }
+    if (D_8009B0F4 & 0x400000) {
+        if (func_80077240(0) == 0) {
+            return;
+        }
+        D_8009B0F4 = D_8009B0F4 & 0xFFBFFFFF;
+    }
+    if ((s32)D_8009B0F4 >= 0) {
+        if (func_8007B468(
+                0xA0, ((DslLOC *)( D_8009B104 )) , 6,
+                (DslCB)func_800140A0, -1) == 0) {
+            return;
+        }
+        D_8009B0F4 = D_8009B0F4 | 0x400 ;
+    }
+    D_8009B0F4 = D_8009B0F4 | 0x180;
+}

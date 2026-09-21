@@ -65,16 +65,41 @@ def load_kg():
     return fn, mc, profiles
 
 
+ALIAS_SHAPE = re.compile(r"^(D_[0-9A-F]{8}_\w+|Base\d*_[0-9A-F]{8}\w*)$")
+
+
+def kg_symbols():
+    """name -> address from his three symbol files (symbols.txt has 1361 names,
+    c_symbols.ld another 400 that only the linker sees, link_symbols.ld 2)."""
+    out = {}
+    for f in ("symbols.txt", "c_symbols.ld", "link_symbols.ld"):
+        for m in re.finditer(r"(?m)^\s*([A-Za-z_]\w*)\s*=\s*0x([0-9A-Fa-f]+)\s*;",
+                             (KG / "config/slus_01411" / f).read_text()):
+            out.setdefault(m.group(1), int(m.group(2), 16))
+    return out
+
+
 def renames(fn):
+    """A named symbol becomes this tree's func_ADDR / D_ADDR. A SECOND name for
+    an address that already has its D_ name (`D_800E9EC8_arr`, `D_8009B0F4_abs`,
+    `Base2_...`) is one of his linker-script aliases: it exists so that one
+    reference can be declared with another type or emitted in another form,
+    so it cannot be folded into the D_ name inside the unit. Those are kept
+    and reported as ALIASES for config/symbol_aliases.txt."""
     ren = {}
     for a, row in fn.items():
         if row["name"] != f"func_{a:08X}":
             ren[row["name"]] = f"func_{a:08X}"
-    for line in open(KG / "config/slus_01411/symbols.txt"):
-        m = re.match(r"\s*([A-Za-z_]\w*)\s*=\s*0x([0-9A-Fa-f]+)\s*;", line)
-        if m and int(m.group(2), 16) not in fn:
-            ren[m.group(1)] = f"D_{int(m.group(2), 16):08X}"
+    for name, addr in kg_symbols().items():
+        if addr in fn or ALIAS_SHAPE.match(name) or name == f"D_{addr:08X}":
+            continue
+        ren[name] = f"D_{addr:08X}"
     return ren
+
+
+def aliases_used(text):
+    syms = kg_symbols()
+    return {w: syms[w] for w in set(IDENT.findall(text)) if w in syms and ALIAS_SHAPE.match(w)}
 
 
 def preprocess(src):
@@ -227,12 +252,16 @@ def main():
     pruned, n_units, n_kept = prune(text, func)
     (OUT / f"port_pruned_{func}.c").write_text(pruned)
     cc, asg = flags_for(profiles[entry["profile"]])
+    aliases = aliases_used(pruned)
+    if aliases:
+        print("ALIASES " + " ".join(f"{k}=0x{v:08X}" for k, v in sorted(aliases.items())))
     print(f"{func}: {entry['source']} ({fn[addr]['name']}) profile={entry['profile']} "
           f"units {n_units} -> {n_kept}, {pruned.count(chr(10))} lines")
     print("FLAGS " + " ".join(cc) + (f"   as {asg}" if asg else ""))
     if "--json" in sys.argv:
         print("JSON " + json.dumps({"cc": cc, "as": asg, "source": entry["source"],
-                                    "name": fn[addr]["name"], "profile": entry["profile"]}))
+                                    "name": fn[addr]["name"], "profile": entry["profile"],
+                                    "aliases": {k: f"0x{v:08X}" for k, v in sorted(aliases.items())}}))
 
 
 if __name__ == "__main__":

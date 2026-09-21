@@ -283,7 +283,6 @@ PER_FUNC_FLAGS = {
     # saves a fifth callee-saved register -- 234 differences against 194.
     # The flag is per file, so the THIRD loop's givs are written out by
     # hand in the candidate; see docs/PARKED.txt.
-    "func_8001825C": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at +9. Without it gcc gives the record cursor a second, biased
     # register ($s0 = $s3 + 4, reading 2($s0) where retail reads 6($s3)),
     # which is +13 and four differences worse.
@@ -335,7 +334,6 @@ PORTED_FLAGS = {
     # retail walks one cursor with plain displacements.
     "func_800177C4": _O2_G8_NOSTRENGTH,
     "func_800178BC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_80018608": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001898C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001944C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001B0CC": ['-quiet', '-O2', '-G0', '-msplit-addresses'],
@@ -560,7 +558,6 @@ PER_FUNC_AS_FLAGS["func_8004C114"] = "-G0"
 # so they leave small data while the four-byte D_8009B180/B184 stay %gp_rel.
 PER_FUNC_AS_FLAGS["func_800222F4"] = "-G4"
 # func_80056504 (parked): gp=0, so the D_8009B0F4 stores take the bare form.
-PER_FUNC_AS_FLAGS["func_80056504"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80048A28"] = "-G0"
@@ -576,7 +573,6 @@ PER_FUNC_AS_FLAGS["func_8002BD0C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80057544"] = "-G0"
 # func_80046294: gp == 0, so any -G is free, and retail reads D_8009B45C
 # through a %hi/%lo pair at every site rather than gp-relatively.
-PER_FUNC_AS_FLAGS["func_80046294"] = "-G0"
 # func_800164FC: gp == 0 and three `lui $at` stores to the D_8009B30C group.
 PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 # func_80030998: the gp side is one- and two-byte scalars, and D_8009B2A0
@@ -867,6 +863,21 @@ PER_FUNC_FLAGS["func_80072A48"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msp
 PER_FUNC_AS_FLAGS["func_80072A48"] = "-G0"
 PER_FUNC_FLAGS["func_800734DC"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
 PER_FUNC_AS_FLAGS["func_800734DC"] = "-G0"
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_80032C48"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8003DC1C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80046294"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001455C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800218F0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800323F8"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8003E490"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80031874"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800283F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001825C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80018608"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80056504"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

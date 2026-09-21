@@ -119,3 +119,4 @@ D_8009B20E = 0x8009B20E;
 # ported functions carry his declarations, so they carry his names.
 D_8009B0F4_abs = 0x8009B0F4;
 D_8009B134_abs = 0x8009B134;
+D_800E9EC8_arr = 0x800E9EC8;

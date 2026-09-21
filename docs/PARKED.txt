@@ -6,6 +6,21 @@
 # Ferramenta: tools_src/port_kg.py + tools_src/port_sweep.py; a medicao e o
 # relato estao em docs/MERGE_KRYSTALGAMER.md. As entradas antigas abaixo ficam
 # como historia do que foi medido a mao.
+# Segunda leva, mesma tarde: os 12 a 1-6 diferencas eram TODOS nomes (simbolos
+# que so o c_symbols.ld dele nomeia, aliases _abs/_arr dele, rotulos .rodata+N
+# de jump table que o try_func renderiza diferente); build byte-identico com os 12.
+func_80032C48 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_8003DC1C -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_80046294 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_8001455C -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_800218F0 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_800323F8 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_8003E490 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_80031874 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_800283F4 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_8001825C -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_80018608 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
+func_80056504 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
 func_80013154 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
 func_80013360 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
 func_80013C28 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
