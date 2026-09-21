@@ -5,14 +5,14 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern SceneScriptSlot D_800EAE98[];
 FileTransferDescriptor *func_80014E1C(
     s32, u8 *, s32, s32, FileTransferCallback, s32, s32
 );
 void func_800137E4(void);
 extern int func_80082324(int max_count);
-extern int func_80081DE8(RECT *rect, u32 *p);
-extern RECT D_800E9D70[2];
 extern s16 D_8009B146 __attribute__((section(".data")));
 extern s16 D_8009B148 __attribute__((section(".data")));
 s8 *func_80039E9C(void);
@@ -23,7 +23,6 @@ void func_8002FB78(
 );
 extern DisplayObject *D_8009B2A0;
 DisplayObject *func_8002E3FC(void);
-extern u8 *D_80010000 __attribute__((section(".data")));
 void func_8002FD10(s16 arg0)
 {
     SceneScriptSlot *slot;

@@ -5,19 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern MATRIX *func_80088C50(SVECTOR *r,MATRIX *m);
-extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
-extern void func_80089CC0(SVECTOR *v0,SVECTOR *v1,long *flag);
-extern long func_800879A0(long sxy0,long sxy1,long sxy2);
-extern long func_80087C70(SVECTOR *v0,SVECTOR *v1,CVECTOR *v2,
-			long *sxy,CVECTOR *v3,long *flag);
-extern void func_80082840(void *p, int abe) ;
-void    func_80084320(void *pp, GsOT * ot, unsigned short pri);
-void    func_80085600(MATRIX * mp);
-void    func_800855D0(MATRIX * mp);
-extern MATRIX D_800FE148;
-extern GsOT *D_800E9D90[4];
-void func_80015EF4(void *record, POLY_GT4 *prim, POLY_FT4 *sprite, s32 *color);
+#include "kg_variables.h"
+#include "kg_functions.h"
 void func_80015EF4(void *record, POLY_GT4 *prim, POLY_FT4 *sprite, s32 *color)
 {
     DuelCardRenderHolder *holder = record;

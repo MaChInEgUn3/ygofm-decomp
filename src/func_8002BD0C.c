@@ -5,9 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern int func_80081DE8(RECT *rect, u32 *p);
-extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
-extern RECT D_800E9D70[2];
+#include "kg_variables.h"
+#include "kg_functions.h"
 void func_8002BD0C(FileTransferDescriptor *object, s32 mode);
 void func_80048D08(s32 side, u32 *src);
 extern s32 D_8009B118 __attribute__((section(".data")));

@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 u8 *func_800291E0(s32 index, s32 x, s32 y);
 void func_80029528(s32 index);
 void func_800137E4(void);
@@ -18,8 +20,6 @@ extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
 u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
-extern u16 D_8009B23A;
-extern u16 D_8009B23A;
 extern u16 D_800908A0[];
 extern u8 D_8009B16C[4];
 extern u8 gDebugEffect_abPreviewState[6];

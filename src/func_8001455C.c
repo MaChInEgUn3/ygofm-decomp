@@ -5,31 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-CdlCB func_8007E860(CdlCB func);
-int func_8007B1F4( u8 com, u8* param, DslCB cbsync, int count );
-int func_8007B468( u8 mode, DslLOC* pos, u8 com, DslCB func, int count );
-void func_8007DDD4( void );
-extern long func_80077240 (long flag);
-CdlLOC *func_8007E600(s32 sector, CdlLOC *position);
-extern u16 D_8009B0EC;
-void func_800140A0(u8 event);
-void func_80014134(u8 event);
-void func_800141A8(u8 event);
-void func_80014220(s32 event);
-void func_8001455C(void);
-extern volatile u32 D_8009B0F4;
-extern volatile u16 D_8009B112;
-extern FileTransferDescriptor D_800E9E60;
-extern char D_8009B11C[1];
-extern u8 D_8009B11C_byte asm("D_8009B11C");
-extern volatile u16 D_8009B100;
-extern char D_8009B104[1];
-extern void (*D_8009B0F0)(void);
-extern void (*D_8009B120)(void);
-void func_80014294(u8 event);
-void func_80014308(u8 event);
-void func_80014390(u8 event, u8 *result);
-void func_800144B8(void);
+#include "kg_variables.h"
+#include "kg_functions.h"
 void func_8001455C(void)
 {
     FileTransferDescriptor *p;

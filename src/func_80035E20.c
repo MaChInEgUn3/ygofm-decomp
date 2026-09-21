@@ -5,17 +5,14 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern MATRIX *func_80088C50(SVECTOR *r,MATRIX *m);
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern void func_800878B0(long ofx,long ofy);
-extern void func_800878D0(long h);
 extern long func_80087BC0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
 			long *p,long *otz,long *flag);
 extern void func_80082980(POLY_GT4 *p) ;
-extern void func_80082840(void *p, int abe) ;
 void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-void    func_80084320(void *pp, GsOT * ot, unsigned short pri);
-void    func_800855D0(MATRIX * mp);
 extern DuelEffectChannel D_800EB0F8[4 ];
 extern s16 D_8009B146 __attribute__((section(".data")));
 extern s16 D_8009B148 __attribute__((section(".data")));

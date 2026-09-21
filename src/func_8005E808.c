@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern long func_80086E50(long a);
 extern SVECTOR D_800F5768[3 ];
 void func_80058FB0(s32 idx, u16 *out);

@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim);
 Color *func_8005ABA0(Color *out, s32 h, u16 s, u16 v, u8 lim)
 {

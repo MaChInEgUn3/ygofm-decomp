@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
 void func_800357E8(s32 arg0, s32 arg1, u8 *arg2);
 void func_800358A0(s32 value, s32 count_arg, u8 *data_arg);

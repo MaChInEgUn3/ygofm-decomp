@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern ModelSlot D_800F2C40[3 ];
 extern ModelCameraMove D_800F2B20;
 extern GsRVIEW2 D_800F56F0;

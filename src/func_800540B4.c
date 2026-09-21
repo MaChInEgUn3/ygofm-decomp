@@ -5,17 +5,14 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
-extern long func_800879A0(long sxy0,long sxy1,long sxy2);
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern long func_80087A50(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
 			long *sxy0,long *sxy1,long *sxy2,long *p,long *flag);
 extern int func_80082324(int max_count);
-extern int func_80081DE8(RECT *rect, u32 *p);
 extern int func_80081ED4(RECT *rect, u32 *p);
 int     func_800857E0(int id, GsF_LIGHT * lt);
 void    func_80085D50(long r, long g, long b);
-void    func_80085600(MATRIX * mp);
-void    func_800855D0(MATRIX * mp);
 extern void func_8008A150(GsUNIT *, GsOT *, u32 *);
 extern void func_8008A760(GsCOORDUNIT *, MATRIX *);
 extern void func_8008AA30(GsCOORDUNIT *, MATRIX *, MATRIX *);

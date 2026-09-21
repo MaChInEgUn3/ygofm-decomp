@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern int  func_8008E590(void);
 void func_8004036C(void *object);
 void *func_80042B40(s32 value);
@@ -18,7 +20,6 @@ void func_80043178(DisplayObjectSnapshot *object);
 void func_8004318C(
     DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
 extern DisplayObject *D_800E9EF0[];
-extern u16 D_8009B23A;
 extern DuelHandSlot D_800EA030[5 ];
 extern u8 D_800E9F10[];
 extern DuelCardPickCursor *D_8009B1B4;
@@ -42,7 +43,6 @@ extern int func_80086770(int a);
 extern int func_800866A0(int a);
 extern int func_80081ED4(RECT *rect, u32 *p);
 extern DuelEffectResourceRecord D_800EA0E8[];
-extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
 extern u32 D_8009B134_abs __attribute__((section(".data")));
 FileTransferDescriptor *func_80029164(s32 slot, s32 value);
 extern DisplayObject *D_8009B1C0;
@@ -56,7 +56,6 @@ void func_80035B7C(struct DuelEffectChannel *record);
 extern DuelEffectChannel D_800EB0F8[4 ];
 void func_8003FEE0(u32);
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern u16 D_8009B150;
 extern u8 D_8009B1B9;

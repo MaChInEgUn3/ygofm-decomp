@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 s32 func_8004002C(void);
 void *func_800400AC(s32 index, s32 key);
 extern u8 D_801AF000[];
@@ -21,7 +23,6 @@ void func_800428A8(
     void *resource
 );
 void func_80042918(DisplayObject *object);
-extern u16 D_8009B23A;
 extern u16 D_801799D8[];
 extern int  func_8008E590(void);
 void func_8001EC70(DisplayObject *object);
@@ -32,7 +33,6 @@ extern DisplayObject *D_8009B21C;
 FileTransferDescriptor *func_80014E1C(
     s32, u8 *, s32, s32, FileTransferCallback, s32, s32
 );
-extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
 extern u32 D_8009B134_abs __attribute__((section(".data")));
 void func_80020BE4(FileTransferDescriptor *descriptor, s32 mode);
 void func_8003FF08(u32);
@@ -51,7 +51,6 @@ void func_80020F4C(void);
 extern DuelResultSpriteSpec D_80090928[][7 ];
 extern DuelResultSpriteSpec D_80090960[][7 ];
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern u16 D_8009B1D0;
 void func_80020F4C(void)

@@ -5,36 +5,13 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern void func_80086DC8();
-extern void func_800878D0(long h);
-extern int func_8007F350(int mode);
-void    func_80084DD0(unsigned short x, unsigned short y, unsigned short intmode,
-		              unsigned short dith, unsigned short varmmode);
-void    func_80085740(void);
-void    func_80085DB0(unsigned short offset, unsigned short point, GsOT * otp);
-void    func_800856A0(unsigned short x0, unsigned short y0, unsigned short x1, unsigned short y1);
-void    func_800855B0(long x, long y);
-void func_8008B7B0( long val );
-extern void func_8008E5C0(unsigned int);
-extern volatile u8 D_8009B14A __attribute__((section(".data")));
-extern volatile u8 D_8009B14B __attribute__((section(".data")));
-extern volatile u8 D_8009B14C __attribute__((section(".data")));
-void func_800136E4(void);
-extern DISPENV D_800E9D28;
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern volatile DRAWENV D_800FE048[];
-extern DISPENV D_800FE0A8;
 extern volatile u8 D_8009B142 __attribute__((section(".data")));
 extern volatile u8 D_8009B143 __attribute__((section(".data")));
 extern volatile u8 D_8009B144 __attribute__((section(".data")));
-extern u8 D_8009B0AD;
-extern u8 D_8009B0D0;
-extern u8 D_8009B0A8;
 extern volatile u8 D_8009B0A0;
-extern volatile u8 D_8009B0A1;
-extern volatile u8 D_8009B0A2;
-void func_8003CBE8(void);
-extern volatile u8 D_8009B0A3;
-void func_80013154(struct GraphicsFrameBuffer *base);
 void func_80013154(GraphicsFrameBuffer *base)
 {
     GraphicsFrameBuffer *buf;

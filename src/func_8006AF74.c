@@ -5,9 +5,10 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern MATRIX *func_80087480(MATRIX *m0,MATRIX *m1);
 extern MATRIX *func_80087D30(SVECTOR *r,MATRIX *m);
-extern MATRIX *func_80087670(MATRIX *m,VECTOR *v);
 extern void func_800871D0();
 extern void func_80087274();
 extern void func_80087970(SVECTOR *v0,VECTOR *v1,long *flag);
@@ -17,7 +18,6 @@ extern long func_80087B30(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
 extern void func_800828E0(POLY_G3 *p) ;
 extern void func_80082960(POLY_G4 *p) ;
 void    func_80083FB0(GsLINE * lp, GsOT * ot, unsigned short pri);
-void    func_800855D0(MATRIX * mp);
 extern void *func_8008E3D0 ( );
 extern char *index  (const char *, char);
 extern int func_8008E870(const char *fmt, ...);

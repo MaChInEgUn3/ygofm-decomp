@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 s32 func_80051350(s32 mode, s32 min_extent, s32 depth);
 extern ModelSlot D_800F2C40[3 ];
 extern u8 D_8009AF98;

@@ -13,13 +13,14 @@
  * 20 differences with his spelling, byte-identical with this one; load alone at each site
  * is 10 and 16, both sites 6 (all six the renderer's `sym+2` spelling), volatile untried. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern int func_8008E870(const char *fmt, ...);
 extern s16 D_8009B19E;
 extern u8 D_8009B1E2;
 extern u16 D_8009B1E4;
 extern const char D_80010060[];
 void func_8001BD88(void);
-extern u16 D_8009B23A;
 extern s8 D_8009B208[8];
 extern u8 D_800907D8[];
 extern u8 D_800907CC[];
@@ -81,7 +82,6 @@ extern u8 D_801A8000[];
 void func_8003FEE0(u32);
 void func_80028220(void);
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern DisplayObject *D_8009B188;
 extern DisplayObject *D_8009B18C;

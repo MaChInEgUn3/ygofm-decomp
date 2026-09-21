@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 u32	func_800784D0(u32 *base);
 u32	func_800785C0(u32 **addr,u32 **header);
 int     func_800783DC(CdlLOC *loc);

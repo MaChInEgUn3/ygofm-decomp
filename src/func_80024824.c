@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern DuelDeckCardRecord D_801A7E20[];
 extern u8 D_8018C2D8[];
 extern u8 D_8015C424[];

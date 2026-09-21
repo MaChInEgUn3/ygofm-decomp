@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 long func_8008BC90( long chan );
 long func_8008C638( long chan, char* file, unsigned long* adrs, long ofs, long bytes );
 long func_8008CA78( long chan, char* name, struct DIRENTRY* dir, long* files, long ofs, long max );

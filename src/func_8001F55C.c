@@ -14,12 +14,11 @@
  * and byte-identical with both; casting the second site's load as well is +1 (the load must
  * stay free to hoist, as it does in retail). */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern int  func_8008E590(void);
-extern u16 D_8009B23A;
-extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
 extern u32 D_8009B134_abs __attribute__((section(".data")));
 extern u8 D_8009B1D5;
-extern DuelSideState D_800E9FF0[2 ];
 extern DuelSideState *D_8009B1C8;
 extern u8 D_8009B229;
 extern s16 D_8009B22A;
@@ -81,7 +80,6 @@ s32 func_80049120(void);
 void func_80059C18(s32 value);
 void func_8001ED20(DisplayObject *object);
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern u16 D_8009B1D0;
 extern u8 D_8009B1B8;

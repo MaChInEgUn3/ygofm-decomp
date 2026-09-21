@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern long func_80076D20 (SpuDecodedData *d_data, long flag);
 extern SDValue *D_8009B45C;
 s32 func_80045054(void);

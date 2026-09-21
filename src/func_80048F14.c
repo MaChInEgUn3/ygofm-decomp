@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern long func_80075BE0 (long on_off);
 extern long func_80075DE0 (SpuReverbAttr *attr);
 extern long func_80076790 (long on_off);

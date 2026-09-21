@@ -5,14 +5,10 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern u32 *func_8007EC68(int id);
-extern u16 D_8009B098;
-extern DISPENV D_800E9D28;
-void func_80012D4C(void);
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
-void func_8003CB7C(void);
-void func_80013360(void);
 void func_80013360(void)
 {
     RECT *origin;

@@ -5,41 +5,14 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern DISPENV *func_8007FEFC(DISPENV *env);
-extern int func_8007F350(int mode);
-void    func_80085D80(GsOT * ot);
-void    func_800862C0(PACKET * outpacketp);
-void    func_80085DB0(unsigned short offset, unsigned short point, GsOT * otp);
-GsOT   *func_80085E10(GsOT * ot_src, GsOT * ot_dest);
-void    func_80085500(void);
-int     func_80085320(void);
-extern u8 D_8009B318 __attribute__((section(".data")));
-extern u16 D_8009B098;
-extern DISPENV D_800E9D28;
-extern u8 D_8009B0AC;
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern DRAWENV D_800FE048[];
 extern u8 D_8009B142 __attribute__((section(".data")));
 extern u8 D_8009B143 __attribute__((section(".data")));
 extern u8 D_8009B144 __attribute__((section(".data")));
-extern GraphicsFrameBuffer D_8009B4A8[];
-extern GraphicsFrameBuffer *D_8009B0B4;
-extern u8 D_800A5768[];
-extern u8 D_8009B0AD;
-extern u8 D_8009B0D0;
-extern u8 D_8009B0A8;
 extern u8 D_8009B0A0[4];
-void func_80012E5C(void);
-extern u8 D_8009B141 __attribute__((section(".data")));
-extern GsOT *D_800E9D90[4];
-extern u8 D_8009AFA2 __attribute__((section(".data")));
-void func_800359B0(void);
-extern u8 D_8009B0A8;
-extern u8 D_8009B0AD;
-extern u8 D_8009B0D0;
-extern u16 D_8009B098;
 extern u8 D_8009B0A0[4];
-extern u8 D_8009B0AC;
-extern GraphicsFrameBuffer *D_8009B0B4;
 void func_80012E5C(void)
 {
     s32 i;

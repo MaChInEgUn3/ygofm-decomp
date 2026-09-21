@@ -5,17 +5,15 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern void func_800878B0(long ofx,long ofy);
-extern void func_800878D0(long h);
 extern int func_80086770(int a);
 extern int func_800866A0(int a);
-void    func_800855D0(MATRIX * mp);
 void func_800559D4(s32 index);
-extern MATRIX D_800FE148;
 void func_800540B4(s32 index);
 void func_800556E8(s32 index);
 void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
-extern GsOT *D_800E9D90[4];
 extern LibraryMotionState D_800EA1E8;
 void func_80029684(LINE_G3 *packet, GsOT *ot, SVECTOR *points,
                   long *control, s32 origin, s32 span);

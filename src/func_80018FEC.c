@@ -5,8 +5,9 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern u8 D_8009B1D5;
-extern DuelSideState D_800E9FF0[2 ];
 extern u8 D_8009B165;
 extern u8 D_8009B369 __attribute__((section(".data")));
 u8 *func_8002C604(s32 id);
@@ -19,7 +20,6 @@ extern DuelCardPickCursor *D_8009B1B4;
 extern u8 D_8015C424[];
 extern u8 D_8009B1B9;
 void func_80018FEC(void);
-extern u16 D_8009B23A;
 extern DuelExodiaCardPoseTable D_80090918;
 s32 func_800358FC(s32 divisor);
 void func_800156DC(void);
@@ -31,7 +31,6 @@ void *func_80042B40(s32 value);
 extern u8 *D_8009B214;
 extern u8 *D_8009B21C;
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u16 D_8009B1D0;
 extern u8 D_8009B269 __attribute__((section(".data")));
 extern u8 D_8009B26C __attribute__((section(".data")));

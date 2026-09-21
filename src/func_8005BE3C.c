@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern DRAWENV *func_8007FEC8(DRAWENV *env);
 s32 func_8005BE3C(void);
 s32 func_8005BFC8(s32 resync);

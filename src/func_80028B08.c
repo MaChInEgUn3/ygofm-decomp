@@ -11,6 +11,8 @@
  * 2026-09-21: 5 differences, then MATCH either way; the member spelling `PRM->extent.word`
  * is still 5). Same marking difference as func_8001BD88 and func_8001F55C. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 void func_800357E8(s32 arg0, s32 arg1, u8 *arg2);
 s32 func_80041F90(struct DisplayObject *obj, s32 x, s32 y,
                   struct ProjectionOut *out);

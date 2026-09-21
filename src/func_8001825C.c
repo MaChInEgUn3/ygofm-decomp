@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern u8 D_800907D8[];
 extern DuelCardRecord D_801A7AD8[];
 extern DuelCardRecord D_801A7B64[];
@@ -15,12 +17,10 @@ void func_80024954(DuelCardRecord *object);
 void func_80024D34(s32 slot, s32 card_id);
 extern u8 D_8015C424[];
 extern u8 D_8009B1D5;
-extern DuelSideState D_800E9FF0[2 ];
 extern DuelSideState *D_8009B1C8;
 extern DuelFieldEffectObject
     *D_8009B1F0[2 ];
 extern u16 D_8009B36A __attribute__((section(".data")));
-extern u16 D_8009B23A;
 extern s8 D_8009B208[8];
 void func_8001825C(void);
 extern s8 D_8009B1B9;
@@ -28,11 +28,9 @@ void func_8001352C(void);
 void func_8001352C(void);
 extern FadeTransitionState D_800E9EC8;
 void func_800157DC(void);
-extern volatile u32 D_8009B0F4_abs __attribute__((section(".data")));
 extern u32 D_8009B134_abs __attribute__((section(".data")));
 void func_8003FF08(u32);
 void func_8003FEE0(u32);
-extern u16 D_8009B23A;
 void func_80018080(DuelCardDisplayObject *object);
 void func_8001825C(void)
 {

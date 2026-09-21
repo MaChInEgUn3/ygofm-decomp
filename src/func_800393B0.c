@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern DuelEffectEntry D_800EB288[620 ];
 extern volatile s32 D_8009B350;
 s32 func_80037C74(DuelEffectChannel *object);

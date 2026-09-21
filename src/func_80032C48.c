@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern void func_8008E400(void *, size_t, size_t, int (*)());
 void func_80031E04(CardList *list, s32 count);
 s32 func_80032B60(

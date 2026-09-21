@@ -208,6 +208,102 @@ def fold_types():
     return 0
 
 
+VAR_HEADER = ROOT / "include" / "kg_variables.h"
+FUNC_HEADER = ROOT / "include" / "kg_functions.h"
+VAR_INCLUDE = '#include "kg_variables.h"\n'
+FUNC_INCLUDE = '#include "kg_functions.h"\n'
+
+
+def decl_units(files):
+    """Per file, its extern/proto units with spans; and every text seen per name."""
+    per_file, texts = {}, collections.defaultdict(set)
+    for p in files:
+        text, units = units_of(p)
+        rows = [(k, u, i, j) for k, u, i, j in units if k in ("extern", "proto")]
+        per_file[p] = (text, rows)
+        for k, u, _, _ in rows:
+            for nme in P.definers(u):
+                texts[nme].add(norm(u))
+    return per_file, texts
+
+
+def fold_externs(limit=None):
+    """Move the AGREED extern and prototype declarations into two headers that
+    only the ported units include; leave every disagreeing symbol inline.
+
+    A symbol disagrees when two ported units spell its declaration
+    differently, and in this tree that is never cosmetic: the census of
+    2026-09-21 put the 46 extern disagreements at 14 `.data` attributes, 13
+    types or widths, 9 `volatile`, 9 array-versus-scalar and 1 `const`, i.e.
+    all five are codegen knobs, so folding them would be a silent codegen
+    change. Those stay where they are, next to the unit that wants them.
+    `limit` folds only the first N agreed symbols (first-seen order over the
+    sorted file names) so a batch can be measured against the full build,
+    which is the only arbiter -- 139 units start seeing declarations they do
+    not carry today, and the hazard that matters is a unit that calls a
+    function it deliberately does not declare (measured: of 6 names mentioned
+    without being declared, five are prose or a `goto` label and the sixth is
+    an `asm()`-labelled view of a symbol that disagrees anyway).
+    """
+    files = ported_files()
+    per_file, texts = decl_units(files)
+    agreed = {n for n, v in texts.items() if len(v) == 1}
+    order, seen = [], set()
+    for p in files:
+        for k, u, _, _ in per_file[p][1]:
+            for nme in P.definers(u):
+                if nme in agreed and nme not in seen:
+                    seen.add(nme); order.append(nme)
+    if limit is not None:
+        agreed = set(order[:limit])
+    emitted = {"extern": [], "proto": []}
+    seen_text, edits, kept = set(), [], 0
+    for p in files:
+        text, rows = per_file[p]
+        spans = []
+        for k, u, i, j in rows:
+            names = set(P.definers(u))
+            if not names or not names <= agreed:
+                kept += 1
+                continue                      # a disagreeing symbol stays inline
+            n = norm(u)
+            if n not in seen_text:
+                seen_text.add(n); emitted[k].append(u)
+            spans.append((i, j))
+        edits.append((p, text, spans))
+    head = ("/* %s from krystalgamer/memories-decomp, as the ported units in src/\n"
+            " * declare them. Included ONLY by those units, like kg_types.h: a\n"
+            " * non-ported unit never sees this file. Built by\n"
+            " * tools_src/kg_decls.py fold-externs from the units' own inline copies,\n"
+            " * in first-seen order over the sorted file names, each text once. A\n"
+            " * symbol two ported units declare differently is NOT here -- that\n"
+            " * disagreement is a codegen knob (.data, volatile, const, width,\n"
+            " * array-versus-scalar) and it stays inline in the unit that wants it. */\n")
+    for path, kind, what in ((VAR_HEADER, "extern", "Variables"), (FUNC_HEADER, "proto", "Prototypes")):
+        guard = path.stem.upper() + "_H"
+        out = [head % what, "#ifndef %s\n#define %s\n\n#include \"kg_types.h\"\n\n" % (guard, guard)]
+        out += [u + "\n" for u in emitted[kind]]
+        out.append("\n#endif /* %s */\n" % guard)
+        path.write_text("".join(out))
+    for p, text, spans in edits:
+        for i, j in sorted(spans, reverse=True):
+            k = j
+            while k < len(text) and text[k] == "\n":
+                k += 1
+            text = text[:i] + text[k:]
+        if INCLUDE_LINE in text and VAR_INCLUDE not in text:
+            text = text.replace(INCLUDE_LINE, INCLUDE_LINE + VAR_INCLUDE + FUNC_INCLUDE, 1)
+        p.write_text(text)
+    print("agreed symbols: %d of %d%s" % (len(agreed), len(texts),
+                                          "" if limit is None else " (limit %d of %d agreed)" % (limit, len(order))))
+    print("kg_variables.h: %d declarations; kg_functions.h: %d" % (len(emitted["extern"]), len(emitted["proto"])))
+    print("inline units removed: %d; left inline (disagreeing or over the limit): %d"
+          % (sum(len(s) for _, _, s in edits), kept))
+    return 0
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "census"
+    if cmd == "fold-externs":
+        sys.exit(fold_externs(int(sys.argv[2]) if len(sys.argv) > 2 else None))
     sys.exit({"census": census, "fold-types": fold_types}[cmd]())

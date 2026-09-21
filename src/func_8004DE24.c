@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern void func_80089C20(SVECTOR *v0,CVECTOR *v1,CVECTOR *v2);
 extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
@@ -14,9 +16,6 @@ extern int func_800866A0(int a);
 int     func_800857E0(int id, GsF_LIGHT * lt);
 void    func_80085D50(long r, long g, long b);
 void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-void    func_80084320(void *pp, GsOT * ot, unsigned short pri);
-void    func_80085600(MATRIX * mp);
-void    func_800855D0(MATRIX * mp);
 extern ModelSlot D_800F2C40[3 ];
 void func_8004DE24(void);
 void *func_80059220(void);
@@ -25,7 +24,6 @@ extern s16 D_8009AF8E;
 extern s16 D_8009AF90;
 void func_8004E7B0(s32 force);
 extern GsCOORDUNIT D_800F56A0;
-extern GsOT *D_800E9D90[4];
 void func_8004DE24(void)
 {
     CVECTOR colors[5] = {

@@ -5,7 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
-extern u16 D_8009B23A;
+#include "kg_variables.h"
+#include "kg_functions.h"
 extern SaveDataState *D_8009B1D8[2];
 extern u16 D_8009B32E __attribute__((section(".data")));
 extern u8 D_801D5708[];

@@ -5,6 +5,8 @@
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
  * under the flag row in tools_src/build.py. */
 #include "kg_types.h"
+#include "kg_variables.h"
+#include "kg_functions.h"
 void func_8001D670(void);
 extern s32 D_8009B1BC;
 extern u8 D_8009B21A;
@@ -12,12 +14,10 @@ extern u16 D_8009B170;
 extern u16 D_8009B172;
 extern u16 D_8009B178;
 extern u16 D_8009B17A;
-extern u16 D_8009B23A;
 extern s16 D_800907AC[2 ][2][4];
 extern u8 D_800907D8[];
 extern u8 D_8009B1D5;
 extern u8 D_8009B19C;
-extern DuelSideState D_800E9FF0[2 ];
 extern DuelSideState *D_8009B1C8;
 extern u8 D_8009B229;
 extern s8 D_8009B360[2 ] __attribute__((section(".data")));
@@ -57,7 +57,6 @@ extern u8 D_800EAE91[];
 extern u8 D_800EAE92[];
 void func_800705D8(u8 *script);
 s32 func_80070650(void);
-extern u8 D_801A9800[];
 void func_8004036C(void *object);
 void *func_80042B40(s32 value);
 s32 func_800428EC(DisplayObject *object, s8 value);
@@ -70,7 +69,6 @@ extern u32 D_8009B300 __attribute__((section(".data")));
 void func_8003FEE0(u32);
 void func_80028220(void);
 extern u16 D_8009B162;
-extern u16 D_8009B23A;
 extern u8 D_8009B174;
 extern u8 D_8009B152;
 extern DisplayObject *D_8009B1CC;
