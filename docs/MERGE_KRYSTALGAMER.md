@@ -365,3 +365,18 @@ his profiles apply after cc1 and this tree has no hook for yet; and
 func_80028B08 differs by one `sw` moved five instructions under the same
 flags in both compilers' output, which is the first codegen disagreement
 between his gcc 2.8.1 build and cc1psx seen on this port.
+
+**The two gcc 2.8.1 builds DO disagree, on three of the 34 -- measured on
+the same unit through both.** `$SP/cc1_s.py`-style: run cpppsx+cc1psx the
+way try_func does on the ported unit, run his `mips-sony-psx-gcc -S` with
+his profile on the same file, align the instruction streams. func_8001BD88
+(1130/1130, 6 hunks), func_8001F55C (1069/1069, 6 hunks) and func_80028B08
+(368/368, 2 hunks): in each, cc1psx hoists a load through a pointer above
+a gp-relative store (or moves one `sw` five instructions) where his
+compiler keeps source order. Same C, same flags, different scheduler
+tie-break between SN's build and the decompals build of 2.8.1. They are
+parked with the pruned units as candidates and the diagnosis in the
+header; the only way to close them here is his compiler binary, which
+would be a per-function compiler knob in build.py and a decision, not a
+port. func_800534B8 was the last naming residue (`D_8009B48C` as
+`D_8009B488+4`) and went in on the build (1231 -> 1232).

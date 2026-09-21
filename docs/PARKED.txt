@@ -26,6 +26,13 @@
 # link descartava-o; build.py ganhou RODATA_OWNED (posse explicita de blocos
 # de rodata que nao sao jump table) e a funcao entrou. 105/105 portados.
 func_80030294 -- MATCH 2026-09-21, C do krystalgamer portado (rodata local via RODATA_OWNED).
+# Tres funcoes grandes onde os DOIS builds do gcc 2.8.1 discordam: o cc1psx da SN
+# hoisted um load por ponteiro acima de um store gp-relativo (ou move um sw) onde o
+# mips-sony-psx-gcc dele nao; mesma contagem, mesmo C. Diagnostico por diff alinhado
+# das duas saidas .s sobre a mesma unidade. So fecham com o compilador dele.
+func_8001BD88 -- PARK 2026-09-21: C do krystalgamer identico, mas o cc1psx escalona diferente do gcc 2.8.1 dele (um `lw 44($s3)` por ponteiro hoisted acima de `sh d_8009b20c` (gp) e o `sw 40($s3)` que o segue). Candidato em parked/func_8001BD88.c, so casa com o compilador dele.
+func_80028B08 -- PARK 2026-09-21: C do krystalgamer identico, mas o cc1psx escalona diferente do gcc 2.8.1 dele (um `sw $v1,8($a0)` cinco instrucoes acima). Candidato em parked/func_80028B08.c, so casa com o compilador dele.
+func_8001F55C -- PARK 2026-09-21: C do krystalgamer identico, mas o cc1psx escalona diferente do gcc 2.8.1 dele (`lw 48($s1)` hoisted acima de `sb d_8009b174` (gp) e o `sw 40($s1)` deslocado). Candidato em parked/func_8001F55C.c, so casa com o compilador dele.
 func_800222F4 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva).
 func_8004E7B0 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva, nop mfhi->sh gp).
 func_800171A8 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
