@@ -120,3 +120,7 @@ D_8009B20E = 0x8009B20E;
 D_8009B0F4_abs = 0x8009B0F4;
 D_8009B134_abs = 0x8009B134;
 D_800E9EC8_arr = 0x800E9EC8;
+
+# krystalgamer's TU-owned name for the six preview bytes at D_8009AF2A (his
+# debug_effect_screen.c defines it; the ported func_800222F4 declares it).
+gDebugEffect_abPreviewState = 0x8009AF2A;

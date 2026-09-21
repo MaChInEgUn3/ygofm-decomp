@@ -300,3 +300,24 @@ Left: func_80030294 (an anonymous `enum` constant the pruner does not see
 as a definer), func_800222F4 (a name his `data_c.json` owns, not his symbol
 files), func_8004E7B0 (a store into small data one slot early -- the
 `SMALL_DATA_NOP_FUNCS` shape), and the two parks his tree has no C for.
+
+**Fifth batch: two of the last three, and the one that stays is a build.py
+question (104 of 105).** func_800222F4 declares a global his TU defines with
+an initialiser and a section attribute (`u8 g[6] __attribute__((section(".sdata"))) = {0};`);
+the port now strips that to an `extern` and the name gets an alias line
+(`gDebugEffect_abPreviewState = 0x8009AF2A`). func_8004E7B0 was one `nop`
+short: aspsx puts a nop between `mfhi $v0` and a gp-relative `sh $v0`, and
+maspsx does too when it knows the symbol is small data -- it learns that
+from `.comm` (his unit, where the TU owns the symbol) and never from
+`.extern` (ours). His pipeline was checked instruction by instruction:
+same cc1 output, his maspsx prints `nop # DEBUG: Reuse of '$2'`, ours does
+not; updating our maspsx to his commit changes nothing here (the corpus
+stays byte-identical at 746b895, now the pin) because the knowledge, not
+the version, is what differs. `insert_small_data_load_delay_nops` treats
+`mfhi`/`mflo` as a load now and func_8004E7B0 is in SMALL_DATA_NOP_FUNCS.
+What stays parked is func_80030294: three local `const` arrays go into the
+object's own `.rodata`, which the link discards (`.rodata referenced in
+.text ... defined in discarded section`); build.py places an object's rodata
+only for jump tables, so this is the same hole one class over, and it is
+a build.py change, not a port question. The two parks his tree has no C
+for (func_80012AE8, func_80073758) are untouched by any of this.

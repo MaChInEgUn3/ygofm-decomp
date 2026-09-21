@@ -17,6 +17,16 @@
 # (definicao repetida, alias, K&R, definicao tentativa) e um regex que
 # retrocedia minutos; 18 casaram, 3 ficam (enum anonimo, nome de data_c.json,
 # nop de small data). Build byte-identico com os 18. Divida de assembly: ZERO.
+# Quinta leva: func_800222F4 (definicao inicializada da TU dele vira extern +
+# alias gDebugEffect_abPreviewState em symbol_aliases.txt) e func_8004E7B0 (o
+# nop entre mfhi e um sh gp-relativo do mesmo registo: o maspsx dele sabe pelo
+# .comm que o simbolo e small data, o nosso so ve .extern; o passo
+# SMALL_DATA_NOP_FUNCS agora trata mfhi/mflo como load). Build byte-identico.
+# func_80030294 volta ao park: tres arrays locais const vao para o .rodata do
+# objeto e o link descarta-o (`.rodata referenced in .text ... discarded`),
+# a mesma pergunta de build.py que as jump tables ja tem resposta e estes nao.
+func_800222F4 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva).
+func_8004E7B0 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva, nop mfhi->sh gp).
 func_800171A8 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
 func_80019608 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
 func_80020F4C -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).

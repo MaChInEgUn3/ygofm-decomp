@@ -188,6 +188,9 @@ def strip_bodies(s):
 def definers(u):
     """Names a declaration introduces: typedef names, tags, variables, functions."""
     names = set(re.findall(r"\b(?:struct|union|enum)\s+([A-Za-z_]\w*)\s*\{", u))
+    m = re.match(r"\s*(?:typedef\s+)?enum\b[^{]*\{([^}]*)\}", u)
+    if m:   # an enum's constants are definers too: `enum { ROW_COUNT = 3 };`
+        names |= {c.split("=")[0].strip() for c in m.group(1).split(",") if c.strip()}
     s = strip_bodies(u)
     s = re.sub(r"__attribute__\s*\(\(.*?\)\)", " ", s)
     s = re.sub(r"\basm\s*\(\s*\"[^\"]*\"\s*\)", " ", s)
@@ -231,9 +234,13 @@ def prune(text, func):
                 continue
             if is_def(u) and not u.startswith("static") and k != t:
                 units[k] = u[:u.index("{")].rstrip() + ";"
-            if (not is_def(units[k]) and not DECL_HEAD.match(units[k]) and "=" not in units[k]
-                    and not re.match(r"\s*(extern|static|typedef)\b", units[k])
-                    and "(" not in strip_bodies(units[k])):
+            if (not is_def(units[k]) and not DECL_HEAD.match(units[k])
+                    and not re.match(r"\s*(extern|static|typedef|const)\b", units[k])
+                    and "(" not in strip_bodies(units[k].split("=")[0])):
+                # a definition with a zero initialiser and a section attribute
+                # (`u8 g[6] __attribute__((section(".sdata"))) = {0};`) is the
+                # same thing: his TU owns it, here it is a linker symbol
+                units[k] = re.sub(r"\s*__attribute__\s*\(\(.*?\)\)", "", units[k].split("=")[0]).rstrip() + ";"
                 # a tentative definition, `u8 D_8009B0A8;`: his TU OWNS the
                 # object and maspsx --use-comm-section places it; here every
                 # global is a linker symbol, so the unit only declares it

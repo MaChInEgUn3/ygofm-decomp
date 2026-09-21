@@ -443,6 +443,8 @@ HOIST_EPILOGUE_FUNCS = {
 }
 
 SMALL_DATA_NOP_FUNCS = {
+    # mfhi followed by a gp-relative sh of the same register (see _HILO).
+    "func_8004E7B0",
     "func_80019608",
     # `lbu` of a struct field followed by a gp-relative `sb` of it: maspsx
     # expects the store to expand through $at and fill the slot.
@@ -551,7 +553,6 @@ PER_FUNC_AS_FLAGS["func_8005B8A0"] = "-G4"
 # func_8004C114: gp=0; the scalar D_8009B458 bare so each lui/lw pair stays indivisible.
 # func_800222F4 (parked): volatile u16 D_8009B394/B398/B3A4 sized to eight bytes
 # so they leave small data while the four-byte D_8009B180/B184 stay %gp_rel.
-PER_FUNC_AS_FLAGS["func_800222F4"] = "-G4"
 # func_80056504 (parked): gp=0, so the D_8009B0F4 stores take the bare form.
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
@@ -905,6 +906,14 @@ PER_FUNC_FLAGS["func_8004C114"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno
 PER_FUNC_AS_FLAGS["func_8004C114"] = "-G0"
 PER_FUNC_FLAGS["func_80057544"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_800222F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_8004E7B0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a
@@ -1183,6 +1192,12 @@ def split_address_across_call(lines):
 
 
 _ANY_LOAD = re.compile(r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,")
+# mfhi/mflo produce a register the same way a load does, and aspsx puts the
+# same nop between one and a gp-relative store of that register (maspsx does
+# too, once it knows the symbol is small data -- from .comm, never from
+# .extern). func_8004E7B0 is the first user, ported from krystalgamer's tree
+# where the symbol is a .comm in the unit.
+_HILO = re.compile(r"^\s*(mfhi|mflo)\s+(\$\w+)\s*$")
 _LOAD_BARE_SYM = re.compile(
     r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
 _EXTERN = re.compile(r"^\s*\.extern\s+([A-Za-z_]\w*)\s*,\s*(\d+)")
@@ -1249,7 +1264,7 @@ def insert_small_data_load_delay_nops(lines, sdata_limit=8):
             # small symbol does not matter to it, and the first version of this
             # pass only handled the load side. func_80025028 is the case where
             # the store is the small one.
-            m2 = _ANY_LOAD.match(body_here)
+            m2 = _ANY_LOAD.match(body_here) or _HILO.match(body_here)
             if not m2:
                 continue
             reg = m2.group(2)

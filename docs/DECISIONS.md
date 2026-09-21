@@ -108,7 +108,7 @@ Note it rebuilds **everything** on every run — there is no incremental/mtime c
 Toolchain components (all gitignored, must be re-fetched by anyone cloning):
 - **MIPS binutils**: prebuilt Windows `mipsel-none-elf` toolchain (GNU Binutils 2.46.1) from `https://static.grumpycoder.net/pixel/mips/g++-mipsel-none-elf-16.1.0.zip`. URL taken from pcsx-redux's own `mips.ps1` installer + its `index.json`, so it stays correct as versions move. Extracted to `tools/mips/`.
   - GNU binutils is **not optional**: splat emits GNU-as syntax (`glabel`, `%gp_rel`, `.section`), which PsyQ's own `ASPSX.EXE` cannot assemble.
-- **maspsx** (`https://github.com/mkst/maspsx`, cloned to `tools/maspsx/`): bridges cc1psx's asm output to GNU as. Not on PyPI — must be cloned, then run as `python tools/maspsx/maspsx.py`. Invoked with `--aspsx-version=2.86` (the ASPSX bundled with PsyQ 4.6) and `--macro-inc`.
+- **maspsx** (`https://github.com/mkst/maspsx`, cloned to `tools/maspsx/`, **checked out at `746b895` since 2026-09-21** -- the commit krystalgamer's tree pins; the whole corpus builds byte-identical at it, measured before moving): bridges cc1psx's asm output to GNU as. Not on PyPI — must be cloned, then run as `python tools/maspsx/maspsx.py`. Invoked with `--aspsx-version=2.79` and `--macro-inc --expand-div` (the 2.86 this line used to say was the mislabel WORKFLOW.md describes).
   - Chose maspsx over the more "authentic" `ASPSX.EXE` + `psyq-obj-parser` path (what decomp.me runs internally) because maspsx is pure Python, needs no extra binary, and is what every modern splat-based PS1 decomp uses (sotn-decomp, Silent Hill, MediEvil, Soul Reaver, Croc…).
 
 Two non-obvious things that had to be fixed to reach byte-exactness:
@@ -2049,7 +2049,7 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-1202 of 1794 functions decompiled and byte-matching.
+1204 of 1794 functions decompiled and byte-matching.
 
 The 1794 total is misleading as a denominator, though, and so is the file count above it: `src/` holds library and above-scope functions that were matched along the way as well as the in-scope ones. The scoped figures -- in-scope functions and, more usefully, in-scope *instructions* -- live in README.md's Status tables and are derived rather than typed: `.venv/bin/python tools_src/status.py` recomputes them from the tree, importing candidates.py's own scope filters so it cannot drift from what the candidate list believes. Read the instruction column, not the function column: the two disagree sharply because the short bands empty first, and the instruction column is the honest one. For the whole binary, ignoring scope entirely, the listings under `asm/nonmatchings/` total 1,796 functions and 128,950 instructions.
 
