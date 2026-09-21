@@ -1,8 +1,15 @@
-/* CANDIDATO PORTADO de krystalgamer/memories-decomp (src/game/func_80028B08.c, perfil gcc_2_8_1_g8_split):
- * C identico ao que casa la. Aqui NAO casa: a saida do cc1psx (SN, 2.8.1) e a do
- * mips-sony-psx-gcc 2.8.1 dele diferem no escalonamento -- um `sw $v1,8($a0)` cinco instrucoes acima; 2 hunks, 368/368. Medido 2026-09-21
- * com os dois compiladores sobre ESTA unidade ($SP/cc1_s.py + gcc -S dele). Nao e
- * questao de fonte: e o par de builds do gcc 2.8.1. Flags: -quiet -O2 -G8 -fno-builtin -msplit-addresses; as -G8. */
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/func_80028B08.c, profile gcc_2_8_1_g8_split.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py.
+ * NOT his C verbatim: `*(u32 *)&PRM->extent = 0x00100010;` is spelled
+ * `*(u32 *)((u8 *)PRM + 8) = 0x00100010;` here. With his spelling cc1psx emits that store five
+ * instructions early (above the `sh 4($a0)`), the one residue of this unit; the byte-address
+ * cast, or writing the store after the `xy.h.y` line, both give retail's order (measured
+ * 2026-09-21: 5 differences, then MATCH either way; the member spelling `PRM->extent.word`
+ * is still 5). Same marking difference as func_8001BD88 and func_8001F55C. */
 typedef signed char s8;
 typedef unsigned char u8;
 typedef signed short s16;
@@ -625,7 +632,7 @@ void func_80028B08(DisplayObject *obj, s32 arg1) {
     }
 
     PRM->xy.h.x = win->field_30.h.field_30 + 0x6E;
-    *(u32 *)&PRM->extent = 0x00100010;
+    *(u32 *)((u8 *)PRM + 8) = 0x00100010;
     PRM->xy.h.y = win->field_30.h.field_32 + 0xD;
     lo = rec->field_3B << 4;
     PRM->uv.b.lo = lo;

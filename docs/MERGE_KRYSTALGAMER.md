@@ -381,6 +381,32 @@ would be a per-function compiler knob in build.py and a decision, not a
 port. func_800534B8 was the last naming residue (`D_8009B48C` as
 `D_8009B488+4`) and went in on the build (1231 -> 1232).
 
+**RETRACTED the same day: the three are a SPELLING, not a compiler (1236 ->
+1239).** "The only way to close them here is his compiler binary" was
+written one paragraph up and it is wrong. gcc 2.8.1's `true_dependence`
+(sched.c) lets a load or store move across another memory reference only
+when exactly one of the two carries the struct marking (`MEM_IN_STRUCT_P`)
+at a varying address and the other is unmarked at a fixed address -- a
+member access through a pointer against a scalar global. The disagreement
+is in how the two front ends mark `*(T *)&p->member`: cc1psx keeps the
+marking (the load is free to hoist above `sh D_8009B20C`, the store is free
+to sink below `sh D_8009B1D0` into a delay slot), his mips-sony-psx-gcc
+build does not, and `*(T *)((u8 *)p + K)` is unmarked in both. So the
+lever is WORKFLOW's func_80013B68 / func_80049CF8 byte-address cast, one
+expression per site: func_8001BD88 two copy statements (20 differences ->
+10 and 16 with one site, 6 with both, all six the renderer's `sym+2`
+spelling), func_8001F55C the case-8 copy's load and the 0xBF arm's store
+(-1/352 -> 347 -> exact length and byte-identical; casting that arm's load
+too is +1, because retail DOES hoist it), func_80028B08 the extent store
+(5 -> MATCH; moving the statement after the `xy.h.y` line also matches,
+the member spelling `PRM->extent.word` stays at 5). Each installed file
+says in its header which statements differ from his and why, since the
+provenance line otherwise claims his C verbatim. The measured shapes that
+did NOT move: a named read of the copy's source before the flag store
+(347 either side of the `&=`), the member spelling of the store. Not
+measured: `volatile` on either side, his compiler as a knob. Every ported
+function is in; `parked/` holds the two SDK stubs only.
+
 **The four GTE functions: his assembly filter, ported as a per-function pass
 (1232 -> 1236, and the 34 are done: 31 in, 3 parked on the compiler).**
 Psy-Q's `inline_c.h` is written for DMPSX and its GTE macros emit marker

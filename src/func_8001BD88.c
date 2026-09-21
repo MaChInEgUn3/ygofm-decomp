@@ -1,8 +1,17 @@
-/* CANDIDATO PORTADO de krystalgamer/memories-decomp (src/game/duel_scene_hand_actions.c, perfil gcc_2_8_1_g8_split):
- * C identico ao que casa la. Aqui NAO casa: a saida do cc1psx (SN, 2.8.1) e a do
- * mips-sony-psx-gcc 2.8.1 dele diferem no escalonamento -- um `lw 44($s3)` por ponteiro hoisted acima de `sh d_8009b20c` (gp) e o `sw 40($s3)` que o segue; 6 hunks, 1130/1130. Medido 2026-09-21
- * com os dois compiladores sobre ESTA unidade ($SP/cc1_s.py + gcc -S dele). Nao e
- * questao de fonte: e o par de builds do gcc 2.8.1. Flags: -quiet -O2 -G8 -fno-builtin -msplit-addresses; as -G8. */
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/duel_scene_hand_actions.c (DuelScene_UpdateHandActions), profile gcc_2_8_1_g8_split.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py.
+ * NOT his C verbatim: at two sites his `*(s32 *)&obj->target = *(s32 *)&obj->saved;`
+ * is spelled `*(s32 *)((u8 *)obj + 40) = *(s32 *)((u8 *)obj + 44);` here. In cc1psx a
+ * `*(T *)&p->member` access keeps the struct marking (MEM_IN_STRUCT_P), so the load is free
+ * to move above the scalar-global store beside it (sched.c true_dependence exempts
+ * struct+varying against non-struct+fixed); his mips-sony-psx-gcc build does not mark it and
+ * keeps source order. The byte-address cast is unmarked in both. Measured 2026-09-21:
+ * 20 differences with his spelling, byte-identical with this one; load alone at each site
+ * is 10 and 16, both sites 6 (all six the renderer's `sym+2` spelling), volatile untried. */
 typedef signed char s8;
 typedef unsigned char u8;
 typedef signed short s16;
@@ -816,7 +825,7 @@ void func_8001BD88(void)
                 }
                 obj->update = func_8001EC70;
                 (*(u16 *)D_8009B20C)  |= 0x5000;
-                *(s32 *)&obj->target = *(s32 *)&obj->saved;
+                *(s32 *)((u8 *)obj + 40) = *(s32 *)((u8 *)obj + 44);
                 obj->saved.xy.x = 0x10;
                 obj->field_6C = 1;
                 return;
@@ -1001,7 +1010,7 @@ void func_8001BD88(void)
                     func_8004036C(D_8009B18C);
                     D_8009B18C = 0;
                     D_8009B188 = 0;
-                    *(s32 *)&obj->target = *(s32 *)&obj->saved;
+                    *(s32 *)((u8 *)obj + 40) = *(s32 *)((u8 *)obj + 44);
                     func_80043178((void *)obj);
                     obj->step = 0;
                     D_8009B174 |= 0x50;

@@ -1012,6 +1012,12 @@ PER_FUNC_FLAGS["func_80033DB0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 PER_FUNC_FLAGS["func_80029934"] = ['-quiet', '-O2', '-G8', '-fno-cse-skip-blocks', '-fno-builtin', '-msplit-addresses']
 PER_FUNC_FLAGS["func_80034830"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_8001BD88"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001F55C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80028B08"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a

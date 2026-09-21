@@ -1,8 +1,18 @@
-/* CANDIDATO PORTADO de krystalgamer/memories-decomp (src/game/duel_scene_battle.c, perfil gcc_2_8_1_g8_split_comm):
- * C identico ao que casa la. Aqui NAO casa: a saida do cc1psx (SN, 2.8.1) e a do
- * mips-sony-psx-gcc 2.8.1 dele diferem no escalonamento -- `lw 48($s1)` hoisted acima de `sb d_8009b174` (gp) e o `sw 40($s1)` deslocado; 6 hunks, 1069/1069 (+ o passo SMALL_DATA_NOP_FUNCS, ja na tabela). Medido 2026-09-21
- * com os dois compiladores sobre ESTA unidade ($SP/cc1_s.py + gcc -S dele). Nao e
- * questao de fonte: e o par de builds do gcc 2.8.1. Flags: -quiet -O2 -G8 -fno-builtin -msplit-addresses; as -G8. */
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/duel_scene_battle.c (DuelScene_UpdateBattle), profile gcc_2_8_1_g8_split_comm.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py.
+ * NOT his C verbatim: two copy statements are spelled through byte-address casts,
+ * `*(u32 *)((u8 *)side + 40) = *(u32 *)((u8 *)side + 48);` (case 8) and
+ * `*(u32 *)((u8 *)side + 48) = side->position.word;` (the 0xBF arm), where his tree has
+ * `*(u32 *)&side->position` / `*(u32 *)&side->field_30`. In cc1psx that spelling carries the
+ * struct marking and the load moves above the `sb D_8009B174` beside it, and the store moves
+ * below `sh D_8009B1D0` into the `j`'s delay slot (-1 instruction); his build marks neither.
+ * Measured 2026-09-21: -1/352 with his spelling, 347 with the first site cast, exact length
+ * and byte-identical with both; casting the second site's load as well is +1 (the load must
+ * stay free to hoist, as it does in retail). */
 typedef signed char s8;
 typedef unsigned char u8;
 typedef signed short s16;
@@ -1104,7 +1114,7 @@ void func_8001F55C(void)
             side = D_800E9EF0[ix + 2];
             if (!(flags & 0x80)) {
                 D_8009B174 = flags | 0xC0;
-                *(u32 *)&side->position = *(u32 *)&side->field_30;
+                *(u32 *)((u8 *)side + 40) = *(u32 *)((u8 *)side + 48);
                 wins = D_8009B1B0;
                 if (wins[ix] != 0) {
                     req =
@@ -1140,7 +1150,7 @@ void func_8001F55C(void)
                 if (!(((DuelEffectRequest *)( D_8009B17C )) ->flags & 0x80)) {
                     f &= 0xBF;
                     D_8009B174 = f;
-                    *(u32 *)&side->field_30 = side->position.word;
+                    *(u32 *)((u8 *)side + 48) = side->position.word;
                     D_8009B1D0 = 0xA;
                     return;
                 }

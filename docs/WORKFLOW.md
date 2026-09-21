@@ -122,6 +122,15 @@ in krystalgamer's tree, and on 2026-09-21 67 of 105 ported byte-identical on
 the first try: `tools_src/port_sweep.py func_XXXXXXXX` (his tree checked out
 beside this one as `../memories-decomp`, or `YGOFM_KG=<path>`). Four seconds
 per function; `docs/MERGE_KRYSTALGAMER.md` has the recipe and the numbers.
+Every one of them is in now. The last three (func_8001BD88, func_8001F55C,
+func_80028B08) were parked as "the two gcc 2.8.1 builds disagree" and were
+a spelling: cc1psx marks `*(T *)&p->member` as a struct access and his
+build does not, so a copy written that way moves across a scalar-global
+store here and not there. `*(T *)((u8 *)p + K)` is unmarked in both --
+the func_80013B68 / func_80049CF8 lever below, one expression per site.
+When a ported unit differs from his output only around a pointer access
+next to a gp-relative store, spell that access as a byte-address cast
+before believing it is the compiler.
 
 **Start with the m2c draft.** `tools_src/m2c_draft.py func_XXXXXXXX` prints
 structurally-correct C for the listing in about a second: loop and switch
