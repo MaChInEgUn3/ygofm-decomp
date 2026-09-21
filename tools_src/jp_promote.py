@@ -89,13 +89,20 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         if syms.get(n, jaddr) != jaddr: return False
         syms[n] = jaddr; return True
     pending = None    # register written by the previous word, dropped from lui before this one
+    unpaired = {}     # rt -> word index of a lui whose halves differ and has had no lo use yet
     for i, (u, j) in enumerate(zip(uw, jw)):
         op, rs, rt = u >> 26, (u >> 21) & 31, (u >> 16) & 31
         # the register a word writes: a stale lui entry for it would pair a
         # later displacement off a LOADED pointer as a symbol half (first
         # seen as a bogus `D_FFFF0058` line splat could place nowhere). The
         # drop is deferred one word because `lw $v0, lo($v0)` reads rs first.
-        if pending is not None: lui.pop(pending, None)
+        if pending is not None:
+            lui.pop(pending, None)
+            # a lui whose halves differ and that no load/store/addiu ever
+            # consumed was a CONSTANT, and the code differs (text_control_commands:
+            # US `lui $a0,0xffff` for a mask where the JP has `lui $a0,0x801f`;
+            # the old scan called it clean and the link showed one wrong byte)
+            if pending in unpaired: return False, {}, f"word {unpaired[pending]}: lui immediate differs with no lo use"
         if op == 0: dst = (u >> 11) & 31
         elif op == 0x03: dst = 31
         elif op in (0x01, 0x02, 0x04, 0x05, 0x06, 0x07) or op in (0x28, 0x29, 0x2A, 0x2B, 0x2E) or op >= 0x38: dst = None
@@ -103,6 +110,8 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         pending = dst if (dst and op != 0x0F) else None
         if op == 0x0F and (j >> 26) == 0x0F and ((u ^ j) & 0xFFFF0000) == 0:
             lui[rt] = (u & 0xFFFF, j & 0xFFFF)
+            if (u & 0xFFFF) != (j & 0xFFFF): unpaired[rt] = i
+            else: unpaired.pop(rt, None)
         if u == j:
             # an equal word still names a symbol: through gp it is the SAME
             # offset from a DIFFERENT gp (US 0x8009AF08, JP 0x8009AE48, so the
@@ -116,6 +125,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
                 ua = ((lui[rs][0] << 16) + sx16(u & 0xFFFF)) & 0xFFFFFFFF
                 ja = ((lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
                 if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
+                unpaired.pop(rs, None)
             continue
         if op in (0x02, 0x03) and (j >> 26) == op:
             ua, ja = 0x80000000 | ((u & 0x3FFFFFF) << 2), 0x80000000 | ((j & 0x3FFFFFF) << 2)
@@ -134,8 +144,10 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
             ua = ((lui[rs][0] << 16) + sx16(u & 0xFFFF)) & 0xFFFFFFFF
             ja = ((lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
             if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
+            unpaired.pop(rs, None)
             continue
         return False, {}, f"word {i}: immediate differs {u:08x} {j:08x}"
+    if unpaired: return False, {}, f"word {min(unpaired.values())}: lui immediate differs with no lo use"
     # named symbols at an equal address: the C names them, JP splat does not
     for n, a in eq.items():
         if not re.match(r"(D_|func_)[0-9A-Fa-f]{8}$", n):
