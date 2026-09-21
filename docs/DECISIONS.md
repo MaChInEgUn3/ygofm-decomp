@@ -2049,7 +2049,7 @@ This was broken once: the config changed several times during setup without `asm
 
 ### Progress
 
-1110 of 1794 functions decompiled and byte-matching.
+1171 of 1794 functions decompiled and byte-matching.
 
 The 1794 total is misleading as a denominator, though, and so is the file count above it: `src/` holds library and above-scope functions that were matched along the way as well as the in-scope ones. The scoped figures -- in-scope functions and, more usefully, in-scope *instructions* -- live in README.md's Status tables and are derived rather than typed: `.venv/bin/python tools_src/status.py` recomputes them from the tree, importing candidates.py's own scope filters so it cannot drift from what the candidate list believes. Read the instruction column, not the function column: the two disagree sharply because the short bands empty first, and the instruction column is the honest one. For the whole binary, ignoring scope entirely, the listings under `asm/nonmatchings/` total 1,796 functions and 128,950 instructions.
 
@@ -4289,3 +4289,13 @@ find them.
 - **Guard plus `do`/`while` for a counted draw loop** (`if (n != 0) { i = 0; do
   { ... } while (i < n); }`) removed a stray `nop` where the `for` spelling
   rotated the test.
+
+## krystalgamer's C ports here byte-for-byte (2026-09-21)
+
+Measured, not assumed: 67 of the 107 parked functions matched on the first
+try from his matched sources, preprocessed in his tree, pruned and renamed
+(`tools_src/port_kg.py`). Same gcc 2.8.1 on both sides, so the earlier
+"C does not port between the trees" was about headers and names, not
+codegen. Numbers and recipe in `docs/MERGE_KRYSTALGAMER.md`; the count line
+above is from `sync_count.py`. Before hand-matching any park, run the port
+first: it costs four seconds per function.

@@ -97,6 +97,31 @@ def templates(text):
     text = re.sub(r"//[^\n]*", "", text)
     for m in re.finditer(r"(?:__asm__|(?<![_A-Za-z0-9])asm)\s*"
                          r"(?:volatile\s*|__volatile__\s*)?\(", text):
+        # A SYMBOL ALIAS is not assembly: `extern u8 sym_flat[] asm("sym");`
+        # puts one string in the parens and a declarator in front of it. The
+        # ported units from krystalgamer's tree carry these (2026-09-21) and
+        # three real-C files were counted as debt for them. An alias has an
+        # identifier or `]` immediately before the keyword; a statement has
+        # `;`, `{`, `}` or nothing. Controls: the four remaining transcriptions
+        # still count, the seven GTE files still count as gte.
+        before = text[:m.start()].rstrip()
+        close = text.find(")", m.end())
+        inner = text[m.end():close].strip() if close != -1 else ""
+        declarator = bool(before) and (before[-1] == "]" or re.match(r"[A-Za-z0-9_]", before[-1]))
+        if before and before[-1] == ")":
+            # a prototype's parameter list: `T f(...) asm("sym")`, as against
+            # `if (c) asm("nop")`, which is a statement after a control paren
+            depth, i = 0, len(before) - 1
+            while i >= 0:
+                depth += {")": 1, "(": -1}.get(before[i], 0)
+                if depth == 0:
+                    break
+                i -= 1
+            head = before[:i].rstrip()
+            w = re.search(r"([A-Za-z_]\w*)$", head)
+            declarator = bool(w) and w.group(1) not in ("if", "while", "for", "switch", "return", "sizeof")
+        if declarator and re.fullmatch(r'"[A-Za-z_]\w*"', inner):
+            continue
         # `register s32 v0 asm("v0");` is a REGISTER PIN, not an asm
         # statement: the string names a register, and reading it as an
         # instruction template makes every pinned file read as debt. That

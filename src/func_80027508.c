@@ -1,147 +1,101 @@
-/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
- * Ordinary MIPS written into an inline asm block to force a match. It is
- * byte-exact and therefore invisible to build.py, which is exactly the
- * problem: the oracle cannot tell transcribed assembly from real C, so
- * nothing but this comment stops it being counted as done.
- * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
- */
-/* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
- * His C, his comments; the identifiers are rewritten to this repo's address
- * form and nothing else was touched. Verified the only way that counts here:
- * tools_src/build.py rebuilds the retail image byte-for-byte with this in it.
- *
- * Self-contained by design -- it keeps his declarations rather than ours,
- * because a declaration is a codegen input and his are what this C matched
- * under. See docs/MERGE_UNCHIGA.md and tools_src/install_ported.py.
- */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/ai_turn_action.c, profile gcc_2_8_1_g8_split.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py. */
 typedef signed char s8;
-typedef short s16;
-typedef int s32;
+typedef unsigned char u8;
+typedef signed short s16;
+typedef unsigned short u16;
+typedef signed int s32;
+extern int  func_8008E590(void);
+typedef struct {
+    s8 result;       
+    s8 field1;       
+     
 
-struct EquipSlot {
-    char pad0[0xC];
-    s16 unkC;
-    char padE[0x18 - 0xE];
-    u8 unk18;
-    char pad19[0x1C - 0x19];
-};
-
-extern u8 D_8009B1D5;
-
-struct Outcome {
-    u8 unk0;
-    u8 unk1;
-    char pad2[0x6 - 2];
-    s8 unk6;
-    u8 unk7;
-    u8 unk8;
-};
-
-extern struct EquipSlot D_801A7AD8[];
+    s8 field_02;     
+    char pad_03[3];  
+    s8 value;        
+    s8 zero;         
+    s8 random;       
+    s8 field_09;     
+    s8 field_0A;     
+    s8 field_0B;     
+} AiSelection;
+typedef struct {
+    void *object;
+    void *data;
+    u8 pad_08[4];
+    s16 card_id;
+    s16 attack;
+    s16 defense;
+    s16 stat_modifier;
+    s16 terrain_modifier;
+    u16 flags;
+    u8 table_index;
+    u8 pad_19[3];
+} DuelCardRecord;
+extern DuelCardRecord D_801A7AD8[];
 extern s32 D_801D4244[];
-extern struct Outcome D_800EAE88[1];
-
-extern s32 func_800358FC(s32 n);
-extern s32 func_80026C0C(s32 n);
-extern s32 func_80026DC8(void);
-extern s32 func_80027060(void);
-extern s32 func_8002712C(void);
-extern s32 func_80027228(void);
-extern s32 func_8008E590(void);
-
-/* Random equip/status-effect roll: 4-way independent-roll gate (each stage
-   is "50/50 (or 25% for the 3rd) OR the matching func_800270xx forces it"),
-   then picks a D_801A7AD8 slot (index driven by gp+0x2CD and
-   func_800358FC(5)) and rolls one of two D_800EAE88 outcome records
-   depending on a D_801D4244[slot->unkC-1] bitfield threshold, sharing one
-   tail that force-sets unk8=1.
-
-   m2c's draft fabricated 2 fake calls to a nonexistent func_80027768 --
-   both are `goto` to this function's own shared tail (plain fallthrough
-   labels, no jal/j at either site); also invented bogus arguments for the
-   first 3 func_8008E590() calls, which are the real libc func_8008E590() (0x8008E590)
-   taking no arguments -- the "arguments" m2c saw were just leftover
-   register contents from unrelated earlier computation.
-
-   Real logic reaches 83/161, 165w vs target's 161w (see
-   match/sketches/func_80027508_best.c). Ran a real msearch search (1 ALT
-   knob covering the two field-func_80073900 orders, 8 variants across 4 flags) --
-   no effect either way. Residual is concentrated in the two %5-modulo
-   (magic-multiply-by-0x66666667) sequences: target computes the "base"
-   field's sign-extend into $a0 and the "roll" field's into $a1 (or vice
-   versa depending on branch), while this candidate picks the opposite
-   register for one of the two -- tried both statement orders via the ALT,
-   neither reproduces target's specific pick. Looks like the same class of
-   register-role tie documented elsewhere in this project (declare-two-
-   aliases-and-ALT-which-reads-which), but for two DIFFERENT source values
-   sharing one magic-constant multiply rather than one value func_800738F0 two
-   ways -- not yet tried. Not attempted further given time budget. */
-
+extern u8 D_8009B1D5;
+s32 func_800358FC(s32 divisor);
+s32 func_80026C0C(s32 start);
+s32 func_80026DC8(void);
+s32 func_80027060(void);
+extern AiSelection D_800EAE88;
+int func_8002712C(void);
+s32 func_80027228(void);
 s32 func_80027508(void) {
-    struct EquipSlot *slot;
-    s32 idx;
-    s32 tier;
-    s32 roll;
-    struct Outcome *out;
-    s32 sentinel;
-    s32 word2;
-    register s32 rawBase asm("a0");
-    register s32 signedBase asm("a1");
+    DuelCardRecord *card;
+    s32 slot;
 
-    if (!((func_8008E590() & 1) || func_80026DC8())) {
+    if ((func_8008E590() & 1) == 0 && func_80026DC8() == 0) {
         return 0;
     }
-    if (!((func_8008E590() & 1) || func_80027060())) {
+    if ((func_8008E590() & 1) == 0 && func_80027060() == 0) {
         return 0;
     }
-    if (!((func_8008E590() & 3) || func_8002712C())) {
+    if ((func_8008E590() & 3) == 0 && func_8002712C() == 0) {
         return 0;
     }
-    if (!func_80027228()) {
+    if (func_80027228() == 0) {
         return 0;
     }
+    card = &D_801A7AD8[
+        D_8009B1D5 * 15  +
+        func_800358FC(5 )
+    ];
+    if (((D_801D4244[*(s16 *)&card->card_id - 1] >> 26 ) & 0x1F ) < 20 ) {
+        s8 v;
 
-    idx = D_8009B1D5 * 0xF + func_800358FC(5);
-    slot = &D_801A7AD8[idx];
-    tier = (D_801D4244[slot->unkC - 1] >> 0x1A) & 0x1F;
-
-    if (tier < 0x14) {
-        roll = func_80026C0C(5);
-        if (roll < 0) {
-            roll = func_800358FC(5);
+        slot = func_80026C0C(5 );
+        if (slot < 0) {
+            slot = func_800358FC(5 );
         }
-        rawBase = slot->unk18;
-        signedBase = (s8)rawBase;
-        out = D_800EAE88;
-        out->unk1 = 0;
-        out->unk6 = (roll % 5) + 1;
-        out->unk0 = (signedBase % 5) + 0xB;
-        out->unk7 = func_8008E590() & 1;
-        goto force_one;
-    }
+        v = card->table_index;
+        D_800EAE88.field1 = 0;
+        D_800EAE88.value = slot % 5  + 1;
+        D_800EAE88.result = v % 5  + 0xB;
+        D_800EAE88.zero = func_8008E590() & 1;
+        D_800EAE88.random = 1;
+    } else {
+        s8 v;
 
-    roll = func_80026C0C(0xA);
-    if (roll < 0) {
-        roll = func_800358FC(5);
-    }
-    rawBase = slot->unk18;
-    signedBase = (s8)rawBase;
-    out = D_800EAE88;
-    out->unk1 = 0;
-    out->unk7 = 0;
-    out->unk6 = (roll % 5) + 6;
-    out->unk0 = (signedBase % 5) + 0xB;
-    out->unk8 = func_8008E590() & 1;
-
-    word2 = D_801D4244[slot->unkC - 1];
-    __asm__ __volatile__("addiu %0, $0, 23" : "=r"(sentinel) : "r"(word2));
-    tier = (word2 >> 0x1A) & 0x1F;
-    if (tier == sentinel) {
-force_one:
-        out->unk8 = 1;
+        slot = func_80026C0C(10 );
+        if (slot < 0) {
+            slot = func_800358FC(5 );
+        }
+        v = card->table_index;
+        D_800EAE88.field1 = 0;
+        D_800EAE88.zero = 0;
+        D_800EAE88.value = slot % 5  + 6;
+        D_800EAE88.result = v % 5  + 0xB;
+        D_800EAE88.random = func_8008E590() & 1;
+        if (((D_801D4244[*(s16 *)&card->card_id - 1] >> 26 ) & 0x1F ) == 23 ) {
+            D_800EAE88.random = 1;
+        }
     }
     return 0;
 }

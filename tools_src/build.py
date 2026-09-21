@@ -215,7 +215,6 @@ PER_FUNC_FLAGS = {
     "func_80037A58": _O2_G8_MACRO,
     "func_80012B50": _O2_G8_NOSCHED1,
     # Parked; kept so PARKED.txt's difference count is reproducible.
-    "func_80060E70": _O2_G8_NOSTRENGTH,
     "func_80031000": _O2_G8_MACRO,
     "func_80044DC0": _O2_G8_MACRO,
     "func_80041D60": _O2_G8_MACRO,
@@ -279,7 +278,6 @@ PER_FUNC_FLAGS = {
     "func_800722CC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at 288/288 and 249; the flag removes a biased giv the target
     # does not have. See docs/PARKED.txt.
-    "func_800528AC": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # func_8001825C: PARKED at 235/235 and 55. Both 28-byte-record loops
     # grow a second cursor at base+4 without it, and the function then
     # saves a fifth callee-saved register -- 234 differences against 194.
@@ -289,10 +287,8 @@ PER_FUNC_FLAGS = {
     # PARKED at +9. Without it gcc gives the record cursor a second, biased
     # register ($s0 = $s3 + 4, reading 2($s0) where retail reads 6($s3)),
     # which is +13 and four differences worse.
-    "func_80071700": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at 131/131. Without it gcc gives the record cursor a biased giv
     # for the +0x5150 store and the function is +5.
-    "func_80013154": ["-quiet", "-O2", "-G8", "-fno-strength-reduce"],
     # PARKED at 60 differences.  Without this the last nested loop is reversed
     # (countdown + bgez) where retail counts up against slti 32, and the outer
     # `sll i,6` becomes a giv -- one instruction short and much further out.
@@ -302,7 +298,6 @@ PER_FUNC_FLAGS = {
     # r+0x14 one into a giv that every neighbouring store is then rebased on
     # (sh -8/-6/-10 off an r+20 anchor). Retail addresses everything as plain
     # displacements off the cursor; only the flag removes the anchor.
-    "func_80058938": _O2_G8_NOSTRENGTH,
     # func_8002C6C8: same anchor phenomenon without a block move -- the
     # record walk's field references get rebased on a base+0x14 giv that
     # retail does not have, and the anchor also eats the callee-saved
@@ -314,7 +309,6 @@ PER_FUNC_FLAGS = {
     "func_80071B64": _O2_G8_NOSTRENGTH,
     "func_8004C8C8": _O2_G8_NOSTRENGTH,
     "func_8007308C": _O2_G8_NOSTRENGTH,
-    "func_80039794": _O2_G8_NOSTRENGTH,
     # Parked: this row is the permuter's base, not a match. At default flags
     # the store order is right and the two sll/ori pairs float (8); under
     # -fno-schedule-insns2 the pairs are right and three stores float (9),
@@ -345,7 +339,6 @@ PORTED_FLAGS = {
     "func_8001898C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001944C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8001B0CC": ['-quiet', '-O2', '-G0', '-msplit-addresses'],
-    "func_8001D5B4": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_800208D4": ['-quiet', '-O2', '-G8', '-mno-split-addresses'],
     "func_80021810": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80022D94": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -354,12 +347,10 @@ PORTED_FLAGS = {
     "func_8002525C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80025B28": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80026C0C": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_80027508": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80027DF8": ['-quiet', '-O2', '-G0', '-msplit-addresses'],
     "func_800291E0": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8002A3CC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8002C6C8": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_8002C7E8": ['-quiet', '-O2', '-G8', '-mno-split-addresses'],
     "func_8002CCE4": ['-quiet', '-O2', '-G8', '-mno-split-addresses'],
     "func_8002DDFC": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8002E128": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -415,9 +406,7 @@ PORTED_FLAGS = {
     "func_800497E0": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_80049AF4": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004A0FC": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
-    "func_8004A6F8": ['-quiet', '-O2', '-G0', '-msplit-addresses'],
     "func_8004A764": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
-    "func_800260D0": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_8004A854": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004BCE8": ['-quiet', '-O2', '-G0', '-mno-split-addresses'],
     "func_8004C420": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
@@ -439,7 +428,6 @@ PORTED_FLAGS = {
     "func_80071460": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80071924": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
     "func_80071EB8": ['-quiet', '-O2', '-G0'],
-    "func_800734DC": ['-quiet', '-O2', '-G8', '-msplit-addresses'],
 }
 # <<< ported flags
 PER_FUNC_FLAGS.update(PORTED_FLAGS)
@@ -537,14 +525,11 @@ PER_FUNC_AS_FLAGS["func_80024734"] = "-G0"
 # touch D_8009B45C and nothing else, both grep gp=0 at=0, so recipe branch 1
 # applies: the scalar declaration with a -G0 assembler.
 PER_FUNC_AS_FLAGS["func_80045F3C"] = "-G0"
-PER_FUNC_AS_FLAGS["func_800482B0"] = "-G0"
 # Parked too. Five one- and two-byte symbols want the bare form through $at
 # while the one-byte D_8009B1D5 keeps %gp_rel, and no real -G separates them,
 # so each bare-wanting symbol is declared [8] and the assembler runs at -G4.
-PER_FUNC_AS_FLAGS["func_80023144"] = "-G4"
 # D_800EAE88 sized to eight so it comes out bare; 8 > 4 takes it out of small
 # data while the four-byte D_8009B1C8 beside it stays gp-relative.
-PER_FUNC_AS_FLAGS["func_800279BC"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80048D08"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047480"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A518"] = "-G0"
@@ -556,14 +541,12 @@ PER_FUNC_AS_FLAGS["func_8003BF00"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80043328"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DDFC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800339D0"] = "-G4"
-PER_FUNC_AS_FLAGS["func_80013154"] = "-G1"
 PER_FUNC_AS_FLAGS["func_80040DD8"] = "-G0"
 # Same body as func_80040DD8 with a 12-byte stride; retail reaches
 # D_8009B146/D_8009B148 and D_800EFE42 with bare %hi/%lo pairs, and the
 # function has no %gp_rel at all, so any -G is free.
 PER_FUNC_AS_FLAGS["func_80041068"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80040588"] = "-G4"
-PER_FUNC_AS_FLAGS["func_800408D0"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002CEE8"] = "-G1"
 # func_8005BB7C: s16 D_800FE0CC stored through $at beside one-byte gp symbols.
 # func_80031084: volatile u16 D_8009B394/D_8009B398 bare beside one-byte gp symbols.
@@ -600,10 +583,8 @@ PER_FUNC_AS_FLAGS["func_800164FC"] = "-G0"
 # (4 bytes), D_8009B26C and D_8009B27A (sized [4]) all want the bare form.
 # func_8002BAB4: gp == 0, and the two overlay halfwords D_80181002/D_80181012
 # are reached %hi/%lo.
-PER_FUNC_AS_FLAGS["func_8002BAB4"] = "-G0"
 # func_80045C98: gp == 0 and thirteen %hi/%lo reads of D_8009B45C.
 PER_FUNC_AS_FLAGS["func_80045C98"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8004803C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B808"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800136E4"] = "-G2"
 # func_80030FA0 no longer needs an assembler -G: the two bare-form symbols are
@@ -623,7 +604,6 @@ PER_FUNC_AS_FLAGS["func_8002A2F4"] = "-G0"
 # Parked, so no src/ file reads this; kept so PARKED.txt's difference count
 # is reproducible from the repo.
 PER_FUNC_AS_FLAGS["func_80031CD4"] = "-G0"
-PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020BE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002EA0C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004BBBC"] = "-G0"
@@ -631,17 +611,14 @@ PER_FUNC_AS_FLAGS["func_8003D46C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004C77C"] = "-G0"
 # Parked; kept so PARKED.txt's difference counts reproduce.
 PER_FUNC_AS_FLAGS["func_8004A764"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8004A6F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800497E0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047788"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049CF8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A43C"] = "-G0"
 # gp == 0 in func_8004A27C too; the pointer scalar bare at -G0 (parked, 9).
-PER_FUNC_AS_FLAGS["func_8004A27C"] = "-G0"
 # gp == 0 in func_8004A8E4: the pointer scalar bare at -G0 (parked at 11, exact length).
 PER_FUNC_AS_FLAGS["func_8004A8E4"] = "-G0"
 # gp == 0 in func_800330BC: both flag halfwords bare at -G0 (parked at 17, exact length).
-PER_FUNC_AS_FLAGS["func_800330BC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049010"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049DD8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047CC4"] = "-G0"
@@ -649,8 +626,6 @@ PER_FUNC_AS_FLAGS["func_8005B260"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005B36C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B734"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048F14"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8003700C"] = "-G1"
-PER_FUNC_AS_FLAGS["func_80013360"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8002F4C0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800464F0"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003B9BC"] = "-G0"
@@ -659,14 +634,12 @@ PER_FUNC_AS_FLAGS["func_8004BAE4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004CABC"] = "-G0"
 # func_80025D30: D_8009B260 declared [8] must be non-small while D_8009B20C,
 # declared [2] in that unit, stays gp-relative -- the window is 4 <= G < 8.
-PER_FUNC_AS_FLAGS["func_80025D30"] = "-G4"
 # D_8009B260 bare while the four-byte D_8009B17C beside it keeps %gp_rel:
 # the window is 4 <= G < 8, and the declaration is inflated to eight to open
 # it (func_80025BEC).
 # Same window as func_80025BEC: D_8009B408 declared eight and bare, the
 # gp-relative neighbours are one and four bytes, so 4 <= G < 8.
 PER_FUNC_AS_FLAGS["func_8003C628"] = "-G4"
-PER_FUNC_AS_FLAGS["func_80060E70"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
 PER_FUNC_AS_FLAGS["func_8002FB78"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
@@ -722,7 +695,6 @@ PER_FUNC_AS_FLAGS["func_8003C328"] = "-G0"
 # func_8003C120 is func_8003C328's sibling and wants the same threshold.
 # func_8005C1F4: D_800F5D44 declared [8] must be non-small while the 4-byte
 # D_8009B498 stays gp-relative -- the window is 4 <= G < 8.
-PER_FUNC_AS_FLAGS["func_8005C1F4"] = "-G4"
 # func_80032184: gp == 0, so -G0 is free and both D_8009B0F4 and D_8009B118
 # get the %hi/%lo pairs retail has (recipe branch 1).
 PER_FUNC_AS_FLAGS["func_80032184"] = "-G0"
@@ -740,7 +712,6 @@ PER_FUNC_AS_FLAGS["func_80048768"] = "-G0"
 # func_8002FD10: D_8009B146/D_8009B148 declared [4] (eight bytes) go non-small
 # at -G4 and expand through $at, while the four-byte D_8009B2A0 and the
 # two-byte D_8009B2A4 keep %gp_rel. Same pair of knobs as func_8002E470.
-PER_FUNC_AS_FLAGS["func_8002FD10"] = "-G4"
 # func_800257A0: D_8009B112 inflated to eight bytes goes non-small at -G4
 # while the one- and two-byte gp scalars beside it stay %gp_rel.
 # func_80024E58: D_8009B364 inflated to eight bytes for the $at store, while
@@ -769,7 +740,6 @@ PER_FUNC_AS_FLAGS["func_8002C9B4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80020D4C"] = "-G0"
 # func_80039794 needs D_8009B0C1 non-small while D_8009B35A (2 bytes) and
 # D_8009B356 (1) stay gp-relative: recipe branch 3, declared size 8 and -G4.
-PER_FUNC_AS_FLAGS["func_80039794"] = "-G4"
 PER_FUNC_AS_FLAGS["func_80045484"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A854"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800493F8"] = "-G0"
@@ -806,7 +776,6 @@ PER_FUNC_AS_FLAGS["func_80047B68"] = "-G0"
 # D_8009B1D5 one instruction to gcc. Under the aggregate arm cc1psx's own
 # %hi/%lo pair is two, and gcc hoists the lui out of the block into the
 # search loop's load delay slot, where retail leaves a nop.
-PER_FUNC_AS_FLAGS["func_8002C7E8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049920"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004A0FC"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"
@@ -814,6 +783,90 @@ PER_FUNC_AS_FLAGS["func_800478EC"] = "-G0"
 # free -- and because the fix is the assembler's threshold rather than
 # -mno-split-addresses, the function's jump table (jtbl_8001179C) survives.
 PER_FUNC_AS_FLAGS["func_800577B0"] = "-G0"
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8): the row is his
+# compiler profile spelled in this table's terms, measured through try_func on
+# the installed source (2026-09-21).
+PER_FUNC_FLAGS["func_80013154"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80013360"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80013C28"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800179F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80018FEC"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001BAF0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001D5B4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_80021598"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80023144"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800235C0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80023D08"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800245EC"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_800245EC"] = "-G0"
+PER_FUNC_FLAGS["func_80024824"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80025D30"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800260D0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800262D4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80027228"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80027508"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800279BC"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80029EC4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8002BAB4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8002C7E8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8002FD10"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800330BC"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8003700C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_80037DA4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80038EB0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80039794"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8003EED0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800408D0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80044838"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004803C"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8004803C"] = "-G0"
+PER_FUNC_FLAGS["func_800482B0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80049FB4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004A27C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004A6F8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004D134"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8004D134"] = "-G0"
+PER_FUNC_FLAGS["func_8004D58C"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8004D58C"] = "-G0"
+PER_FUNC_FLAGS["func_8004D75C"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8004D75C"] = "-G0"
+PER_FUNC_FLAGS["func_8004DC38"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_800528AC"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80052D2C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80053248"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800533D8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800556E8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80056828"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80057AF4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800580D4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80058938"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8005ABA0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005AE68"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005B0B4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005BE3C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005BFC8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005C1F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005C7BC"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_8005C7BC"] = "-G0"
+PER_FUNC_FLAGS["func_8005E808"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8005EBF4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8005F7B0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80060B38"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_80060B38"] = "-G0"
+PER_FUNC_FLAGS["func_80060E70"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80071700"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_80071700"] = "-G0"
+PER_FUNC_FLAGS["func_80071CB0"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_80071CB0"] = "-G0"
+PER_FUNC_FLAGS["func_80071FC8"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_80071FC8"] = "-G0"
+PER_FUNC_FLAGS["func_8007214C"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_8007214C"] = "-G0"
+PER_FUNC_FLAGS["func_80072A48"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_80072A48"] = "-G0"
+PER_FUNC_FLAGS["func_800734DC"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_AS_FLAGS["func_800734DC"] = "-G0"
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

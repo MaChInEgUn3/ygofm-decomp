@@ -113,3 +113,9 @@ CtorCount_0 = 0x0;
 # 0x8009B20E as its own halfword; splat only names D_8009B20C, and the rest of
 # the tree spells it D_8009B20C[1]. Same address, same %gp_rel encoding.
 D_8009B20E = 0x8009B20E;
+
+# Second names krystalgamer's tree gives two addresses so that some references
+# are emitted absolute (.data attribute) while the rest stay gp-relative; the
+# ported functions carry his declarations, so they carry his names.
+D_8009B0F4_abs = 0x8009B0F4;
+D_8009B134_abs = 0x8009B134;

@@ -117,6 +117,12 @@ This changes what "pick a new function" costs: there is no warm-up band any
 more, and the prose below about a 26-instruction sweet spot describes a
 pool that no longer exists.
 
+**Before anything else, try the PORT.** Every remaining park has matched C
+in krystalgamer's tree, and on 2026-09-21 67 of 105 ported byte-identical on
+the first try: `tools_src/port_sweep.py func_XXXXXXXX` (his tree checked out
+beside this one as `../memories-decomp`, or `YGOFM_KG=<path>`). Four seconds
+per function; `docs/MERGE_KRYSTALGAMER.md` has the recipe and the numbers.
+
 **Start with the m2c draft.** `tools_src/m2c_draft.py func_XXXXXXXX` prints
 structurally-correct C for the listing in about a second: loop and switch
 shapes, case groupings, reciprocal multiplies read back as `/ 3`, field

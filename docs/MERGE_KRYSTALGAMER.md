@@ -209,3 +209,53 @@ half. Candidate and full evidence are preserved in his tree at
 `tmp/port/rotated/func_80013B04.{c,diff,notes}`; nothing was written to his
 ledger, because his external history for that address is already terminal at
 `deferred` and `post_terminal_resolution` is only for an exact result.
+
+## The other direction: his C ports HERE, and 67 parks fell in one afternoon (2026-09-21)
+
+The section above measured that this tree's C does not move into his tree as a
+formality. The reverse was never measured, and it is the direction that
+matters once his tree reached 1134/1134 on 2026-09-21: every park here has a
+matched function there. Measured on all of them in one sweep:
+
+| | functions |
+|---|---:|
+| parked here (`parked/*.c`) | 107 |
+| of those, `matching_c` in his tree (commit 3dfeb592f) | 105 |
+| byte-identical here on the first try, no C edited | **67** |
+| exact length, 1 to 6 differences | 12 |
+| the rest (larger residues, 4 compile failures, 1 port failure) | 26 |
+
+The recipe, `tools_src/port_kg.py` and `tools_src/port_sweep.py`: preprocess
+his unit with his gcc from his tree (so his per-TU headers and guards are
+exactly what his build saw), rename every symbol of his tree to this tree's
+spelling using his `functions.csv` and `symbols.txt`, move the target
+definition to the end of the unit (try_func reads the object from the symbol
+to the end), prune the unit to the declarations the function reaches (a
+fixpoint over the names each declaration DEFINES, not the names it mentions;
+called `static` helpers are kept, other functions become prototypes), and
+measure through try_func with his compiler profile spelled as a build.py row
+(`-quiet -O2 -G{0,8}`, `-msplit-addresses` or `-mno-split-addresses`, any
+`-fno-*`) and his assembler `-G` as the `PER_FUNC_AS_FLAGS` row. The full
+build is the arbiter: try_func does not link, so a pruned unit that still
+carried another TU's definition, or that referenced one of his linker-script
+aliases (`D_8009B0F4_abs`, `D_8009B134_abs`, now in `config/symbol_aliases.txt`),
+passed try_func and broke the link. Both are fixed in the pruner and the
+build hashes `84747e64...` with all 67 installed.
+
+Three things the sweep says beyond the count. The two pipelines agree: his
+`mips-sony-psx-gcc` 2.8.1 profile and this tree's `cc1psx` 2.8.1 produce the
+same bytes from the same C on 67 of 67 units tried at the same flags, so the
+"C does not port between the trees" reading was about the SOURCE (types,
+names, guards), never about the compilers. Five of the 67 were assembly-debt
+transcriptions here, now real C. And the installed files carry HIS types
+(preprocessed and pruned, in the file, with a header saying so), not this
+tree's `variables.h` declarations; folding them into the shared headers is
+the follow-up, and until then those 67 files are the measured state, not a
+style choice.
+
+What is left: the 12 at 1 to 6 differences are worth a look each (the
+residue is usually the assembler `-G` this tree's row wants against his
+profile, or a guard his unit had that the pruner cannot see). The 26 larger
+ones are the parks where his source uses a structure this tree's symbol map
+renames badly, or where his unit needs a `static inline` this tree does not
+have; each is a port question first and a matching question second.

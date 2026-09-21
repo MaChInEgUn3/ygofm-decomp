@@ -1,3 +1,79 @@
+# 2026-09-21 -- 67 parks fechados de uma vez PORTANDO o C casado do repo do
+# krystalgamer (memories-decomp, commit 3dfeb592f): o fonte dele preprocessado,
+# podado as declaracoes que a funcao usa e com os simbolos renomeados para a
+# grafia desta arvore. Primeira tentativa, sem edicao de C. 105 dos 107 parks
+# tinham C casado la; 67 casaram de primeira, 38 ficam (12 a 1-6 diferencas).
+# Ferramenta: tools_src/port_kg.py + tools_src/port_sweep.py; a medicao e o
+# relato estao em docs/MERGE_KRYSTALGAMER.md. As entradas antigas abaixo ficam
+# como historia do que foi medido a mao.
+func_80013154 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80013360 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80013C28 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800179F4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80018FEC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8001BAF0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8001D5B4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80021598 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80023144 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800235C0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80023D08 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800245EC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80024824 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80025D30 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800260D0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800262D4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80027228 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80027508 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800279BC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80029EC4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8002BAB4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8002C7E8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8002FD10 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800330BC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8003700C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80037DA4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80038EB0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80039794 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8003EED0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800408D0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80044838 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004803C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800482B0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80049FB4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004A27C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004A6F8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004D134 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004D58C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004D75C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8004DC38 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800528AC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80052D2C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80053248 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800533D8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800556E8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80056828 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80057AF4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800580D4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80058938 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005ABA0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005AE68 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005B0B4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005BE3C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005BFC8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005C1F4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005C7BC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005E808 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005EBF4 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8005F7B0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80060B38 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80060E70 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80071700 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80071CB0 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80071FC8 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_8007214C -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_80072A48 -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+func_800734DC -- MATCH 2026-09-21, C do krystalgamer portado (3dfeb592f).
+
 func_800218F0 -- 496/498 com excesso de censo 1, 20 blocos, 2026-09-13.
   Escrita do zero no mesmo dia, flags padrao. Tela de resultado do duelo.
   Os cinco levers e o que foi medido estao no cabecalho de

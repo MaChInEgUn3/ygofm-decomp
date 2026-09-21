@@ -1,5 +1,5 @@
 /* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
- * src/game/sound_voice_envelope.c (SD_SetVoiceEnvelopeFromTone), profile gcc_2_8_1_g8_split.
+ * src/game/sound_voice_volume.c (SD_SetVoiceVolume), profile gcc_2_8_1_g8_split.
  * The declarations above the function are the subset of that tree's headers
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
@@ -91,12 +91,6 @@ typedef struct {
     u8 pad0020[8];
 } SDSecondaryObject;
 typedef struct {
-    u8 pad0000[0x20];
-    u16 adsr1;
-    u16 adsr2;
-    u16 a_mode;
-} SDToneEnvelopeView;
-typedef struct {
     s16 field_0000;
     u8 pad0002[2];
     u8 *field_0004;
@@ -183,16 +177,16 @@ typedef struct {
 } SDSecondaryState;
 extern SDSecondaryState *D_8009B458 __attribute__((section(".data")));
 extern const s32 D_80011434[20];
-void func_8004A6F8(s32 index, SDToneEnvelopeView *tone);
-void func_8004A6F8(s32 index, SDToneEnvelopeView *tone)
-{
-    SDSecondaryState *p = D_8009B458;
+void func_8004A27C(s32 voice, s32 left, s32 right);
+void func_8004A27C(s32 voice, s32 left, s32 right) {
+    SDSecondaryState *s;
 
-    p->voice_attr.mask =
-        (0x01 <<  8)  | (0x01 << 17)  | (0x01 << 18) ;
-    p->voice_attr.voice = D_80011434[index];
-    p->voice_attr.adsr1 = tone->adsr1;
-    p->voice_attr.adsr2 = tone->adsr2;
-    p->voice_attr.a_mode = tone->a_mode;
-    func_80077450(&p->voice_attr);
+    s = D_8009B458;
+    s->voice_attr.mask = (0x01 <<  0)  | (0x01 <<  1)  | (0x01 <<  2)  | (0x01 <<  3) ;
+    s->voice_attr.voice = D_80011434[voice];
+    s->voice_attr.volume.left = (left * (u16)s->field_0514) >> 7;
+    s->voice_attr.volume.right = (right * (u16)s->field_0516) >> 7;
+    s->voice_attr.volmode.left = 0 ;
+    s->voice_attr.volmode.right = 0 ;
+    func_80077450(&s->voice_attr);
 }

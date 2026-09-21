@@ -1,171 +1,119 @@
-/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
- * Ordinary MIPS written into an inline asm block to force a match. It is
- * byte-exact and therefore invisible to build.py, which is exactly the
- * problem: the oracle cannot tell transcribed assembly from real C, so
- * nothing but this comment stops it being counted as done.
- * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
- */
-/* MATCH (2026-09-05, full build). try_func reports 4 differences on this
- * file and every one is a NAME: retail addresses the rolling counter as
- * `%gp_rel(D_8009B20C+2)` and this source as the interior symbol
- * D_8009B20E -- the same halfword, the same encoding, the try_func
- * over-report WORKFLOW describes. The build is the arbiter and it is
- * byte-identical. Flags: -G8 -msplit-addresses (a PER_FUNC_FLAGS row).
- */
-/* PARKED CANDIDATE PORTED from Unchiga's tree (docs/MERGE_UNCHIGA.md).
- * Installed here because HIS base is closer than the one this tree
- * reached: the counts are in PARKED.txt. Measure it with the flags on
- * the next line -- they are his unit's, and try_func's default flags
- * report a different number.
- * FLAGS: -G8 -msplit-addresses
- */
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/duel_field_effect_steps.c (DuelEffect_ApplyCursebreaker), profile gcc_2_8_1_g8_split.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py. */
 typedef unsigned char u8;
+typedef signed short s16;
 typedef unsigned short u16;
+typedef signed int s32;
 typedef unsigned int u32;
-typedef signed char s8;
-typedef short s16;
-typedef int s32;
-
-/* func_800260D0 -- no confirmed real name. Countdown-gated dispatcher:
-   every call decrements D_8009B1D0; once it underflows to <=0, resets it
-   to 0x10 and advances D_8009B20E (a rolling counter, reset to -1 by
-   func_80024E24()'s cold-start branch). If the counter is < 5, spawns
-   an Obj (func_8002C604(8)) seeded from a D_800907D8[] slot lookup and a
-   D_80090800[] Row table entry, and conditionally clears a D_801A7AD8[]
-   Rec's f12 flag; else clears D_8009B220.
-
-   w5 near-miss refinement (2026-08-28): took the PERMUTER-IMMUNE 6/87
-   candidate (match/sketches/func_800260D0_permuted140.c, harvested by w3
-   from a 24->3-class permuter reorder run, itself stuck after 237K
-   iterations) down to 2/87. The 6-diff residual was actually TWO
-   independent, unrelated issues bundled together -- separating them
-   mattered:
-   1. offsets 0xb0-0xd0 (marker->f0/f2/f4 field-store block): NOT a
-      scheduler tie at all, despite the 17:57:47Z note's diagnosis -- it
-      was a plain wrong SOURCE STATEMENT ORDER. Target reads row->f0 and
-      stores marker->f0 FIRST, THEN (much later, right before the
-      following call) reads row->f2 and stores marker->f4 in the CALL's
-      branch-delay slot. The inherited C had `marker->f4=row->f2;` as the
-      very FIRST of the three field assignments -- swapping it with
-      `marker->f0=row->f0;` (so f0 comes first, f4 third, `f2=0` stays in
-      the middle) reproduced target exactly, 6->2. IMPORTANT: this is
-      extremely order-position-sensitive at the WHOLE-FUNCTION level, not
-      just locally -- moving `marker->f4=row->f2;` further down to sit
-      immediately before the call() (the "obvious" reading of target's
-      deferred-store timing) instead regressed catastrophically to 21/87,
-      reshuffling register allocation all the way up at the function's
-      TOP-level branch/compare code. Only the minimal adjacent swap (f0
-      and f4 trade places, f2 stays put, nothing else moves) works.
-   MATCHED 0/87 (2026-08-28, w1) under -G8 -msplit-addresses ONLY: the other
-   three combos give 61/93/97, so this unit NEEDS that flag pair.
-
-   HOW THE LAST 2 CLOSED, and why every single-lever attempt func_800738F0 as a wall.
-   The residual at 0x78/0x7c was target addiu v0,v0,10 then addu v0,a1,v0
-   ((player*20 + 10) + counter) against the candidate addiu v1,a1,10 then
-   addu v0,v0,v1 (player*20 + (counter + 10)) -- the same multiset,
-   reassociated. Forcing the grouping needs a barrier or a raw asm addu, and
-   EVERY form of that regressed to 63-64/87, which the note on file func_800738F0 as
-   "extremely fragile, PERM-immune, leave it alone". That reading was wrong,
-   and the 63 was one clue misread as noise: the regression is not a
-   reshuffle, it is TWO NOPS. Any extra local or asm in this block makes gcc
-   sink the D_800907D8 base materialisation (lui a0,0x8009 / addiu a0,a0,2008)
-   past the two slots target fills with it -- the beqz delay slot at 0x60 and
-   the lbu load-delay slot at 0x68 -- so the whole tail shifts by 2 words and
-   every later word "differs".
-   So the fix is COUPLED, and neither half works alone:
-     - pin the table base into its target register and materialise it FIRST
-       (register u8 *tbl asm("a0") = D_800907D8; before the player load), which
-       keeps it available to fill both delay slots; AND
-     - force the addition grouping with a minimal 2-input asm addu into a
-       v0-pinned index.
-   Applying only the second gives 63/87; only the first was never the
-   suspect. Same coupled-residual shape as func_8003A198 and func_8004A8E4,
-   closed in the same pass: when one lever makes the count WORSE, func_800738F0 the
-   regression instead of dropping the lever -- it can be naming the second
-   half of the fix.
-   Dead ends re-measured from the 2/87 base: named intermediate for
-   player*20+10, at function scope, at if-block scope, or v0-pinned: 63/87
-   each; scoped asm addu without the table pin: 63/87; empty +r launder on
-   the intermediate: 63/87; counter instead of the D_8009B20E re-func_800738F0: 2/87
-   (no change); (s32) casts at the add site: 2/87; D_8009B20E + (player*20+10):
-   11/87.
-
-*/
-
-struct Obj {
-    u16 f0;
-    u16 f2;
-    u16 f4;
-    char pad[0x14 - 6];
-    s32 f14;
-    char pad2[0x1A - 0x18];
-    u16 f1A;
-};
-struct Rec {
-    char pad[0x12];
-    s16 f12;
-    char pad2[0x16 - 0x14];
-    u16 f16;
-    char pad3[0x1C - 0x18];
-};
-struct Row {
-    u16 f0;
-    u16 f2;
-};
-
 extern u16 D_8009B1D0;
-extern u8 D_8009B1D5;
-extern s16 D_8009B20E;
+typedef struct {
+    s16 x;
+    s16 y;
+} DuelFieldPosition;
+extern u8 D_800907D8[2 ][20 ];
+extern DuelFieldPosition
+    D_80090800[2 ][20 ];
+u8 *func_8002C604(s32 id);
 extern u16 D_8009B220;
-extern u8 D_800907D8[];
-extern struct Row D_80090800[];
-extern struct Rec D_801A7AD8[];
+extern s16 D_8009B20C[2];
 s32 func_80024E24(void);
-struct Obj *func_8002C604(s32);
+extern volatile u8 D_8009B1D5;
+typedef struct {
+    void *object;
+    void *data;
+    u8 pad_08[4];
+    s16 card_id;
+    s16 attack;
+    s16 defense;
+    s16 stat_modifier;
+    s16 terrain_modifier;
+    u16 flags;
+    u8 table_index;
+    u8 pad_19[3];
+} DuelCardRecord;
+extern DuelCardRecord D_801A7AD8[];
+typedef struct {
+    u16 x;              
+    u16 y;              
+    u16 field_04;       
+    u8 pad_06[0xC];     
+    s16 field_12;       
+    s32 field_14;       
+    u8 pad_18[2];       
+    s16 field_1A;       
+} DuelEffectObject;
 void func_8003FEE0(u32);
-
+void func_800260D0(void);
 void func_800260D0(void) {
-    s16 counter;
-    u8 player;
-    u8 slot;
-    struct Rec *rec;
-    struct Obj *marker;
-    struct Row *row;
+    DuelCardRecord *record;
+    DuelEffectObject *object;
+    DuelFieldPosition *position;
+    u8 *positions;
+    s32 card;
+    s32 next;
+    s32 base_slot;
+    s32 x;
+    s32 timer;
+    s32 step;
+    s32 position_index;
+    u8 *grid;
 
     if (func_80024E24() == 0) {
-        D_8009B20E = -1;
+        D_8009B20C[1] = -1;
         D_8009B1D0 = 0;
     }
-    D_8009B1D0 -= 1;
-    if ((s16) D_8009B1D0 > 0) {
+
+    timer = D_8009B1D0 - 1;
+    D_8009B1D0 = timer;
+    if ((s16)timer > 0) {
         return;
     }
+
     D_8009B1D0 = 0x10;
-    counter = D_8009B20E + 1;
-    D_8009B20E = counter;
-    if (counter < 5) {
-        register u8 *tbl asm("a0");
-        register s32 pidx asm("v0");
-        tbl = D_800907D8;
-        player = D_8009B1D5;
-        pidx = player * 20 + 10;
-        __asm__("addu %0, %1, %2" : "=r" (pidx) : "r" ((s32) counter), "r" (pidx));
-        slot = tbl[pidx];
-        rec = &D_801A7AD8[slot];
-        marker = func_8002C604(8);
-        {
-            char *rowbase = (char *) D_80090800;
-            marker->f1A = 3;
-            row = (struct Row *) (rowbase + (((D_8009B20E + 10) * 4) + (D_8009B1D5 * 80)));
-        }
-        marker->f0 = row->f0;
-        marker->f2 = 0;
-        marker->f4 = row->f2;
-        marker->f14 += D_8009B20E * 0x3000;
+    next = *(u16 *)&D_8009B20C[1] + 1;
+    D_8009B20C[1] = next;
+    if ((s16)next < 5 ) {
+         
+
+
+
+
+
+
+        do {
+            grid = (u8 *)D_800907D8;
+            base_slot = D_8009B1D5 * 20  +
+                        10 ;
+        } while ((s16)next == 0 && (s16)next != 0);
+        card = grid[(s16)next + base_slot];
+        record = &D_801A7AD8[card];
+        object = (DuelEffectObject *)func_8002C604(8);
+        positions = (u8 *)D_80090800;
+        step = D_8009B20C[1];
+         
+        position_index = step + 10 ;
+        object->field_1A = 3;
+        position = (DuelFieldPosition *)(
+            (u32)&((DuelFieldPosition *)0)[position_index] +
+            D_8009B1D5 * (20  * sizeof(DuelFieldPosition))  +
+            positions
+        );
+        x = *(u16 *)&position->x;
+        object->y = 0;
+        object->x = x;
+        object->field_04 = *(u16 *)&position->y;
+        object->field_14 = object->field_14 + step * 0x3000;
         func_8003FEE0(0x14);
-        if ((rec->f16 & 0x8000) && (rec->f12 < 0)) {
-            rec->f12 = 0;
-            marker->f1A = 5;
+
+        if ((record->flags & 0x8000 ) != 0) {
+            if (record->stat_modifier < 0) {
+                record->stat_modifier = 0;
+                object->field_1A = 5;
+            }
         }
     } else {
         D_8009B220 = 0;
