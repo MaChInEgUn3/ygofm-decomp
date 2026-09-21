@@ -22,9 +22,10 @@
 # nop entre mfhi e um sh gp-relativo do mesmo registo: o maspsx dele sabe pelo
 # .comm que o simbolo e small data, o nosso so ve .extern; o passo
 # SMALL_DATA_NOP_FUNCS agora trata mfhi/mflo como load). Build byte-identico.
-# func_80030294 volta ao park: tres arrays locais const vao para o .rodata do
-# objeto e o link descarta-o (`.rodata referenced in .text ... discarded`),
-# a mesma pergunta de build.py que as jump tables ja tem resposta e estes nao.
+# func_80030294: tres arrays locais const vao para o .rodata do objeto e o
+# link descartava-o; build.py ganhou RODATA_OWNED (posse explicita de blocos
+# de rodata que nao sao jump table) e a funcao entrou. 105/105 portados.
+func_80030294 -- MATCH 2026-09-21, C do krystalgamer portado (rodata local via RODATA_OWNED).
 func_800222F4 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva).
 func_8004E7B0 -- MATCH 2026-09-21, C do krystalgamer portado (quinta leva, nop mfhi->sh gp).
 func_800171A8 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).

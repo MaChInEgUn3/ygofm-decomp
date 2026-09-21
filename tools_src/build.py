@@ -914,6 +914,10 @@ PER_FUNC_FLAGS["func_800222F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 # profiles in this table's terms, measured through try_func and the build.
 PER_FUNC_FLAGS["func_8004E7B0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_80030294"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a
@@ -1473,6 +1477,22 @@ def jtbl_owners(lines, blocks):
     return out
 
 
+# Rodata a compiled function owns that is NOT a jump table: local `const`
+# arrays with initialisers, which cc1psx emits into the object's .rodata in
+# declaration order and reaches as %hi(.rodata)+offset. splat dumped the same
+# bytes as `dlabel D_...` blocks, which carry no entries to derive an owner
+# from, so the owner is stated here. The blocks must be contiguous in
+# 800.rodata.s and in the order the function declares the arrays; the build
+# proves the rest. func_80030294 (ported from krystalgamer's tree): three
+# arrays of 5, 4 and 5 words at 0x80010250.
+# Pairs, not a dict keyed by the function: port_install.py drops any line that
+# starts with a quoted func_ name as a stale flag row, and ate the first
+# spelling of this table.
+RODATA_OWNED = (
+    ("func_80030294", ("D_80010250", "D_80010264", "D_80010274")),
+)
+
+
 def plan_rodata(decompiled):
     """Linker entries for .rodata, with compiled objects in the holes.
 
@@ -1486,6 +1506,9 @@ def plan_rodata(decompiled):
     """
     lines, blocks = rodata_blocks()
     owners = jtbl_owners(lines, blocks)
+    for f, names in RODATA_OWNED:
+        for n in names:
+            owners[n] = f
     mine = set(decompiled)
     if not any(f in mine for f in owners.values()):
         return None

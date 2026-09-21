@@ -321,3 +321,17 @@ object's own `.rodata`, which the link discards (`.rodata referenced in
 only for jump tables, so this is the same hole one class over, and it is
 a build.py change, not a port question. The two parks his tree has no C
 for (func_80012AE8, func_80073758) are untouched by any of this.
+
+**And the last one (105 of 105): func_80030294's three local `const` arrays
+are `D_80010250`, `D_80010264` and `D_80010274` in splat's rodata, and the
+object's `.rodata` holds exactly those 56 bytes in declaration order.**
+`plan_rodata` derives a hole's owner from a jump table's entries and had no
+way to own a plain `dlabel` block, so build.py now has `RODATA_OWNED`, a
+list of (function, blocks) pairs merged into the owner map; the hole spans
+the three contiguous blocks and the compiled object's `.rodata` lands in
+it, byte-identical. One trap on the way: the first spelling was a dict
+keyed `"func_80030294":`, and `port_install.py` deleted that line as a
+stale flag row, which is why the table is a tuple of pairs. Every parked
+function his tree has as C is now in `src/`; the two parks left,
+func_80012AE8 (`__do_global_dtors`) and func_80073758 (`PCread`), are
+`sdk_asm` in his tree and library code by this tree's own scope rule.

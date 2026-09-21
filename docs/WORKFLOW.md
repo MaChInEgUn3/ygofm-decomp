@@ -277,6 +277,15 @@ needed.
   callee `void f(...) __attribute__((noreturn));` (func_80030FD0). `volatile
   void f();` does **not** do it.
 
+**A local `const` array with an initialiser lands in the object's own
+`.rodata` too, and the link DISCARDS it unless build.py owns the block.**
+The jump-table split derives the owner from the table's entries; a plain
+`dlabel D_...` block has none, so name it in `RODATA_OWNED` in build.py
+(function, the contiguous blocks in declaration order). func_80030294 was
+the first; the tell is `.rodata referenced in section .text ... defined in
+discarded section` from the linker, after try_func has already said the
+only residue is `%lo(.rodata)` against a `D_` symbol.
+
 **A second stack-allocating prologue partway through a listing is two
 functions**, and candidates.py tags it `[MERGED]`: splat missed the boundary
 because nothing in `.text` references the second entry — look for its address as
