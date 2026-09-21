@@ -9,6 +9,15 @@
 # Segunda leva, mesma tarde: os 12 a 1-6 diferencas eram TODOS nomes (simbolos
 # que so o c_symbols.ld dele nomeia, aliases _abs/_arr dele, rotulos .rodata+N
 # de jump table que o try_func renderiza diferente); build byte-identico com os 12.
+# Terceira leva: os 4 que nao compilavam e o que o porte nao encontrava eram
+# tres formas do fonte dele que a ferramenta nao lia -- definicao K&R, o mesmo
+# endereco prototipado sob dois nomes dele, e definicoes tentativas dos globais
+# que a TU dele possui (aqui viram extern). Build byte-identico com os 5.
+func_8005B260 -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
+func_8005B36C -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
+func_8005B4D8 -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
+func_80048A28 -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
+func_80012E5C -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
 func_80032C48 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
 func_8003DC1C -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).
 func_80046294 -- MATCH 2026-09-21, C do krystalgamer portado (segunda leva, residual so de nomes).

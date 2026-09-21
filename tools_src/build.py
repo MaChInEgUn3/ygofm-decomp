@@ -560,10 +560,8 @@ PER_FUNC_AS_FLAGS["func_800222F4"] = "-G4"
 # func_80056504 (parked): gp=0, so the D_8009B0F4 stores take the bare form.
 PER_FUNC_AS_FLAGS["func_8004BE88"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DA1C"] = "-G1"
-PER_FUNC_AS_FLAGS["func_80048A28"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8003BA14"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8005B64C"] = "-G0"
-PER_FUNC_AS_FLAGS["func_80012E5C"] = "-G4"
 PER_FUNC_AS_FLAGS["func_8004B49C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80012AE8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002BD0C"] = "-G0"
@@ -618,8 +616,6 @@ PER_FUNC_AS_FLAGS["func_8004A8E4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049010"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80049DD8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80047CC4"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8005B260"] = "-G0"
-PER_FUNC_AS_FLAGS["func_8005B36C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004B734"] = "-G0"
 PER_FUNC_AS_FLAGS["func_80048F14"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002F4C0"] = "-G0"
@@ -644,7 +640,6 @@ PER_FUNC_AS_FLAGS["func_8003A01C"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800434F4"] = "-G0"
 PER_FUNC_AS_FLAGS["func_800289BC"] = "-G0"
 # Parked; kept so PARKED.txt's difference count is reproducible.
-PER_FUNC_AS_FLAGS["func_8005B4D8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8002DC38"] = "-G1"
 PER_FUNC_AS_FLAGS["func_800498F8"] = "-G0"
 PER_FUNC_AS_FLAGS["func_8004545C"] = "-G0"
@@ -878,6 +873,18 @@ PER_FUNC_FLAGS["func_800283F4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 PER_FUNC_FLAGS["func_8001825C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 PER_FUNC_FLAGS["func_80018608"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 PER_FUNC_FLAGS["func_80056504"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_8005B260"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005B36C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_FLAGS["func_8005B4D8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-mno-split-addresses']
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_80048A28"] = ['-quiet', '-O2', '-G0', '-fno-builtin', '-mno-split-addresses']
+PER_FUNC_AS_FLAGS["func_80048A28"] = "-G0"
+PER_FUNC_FLAGS["func_80012E5C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed

@@ -53,6 +53,7 @@ register return short signed sizeof static struct switch typedef union unsigned 
 __attribute__ __volatile__ inline""".split())
 DECL_HEAD = re.compile(r"^\s*(typedef|struct|union|enum)\b")
 FUNC_HEAD = re.compile(r"\)\s*\{")
+KNR_TAIL = re.compile(r"\)\s*[A-Za-z_][^{}()]*$")   # `;` allowed: the 2nd, 3rd parameter declaration
 BASE_FLAGS = ("-mel", "-mips1", "-mcpu=R3000", "-msoft-float", "-Dpsx", "-D__psx__", "-D__psx")
 
 
@@ -112,7 +113,7 @@ def preprocess(src):
 
 
 def move_target_last(text, func):
-    m = re.search(r"(?m)^[^\n;{}]*\b" + func + r"\s*\([^;{]*\)\s*\{", text)
+    m = re.search(r"(?m)^[^\n;{}]*\b" + func + r"\s*\([^;{)]*\)\s*(?:[^;{}]*;\s*)*\{", text)
     if not m:
         sys.exit(f"definition of {func} not found in preprocessed unit")
     depth, i = 0, m.end() - 1
@@ -151,7 +152,13 @@ def split_units(text):
                     units.append(u)
                     buf = []
         elif c == ";" and depth == 0:
-            units.append("".join(buf))
+            u = "".join(buf)
+            # a K&R definition: `void f(a, b)` then `u32 a;` -- the `;` after
+            # a parameter declaration is inside the definition, not its end
+            if KNR_TAIL.search(u[:-1]):
+                i += 1
+                continue
+            units.append(u)
             buf = []
         i += 1
     if "".join(buf).strip():
@@ -212,6 +219,7 @@ def prune(text, func):
     t = target[-1]
     keep, needed = {t}, idents(units[t])
     defs = [definers(u) if not is_def(u) else def_name(u) for u in units]
+    protos = set()
     changed = True
     while changed:
         changed = False
@@ -220,10 +228,25 @@ def prune(text, func):
                 continue
             if is_def(u) and not u.startswith("static") and k != t:
                 units[k] = u[:u.index("{")].rstrip() + ";"
+            if (not is_def(units[k]) and not DECL_HEAD.match(units[k]) and "=" not in units[k]
+                    and not re.match(r"\s*(extern|static|typedef)\b", units[k])
+                    and "(" not in strip_bodies(units[k])):
+                # a tentative definition, `u8 D_8009B0A8;`: his TU OWNS the
+                # object and maspsx --use-comm-section places it; here every
+                # global is a linker symbol, so the unit only declares it
+                units[k] = "extern " + units[k]
+            if not is_def(units[k]) and "(" in strip_bodies(units[k]) and not DECL_HEAD.match(units[k]):
+                # a prototype: his unit can reach one address under two names
+                # with two parameter lists (an SDK header and his own), and
+                # both rename to the same func_; the first declaration wins
+                if defs[k] & protos:
+                    units[k] = ""
+                    continue
+                protos |= defs[k]
             keep.add(k)
             needed |= idents(units[k])
             changed = True
-    return "\n".join(units[k] for k in sorted(keep)) + "\n", len(units), len(keep)
+    return "\n".join(units[k] for k in sorted(keep) if units[k]) + "\n", len(units), len(keep)
 
 
 def flags_for(profile):

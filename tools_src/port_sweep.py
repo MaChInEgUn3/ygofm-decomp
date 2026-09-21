@@ -63,7 +63,10 @@ def main():
         specs[f] = json.loads([l for l in r.stdout.splitlines() if l.startswith("JSON ")][0][5:])
     if OVR.exists():
         sys.exit(f"{OVR} exists; another sweep or an experiment owns it -- not starting")
-    (OUT / "port_specs.json").write_text(json.dumps(specs, indent=1))
+    spec_file = OUT / "port_specs.json"
+    merged = json.loads(spec_file.read_text()) if spec_file.exists() else {}
+    merged.update(specs)          # keep earlier rows so port_install can find them
+    spec_file.write_text(json.dumps(merged, indent=1))
     OVR.write_text(json.dumps({f: {"cc": s["cc"], "as": s["as"] or None} for f, s in specs.items()}, indent=1))
     try:
         with cf.ThreadPoolExecutor(max_workers=4) as ex:

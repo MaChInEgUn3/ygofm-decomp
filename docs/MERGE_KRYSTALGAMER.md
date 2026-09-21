@@ -275,3 +275,16 @@ rows are all symbol names is a MATCH until the build says otherwise, and
 the build said 84747e64 with all twelve installed. `tools_src/port_install.py`
 does the install; the count went 1171 -> 1182 (one of the twelve,
 func_80018608, replaced a transcription, so the debt is 3).
+
+**Third batch: the four compile failures and the port failure were three
+shapes of HIS source the tool did not read (84 of 105).** A K&R definition
+(`void f(id, value, word)` then `u32 id;`), which the unit splitter cut at
+the parameter declarations' semicolons; one address prototyped under two of
+his names with two parameter lists (an SDK header's `PACKET *` and his own
+`void *`), which both rename to one `func_` and then conflict, so the first
+prototype wins; and tentative definitions of the globals his TU owns
+(`u8 D_8009B0A8;`, placed by maspsx `--use-comm-section` in his `_comm`
+profiles), which here become `extern` because every global is a linker
+symbol -- as a definition the unit lost the gp-relative form and was +12.
+Five more byte-identical in the build: 1182 -> 1187. Left: 21 parks whose
+port measures a real residue, and the two parks his tree does not have as C.
