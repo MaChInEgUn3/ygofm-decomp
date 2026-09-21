@@ -666,3 +666,55 @@ re-merge is the cure rather than the symptom. **And a local
 a clean `make clean && make japanese-match` belongs once per PR even though
 the fast incremental gate is what keeps the re-merge cadence under a
 minute.
+
+## The absorption: a landed single-function unit forecloses its whole TU
+
+Measured 2026-09-21 18h. His agents match one function at a time, and when a
+function's translation unit cannot be wrapped as a whole they write that one
+function out by hand as its own Japanese unit -- `src/game/japanese/sd_clear_busy_flag.c`
+is sixteen bytes of hand-written C, `gJapanese_SDValue->busy = 0;`, where the
+other six functions of the same US TU stayed as assembly. krystalgamer noticed
+the shape himself ("i see for jap decomp it's breaking down the TUs again") and
+left it.
+
+**That single entry blocks the whole TU, permanently, by construction.** A
+regional-alias wrapper `#include`s the shared US source, so the object carries
+every function the TU defines; the split `c` line has to cover all of them, and
+the landed single-function entry overlaps that range. `jp_promote.py` reports it
+as `already in JP matching_c` -- which reads exactly like "somebody already did
+this unit" and means the opposite: one seventh of it is done and the other six
+sevenths are now unreachable by the cheap route.
+
+The way back is to **absorb**: remove the single-function manifest entry, its
+split line and its hand-written file, then promote the whole unit. Measured on
+`sound_output_state`: 7 functions, `make clean` then `make japanese-match` gives
+MATCH at sha256 ee3f4558, the US side untouched, and one hand-written copy of
+shared logic deleted. `SD_ClearBusyFlag` keeps its address and its symbols line
+-- it is now compiled from the shared source instead of a copy that could drift.
+`$SP/jp_remerge6.sh` does the re-merge for this shape, and it CANNOT be
+`jp_remerge.sh`: that one takes master's three config files wholesale, which
+silently restores the entry the patch removes, and the re-apply then refuses.
+
+**The census, because it is the whole remaining mechanical lane.** Nine units
+pair cleanly against the Japanese bytes and 40 functions sit in them; every one
+is held by one or two claimed addresses from an open PR of his, each PR taking a
+single function: display_effect_update_callbacks 7 (#5628), file_transfer_flags 7
+(#5636), save_data_payload 9 (#5652), display_effect_lifecycle 5 (#5626/#5625),
+card_list_sort 4 (#5619/#5635), sorted_entry_relink 2 (#5600), func_8001B7AC 2
+(#5627), duel_deck_lookup 2 (#5607), display_object_fade_helpers 2 (#5595). As
+each lands, that unit enters the state above and needs an absorption.
+
+**And the lesson about the instrument, which is this file's recurring one:** the
+refusal was read for three ticks as the wrapper problem I was expecting, and
+published twice as "waiting on the maintainer's decision". The early-return
+branch carries no addresses, so the collision was invisible until the derivation
+was replicated by hand -- `analyze` returns `dict(ok=False, why=...)` and nothing
+else. A rejection that names no address is not a diagnosis.
+
+**The same build also settled the asm-label precedence question**, which had been
+published as a second thing needing his decision. The source declares
+`extern SDValue *volatile g_SDValue_output_level asm("g_SDValue");` and a
+`#define` cannot rename a string literal -- so the wrapper pre-declares the same
+identifier with the Japanese label, and that one binds: gcc 2.8.1 makes an
+extern's RTL at its FIRST declaration and does not discard it on redeclaration
+(`varasm.c`, `make_decl_rtl`). No copied wrapper, and no US header change.
