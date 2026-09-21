@@ -63,10 +63,13 @@ def load_all():
     us_split = (KG / "config/slus_01411/split.yaml").read_text()
     m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", us_split)
     GP_US = int(m.group(1), 16)
-    # a unit with its own .rodata subsegment (a switch table) needs the JP
-    # table placed too; the word comparison covers .text only, so those are
-    # flagged rather than applied (3 of the 81 clean units on 2026-09-21)
-    US_RODATA = set(re.findall(r"\.rodata, (game/\S+)\]", us_split))
+    # A unit with its own .rodata subsegment (a switch table) needs the JP
+    # table placed too, and the word comparison covers .text only. The block's
+    # SIZE comes from the next rodata row, so keep every row sorted by offset:
+    # name -> (file offset, size).
+    rows = sorted((int(m.group(1), 16), m.group(2))
+                  for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), \.?rodata, (\S+)\]", us_split))
+    US_RODATA = {n: (o, rows[i + 1][0] - o) for i, (o, n) in enumerate(rows) if i + 1 < len(rows)}
     global JPVRAM, JP_AUTO
     JPVRAM = {a: n for n, a in jpsyms.items()}       # JP address -> the name JP already gives it
     # default names JP splat generated for ITS OWN addresses (from the last
@@ -172,7 +175,6 @@ def unit_of(us, addr):
 
 def analyze(us, jp, pairs, names, jpsyms, addr):
     src, fns = unit_of(us, addr)
-    if src[len("src/"):-2] in US_RODATA: return dict(ok=False, src=src, why="US unit has a .rodata subsegment (JP placement not derived)")
     sizes = [int(us[a]["size"], 16) for a in fns]
     for a, s, b in zip(fns, sizes, fns[1:]):
         if a + s != b: return dict(ok=False, src=src, why=f"US unit not contiguous at {a:#x}")
@@ -230,8 +232,31 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                 return dict(ok=False, src=src,
                             why=f"{n} and {n2} are two US names of {ua:#x} with different declarations; "
                                 f"one JP identifier ({jn}) cannot carry both")
+    # A unit with its own .rodata block: derive where the JP copy sits and
+    # refuse unless the bytes SELF-CHECK. The block is a switch table of .text
+    # addresses, so the JP words must be the US words shifted by this unit's
+    # own text displacement, uniformly -- measured on both candidates
+    # (display_object_helpers 0x920, mem_card_driver 0x914). Taking the JP
+    # start from any nearby derived symbol instead of the one whose US address
+    # IS the block's read ASCII as a broken table, sixteen bytes off.
+    rodata = None
+    unit_name = src[len("src/"):-2]
+    if unit_name in US_RODATA:
+        off, size = US_RODATA[unit_name]
+        usvram = off - HDR + LOAD
+        want = "D_%08X" % usvram
+        jpvram = syms.get(want)
+        if jpvram is None:
+            return dict(ok=False, src=src, why=f".rodata block at {usvram:#x} has no derived JP address ({want} never paired)")
+        tdelta = fns[0] - jps[0]
+        uw2, jw2 = words(US_EXE, usvram, size), words(JP_EXE, jpvram, size)
+        deltas = {(a - b) & 0xFFFFFFFF for a, b in zip(uw2, jw2)}
+        if deltas != {tdelta}:
+            return dict(ok=False, src=src, why=f".rodata at {usvram:#x} is not the US block shifted by the unit's {tdelta:#x} "
+                                               f"(deltas {sorted(hex(d) for d in deltas)[:3]})")
+        rodata = (jpvram - LOAD + HDR, size)
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                profile=us[fns[0]]["profile"], names=fnames)
+                rodata=rodata, profile=us[fns[0]]["profile"], names=fnames)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -280,17 +305,30 @@ def apply(addr):
     ents = [(int(re.match(r"\s+- \[(0x[0-9a-f]+)", lines[i]).group(1), 16), i) for i in idx]
     offs = {o: i for o, i in ents}
     if start in offs and ", c," in lines[offs[start]]: sys.exit("start offset already a c segment")
-    new = [f"      - [{start:#x}, c, {unit}]"]
-    if end not in offs: new.append(f"      - [{end:#x}, asm, func_{end - HDR + LOAD:08X}]")
+    pending = [(start, f"      - [{start:#x}, c, {unit}]")]
+    if end not in offs: pending.append((end, f"      - [{end:#x}, asm, func_{end - HDR + LOAD:08X}]"))
+    if r.get("rodata"):
+        # The unit's switch table. The JP split covers the whole initial-data
+        # region with ONE `[0x800, rodata, initial_data]` line where the US
+        # split carves it unit by unit, so the table is carved out and the
+        # blob resumed after it. These offsets are LOWER than the text ones,
+        # which is why each line below goes to its own sorted position
+        # instead of the block going in at one point.
+        roff, rsize = r["rodata"]
+        pending.append((roff, f"      - [{roff:#x}, .rodata, {unit}]"))
+        if roff + rsize not in offs:
+            pending.append((roff + rsize, f"      - [{roff + rsize:#x}, rodata, initial_data_{roff + rsize:x}]"))
     keep = [l for i, l in enumerate(lines) if not (i in offs.values() and int(re.match(r"\s+- \[(0x[0-9a-f]+)", l).group(1), 16) == start and ", asm," in l)]
-    # insert in order
-    out, done = [], False
+    # insert each line in offset order
+    out, pend = [], sorted(pending)
     for l in keep:
         m = re.match(r"\s+- \[(0x[0-9a-f]+), ", l)
-        if not done and m and int(m.group(1), 16) > start and "- name: initialized_data" not in "".join(out[-3:]):
-            out.extend(new); done = True
+        if m and "- name: initialized_data" not in "".join(out[-3:]):
+            o = int(m.group(1), 16)
+            while pend and pend[0][0] < o:
+                out.append(pend.pop(0)[1])
         out.append(l)
-    assert done
+    assert not pend, f"nowhere to place {pend}"
     sp.write_text("\n".join(out))
     # matching_c.json
     # matching_c.json: the file is not globally sorted upstream (one entry sits
