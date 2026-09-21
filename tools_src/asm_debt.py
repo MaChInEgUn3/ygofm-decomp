@@ -146,11 +146,41 @@ def templates(text):
         yield "".join(out)
 
 
+def _is_gte_word(line):
+    """A `.word` that is a COP2 encoding or a Psy-Q inline_c.h GTE marker."""
+    if not line.startswith(".word"):
+        return False
+    m = re.search(r"(0x[0-9a-fA-F]+|\b\d+\b)", line)
+    if not m:
+        return False
+    value = int(m.group(1), 0)
+    if value & 0x3F == 0x3F and value & ~0x03FC0000 < 0x10000:
+        return True
+    return ((value >> 26) & 0x3F) in COP_OPCODES
+
+
 def is_debt(tpl):
     """True when an instruction template contains ordinary MIPS."""
-    for line in tpl.replace("\\n", "\n").replace("\\t", " ").split("\n"):
-        line = line.split("/*")[0].strip()
+    # inline_c.h writes a GTE command as ONE template, `nop;nop;.word 0x7f`:
+    # the two nops are the macro's own interlock, not transcribed code. So the
+    # template is split on `;` as well as on newlines, and a `nop` does not
+    # count while the template also carries a COP2 word or a marker.
+    lines = [l for chunk in tpl.replace("\\n", "\n").replace("\\t", " ").split("\n")
+             for l in chunk.split(";")]
+    stripped = [l.split("/*")[0].strip() for l in lines]
+    gte_context = any(_is_gte_word(l) or re.match(r"(cfc2|ctc2|mfc2|mtc2|lwc2|swc2)\b", l)
+                      for l in stripped)
+    for line in stripped:
         if not line or line.startswith((".set", ".align")) or line.endswith(":"):
+            continue
+        if gte_context and re.fullmatch(r"nop", line):
+            continue
+        # inline_c.h's read-back macros move the COP2 value through an asm
+        # OPERAND -- `cfc2 $12,$31; nop; sw $12,0(%0)` -- and a transcription
+        # never has a `%N` operand: it names fixed registers. So an ordinary
+        # instruction that touches an operand, inside a GTE template, is the
+        # macro's own plumbing.
+        if gte_context and "%" in line:
             continue
         if line.startswith(".global"):
             return True

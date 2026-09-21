@@ -242,3 +242,15 @@ A second counter fix the same night: Psy-Q GTE MARKER words (`.word 0x0000007f`
 and the other DMPSX placeholders, see `PSYQ_GTE_MARKERS` in build.py) are GTE
 ops, not transcribed MIPS; four ported GTE functions read as debt until
 `is_debt` learned the marker shape. The debt is still 0.
+
+And two more rules the same hour, because the four ported GTE files still
+counted after the marker rule -- and commit 8c0b377 said "debt 0" while the
+tool said 4, which is the mistake this file exists to prevent (the number in
+prose is a copy; only the tool is the count). `inline_c.h` writes one GTE
+command as ONE template, `nop;nop;.word 0x7f`, so templates are split on `;`
+and a `nop` beside a COP2 word is the macro's interlock; and its read-back
+macros move the value through an asm OPERAND, `cfc2 $12,$31; nop; sw $12,0(%0)`,
+where a transcription names fixed registers, so an ordinary instruction that
+touches `%N` inside a GTE template is the macro's plumbing. Five controls in
+`asm_debt.py`'s commit: the two macro shapes pass, a fixed-register store
+beside `cfc2`, a lone operand store with no GTE and an `addiu` word stay debt.
