@@ -447,7 +447,7 @@ is the user's: arms in variables.h/functions.h selected by a per-unit define
 (one declaration world, WORKFLOW's "every global once", ~200 arms to write
 and each ported unit then includes common.h), or a `kg_variables.h` /
 `kg_functions.h` pair included only by the ported units, arms only for the
-46 + 14 internal disagreements (isolated by construction, two declaration
+46 + 13 internal disagreements (isolated by construction, two declaration
 worlds for one binary). Either way the build is the gate per batch and the
 census line is the definition of done.
 
@@ -468,7 +468,28 @@ until `is_debt` recognises the marker shape (four controls in the commit).
 
 **The extern fold's shape is decided (2026-09-21): `kg_variables.h` and
 `kg_functions.h`, included only by the ported units, with arms only for
-the 46 + 14 internal disagreements.** WORKFLOW's "every global once" exists
+the 46 + 13 internal disagreements.** The 46 extern disagreements were
+measured into their axes, and every one of them is a codegen knob this
+file already documents rather than an accident: **14** are the `.data`
+attribute (the fifth addressing form), **13** a type or width, **9**
+`volatile`, **9** array-versus-scalar, **1** `const` (the sixth form,
+D_80011434). So the arms are not tidying: two ported units really do want
+that symbol spelled two ways, which is what `variables.h`'s own per-file
+guards already say for the same addresses. The 13 prototype disagreements
+are the opposite: **12 are cosmetic** (parameter names, `int` against
+`s32`, `struct X *` against `X *`) and one declaration serves both once
+the build says so, and exactly **one** is real -- `func_8002348C`, typed
+`(DuelFieldDisplaySource *)` in one unit and `(void)` in another, which
+is the missing-prototype case WORKFLOW documents on func_80017F04 and
+must stay two declarations.
+**When you re-count these, do NOT normalise `__attribute__((...))` away.**
+Stripping it makes the 14 `.data` pairs read as a difference of one space
+before the semicolon, i.e. as noise to be collapsed, and collapsing them
+is a silent codegen change. (The suspicion that the census's non-greedy
+`__attribute__\s*\(\(.*?\)\)` was inflating the count was checked with a
+balanced-paren stripper and four controls, and it was **unfounded**: both
+give 46 and 13. The instrument was right; the reading of its output was
+the thing at fault.) WORKFLOW's "every global once" exists
 to stop silent codegen drift between files, and for the ported units that
 hazard is closed by the build gate rather than by header unity; the ported
 units are his type world and the header says so, the way `kg_types.h`
