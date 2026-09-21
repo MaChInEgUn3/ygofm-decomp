@@ -718,3 +718,43 @@ published as a second thing needing his decision. The source declares
 identifier with the Japanese label, and that one binds: gcc 2.8.1 makes an
 extern's RTL at its FIRST declaration and does not discard it on redeclaration
 (`varasm.c`, `make_decl_rtl`). No copied wrapper, and no US header change.
+
+### Three corrections to the absorption entry, all from one afternoon
+
+**"Forecloses permanently" was too strong, and his own #5695 is the
+counterexample.** His route for taking one function of a shared unit is NOT a
+hand-written copy -- that was one instance. It is **region guards in the shared
+US source**: `#if !defined(VERSION_JAPAN) || defined(VERSION_JAPAN_<GROUP>)`
+around the function being taken, `#ifndef VERSION_JAPAN` around the rest, and a
+Japanese wrapper that defines both macros before including the source. So a
+landed single function blocks only the WHOLE-UNIT wrapper, and the remaining
+functions stay reachable by a wrapper that defines `VERSION_JAPAN` plus the
+opt-in macros for exactly those. Two exits, not one: absorption (fewer units,
+deletes hand-written copies, needs his agreement because it removes his entry)
+and region guards (nothing of his removed, more units, region machinery in the
+source). He asked for absorption on #5697. Both claims were corrected publicly.
+
+**Absorbing means removing every split boundary STRICTLY INSIDE the range, not
+just the absorbed unit's `c` line.** #5695 shipped `[0x34f28, c,
+game/japanese/func_8004503C]` and `[0x34f40, asm, func_80044740]`. Removing only
+the first leaves that asm range assembled beside the wrapper's own objects, and
+the link fails with `multiple definition of func_80045334`, the same for
+`SD_ClearBusyFlag`, and a `.initialized_data` / `.main` VMA overlap behind them.
+Derive the range from the manifest (min address, max address+size, minus
+0x80010000 plus 0x800) and drop every boundary between the ends.
+
+**A LINE COUNT CANNOT EXPRESS THE MANIFEST INVARIANT.** Absorbing two entries
+and adding seven is arithmetically +42 -12, and git renders it **+37 -7**,
+because it coalesces identical lines when an insertion sits adjacent to a
+deletion -- both describe the same net 30. The re-merge asserted the arithmetic
+and failed a correct tree. Assert on the PARSED manifest instead: exactly seven
+entries for the unit, no repeated address anywhere, each absorbed unit absent
+from the manifest and from disk. Same family as this file's rule about reading a
+census rather than a length.
+
+**And the absorbed-address filter must be able to say yes.** The first version
+uppercased the address, turning `0x80044B38` into `0X80044B38`, so the manifest
+regex matched nothing and the script printed "no longer in master's manifest --
+nothing to remove" and carried on to a patch that duplicated an address. Every
+removal now carries a positive control: if the plain address string is in the
+file, the entry regex MUST match exactly once, or the run fails.
