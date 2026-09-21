@@ -809,3 +809,41 @@ manifest address, exempting the PRs that are not matching PRs at all. On
 and pushing: #5654 claims an address one unit absorbs (and is itself stale --
 that address is already in master), and #5705 opened minutes before the push and
 claims a free address in another.
+
+### The Japanese queue was never exhausted: the PAIR LIST was stale
+
+Measured 2026-09-21 20h. Every "the mechanical queue is empty" line written
+about the Japanese lane was an artefact of `config/jp_matches.csv`, which
+`jp_promote.py` starts from. That file was written by hand in one commit
+(4a0f518) and never regenerated, while his US config moves under it daily.
+Against his master that day: **306 entries, 127 naming a US address that no
+longer exists, and 351 US units with no coverage at all.**
+
+**The mechanism is his translation-unit splitting, and it removes units
+silently.** #5600 split `sorted_entry_relink.c` from two functions to one; the
+function that moved out carried the unit's only pair entry, so the remaining
+unit began reporting `no function of the unit has a JP pair` -- which reads as
+missing data and is an upstream reshape. Any unit can leave the queue this way
+without anything going red.
+
+**`tools_src/jp_pairs.py` recovers them, and it is self-verifying.** Both
+executables lay the same code out in the same order, so the displacement between
+a US function and its counterpart is locally constant and changes only at region
+boundaries. For an uncovered unit: take the displacement of the nearest known
+pair and its two neighbours, predict the target address, and hand the two word
+streams to `pair_words` -- the SAME check the promoter runs before writing any
+config. A wrong prediction therefore yields no pair rather than a wrong one.
+First run: **223 units, 384 functions recovered**, against 316 Japanese
+functions in the whole of master at that moment.
+
+**The negative control is the part that makes the number mean anything**, and it
+is built into the tool (`--check`, implied by `--write`): a sample of the
+recoveries is re-tried at the predicted displacement off by one instruction,
+minus one instruction, and off by the whole first function. **120 deliberately
+wrong displacements, 0 wrongly accepted.** Without that, "223 recovered" is a
+method that has never been shown capable of saying no -- which is the failure
+this file already records for the `lui $at` grep and the park filter.
+
+The deltas cluster by region exactly as a correct alignment should: `-0x13f0`
+across every `ai_script` unit, `-0x920`/`-0x914`/`-0x944` across sound,
+`+0x2e30` across the file and model-scene units.
