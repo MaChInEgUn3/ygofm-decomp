@@ -445,6 +445,13 @@ HOIST_EPILOGUE_FUNCS = {
 SMALL_DATA_NOP_FUNCS = {
     # mfhi followed by a gp-relative sh of the same register (see _HILO).
     "func_8004E7B0",
+    # ported from krystalgamer's tree: a load or mfhi/mflo, then a gp-relative
+    # store of the same register; his maspsx knows the symbol from .comm.
+    "func_800540B4",
+    "func_8001D670",
+    "func_800534B8",
+    "func_80019D18",
+    "func_8001F55C",
     "func_80019608",
     # `lbu` of a struct field followed by a gp-relative `sb` of it: maspsx
     # expects the store to expand through $at and fill the slot.
@@ -937,6 +944,23 @@ PER_FUNC_FLAGS["func_8006C37C"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 PER_FUNC_FLAGS["func_8006CD78"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 PER_FUNC_FLAGS["func_8006F1B4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_800507D0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8003E854"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8002EE94"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80035E20"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8004DE24"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_8004EB00"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80019D18"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80051A48"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8005DBA4"] = ['-quiet', '-O2', '-G8', '-fno-strength-reduce', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_800540B4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_8001D670"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a
@@ -1126,8 +1150,8 @@ def compile_c(name):
     return obj
 
 
-_BARE_SYM_MEMOP = re.compile(
-    r"^\s*(sw|sh|sb|lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
+_BARE_SYM_MEMOP = re.compile(   # `sym+2` is the same small symbol (func_800534B8)
+    r"^\s*(sw|sh|sb|lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)(?:\+\d+)?\s*$")
 _JUMP = re.compile(r"^\s*(j|jr)\s+(\$\w+)\s*$")
 _NOP = re.compile(r"^\s*nop\b")
 
@@ -1222,7 +1246,7 @@ _ANY_LOAD = re.compile(r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,")
 # where the symbol is a .comm in the unit.
 _HILO = re.compile(r"^\s*(mfhi|mflo)\s+(\$\w+)\s*$")
 _LOAD_BARE_SYM = re.compile(
-    r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)\s*$")
+    r"^\s*(lhu|lbu|lw|lh|lb)\s+(\$\w+)\s*,\s*([A-Za-z_]\w*)(?:\+\d+)?\s*$")
 _EXTERN = re.compile(r"^\s*\.extern\s+([A-Za-z_]\w*)\s*,\s*(\d+)")
 
 
@@ -1509,6 +1533,8 @@ def jtbl_owners(lines, blocks):
 # spelling of this table.
 RODATA_OWNED = (
     ("func_80030294", ("D_80010250", "D_80010264", "D_80010274")),
+    ("func_80035E20", ("D_800102B8",)),                 # s32 tbl[30]
+    ("func_8004DE24", ("D_800114C4", "D_800114D8")),   # CVECTOR colors[5], BackgroundNormals
 )
 
 

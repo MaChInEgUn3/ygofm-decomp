@@ -124,3 +124,6 @@ D_800E9EC8_arr = 0x800E9EC8;
 # krystalgamer's TU-owned name for the six preview bytes at D_8009AF2A (his
 # debug_effect_screen.c defines it; the ported func_800222F4 declares it).
 gDebugEffect_abPreviewState = 0x8009AF2A;
+
+# splat's interior halfword of D_8009B2A4, named in krystalgamer's tree (func_8002EE94).
+D_8009B2A6 = 0x8009B2A6;

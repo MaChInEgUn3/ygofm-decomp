@@ -345,3 +345,23 @@ First pass: func_8001B170, func_8002ACA4, func_80042188, func_80042C08, func_800
 (jump-table labels, interior symbols, rodata blocks to own) plus a pruner
 gap on one typedef, one transient wine failure and a handful with real
 differences to read.
+
+**Second sweep of the 34: 11 more (1220 -> 1231), and the residues sort into
+this tree's own knobs.** Two `RODATA_OWNED` pairs (func_80035E20's `s32
+tbl[30]` is `D_800102B8`; func_8004DE24's `CVECTOR colors[5]` and
+`BackgroundNormals` are `D_800114C4` and `D_800114D8`), five more
+`SMALL_DATA_NOP_FUNCS` members (a load or `mfhi`, then a gp-relative store
+of the same register, `sym+2` included -- his maspsx knows the symbol from
+`.comm`, ours needs the pass), one interior-symbol alias (`D_8009B2A6`),
+one pruner fix (a `} __attribute__((packed)) Name;` typedef read as a K&R
+head and glued to the next unit). Two were installed on a misread of
+try_func's line and backed out by the build, which is the arbiter for
+exactly that: func_8001F55C is five nops short even with the nop pass, and
+func_8001BD88 schedules a `lw` through a pointer above a gp-relative `sh`
+where retail keeps it below, in the full unit as well as the pruned one --
+a real question, not a naming one. Four GTE functions wait on his
+`normalize_psyq_rtps.py` / `normalize_psyq_gte.py` assembly filters, which
+his profiles apply after cc1 and this tree has no hook for yet; and
+func_80028B08 differs by one `sw` moved five instructions under the same
+flags in both compilers' output, which is the first codegen disagreement
+between his gcc 2.8.1 build and cc1psx seen on this port.

@@ -158,7 +158,7 @@ def split_units(text):
             u = "".join(buf)
             # a K&R definition: `void f(a, b)` then `u32 a;` -- the `;` after
             # a parameter declaration is inside the definition, not its end
-            if KNR_TAIL.search(u[:-1]):
+            if "{" not in u and KNR_TAIL.search(u[:-1]):   # a K&R head has no body yet; `} __attribute__((packed)) Name;` is not one
                 i += 1
                 continue
             units.append(u)
