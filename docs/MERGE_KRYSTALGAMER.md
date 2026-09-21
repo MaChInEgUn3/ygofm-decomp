@@ -638,3 +638,31 @@ else.
 Which is to say the including wrapper was the right default and is not
 universal; the five wrappers his tree already had are copies, and that is
 the route for these two if he wants them.
+
+**And the name the tool SYNTHESISES is not the name the source uses --
+which turned one of those two "classes" into a bug of mine.** `symbols.txt`
+does not name every address, so the promoter falls back to `D_<addr>`; when
+the unit's own C calls that address something else, the second name is not
+a disagreement, it is the only real name. `card_list_sort` reads
+`gBuildDeck_pState` twice and `D_8009B2FC` **zero** times -- not even in a
+comment, because that name exists only as an alias in
+`config/slus_01411/c_symbols.ld` and has no C declaration anywhere -- and
+the tool was rejecting the whole unit for a type conflict that cannot
+exist. The rule now: count the address's US names that appear in the unit's
+CODE, with comments stripped (a provenance header naming a sibling, or a
+`goto func_80073900;` label, reads as a reference and is not one -- five of
+six such names were false), emit the line under the one name the code uses,
+and refuse only at two or more. With that, `card_list_sort` promotes and a
+clean `make japanese-match` matches; it is shelved only because two of his
+open PRs claim its range.
+Two habits fall out of the same afternoon, and both are about believing an
+instrument that measured something adjacent. **A pinned three-number diff
+shape is wrong for `symbols.txt`**: when upstream lands a PR declaring a
+function this batch reaches by `jal`, the re-apply correctly stops writing
+that line and the count drops -- and the same fact makes the CI fail, since
+checks run the head MERGED with master where both copies exist, so the
+re-merge is the cure rather than the symptom. **And a local
+`japanese-match` run incrementally cannot see what a clean split sees**, so
+a clean `make clean && make japanese-match` belongs once per PR even though
+the fast incremental gate is what keeps the re-merge cadence under a
+minute.
