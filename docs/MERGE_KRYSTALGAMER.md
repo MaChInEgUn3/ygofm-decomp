@@ -546,3 +546,49 @@ so the PR was merged with master four times (take master's three files,
 re-apply the unit, re-gate, merge commit -- never a rewrite of a reviewed
 head). A batch of ten pre-verified units waits on a local branch for the
 first to land, one PR open at a time.
+
+**And the race is won on LATENCY, not on content -- the advisor's reading
+after six re-merges landed nothing.** His agents detect a landing, rebase and
+go green in about four minutes; a cycle of "poll up to a minute, run four
+minutes of gates, push, wait three and a half minutes for CI" reaches
+mergeable-and-green after the next landing has already happened, so it loses
+every round by construction. Three changes fixed it and the next PR landed:
+drop the 130-second unittest suite from a *re-merge* (the diff is the same
+additive lines already verified, and CI runs the suite anyway), wake on the
+event instead of a heartbeat (a Monitor on `git ls-remote origin master`),
+and make the re-merge one script with no thinking in it. The re-merge now
+pushes about 40 seconds after a landing. Two other things the race teaches:
+**two landings can each declare the same `jal` target, and master's own
+`japanese-split` then fails** on splat's "Duplicate symbol detected" (#5593
+after #5649 on `DisplayObject_SavePosition`) -- the merge drops the duplicate
+line and says so; and **his open PRs are named by Japanese address or
+function and take ONE function of a multi-function unit**, so overlap is only
+visible by comparing the addresses each open PR adds to `matching_c.json`,
+never by file name (four units left one batch that way).
+
+**Two blocked classes, both measured, and both the same answer: an
+INCLUDING wrapper cannot reach them.** The wrapper this tree writes
+`#include`s the US source under `#define USname JPname`; that reaches a
+symbol whose US name is simply taken in the Japanese build, and nothing
+else.
+  * **An object with two US names that the unit uses both of.** 76 addresses
+    carry more than one US name, and the second usually lives in
+    `config/slus_01411/c_symbols.ld` -- which the US link takes
+    (`build_baseline.py`) and the Japanese link does not. `fade_runtime`
+    reads 0x800E9EC8 as `gFade_State` and as `u8 D_800E9EC8_arr[]`; the
+    Japanese address 0x800E9DA8 already answers to `gJapanese_FadeState`,
+    and `symbols.txt` refuses a second name for one address, so both US
+    names have to become that one identifier. That does not compile:
+    `conflicting types for 'gJapanese_FadeState'` at `fade.h:12`. So the
+    tool REJECTS the unit with that reason rather than writing a wrapper
+    that fails, which keeps "the scan says clean" equal to "this builds".
+    31 functions, the largest unit left, and only a copied wrapper reaches
+    it.
+  * **An `asm` label.** `sound_output_state` reaches the sound root through
+    `extern SDValue *volatile g_SDValue_output_level asm("g_SDValue");`, and
+    the label is a string that `#define` does not rename, so the alias never
+    applies and the link asks for `g_SDValue`. One unit of the queue has
+    this shape, and 14 US sources carry an `asm` label at all.
+Which is to say the including wrapper was the right default and is not
+universal; the five wrappers his tree already had are copies, and that is
+the route for these two if he wants them.
