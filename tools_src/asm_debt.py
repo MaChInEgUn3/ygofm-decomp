@@ -170,6 +170,8 @@ def is_debt(tpl):
     stripped = [l.split("/*")[0].strip() for l in lines]
     gte_context = any(_is_gte_word(l) or re.match(r"(cfc2|ctc2|mfc2|mtc2|lwc2|swc2)\b", l)
                       for l in stripped)
+    cop_dests = {m.group(1) for l in stripped
+                 for m in [re.match(r"(?:cfc2|mfc2)\s+(\$\w+)", l)] if m}
     for line in stripped:
         if not line or line.startswith((".set", ".align")) or line.endswith(":"):
             continue
@@ -182,6 +184,13 @@ def is_debt(tpl):
         # macro's own plumbing.
         if gte_context and "%" in line:
             continue
+        # ... and so is arithmetic on the register a COP2 read just filled
+        # (`mfc2 $12,$19; nop; sra $12,$12,2; sw $12,0(%0)`): every register
+        # in the line is one written by cfc2/mfc2 in the same template.
+        if gte_context:
+            regs = set(re.findall(r"\$\w+", line))
+            if regs and regs <= cop_dests:
+                continue
         if line.startswith(".global"):
             return True
         if line.startswith(".word"):

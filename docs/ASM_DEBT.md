@@ -254,3 +254,10 @@ where a transcription names fixed registers, so an ordinary instruction that
 touches `%N` inside a GTE template is the macro's plumbing. Five controls in
 `asm_debt.py`'s commit: the two macro shapes pass, a fixed-register store
 beside `cfc2`, a lone operand store with no GTE and an `addiu` word stay debt.
+
+And a third, because commit 7bb26e8 ALSO said 0 while the tool said 2 --
+twice in one hour, the same mistake, now written down twice: the read-back
+macro's `sra $12,$12,2` touches no operand, only the register the `mfc2`
+filled, so arithmetic on a register a COP2 read wrote in the same template is
+macro plumbing too. The tool printed 0 BEFORE this sentence was written, and
+the gate for the commit is `grep` on the tool's own line.
