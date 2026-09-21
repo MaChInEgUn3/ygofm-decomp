@@ -43,6 +43,21 @@ LOAD, HDR = 0x80010000, 0x800
 # paired a European target against the Japanese gp.
 GP_US, GP_JP = None, None
 
+# Units that reach ONE object under TWO US names whose declarations differ. A
+# `#define` cannot carry both: they become one identifier with two
+# declarations, which is `conflicting types for 'gJapanese_FadeState'` at
+# fade.h:12. The copied wrapper his tree uses elsewhere would work and would
+# duplicate the whole unit. MEASURED 2026-09-21, and it is neither: an `asm`
+# label binds the second name to the same Japanese symbol, a clean
+# `japanese-match` matches, and 31 functions come in with no copy. The
+# declaration is hand-written per unit because its type comes from the US
+# header, and an array is left UNSIZED so that header completes it.
+# unit -> [(extra US name, the US address it shares, declaration template)]
+ASM_ALIASES = {
+    "game/fade_runtime": [("D_800E9EC8_arr", 0x800E9EC8,
+                           'extern u8 D_800E9EC8_arr[] asm("%s");')],
+}
+
 def sx16(v): return v - 0x10000 if v & 0x8000 else v
 
 def words(exe, addr, size):
@@ -252,8 +267,9 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         m = re.match(r"(?:D|func)_([0-9A-Fa-f]{8})$", n)
         ua = int(m.group(1), 16) if m else addr_of.get(n)
         if ua is None: continue
+        handled = {x for x, _, _ in ASM_ALIASES.get(src[len("src/"):-2], ())}
         used = sorted(n2 for n2 in ALT_NAMES.get(ua, ())
-                      if re.search(r"\b%s\b" % re.escape(n2), code))
+                      if n2 not in handled and re.search(r"\b%s\b" % re.escape(n2), code))
         if len(used) == 1 and used[0] != n and used[0] not in aliases and used[0] not in lines:
             # ONE name in the code, and it is not the one usname() picked:
             # symbols.txt does not name this address, so the tool synthesised
@@ -279,6 +295,13 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     for old, newn in rename.items():
         if old in lines: lines[newn] = lines.pop(old)
         if old in aliases: aliases[newn] = aliases.pop(old)
+    # the asm-label declarations for this unit's second names
+    asm_lines = []
+    for extra, uaddr, tmpl in ASM_ALIASES.get(src[len("src/"):-2], ()):
+        jn = aliases.get(usname(names, uaddr))
+        if jn is None:
+            return dict(ok=False, src=src, why=f"{extra} needs the JP name of {uaddr:#x}, which this unit does not alias")
+        asm_lines.append(tmpl % jn)
     # A unit with its own .rodata block: derive where the JP copy sits and
     # refuse unless the bytes SELF-CHECK. The block is a switch table of .text
     # addresses, so the JP words must be the US words shifted by this unit's
@@ -303,7 +326,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                                                f"(deltas {sorted(hex(d) for d in deltas)[:3]})")
         rodata = (jpvram - LOAD + HDR, size)
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, profile=us[fns[0]]["profile"], names=fnames)
+                rodata=rodata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -340,6 +363,13 @@ def apply(addr):
                 f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
                 " * unchanged. */"]
         body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
+        if r.get("asm_aliases"):
+            body += ["",
+                     " /* The same object under a second US name, which a #define cannot carry:".replace(" /*", "/*"),
+                     " * both names would become one identifier with two declarations. An asm",
+                     " * label binds it to the same Japanese symbol instead; an array is left",
+                     " * unsized so the US header completes the type. */"]
+            body += r["asm_aliases"]
         body += ["", f'#include "../{base}.c"', ""]
         wrapper.write_text("\n".join(body))
         unit = "game/" + R["srcdir"] + "/" + base
