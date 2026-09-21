@@ -12,7 +12,7 @@ half (lui / lo pair), a gp-relative offset, or a jal target, and each such
 difference yields `USName = JPaddr;` for symbols.txt. Any other difference
 means the code is not the same and the unit is skipped.
 """
-import csv, json, os, re, struct, sys, pathlib
+import collections, csv, json, os, re, struct, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # his tree checked out beside this one, or YGOFM_KG=<path> (same convention as port_kg.py)
@@ -48,6 +48,17 @@ def load_all():
     for line in open(KG / "config/slpm_86398/symbols.txt"):
         m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
         if m: jpsyms[m.group(1)] = int(m.group(2), 16)
+    # EVERY US name of an address, `names` keeps one. 76 addresses carry more
+    # than one, and `config/slus_01411/c_symbols.ld` -- which the US link
+    # takes and the JP link does not -- is where the second one usually lives
+    # (fade_runtime reads 0x800E9EC8 as both `gFade_State` and
+    # `D_800E9EC8_arr`, and the JP link wanted the name nobody mapped)
+    global ALT_NAMES
+    ALT_NAMES = collections.defaultdict(set)
+    for a, n in names.items(): ALT_NAMES[a].add(n)
+    for line in open(KG / "config/slus_01411/c_symbols.ld"):
+        m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;", line)
+        if m: ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
     global US_RODATA
     us_split = (KG / "config/slus_01411/split.yaml").read_text()
     m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", us_split)
@@ -198,6 +209,27 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
             aliases[n] = jn; lines[jn] = a
         else:
             lines[n] = a
+    # a second US name of the same address, used by this unit's source, needs
+    # the same treatment: splat refuses a second name for one JP address, so
+    # it can only be a #define onto whatever name the JP build does use
+    addr_of = {n: a for a, n in names.items()}
+    text = (KG / src).read_text(errors="replace") if (KG / src).exists() else ""
+    for n, jn in list(aliases.items()) + [(n, n) for n in lines]:
+        m = re.match(r"(?:D|func)_([0-9A-Fa-f]{8})$", n)
+        ua = int(m.group(1), 16) if m else addr_of.get(n)
+        if ua is None: continue
+        for n2 in ALT_NAMES.get(ua, ()):
+            if n2 != n and n2 not in aliases and n2 not in lines and re.search(r"\b%s\b" % re.escape(n2), text):
+                # MEASURED, and it is why this is a rejection rather than a
+                # second #define: fade_runtime reads 0x800E9EC8 as both
+                # `gFade_State` and `u8 D_800E9EC8_arr[]`, and aliasing both
+                # onto gJapanese_FadeState gives cc1 "conflicting types for
+                # `gJapanese_FadeState'" at fade.h:12. One JP identifier
+                # cannot carry two US declarations, so an including wrapper
+                # cannot reach this unit at all -- only a copied one can.
+                return dict(ok=False, src=src,
+                            why=f"{n} and {n2} are two US names of {ua:#x} with different declarations; "
+                                f"one JP identifier ({jn}) cannot carry both")
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
                 profile=us[fns[0]]["profile"], names=fnames)
 
