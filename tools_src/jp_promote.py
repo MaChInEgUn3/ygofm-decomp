@@ -262,7 +262,12 @@ def apply(addr):
     # symbols.txt: upstream appends each PR's lines at the end, functions then
     # data symbols; the existing lines and the trailing newline are kept as is
     st = KG / "config/slpm_86398/symbols.txt"; old = st.read_text()
-    add = [f"{n} = 0x{j:08X};" for n, j in zip(r["names"], r["jps"])]
+    # a function an earlier promotion reached by `jal` already has its line
+    # (splat rejects a second one: "Duplicate symbol detected", first seen on
+    # Text_EncodeDecimalDigits after #5649); a different address is a conflict
+    for n, j in zip(r["names"], r["jps"]):
+        if n in jpsyms and jpsyms[n] != j: sys.exit(f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {j:#x}")
+    add = [f"{n} = 0x{j:08X};" for n, j in zip(r["names"], r["jps"]) if n not in jpsyms]
     # a unit's own function reached by `jal` at an equal address is in syms
     # too (named, equal-address): it is already on the function line above,
     # and splat rejects the duplicate ("Duplicate symbol detected")
