@@ -17,10 +17,31 @@ import collections, csv, json, os, re, struct, sys, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # his tree checked out beside this one, or YGOFM_KG=<path> (same convention as port_kg.py)
 KG = pathlib.Path(os.environ.get("YGOFM_KG", ROOT.parent / "memories-decomp"))
-PAIRS = ROOT / "config" / "jp_matches.csv"   # address = JP, address2 = US; the pair list the scan starts from
-US_EXE, JP_EXE = KG / "game/SLUS_014.11", KG / "game/japanese/SLPM_863.98"
+# One entry per region, because nothing in the pairing is Japanese: it accepts
+# a unit whose target words are the US words modulo relocation, which is true
+# of ANY release built from the same code. krystalgamer's stated next
+# objective is every iteration (European, French, German, Italian, Spanish and
+# Japanese), and his reading is that the European ones differ from the US only
+# in resources -- if that holds, this pairs nearly all of them where it pairs
+# about a fifth of the Japanese queue. `jp` is the one measured so far; add a
+# region by dropping its config directory and executable in here.
+REGIONS = {
+    "jp": dict(config="slpm_86398", exe="game/japanese/SLPM_863.98",
+               srcdir="japanese", make="japanese", pairs="jp_matches.csv"),
+}
+REGION = os.environ.get("YGOFM_REGION", "jp")
+if REGION not in REGIONS: sys.exit(f"unknown region {REGION!r}; known: {', '.join(sorted(REGIONS))}")
+R = REGIONS[REGION]
+BASE_CFG = KG / "config" / "slus_01411"          # the US side, always the source of the C
+TGT_CFG = KG / "config" / R["config"]
+SPLAT = KG / "tmp/splat" / R["config"]
+PAIRS = ROOT / "config" / R["pairs"]   # address = target, address2 = US; the pair list the scan starts from
+US_EXE, JP_EXE = KG / "game/SLUS_014.11", KG / R["exe"]
 LOAD, HDR = 0x80010000, 0x800
-GP_US, GP_JP = None, 0x8009AE48
+# BOTH gp values are read from their own split.yaml. GP_JP used to be the
+# literal 0x8009AE48, which is right for SLPM-86398 and would have silently
+# paired a European target against the Japanese gp.
+GP_US, GP_JP = None, None
 
 def sx16(v): return v - 0x10000 if v & 0x8000 else v
 
@@ -29,23 +50,23 @@ def words(exe, addr, size):
     return list(struct.unpack("<%dI" % (len(b) // 4), b))
 
 def load_all():
-    global GP_US
-    us = {int(f["address"], 16): f for f in json.load(open(KG / "config/slus_01411/matching_c.json"))["functions"]}
-    jp = {int(f["address"], 16): f for f in json.load(open(KG / "config/slpm_86398/matching_c.json"))["functions"]}
+    global GP_US, GP_JP
+    us = {int(f["address"], 16): f for f in json.load(open(BASE_CFG / "matching_c.json"))["functions"]}
+    jp = {int(f["address"], 16): f for f in json.load(open(TGT_CFG / "matching_c.json"))["functions"]}
     pairs = {}
     for r in csv.DictReader(open(PAIRS)):
-        pairs[int(r["address2"], 16)] = int(r["address"], 16)     # US -> JP
+        pairs[int(r["address2"], 16)] = int(r["address"], 16)     # US -> target
     names = {}
-    for line in open(KG / "config/slus_01411/symbols.txt"):
+    for line in open(BASE_CFG / "symbols.txt"):
         m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
         if m: names[int(m.group(2), 16)] = m.group(1)
     # the C sources define functions by the name in functions.csv, which
     # symbols.txt does not always carry (first apply: three undefined
     # `func_` names because the file names them differently)
-    for r in csv.DictReader(open(KG / "config/slus_01411/functions.csv")):
+    for r in csv.DictReader(open(BASE_CFG / "functions.csv")):
         names[int(r["address"], 16)] = r["name"]
     jpsyms = {}
-    for line in open(KG / "config/slpm_86398/symbols.txt"):
+    for line in open(TGT_CFG / "symbols.txt"):
         m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
         if m: jpsyms[m.group(1)] = int(m.group(2), 16)
     # EVERY US name of an address, `names` keeps one. 76 addresses carry more
@@ -56,13 +77,16 @@ def load_all():
     global ALT_NAMES
     ALT_NAMES = collections.defaultdict(set)
     for a, n in names.items(): ALT_NAMES[a].add(n)
-    for line in open(KG / "config/slus_01411/c_symbols.ld"):
+    for line in open(BASE_CFG / "c_symbols.ld"):
         m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;", line)
         if m: ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
     global US_RODATA
-    us_split = (KG / "config/slus_01411/split.yaml").read_text()
+    us_split = (BASE_CFG / "split.yaml").read_text()
     m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", us_split)
     GP_US = int(m.group(1), 16)
+    m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", (TGT_CFG / "split.yaml").read_text())
+    if not m: sys.exit(f"no gp_value in {TGT_CFG.name}/split.yaml")
+    GP_JP = int(m.group(1), 16)
     # A unit with its own .rodata subsegment (a switch table) needs the JP
     # table placed too, and the word comparison covers .text only. The block's
     # SIZE comes from the next rodata row, so keep every row sorted by offset:
@@ -77,10 +101,12 @@ def load_all():
     # with them, and the linker then takes splat's definition (measured:
     # sorted_entry_relink, built lo 0xB314 where JP has 0xB204)
     JP_AUTO = set()
-    for p in list((KG / "tmp/splat/slpm_86398/asm").rglob("*.s")) + [KG / "tmp/splat/slpm_86398/undefined_syms_auto.txt", KG / "tmp/splat/slpm_86398/undefined_funcs_auto.txt", KG / "tmp/splat/slpm_86398/slpm_86398.ld"]:
+    for p in list((SPLAT / "asm").rglob("*.s")) + [SPLAT / "undefined_syms_auto.txt",
+                                                   SPLAT / "undefined_funcs_auto.txt",
+                                                   SPLAT / (R["config"] + ".ld")]:
         if p.exists():
             JP_AUTO.update(re.findall(r"\b(?:D|func)_[0-9A-Fa-f]{8}\b", p.read_text(errors="replace")))
-    if not JP_AUTO: sys.exit("no tmp/splat/slpm_86398 output: run `make japanese-split` in his tree first")
+    if not JP_AUTO: sys.exit(f"no {SPLAT.relative_to(KG)} output: run `make {R['make']}-split` in his tree first")
     JP_AUTO -= set(jpsyms)      # a D_ name symbols.txt gave a JP address is a user name, not a collision
     return us, jp, pairs, names, jpsyms
 
@@ -305,22 +331,22 @@ def apply(addr):
         # names the JP build cannot use are #defined to JP names before the
         # headers are seen; the US source is included rather than copied
         base = unit[len("game/"):]
-        wrapper = KG / "src/game/japanese" / (base + ".c")
+        wrapper = KG / "src/game" / R["srcdir"] / (base + ".c")
         if wrapper.exists(): sys.exit(f"{wrapper} exists")
         # `make basic-types` wants types.h included first in every source file
         body = ['#include "../../types.h"', "",
                 f"/* SLPM-86398 build of {r['src']}: the symbols below sit at other addresses in the",
                 " * Japanese executable and their US names are taken there, so they are aliased",
-                " * (config/slpm_86398/symbols.txt has the addresses). The US source is included",
+                f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
                 " * unchanged. */"]
         body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
         body += ["", f'#include "../{base}.c"', ""]
         wrapper.write_text("\n".join(body))
-        unit = "game/japanese/" + base
+        unit = "game/" + R["srcdir"] + "/" + base
         r["src"] = "src/" + unit + ".c"
     start, end = r["jps"][0] - LOAD + HDR, r["jps"][0] + sum(r["sizes"]) - LOAD + HDR
     # split.yaml: the main segment's subsegment list
-    sp = KG / "config/slpm_86398/split.yaml"; text = sp.read_text()
+    sp = TGT_CFG / "split.yaml"; text = sp.read_text()
     lines = text.split("\n")
     idx = [i for i, l in enumerate(lines) if re.match(r"\s+- \[0x[0-9a-f]+, (c|asm|rodata|pad)", l) and i < lines.index("  - name: initialized_data")]
     ents = [(int(re.match(r"\s+- \[(0x[0-9a-f]+)", lines[i]).group(1), 16), i) for i in idx]
@@ -356,7 +382,7 @@ def apply(addr):
     # out of order), so never re-sort it -- insert before the first entry in
     # file order whose address is larger, else append. The diff is then only
     # the new entries.
-    mc = KG / "config/slpm_86398/matching_c.json"; d = json.load(open(mc))
+    mc = TGT_CFG / "matching_c.json"; d = json.load(open(mc))
     new_ents = [{"address": f"0x{j:08X}", "profile": r["profile"], "size": f"0x{s:X}", "source": r["src"]}
                 for j, s in zip(r["jps"], r["sizes"])]
     pos = next((i for i, f in enumerate(d["functions"]) if int(f["address"], 16) > r["jps"][0]), len(d["functions"]))
@@ -364,7 +390,7 @@ def apply(addr):
     mc.write_text(json.dumps(d, indent=2) + "\n")
     # symbols.txt: upstream appends each PR's lines at the end, functions then
     # data symbols; the existing lines and the trailing newline are kept as is
-    st = KG / "config/slpm_86398/symbols.txt"; old = st.read_text()
+    st = TGT_CFG / "symbols.txt"; old = st.read_text()
     # a function an earlier promotion reached by `jal` already has its line
     # (splat rejects a second one: "Duplicate symbol detected", first seen on
     # Text_EncodeDecimalDigits after #5649); a different address is a conflict
