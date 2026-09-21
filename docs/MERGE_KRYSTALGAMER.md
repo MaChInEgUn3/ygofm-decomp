@@ -407,6 +407,20 @@ did NOT move: a named read of the copy's source before the flag store
 measured: `volatile` on either side, his compiler as a knob. Every ported
 function is in; `parked/` holds the two SDK stubs only.
 
+**`volatile` measured afterwards, two-sided, from his original bodies
+(2026-09-21, record only; the casts stay installed).** func_8001F55C:
+volatile on the copy's source and on the `D_8009B174` store at the case-8
+site, and on the copy's destination and the `D_8009B1D0` store at the 0xBF
+arm, is a MATCH too -- a second spelling of the same dependence.
+func_8001BD88: the same pairing closes the first site and not the second
+(20 -> 4, the four being the `restore:` block's `lw 44($s3)` still above
+the two `sw $zero` to `D_8009B18C`/`D_8009B188`, both marked); the load
+alone marked is 14. func_80028B08: volatile on the extent store, alone or
+with the `field_32` load, stays at 5 -- there the residue is not a
+dependence the scheduler settles by disjointness, so volatile is inert
+(WORKFLOW's func_80048F14 bound). The byte-address cast closes all three
+and says what it does; it is the one installed.
+
 **The declarations fold, step one: types (2026-09-21).** The 139 ported
 files carried 1851 typedefs, 43 tag definitions and 138 forward declarations
 at file scope, one copy per unit (`tools_src/kg_decls.py census`). Folding
