@@ -465,3 +465,44 @@ func_80029934, func_80034830 -- 386, 672, 351, 858 instructions). The
 debt counter had to learn the marker too: a `.word` whose opcode field is
 not COP2 reads as transcribed MIPS, and these four were counted as debt
 until `is_debt` recognises the marker shape (four controls in the commit).
+
+**The extern fold's shape is decided (2026-09-21): `kg_variables.h` and
+`kg_functions.h`, included only by the ported units, with arms only for
+the 46 + 14 internal disagreements.** WORKFLOW's "every global once" exists
+to stop silent codegen drift between files, and for the ported units that
+hazard is closed by the build gate rather than by header unity; the ported
+units are his type world and the header says so, the way `kg_types.h`
+already does. It folds mechanically into `variables.h` arms later if that
+is ever wanted. It is second priority behind the Japanese lane below, which
+is matching work with a live race; the fold is style.
+
+## The Japanese build, from here (2026-09-21)
+
+His tree's SLPM-86398 lane (#5551) reuses the US `.c` files: a Japanese
+match is three config lines per function -- `config/slpm_86398/matching_c.json`
+entry, a `split.yaml` subsegment pair, and `symbols.txt` lines
+`USName = 0xJPaddr;` for every symbol the unit reaches at a different
+address (function names come from `config/slus_01411/functions.csv`, which
+is what the C defines; three link errors said so on the first try).
+`tools_src/jp_promote.py scan|apply 0xUSaddr` derives all of it from the
+bytes: the US words of the unit and the JP words at the paired address are
+compared word by word, and a differing word must be a `lui`/`lo` half, a
+gp-relative offset or a `jal`/`j` target, each yielding one symbols line;
+any other difference means the code is not the same and the unit is
+skipped. Pairs come from the issue's list (`config/jp_matches.csv`,
+address = JP, address2 = US), and a function the list lacks is inferred
+from a paired neighbour by contiguity and then judged by the same
+comparison. Named symbols at an EQUAL address are recorded too, because
+JP splat only auto-labels `D_`/`func_` names; a `D_` name at an equal
+address that the link still wants is one `symbols.txt` line and a retry,
+never a non-match verdict. Units with a US `.rodata` subsegment are
+flagged and not applied -- the comparison covers `.text` and the JP table
+placement is not derived. First scan at his dd9cd44: 73 clean units of 118
+queued (four merged upstream during the analysis: his agents run this lane
+too, so fetch, reset and rescan before every apply). The only proof is
+`make japanese-match` on the exact tree (`MATCH tmp/project-build/SLPM_863.98`,
+sha `ee3f4558…`, 13 s); the first PR is #5632. `tools_src/variants.py`
+(exact substitutions, try_func in parallel, outputs under `build/variants/`)
+is the instrument the three-park closure above was measured with, and it
+lives here for the same reason: a scratch directory does not survive a
+reboot, and both tools are load-bearing now.
