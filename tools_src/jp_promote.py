@@ -216,12 +216,30 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # it can only be a #define onto whatever name the JP build does use
     addr_of = {n: a for a, n in names.items()}
     text = (KG / src).read_text(errors="replace") if (KG / src).exists() else ""
+    # Count the alternates the unit uses IN CODE. Comments have to go first:
+    # a provenance header naming a sibling, or a `goto func_80073900;` label,
+    # reads as a reference and is not one (measured on six such names, five of
+    # them false).
+    code = re.sub(r"//[^\n]*", " ", re.sub(r"/\*.*?\*/", " ", text, flags=re.S))
+    rename = {}
     for n, jn in list(aliases.items()) + [(n, n) for n in lines]:
         m = re.match(r"(?:D|func)_([0-9A-Fa-f]{8})$", n)
         ua = int(m.group(1), 16) if m else addr_of.get(n)
         if ua is None: continue
-        for n2 in ALT_NAMES.get(ua, ()):
-            if n2 != n and n2 not in aliases and n2 not in lines and re.search(r"\b%s\b" % re.escape(n2), text):
+        used = sorted(n2 for n2 in ALT_NAMES.get(ua, ())
+                      if re.search(r"\b%s\b" % re.escape(n2), code))
+        if len(used) == 1 and used[0] != n and used[0] not in aliases and used[0] not in lines:
+            # ONE name in the code, and it is not the one usname() picked:
+            # symbols.txt does not name this address, so the tool synthesised
+            # `D_<addr>` while the unit calls it by its real name. Emit the
+            # line under the name the source uses -- there is no conflict.
+            # card_list_sort is the case: `gBuildDeck_pState` twice in code,
+            # `D_8009B2FC` nowhere in the file, not even in a comment, because
+            # it exists only as an alias in config/slus_01411/c_symbols.ld.
+            rename[n] = used[0]
+            continue
+        for n2 in used:
+            if n2 != n and n2 not in aliases and n2 not in lines:
                 # MEASURED, and it is why this is a rejection rather than a
                 # second #define: fade_runtime reads 0x800E9EC8 as both
                 # `gFade_State` and `u8 D_800E9EC8_arr[]`, and aliasing both
@@ -232,6 +250,9 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                 return dict(ok=False, src=src,
                             why=f"{n} and {n2} are two US names of {ua:#x} with different declarations; "
                                 f"one JP identifier ({jn}) cannot carry both")
+    for old, newn in rename.items():
+        if old in lines: lines[newn] = lines.pop(old)
+        if old in aliases: aliases[newn] = aliases.pop(old)
     # A unit with its own .rodata block: derive where the JP copy sits and
     # refuse unless the bytes SELF-CHECK. The block is a switch table of .text
     # addresses, so the JP words must be the US words shifted by this unit's
