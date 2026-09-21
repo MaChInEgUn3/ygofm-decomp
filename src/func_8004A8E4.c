@@ -1,121 +1,192 @@
-/* ASSEMBLY DEBT -- this is a TRANSCRIPTION, not a decompilation.
- * Ordinary MIPS written into an inline asm block to force a match. It is
- * byte-exact and therefore invisible to build.py, which is exactly the
- * problem: the oracle cannot tell transcribed assembly from real C, so
- * nothing but this comment stops it being counted as done.
- * Counted by tools_src/asm_debt.py; the standard is in docs/ASM_DEBT.md.
- */
-/* PORTED from Unchiga's decompilation of SLUS_014.11, shared 2026-08-30.
- * His C, his comments; the identifiers are rewritten to this repo's address
- * form and nothing else was touched. Verified the only way that counts here:
- * tools_src/build.py rebuilds the retail image byte-for-byte with this in it.
- *
- * Self-contained by design -- it keeps his declarations rather than ours,
- * because a declaration is a codegen input and his are what this C matched
- * under. See docs/MERGE_UNCHIGA.md and tools_src/install_ported.py.
- */
-/* Decrements a per-record counter in the D_8009B458 table: reads the type
-   byte at rec[3] of entry idx, and unless it is 99, walks to the record at
-   base + type*24 and decrements the low nibble of its byte 6 if nonzero.
-
-   MATCHED 0/23 on ALL FOUR flag combos (2026-08-28, w1). History: 7/23 ->
-   2/23 (w1, chain pins, see below), 2/23 -> 0/23 (w1, same pass as
-   func_8003A198's func_80073910).
-
-   WHAT CLOSED THE LAST 2. Residual was 0x8004a8f8/0x8004a8fc: target does
-   addiu v0,v0,384 then addu a1,a2,v0, this compile folded the addiu into
-   the a1-pinned pointer (addiu a1,v0,384 then addu a1,a2,a1). Right
-   destination, WRONG TEMP REGISTER -- gcc homes the offset temp in the
-   pinned destination register itself because that register is free.
-   The general fix, confirmed on two functions in one pass: route the final
-   add through a minimal 2-input inline asm addu, which takes the pinned
-   destination out of the temp's candidate set. Here the operand must stay
-   UNPINNED (plain s32 off) -- gcc then picks v0 on its own, exactly what
-   target does. Pinning off to v0 as well regresses to 21/23. Contrast
-   func_8003A198, where the same asm-addu lever needed its operand pinned
-   to $v1; so the rule is: try the asm addu with unpinned operands FIRST,
-   and only add an operand pin if the temp still lands wrong.
-   A single combined asm ("addiu %0,%0,0x180; addu %1,%2,%0" with "+r"(mult)
-   and "=r"(rec1)) also reaches 0/23 -- kept the two-statement form because
-   it matches the rest of this file and leaves both instructions
-   schedulable.
-   Dead ends re-measured from the 2/23 base: v0-pinned off with the asm addu
-   21/23; v0-pinned mult reused in place for the +0x180 3/23; v0-pinned off
-   with plain-C addition 6/23; dropping the a1 pin entirely 8/23.
-
-   CORRECTNESS TRAP, REPRODUCED AND THEN AVOIDED -- func_800738F0 this before touching
-   the *24 chain. Pinning ONLY the output to v1 scores better (7 -> 5) and is
-   WRONG: with a plain "=r" output and no early-clobber, gcc is free to
-   allocate %0 == %1, and it does, emitting sll v1,v1,1 then addu v1,v1,v1,
-   which computes v*4 and then v*32 instead of v*3 and v*24. The byte-diff
-   counter still improved, by coincidence. This function's own history
-   records the same trap once before. Pinning BOTH ends makes the aliasing
-   impossible without needing "=&r"; adding "=&r" instead of the second pin
-   regresses to 17/23, so early-clobber is not a substitute here.
-   ALWAYS func_800738F0 the operand registers in the disassembly after touching this
-   chain -- the diff count alone will not tell you it is broken. Verified on
-   the winning 0/23: sll v0,a0,2 / addu v0,v0,a0 / sll v0,v0,3 and
-   sll v1,v0,1 / addu v1,v1,v0 / sll v1,v1,3, both non-aliasing.
-
-   WHAT CLOSED THE EARLIER 5: target's move v0,v1 in the beq delay slot is
-   not an opportunistic filler, it is the copy forced by target keeping the
-   *24 chain OUTPUT in v1 -- the same register the loaded byte already
-   occupies -- so the chain SOURCE has to be copied out to v0 first. v0 is
-   free at that point precisely because the li v0,99 it held was consumed by
-   the beq immediately before. The single pointer variable pinned to a1 and
-   reused for both records (rather than a separate rec1/rec2) is also
-   required and is worth 0 on its own -- it only pays off combined with the
-   chain pins. */
+/* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
+ * src/game/sound_secondary_object_selection.c (SD_PrepareSecondaryObjectReuse), profile gcc_2_8_1_g0.
+ * The declarations above the function are the subset of that tree's headers
+ * this unit needs, preprocessed and with symbols renamed to this tree's
+ * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
+ * under the flag row in tools_src/build.py. */
 typedef unsigned char u8;
+typedef signed short s16;
 typedef unsigned short u16;
+typedef signed int s32;
 typedef unsigned int u32;
-typedef signed char s8;
-typedef short s16;
-typedef int s32;
+typedef struct {
+    short left;	        
+    short right;        
+} SpuVolume;
+typedef struct {
+    unsigned long	voice;		 
 
-extern u8 *D_8009B458[3];
 
-s32 func_8004A8E4(s32 idx) {
-    s32 mult;
-    register u8 *base asm("a2");
-    register u8 *rec1 asm("a1");
-    u8 v;
-    __asm__(
-        "sll %0, %1, 2\n\t"
-        "addu %0, %0, %1\n\t"
-        "sll %0, %0, 3"
-        : "=r" (mult)
-        : "r" (idx)
-    );
-    __asm__(
-        "lui %0, %%hi(D_8009B458)\n\t"
-        "lw %0, %%lo(D_8009B458)(%0)"
-        : "=r" (base)
-    );
-    {
-        s32 off;
-        __asm__("addiu %0, %1, 0x180" : "=r" (off) : "r" (mult));
-        __asm__("addu %0, %1, %2" : "=r" (rec1) : "r" (base), "r" (off));
-    }
-    v = rec1[3];
 
-    if (v != 99) {
-        register s32 scaled asm("v1");
-        register s32 vcopy asm("v0") = (s32) v;
-        u8 f6;
+    unsigned long	mask;		 
+    SpuVolume		volume;		 
+    SpuVolume		volmode;	 
+    SpuVolume		volumex;	 
+    unsigned short	pitch;		 
+    unsigned short	note;		 
+    unsigned short	sample_note;	 
+    short		envx;		 
+    unsigned long	addr;		 
+    unsigned long	loop_addr;	 
+    long		a_mode;		 
+    long		s_mode;		 
+    long		r_mode;		 
+    unsigned short	ar;		 
+    unsigned short	dr;		 
+    unsigned short	sr;		 
+    unsigned short	rr;		 
+    unsigned short	sl;		 
+    unsigned short	adsr1;		 
+    unsigned short	adsr2;		 
+} SpuVoiceAttr;
+typedef struct {
+    u8 program;
+    u8 pan;
+    u8 pad0002;
+    u8 volume;
+    u8 field_0004;
+    u8 expression;
+    u8 field_0006;
+    u8 pitch_bend_msb;
+    s32 field_0008;
+    s32 field_000C;
+    u8 field_0010;
+    u8 parameter_selector;
+    u8 control_mode;
+    u8 control_value;
+    s16 field_0014;
+    u8 pad0016[2];
+} SDSecondaryRecord;
+typedef struct {
+    u8 voice_index;
+    u8 pad0001[2];
+    u8 channel_index;
+    u8 pad0004;
+    u8 field_0005;
+    u8 note;
+    u8 pad0007;
+    u8 field_0008;
+    u8 field_0009;
+    u8 field_000A;
+    u8 field_000B;
+     
 
-        __asm__(
-            "sll %0, %1, 1\n\t"
-            "addu %0, %0, %1\n\t"
-            "sll %0, %0, 3"
-            : "=r" (scaled)
-            : "r" (vcopy)
-        );
-        rec1 = base + scaled;
-        f6 = rec1[6];
-        if (f6 & 0xF) {
-            rec1[6] = f6 - 1;
+    u8 pan;
+    u8 field_000D;
+    u8 field_000E;
+    u8 field_000F;
+    u8 pitch_bend_positive_scale;
+    u8 pitch_bend_negative_scale;
+    u8 field_0012;
+    u8 field_0013;
+     
+
+    u16 level_left;
+    u16 level_right;
+    u8 pad0018[2];
+    s16 cached_pitch_bend;
+    s16 field_001C;
+    u16 field_001E;
+    u8 pad0020[8];
+} SDSecondaryObject;
+typedef struct {
+    s16 field_0000;
+    u8 pad0002[2];
+    u8 *field_0004;
+    s32 field_0008;
+    s32 field_000C;
+    s32 field_0010;
+    u8 *field_0014;
+    u8 field_0018;
+    u8 field_0019;
+    u8 field_001A;
+    u8 field_001B;
+} SDSecondaryTransfer;
+typedef struct {
+    s32 pos;
+    s32 pos_saved;
+    s32 chunk_length;
+    s32 chunk_end;
+    s32 chunk_start;
+    u16 tempo_accumulator;
+    u16 tempo_step;
+    u16 field_0018;
+    u16 field_0018_saved;
+    u32 delta_remaining;
+    u32 delta_remaining_saved;
+    u8 ended;
+    u8 ended_saved;
+    u8 loop_count;
+    u8 field_0027;
+    u8 running_status_held;
+    u8 running_status;
+    u8 running_status_saved;
+    u8 field_002B;
+} SDSequenceTrack;
+typedef struct {
+    SDSecondaryRecord channels[16 ];
+    SDSecondaryObject objects[20 ];
+    u8 pad04A0[4];
+    SDSecondaryTransfer transfer;
+    SpuVoiceAttr voice_attr;
+    u8 flag_0500;
+    u8 flag_0501;
+    u8 flag_0502;
+    u8 event_guard;
+    long event_handle;
+    u8 field_0508;
+    u8 field_0509;
+    u8 pad050A[2];
+    void (*field_050C)(void);
+    s16 object_count;
+    s16 field_0512;
+    u16 field_0514;
+    u16 field_0516;
+    SDSequenceTrack tracks[16 ];
+    u8 pad07D8[4];
+    u8 *field_07DC;
+    s16 field_07E0;
+    s16 field_07E2;
+    s16 field_07E4;
+    s16 field_07E6;
+    u8 *field_07E8;
+    s32 field_07EC;
+    s32 field_07F0;
+    s32 field_07F4;
+    u16 field_07F8;
+    u16 track_count;
+    u16 timebase;
+    u8 pad07FE[2];
+    u8 field_0800;
+    u8 field_0801;
+    u8 pad0802[2];
+    s32 field_0804;
+    s32 field_0808;
+    s32 field_080C;
+    s32 field_0810;
+    u8 field_0814;
+    u8 field_0815;
+    u8 pad0816[2];
+    u32 bytes_consumed;
+    s32 field_081C;
+    u8 pad0820[0x24];
+    u8 field_0844;
+    u8 field_0845;
+    u8 pad0846[2];
+} SDSecondaryState;
+extern SDSecondaryState *D_8009B458;
+s32 func_8004A8E4(s32 index, s32 value);
+s32 func_8004A8E4(s32 index, s32 value)
+{
+    SDSecondaryState *state = D_8009B458;
+    SDSecondaryObject *object = &state->objects[index];
+
+    if (object->channel_index != 0x63 ) {
+        SDSecondaryRecord *record = &state->channels[object->channel_index];
+
+        if ((record->field_0006 & 0xF) != 0) {
+            record->field_0006 = record->field_0006 - 1;
         }
     }
-    return idx;
+    return index;
 }

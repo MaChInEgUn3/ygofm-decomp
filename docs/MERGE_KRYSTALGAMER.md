@@ -288,3 +288,15 @@ profiles), which here become `extern` because every global is a linker
 symbol -- as a definition the unit lost the gp-relative form and was +12.
 Five more byte-identical in the build: 1182 -> 1187. Left: 21 parks whose
 port measures a real residue, and the two parks his tree does not have as C.
+
+**Fourth batch: the 21 "larger residues" were the same tool defects, and 18
+of them match (102 of 105).** Nothing in that group was a codegen question:
+once the splitter, the prototype dedupe, the tentative-definition rule and
+a target regex that backtracked for minutes (a unit that prototypes the
+target before defining it, `(?:[^;{}]*;)*` in front of the `{`) were fixed,
+the re-sweep came back 18 MATCH. 1187 -> 1202 in the build, and the
+assembly debt is ZERO: the last three transcriptions were in this batch.
+Left: func_80030294 (an anonymous `enum` constant the pruner does not see
+as a definer), func_800222F4 (a name his `data_c.json` owns, not his symbol
+files), func_8004E7B0 (a store into small data one slot early -- the
+`SMALL_DATA_NOP_FUNCS` shape), and the two parks his tree has no C for.

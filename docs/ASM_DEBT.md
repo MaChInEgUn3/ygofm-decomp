@@ -1,6 +1,6 @@
 # Assembly debt
 
-**3** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (10 until 2026-09-21, when seven were paid by porting krystalgamer's matched C, see the last section; the headline had said 12 for two weeks while the tool said 10, which is why the tool is the count and this line is a copy; 18 when this section was written on 2026-09-04, then 6, and 12 from 2026-09-08 when the counter was taught the three asm spellings it could not see -- `asm`, `__asm__ __volatile__`, and `asm volatile`; six real transcriptions had been counted as clean C, including func_80040588 with three whole blocks of `lw`/`lbu`/`sw`. `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
+**0** of the functions in `src/` are **transcriptions of compiler output** that are owed as C (10 until 2026-09-21, when all ten were paid by porting krystalgamer's matched C, see the last section; the headline had said 12 for two weeks while the tool said 10, which is why the tool is the count and this line is a copy; 18 when this section was written on 2026-09-04, then 6, and 12 from 2026-09-08 when the counter was taught the three asm spellings it could not see -- `asm`, `__asm__ __volatile__`, and `asm volatile`; six real transcriptions had been counted as clean C, including func_80040588 with three whole blocks of `lw`/`lbu`/`sw`. `tools_src/asm_debt.py` is the count, this line is a copy) -- the assembly debt proper. A further **52** are transcriptions of code that was **hand-written assembly in the original** and can never be C; they stay as asm by design and are not debt (see the 2026-09-04 section below; the headline used to read 76 and lumped the two together). The
 body is the retail instruction stream written out as inline `__asm__`. Every
 one of them is byte-exact, which is precisely why they need a file of their
 own: `build.py` cannot tell transcribed assembly from real C, so nothing
@@ -218,14 +218,15 @@ exact length except func_8001D5B4 (-2, structural), with residues of 1 to 11
 that are register allocation or scheduling; every one has a header listing what
 was measured and the permuter has been run on each from its best base.
 
-## Paid back on 2026-09-21 (10 -> 3)
+## Paid back on 2026-09-21 (10 -> 0)
 
 Six transcriptions retired by the port described in `docs/MERGE_KRYSTALGAMER.md`:
 func_8001D5B4, func_800260D0, func_80027508, func_8002C7E8, func_8004A6F8,
 func_800734DC, and func_80018608 in the second batch the same afternoon. No lever of this tree's closed them; krystalgamer's tree had
 the C and this tree's pipeline reproduces the bytes from it (same gcc 2.8.1,
-same maspsx emulation). The three left are func_80048F14, func_8004A854 and func_8004A8E4, all of
-them in his tree as C too and all in the 26 the port has not closed yet.
+same maspsx emulation). The last three, func_80048F14, func_8004A854 and func_8004A8E4, went in the
+fourth batch the same night. The debt is paid; what stays as asm is the 52
+hand-written originals and the GTE files, by design.
 
 The same port surfaced a false positive in the counter: a symbol alias on a
 declaration -- `extern u8 sym_flat[] asm("sym");`, or a prototype followed by

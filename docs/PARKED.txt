@@ -13,6 +13,28 @@
 # tres formas do fonte dele que a ferramenta nao lia -- definicao K&R, o mesmo
 # endereco prototipado sob dois nomes dele, e definicoes tentativas dos globais
 # que a TU dele possui (aqui viram extern). Build byte-identico com os 5.
+# Quarta leva: os 21 'residuos maiores' eram os MESMOS defeitos da ferramenta
+# (definicao repetida, alias, K&R, definicao tentativa) e um regex que
+# retrocedia minutos; 18 casaram, 3 ficam (enum anonimo, nome de data_c.json,
+# nop de small data). Build byte-identico com os 18. Divida de assembly: ZERO.
+func_800171A8 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80019608 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80020F4C -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8002BD0C -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_800393B0 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8003A560 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80045054 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80045208 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80045C98 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80045F3C -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80048658 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80048D08 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80048F14 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8004A854 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8004A8E4 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8004A940 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_8004C114 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
+func_80057544 -- MATCH 2026-09-21, C do krystalgamer portado (quarta leva).
 func_8005B260 -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
 func_8005B36C -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).
 func_8005B4D8 -- MATCH 2026-09-21, C do krystalgamer portado (terceira leva).

@@ -1,5 +1,5 @@
 /* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
- * src/game/sound_voice_data.c (SD_InitSecondaryRuntime), profile gcc_2_8_1_g0.
+ * src/game/sound_voice_data.c (SD_LoadSequenceBankPair), profile gcc_2_8_1_g0.
  * The declarations above the function are the subset of that tree's headers
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
@@ -39,17 +39,6 @@ typedef struct {
     unsigned short	adsr1;		 
     unsigned short	adsr2;		 
 } SpuVoiceAttr;
-typedef struct {
-    unsigned long	mask;	   
-
-    long		mode;	   
-    SpuVolume		depth;	   
-    long                delay;	   
-    long                feedback;  
-} SpuReverbAttr;
-extern long func_80075BE0 (long on_off);
-extern long func_80075DE0 (SpuReverbAttr *attr);
-extern long func_80076790 (long on_off);
 typedef struct {
     u8 command;
     u8 field_0001;
@@ -228,47 +217,65 @@ typedef struct {
     u8 field_164B;
 } SDValue;
 extern SDValue *D_8009B45C;
-s32 func_80049600(u32 count);
-void func_80048F14(void);
-void func_80049544(void);
-void func_80049594(s32 value);
-void func_80048F14(void)
+typedef struct {
+    s32 count;
+    u8 pad0004[4];
+    u16 keys[((0x1A0  - 0x08 ) / 2 ) ];
+    SDNote data[((0x1A0  - 0x08 ) / 2 ) ];
+} SDSeqBlock;
+void func_8004763C(void);
+void func_80048C70(u32 *dst, u32 *src);
+void func_80048D08(s32 side, u32 *src);
+void func_80048D08(s32 side, u32 *src)
 {
-    SpuReverbAttr packet;
-     
+    SDSeqBlock *blk;
+    SDSeqBlock *other;
+    SDSeqBlock *cur;
+    SDNote *e;
+    u32 addr_side;
+    u32 addr_other;
+    s32 rev;
+    s32 i;
+    s32 j;
 
-    SDValue *a;
-    SDValue *b;
-    SDValue *c;
+    if ((u32)side >= 2) {
+        return;
+    }
 
-    func_80076790(1 );
-    func_80075BE0(1 );
-    packet.mask = (0x01 <<  0)  | (0x01 <<  1)  | (0x01 <<  2) ;
-    packet.mode = 2 ;
-    packet.depth.left = 0x7FFF;
-    packet.depth.right = 0x7FFF;
-    func_80075DE0(&packet);
-    b = D_8009B45C;
-    b->field_1586 = 0;
-    b->field_1588 = 0;
-    b->field_158A = 0;
-    a = D_8009B45C;
-    a->field_1580 = 0xFF;
-    a->field_1584 = 0xFF;
-    c = D_8009B45C;
-    a->field_1582 = 0;
-    c->field_1578 = -1;
-    c->field_157A = -1;
-    c->field_157C = -1;
-    c->field_157E = -1;
-    c->music_track = (u16 *)0x801EA800;
-    c->field_1560 = (u8 *)0x801E2000;
-    c->music_track[0] = 0xFFFF;
-    c->music_track[1] = 0;
-    *(s32 *)&c->music_track[2] = 0;
-    *(s32 *)&c->music_track[4] = 0;
-    *(s32 *)&c->music_track[6] = 0x40000;
-    func_80049594(2);
-    func_80049600(0x14);
-    func_80049544();
+    rev = 1 - side;
+    addr_side = 0xD810 + (side % 2) * 0x19000;
+    addr_other = 0xD810 + (rev % 2) * 0x19000;
+    blk = (SDSeqBlock *)(0x801E7800 + (side << 11 ));
+    other = (SDSeqBlock *)(0x801E7800 + (rev << 11 ));
+    func_80048C70((u32 *)blk, src);
+    func_8004763C();
+
+    for (i = 0; i < 2; i++) {
+        cur = other;
+        if (i != 0) {
+            cur = blk;
+        }
+        for (j = 0; j < cur->count; j++) {
+            u16 key = cur->keys[j];
+            if (key != 0xFFFF ) {
+                u16 n = D_8009B45C->field_0440;
+                u16 v;
+
+                D_8009B45C->field_043C[key] = n;
+                D_8009B45C->field_0444[n] = cur->data[j];
+                e = (SDNote *)(
+                    (u32)&((SDNote *)0)[n] +
+                    (u32)D_8009B45C->field_0444
+                );
+                v = e->field_0006;
+                e->field_0006 =
+                    (i != 0) ? (u16)(v + (addr_side >> 4))
+                             : (u16)(v + (addr_other >> 4));
+                D_8009B45C->field_0440 = D_8009B45C->field_0440 + 1;
+            }
+            if (i != 0) {
+                D_8009B45C->field_044C[side][j] = key;
+            }
+        }
+    }
 }

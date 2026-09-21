@@ -113,7 +113,10 @@ def preprocess(src):
 
 
 def move_target_last(text, func):
-    m = re.search(r"(?m)^[^\n;{}]*\b" + func + r"\s*\([^;{)]*\)\s*(?:[^;{}]*;\s*)*\{", text)
+    # ANSI head, or a K&R head followed by parameter declarations that cannot
+    # contain parens -- an unbounded `(?:[^;{}]*;)*` here backtracked for
+    # minutes on a unit that prototypes the target before defining it
+    m = re.search(r"(?m)^[^\n;{}]*\b" + func + r"\s*\([^;{)]*\)(?:\s*[A-Za-z_][^;{}()]*;)*\s*\{", text)
     if not m:
         sys.exit(f"definition of {func} not found in preprocessed unit")
     depth, i = 0, m.end() - 1

@@ -56,7 +56,12 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     specs = {}
     for f in funcs:
-        r = subprocess.run([PY, "tools_src/port_kg.py", f, "--json"], cwd=ROOT, capture_output=True, text=True)
+        try:
+            r = subprocess.run([PY, "tools_src/port_kg.py", f, "--json"], cwd=ROOT,
+                               capture_output=True, text=True, timeout=180)
+        except subprocess.TimeoutExpired:
+            print(f"{f}\tPORT-FAIL\tport_kg.py exceeded 180 s", flush=True)
+            continue
         if r.returncode:
             print(f"{f}\tPORT-FAIL\t{(r.stderr or r.stdout).strip().splitlines()[-1][:120]}", flush=True)
             continue

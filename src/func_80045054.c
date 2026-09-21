@@ -1,5 +1,5 @@
 /* Ported from krystalgamer/memories-decomp at commit 3dfeb592fcc8,
- * src/game/sound_voice_data.c (SD_InitSecondaryRuntime), profile gcc_2_8_1_g0.
+ * src/game/sound_output_state.c, profile gcc_2_8_1_g0.
  * The declarations above the function are the subset of that tree's headers
  * this unit needs, preprocessed and with symbols renamed to this tree's
  * spelling (func_ADDR, D_ADDR); their types are that tree's. Byte-identical
@@ -40,16 +40,12 @@ typedef struct {
     unsigned short	adsr2;		 
 } SpuVoiceAttr;
 typedef struct {
-    unsigned long	mask;	   
-
-    long		mode;	   
-    SpuVolume		depth;	   
-    long                delay;	   
-    long                feedback;  
-} SpuReverbAttr;
-extern long func_80075BE0 (long on_off);
-extern long func_80075DE0 (SpuReverbAttr *attr);
-extern long func_80076790 (long on_off);
+    short cd_left  [0x200 ];
+    short cd_right [0x200 ];
+    short voice1   [0x200 ];
+    short voice3   [0x200 ];
+} SpuDecodedData;
+extern long func_80076D20 (SpuDecodedData *d_data, long flag);
 typedef struct {
     u8 command;
     u8 field_0001;
@@ -228,47 +224,53 @@ typedef struct {
     u8 field_164B;
 } SDValue;
 extern SDValue *D_8009B45C;
-s32 func_80049600(u32 count);
-void func_80048F14(void);
-void func_80049544(void);
-void func_80049594(s32 value);
-void func_80048F14(void)
+s32 func_80045054(void);
+extern SDValue *volatile g_SDValue_output_level asm("D_8009B45C");
+s32 func_80045054(void)
 {
-    SpuReverbAttr packet;
-     
+    s32 select = func_80076D20(
+        (SpuDecodedData *)g_SDValue_output_level->buffer_053C, 5 
+    );
+    SDValue *choice_state = g_SDValue_output_level;
+    s16 *values;
+    s32 i;
+    SDValue *loaded;
+    SDValue *state;
 
-    SDValue *a;
-    SDValue *b;
-    SDValue *c;
-
-    func_80076790(1 );
-    func_80075BE0(1 );
-    packet.mask = (0x01 <<  0)  | (0x01 <<  1)  | (0x01 <<  2) ;
-    packet.mode = 2 ;
-    packet.depth.left = 0x7FFF;
-    packet.depth.right = 0x7FFF;
-    func_80075DE0(&packet);
-    b = D_8009B45C;
-    b->field_1586 = 0;
-    b->field_1588 = 0;
-    b->field_158A = 0;
-    a = D_8009B45C;
-    a->field_1580 = 0xFF;
-    a->field_1584 = 0xFF;
-    c = D_8009B45C;
-    a->field_1582 = 0;
-    c->field_1578 = -1;
-    c->field_157A = -1;
-    c->field_157C = -1;
-    c->field_157E = -1;
-    c->music_track = (u16 *)0x801EA800;
-    c->field_1560 = (u8 *)0x801E2000;
-    c->music_track[0] = 0xFFFF;
-    c->music_track[1] = 0;
-    *(s32 *)&c->music_track[2] = 0;
-    *(s32 *)&c->music_track[4] = 0;
-    *(s32 *)&c->music_track[6] = 0x40000;
-    func_80049594(2);
-    func_80049600(0x14);
-    func_80049544();
+    choice_state->decoded_half = select;
+    if (select == 0 ) {
+        values = (s16 *)choice_state->buffer_ptrs_153C[0];
+    } else {
+        values = (s16 *)choice_state->buffer_ptrs_153C[1];
+    }
+    loaded = g_SDValue_output_level;
+    i = 0;
+    state = loaded;
+    state->output_level.sum = 0;
+    state->field_1550.sum = 0;
+    do {
+        s32 value = *values;
+        u32 square = value * value;
+        state->output_level.sum += square >> 8;
+        i++;
+        values++;
+    } while (i < 256 );
+    {
+        s32 result;
+        s32 flags;
+        s32 other;
+        state = g_SDValue_output_level;
+        do {
+            result = state->output_level.halves[1];
+        } while (0);
+        flags = state->flags_0040;
+        other = state->field_1550.halves[1];
+        flags &= 3;
+        state->output_level.sum = result;
+        state->field_1550.sum = other;
+        if (!flags) {
+            return result;
+        }
+        return 0;
+    }
 }
