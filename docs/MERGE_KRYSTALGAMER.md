@@ -506,3 +506,43 @@ sha `ee3f4558…`, 13 s); the first PR is #5632. `tools_src/variants.py`
 is the instrument the three-park closure above was measured with, and it
 lives here for the same reason: a scratch directory does not survive a
 reboot, and both tools are load-bearing now.
+
+**What the first batch of ten measured (2026-09-21, all on the gate).**
+Three classes the word comparison cannot see, each first read as a
+non-match and each a tool gap:
+  * **A US default name collides with the JP build's own default name.**
+    `D_8009B314` in the US is at 0x8009B204 in the JP executable, but JP
+    splat also labels *its* 0x8009B314 `D_8009B314`, and the linker keeps
+    splat's definition: sorted_entry_relink built `lo 0xB314` where the JP
+    bytes have `0xB204`, in a function the unit does not even contain. The
+    same wall in a second shape: a JP address that `symbols.txt` already
+    names refuses a second name ("clashes with gJapanese_bActiveMainMode").
+    His tree's answer is the regional-alias wrapper, `src/game/japanese/
+    <unit>.c`, with `#define USname JPname` above the headers; the tool
+    writes one (types.h first, because `make basic-types` insists, then the
+    defines, then `#include "../<unit>.c"` -- the US source included, not
+    copied, which is the one place this departs from his five hand-made
+    wrappers) and names the JP side `gJapanese_<USname>`, or reuses the
+    name JP already has. The JP data block around 0x8009B1xx-B4xx sits
+    0x110 below the US one, so this is the common case, not the odd one.
+  * **An equal word still names a symbol.** Through `gp` it is the same
+    offset from a different `gp` (US 0x8009AF08, JP 0x8009AE48), so the
+    symbol moved by -0xC0 and needs its line; through a `lui`/`lo` pair
+    with equal halves it is an equal address that a *named* symbol still
+    needs declared, because JP splat only auto-labels `D_`/`func_` names
+    (`undefined reference to gDuel_awPlayerDeck`).
+  * **A stale `lui` entry pairs a displacement off a LOADED pointer as a
+    symbol half** (`D_FFFF0058`, which splat could place nowhere). The
+    register a word writes now drops its `lui` entry, one word late because
+    `lw $v0, lo($v0)` reads the base first.
+Two classes stay out until they are worth a source change in his tree: a
+US name defined only in `config/slus_01411/c_symbols.ld`
+(`D_800E9EC8_arr`, fade_runtime), which the JP link never sees, and an
+address spelled as a *literal* in the C (mem_card_io_result_callbacks
+writes `(u8 *)0x800A0000 - 0x4BB0`), which no symbol line can move.
+And the race is the dominant cost: his agents merged nine Japanese PRs in
+the hour the first one here was open, every one on the same three files,
+so the PR was merged with master four times (take master's three files,
+re-apply the unit, re-gate, merge commit -- never a rewrite of a reviewed
+head). A batch of ten pre-verified units waits on a local branch for the
+first to land, one PR open at a time.
