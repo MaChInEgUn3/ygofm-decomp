@@ -10,12 +10,8 @@
 extern u8 D_8009B0C1 __attribute__((section(".data")));
 extern u16 D_8009B398 __attribute__((section(".data")));
 void func_8003B50C(s32 value);
-extern DuelEffectChannel D_800EB0F8[4 ];
 void func_80039D64(DuelEffectChannel *);
-void func_8003FEE0(u32);
-void func_8004036C(void *object);
 extern u8 D_8009B356;
-void func_80039794(void);
 void func_800393B0(struct DuelEffectChannel *object);
 extern s16 D_8009B35A;
 struct DisplayObject *func_800374F4(DuelEffectChannel *record);

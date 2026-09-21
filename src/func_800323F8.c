@@ -7,27 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
-extern s16 D_801D07BC[16 ];
-void func_80032328(void);
-void func_80032370(void);
-extern s32 D_801D4244[];
-extern BuildDeckTransitionState *D_8009B2FC;
-void func_80031E5C(BuildDeckTransitionState *record);
-void func_8003201C(BuildDeckTransitionState *state);
-void func_80032C48(CardList *list);
-void func_80031874(DisplayObject *obj, GsOT *ot);
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_8003FF08(u32);
-extern u8 D_80090DD8[];
-void func_800323F8(u8 *base, void *deck, s32 other, s32 flags);
 void func_800323F8(u8 *base, void *deck, s32 other, s32 flags)
 {
     u8 *state;

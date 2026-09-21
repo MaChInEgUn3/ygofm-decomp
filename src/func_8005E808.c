@@ -9,8 +9,6 @@
 #include "kg_functions.h"
 extern long func_80086E50(long a);
 extern SVECTOR D_800F5768[3 ];
-void func_80058FB0(s32 idx, u16 *out);
-int func_80058DD8(int index);
 void func_8005EBF4(Key *cur, s32 k, s32 scale, s32 den, s16 *out);
 void func_8005E808(Key *key);
 void func_8005FB30(Key *key);

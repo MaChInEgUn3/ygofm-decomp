@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8008E870(const char *fmt, ...);
 extern void func_8008FBD0(s32 status) __attribute__((noreturn));
 extern char D_800117EC[];
 extern char D_80011814[];

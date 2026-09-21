@@ -9,58 +9,11 @@
 #include "kg_functions.h"
 extern u8 D_800907D8[];
 extern u8 D_8009B1D5;
-extern DuelSideState *D_8009B1C8;
-extern u8 *D_8009B22C;
-extern s8 D_8009B238;
-extern u8 D_8009B369 __attribute__((section(".data")));
-void func_800175A0(void);
-void func_80016E70(DisplayObject *widget);
-void func_8001778C(void);
-void func_800164FC(void);
-extern u16 D_801D0200[];
-extern u8 D_801D1200[];
-extern u8 D_8009B1D4;
-void func_800176D0(void);
-void func_80017708(void);
-void func_80012D84(s32 count);
-extern u8 D_801781D8[];
-extern u8 D_8009B164;
 extern u16 D_8009B16C;
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
-FileTransferDescriptor *func_80014E1C(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-void func_800137E4(void);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80042918(DisplayObject *object);
-extern ViewState D_800F2848;
-void func_8001352C(void);
-void func_8001352C(void);
-extern void (*D_800E9DB0[4])(void);
-extern DuelEffectResourceRecord D_800EA0E8[];
-void func_8004763C(void);
-s32 func_80047AD0(s32 value);
-extern u16 D_8009B220;
-extern u16 D_8009B162;
-extern u8 D_8009B174;
-void func_800179F4(void);
 extern DisplayObject *D_8009B214;
 extern DisplayObject *D_8009B21C;
 extern u8 *D_8009B1D8;
-extern u8 *D_8009B1DC;
-void func_8001755C(void);
-void func_8002C598(void);
-void func_80029574(s32 index);
-void func_80035668(u32 value);
-void func_800178BC(void);
-extern u8 D_8009B364 __attribute__((section(".data")));
 extern u16 D_8009B204;
-extern s8 D_8009B361 __attribute__((section(".data")));
 void func_800179F4(void)
 {
     DisplayObject *obj;

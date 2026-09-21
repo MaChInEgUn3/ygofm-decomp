@@ -25,25 +25,15 @@ extern u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
 extern u16 D_8009B39A __attribute__((section(".data")));
 extern ModelSlot D_800F2C40[3 ];
-s32 func_80056504(
-    s32 slot, s32 model, s32 p2, s32 p3, s32 p4, s32 p5, s32 arg6
-);
-void func_80056828(s32 index);
 extern u8 *D_8009AF88;
 extern s8 D_8009AF9A;
 extern u8 D_8009AFA1;
-extern int func_8007EF84();
 extern s16 D_8009B488[3 ];
 extern u8 D_8009B48E[2];
 extern u8 D_8009B490[2];
 void func_80053248(s32 idx, ...);
-void func_800533D8(void);
 void func_80059AEC(s32 value);
-s32 func_80059AA8(s32 index, s32 value);
 void func_8005922C(struct _GsCOORDUNIT *unit, VECTOR *scale);
-void func_800137E4(void);
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-extern int  func_8008E590(void);
 extern ModelDebugState D_8009B004;
 s32 func_800534B8(void)
 {

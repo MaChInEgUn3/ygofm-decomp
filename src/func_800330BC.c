@@ -7,14 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_80031E04(CardList *list, s32 count);
-void func_80032C48(CardList *list);
-s32 func_800330BC(CardList *list);
-void func_80032C48(CardList *list);
-extern u8 D_80090DD8[];
 extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
-void func_8003FEE0(u32);
 s32 func_800330BC(CardList *list)
 {
     s32 row;

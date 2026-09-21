@@ -7,57 +7,12 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-int func_800282E8(void);
-extern volatile u8 D_8009B0C0 __attribute__((section(".data")));
-void func_80029574(s32 index);
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern volatile u16 D_8009B39A __attribute__((section(".data")));
-extern u8 D_8009B140 __attribute__((section(".data")));
-void func_80015BD8(s32, s32);
-extern DuelEffectChannel D_800EB0F8[4 ];
 extern s16 D_8009B338 __attribute__((section(".data")));
-extern u8 D_8009B248;
-extern u8 D_8009B248;
 extern u8 D_8009B254;
 extern u16 D_8009B246;
-extern DisplayObject *D_8009B240;
 extern u8 D_8009B24B;
-extern DisplayObject *D_8009B24C;
-extern DuelEffectChannel *D_8009B250;
-extern DisplayObject *D_8009B240;
-extern DisplayObject *D_8009B24C;
-extern DuelEffectChannel *D_8009B250;
-void func_80035B7C(struct DuelEffectChannel *record);
-void *func_80035BE4(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height
-);
-void func_8003FEE0(u32);
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_8004036C(void *object);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
-extern volatile u16 D_8009AF74[4] __attribute__((section(".data")));
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80042918(DisplayObject *object);
-u8 *func_800291E0(s32 index, s32 x, s32 y);
-void func_80029528(s32 index);
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-FileTransferDescriptor *func_80029164(s32 slot, s32 value);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
-void func_80039934(struct DuelEffectChannel *record, s32 x, s32 y);
-void func_80039A14(struct DuelEffectChannel *object);
-extern s32 D_801D4244[];
-extern DuelEffectResourceRecord D_800EA0E8[];
-void func_800283F4(void);
-extern u8 D_8009B26C __attribute__((section(".data")));
 void func_800283F4(void)
 {
     s32 slide_in;

@@ -8,7 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern u32 *D_800FE240 __attribute__((section(".data")));
-void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
 void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags)
 {
     u32 *s;

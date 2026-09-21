@@ -8,7 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern s32 D_800F5B98[20 ];
-extern AiActiveCard D_801AB000[];
 s32 func_80070920(s32 mode, s32 index);
 void func_80070738(s32 kind, s32 *low, s32 *high);
 s32 func_8007058C(void);

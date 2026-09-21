@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_800245EC(FileTransferDescriptor *, s32);
 void func_800245EC(FileTransferDescriptor *o, int mode) {
     s16 *p = o->callback_data;
 

@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8007EF84();
-extern int func_8008E870(const char *fmt, ...);
 s32 func_8004413C(s32 channel);
 s32 func_800441DC(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
 s32 func_800442E4(s32 channel, s32 name, s32 buffer, s32 offset, s32 size);
@@ -44,13 +42,10 @@ extern char D_800103A4[];
 void func_8003DC1C(void);
 void func_80043E30(long val);
 void func_80043EBC(void);
-extern DuelEffectChannel D_800EB0F8[4 ];
 extern u8 D_8009B3C1;
 extern u8 D_8009B3C7;
 DuelEffectChannel *func_8003D46C(s32 value, s32 set_flags);
 extern s8 D_8009B34D __attribute__((section(".data")));
-void func_80039794(void);
-void func_800356A0(u8 *destination, u8 *source, u32 length);
 void func_80035748(u8 *destination, s32 value, u32 length);
 extern u8 D_801D4000[];
 void func_8003DC1C(void)

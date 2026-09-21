@@ -7,16 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s16 D_800907AC[2 ][2][4];
-extern DuelFieldPosition
-    D_80090800[2 ][20 ];
 extern u8 D_8009B1D5;
-void func_8003FEE0(u32);
-void func_800429D8(DisplayObjectVelocity *object);
-extern u16 D_8009AF20[2];
-void func_80022D94(s32 frames, s32 x, s32 z, s32 y, s32 value);
-extern u16 D_8009B162;
-void func_80023D08(GridCursor *o, s32 dir);
 void func_8002348C(void);
 void func_80023D08(GridCursor *o, s32 dir) {
     DuelFieldCursorObject *d;

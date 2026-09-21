@@ -7,26 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s32 D_801D4244[];
-extern DuelDeckCardRecord D_801A7E20[];
 extern u8 D_8009B1D5;
-extern u16 D_8009B36A __attribute__((section(".data")));
-void func_80018608(void);
-extern ViewState D_800F2848;
-void func_8001352C(void);
-void func_8001352C(void);
-extern DuelHandSlot D_800EA030[5 ];
-extern u8 D_8009B1EC;
-void func_800176D0(void);
-void func_800157DC(void);
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-extern u8 D_800E9F10[];
-extern DuelCardPickCursor *D_8009B1B4;
-void func_8003FF08(u32);
-extern u16 D_8009B162;
-extern u8 D_8009B174;
-void func_80024734(void);
-void func_80024824(void);
 void func_80018608(void)
 {
     u16 *w;

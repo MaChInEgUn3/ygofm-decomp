@@ -279,10 +279,22 @@ def fold_externs(limit=None):
             " * symbol two ported units declare differently is NOT here -- that\n"
             " * disagreement is a codegen knob (.data, volatile, const, width,\n"
             " * array-versus-scalar) and it stays inline in the unit that wants it. */\n")
+    added = {}
     for path, kind, what in ((VAR_HEADER, "extern", "Variables"), (FUNC_HEADER, "proto", "Prototypes")):
         guard = path.stem.upper() + "_H"
-        out = [head % what, "#ifndef %s\n#define %s\n\n#include \"kg_types.h\"\n\n" % (guard, guard)]
-        out += [u + "\n" for u in emitted[kind]]
+        # ADDITIVE, and it has to be: a later batch only sees what is still
+        # inline, so rewriting the header from that would delete every
+        # declaration an earlier batch moved here and leave those symbols
+        # undeclared. The existing block is carried over as opaque text.
+        old = ""
+        if path.exists():
+            m = re.search(r'#include "kg_types\.h"\n\n(.*?)\n#endif', path.read_text(), re.S)
+            old = (m.group(1).strip("\n") + "\n") if m and m.group(1).strip() else ""
+        oldnorm = re.sub(r"\s+", " ", old)
+        new = [u for u in emitted[kind] if norm(u) not in oldnorm]
+        added[kind] = (len(new), old.count("\n"))
+        out = [head % what, "#ifndef %s\n#define %s\n\n#include \"kg_types.h\"\n\n" % (guard, guard), old]
+        out += [u + "\n" for u in new]
         out.append("\n#endif /* %s */\n" % guard)
         path.write_text("".join(out))
     for p, text, spans in edits:
@@ -296,7 +308,8 @@ def fold_externs(limit=None):
         p.write_text(text)
     print("agreed symbols: %d of %d%s" % (len(agreed), len(texts),
                                           "" if limit is None else " (limit %d of %d agreed)" % (limit, len(order))))
-    print("kg_variables.h: %d declarations; kg_functions.h: %d" % (len(emitted["extern"]), len(emitted["proto"])))
+    print("kg_variables.h: +%d declarations (%d carried over); kg_functions.h: +%d (%d carried over)"
+          % (added["extern"][0], added["extern"][1], added["proto"][0], added["proto"][1]))
     print("inline units removed: %d; left inline (disagreeing or over the limit): %d"
           % (sum(len(s) for _, _, s in edits), kept))
     return 0

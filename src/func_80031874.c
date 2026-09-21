@@ -7,21 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-void func_800357E8(s32 arg0, s32 arg1, u8 *arg2);
-void func_800358A0(s32 value, s32 count_arg, u8 *data_arg);
-extern u8 D_80090DD8[];
-extern BuildDeckTransitionState *D_8009B2FC;
-void func_800316F0(
-    GsSPRITE *sprite, GsOT *ot, const u8 *digits, s32 count
-);
-void func_80031784(
-    GsSPRITE *sprite, GsOT *ordering_table, u8 *data, s32 selected);
-void func_80031784(
-    GsSPRITE *sprite, GsOT *ordering_table, u8 *data, s32 selected);
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
-void func_80031874(DisplayObject *obj, GsOT *ot);
 void func_80031874(DisplayObject *obj, GsOT *ot)
 {
     u8 *text;

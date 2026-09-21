@@ -18,13 +18,10 @@ extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 extern int func_80086920(int a);
 extern int func_80086BB0(int a);
 extern void *func_8008E3D0 ( );
-extern int  func_8008E590(void);
 extern VECTOR D_8001188C;
 void func_80057E20(s32 index, ModelEffectAdjustment *out);
 s32 func_80058E1C(void);
-void func_80058FB0(s32 idx, u16 *out);
 GsOT *func_80058F10(void);
-void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
 s32 func_80058DCC(void);
 s32 func_8006CD78(void *data, s32 arg1);
 extern u16 D_80091610[];

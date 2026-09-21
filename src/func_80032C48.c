@@ -7,17 +7,11 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern void func_8008E400(void *, size_t, size_t, int (*)());
-void func_80031E04(CardList *list, s32 count);
 s32 func_80032B60(
     CardListSortItem *left,
     CardListSortItem *right
 );
 s32 func_80032BD4(CardListSortItem *left, CardListSortItem *right);
-void func_80032C48(CardList *list);
-s32 func_800358FC(s32 divisor);
-extern s32 D_801D4244[];
-extern BuildDeckTransitionState *D_8009B2FC;
 s32 func_80032B60(
     CardListSortItem *arg0,
     CardListSortItem *arg1

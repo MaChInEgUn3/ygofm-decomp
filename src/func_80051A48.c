@@ -16,7 +16,6 @@ s32 func_8005FB08(void);
 s32 func_8005FB14(void);
 void func_80052694(s32 arg0);
 void func_80059EBC(s32 value);
-void func_80057F38(u8 *view);
 void func_80058434(s32 direction, s32 yaw, s32 pitch, s32 distance, s32 unused);
 s32 func_80058E1C(void);
 void func_80051A48(void)

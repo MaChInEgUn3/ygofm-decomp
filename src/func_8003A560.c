@@ -8,15 +8,10 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern int func_8007F978(RECT *rect, u32 *p);
-extern int func_8007F9D8(RECT *rect, u32 *p);
-extern int func_80082324(int max_count);
 s32 func_80039F1C(DisplayEffectState *object);
-extern u8 D_801AF000[];
 FileTransferDescriptor *func_80014EEC(
     s32, u8 *, s32, s32, FileTransferCallback, s32, s32
 );
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-void func_800356A0(u8 *destination, u8 *source, u32 length);
 void func_8003A01C(
     FileTransferDescriptor *descriptor, s32 mode);
 s32 func_8003A1EC(

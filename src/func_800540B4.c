@@ -9,8 +9,6 @@
 #include "kg_functions.h"
 extern long func_80087A50(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,
 			long *sxy0,long *sxy1,long *sxy2,long *p,long *flag);
-extern int func_80082324(int max_count);
-extern int func_80081ED4(RECT *rect, u32 *p);
 int     func_800857E0(int id, GsF_LIGHT * lt);
 void    func_80085D50(long r, long g, long b);
 extern void func_8008A150(GsUNIT *, GsOT *, u32 *);
@@ -43,11 +41,9 @@ extern u32 D_8009AFE0;
 extern u16 D_800914E8[];
 extern GsOT *D_800E9D98[];
 s32 func_80058E1C(void);
-void func_80057AF4(s32 index, s32 anim, s32 flag);
 void func_80057E20(s32 index, ModelEffectAdjustment *out);
 void func_8005922C(struct _GsCOORDUNIT *unit, VECTOR *scale);
 void func_80059700(s32 index, s32 sign);
-void func_800597C8(s32 idx, s32 flag, s32 val);
 void func_8005A53C(
     s32 (*fn)(s32),
     ModelHandlerRunEntry *entry,
@@ -55,10 +51,8 @@ void func_8005A53C(
     s32 count
 );
 s32 func_8005AE68(u16 color, s32 flags, u16 scale);
-void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
 void *func_80059220(void);
 s32 func_8005FE44(s32 arg0);
-void func_800540B4(s32 index);
 extern u32 D_8009AFE0;
 extern u8 D_8009AFE4;
 static inline s32 Model_MirrorOffset(s32 index, s32 value, s32 offset)

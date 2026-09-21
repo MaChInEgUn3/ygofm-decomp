@@ -12,7 +12,6 @@ extern ModelCameraMove D_800F2B20;
 void func_80052D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_8005F174(void);
 s32 func_8005F18C(void);
-void func_80057F38(u8 *view);
 extern u8 D_8009AF98;
 extern GsRVIEW2 D_800F56F0;
 extern void *func_8008E3D0 ( );

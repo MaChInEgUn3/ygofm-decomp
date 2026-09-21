@@ -11,7 +11,6 @@ extern u8 D_8009B320;
 extern s16 D_8009B338;
 void func_80036C14(DuelEffectChannel *channel, s32 tagged_value);
 void func_80036C14(DuelEffectChannel *channel, s32 tagged_value);
-extern s32 D_801D4244[];
 extern u16 D_801B0000[];
 extern u16 D_801C0000[];
 extern u16 D_801D5800[];

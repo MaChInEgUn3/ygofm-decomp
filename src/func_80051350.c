@@ -12,10 +12,7 @@ extern ModelSlot D_800F2C40[3 ];
 extern u8 D_8009AF98;
 extern s8 D_8009AF99;
 extern u16 D_8009B47A;
-void func_80057F38(u8 *view);
 extern long func_80086E50(long a);
-extern int func_80086770(int a);
-extern int func_800866A0(int a);
 extern GsRVIEW2 D_800F56F0;
 s32 func_80051350(s32 mode, s32 min_extent, s32 depth)
 {

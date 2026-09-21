@@ -7,18 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u16 D_8009B1D0;
 extern u8 D_800907D8[2 ][20 ];
-extern DuelFieldPosition
-    D_80090800[2 ][20 ];
-u8 *func_8002C604(s32 id);
-extern u16 D_8009B220;
-extern s16 D_8009B20C[2];
-s32 func_80024E24(void);
 extern volatile u8 D_8009B1D5;
-extern DuelCardRecord D_801A7AD8[];
-void func_8003FEE0(u32);
-void func_800260D0(void);
 void func_800260D0(void) {
     DuelCardRecord *record;
     DuelEffectObject *object;

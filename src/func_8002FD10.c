@@ -7,22 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern SceneScriptSlot D_800EAE98[];
-FileTransferDescriptor *func_80014E1C(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-void func_800137E4(void);
-extern int func_80082324(int max_count);
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
-s8 *func_80039E9C(void);
-extern u16 D_8009B2A4;
-void func_8002FD10(s16 arg0);
-void func_8002FB78(
-    FileTransferDescriptor *descriptor, s32 stage
-);
-extern DisplayObject *D_8009B2A0;
-DisplayObject *func_8002E3FC(void);
 void func_8002FD10(s16 arg0)
 {
     SceneScriptSlot *slot;

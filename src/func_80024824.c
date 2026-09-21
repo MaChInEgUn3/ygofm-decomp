@@ -7,12 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern DuelDeckCardRecord D_801A7E20[];
-extern u8 D_8018C2D8[];
-extern u8 D_8015C424[];
-extern u16 D_80178130[];
-void func_80024824(void);
-void func_800356A0(u8 *destination, u8 *source, u32 length);
 void func_80024824(void)
 {
     u8 *dst = D_8018C2D8;

@@ -35,7 +35,6 @@ s32 func_8003D2B8(
     SaveDataState *left,
     SaveDataState *right
 );
-extern TextStagingValues D_801D5608[];
 extern s8 D_8009B34D __attribute__((section(".data")));
 extern u8 D_8009B3F9;
 extern u8 D_8009B3EB;

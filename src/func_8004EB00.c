@@ -7,7 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8007EF84();
 extern s32 (*D_800114E8[4])(s32, s32);
 extern ModelSlot D_800F2C40[3 ];
 void func_80059284(s32 index, s32 value);
@@ -18,7 +17,6 @@ extern u8 D_8009AFA0;
 extern u8 D_8009AFE9;
 extern u32 D_8009AFEC[];
 extern char D_8009AFF4[];
-extern s32 D_801D4244[];
 void func_80059590(
     s32 slot,
     s32 mode,
@@ -26,7 +24,6 @@ void func_80059590(
     s32 target1,
     s32 target2
 );
-void func_800595C8(s32 index, s32 x, s32 y, s32 z);
 void func_80047314(u32 value);
 void func_8005F27C(s32 mode, s32 coefficient, SVECTOR *offset);
 void func_8005F3B8(s32 mode, s32 y, s32 a, s32 b, SVECTOR *offset);
@@ -40,7 +37,6 @@ void func_8005F91C(
     s32 arg
 );
 ModelEffectCoefficient *func_8005F1A4(s32 index);
-s32 func_8005F1B8(s32 level, s32 value);
 void func_8005A188(int value);
 int func_8005A878(int arg);
 s32 func_8005A618(s32 index);
@@ -49,7 +45,6 @@ s32 func_8005FB14(void);
 s32 func_8005F174(void);
 void func_8005F180(s32 value);
 s32 func_80058E1C(void);
-void func_80057AF4(s32 index, s32 anim, s32 flag);
 void func_80050F24(s32 index);
 void func_80059EBC(s32 value);
 void func_80059F18(s32 first, s32 second, s32 third, s32 fourth);
@@ -60,9 +55,6 @@ extern ;
 extern u16 D_8009B478;
 extern u16 D_8009B47A;
 void func_8004EB00(void);
-void func_80015904(void);
-void func_8004763C(void);
-extern u8 D_800E9ECE[];
 void func_8004EB00(void)
 {
     s32 (*handlers[4])(s32, s32);

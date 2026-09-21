@@ -7,14 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s32 D_8009B09C __attribute__((section(".data")));
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
 extern u8 D_800EA1E8[];
-unsigned int func_80029EB0(unsigned char *base, int index);
-void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-void    func_80084130(GsGLINE * lp, GsOT * ot, unsigned short pri);
-void func_80029EC4(void);
 void func_80029EC4(void)
 {
     GsSPRITE *p;

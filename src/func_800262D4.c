@@ -7,61 +7,12 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u16 D_8009B220;
-extern s16 D_8009B1D2;
-extern s16 D_8009B20C[2];
-extern u16 D_8009B210;
-s32 func_80024E24(void);
-s32 func_8002C7E8(DuelRitualResult *out, s32 ritual_id);
-extern s16 D_8009B1A0;
-extern DisplayObject *D_8009B1C0;
-extern u16 D_800EA128[22 ];
-void func_80019CC8(void *card_id);
-extern DuelCardRecord D_801A7AD8[];
-u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
-void func_80024914(DuelCardRecord *object);
-void func_80024D34(s32 slot, s32 card_id);
-extern u8 D_8018C2D8[];
-extern u8 D_8015C424[];
-extern DuelCardStagingDeckView D_8015C424_cards asm("D_8015C424");
-u8 *func_8002C604(s32 id);
-extern u8 *D_8009B17C;
 extern u8 D_8009B1D5;
-extern u8 D_8009B19C;
-extern s8 D_8009B360[2 ] __attribute__((section(".data")));
 extern DisplayObjectRitualWorkArea D_800E9EF0;
-void *func_80042B40(s32 value);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_800429D8(DisplayObjectVelocity *object);
-void func_80042A28(DisplayObjectVelocity *object);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
 void func_8001EC70(u8 *object);
-void func_8004036C(void *object);
-void func_8001944C(DisplayObject *object);
-void func_8001944C(DisplayObject *object);
-DisplayObject *func_80019564(DisplayObjectConfigView *source);
-u8 *func_800291E0(s32 index, s32 x, s32 y);
-void func_80029528(s32 index);
-extern DuelEffectChannel D_800EB0F8[4 ];
 extern s16 D_8009B338 __attribute__((section(".data")));
-void func_80035B7C(struct DuelEffectChannel *record);
-void *func_80035C38(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height, s32 flags
-);
-s32 func_8003700C(struct DuelEffectChannel *record);
 extern s8 D_8009B34D __attribute__((section(".data")));
 extern u16 D_8009B398 __attribute__((section(".data")));
-void func_8003FEE0(u32);
-void func_8003FF88(u32);
-void func_80039794(void);
-extern int  func_8008E590(void);
-extern int func_8007F9D8(RECT *rect, u32 *p);
-void func_800262D4(void);
 void func_800262D4(void)
 {
     DisplayObject *object;

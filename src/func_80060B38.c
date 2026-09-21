@@ -7,10 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_80090DD8[];
-void func_800357E8(s32 arg0, s32 arg1, u8 *arg2);
-void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
-extern s32 D_801D4244[];
 void func_80060B38(DisplayObject *obj, GsOT *ot);
 extern CardListRowSet D_801A8000[];
 void func_80060B38(DisplayObject *obj, GsOT *ot) {

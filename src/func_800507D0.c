@@ -18,21 +18,13 @@ void func_80059590(
     s32 target1,
     s32 target2
 );
-s32 func_8004703C(void);
 void func_80047314(u32 value);
-void func_80057AF4(s32 index, s32 anim, s32 flag);
 void func_80059F18(s32 first, s32 second, s32 third, s32 fourth);
 void func_80050584(s32 index);
 void func_800507D0(void);
-void func_8004763C(void);
 void func_80059AEC(s32 value);
-FileTransferDescriptor *func_80014E1C(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-void func_800137E4(void);
 extern s32 D_80010030 __attribute__((section(".data")));
 extern void *D_80010034 __attribute__((section(".data")));
-extern int  func_8008E590(void);
 extern ;
 void func_801807B0(void);
 void func_80181C4C(s32 value);

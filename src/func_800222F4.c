@@ -7,27 +7,13 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-u8 *func_800291E0(s32 index, s32 x, s32 y);
-void func_80029528(s32 index);
-void func_800137E4(void);
-FileTransferDescriptor *func_80029164(s32 slot, s32 value);
-u8 *func_8002C604(s32 id);
-void func_80012D84(s32 count);
-void func_8004036C(void *object);
-void func_8001944C(DisplayObject *object);
 extern ;
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
-u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
-extern u16 D_800908A0[];
 extern u8 D_8009B16C[4];
 extern u8 gDebugEffect_abPreviewState[6];
-extern u8 *D_8009B180;
-extern u8 *D_8009B184;
-extern DuelCardRecord D_801A7B80[];
 u8 gDebugEffect_abPreviewState[6] __attribute__((section(".sdata"))) = {0};
-void func_800220B8(void);
 void func_800222F4(void) {
     DisplayObject *obj;
     DuelEffectRequest *p;

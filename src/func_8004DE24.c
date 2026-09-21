@@ -11,11 +11,8 @@ extern void func_80089C20(SVECTOR *v0,CVECTOR *v1,CVECTOR *v2);
 extern long func_80087AB0(SVECTOR *v0,SVECTOR *v1,SVECTOR *v2,SVECTOR *v3,
 			long *sxy0,long *sxy1,long *sxy2,long *sxy3,
 			long *p,long *flag);
-extern int func_80086770(int a);
-extern int func_800866A0(int a);
 int     func_800857E0(int id, GsF_LIGHT * lt);
 void    func_80085D50(long r, long g, long b);
-void    func_800849F0(GsSPRITE * sp, GsOT * ot, unsigned short pri);
 extern ModelSlot D_800F2C40[3 ];
 void func_8004DE24(void);
 void *func_80059220(void);

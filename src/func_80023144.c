@@ -8,24 +8,8 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern u8 D_8009B1D5;
-extern DuelSideState *D_8009B1C8;
-extern DuelCardRecord D_801A7AD8[];
-extern s32 D_801D4244[];
-s32 func_800170C8(DuelCardRecord *card);
-s32 func_80023090(DuelFieldCursor *cursor_a, DuelFieldCursor *cursor_b);
-void func_80023144(DuelFieldDisplaySource *source, s32 index);
-extern u8 D_8009B344 __attribute__((section(".data")));
-extern u8 D_8009B34E __attribute__((section(".data")));
-extern u8 D_8009B355 __attribute__((section(".data")));
 extern u8 D_8009B320 __attribute__((section(".data")));
 extern s16 D_8009B338 __attribute__((section(".data")));
-extern u8 D_800E9F48[];
-void *func_80035BE4(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height
-);
-void func_80039A14(struct DuelEffectChannel *object);
-extern TextStagingValues D_801D5608[];
-s32 func_80023090(DuelFieldCursor *cursor_a, DuelFieldCursor *cursor_b);
 void func_80023144(DuelFieldDisplaySource *source, s32 index)
 {
     DuelCardRecord *record = &D_801A7AD8[index];

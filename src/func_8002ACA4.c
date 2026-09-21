@@ -7,75 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_80086770(int a);
-extern int func_800866A0(int a);
-int func_80058DD8(int index);
-void    func_800857C0(long h);
-void func_80014FA4(void);
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-extern volatile u8 D_8009B0C0 __attribute__((section(".data")));
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
-void func_8002ACA4(u8 *state);
-void func_80058FB0(s32 idx, u16 *out);
-extern ViewState D_800F2848;
-void func_8001352C(void);
 extern ;
-extern u8 D_800E9ECE[];
-extern u8 D_800E9ECF[];
-void func_80057AF4(s32 index, s32 anim, s32 flag);
-void func_80029EC4(void);
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_8004036C(void *object);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
-extern void (*D_800E9DB0[4])(void);
-void func_80035B7C(struct DuelEffectChannel *record);
-void *func_80035BE4(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height
-);
-extern s32 D_801D4244[];
-extern DuelEffectResourceRecord D_800EA0E8[];
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80042918(DisplayObject *object);
-void func_8003FEE0(u32);
-void func_80047EC4(void);
-void func_80039934(struct DuelEffectChannel *record, s32 x, s32 y);
-void func_80040410(DisplayObjectConfig *object, s32 value);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_8004318C(
-    DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
-extern DuelEffectChannel D_800EB0F8[4 ];
 extern s16 D_8009B338 __attribute__((section(".data")));
-FileTransferDescriptor *func_80029164(s32 slot, s32 value);
-void func_80015C0C(void);
-void func_80015C84();
-u8 *func_800291E0(s32 index, s32 x, s32 y);
-void func_80029528(s32 index);
-void func_80029934(void);
-DisplayObject *func_8002ABB4(DisplayObject *src, int add);
-void func_80039794(void);
-s32 func_80059AA8(s32 index, s32 value);
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
-s32 func_80056504(
-    s32 slot, s32 model, s32 p2, s32 p3, s32 p4, s32 p5, s32 arg6
-);
-s32 func_8005F1B8(s32 level, s32 value);
-void func_80056828(s32 index);
-void func_800530C4(void);
-void func_800533D8(void);
-void func_800595C8(s32 index, s32 x, s32 y, s32 z);
-void func_800597C8(s32 idx, s32 flag, s32 val);
-unsigned char *func_800591C0(unsigned int index, unsigned int light);
-void func_80059AE0(s32 value);
 void func_8002ACA4(u8 *state)
 {
     DuelEffectResourceRecord *rec;

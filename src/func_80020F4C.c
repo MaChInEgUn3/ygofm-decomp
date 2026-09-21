@@ -7,52 +7,11 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-extern u8 D_801AF000[];
-void *func_80042B40(s32 value);
-void func_800428A8(
-    DisplayObject *object,
-    s32 arg1,
-    s32 arg2,
-    s32 arg3,
-    s32 arg4,
-    s32 arg5,
-    s32 arg6,
-    s32 arg7,
-    void *resource
-);
-void func_80042918(DisplayObject *object);
 extern u16 D_801799D8[];
-extern int  func_8008E590(void);
 void func_8001EC70(DisplayObject *object);
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
-s32 func_800358FC(s32 divisor);
 extern DisplayObject *D_8009B214;
 extern DisplayObject *D_8009B21C;
-FileTransferDescriptor *func_80014E1C(
-    s32, u8 *, s32, s32, FileTransferCallback, s32, s32
-);
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-void func_80020BE4(FileTransferDescriptor *descriptor, s32 mode);
-void func_8003FF08(u32);
-void func_8003FF34(void);
-s32 func_8004703C(void);
-void func_800472A8(s32 arg0);
-extern FadeTransitionState D_800E9EC8;
-extern u8 D_8009B165;
-extern s8 D_8009B238;
-extern u8 D_8009B362 __attribute__((section(".data")));
-extern s8 D_8009B361 __attribute__((section(".data")));
-void func_80020D4C(DisplayObject *object);
-void func_80020EE8(DuelCardDisplayObject *object);
-extern u16 D_8009B1E0;
-void func_80020F4C(void);
-extern DuelResultSpriteSpec D_80090928[][7 ];
-extern DuelResultSpriteSpec D_80090960[][7 ];
-extern u16 D_8009B162;
-extern u8 D_8009B174;
-extern u16 D_8009B1D0;
 void func_80020F4C(void)
 {
     DuelResultSpriteSlot *slots;

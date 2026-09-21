@@ -26,9 +26,7 @@ void func_80057E20(s32 index, ModelEffectAdjustment *out);
 s32 func_80058E1C(void);
 s32 func_80058DCC(void);
 void *func_80059220(void);
-void func_80058FB0(s32 idx, u16 *out);
 GsOT *func_80058F10(void);
-void func_8005B260(u32 *src, GsOT *ot, s32 idx, s32 flags);
 s32 func_8006C37C(ModelDiscEffectState *arg0, s32 arg1)
 {
     ModelDiscEffectState *e;

@@ -7,11 +7,8 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s8 D_8009B160;
 extern s8 D_8009B1D6;
 extern s8 D_8009B1D7;
-s32 func_80024088(DuelFieldCursor *cursor, s8 dir);
-extern u16 D_8009B162;
 s32 func_8001D5B4(DuelFieldCursor *cursor)
 {
     if (D_8009B162 != 0) { D_8009B160 = -1; return 1; }

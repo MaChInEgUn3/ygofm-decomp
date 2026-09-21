@@ -15,76 +15,18 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8008E870(const char *fmt, ...);
-extern s16 D_8009B19E;
-extern u8 D_8009B1E2;
-extern u16 D_8009B1E4;
-extern const char D_80010060[];
-void func_8001BD88(void);
 extern s8 D_8009B208[8];
 extern u8 D_800907D8[];
-extern u8 D_800907CC[];
 extern u8 D_8009B1D5;
-extern u8 D_8009B19C;
-extern DuelSideState *D_8009B1C8;
-extern s8 D_8009B360[2 ] __attribute__((section(".data")));
-extern u8 D_8009B1D4;
-void func_800240B0(DuelCardPickCursor *cursor);
-extern DuelHandSlot D_800EA030[5 ];
-extern u8 D_800E9F10[];
-extern u8 D_800E9F2C[];
-extern u8 D_800E9F48[];
-extern DuelCardPickCursor *D_8009B1B4;
-void func_8001B938(DuelSelectionRecord *selection);
-void func_8001BAF0(void);
-void func_8001B8B8(DuelSelectionRecord *side);
-extern DuelCardRecord D_801A7AD8[];
-extern s32 D_801D4244[];
-extern u8 D_8015C424[];
-u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
-void func_80024914(DuelCardRecord *object);
-extern s8 D_8009B160;
-s32 func_80024060(DuelCursorStatus *object);
-s32 func_80024088(DuelFieldCursor *cursor, s8 dir);
-void func_80023144(DuelFieldDisplaySource *source, s32 index);
-extern s16 D_8009B20C[2];
-extern u16 D_8009B210;
 extern u8 D_8009B254 __attribute__((section(".data")));
 extern u16 D_8009B246 __attribute__((section(".data")));
 extern u8 D_8009B24B __attribute__((section(".data")));
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_8004036C(void *object);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
-void *func_80040468(struct DisplayObject *object, s32 field_67,
-                    s32 field_68, s32 field_69, s32 color, s32 texture);
-void *func_80042B40(s32 value);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80042918(DisplayObject *object);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_8004318C(
-    DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
 void func_8001EC70(DisplayObject *object);
 extern DisplayObject *D_800E9EF0[];
-void func_8001B780(DuelHandStackState *state);
-void func_8001B7AC(DuelHandStackState *state);
-s32 func_80017034(DuelCardRecord *card);
-s32 func_8001BD48(void);
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
 extern volatile u16 D_8009B3A4 __attribute__((section(".data")));
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
-void func_800705D8(u8 *script);
-s32 func_80070650(void);
 extern u8 D_801A8000[];
-void func_8003FEE0(u32);
-void func_80028220(void);
-extern u16 D_8009B162;
-extern u8 D_8009B174;
-extern DisplayObject *D_8009B188;
-extern DisplayObject *D_8009B18C;
 extern u8 D_800EAE88[];
 void func_8001BD88(void)
 {

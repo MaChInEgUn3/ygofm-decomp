@@ -8,41 +8,12 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern u8 D_8009B1D5;
-extern u8 D_8009B165;
-extern u8 D_8009B369 __attribute__((section(".data")));
-u8 *func_8002C604(s32 id);
-extern u8 *D_8009B17C;
-extern u8 D_8009B260 __attribute__((section(".data")));
-DuelEffectRequest *func_8002C68C(s32 id);
-extern DuelHandSlot D_800EA030[5 ];
-extern u8 D_800E9F10[];
-extern DuelCardPickCursor *D_8009B1B4;
-extern u8 D_8015C424[];
 extern u8 D_8009B1B9;
-void func_80018FEC(void);
-extern DuelExodiaCardPoseTable D_80090918;
-s32 func_800358FC(s32 divisor);
-void func_800156DC(void);
-void func_80015C84();
 void func_8001EC70(DisplayObject *object);
 extern DisplayObject *D_800E9EF0[];
-void func_8004036C(void *object);
-void *func_80042B40(s32 value);
 extern u8 *D_8009B214;
 extern u8 *D_8009B21C;
-extern u16 D_8009B162;
-extern u16 D_8009B1D0;
-extern u8 D_8009B269 __attribute__((section(".data")));
-extern u8 D_8009B26C __attribute__((section(".data")));
-extern u8 D_800E9ECF[];
-void func_800472A8(s32 arg0);
-void func_8003FEE0(u32);
-void func_8003FF58(s32);
-void func_8003FF88(u32);
-void func_80059C18(s32 value);
 extern u16 D_800EF658[];
-extern int  func_8008E590(void);
-extern s32 D_800E9F04[];
 void func_80018FEC(void)
 {
     u16 flags;

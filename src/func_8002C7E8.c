@@ -8,9 +8,7 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern u16 D_801799D8[];
-s32 func_8002C7E8(DuelRitualResult *out, s32 ritual_id);
 extern u8 D_8009B1D5 __attribute__((section(".data")));
-extern DuelCardRecord D_801A7AD8[];
 s32 func_8002C7E8(DuelRitualResult *out, s32 ritualId)
 {
     DuelCardRecord *found[3 ];

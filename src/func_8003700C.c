@@ -11,8 +11,6 @@ void func_80036F80(struct DuelEffectChannel *record);
 extern s8 D_8009B345;
 extern s8 D_8009B34D;
 extern volatile u16 D_8009B394 __attribute__((section(".data")));
-void func_8003FEE0(u32);
-s32 func_8003700C(struct DuelEffectChannel *record);
 void func_80036F80(DuelEffectChannel *record);
 s32 func_8003700C(DuelEffectChannel *record)
 {

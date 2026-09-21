@@ -7,63 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int  func_8008E590(void);
-void func_8004036C(void *object);
-void *func_80042B40(s32 value);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_800429D8(DisplayObjectVelocity *object);
-void func_80042A00(DisplayObjectVelocity *object);
-void func_80042A78(DisplayObjectVelocity *object);
-s32 func_80042AD8(s32 value, s32 target, s32 step);
-s32 func_80042B08(s32 value, s32 step);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_8004318C(
-    DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
 extern DisplayObject *D_800E9EF0[];
-extern DuelHandSlot D_800EA030[5 ];
-extern u8 D_800E9F10[];
-extern DuelCardPickCursor *D_8009B1B4;
 extern u8 D_8009B1D5;
-extern s16 D_8009B154;
-extern DuelSideState *D_8009B1C8;
-extern DuelCardRecord D_801A7AD8[];
-s32 func_800170C8(DuelCardRecord *card);
-u8 *func_80017F04(DuelCardRecord *arg0, s32 arg1, s32 arg2);
-void func_80024954(DuelCardRecord *object);
-s32 func_80019A08(s32 equipment, s32 monster);
-s32 func_80019A60(s32 card_a, s32 card_b);
-extern u8 D_8018C2D8[];
-u8 *func_800249E0(s32, s32);
-extern u8 D_8015C424[];
-extern DuelCardStagingDeckView D_8015C424_cards asm("D_8015C424");
-extern u16 D_8009B210;
-u8 *func_8002C604(s32 id);
-extern u8 *D_8009B17C;
-extern int func_80086770(int a);
-extern int func_800866A0(int a);
-extern int func_80081ED4(RECT *rect, u32 *p);
-extern DuelEffectResourceRecord D_800EA0E8[];
-extern u32 D_8009B134_abs __attribute__((section(".data")));
-FileTransferDescriptor *func_80029164(s32 slot, s32 value);
-extern DisplayObject *D_8009B1C0;
-void func_80019CC8(void *card_id);
-void func_80019BA0(
-    DisplayObject *object, u8 field_21, s16 x, s16 y
-);
-u8 *func_800291E0(s32 index, s32 x, s32 y);
-void func_80029528(s32 index);
-void func_80035B7C(struct DuelEffectChannel *record);
-extern DuelEffectChannel D_800EB0F8[4 ];
-void func_8003FEE0(u32);
-extern u16 D_8009B162;
-extern u8 D_8009B174;
-extern u16 D_8009B150;
 extern u8 D_8009B1B9;
-extern s16 D_8009B206;
-extern s8 D_8009B218;
-void func_80019D18(void);
-void func_80019BD0(DisplayObject *object);
-extern s16 D_8009B206;
 static __inline__ s32 placement_velocity(s32 distance)
 {
     return distance / 8;

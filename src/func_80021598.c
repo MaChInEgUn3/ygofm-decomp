@@ -7,11 +7,7 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_8009B165;
 s32 func_80021558(s32 rule, s32 value);
-extern DuelResultDisplayState *D_8009B1E8;
-void func_80021598(void);
-extern TextStagingValues D_801D5608[];
 s32 func_80021558(s32 arg0, s32 arg1);
 void func_80021598(void) {
     DuelResultDisplayState *p;

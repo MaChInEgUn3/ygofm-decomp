@@ -8,57 +8,11 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 extern SaveDataState *D_8009B1D8[2];
-extern u16 D_8009B32E __attribute__((section(".data")));
-extern u8 D_801D5708[];
-extern s32 D_801D56A8[];
-extern u8 D_801AF000[];
-extern ViewState D_800F2848;
-void func_8001352C(void);
-void func_8001352C(void);
-extern s16 D_8009B146 __attribute__((section(".data")));
-extern s16 D_8009B148 __attribute__((section(".data")));
-extern DuelResultDisplayState *D_8009B1E8;
-void func_800218F0(void);
-void func_80021480(s32 page);
-void func_80021598(void);
-s32 func_80021810(s32 pool_index);
-void func_80021894(s32 card_id);
 extern DuelResultDisplayState D_801799D8;
 extern u16 D_8009B16C;
-extern s8 D_8009B360[2 ] __attribute__((section(".data")));
-extern u8 D_8009B165;
-extern s8 D_8009B361 __attribute__((section(".data")));
-extern u8 D_8009B34E __attribute__((section(".data")));
-extern u8 D_8009B355 __attribute__((section(".data")));
 extern s16 D_8009B338 __attribute__((section(".data")));
-extern u8 D_800E9EC8_arr[0x28 ];
-void func_800156B8(s32);
-void func_80015904(void);
-void func_80015BD8(s32, s32);
-void func_80015C84();
 extern u16 D_8009B398 __attribute__((section(".data")));
 extern u16 D_8009B394 __attribute__((section(".data")));
-void func_8003FF08(u32);
-void func_8003FEE0(u32);
-void func_800428A8(
-    DisplayObject *object,
-    s32 arg1,
-    s32 arg2,
-    s32 arg3,
-    s32 arg4,
-    s32 arg5,
-    s32 arg6,
-    s32 arg7,
-    void *resource
-);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80042918(DisplayObject *object);
-s32 func_8004002C(void);
-void *func_800400AC(s32 index, s32 key);
-void func_800404CC(
-    void *object, s32 x, s32 y, s32 field_67, s32 field_68,
-    s32 field_69, s32 color, s32 texture
-);
 void func_800218F0(void)
 {
     DisplayObject *object;

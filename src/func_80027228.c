@@ -7,12 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int  func_8008E590(void);
-s32 func_800358FC(s32 divisor);
-s32 func_80026C0C(s32 start);
-s32 func_80026C6C(DuelCardRecord **out, s32 arg1, s32 arg2);
-s32 func_80026D18(DuelCardRecord **out, s32 arg1, s32 arg2);
-s32 func_80019A60(s32 card_a, s32 card_b);
 extern AiSelection D_800EAE88;
 s32 func_80027228(void) {
     DuelCardRecord *list1[6];

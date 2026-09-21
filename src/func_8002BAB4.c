@@ -7,25 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-int func_80058DD8(int index);
-void *func_800591FC(void);
 extern u8 D_800EA1E8[];
-extern s16 D_80181002 __attribute__((section(".data")));
-extern s16 D_80181012 __attribute__((section(".data")));
-void func_8002ACA4(u8 *state);
 void func_8002BAA0(u8 *state);
 void func_8002BAAC(u8 *state);
-void func_8002BAB4(void);
-void func_80058FB0(s32 idx, u16 *out);
-void func_80057F38(u8 *view);
-extern ViewState D_800F2848;
-void func_8001352C(void);
-void func_8001352C(void);
-extern int  func_8008E590(void);
-s32 func_80058E68(s32 index);
-void func_80057AF4(s32 index, s32 anim, s32 flag);
-void func_8002A788(u8 *state);
-void func_8002ACA4(u8 *state);
 void func_8002BAA0(u8 *value);
 void func_8002BAAC(u8 *value);
 void func_8002BAB4(void)

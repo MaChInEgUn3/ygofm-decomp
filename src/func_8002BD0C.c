@@ -7,8 +7,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_8002BD0C(FileTransferDescriptor *object, s32 mode);
-void func_80048D08(s32 side, u32 *src);
 extern s32 D_8009B118 __attribute__((section(".data")));
 void func_8002BD0C(FileTransferDescriptor *object, s32 mode)
 {

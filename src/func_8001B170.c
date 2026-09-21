@@ -7,47 +7,13 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern u8 D_800EAE8F[];
 extern DisplayObject *D_800E9EF0[];
-void func_80043178(DisplayObjectSnapshot *object);
-void func_8004318C(
-    DisplayObjectPosition *object, s32 arg1, s32 arg2, s32 arg3);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
-void func_8004036C(void *object);
-extern DuelCardRecord D_801A7AD8[];
-void func_80018080(DuelCardDisplayObject *object);
-extern u8 D_8015C424[];
-extern DuelCardStagingDeckView D_8015C424_cards asm("D_8015C424");
-void func_80024D34(s32 slot, s32 card_id);
 extern u8 D_8009B1D5;
-extern u8 D_8009B19C;
-extern s16 D_8009B154;
-extern s8 D_8009B360[2 ] __attribute__((section(".data")));
-void func_8001B170(void);
-extern DuelEffectChannel D_800EB0F8[4 ];
 extern s16 D_8009B338 __attribute__((section(".data")));
-DuelEffectRequest *func_8002C68C(s32 id);
-extern u16 D_8009B210;
-s32 func_8001F364(void);
 extern ;
-s16 func_8001B0CC(s32 index);
 extern s8 D_8009B34D __attribute__((section(".data")));
-s32 func_8003700C(struct DuelEffectChannel *record);
-void func_80035B7C(struct DuelEffectChannel *record);
-void *func_80035C38(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height, s32 flags
-);
-void func_80039794(void);
-s32 func_80025028(s32 card_id);
-void func_8003B6AC(s32 range, s32 layout);
 extern ;
 extern u16 D_8009B398 __attribute__((section(".data")));
-void func_8003FEE0(u32);
-extern u8 D_8009B174;
 void func_8001B170(void)
 {
     DisplayObject *object;

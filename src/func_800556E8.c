@@ -12,10 +12,7 @@ void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
 void func_8005106C(s32 index);
 s32 func_80058E1C(void);
 void func_80059700(s32 index, s32 sign);
-void func_800597C8(s32 idx, s32 flag, s32 val);
-void func_80057AF4(s32 index, s32 anim, s32 flag);
 void func_8005F714(s32 first, s32 second, s32 arg);
-void func_800556E8(s32 index);
 void func_800556E8(s32 index) {
     ModelSlot *m;
     s32 anim;

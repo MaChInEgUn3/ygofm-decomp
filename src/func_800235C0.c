@@ -7,52 +7,10 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern s16 D_800907AC[2 ][2][4];
 extern u8 D_8009B1D5;
-void func_8004036C(void *object);
-extern DuelCardRecord D_801A7AD8[];
-void func_80040410(DisplayObjectConfig *object, s32 value);
-void func_80022FF0(DisplayParent *parent, s32 clear);
 void func_8002348C(DuelFieldDisplaySource *source);
-void func_800234E4(DuelFieldDisplaySource *source);
-s32 func_800235C0(void);
-extern DuelEffectChannel D_800EB0F8[4 ];
-extern DuelCardPickCursor *D_8009B1B4;
-void func_80035B7C(struct DuelEffectChannel *record);
-void func_80039934(struct DuelEffectChannel *record, s32 x, s32 y);
-void *func_80042B40(s32 value);
-s32 func_800428EC(DisplayObject *object, s8 value);
-void func_80043178(DisplayObjectSnapshot *object);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
-DisplayObject *func_80018150(int arg0, int arg1);
-extern u8 D_8015C424[];
-void func_80022674(DuelCardTurnObject *p);
-void func_800229F4(DuelCardTurnObject *p);
-extern u16 D_8009AF20[2];
-void func_80022D94(s32 frames, s32 x, s32 z, s32 y, s32 value);
 extern s16 D_8009B204;
-extern s16 D_8009B1EE;
-extern s16 D_8009B192;
-extern s16 D_8009B190;
-extern s16 D_8009B166;
-extern s32 D_8009B1C4;
-extern s32 D_8009B15C;
-extern s32 D_8009B158;
-extern s32 D_8009B224;
-extern s32 D_8009B1FC;
-extern s32 D_8009B198;
-extern s32 D_8009B194;
-extern s32 D_8009B168;
-extern ViewState D_800F2848;
-void func_8001352C(void);
-void func_8001352C(void);
-extern u16 D_8009B162;
 void func_8002348C(DuelFieldDisplaySource *source);
-void func_800234E4(DuelFieldDisplaySource *source);
 s32 func_800235C0(void)
 {
     DuelFieldDisplaySource *source;

@@ -13,11 +13,6 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-void func_800357E8(s32 arg0, s32 arg1, u8 *arg2);
-s32 func_80041F90(struct DisplayObject *obj, s32 x, s32 y,
-                  struct ProjectionOut *out);
-extern DuelEffectResourceRecord D_800EA0E8[];
-void func_80028B08(DisplayObject *object, s32 arg1);
 void func_80042188(
     SpritePrim *sprite,
     Func80028B08Ctx *packet,

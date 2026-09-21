@@ -7,45 +7,9 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-s32 func_8003F70C(void);
-void func_80033C90(void);
 extern volatile u16 D_8009B398 __attribute__((section(".data")));
-extern s16 D_801D0000[];
-void func_8003F87C(void);
-s32 func_8002E3B4(void);
-extern DuelEffectChannel D_800EB0F8[4 ];
-void func_80035B7C(struct DuelEffectChannel *record);
-void *func_80035BE4(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height
-);
-void *func_80035C38(
-    s32 index, s32 string_id, s32 x, s32 y, s32 width, s32 height, s32 flags
-);
-void func_8003FEE0(u32);
-void func_80039934(struct DuelEffectChannel *record, s32 x, s32 y);
-void func_80039794(void);
-void func_8003B6AC(s32 range, s32 layout);
 extern ;
-void func_80043178(DisplayObjectSnapshot *object);
-void func_80043230(
-    DisplayObjectPosition *object,
-    int target_x,
-    int target_y,
-    int phase);
 extern u16 D_8009B27C;
-extern u8 *D_8009B290;
-extern u16 D_8009B2A6;
-extern u8 D_8009B268 __attribute__((section(".data")));
-extern u8 D_8009B26D __attribute__((section(".data")));
-extern u8 D_8009B34C __attribute__((section(".data")));
-extern u8 D_8009B269 __attribute__((section(".data")));
-extern u8 D_8009B26C __attribute__((section(".data")));
-extern u8 D_8009B27A;
-s32 func_8003700C(struct DuelEffectChannel *record);
-void func_8002EE94(void);
-s32 func_8002EE5C(void);
-void func_8002E370(MenuRecord *record);
-s32 func_8003735C(DuelEffectChannel *channel);
 extern s8 D_8009B345 __attribute__((section(".data")));
 extern s8 D_8009B34D __attribute__((section(".data")));
 extern ;

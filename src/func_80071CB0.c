@@ -9,7 +9,6 @@
 #include "kg_functions.h"
 s32 func_8007058C(void);
 extern s32 D_800F5B98[20 ];
-extern AiActiveCard D_801AB000[];
 void func_80071CB0(void);
 void func_80071CB0(void)
 {

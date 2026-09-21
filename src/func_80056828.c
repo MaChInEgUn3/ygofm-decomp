@@ -8,7 +8,6 @@
 #include "kg_variables.h"
 #include "kg_functions.h"
 int func_80074170(int mode);
-extern int func_8008E870(const char *fmt, ...);
 extern ModelSlot D_800F2C40[3 ];
 extern u8 D_8009AFA0;
 extern u8 *D_80010004 __attribute__((section(".data")));
@@ -24,10 +23,8 @@ void func_8005A4C4(ModelSlot *record, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_800582C0(s32 side, s32 tint, s32 level);
 void func_8005F198(s32 value);
 void func_8004DC38(ModelSlot *slot, s32 i, s32 n, u32 pos);
-void func_80048D08(s32 side, u32 *src);
 extern u8 D_801A8000[];
 extern char D_80011594[];
-void func_80056828(s32 index);
 static inline s16 load_phase(ModelSlot *slot)
 {
     return slot->field_E14;

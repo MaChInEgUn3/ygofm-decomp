@@ -7,34 +7,13 @@
 #include "kg_types.h"
 #include "kg_variables.h"
 #include "kg_functions.h"
-extern int func_8007EF84();
-extern char D_8009AF54[];
-extern char D_8009AF58[];
-s32 func_80030294(void);
-extern FrontendDebugColumns D_8009B2B4;
-extern FrontendDebugDigitCounts D_8009B2C0;
-extern u16 D_8009B2C8;
-extern u8 D_8009B2B8;
-extern u16 D_8009B2CA;
-extern u16 D_8009B2CC;
-extern s8 D_8009B2DC;
-extern u8 D_8009B2E0;
-extern s8 D_8009B2E9;
-extern u8 D_8009B2EA;
-extern u8 *D_8009B2EC;
-extern u8 D_800EAED8[];
-extern u16 D_8009AF4C[];
 extern volatile u16 D_8009B398[4]
     __attribute__((section(".data")));
 extern volatile u16 D_8009B3A4[4]
     __attribute__((section(".data")));
 extern volatile u16 D_8009B394[4]
     __attribute__((section(".data")));
-extern volatile u16 D_8009B3A6[4]
-    __attribute__((section(".data")));
 extern volatile u16 D_8009B39A[4]
-    __attribute__((section(".data")));
-extern volatile u16 D_8009B396[4]
     __attribute__((section(".data")));
 s32 func_80030294(void)
 {
