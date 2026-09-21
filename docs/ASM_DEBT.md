@@ -237,3 +237,8 @@ whose keyword follows a declarator (an identifier, `]`, or a parameter list
 whose head is not `if`/`while`/`for`/`switch`), with four controls in the
 commit that introduced it: the array alias and the prototype alias are
 skipped, `if (c) asm("nop");` and a bare `asm("nop");` are still counted.
+
+A second counter fix the same night: Psy-Q GTE MARKER words (`.word 0x0000007f`
+and the other DMPSX placeholders, see `PSYQ_GTE_MARKERS` in build.py) are GTE
+ops, not transcribed MIPS; four ported GTE functions read as debt until
+`is_debt` learned the marker shape. The debt is still 0.

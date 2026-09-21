@@ -478,6 +478,46 @@ SMALL_DATA_NOP_FUNCS = {
 
 # Functions where an address computation, not a memory op, is split across a
 # call's delay slot. See split_address_across_call.
+# Psy-Q's inline_c.h is written for DMPSX: its GTE command macros emit MARKER
+# words (`.word 0x0000007f` for RTPS) that DMPSX rewrites into COP2 encodings
+# after assembly. Functions ported from krystalgamer's tree use those macros;
+# his build runs tools/project/normalize_psyq_gte.py over the .s and this is
+# that table and that rule (any other official marker -- low six bits set,
+# sixteen bits once the MVMVA parameter field is removed -- is refused, so an
+# unsupported command cannot be assembled silently as data).
+PSYQ_GTE_MARKERS = {
+    ".word 0x0000007f": ".word 0x4A180001",   # RTPS
+    ".word 0x00000fff": ".word 0x4AE80413",   # NCDS
+    ".word 0x0000117f": ".word 0x4B400006",   # NCLIP
+}
+PSYQ_GTE_MARKER_FUNCS = {
+    "func_80015EF4",
+    "func_80033DB0",
+    "func_80029934",
+    "func_80034830",
+}
+_MVMVA_PARAMETER_BITS = 0x03FC0000
+_WORD_DIRECTIVE = re.compile(r"\.word\s+(0[xX][0-9A-Fa-f]+|\d+)\b")
+
+
+def expand_psyq_gte_markers(lines):
+    """Replace inline_c.h's GTE marker words with the COP2 encodings."""
+    out = []
+    for line in lines:
+        body = line.split("#")[0]
+        for marker, word in PSYQ_GTE_MARKERS.items():
+            if marker in body:
+                line = line.replace(marker, word)
+                body = line.split("#")[0]
+        m = _WORD_DIRECTIVE.search(body)
+        if m:
+            value = int(m.group(1), 0)
+            if value & 0x3F == 0x3F and value & ~_MVMVA_PARAMETER_BITS < 0x10000:
+                raise SystemExit(f"unsupported Psy-Q GTE placeholder: {m.group(0)}")
+        out.append(line)
+    return out
+
+
 LA_CALL_FUNCS = {
     "func_8002CE64",
 }
@@ -965,6 +1005,13 @@ PER_FUNC_FLAGS["func_8001D670"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msp
 # profiles in this table's terms, measured through try_func and the build.
 PER_FUNC_FLAGS["func_800534B8"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
 
+# Ported from krystalgamer/memories-decomp (3dfeb592fcc8); rows are his compiler
+# profiles in this table's terms, measured through try_func and the build.
+PER_FUNC_FLAGS["func_80015EF4"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80033DB0"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80029934"] = ['-quiet', '-O2', '-G8', '-fno-cse-skip-blocks', '-fno-builtin', '-msplit-addresses']
+PER_FUNC_FLAGS["func_80034830"] = ['-quiet', '-O2', '-G8', '-fno-builtin', '-msplit-addresses']
+
 # Optional experiment file, so sweeping flags for one function never means
 # rewriting this script (editing it by string substitution silently failed
 # more than once, and a flag that never took effect looks exactly like a
@@ -1131,8 +1178,11 @@ def compile_c(name):
 
     # Post-passes that emulate aspsx behaviour maspsx does not reproduce.
     if (name in DELAY_SLOT_MACRO_FUNCS or name in SMALL_DATA_NOP_FUNCS
-            or name in HOIST_EPILOGUE_FUNCS or name in LA_CALL_FUNCS):
+            or name in HOIST_EPILOGUE_FUNCS or name in LA_CALL_FUNCS
+            or name in PSYQ_GTE_MARKER_FUNCS):
         text = masm.read_text().splitlines()
+        if name in PSYQ_GTE_MARKER_FUNCS:
+            text = expand_psyq_gte_markers(text)
         if name in DELAY_SLOT_MACRO_FUNCS:
             text = fill_delay_slot_with_macro_tail(text)
         if name in SMALL_DATA_NOP_FUNCS:

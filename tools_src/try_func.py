@@ -411,6 +411,8 @@ def built_lines(func, csrc, extra_flags):
         sys.exit(f"maspsx failed:\n{r.stderr[:4000]}")
 
     text = masm.read_text().splitlines()
+    if func in B.PSYQ_GTE_MARKER_FUNCS:
+        text = B.expand_psyq_gte_markers(text)
     if func in B.DELAY_SLOT_MACRO_FUNCS:
         text = B.fill_delay_slot_with_macro_tail(text)
     if func in B.SMALL_DATA_NOP_FUNCS:

@@ -155,9 +155,17 @@ def is_debt(tpl):
         if line.startswith(".global"):
             return True
         if line.startswith(".word"):
-            m = re.search(r"0x([0-9a-fA-F]+)", line)
-            if m and ((int(m.group(1), 16) >> 26) & 0x3F) not in COP_OPCODES:
-                return True
+            m = re.search(r"(0x[0-9a-fA-F]+|\b\d+\b)", line)
+            if m:
+                value = int(m.group(1), 0)
+                # Psy-Q inline_c.h GTE command MARKER (DMPSX placeholder: the
+                # low six bits set, sixteen bits once the MVMVA parameter
+                # field is removed); build.py rewrites it into the COP2 word
+                # for PSYQ_GTE_MARKER_FUNCS, so it is a GTE op, not MIPS.
+                if value & 0x3F == 0x3F and value & ~0x03FC0000 < 0x10000:
+                    continue
+                if ((value >> 26) & 0x3F) not in COP_OPCODES:
+                    return True
             continue
         if line.split()[0] not in COP_MNEMONICS:
             return True

@@ -380,3 +380,18 @@ header; the only way to close them here is his compiler binary, which
 would be a per-function compiler knob in build.py and a decision, not a
 port. func_800534B8 was the last naming residue (`D_8009B48C` as
 `D_8009B488+4`) and went in on the build (1231 -> 1232).
+
+**The four GTE functions: his assembly filter, ported as a per-function pass
+(1232 -> 1236, and the 34 are done: 31 in, 3 parked on the compiler).**
+Psy-Q's `inline_c.h` is written for DMPSX and its GTE macros emit marker
+words (`.word 0x0000007f` for RTPS, `0x00000fff` NCDS, `0x0000117f` NCLIP)
+that DMPSX rewrites after assembly; his `psyq_rtps`/`psyq_gte` profiles run
+`tools/project/normalize_psyq_gte.py` over the `.s`. build.py and try_func
+now carry the same table and the same refusal rule as
+`expand_psyq_gte_markers`, applied to `PSYQ_GTE_MARKER_FUNCS` before the
+other post-passes; try_func's residue for all four had been the `rtps`
+sitting where a marker word was (func_80015EF4, func_80033DB0,
+func_80029934, func_80034830 -- 386, 672, 351, 858 instructions). The
+debt counter had to learn the marker too: a `.word` whose opcode field is
+not COP2 reads as transcribed MIPS, and these four were counted as debt
+until `is_debt` recognises the marker shape (four controls in the commit).
