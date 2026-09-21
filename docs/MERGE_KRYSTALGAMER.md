@@ -758,3 +758,54 @@ regex matched nothing and the script printed "no longer in master's manifest --
 nothing to remove" and carried on to a patch that duplicated an address. Every
 removal now carries a positive control: if the plain address string is in the
 file, the entry regex MUST match exactly once, or the run fails.
+
+### Finding the absorbable units, and four traps in doing it
+
+**The promoter's `already in JP matching_c` hides the whole remaining seam.** It
+means two different things: a unit fully promoted, and a unit where one or two
+functions landed as units of their own and the rest are still assembly. Counting
+them apart (derive each US unit's JP addresses, count how many are in the JP
+manifest, keep `0 < landed < total`) gave **ten partially-promoted units on
+2026-09-21**, none of them claimed by any open PR, holding 86 functions. The
+word-level comparison had never run on one of them, because the occupancy check
+refuses first: run `analyze` with the occupancy map EMPTIED to get the pairing
+verdict, with controls at both ends (a unit known to pair must say ok, a unit
+known to differ must not). Five pair cleanly, five differ in code.
+
+**A symbol declared only in a C header has no name for the promoter to emit, and
+the fix is an alias, not a symbols line.** `display_object_runtime` calls through
+`gDisplayObject_ListRenderers`, defined in another TU that the JP build does not
+compile, so the link says `undefined reference`. The promoter saw the difference
+(US `0x24420fb0` against JP `0x24420e60`, the table shifted -0x150) and had
+nothing to write, because no config names `0x80090fb0`. Adding
+`gDisplayObject_ListRenderers = 0x80090E60;` is WRONG: that address is already
+named `D_80090FB0` and splat refuses a second name for one address. The wrapper
+renames the identifier instead -- `#define gDisplayObject_ListRenderers
+D_80090FB0` -- and the header then declares the name the linker already knows.
+Decode the address from both executables at the site the linker names
+(`.text+0x5d0` is word 372 of the unit); do not assume the table is unshifted.
+
+**A per-unit script CANNOT be correct when each run re-takes master's config.**
+Running an absorb-one-unit script twice on one branch silently undid the first
+unit's absorptions, because step one is `git checkout origin/master -- <config>`
+and master still carries every landed single-function unit. The second run then
+restored four entries beside the branch's own whole-unit `c` line, splat
+regenerated their nonmatching stubs, and the assembler met `glabel` with no
+macros. That reads exactly like a stale artifact, and wiping `tmp/splat` changes
+nothing. **Declare the batch once and apply it once**; the driver resets to
+`origin/master` and redoes everything, so it doubles as the re-merge.
+
+**Removing the LAST manifest entry leaves a dangling comma** before the closing
+bracket and the file stops being JSON. `re.sub(r',(\s*\])', r'\1', t)` after
+each removal is a no-op on valid JSON and fixes it.
+
+**The overlap check must count ABSORBED addresses, not only free ones**, and its
+control must fit what it measures. An absorbing PR is the wrong positive control
+for a pure-addition harvest: it re-adds the addresses it absorbs, so those lines
+are unchanged CONTEXT rather than additions (6 of 7 rows, not 7). The control
+that works is that every open "Match Japanese" PR contributes at least one
+manifest address, exempting the PRs that are not matching PRs at all. On
+2026-09-21 the race removed two of three units from one batch between building
+and pushing: #5654 claims an address one unit absorbs (and is itself stale --
+that address is already in master), and #5705 opened minutes before the push and
+claims a free address in another.
