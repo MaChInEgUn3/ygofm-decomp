@@ -60,7 +60,11 @@ LOGS = KG / "tmp/jp_batch_gates"
 LOAD, HDR = 0x80010000, 0x800
 
 # unit -> [(name the shared source uses, name the Japanese symbols already give that address)]
-ALIASES = {}
+ALIASES = {
+    # upstream model_packet_handler_lookup.c already carries this exact #define
+    "func_8005CEF0": [("func_8005CEF0", "func_8005EEDC")],
+    "model_interpolate_transform": [("func_8005D378", "func_8005F364")],
+}
 # unit -> lines to pre-declare before `#include "../<unit>.c"`
 ASM_LABELS = {
     "sound_output_transition": ['#include "../sound.h"',
@@ -141,6 +145,9 @@ def apply_aliases(rows):
             if not re.search(rf'^\s*{re.escape(jp_name)}\s*=', syms, re.M):
                 sys.exit(f"{jp_name} is not named in the Japanese symbols")
             defines.append(f"#define {src_name} {jp_name}")
+            # the apply wrote `src_name = <jp addr>`, which splat refuses beside jp_name
+            syms = re.sub(rf"^{re.escape(src_name)}\s*=.*\n", "", syms, flags=re.M)
+        SYMS.write_text(syms)
         if w.exists():
             t = w.read_text(); inc = f'#include "../{unit}.c"'
             add = [d for d in defines if d not in t]
