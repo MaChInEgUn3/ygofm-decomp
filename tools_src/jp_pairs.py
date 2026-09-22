@@ -79,7 +79,25 @@ def main():
         ok, syms, _why = M.pair_words(uw, jw, names, pairs, (addrs[0], addrs[0] + d))
         return syms if ok else None
 
-    recovered, tried = [], 0
+    # FALLBACK: find the unit by its SHAPE. Measured 2026-09-22 on the 129 units
+    # the displacement predictor could not pair: 84 failed on an opcode, which
+    # means the predicted address was wrong, not the code -- the JP build moved
+    # some functions a long way (card_list_render_deck_box_stats by 0x114cc).
+    # The first K instructions with immediates and jump targets masked are
+    # looked up across the whole target .text, and a hit still has to pass
+    # pair_words, so a shape collision cannot become a pair.
+    K = 8
+    def mask(w):
+        op = w >> 26
+        if op in (2, 3): return w & 0xFC000000
+        if op == 0: return w
+        return w & 0xFFFF0000
+    n = (len(jpb) - M.HDR) // 4
+    jm = [mask(w) for w in struct.unpack("<%dI" % n, jpb[M.HDR:M.HDR + n * 4])]
+    shape = collections.defaultdict(list)
+    for i in range(n - K): shape[tuple(jm[i:i + K])].append(M.LOAD + i * 4)
+
+    recovered, tried, by_shape = [], 0, 0
     for src, addrs in sorted(by_src.items()):
         addrs.sort()
         if any(a in pairs for a in addrs): continue
@@ -91,8 +109,15 @@ def main():
             syms = verify(addrs, sizes, d)
             if syms is not None:
                 recovered.append((src, addrs, sizes, d, len(syms))); break
+        else:
+            uw = words(usb, addrs[0], sum(sizes))
+            hits = [(ja - addrs[0], s) for ja in shape.get(tuple(mask(w) for w in uw[:K]), [])
+                    for s in [verify(addrs, sizes, ja - addrs[0])] if s is not None]
+            if len(hits) == 1:             # a unique verified hit only
+                recovered.append((src, addrs, sizes, hits[0][0], len(hits[0][1]))); by_shape += 1
     print(f"uncovered contiguous units: {tried}")
-    print(f"recovered: {len(recovered)} units, {sum(len(r[1]) for r in recovered)} functions")
+    print(f"recovered: {len(recovered)} units, {sum(len(r[1]) for r in recovered)} functions "
+          f"({by_shape} of the units by shape search)")
 
     if CHECK:
         # NEGATIVE CONTROL. The same units at a displacement that is wrong by one
