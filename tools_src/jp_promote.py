@@ -125,6 +125,14 @@ def load_all():
     JP_AUTO -= set(jpsyms)      # a D_ name symbols.txt gave a JP address is a user name, not a collision
     return us, jp, pairs, names, jpsyms
 
+def _ua_of(names, n, jp_addr):
+    """The US address `n` names: from the name map, or from the name itself."""
+    for a, x in names.items():
+        if x == n: return a
+    m = re.match(r"(?:D|func)_([0-9A-Fa-f]{8})$", n)
+    return int(m.group(1), 16) if m else None
+
+
 def usname(names, addr, func=False):
     return names.get(addr) or (("func_%08X" if func else "D_%08X") % addr)
 
@@ -217,7 +225,12 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
     if unpaired: return False, {}, f"word {min(unpaired.values())}: lui immediate differs with no lo use"
     # named symbols at an equal address: the C names them, JP splat does not
     for n, a in eq.items():
-        if not re.match(r"(D_|func_)[0-9A-Fa-f]{8}$", n):
+        # A D_/func_ name is skipped only when JP splat really generates it. The US
+        # link also takes `config/slus_01411/c_symbols.ld`, which the JP link does
+        # not, so a name defined only there is undefined on the JP side however
+        # ordinary it looks: `undefined reference to D_8009B23A` deferred five units
+        # before this was measured (2026-09-22).
+        if not re.match(r"(D_|func_)[0-9A-Fa-f]{8}$", n) or n not in JP_AUTO:
             syms[n] = a
     return True, syms, "ok"
 
@@ -250,10 +263,32 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # aliases: US name -> the name the JP build must use (a wrapper's #define
     # lines, upstream's "regional alias"); lines: symbols.txt lines to add
     aliases, lines = {}, {}
+    # the unit's own source text, with comments stripped: a provenance header or a
+    # goto label reads as a reference and is not one
+    _text = (KG / src).read_text(errors="replace") if (KG / src).exists() else ""
+    _code = re.sub(r"//[^\n]*", " ", re.sub(r"/\*.*?\*/", " ", _text, flags=re.S))
     for n, a in syms.items():
         if n in fnames: continue                          # on the function line already
         if a in JPVRAM:                                   # JP already names that address
-            if JPVRAM[a] != n: aliases[n] = JPVRAM[a]
+            if JPVRAM[a] != n:
+                aliases[n] = JPVRAM[a]
+            else:
+                # SAME name, already there -- and still an undefined reference when the
+                # SOURCE calls the object by its other US name. `config/slus_01411/c_symbols.ld`
+                # gives 0x8009B23A the second name `D_8009B23A`, the US link takes that file
+                # and the JP link does not, so `flags = D_8009B23A;` has nothing to bind to
+                # while `gDuel_wSceneStateFlags` sits in the JP symbols already. Alias the
+                # name the source uses onto the one the JP build has. Measured 2026-09-22 on
+                # func_80018FEC, deferred until then as "nothing on the JP side names it".
+                # Only when the source uses ONE other name INSTEAD of this one: with both
+                # names in the source the two declarations still cannot share one JP
+                # identifier, which is the rejection below (measured: aliasing both cost
+                # func_80059AF8, whose source reads 0x80058938 as func_80058938 and as
+                # Model_QueueTintRequest).
+                if not re.search(r"\b%s\b" % re.escape(n), _code):
+                    alt = [n2 for n2 in sorted(ALT_NAMES.get(_ua_of(names, n, a), ()))
+                           if n2 != n and re.search(r"\b%s\b" % re.escape(n2), _code)]
+                    if len(alt) == 1 and alt[0] not in aliases: aliases[alt[0]] = JPVRAM[a]
             continue
         if n in jpsyms:
             if jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
