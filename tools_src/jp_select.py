@@ -45,14 +45,6 @@ DEFERRED = {
     "func_800339D0":              "F: links, then bytes differ at 0x80033820 (profile gcc_2_8_1_g8_split)",
     "sd_arm_busy_callback":       "F: links, then bytes differ; source hardcodes 0x8009B45C",
     "duel_effect_create_channel": "F predicted: source hardcodes 0x8009B34D, in a region measured to shift",
-    # gFade_State now aliases (68f31e9) and it LINKS. One word of 59 differs:
-    # lbu imm 0xaf76 against 0xaebe, one symbol 0xb8 out. The JP symbols.txt
-    # already maps D_8009AF76 = 0x8009AEBE -- the mapping is not missing.
-    # display_object_helpers.h says that object was RENAMED upstream ("[1] and
-    # [3] used to be spelled D_8009AF76 and D_8009AF7A"), so the source reaches
-    # it as an element off a base while the words carry the interior, and
-    # nothing joins the two.
-    "func_800388D8": "F: links now; one word, D_8009AF76 reached as a renamed base element",
     "duel_update_card_pick_cursor": "F: batch 23, links then bytes differ at 0x80023fd4 (0x36 expected, 0x46 built)",
     "func_80019608": "measured by batch 25's link: undefined reference to func_8001944C",
     # the base derivation cannot fire here: the words record NO neighbour
