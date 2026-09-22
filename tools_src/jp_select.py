@@ -47,6 +47,7 @@ DEFERRED = {
     "func_80018FEC": "measured by batch 19's link: undefined reference to D_8009B23A (nothing on the JP side names it)",
     "func_800388D8": "E: batch 20's link, undefined reference to gFade_State (the script_image_commands alias chain)",
     "func_8004E9A0": "measured by batch 20's link: undefined D_8009B468 and gModel_abImageCopyFrameRows",
+    "debug_menu_leave_entries": "measured by batch 22's link: undefined reference to gDebugMenu_abMainModeByEntry",
 }
 
 
