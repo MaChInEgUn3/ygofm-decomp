@@ -111,6 +111,24 @@ def load_all():
     # `make clean` inside a batch deletes the map.
     for r in csv.DictReader(open(US_LINK_SYMS)) if US_LINK_SYMS.exists() else ():
         ALT_NAMES[int(r["address"], 16)].add(r["name"])
+    # A FIFTH source, and the only one that maps a name to another NAME instead
+    # of to an address: `config/slus_01411/link_symbols.ld`, which the US link
+    # takes and the JP link does not (there is no slpm_86398 copy, and the
+    # build hard-codes the US path). Its own comment says what it is for --
+    # "Address-based call target retained by unmatched DuelScene_UpdateBattle"
+    # -- and duel_scene_battle is exactly the unit whose JP link reported
+    # `undefined reference to func_8001F0D0`: the source calls the address
+    # name while duel_trap_resolution.c defines Duel_SelectAttackTrap, and
+    # `func_8001F0D0 = Duel_SelectAttackTrap;` is what joins them.
+    # Only the plain `A = B;` form is a second name: `A = 0x...;` is a layout
+    # address and `A = B + N;` is an interior symbol.
+    byname = {}
+    for a, n in names.items(): byname.setdefault(n, a)
+    lnk = BASE_CFG / "link_symbols.ld"
+    for line in (open(lnk) if lnk.exists() else ()):
+        m = re.match(r"\s*(\w+)\s*=\s*(\w+)\s*;", line)
+        if m and not m.group(2).startswith("0x") and m.group(2) in byname:
+            ALT_NAMES[byname[m.group(2)]].add(m.group(1))
     global US_RODATA
     us_split = (BASE_CFG / "split.yaml").read_text()
     m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", us_split)
@@ -136,13 +154,24 @@ def load_all():
     # 0x8b70c). Matching `\.?s?data` instead would also match the "data" inside
     # ".rodata" -- that spelling reported 8 phantom sdata carves in the JP split,
     # which has none.
-    allrows = sorted(int(m.group(1), 16)
-                     for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), ", us_split))
+    # A `pad` row after a .sdata row is the block's alignment tail, and it is a
+    # row of its OWN because the object does not supply those bytes:
+    # game/main_frame is `[0x8b70c, .sdata]`, `[0x8b70d, pad]`, `[0x8b710, ...]`,
+    # and its object's .sdata is one byte at alignment 1 (against six at
+    # alignment 4 for duel_trap_resolution). Both ways of ignoring that row cost
+    # the same four bytes -- "rebuilt executable is 0x1d07fc bytes, expected
+    # 0x1d0800": carving only the byte resumes the blob at 1 mod 4 and the
+    # linker realigns it, and carving the padding too promises three bytes no
+    # object provides. So the US shape is mirrored exactly, `pad` row included:
+    # (start, size the object supplies, where the blob resumes).
+    allrows = sorted((int(m.group(1), 16), m.group(2))
+                     for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), ([.\w]+)", us_split))
     US_SDATA = {}
     for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), \.sdata, (\S+)\]", us_split):
         o = int(m.group(1), 16)
-        nxt = [x for x in allrows if x > o]
-        if nxt: US_SDATA[m.group(2)] = (o, nxt[0] - o)
+        nxt = [x for x, t in allrows if x > o]
+        real = [x for x, t in allrows if x > o and t != "pad"]
+        if nxt and real: US_SDATA[m.group(2)] = (o, nxt[0] - o, real[0])
     global JPVRAM, JP_AUTO
     JPVRAM = {a: n for n, a in jpsyms.items()}       # JP address -> the name JP already gives it
     # default names JP splat generated for ITS OWN addresses (from the last
@@ -452,7 +481,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # displacement does not apply to it.
     sdata = None
     if unit_name in US_SDATA:
-        off, size = US_SDATA[unit_name]
+        off, size, resume = US_SDATA[unit_name]
         usvram = off - HDR + LOAD
         cand = sorted((n, j) for n, j in syms.items() if _ua_of(names, n, j) == usvram)
         if len(cand) != 1:
@@ -468,7 +497,9 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         # no longer emits
         inside = {n for n, j in syms.items() if jpvram <= j < jpvram + size}
         for n in inside: lines.pop(n, None)
-        sdata = (jpvram - LOAD + HDR, size)
+        # the blob resumes where the US split resumes, which is past the `pad`
+        # row when there is one -- the padding gets a row of its own
+        sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
                 rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
 
@@ -554,7 +585,7 @@ def apply(addr):
     if r.get("sdata"):
         # the carve goes in the initialized_data segment, which the pass above
         # deliberately does not touch
-        soff, ssize = r["sdata"]; end = soff + ssize
+        soff, ssize, sresume = r["sdata"]; end = soff + ssize
         l2 = sp.read_text().split("\n")
         i0 = l2.index("  - name: initialized_data")
         j = i0
@@ -582,7 +613,9 @@ def apply(addr):
         # (0 warnings) and the build then does NOT match. Measured 2026-09-22,
         # all three variants; only this one is byte-identical, so the warning is
         # disclosed in the PR rather than traded for a wrong image.
-        have.setdefault(end, f"      - [{end:#x}, sdata, initialized_data_{end:x}]")
+        if sresume != end:
+            have.setdefault(end, f"      - [{end:#x}, pad]")
+        have.setdefault(sresume, f"      - [{sresume:#x}, sdata, initialized_data_{sresume:x}]")
         sp.write_text("\n".join(l2[:j] + [have[o] for o in sorted(have)] + l2[k:]))
     # matching_c.json
     # matching_c.json: the file is not globally sorted upstream (one entry sits
