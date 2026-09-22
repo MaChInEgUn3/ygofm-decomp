@@ -223,6 +223,13 @@ def main():
     apply_asm_labels(rows)
     total = check_structure(rows)
     run("MAKEFLAGS=-j2 make japanese-split", log="split2.log")
+    # Each config file must end in EXACTLY one newline. The promoter appends lines and
+    # the dedupe rewrites the file, and between them a trailing blank line appeared:
+    # batch 18 passed every build gate and then failed `git diff --check` on
+    # "symbols.txt:1075: new blank line at EOF". Normalise before staging.
+    for f in (MC, SPLIT, SYMS):
+        t = f.read_text(); n = t.rstrip("\n") + "\n"
+        if n != t: f.write_text(n)
     run(["git", "add", *CFG, "src/game/japanese/", "src/game/"])
     if a.no_gates:
         print(f"structural checks passed for {total} functions; gates skipped"); return
