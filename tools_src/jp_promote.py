@@ -349,6 +349,16 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                 return dict(ok=False, src=src,
                             why=f"{n} and {n2} are two US names of {ua:#x} with different declarations; "
                                 f"one JP identifier ({jn}) cannot carry both")
+    # A US HEADER CAN BIND A NAME TO A LABEL: func_8004E9A0.h declares
+    # `extern RECT gModel_ImageCopyRect asm("D_8009B468");`, so the object emits
+    # D_8009B468 and a line written under the C name binds nothing. Read the labels
+    # out of the unit's own header and write each line under the label instead.
+    hdr = (KG / src).with_suffix(".h")
+    if hdr.exists():
+        pat = r'\bextern\b[^;{}]*?\b(\w+)\s*(?:\[[^\]]*\])?\s*asm\s*\(\s*"(\w+)"\s*\)'
+        for m0 in re.finditer(pat, hdr.read_text(errors="replace")):
+            decl, label = m0.group(1), m0.group(2)
+            if decl != label and decl in lines and label not in lines: rename.setdefault(decl, label)
     for old, newn in rename.items():
         if old in lines: lines[newn] = lines.pop(old)
         if old in aliases: aliases[newn] = aliases.pop(old)
