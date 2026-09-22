@@ -134,6 +134,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
     """Return (ok, symbol map {USname: JPaddr}, reason)."""
     if len(uw) != len(jw): return False, {}, "size differs"
     lui = {}       # rt -> (us_hi, jp_hi)
+    last_lui = {}  # rt -> the last lui pair on rt, kept after the register is overwritten
     syms = {}      # US name -> JP address, where the two differ
     eq = {}        # US name -> address, where they are equal: the JP link still needs
                    # a line for a NAMED symbol (splat only auto-labels D_/func_ names)
@@ -165,6 +166,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         pending = dst if (dst and op != 0x0F) else None
         if op == 0x0F and (j >> 26) == 0x0F and ((u ^ j) & 0xFFFF0000) == 0:
             lui[rt] = (u & 0xFFFF, j & 0xFFFF)
+            last_lui[rt] = lui[rt]
             if (u & 0xFFFF) != (j & 0xFFFF): unpaired[rt] = i
             else: unpaired.pop(rt, None)
         if u == j:
@@ -200,6 +202,16 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
             ja = ((lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
             if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
             unpaired.pop(rs, None)
+            continue
+        # A %lo at a BRANCH TARGET whose %hi was loaded on another path: the linear
+        # scan saw the register overwritten in between and forgot it (measured on
+        # script_op_fade_out: `lui $v0,0x800f` ... `andi $v0,...` ... label:
+        # `lbu 0x9ece($v0)`). Only the differing-word path uses it, only with equal
+        # %hi halves on both sides, and put() still rejects a conflicting symbol.
+        if op in LOADSTORE and rs in last_lui and rs not in lui and last_lui[rs][0] == last_lui[rs][1]:
+            ua = ((last_lui[rs][0] << 16) + sx16(u & 0xFFFF)) & 0xFFFFFFFF
+            ja = ((last_lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
+            if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
             continue
         return False, {}, f"word {i}: immediate differs {u:08x} {j:08x}"
     if unpaired: return False, {}, f"word {min(unpaired.values())}: lui immediate differs with no lo use"

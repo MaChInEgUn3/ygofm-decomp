@@ -51,6 +51,9 @@ DEFERRED = {
     "duel_field_effect_steps": "measured by batch 23's link: undefined reference to D_8009B20C",
     "game_over": "E: batch 23's link, undefined reference to gFade_State (the script_image_commands alias chain)",
     "duel_update_card_pick_cursor": "F: batch 23, links then bytes differ at 0x80023fd4 (0x36 expected, 0x46 built)",
+    "duel_card_effects": "measured by batch 25's link: undefined D_8009B112_abs and D_8009B20C",
+    "func_80019608": "measured by batch 25's link: undefined reference to func_8001944C",
+    "script_op_load_image_scene": "E: batch 25's link, undefined reference to gFade_State",
 }
 
 
