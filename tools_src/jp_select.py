@@ -44,6 +44,7 @@ DEFERRED = {
     "func_800339D0":              "F: links, then bytes differ at 0x80033820 (profile gcc_2_8_1_g8_split)",
     "sd_arm_busy_callback":       "F: links, then bytes differ; source hardcodes 0x8009B45C",
     "duel_effect_create_channel": "F predicted: source hardcodes 0x8009B34D, in a region measured to shift",
+    "func_80018FEC": "measured by batch 19's link: undefined reference to D_8009B23A (nothing on the JP side names it)",
 }
 
 
