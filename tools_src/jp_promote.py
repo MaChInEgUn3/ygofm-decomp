@@ -57,6 +57,45 @@ GP_US, GP_JP = None, None
 ASM_ALIASES = {
     "game/fade_runtime": [("D_800E9EC8_arr", 0x800E9EC8,
                            'extern u8 D_800E9EC8_arr[] asm("%s");')],
+    # duel_card_effects.c defines DUEL_FIELD_GRID_ALIASES on its line 2, which
+    # takes the branch of src/game/duel_grid.h -- ANOTHER unit's header, so the
+    # scan of this unit's own header below never sees it -- declaring TWO views
+    # of one object, both bound by an asm label:
+    #     extern u8 D_800907D8_2d[..][..] asm("D_800907D8");
+    #     extern u8 D_800907D8_flat[]     asm("D_800907D8");
+    #     #define D_800907D8 D_800907D8_flat
+    # The wrapper's `#define D_800907D8 gJapanese_D_800907D8` cannot reach
+    # either, because a macro does not expand inside a string literal, so every
+    # reference bound to the US name and seven words came out with the US
+    # address (0x800907D8 against the Japanese 0x80090688, a uniform 0x150).
+    # The inner bound is DUEL_FIELD_SIDE_GRID_SLOT_COUNT, which that header
+    # defines at its line 9; it is written out here because the wrapper is
+    # included before the header that defines it, and the outer bound is left
+    # for the header to complete.
+    "game/duel_card_effects": [("D_800907D8_2d", 0x800907D8,
+                                'extern u8 D_800907D8_2d[][20] asm("%s");'),
+                               ("D_800907D8_flat", 0x800907D8,
+                                'extern u8 D_800907D8_flat[] asm("%s");')],
+}
+
+# Carving a block can leave the blob piece BEFORE it short, and the bytes are
+# lost silently. splat drops the TRAILING ZEROS of a row that now has a fixed
+# end: `initialized_data_8b66a` spans 0x8b66a..0x8b670 and its object comes out
+# FOUR bytes, so everything after it shifts down by two. Measured on
+# duel_card_effects as three `addiu $v0,$gp` off by exactly 2, each pointing two
+# bytes below that unit's own block.
+# Naming the byte in symbols.txt does NOT fix it -- splat accepts the symbol
+# (it is not in the "unable to determine a segment" list) and still drops the
+# bytes. A `pad` row does, and it is how the US split spells the same gap
+# (`[0x8b70d, pad]`); the Japanese split already carries `pad` rows, while a
+# `size:` attribute -- the other route, used 1137 times in the US symbols --
+# appears there zero times, so the row is the smaller imposition.
+# Hand-written per unit, like ASM_ALIASES above, because only a splat run says
+# where the emission stops. These two bytes are the zero tail of
+# debug_effect_screen's unpromoted block, not real padding.
+# unit -> [file offset of a `pad` row to add inside initialized_data]
+CARVE_PADS = {
+    "game/duel_card_effects": [0x8b66e],
 }
 
 def sx16(v): return v - 0x10000 if v & 0x8000 else v
@@ -480,6 +519,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # shifted: this is data, and it sits in the gp region, so the unit's text
     # displacement does not apply to it.
     sdata = None
+    carve_pads = []
     if unit_name in US_SDATA:
         off, size, resume = US_SDATA[unit_name]
         usvram = off - HDR + LOAD
@@ -500,8 +540,9 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         # the blob resumes where the US split resumes, which is past the `pad`
         # row when there is one -- the padding gets a row of its own
         sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
+        carve_pads = CARVE_PADS.get(unit_name, [])
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
+                rodata=rodata, sdata=sdata, carve_pads=carve_pads, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -613,6 +654,8 @@ def apply(addr):
         # (0 warnings) and the build then does NOT match. Measured 2026-09-22,
         # all three variants; only this one is byte-identical, so the warning is
         # disclosed in the PR rather than traded for a wrong image.
+        for b in r.get("carve_pads", []):
+            have.setdefault(b, f"      - [{b:#x}, pad]")
         if sresume != end:
             have.setdefault(end, f"      - [{end:#x}, pad]")
         have.setdefault(sresume, f"      - [{sresume:#x}, sdata, initialized_data_{sresume:x}]")
