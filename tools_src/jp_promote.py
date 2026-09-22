@@ -65,6 +65,12 @@ def words(exe, addr, size):
     b = exe.read_bytes()[addr - LOAD + HDR: addr - LOAD + HDR + size]
     return list(struct.unpack("<%dI" % (len(b) // 4), b))
 
+def raw(exe, addr, size):
+    # a .sdata block is data, not instructions: its size is not a multiple of
+    # four (gDuel_abTrapAttackThresholds is 5 bytes and the scalar after it 1,
+    # game/main_frame's whole block is 1), so it is compared byte-wise
+    return exe.read_bytes()[addr - LOAD + HDR: addr - LOAD + HDR + size]
+
 def load_all():
     global GP_US, GP_JP
     us = {int(f["address"], 16): f for f in json.load(open(BASE_CFG / "matching_c.json"))["functions"]}
@@ -119,6 +125,24 @@ def load_all():
     rows = sorted((int(m.group(1), 16), m.group(2))
                   for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), \.?rodata, (\S+)\]", us_split))
     US_RODATA = {n: (o, rows[i + 1][0] - o) for i, (o, n) in enumerate(rows) if i + 1 < len(rows)}
+    global US_SDATA
+    # A unit whose source DEFINES data has its own `.sdata` row in the US
+    # split; the JP split carries the whole region as ONE blob, so without a
+    # carve the symbol is defined twice and the link says so -- measured on
+    # duel_trap_resolution: "multiple definition of `gDuel_abTrapAttackThresholds';
+    # initialized_data.data.o ... first defined here src/game/japanese/duel_trap_resolution.o:(.sdata+0x0)".
+    # The size comes from the NEXT row whatever its type, because a block can be
+    # bounded by a `pad` rather than by another unit (game/main_frame is, at
+    # 0x8b70c). Matching `\.?s?data` instead would also match the "data" inside
+    # ".rodata" -- that spelling reported 8 phantom sdata carves in the JP split,
+    # which has none.
+    allrows = sorted(int(m.group(1), 16)
+                     for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), ", us_split))
+    US_SDATA = {}
+    for m in re.finditer(r"- \[(0x[0-9a-fA-F]+), \.sdata, (\S+)\]", us_split):
+        o = int(m.group(1), 16)
+        nxt = [x for x in allrows if x > o]
+        if nxt: US_SDATA[m.group(2)] = (o, nxt[0] - o)
     global JPVRAM, JP_AUTO
     JPVRAM = {a: n for n, a in jpsyms.items()}       # JP address -> the name JP already gives it
     # default names JP splat generated for ITS OWN addresses (from the last
@@ -419,8 +443,34 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
             return dict(ok=False, src=src, why=f".rodata at {usvram:#x} is not the US block shifted by the unit's {tdelta:#x} "
                                                f"(deltas {sorted(hex(d) for d in deltas)[:3]})")
         rodata = (jpvram - LOAD + HDR, size)
+    # A unit whose source DEFINES data needs its block carved out of the JP
+    # blob: otherwise splat's blob and the promoted object both define the
+    # symbol and the link refuses it. The block's JP address comes from the
+    # symbol whose US address IS the block's start -- the same rule the
+    # .rodata carve above uses -- and the bytes must then be EQUAL rather than
+    # shifted: this is data, and it sits in the gp region, so the unit's text
+    # displacement does not apply to it.
+    sdata = None
+    if unit_name in US_SDATA:
+        off, size = US_SDATA[unit_name]
+        usvram = off - HDR + LOAD
+        cand = sorted((n, j) for n, j in syms.items() if _ua_of(names, n, j) == usvram)
+        if len(cand) != 1:
+            return dict(ok=False, src=src, why=f".sdata block at {usvram:#x} has {len(cand)} derived JP "
+                                               f"addresses, needs exactly one ({cand})")
+        jpvram = cand[0][1]
+        ub, jb = raw(US_EXE, usvram, size), raw(JP_EXE, jpvram, size)
+        if ub != jb:
+            return dict(ok=False, src=src, why=f".sdata at {usvram:#x} is not the JP block at {jpvram:#x} "
+                                               f"({ub.hex()} against {jb.hex()})")
+        # every symbol the carved range covers is defined by the promoted C, so
+        # its symbols.txt line has to go: splat would name it inside a range it
+        # no longer emits
+        inside = {n for n, j in syms.items() if jpvram <= j < jpvram + size}
+        for n in inside: lines.pop(n, None)
+        sdata = (jpvram - LOAD + HDR, size)
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
+                rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -501,6 +551,39 @@ def apply(addr):
         out.append(l)
     assert not pend, f"nowhere to place {pend}"
     sp.write_text("\n".join(out))
+    if r.get("sdata"):
+        # the carve goes in the initialized_data segment, which the pass above
+        # deliberately does not touch
+        soff, ssize = r["sdata"]; end = soff + ssize
+        l2 = sp.read_text().split("\n")
+        i0 = l2.index("  - name: initialized_data")
+        j = i0
+        while j < len(l2) and not re.match(r"\s+- \[0x[0-9a-f]+, ", l2[j]): j += 1
+        k = j
+        while k < len(l2) and re.match(r"\s+- \[0x[0-9a-f]+, ", l2[k]): k += 1
+        have = {int(re.match(r"\s+- \[(0x[0-9a-f]+), ", l).group(1), 16): l for l in l2[j:k]}
+        assert soff not in have, f"{soff:#x} already a subsegment of initialized_data"
+        have[soff] = f"      - [{soff:#x}, .sdata, {unit}]"
+        # ONE resumption row, and it must be typed `sdata` rather than `data`:
+        # section_order puts .data before .sdata, so a `data` remainder places
+        # the carved block after the whole .data region (measured: no match,
+        # mismatch at 0x80012d18).
+        #
+        # The remainder then starts at an offset that is 2 mod 4, which makes
+        # every 4-aligned datum inside it 2-aligned as far as ld is concerned,
+        # and it warns where a C unit has the same name as a common definition
+        # with alignment 4: `alignment 2 of normal symbol D_8009AF88 ... is
+        # smaller than 4 used by the common definition in func_8004E7B0.o`
+        # (D_8009AF88 is a tentative definition at src/game/func_8004E7B0.c:11
+        # and the JP symbols.txt also gives that US name to the blob address
+        # 0x8009AEF0, so the two have always been one symbol). The warning is
+        # NEW -- it is in no earlier gate log -- and the obvious fix does not
+        # work: resuming a SECOND time at the next 4-aligned offset silences it
+        # (0 warnings) and the build then does NOT match. Measured 2026-09-22,
+        # all three variants; only this one is byte-identical, so the warning is
+        # disclosed in the PR rather than traded for a wrong image.
+        have.setdefault(end, f"      - [{end:#x}, sdata, initialized_data_{end:x}]")
+        sp.write_text("\n".join(l2[:j] + [have[o] for o in sorted(have)] + l2[k:]))
     # matching_c.json
     # matching_c.json: the file is not globally sorted upstream (one entry sits
     # out of order), so never re-sort it -- insert before the first entry in
