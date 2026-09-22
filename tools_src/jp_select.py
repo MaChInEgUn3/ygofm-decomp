@@ -45,6 +45,8 @@ DEFERRED = {
     "sd_arm_busy_callback":       "F: links, then bytes differ; source hardcodes 0x8009B45C",
     "duel_effect_create_channel": "F predicted: source hardcodes 0x8009B34D, in a region measured to shift",
     "func_80018FEC": "measured by batch 19's link: undefined reference to D_8009B23A (nothing on the JP side names it)",
+    "func_800388D8": "E: batch 20's link, undefined reference to gFade_State (the script_image_commands alias chain)",
+    "func_8004E9A0": "measured by batch 20's link: undefined D_8009B468 and gModel_abImageCopyFrameRows",
 }
 
 
