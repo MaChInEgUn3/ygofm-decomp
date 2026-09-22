@@ -36,6 +36,7 @@ BASE_CFG = KG / "config" / "slus_01411"          # the US side, always the sourc
 TGT_CFG = KG / "config" / R["config"]
 SPLAT = KG / "tmp/splat" / R["config"]
 PAIRS = ROOT / "config" / R["pairs"]   # address = target, address2 = US; the pair list the scan starts from
+US_LINK_SYMS = ROOT / "config" / "us_link_symbols.csv"   # names the US link gives C-defined data
 US_EXE, JP_EXE = KG / "game/SLUS_014.11", KG / R["exe"]
 LOAD, HDR = 0x80010000, 0x800
 # BOTH gp values are read from their own split.yaml. GP_JP used to be the
@@ -95,6 +96,15 @@ def load_all():
     for line in open(BASE_CFG / "c_symbols.ld"):
         m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;", line)
         if m: ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
+    # DATA DEFINED IN C carries a name that no config file holds: the address comes
+    # out of the US link and nothing else. `gDebugMenu_abMainModeByEntry` is one --
+    # the promoter recorded 0x80090D68 -> 0x80090C18 and wrote it as `D_80090D68`,
+    # while debug_menu_leave_entries calls it by its real name and the JP link had
+    # nothing to bind. config/us_link_symbols.csv is that map, read off
+    # tmp/project-build/SLUS_014.11.map after `make match`; it is committed because
+    # `make clean` inside a batch deletes the map.
+    for r in csv.DictReader(open(US_LINK_SYMS)) if US_LINK_SYMS.exists() else ():
+        ALT_NAMES[int(r["address"], 16)].add(r["name"])
     global US_RODATA
     us_split = (BASE_CFG / "split.yaml").read_text()
     m = re.search(r"gp_value:\s*(0x[0-9a-fA-F]+)", us_split)
