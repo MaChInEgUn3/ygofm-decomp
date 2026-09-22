@@ -462,12 +462,31 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # The base's JP address is derived from the symbols this unit DID record, and only
     # when at least two of them within 0x100 agree on one displacement; a single
     # neighbour is not evidence, and a disagreement means the region is not uniform.
+    # The neighbours come from every pair the words yielded, not just the ones
+    # that reached `lines`: game_over records D_800E9ECE and D_800E9ECF in syms
+    # and NEITHER reaches lines, so a lines-only seed leaves the set empty and
+    # the derivation cannot fire at all. Function pairs are excluded -- a jal
+    # target's displacement is the text one and would poison a data neighbourhood.
     known = []
-    for n0, ja in lines.items():
-        m0 = re.match(r"D_([0-9A-Fa-f]{8})$", n0)
-        if m0: known.append((int(m0.group(1), 16), ja))
-    for m0 in re.finditer(r"\bD_([0-9A-Fa-f]{8})\b", code):
-        n0, ua0 = m0.group(0), int(m0.group(1), 16)
+    for n0, ja in syms.items():
+        if n0.startswith("func_"): continue
+        ua = _ua_of(names, n0, ja)
+        if ua is None or ua in us: continue
+        known.append((ua, ja))
+    # A NAMED base is the same case and the D_ pattern cannot see it. game_over
+    # reads gFade_State (US 0x800E9EC8) only at +6 and +7, so the words yield
+    # D_800E9ECE and D_800E9ECF and the name the source actually writes is never
+    # recorded: `undefined reference to gFade_State`, six times, and no wrapper
+    # at all because the unit derived no aliases.
+    cands = [(m0.group(0), int(m0.group(1), 16))
+             for m0 in re.finditer(r"\bD_([0-9A-Fa-f]{8})\b", code)]
+    _byname = {}
+    for _a, _n in names.items(): _byname.setdefault(_n, _a)
+    for m0 in re.finditer(r"\b[A-Za-z_]\w+\b", code):
+        n0 = m0.group(0)
+        if n0 in _byname and not n0.startswith("func_") and _byname[n0] not in us:
+            cands.append((n0, _byname[n0]))
+    for n0, ua0 in cands:
         if n0 in lines or n0 in aliases or n0 in jpsyms or n0 in JP_AUTO: continue
         # One neighbour is evidence only when it is a few bytes away, i.e. the same
         # object: `D_8009B20C` against the recorded `D_8009B20E`. Further out the
@@ -479,7 +498,14 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
             ds = {ja - ua for ua, ja in group}
             if len(ds) == 1 and len({ua for ua, _ in group}) >= need:
                 d = ds.pop()
-                if (ua0 + d) not in JPVRAM: lines[n0] = ua0 + d
+                j0 = ua0 + d
+                # when the derived address is ALREADY named on the Japanese side
+                # the base needs an alias, not a symbols line: splat refuses a
+                # second name for one address (gFade_State against the
+                # gJapanese_FadeState that fade_runtime's promotion put at
+                # 0x800E9DA8)
+                if j0 not in JPVRAM: lines[n0] = j0
+                elif JPVRAM[j0] != n0: aliases[n0] = JPVRAM[j0]
                 break
     # the asm-label declarations for this unit's second names
     asm_lines = []
