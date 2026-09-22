@@ -37,8 +37,10 @@ DEFERRED = {
     "main_run_password_menu":     "A: calls overlay imports (Password_*)",
     "main_run_selection_menus":   "A: link fails inside Main_RunMenu, overlay imports",
     "main_run_frontend_menus":    "A: link fails inside Main_RunMenu, overlay imports",
-    "main_frame":                 "C: source DEFINES D_8009AF0C, which the JP initialized_data blob already carries",
-    "duel_trap_resolution":       "C: source DEFINES gDuel_abTrapAttackThresholds, already in the JP blob",
+    # NOT class C any more: the .sdata carve promotes it and the build MATCHES.
+    # It is held because 0x80012C70 is claimed by eleven open PRs (#5787 and the
+    # ten stacked on it) and a unit promotes whole. Re-check when those close.
+    "main_frame":                 "claimed: 0x80012C70 is in eleven open PRs; the carve itself works",
     "display_object_fade_callbacks": "D: func_80039BE0 defined twice in the JP layout",
     "script_image_commands":      "E: alias chain -- gFade_State, then D_8009B0F4_abs and D_8009B134_abs",
     "func_800339D0":              "F: links, then bytes differ at 0x80033820 (profile gcc_2_8_1_g8_split)",
@@ -47,10 +49,8 @@ DEFERRED = {
     "func_800388D8": "E: batch 20's link, undefined reference to gFade_State (the script_image_commands alias chain)",
     "game_over": "E: batch 23's link, undefined reference to gFade_State (the script_image_commands alias chain)",
     "duel_update_card_pick_cursor": "F: batch 23, links then bytes differ at 0x80023fd4 (0x36 expected, 0x46 built)",
-    "duel_card_effects": "measured by batch 25's link: undefined D_8009B112_abs and D_8009B20C",
     "func_80019608": "measured by batch 25's link: undefined reference to func_8001944C",
     "script_op_load_image_scene": "E: batch 25's link, undefined reference to gFade_State",
-    "duel_scene_battle": "measured by batch 26's link: undefined func_8001F0D0 and func_8001F364",
 }
 
 
