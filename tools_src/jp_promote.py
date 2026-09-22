@@ -487,7 +487,14 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         if n0 in _byname and not n0.startswith("func_") and _byname[n0] not in us:
             cands.append((n0, _byname[n0]))
     for n0, ua0 in cands:
-        if n0 in lines or n0 in aliases or n0 in jpsyms or n0 in JP_AUTO: continue
+        # The name being TAKEN on the Japanese side blocks a symbols.txt line and
+        # is exactly when an alias is wanted, so the skip cannot come first:
+        # func_800388D8 reads `*(u8 *)&D_8009AF74[1]`, the words carry only the
+        # interior D_8009AF76 (JP 0x8009AEBE), the base derives to 0x8009AEBC --
+        # and splat already calls that gJapanese_D_8009AF74 while generating
+        # `D_8009AF74` for its OWN 0x8009AF74. Skipping there left the unit one
+        # word out (lbu imm 0xaf76 against 0xaebe).
+        if n0 in lines or n0 in aliases: continue
         # One neighbour is evidence only when it is a few bytes away, i.e. the same
         # object: `D_8009B20C` against the recorded `D_8009B20E`. Further out the
         # displacement is not uniform -- those two move by 0x110 where gp moves by
@@ -504,8 +511,13 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                 # second name for one address (gFade_State against the
                 # gJapanese_FadeState that fade_runtime's promotion put at
                 # 0x800E9DA8)
-                if j0 not in JPVRAM: lines[n0] = j0
-                elif JPVRAM[j0] != n0: aliases[n0] = JPVRAM[j0]
+                if j0 in JPVRAM:
+                    if JPVRAM[j0] != n0: aliases[n0] = JPVRAM[j0]
+                # a line only when the name is free on the Japanese side: it is
+                # taken when symbols.txt carries it, or when splat generated the
+                # same D_ name for its own address
+                elif n0 not in jpsyms and n0 not in JP_AUTO:
+                    lines[n0] = j0
                 break
     # the asm-label declarations for this unit's second names
     asm_lines = []
