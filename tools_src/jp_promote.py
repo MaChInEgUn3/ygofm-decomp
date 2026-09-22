@@ -342,6 +342,33 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     for old, newn in rename.items():
         if old in lines: lines[newn] = lines.pop(old)
         if old in aliases: aliases[newn] = aliases.pop(old)
+    # A BASE SYMBOL THE CODE NAMES AND NO INSTRUCTION CARRIES. `D_8009B20C[1]` on a
+    # u16 array is an access at 0x8009B20E, so the words yield `D_8009B20E` and the
+    # source's own `D_8009B20C` is never written -- undefined at the JP link, which is
+    # what deferred duel_field_effect_steps (measured 2026-09-22). splat's interior
+    # symbol, from the other side.
+    # The base's JP address is derived from the symbols this unit DID record, and only
+    # when at least two of them within 0x100 agree on one displacement; a single
+    # neighbour is not evidence, and a disagreement means the region is not uniform.
+    known = []
+    for n0, ja in lines.items():
+        m0 = re.match(r"D_([0-9A-Fa-f]{8})$", n0)
+        if m0: known.append((int(m0.group(1), 16), ja))
+    for m0 in re.finditer(r"\bD_([0-9A-Fa-f]{8})\b", code):
+        n0, ua0 = m0.group(0), int(m0.group(1), 16)
+        if n0 in lines or n0 in aliases or n0 in jpsyms or n0 in JP_AUTO: continue
+        # One neighbour is evidence only when it is a few bytes away, i.e. the same
+        # object: `D_8009B20C` against the recorded `D_8009B20E`. Further out the
+        # displacement is not uniform -- those two move by 0x110 where gp moves by
+        # 0xC0 -- so a wider window needs two neighbours that agree.
+        close = [(ua, ja) for ua, ja in known if abs(ua - ua0) <= 0x10]
+        wide = [(ua, ja) for ua, ja in known if abs(ua - ua0) < 0x100]
+        for group, need in ((close, 1), (wide, 2)):
+            ds = {ja - ua for ua, ja in group}
+            if len(ds) == 1 and len({ua for ua, _ in group}) >= need:
+                d = ds.pop()
+                if (ua0 + d) not in JPVRAM: lines[n0] = ua0 + d
+                break
     # the asm-label declarations for this unit's second names
     asm_lines = []
     for extra, uaddr, tmpl in ASM_ALIASES.get(src[len("src/"):-2], ()):
