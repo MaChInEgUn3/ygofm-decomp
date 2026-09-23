@@ -398,9 +398,11 @@ REGIONAL = {
                               [("SCRIPT_DUEL_RESULT_MENU_ASSETS_START_SECTOR", "0x1FB2")]),
     # `44 * FILE_SECTOR_SIZE` (0x16000), JP 48 sectors (0x18000): lui 0x0001 + ori
     # only the start sector moves (the count stays 0x32). The address comes from
-    # the order of the request sites: US and JP list the same package calls in the
-    # same order, and this is the ninth on both sides. NOT JP 0x80032090, which
-    # shape search chose once -- see the note above.
+    # the order of the `addiu $a2,sector; addiu $a3,count` request sites: 13 in
+    # the US, 12 in JP, in the same order -- the options package's second request
+    # (0x2147/0x10) has no JP counterpart -- and game over follows the options
+    # request on both sides (9th US, 8th JP). NOT JP 0x80032090, which shape search
+    # chose once -- see the note above.
     "file_request_game_over_package": (0x8003BA64, [(0x8003C4AC, 0x2157, 0x2152)],
                                        [("GAME_OVER_PACKAGE_START_SECTOR", "0x2152")]),
     "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
