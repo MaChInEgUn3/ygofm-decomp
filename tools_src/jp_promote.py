@@ -464,6 +464,17 @@ REGIONAL = {
     # neighbour moves by -0x844
     "dialog_update_choice": (0x80036964, [(0x800372E0, 0x00C0, 0x00A0)],
                              [("DIALOG_UPDATE_CHOICE_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)")]),
+    # the result-rewards confirm button, a literal 0x40 (Cross) in the source,
+    # Circle (0x20) in the Japanese build; both neighbours move by -0x1B8
+    "func_800218F0": (0x80021738, [(0x80022078, 0x0040, 0x0020)],
+                      [("DUEL_RESULT_REWARDS_CONFIRM_BUTTON", "PAD_BUTTON_CIRCLE")]),
+    # the field-action confirm mask (0xC0 -> 0xA0, twice) and cancel button
+    # (0x20 -> 0x40), literals in the source; both neighbours move by -0x1B8
+    "duel_scene_field_actions": (0x8001D4B8, [(0x8001DDA4, 0x00C0, 0x00A0),
+                                              (0x8001E1F0, 0x0020, 0x0040),
+                                              (0x8001E3A4, 0x00C0, 0x00A0)],
+                                 [("DUEL_FIELD_ACTIONS_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)"),
+                                  ("DUEL_FIELD_ACTIONS_CANCEL_BUTTON", "PAD_BUTTON_CROSS")]),
     "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
@@ -612,6 +623,15 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         self_named = m is not None and jpsyms.get(n) == int(m.group(2), 16)
         if n in jpsyms and not self_named:
             if jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
+            continue
+        # a function already promoted in C at its Japanese address, with no
+        # symbols line: its wrapper defines it under the JP-address name
+        # (duel_card_state_reset: `#define func_80028220 func_80028034`), so a
+        # second unit calling it must alias to that name -- a symbols line would
+        # name a label nothing defines ("undefined reference to func_80028220")
+        if m and m.group(1) == "func" and a in jp and a not in set(jpsyms.values()) \
+                and int(m.group(2), 16) != a:
+            aliases[n] = f"func_{a:08X}"
             continue
         if m and (n in JP_AUTO or self_named) and int(m.group(2), 16) != a:
             jn = ("gJapanese_" if m.group(1) == "D" else "Japanese_") + n
