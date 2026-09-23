@@ -417,6 +417,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # the US names so the unit's calls to itself are still skipped below -- the
     # wrapper's #define renames those.
     fnames_out = list(fnames)
+    own_asm = []
     for k, (n, j) in enumerate(zip(fnames, jps)):
         # The address a function lands at can ALREADY carry a name in the JP
         # symbols.txt, put there by an earlier promotion that called it while it was
@@ -426,7 +427,25 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         # symbol detected! GameOver_Init clashes with func_8003BFA4"), so the unit's
         # function takes the name already there, and the caller binds to it.
         if j in JPVRAM and JPVRAM[j] != n:
-            aliases[n] = fnames_out[k] = JPVRAM[j]
+            tgt = JPVRAM[j]
+            # ...unless the unit's own source ALSO declares that name. Then a
+            # `#define n tgt` turns the source's declaration of n into a second
+            # declaration of tgt: func_80031784's header declares both
+            # BuildDeck_DrawSortIcons (which the .c defines) and func_80031784 (the
+            # compatibility name its caller uses), and the JP symbols.txt already has
+            # `func_80031784 = 0x800314BC`. An asm label on a first, parameterless
+            # declaration makes the DEFINITION emit tgt instead, and touches no C
+            # identifier; the header's prototype completes the type.
+            _own = (KG / src).read_text(errors="replace") if (KG / src).exists() else ""
+            _hdr = (KG / src).with_suffix(".h")
+            _own += _hdr.read_text(errors="replace") if _hdr.exists() else ""
+            if re.search(r"\b%s\b" % re.escape(tgt), _own):
+                m1 = re.search(r"^\s*((?:static\s+)?[A-Za-z_][\w\s\*]*?)\s*\b%s\s*\(" % re.escape(n), _own, re.M)
+                if m1:
+                    own_asm.append(f'{m1.group(1).strip()} {n}() asm("{tgt}");')
+                    fnames_out[k] = tgt
+                    continue
+            aliases[n] = fnames_out[k] = tgt
             continue
         m0 = re.match(r"func_([0-9A-Fa-f]{8})$", n)
         if m0 and int(m0.group(1), 16) != j and n in JP_AUTO:
@@ -586,7 +605,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                     lines[n0] = j0
                 break
     # the asm-label declarations for this unit's second names
-    asm_lines = []
+    asm_lines = list(own_asm)
     for extra, uaddr, tmpl in ASM_ALIASES.get(src[len("src/"):-2], ()):
         jn = aliases.get(usname(names, uaddr))
         if jn is None:
@@ -667,7 +686,9 @@ def apply(addr):
     if not r["ok"]: sys.exit(f"cannot apply {r['src']}: {r['why']}")
     unit = r["src"][len("src/"):-2]
     wrapper = None
-    if r["aliases"]:
+    # an asm label alone needs the wrapper too (func_80031784 has no #define, only
+    # the label), or it never reaches the build
+    if r["aliases"] or r.get("asm_aliases"):
         # upstream's regional-alias wrapper (src/game/japanese/*.c): the US
         # names the JP build cannot use are #defined to JP names before the
         # headers are seen; the US source is included rather than copied
