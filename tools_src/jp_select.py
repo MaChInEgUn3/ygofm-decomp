@@ -58,7 +58,10 @@ DEFERRED = {
     # (US 0x8009B246) to JP 0x8009B136; the literal simply never goes through it.
     # Build: `sh $v0,-0x4dba($at)` against JP -0x4eca, one symbol 0x110 out.
     # (A comment-line filter on `^\s*\*` hid this line once: it starts with `*`.)
-    "duel_update_card_pick_cursor": "F: source hardcodes 0x8009B246 inline at line 84; needs a regional spelling upstream",
+    # RESOLVED 2026-09-23 by #5907: #5730's `#ifndef NAME / #define NAME <US>`
+    # spelling for both literals, the JP wrapper defines the JP addresses. Kept
+    # here only until #5907 lands; the in-flight scan skips it meanwhile anyway.
+    "duel_update_card_pick_cursor": "in flight: #5907 (regional literal spelling, same pattern as #5730)",
 }
 
 
