@@ -126,6 +126,8 @@ def main():
                 i = s.rfind("\n", 0, k) + 1
             elif line.startswith("//"):
                 i = prev
+            elif line == "" and s[:prev].rstrip().endswith("*/"):
+                i = prev   # a blank line between the comment and the function
             else:
                 break
         j = s.index("\n}\n", mdef.end()) + 3
@@ -149,6 +151,13 @@ def main():
         if s2 == s: break
         s = s2
     s = s.rstrip("\n") + "\n"   # a split of the file's last block left a blank line at EOF
+    # the two ways the split went wrong by hand, checked on the result: a guard
+    # inside a /* */ comment, and a #ifndef block holding nothing but a comment
+    inside = [m.start() for m in re.finditer(r"#(if|endif)", s)
+              if s.rfind("/*", 0, m.start()) > s.rfind("*/", 0, m.start())]
+    orphan = re.findall(r"#ifndef VERSION_JAPAN\n(?:\s*/\*.*?\*/\s*)+#endif", s, re.S)
+    if inside or orphan:
+        sys.exit(f"{src}: {len(inside)} directive(s) inside comments, {len(orphan)} comment-only block(s)")
     p.write_text(s)
 
     # ---- wrapper
