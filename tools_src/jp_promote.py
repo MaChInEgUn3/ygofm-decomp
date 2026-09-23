@@ -361,6 +361,19 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
     ok, syms, why = pair_words(uw, jw, names, pairs, (fns[0], jps[0]))
     if not ok: return dict(ok=False, src=src, why=why)
+    # A derived symbol whose US address is outside the image cannot be a symbol:
+    # it is a mispaired %hi/%lo, and a unit that passed carrying one would put a
+    # nonsense line in upstream's symbols.txt. script_op_load_image_scene yields
+    # `D_01FF9ECE -> 0x01FF9DAE`, which LOOKS right because it tracks the data
+    # displacement (0x120) exactly, like every real pair in that unit. Refusing is
+    # better than dropping it silently: the unit is not promotable until the
+    # pairing is understood. The scratchpad and hardware registers at 0x1F80xxxx
+    # are addresses the code legitimately names (WORKFLOW's 0x1F8002A0).
+    def _plausible(a):
+        return a is not None and (0x80000000 <= a < 0x80200000 or 0x1F800000 <= a < 0x1F802000)
+    bad = sorted(n for n, a in syms.items() if not _plausible(_ua_of(names, n, a)))
+    if bad:
+        return dict(ok=False, src=src, why=f"derived symbol outside the image, mispaired %hi/%lo: {bad[:3]}")
     fnames = [usname(names, a, True) for a in fns]
     # aliases: US name -> the name the JP build must use (a wrapper's #define
     # lines, upstream's "regional alias"); lines: symbols.txt lines to add
