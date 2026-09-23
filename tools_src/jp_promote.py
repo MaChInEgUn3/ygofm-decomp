@@ -464,9 +464,6 @@ REGIONAL = {
     # neighbour moves by -0x844
     "dialog_update_choice": (0x80036964, [(0x800372E0, 0x00C0, 0x00A0)],
                              [("DIALOG_UPDATE_CHOICE_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)")]),
-    # Start|confirm, 0x8C0 against 0x8A0; the next neighbour moves by -0x914
-    "main_run_frontend_loop": (0x800432B8, [(0x80043C68, 0x08C0, 0x08A0)],
-                               [("MAIN_FRONTEND_LOOP_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)")]),
     "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }

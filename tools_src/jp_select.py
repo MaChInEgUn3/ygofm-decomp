@@ -33,6 +33,10 @@ MANIFEST = "config/slpm_86398/matching_c.json"
 
 # unit -> the measured reason it cannot be promoted yet (classes as in docs/MERGE_KRYSTALGAMER.md)
 DEFERRED = {
+    # MEASURED 2026-09-23: the button swap is one REGIONAL entry (0x8C0 -> 0x8A0),
+    # but the function calls MainMenu_InitFrontendMenu / _Update / _Destroy in the
+    # main-menu overlay and the link has no Japanese overlay symbols: class A.
+    "main_run_frontend_loop":     "A: calls overlay imports (MainMenu_*); button swap alone would match",
     # MEASURED 2026-09-23: pairs word for word except 16 words where two loops'
     # pointer and counter swap $a0/$a1 (US cp=$a1, k=$a0; JP the reverse). Four
     # spellings measured against the built image, none moves them: the pointer
