@@ -143,15 +143,24 @@ def main():
         if not blk: sys.exit(f"{src} has a jump table but no US .rodata block")
         lo = fns[0][0]; hi = fns[-1][0] + int(us[fns[-1][0]]["size"], 16)
         tw = words(usb, blk[0] - M.HDR + M.LOAD, blk[1])
-        outside = [w for w in tw if 0x80010000 <= w < 0x80090000 and not lo <= w < hi]
-        if outside or not tw:
-            sys.exit(f"{src}'s .rodata block points outside these functions ({len(outside)} words); "
-                     "promote the whole unit")
+        mine = [i for i, w in enumerate(tw) if lo <= w < hi]
+        if not mine: sys.exit(f"{src}'s .rodata block has no word pointing into these functions")
+        # the tables these functions own may be a contiguous SUFFIX of the block
+        # (model_texture_transfer: func_80056D7C's 17 words stay, func_80057544's
+        # and func_800577B0's follow); then only that suffix is carved
+        first = mine[0]
+        outside = [w for w in tw[first:] if 0x80010000 <= w < 0x80090000 and not lo <= w < hi]
+        if outside or mine != list(range(first, len(tw))):
+            sys.exit(f"{src}'s .rodata block points outside these functions ({len(outside)} words) "
+                     "and the rest is not a suffix of it; promote the whole unit")
+        if first:
+            M.US_RODATA[f"game/{a.unit}"] = (blk[0] + 4 * first, blk[1] - 4 * first)
     if patches:
         M.REGIONAL[a.unit] = (fns[0][1], [(wa, ui, ji) for wa, (ui, ji) in patches.items()], [])
     r = M.analyze(us, jp, pairs, names, jpsyms, fns[0][0],
                   only=[u for u, _ in fns], jps_given=[j for _, j in fns], rodata_ok=has_table)
-    if has_table and not r.get("rodata"): sys.exit(f"{src}: the jump table's JP copy was not derived")
+    if has_table and not r.get("rodata"):
+        sys.exit(f"{src}: the jump table's JP copy was not derived ({r.get('why')})")
     if not r.get("ok"): sys.exit(f"{src}: {r.get('why')}")
     aliases, lines, asm_lines = dict(r["aliases"]), dict(r["lines"]), list(r.get("asm_aliases") or [])
     renames = {names[u]: n for (u, _), n in zip(fns, r["names"]) if n != names[u]}

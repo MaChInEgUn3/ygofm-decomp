@@ -541,8 +541,19 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
     jw = regional_words(src, fns[0], uw, jw, jps[0])
     if jw is None:
         return dict(ok=False, src=src, why="a REGIONAL entry does not hold in the binaries")
-    ok, syms, why = pair_words(uw, jw, names, pairs, (fns[0], jps[0]))
-    if not ok: return dict(ok=False, src=src, why=why)
+    # one function at a time: the lui state must not cross a function boundary.
+    # Paired as one stream, model_texture_transfer's func_80057544 left a
+    # `lui $a0, 0x1` constant as a stale %hi that func_800577B0's first
+    # `lw 4($a0)` on its argument completed into D_00010004.
+    syms, o = {}, 0
+    for f, j, sz in zip(fns, jps, sizes):
+        n = sz // 4
+        ok, s1, why = pair_words(uw[o:o + n], jw[o:o + n], names, pairs, (f, j))
+        if not ok: return dict(ok=False, src=src, why=why)
+        for k, v in s1.items():
+            if syms.get(k, v) != v: return dict(ok=False, src=src, why=f"{k} pairs to two JP addresses")
+            syms[k] = v
+        o += n
     # A derived symbol whose US address is outside the image cannot be a symbol:
     # it is a mispaired %hi/%lo, and a unit that passed carrying one would put a
     # nonsense line in upstream's symbols.txt. script_op_load_image_scene yields
@@ -809,7 +820,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
         if unmoved: jpvram = usvram
         if jpvram is None:
             return dict(ok=False, src=src, why=f".rodata block at {usvram:#x} has no derived JP address ({want} never paired)")
-        tdelta = fns[0] - jps[0]
+        tdelta = (fns[0] - jps[0]) & 0xFFFFFFFF   # a unit can move UP in the JP build
         uw2, jw2 = words(US_EXE, usvram, size), words(JP_EXE, jpvram, size)
         deltas = {(a - b) & 0xFFFFFFFF for a, b in zip(uw2, jw2)}
         if deltas != {tdelta} and not unmoved:
