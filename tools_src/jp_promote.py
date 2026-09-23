@@ -250,6 +250,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         if syms.get(n, jaddr) != jaddr: return False
         syms[n] = jaddr; return True
     pending = None    # register written by the previous word, dropped from lui before this one
+    carry = None      # (rd, %hi pair) a move copies into rd once rd's write is dropped
     unpaired = {}     # rt -> word index of a lui whose halves differ and has had no lo use yet
     # The lui state that REACHES a label. A linear scan carries the fall-through
     # state into every word, which is wrong at a label nothing falls into: there
@@ -276,6 +277,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         # drop is deferred one word because `lw $v0, lo($v0)` reads rs first.
         if pending is not None:
             lui.pop(pending, None)
+            if carry and carry[0] == pending: lui[pending] = carry[1]
             # a lui whose halves differ and that no load/store/addiu ever
             # consumed was a CONSTANT, and the code differs (text_control_commands:
             # US `lui $a0,0xffff` for a mask where the JP has `lui $a0,0x801f`;
@@ -302,6 +304,16 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         elif op in (0x01, 0x02, 0x04, 0x05, 0x06, 0x07) or op in (0x28, 0x29, 0x2A, 0x2B, 0x2E) or op >= 0x38: dst = None
         else: dst = rt
         pending = dst if (dst and op != 0x0F) else None
+        # a MOVE of a %hi register (`addu/or rd, rs, $zero`, the same word on both
+        # sides) carries the %hi to rd, applied after rd's own write is dropped.
+        # Measured on campaign_load_scene_package: `lui $v0,0x800f` then
+        # `addu $s3,$v0,$zero`, and the %lo uses go through $s3 (`sh $v1,0x9d70($s3)`,
+        # JP 0x9c50). Only equal halves are carried: an unpaired lui stays tied to
+        # the register it was loaded into.
+        carry = None
+        if op == 0 and u == j and (u & 0x3F) in (0x21, 0x25) and rt == 0 and dst \
+                and rs in lui and lui[rs][0] == lui[rs][1]:
+            carry = (dst, lui[rs])
         if op == 0x0F and (j >> 26) == 0x0F and ((u ^ j) & 0xFFFF0000) == 0:
             lui[rt] = (u & 0xFFFF, j & 0xFFFF)
             last_lui[rt] = lui[rt]
@@ -392,6 +404,10 @@ REGIONAL = {
     # FILE_WA_EGYPT_OVERWORLD_START_SECTOR: JP 0x1FE4, the Japanese WA.MRG layout
     "campaign_map_load_package_stage": (0x8003B4F8, [(0x8003C0F0, 0x1FD9, 0x1FE4)],
                                         [("CAMPAIGN_MAP_PACKAGE_START_SECTOR", "0x1FE4")]),
+    # the other differences are a %lo through a register that COPIED its %hi
+    # (pair_words' move carry); both neighbours move by -0x258
+    "campaign_load_scene_package": (0x8002FAB8, [(0x8002FD34, 0x1E57, 0x1E62)],
+                                    [("CAMPAIGN_SCENE_PACKAGE_START_SECTOR", "0x1E62")]),
     "password_load_package_stage": (0x8003B30C, [(0x8003BECC, 0x1F2F, 0x1F3A)],
                                     [("PASSWORD_PACKAGE_START_SECTOR", "0x1F3A")]),
     "script_op_duel_result": (0x8002F3D8, [(0x8002F660, 0x1FA7, 0x1FB2)],
