@@ -47,12 +47,6 @@ DEFERRED = {
     "duel_effect_create_channel": "F predicted: source hardcodes 0x8009B34D, in a region measured to shift",
     "duel_update_card_pick_cursor": "F: batch 23, links then bytes differ at 0x80023fd4 (0x36 expected, 0x46 built)",
     "func_80019608": "measured by batch 25's link: undefined reference to func_8001944C",
-    # the base derivation cannot fire here: the words record NO neighbour
-    # anywhere near the fade object in this unit, so there is nothing to infer
-    # a displacement from. Needs an explicit route, not a wider window.
-    # Also worth measuring first: its aliases include D_01FF9ECE, and
-    # 0x01FF9ECE is not an address in this image -- a suspected false pairing.
-    "script_op_load_image_scene": "E: gFade_State, and no neighbour to derive the base from",
 }
 
 
