@@ -98,6 +98,14 @@ def main():
             elif v in jp and v not in byaddr: aliases[n] = f"func_{v:08X}"
             else: lines[n] = v
 
+    runs = []
+    for ua, ja in fns:
+        sz = int(us[ua]["size"], 16)
+        if runs and runs[-1][1] == ja: runs[-1][1] = ja + sz
+        else: runs.append([ja, ja + sz])
+    if len(runs) > 1:
+        sys.exit(f"{len(runs)} separate runs {[hex(r[0]) for r in runs]}: call once per contiguous run")
+
     # ---- the US source: split each function out of its #ifndef VERSION_JAPAN block
     p = KG / src; s = p.read_text()
     for ua, ja in fns:
@@ -105,12 +113,21 @@ def main():
         mdef = re.search(r"\n([^\n;{}]*\b%s\s*\([^;{]*\)\s*\{)" % re.escape(fn), s)
         if not mdef: sys.exit(f"no definition of {fn} in {src}")
         i = mdef.start() + 1
-        # take the comment block right above the definition with it
+        # take the comment right above the definition with it. A /* */ comment is
+        # taken WHOLE, from its closing line back to the line holding its `/*`:
+        # reading line by line for a leading `*` stopped halfway through a comment
+        # whose middle lines do not start with one (sound_sequence_parser), put the
+        # guard inside the comment and left the function under #ifndef VERSION_JAPAN
         while True:
             prev = s.rfind("\n", 0, i - 1) + 1
-            line = s[prev:i - 1]
-            if line.strip().startswith(("/*", "*", "//")) or line.strip().endswith("*/"): i = prev
-            else: break
+            line = s[prev:i - 1].strip()
+            if line.endswith("*/"):
+                k = s.rfind("/*", 0, i - 1)
+                i = s.rfind("\n", 0, k) + 1
+            elif line.startswith("//"):
+                i = prev
+            else:
+                break
         j = s.index("\n}\n", mdef.end()) + 3
         before = s[:i]
         opened = before.rfind("#ifndef VERSION_JAPAN\n"); closed = before.rfind("#endif")
@@ -150,6 +167,11 @@ def main():
         sz = int(us[ua]["size"], 16)
         if runs and runs[-1][1] == ja: runs[-1][1] = ja + sz
         else: runs.append([ja, ja + sz])
+    # one wrapper is one object: two separate runs under one wrapper would put the
+    # same object (with every run in it) at both places. Refuse; call once per run,
+    # each with its own GUARD and WRAPPER (sound_sequence_parser had three runs).
+    if len(runs) > 1:
+        sys.exit(f"{len(runs)} separate runs {[hex(r[0]) for r in runs]}: call once per contiguous run")
     sp = CFG / "split.yaml"; st = sp.read_text().split("\n")
     rows = [(i, int(m.group(1), 16), m) for i, l in enumerate(st)
             for m in [re.match(r"\s+- \[(0x[0-9a-f]+), (asm|c|rodata|\.rodata|bin|pad|data)", l)] if m]
