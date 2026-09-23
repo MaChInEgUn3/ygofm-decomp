@@ -78,25 +78,20 @@ ASM_ALIASES = {
                                 'extern u8 D_800907D8_flat[] asm("%s");')],
 }
 
-# Carving a block can leave the blob piece BEFORE it short, and the bytes are
-# lost silently. splat drops the TRAILING ZEROS of a row that now has a fixed
-# end: `initialized_data_8b66a` spans 0x8b66a..0x8b670 and its object comes out
-# FOUR bytes, so everything after it shifts down by two. Measured on
-# duel_card_effects as three `addiu $v0,$gp` off by exactly 2, each pointing two
-# bytes below that unit's own block.
-# Naming the byte in symbols.txt does NOT fix it -- splat accepts the symbol
-# (it is not in the "unable to determine a segment" list) and still drops the
-# bytes. A `pad` row does, and it is how the US split spells the same gap
-# (`[0x8b70d, pad]`); the Japanese split already carries `pad` rows, while a
-# `size:` attribute -- the other route, used 1137 times in the US symbols --
-# appears there zero times, so the row is the smaller imposition.
-# Hand-written per unit, like ASM_ALIASES above, because only a splat run says
-# where the emission stops. These two bytes are the zero tail of
-# debug_effect_screen's unpromoted block, not real padding.
-# unit -> [file offset of a `pad` row to add inside initialized_data]
-CARVE_PADS = {
-    "game/duel_card_effects": [0x8b66e],
-}
+# Carving a block splits the fallback data blob, and splat emits an asm data
+# subsegment in WHOLE 32-bit words: spimdisasm reads it with `bytesToWords` and
+# iterates `range(self.sizew)` (mips/sections/MipsSectionData.py:20, :106), so a
+# piece whose length is not a multiple of four loses its trailing partial word
+# before any symbol is involved. `initialized_data_8b66a` in front of
+# duel_card_effects is six bytes starting at 2 mod 4: it emitted four, and
+# everything after it shifted down by two. A `size:` annotation cannot help (the
+# loss is in the section's length; spimdisasm itself reports "declared size (0x6)
+# does not match the amount of bytes that will be emitted (0x4)"), and a `pad`
+# row -- the first fix -- rebuilt the image by misclassifying the tail as padding,
+# which krystalgamer rejected in review on #5876. His choice, from the options
+# measured there: type that piece `bin`, a bounded raw row that emits exactly its
+# bytes and keeps them owned by the fallback data. So the piece immediately in
+# front of a carve becomes `bin` whenever its length is not a word multiple.
 
 def sx16(v): return v - 0x10000 if v & 0x8000 else v
 
@@ -618,7 +613,6 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # shifted: this is data, and it sits in the gp region, so the unit's text
     # displacement does not apply to it.
     sdata = None
-    carve_pads = []
     if unit_name in US_SDATA:
         off, size, resume = US_SDATA[unit_name]
         usvram = off - HDR + LOAD
@@ -639,9 +633,8 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         # the blob resumes where the US split resumes, which is past the `pad`
         # row when there is one -- the padding gets a row of its own
         sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
-        carve_pads = CARVE_PADS.get(unit_name, [])
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, sdata=sdata, carve_pads=carve_pads, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out)
+                rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -753,8 +746,23 @@ def apply(addr):
         # (0 warnings) and the build then does NOT match. Measured 2026-09-22,
         # all three variants; only this one is byte-identical, so the warning is
         # disclosed in the PR rather than traded for a wrong image.
-        for b in r.get("carve_pads", []):
-            have.setdefault(b, f"      - [{b:#x}, pad]")
+        # the fallback piece in front of the carve: `bin` when its length is not a
+        # whole number of words, so splat emits all of it (see the note above
+        # sx16). Only an asm data piece is retyped -- a C unit's row is not ours.
+        before = [o for o in have if o < soff]
+        if before:
+            b0 = max(before)
+            m0 = re.match(r"\s+- \[0x[0-9a-f]+, (s?data), (\S+)\]$", have[b0])
+            if m0 and (soff - b0) % 4:
+                # A plain `[.., bin, ..]` row links in the `.data` group, which
+                # section_order places BEFORE every `.sdata` piece: the linker
+                # script put it straight after the big blob, at 0x8b664 -- where
+                # duel_trap_resolution's .sdata belongs -- instead of 0x8b66a.
+                # `linker_section_order` moves only the ORDERING (splat's own
+                # docstring: "putting .data with the other .rodata sections");
+                # the asset keeps its .data section, so no bytes are dropped.
+                have[b0] = (f"      - {{start: {b0:#x}, type: bin, name: {m0.group(2)}, "
+                            f"linker_section_order: .sdata}}")
         if sresume != end:
             have.setdefault(end, f"      - [{end:#x}, pad]")
         have.setdefault(sresume, f"      - [{sresume:#x}, sdata, initialized_data_{sresume:x}]")
