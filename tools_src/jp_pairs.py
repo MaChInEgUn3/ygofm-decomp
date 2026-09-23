@@ -129,8 +129,37 @@ def main():
                     bad.append((src, d, off))
         print(f"negative control: {len(recovered[:40]) * 3} deliberately wrong displacements tried, "
               f"{len(bad)} wrongly accepted")
+        for b in bad[:5]: print("   ACCEPTED A WRONG PAIR:", b)
+        # The control above only perturbs what THIS run recovered, so when nothing
+        # is recovered -- the normal case once the queue is drained -- it tries
+        # nothing and still prints "0 wrongly accepted". Measured 2026-09-23 right
+        # after a change to pair_words: "0 deliberately wrong displacements tried,
+        # 0 wrongly accepted", a pass that had tested nothing. This second control
+        # uses pairs ALREADY in the list, whose units verify at their true
+        # displacement (the positive half, so the check can say yes), and shifts
+        # each of them (the negative half, so it can say no). It cannot go empty
+        # while the pair list has entries.
+        good, pos, neg_tried, neg_bad = [], 0, 0, []
+        for src, addrs in sorted(by_src.items()):
+            addrs = sorted(addrs)
+            if addrs[0] not in pairs: continue
+            sizes = [int(us[a]["size"], 16) for a in addrs]
+            if any(a + s != b for a, s, b in zip(addrs, sizes, addrs[1:])): continue
+            d = pairs[addrs[0]] - addrs[0]
+            if verify(addrs, sizes, d) is None: continue
+            pos += 1
+            for off in (4, -4, sizes[0]):
+                neg_tried += 1
+                if verify(addrs, sizes, d + off) is not None: neg_bad.append((src, d, off))
+            if pos >= 40: break
+        print(f"known-pair control: {pos} true displacements verify; "
+              f"{neg_tried} shifted ones tried, {len(neg_bad)} wrongly accepted")
+        for b in neg_bad[:5]: print("   ACCEPTED A WRONG PAIR:", b)
+        if pos == 0 or neg_tried == 0:
+            print("   CONTROL RAN NOTHING: no known pair verified, so this --check proves nothing")
+            bad.append(("known-pair control", 0, 0))
+        bad.extend(neg_bad)
         if bad:
-            for b in bad[:5]: print("   ACCEPTED A WRONG PAIR:", b)
             sys.exit("negative control FAILED -- the verification cannot say no, so the recoveries mean nothing")
 
     if not WRITE:
