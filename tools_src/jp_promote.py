@@ -910,7 +910,14 @@ def apply(addr):
         pending.append((roff, f"      - [{roff:#x}, .rodata, {unit}]"))
         if roff + rsize not in offs:
             pending.append((roff + rsize, f"      - [{roff + rsize:#x}, rodata, initial_data_{roff + rsize:x}]"))
-    keep = [l for i, l in enumerate(lines) if not (i in offs.values() and int(re.match(r"\s+- \[(0x[0-9a-f]+)", l).group(1), 16) == start and ", asm," in l)]
+    # a blob row that starts exactly where the unit's .rodata block starts is
+    # REPLACED by it, not left in front at size zero (func_80030294's block at
+    # 0xa50 left `[0xa50, rodata, initial_data_a50]` right before its own row)
+    rstart = r["rodata"][0] if r.get("rodata") else None
+    def _o(l): return int(re.match(r"\s+- \[(0x[0-9a-f]+)", l).group(1), 16)
+    keep = [l for i, l in enumerate(lines)
+            if not (i in offs.values() and ((_o(l) == start and ", asm," in l)
+                                            or (_o(l) == rstart and ", rodata," in l)))]
     # insert each line in offset order
     out, pend = [], sorted(pending)
     for l in keep:
