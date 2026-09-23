@@ -256,6 +256,23 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         syms[n] = jaddr; return True
     pending = None    # register written by the previous word, dropped from lui before this one
     unpaired = {}     # rt -> word index of a lui whose halves differ and has had no lo use yet
+    # The lui state that REACHES a label. A linear scan carries the fall-through
+    # state into every word, which is wrong at a label nothing falls into: there
+    # the live state is whatever the branches carry, taken AFTER each branch's
+    # delay slot because MIPS executes it on the taken path too. Measured on
+    # script_op_load_image_scene: `bne` at 0x8002E530 with `lui $v0,0x800f` in
+    # its delay slot, the fall-through then does `lui $v0,0x0200` for a constant,
+    # and 0x8002E584 (after a `j` + delay slot, so reachable only by that bne)
+    # reads `lbu 0x9ece($v0)`. Linearly that is 0x0200_0000 - 0x6132 =
+    # 0x01FF9ECE, an address outside the image that nonetheless tracked the
+    # region's 0x120 displacement; through the branch it is 0x800E9ECE,
+    # gFade_State + 6 -- the very neighbour the base derivation was missing.
+    branch_tgt = {}   # word index of a branch/jump -> its target word index
+    at_target = {}    # target word index -> {rt: (us_hi, jp_hi)} carried into it
+    def _uncond(w):
+        o = w >> 26
+        return (o == 0x02 or (o == 0 and (w & 0x3F) == 0x08)
+                or (o == 0x04 and ((w >> 21) & 31) == 0 and ((w >> 16) & 31) == 0))
     for i, (u, j) in enumerate(zip(uw, jw)):
         op, rs, rt = u >> 26, (u >> 21) & 31, (u >> 16) & 31
         # the register a word writes: a stale lui entry for it would pair a
@@ -269,6 +286,22 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
             # US `lui $a0,0xffff` for a mask where the JP has `lui $a0,0x801f`;
             # the old scan called it clean and the link showed one wrong byte)
             if pending in unpaired: return False, {}, f"word {unpaired[pending]}: lui immediate differs with no lo use"
+        # record what a branch two words back carries into its target (its delay
+        # slot, word i-1, has been applied and its own write dropped by now)
+        if (i - 2) in branch_tgt:
+            t = branch_tgt.pop(i - 2)
+            snap = dict(lui)
+            at_target[t] = snap if t not in at_target else {r: v for r, v in at_target[t].items() if snap.get(r) == v}
+        # at a label nothing falls into, the branches' state IS the live state;
+        # several forward branches keep only the registers they agree on
+        if i >= 2 and _uncond(uw[i - 2]) and i in at_target:
+            lui = dict(at_target[i])
+        if op in (0x01, 0x04, 0x05, 0x06, 0x07) or (0x14 <= op <= 0x17):
+            t = i + 1 + sx16(u & 0xFFFF)
+            if i < t < len(uw): branch_tgt[i] = t
+        elif op == 0x02 and uw_base[0]:
+            t = ((0x80000000 | ((u & 0x3FFFFFF) << 2)) - uw_base[0]) // 4
+            if i < t < len(uw): branch_tgt[i] = t
         if op == 0: dst = (u >> 11) & 31
         elif op == 0x03: dst = 31
         elif op in (0x01, 0x02, 0x04, 0x05, 0x06, 0x07) or op in (0x28, 0x29, 0x2A, 0x2B, 0x2E) or op >= 0x38: dst = None
