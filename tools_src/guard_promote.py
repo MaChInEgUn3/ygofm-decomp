@@ -248,7 +248,11 @@ def main():
     # consistency across calls: no name may be both a symbols.txt line and a
     # #define in a Japanese wrapper (func_80014308 was renamed by one call and
     # given a line by another, so the asm around it called a name nothing defined)
-    new = sorted(_clashes() - clash0)
+    # a NAME already in that state in some existing wrapper is the tree's own
+    # pattern (D_8009B360 is #defined in several and has a line); only a name that
+    # was clean before this call is an error
+    known = {n for _, n in clash0}
+    new = sorted(c for c in _clashes() - clash0 if c[1] not in known)
     if new: sys.exit(f"names both #defined in a wrapper and given a symbols line by this call: {new[:8]}")
     print(f"{a.wrapper}: {len(fns)} fn, {len(runs)} c row(s), {len(aliases)} aliases, "
           f"{len(renames)} renames {renames}, {len(lines)} lines")
