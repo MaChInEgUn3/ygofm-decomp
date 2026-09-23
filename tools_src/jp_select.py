@@ -34,12 +34,12 @@ MANIFEST = "config/slpm_86398/matching_c.json"
 # unit -> the measured reason it cannot be promoted yet (classes as in docs/MERGE_KRYSTALGAMER.md)
 DEFERRED = {
     # MEASURED 2026-09-23: pairs word for word except 16 words where two loops'
-    # pointer and counter swap $a0/$a1 (US cp=$a1, k=$a0; JP the reverse). Five
+    # pointer and counter swap $a0/$a1 (US cp=$a1, k=$a0; JP the reverse). Four
     # spellings measured against the built image, none moves them: the pointer
     # declared first, the for-increments swapped, `cp = &lw` above `max = 0`,
-    # `cp` set inside the `if (max != 0)`, and a control. Register allocation;
-    # a permuter job, not a regional constant.
-    "func_800540B4":              "G: $a0/$a1 swap in two loops, five spellings measured, allocation only",
+    # `cp` set inside the `if (max != 0)`. Register allocation; a permuter job,
+    # not a regional constant.
+    "func_800540B4":              "G: $a0/$a1 swap in two loops, four spellings measured, allocation only",
     "main_mode_runners":          "A: calls overlay imports (MainMenu_*); the JP side has no overlay symbol maps",
     "main_run_password_menu":     "A: calls overlay imports (Password_*)",
     "main_run_selection_menus":   "A: link fails inside Main_RunMenu, overlay imports",
