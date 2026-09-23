@@ -575,6 +575,12 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # reads as a reference and is not one (measured on six such names, five of
     # them false).
     code = re.sub(r"//[^\n]*", " ", re.sub(r"/\*.*?\*/", " ", text, flags=re.S))
+    # nor is a name inside a string: `#include "func_8002E3FC.h"` made
+    # campaign_load_scene_package look like it used func_8002E3FC beside
+    # Campaign_CreatePrimaryDisplayObject, and the unit was refused as two names.
+    # asm labels are strings too, but they bind a name the declaration already
+    # carries, so nothing is lost by blanking them here.
+    code = re.sub(r'"(?:[^"\\\n]|\\.)*"', '""', code)
     rename = {}
     for n, jn in list(aliases.items()) + [(n, n) for n in lines]:
         m = re.match(r"(?:D|func)_([0-9A-Fa-f]{8})$", n)
