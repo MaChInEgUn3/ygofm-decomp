@@ -509,12 +509,16 @@ def regional_words(src, us_base, uw, jw, jp_base):
     return jw
 
 
-def analyze(us, jp, pairs, names, jpsyms, addr):
+def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None):
+    """`only` + `jps_given`: analyse just those functions of the unit, at those JP
+    addresses (guard_promote.py). The unit's .rodata and .sdata carves are skipped
+    then; guard_promote refuses a function with a jump table."""
     src, fns = unit_of(us, addr)
+    if only: fns = sorted(only)
     sizes = [int(us[a]["size"], 16) for a in fns]
     for a, s, b in zip(fns, sizes, fns[1:]):
         if a + s != b: return dict(ok=False, src=src, why=f"US unit not contiguous at {a:#x}")
-    jps = [pairs.get(a) for a in fns]
+    jps = list(jps_given) if jps_given else [pairs.get(a) for a in fns]
     # the pair list is incomplete: infer a missing JP address from a paired
     # neighbour by contiguity, and let the word comparison decide
     for k in range(len(fns)):
@@ -785,7 +789,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # IS the block's read ASCII as a broken table, sixteen bytes off.
     rodata = None
     unit_name = src[len("src/"):-2]
-    if unit_name in US_RODATA:
+    if unit_name in US_RODATA and not only:
         off, size = US_RODATA[unit_name]
         usvram = off - HDR + LOAD
         want = "D_%08X" % usvram
@@ -814,7 +818,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # shifted: this is data, and it sits in the gp region, so the unit's text
     # displacement does not apply to it.
     sdata = None
-    if unit_name in US_SDATA:
+    if unit_name in US_SDATA and not only:
         off, size, resume = US_SDATA[unit_name]
         usvram = off - HDR + LOAD
         cand = sorted((n, j) for n, j in syms.items() if _ua_of(names, n, j) == usvram)

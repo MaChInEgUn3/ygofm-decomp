@@ -16,7 +16,10 @@ never gets promoted. The maintainer's own pattern for that is this guard
 (#5922, and #5928/#5933/#5942/#5943 by hand). The census of 2026-09-23 found
 about 95 such functions. Every step below was done by hand five times first.
 
-WHAT IT REFUSES, each learned by hand:
+WHAT IT REFUSES, each learned by hand (and one thing it does NOT see: a callee
+reached through an `asm("NAME")` label, like external_funcs.h's
+SD_ConfigureTransferPhase_callback -- a #define cannot rename inside the string,
+so the link fails with "undefined reference to NAME"; leave that function out):
   * a function that does not pair (pair_words, with the --patch immediates only);
   * a US source file where the function is not inside `#ifndef VERSION_JAPAN`,
     because in an unguarded file the wrapper would compile every other function
@@ -48,6 +51,17 @@ def sub1(s, a, b):
     return s.replace(a, b)
 
 
+def _clashes():
+    """(wrapper, name) pairs where a wrapper #defines a name symbols.txt also lines up.
+    The tree has some on purpose (data aliases), so only NEW ones are an error."""
+    final = {m[1] for m in re.finditer(r"^(\w+) = ", (CFG / "symbols.txt").read_text(), re.M)}
+    out = set()
+    for wf in (KG / "src/game/japanese").glob("*.c"):
+        for m in re.finditer(r"^#define (\w+) ", wf.read_text(), re.M):
+            if m.group(1) in final and not m.group(1).startswith("VERSION_JAPAN"): out.add((wf.name, m.group(1)))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unit"); ap.add_argument("wrapper"); ap.add_argument("guard")
@@ -55,6 +69,7 @@ def main():
     ap.add_argument("--patch", action="append", default=[])
     ap.add_argument("--define", action="append", default=[])
     a = ap.parse_args()
+    clash0 = _clashes()
     us, jp, pairs, names, jpsyms = M.load_all()
     usb, jpb = M.US_EXE.read_bytes(), M.JP_EXE.read_bytes()
     patches = {}
@@ -67,49 +82,47 @@ def main():
     byaddr = {}
     for n, v in jsym.items(): byaddr.setdefault(v, []).append(n)
 
-    aliases, lines, renames = {}, {}, {}
+    # the naming is jp_promote.analyze's, on just these functions: a second US name
+    # (`D_8009B0F4_abs`), a base the source names but no instruction carries
+    # (`gFade_State`), a name splat already gives the JP address, an asm label.
+    # A first version of this tool re-derived those rules and got each wrong once.
     for ua, ja in fns:
         if ua not in us or us[ua]["source"] != src: sys.exit(f"{ua:#x} is not a function of {src}")
-        if ja in jp: sys.exit(f"{ja:#x} is already in the Japanese manifest")
-        sz = int(us[ua]["size"], 16)
-        uw = words(usb, ua, sz); jw = list(words(jpb, ja, sz))
-        for wa, (ui, ji) in patches.items():
-            k = (wa - ua) // 4
-            if 0 <= k < len(uw):
-                if uw[k] & 0xFFFF != ui or jw[k] & 0xFFFF != ji or (uw[k] ^ jw[k]) & 0xFFFF0000:
-                    sys.exit(f"--patch {wa:#x} does not hold in the binaries")
-                jw[k] = uw[k]
-        ok, syms, why = M.pair_words(uw, jw, names, pairs, (ua, ja))
-        if not ok: sys.exit(f"{names.get(ua)} at {ja:#x} does not pair: {why}")
+        sz = int(us[ua]["size"], 16); uw = words(usb, ua, sz)
         # a `jr` through anything but $ra is a switch whose table sits in .rodata,
         # which this tool does not carve (library_runtime's func_8002BAB4 linked
         # with the table still pointing at labels the asm no longer had)
         if any(w >> 26 == 0 and (w & 0x3F) == 0x08 and (w >> 21) & 31 != 31 for w in uw):
             sys.exit(f"{names.get(ua)} has a jump table; promote its unit with jp_batch or by hand")
-        own = names[ua]
-        if jsym.get(own) == ja: pass
-        elif ja in byaddr: renames[own] = byaddr[ja][0]
-        else: renames[own] = f"func_{ja:08X}"
-        for n, v in syms.items():
-            if jsym.get(n) == v: continue
-            m = re.match(r"(D|func)_([0-9A-Fa-f]{8})$", n)
-            if v in byaddr: aliases[n] = byaddr[v][0]
-            elif n in jsym:
-                aliases[n] = ("gJapanese_" if not n.startswith("func_") else "Japanese_") + n
-                lines[aliases[n]] = v
-            # already C in the Japanese build with no symbols line: its wrapper
-            # defines it under the JP-address name, whatever its US name is
-            # (DisplayEffect_BuildResourceObjects is `func_8003986C` there)
-            elif v in jp and v not in byaddr: aliases[n] = f"func_{v:08X}"
-            else: lines[n] = v
-
-    runs = []
-    for ua, ja in fns:
-        sz = int(us[ua]["size"], 16)
-        if runs and runs[-1][1] == ja: runs[-1][1] = ja + sz
-        else: runs.append([ja, ja + sz])
-    if len(runs) > 1:
-        sys.exit(f"{len(runs)} separate runs {[hex(r[0]) for r in runs]}: call once per contiguous run")
+        # a call into an overlay: the Japanese link has no overlay symbols
+        # (main_mode_runners' Main_RunTrade -> MainMenu_InitTradeScreen)
+        if any(w >> 26 == 3 and (0x80000000 | ((w & 0x3FFFFFF) << 2)) >= 0x80100000 for w in uw):
+            sys.exit(f"{names.get(ua)} calls into an overlay, which the Japanese link cannot resolve")
+    if patches:
+        M.REGIONAL[a.unit] = (fns[0][1], [(wa, ui, ji) for wa, (ui, ji) in patches.items()], [])
+    r = M.analyze(us, jp, pairs, names, jpsyms, fns[0][0],
+                  only=[u for u, _ in fns], jps_given=[j for _, j in fns])
+    if not r.get("ok"): sys.exit(f"{src}: {r.get('why')}")
+    aliases, lines, asm_lines = dict(r["aliases"]), dict(r["lines"]), list(r.get("asm_aliases") or [])
+    renames = {names[u]: n for (u, _), n in zip(fns, r["names"]) if n != names[u]}
+    # existing Japanese wrappers may call a function of this call by its
+    # JP-address name, from when it was asm (func_80014294's wrappers call
+    # `func_8001427C`): the definition must then carry that name, and the US
+    # name gets no symbols line
+    others = "".join(wf.read_text(errors="replace") for wf in (KG / "src/game/japanese").glob("*.c")
+                     if wf.stem != a.wrapper)
+    for (u, j), n in zip(fns, r["names"]):
+        jn = f"func_{j:08X}"
+        if n != jn and re.search(r"\b%s\b" % jn, others):
+            aliases[names[u]] = jn; renames[names[u]] = jn
+            lines.pop(names[u], None); lines.pop(n, None)
+    # each promoted function whose final name is not splat's automatic one needs a
+    # symbols line, or splat keeps labelling the address `func_<JP>` and the asm
+    # around it calls a name no object defines (File_StepActiveTransfer, still
+    # asm, called func_8001427C); jp_batch's apply writes the same lines
+    for (u, j), n in zip(fns, r["names"]):
+        final = aliases.get(names[u], n)
+        if final != f"func_{j:08X}" and jsym.get(final) != j: lines[final] = j
 
     # ---- the US source: split each function out of its #ifndef VERSION_JAPAN block
     p = KG / src; s = p.read_text()
@@ -179,7 +192,7 @@ def main():
     body = ['#include "../../types.h"', "", "#define VERSION_JAPAN", f"#define {a.guard}"]
     body += [f"#define {d.split('=', 1)[0]} {d.split('=', 1)[1]}" for d in a.define]
     body += [f"#define {n} {v}" for n, v in sorted(aliases.items())]
-    body += [f"#define {n} {v}" for n, v in sorted(renames.items())]
+    body += asm_lines
     body += [f'#include "../{a.unit}.c"', ""]
     w = KG / f"src/game/japanese/{a.wrapper}.c"
     if w.exists(): sys.exit(f"{w} exists")
@@ -232,6 +245,11 @@ def main():
         if not s.endswith("\n"): s += "\n"
         s += "".join(f"{n} = 0x{v:08X};\n" for n, v in sorted(lines.items(), key=lambda t: t[1]))
         (CFG / "symbols.txt").write_text(s)
+    # consistency across calls: no name may be both a symbols.txt line and a
+    # #define in a Japanese wrapper (func_80014308 was renamed by one call and
+    # given a line by another, so the asm around it called a name nothing defined)
+    new = sorted(_clashes() - clash0)
+    if new: sys.exit(f"names both #defined in a wrapper and given a symbols line by this call: {new[:8]}")
     print(f"{a.wrapper}: {len(fns)} fn, {len(runs)} c row(s), {len(aliases)} aliases, "
           f"{len(renames)} renames {renames}, {len(lines)} lines")
 
