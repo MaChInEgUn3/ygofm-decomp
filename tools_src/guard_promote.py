@@ -81,6 +81,11 @@ def main():
                 jw[k] = uw[k]
         ok, syms, why = M.pair_words(uw, jw, names, pairs, (ua, ja))
         if not ok: sys.exit(f"{names.get(ua)} at {ja:#x} does not pair: {why}")
+        # a `jr` through anything but $ra is a switch whose table sits in .rodata,
+        # which this tool does not carve (library_runtime's func_8002BAB4 linked
+        # with the table still pointing at labels the asm no longer had)
+        if any(w >> 26 == 0 and (w & 0x3F) == 0x08 and (w >> 21) & 31 != 31 for w in uw):
+            sys.exit(f"{names.get(ua)} has a jump table; promote its unit with jp_batch or by hand")
         own = names[ua]
         if jsym.get(own) == ja: pass
         elif ja in byaddr: renames[own] = byaddr[ja][0]
@@ -150,6 +155,16 @@ def main():
         s2 = join.sub(lambda m: opener + m.group(1) + "\n", s)
         if s2 == s: break
         s = s2
+    # a #ifndef VERSION_JAPAN block left holding only macros, comments and blank
+    # lines loses its guard: the US build already saw it, and a promoted function
+    # next to it needs it (library_runtime's `#define gStageRect (D_800E9D70[0])`
+    # sat between two promoted functions and the Japanese compile lost it)
+    def _only_macros(body):
+        body = re.sub(r"/\*.*?\*/", "", body, flags=re.S)
+        body = re.sub(r"\\\n", " ", body)
+        return all(l.strip() == "" or l.strip().startswith(("#define", "//")) for l in body.split("\n"))
+    s = re.sub(r"#ifndef VERSION_JAPAN\n((?:(?!#if|#endif).)*?)#endif\n",
+               lambda m: m.group(1) if _only_macros(m.group(1)) else m.group(0), s, flags=re.S)
     s = s.rstrip("\n") + "\n"   # a split of the file's last block left a blank line at EOF
     # the two ways the split went wrong by hand, checked on the result: a guard
     # inside a /* */ comment, and a #ifndef block holding nothing but a comment
