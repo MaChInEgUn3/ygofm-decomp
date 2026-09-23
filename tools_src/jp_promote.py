@@ -428,6 +428,13 @@ REGIONAL = {
     # (pair_words' move carry); both neighbours move by -0x258
     "campaign_load_scene_package": (0x8002FAB8, [(0x8002FD34, 0x1E57, 0x1E62)],
                                     [("CAMPAIGN_SCENE_PACKAGE_START_SECTOR", "0x1E62")]),
+    # both neighbours move by -0xA08
+    "name_entry_load_package_stage": (0x8003B00C, [(0x8003BC0C, 0x1EDF, 0x1EEA)],
+                                      [("NAME_ENTRY_PACKAGE_START_SECTOR", "0x1EEA")]),
+    # `base + index * stride + 0x21D5`, the image sets' first sector; both
+    # neighbours move by -0x21C
+    "script_image_objects": (0x8002DBE0, [(0x8002DFE0, 0x21D5, 0x21D0)],
+                             [("SCRIPT_IMAGE_START_SECTOR", "0x21D0")]),
     "password_load_package_stage": (0x8003B30C, [(0x8003BECC, 0x1F2F, 0x1F3A)],
                                     [("PASSWORD_PACKAGE_START_SECTOR", "0x1F3A")]),
     "script_op_duel_result": (0x8002F3D8, [(0x8002F660, 0x1FA7, 0x1FB2)],
