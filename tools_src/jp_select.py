@@ -41,7 +41,6 @@ DEFERRED = {
     # It is held because 0x80012C70 is claimed by eleven open PRs (#5787 and the
     # ten stacked on it) and a unit promotes whole. Re-check when those close.
     "main_frame":                 "claimed: 0x80012C70 is in eleven open PRs; the carve itself works",
-    "display_object_fade_callbacks": "D: func_80039BE0 defined twice in the JP layout",
     # MEASURED 2026-09-23: the source spells the object as a literal-address
     # MACRO, `#define g_SDValue (*(SDValue **)0x8009B45C)` at its line 7 (and
     # D_8009B128 the same way at line 8). The wrapper cannot interpose: the .c
