@@ -214,7 +214,10 @@ def main():
         body = re.sub(r"\\\n", " ", body)
         return all(l.strip() == "" or l.strip().startswith(("#define", "//")) for l in body.split("\n"))
     s = re.sub(r"#ifndef VERSION_JAPAN\n((?:(?!#if|#endif).)*?)#endif\n",
-               lambda m: m.group(1) if _only_macros(m.group(1)) else m.group(0), s, flags=re.S)
+               lambda m: (m.group(1).strip("\n") + "\n") if _only_macros(m.group(1)) else m.group(0),
+               s, flags=re.S)
+    # (the strip: the directives' own blank lines would otherwise double up around
+    # the macro, and `make basic-types` refuses a double blank line)
     s = s.rstrip("\n") + "\n"   # a split of the file's last block left a blank line at EOF
     # the two ways the split went wrong by hand, checked on the result: a guard
     # inside a /* */ comment, and a #ifndef block holding nothing but a comment
