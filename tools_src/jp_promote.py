@@ -251,6 +251,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         syms[n] = jaddr; return True
     pending = None    # register written by the previous word, dropped from lui before this one
     carry = None      # (rd, %hi pair) a move copies into rd once rd's write is dropped
+    owed = {}         # target word -> {rt: lui word}: unpaired luis whose lo use must be on that path
     unpaired = {}     # rt -> word index of a lui whose halves differ and has had no lo use yet
     # The lui state that REACHES a label. A linear scan carries the fall-through
     # state into every word, which is wrong at a label nothing falls into: there
@@ -276,13 +277,24 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         # seen as a bogus `D_FFFF0058` line splat could place nowhere). The
         # drop is deferred one word because `lw $v0, lo($v0)` reads rs first.
         if pending is not None:
-            lui.pop(pending, None)
+            lui_was = lui.pop(pending, None)
             if carry and carry[0] == pending: lui[pending] = carry[1]
             # a lui whose halves differ and that no load/store/addiu ever
             # consumed was a CONSTANT, and the code differs (text_control_commands:
             # US `lui $a0,0xffff` for a mask where the JP has `lui $a0,0x801f`;
             # the old scan called it clean and the link showed one wrong byte)
-            if pending in unpaired: return False, {}, f"word {unpaired[pending]}: lui immediate differs with no lo use"
+            if pending in unpaired:
+                # the lui may be used on the BRANCH path: a lui in a delay slot
+                # reaches the target even when the fall-through overwrites the
+                # register at once (model_primitive_handler: `beq` with
+                # `lui $v0,0x8006` in its slot, `sltiu $v0` next). Move the
+                # obligation to every later target that carries this lui; only
+                # when none does was it a constant.
+                carried = [t for t, st in at_target.items() if t >= i and st.get(pending) == lui_was]
+                if not carried:
+                    return False, {}, f"word {unpaired[pending]}: lui immediate differs with no lo use"
+                for t in carried: owed.setdefault(t, {})[pending] = unpaired[pending]
+                unpaired.pop(pending)
         # record what a branch two words back carries into its target (its delay
         # slot, word i-1, has been applied and its own write dropped by now)
         if (i - 2) in branch_tgt:
@@ -293,6 +305,13 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         # several forward branches keep only the registers they agree on
         if i >= 2 and _uncond(uw[i - 2]) and i in at_target:
             lui = dict(at_target[i])
+        elif i in at_target:
+            # a label the fall-through also reaches: a register the fall-through
+            # no longer holds a %hi in can only be read as one on the branch path
+            for r, v in at_target[i].items(): lui.setdefault(r, v)
+        for r, k in owed.pop(i, {}).items():
+            if lui.get(r) is not None and lui[r] == at_target.get(i, {}).get(r): unpaired[r] = k
+            else: return False, {}, f"word {k}: lui immediate differs with no lo use"
         if op in (0x01, 0x04, 0x05, 0x06, 0x07) or (0x14 <= op <= 0x17):
             t = i + 1 + sx16(u & 0xFFFF)
             if i < t < len(uw): branch_tgt[i] = t
@@ -365,6 +384,7 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
             continue
         return False, {}, f"word {i}: immediate differs {u:08x} {j:08x}"
     if unpaired: return False, {}, f"word {min(unpaired.values())}: lui immediate differs with no lo use"
+    if owed: return False, {}, f"word {min(k for d in owed.values() for k in d.values())}: lui immediate differs with no lo use"
     # named symbols at an equal address: the C names them, JP splat does not
     for n, a in eq.items():
         # A D_/func_ name is skipped only when JP splat really generates it. The US
