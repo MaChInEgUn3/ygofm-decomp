@@ -471,8 +471,12 @@ def regional_words(src, us_base, uw, jw, jp_base):
     jw = list(jw)
     for ua, ui, ji in patches:
         k = (ua - us_base) // 4
-        if not (0 <= k < len(uw)) or uw[k] & 0xFFFF != ui or jw[k] & 0xFFFF != ji \
-                or (uw[k] ^ jw[k]) & 0xFFFF0000:
+        if not (0 <= k < len(uw)): return None
+        if ui > 0xFFFF or ji > 0xFFFF:
+            # a WHOLE word, for a difference the source spells regionally that is
+            # not an immediate (a register swap from a declaration order)
+            if uw[k] != ui or jw[k] != ji: return None
+        elif uw[k] & 0xFFFF != ui or jw[k] & 0xFFFF != ji or (uw[k] ^ jw[k]) & 0xFFFF0000:
             return None
         jw[k] = uw[k]
     return jw
@@ -590,11 +594,17 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
                            if n2 != n and re.search(r"\b%s\b" % re.escape(n2), _code)]
                     if len(alt) == 1 and alt[0] not in aliases: aliases[alt[0]] = JPVRAM[a]
             continue
-        if n in jpsyms:
+        m = re.match(r"(D|func)_([0-9A-Fa-f]{8})$", n)
+        # a `D_<addr>` line in the JP symbols that names the JAPANESE object at
+        # that very address (`D_8009AFAC = 0x8009AFAC;`) is the same situation as
+        # splat's automatic name: the US object of that name lives elsewhere in
+        # the Japanese build (func_800540B4: US D_8009AFAC is JP 0x8009AF14), so
+        # it takes a gJapanese_ name instead of being refused
+        self_named = m is not None and jpsyms.get(n) == int(m.group(2), 16)
+        if n in jpsyms and not self_named:
             if jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
             continue
-        m = re.match(r"(D|func)_([0-9A-Fa-f]{8})$", n)
-        if m and n in JP_AUTO and int(m.group(2), 16) != a:
+        if m and (n in JP_AUTO or self_named) and int(m.group(2), 16) != a:
             jn = ("gJapanese_" if m.group(1) == "D" else "Japanese_") + n
             aliases[n] = jn; lines[jn] = a
         else:
