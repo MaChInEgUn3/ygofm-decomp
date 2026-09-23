@@ -42,11 +42,24 @@ DEFERRED = {
     # ten stacked on it) and a unit promotes whole. Re-check when those close.
     "main_frame":                 "claimed: 0x80012C70 is in eleven open PRs; the carve itself works",
     "display_object_fade_callbacks": "D: func_80039BE0 defined twice in the JP layout",
-    "func_800339D0":              "F: links, then bytes differ at 0x80033820 (profile gcc_2_8_1_g8_split)",
-    "sd_arm_busy_callback":       "F: links, then bytes differ; source hardcodes 0x8009B45C",
-    "duel_effect_create_channel": "F predicted: source hardcodes 0x8009B34D, in a region measured to shift",
-    "duel_update_card_pick_cursor": "F: batch 23, links then bytes differ at 0x80023fd4 (0x36 expected, 0x46 built)",
-    "func_80019608": "measured by batch 25's link: undefined reference to func_8001944C",
+    # MEASURED 2026-09-23: the source spells the object as a literal-address
+    # MACRO, `#define g_SDValue (*(SDValue **)0x8009B45C)` at its line 7 (and
+    # D_8009B128 the same way at line 8). The wrapper cannot interpose: the .c
+    # defines the macro after the wrapper's own lines, so it wins. Nor can it just
+    # become a symbol -- in that region a symbol assembles %gp_rel where the literal
+    # gives lui/addiu, so the literal is what the US match rests on. Needs a
+    # regional spelling upstream. Build: one byte, 0x5c where JP has 0x4c.
+    "sd_arm_busy_callback":       "F: source hardcodes 0x8009B45C in a macro; needs a regional spelling upstream",
+    # MEASURED 2026-09-23: `#define gDialog_bChoice (*(s8 *)0x8009B34D)` at its
+    # line 8 -- the same literal-address macro as sd_arm_busy_callback, same
+    # reasons. Build: one byte, 0x4d where JP has 0x3d.
+    "duel_effect_create_channel": "F: source hardcodes 0x8009B34D in a macro; needs a regional spelling upstream",
+    # MEASURED 2026-09-23: `*(u16 *) 0x8009B246 = picked;` at its line 84, a
+    # literal inline in the code. symbols.txt ALREADY maps gDuel_wViewerCardID
+    # (US 0x8009B246) to JP 0x8009B136; the literal simply never goes through it.
+    # Build: `sh $v0,-0x4dba($at)` against JP -0x4eca, one symbol 0x110 out.
+    # (A comment-line filter on `^\s*\*` hid this line once: it starts with `*`.)
+    "duel_update_card_pick_cursor": "F: source hardcodes 0x8009B246 inline at line 84; needs a regional spelling upstream",
 }
 
 
