@@ -323,6 +323,13 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
         elif op in (0x01, 0x02, 0x04, 0x05, 0x06, 0x07) or op in (0x28, 0x29, 0x2A, 0x2B, 0x2E) or op >= 0x38: dst = None
         else: dst = rt
         pending = dst if (dst and op != 0x0F) else None
+        # `addiu rt, rs, %lo(sym)` with rs holding a %hi leaves the FULL address in
+        # rt, so a later `sh $a1,0x12(rt)` is a field of sym, not a %lo half. The
+        # stale-%hi fallback below read it as one: model_effect_requests'
+        # `addiu $v0,$v0,%lo(D_800F2B20)` then `sh $a1,0x12($v0)` became
+        # "D_800F0012 -> 0x800F0010" and hid a real field-offset difference (US
+        # 0x12, JP 0x10). An `addu` of an index keeps the %hi and is not affected.
+        if op == 0x09 and rs in lui and dst: last_lui.pop(dst, None)
         # a MOVE of a %hi register (`addu/or rd, rs, $zero`, the same word on both
         # sides) carries the %hi to rd, applied after rd's own write is dropped.
         # Measured on campaign_load_scene_package: `lui $v0,0x800f` then
