@@ -62,6 +62,41 @@ def _clashes():
     return out
 
 
+def _guard_whole_file(s, src):
+    """A file with no VERSION_JAPAN at all: put every function definition under
+    `#ifndef VERSION_JAPAN` first, so the split below can open the promoted ones.
+    Refused when anything outside the functions DEFINES data -- the wrapper would
+    compile it a second time."""
+    code = re.sub(r"/\*.*?\*/", lambda m: " " * len(m.group(0)), s, flags=re.S)
+    code = re.sub(r"//[^\n]*", lambda m: " " * len(m.group(0)), code)
+    spans = []
+    for m in re.finditer(r"^[A-Za-z_][^;{}()\n]*\b\w+\s*\([^;{}]*\)\s*\{", code, re.M):
+        if spans and m.start() < spans[-1][1]: continue
+        j = code.index("\n}\n", m.end()) + 3
+        spans.append((m.start(), j))
+    if not spans: sys.exit(f"{src}: no function definitions found")
+    outside, prev = [], 0
+    for a0, b0 in spans:
+        outside.append(code[prev:a0]); prev = b0
+    outside.append(code[prev:])
+    for chunk in outside:
+        for line in chunk.split("\n"):
+            t = line.strip()
+            if t.endswith(";") and not t.startswith(("extern", "typedef", "#")) and "(" not in t.split("=")[0]:
+                sys.exit(f"{src} defines data outside its functions ({t[:50]!r}); guard it by hand")
+    out, prev = [], 0
+    for a0, b0 in spans:
+        # keep a comment that ends right above the definition with it
+        k = a0
+        above = s[:k].rstrip()
+        if above.endswith("*/"):
+            k = s.rfind("\n", 0, s.rfind("/*", 0, len(above))) + 1
+        out.append(s[prev:k]); out.append("#ifndef VERSION_JAPAN\n" + s[k:b0] + "#endif\n"); prev = b0
+    out.append(s[prev:])
+    s = "".join(out)
+    return s.replace("#endif\n\n#ifndef VERSION_JAPAN\n", "\n").replace("#endif\n#ifndef VERSION_JAPAN\n", "")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unit"); ap.add_argument("wrapper"); ap.add_argument("guard")
@@ -126,6 +161,8 @@ def main():
 
     # ---- the US source: split each function out of its #ifndef VERSION_JAPAN block
     p = KG / src; s = p.read_text()
+    if "VERSION_JAPAN" not in s:
+        s = _guard_whole_file(s, src)
     for ua, ja in fns:
         fn = names[ua]
         mdef = re.search(r"\n([^\n;{}]*\b%s\s*\([^;{]*\)\s*\{)" % re.escape(fn), s)
