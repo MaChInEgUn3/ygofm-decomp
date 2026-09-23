@@ -387,6 +387,10 @@ REGIONAL = {
     "script_op_duel_result": ([(0x8002F660, 0x1FA7, 0x1FB2)],
                               [("SCRIPT_DUEL_RESULT_MENU_ASSETS_START_SECTOR", "0x1FB2")]),
     # `44 * FILE_SECTOR_SIZE` (0x16000), JP 48 sectors (0x18000): lui 0x0001 + ori
+    # both literals in the call: start sector and sector count
+    "file_request_game_over_package": ([(0x8003C4AC, 0x2157, 0x2184), (0x8003C4B0, 0x0032, 0x004C)],
+                                       [("GAME_OVER_PACKAGE_START_SECTOR", "0x2184"),
+                                        ("GAME_OVER_PACKAGE_SECTOR_COUNT", "0x4C")]),
     "duel_load_package_stage": ([(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
