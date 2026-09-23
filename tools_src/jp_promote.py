@@ -76,6 +76,12 @@ ASM_ALIASES = {
                                 'extern u8 D_800907D8_2d[][20] asm("%s");'),
                                ("D_800907D8_flat", 0x800907D8,
                                 'extern u8 D_800907D8_flat[] asm("%s");')],
+    # Duel_GetTerrainBoost reads 0x8009B364 as gDuel_bTerrain and, through a
+    # local, as gDuel_bTerrainCodegenAlias -- a second name c_symbols.ld gives
+    # the same byte so that gcc keeps two address materialisations. The label
+    # keeps them two identifiers in the Japanese build too.
+    "game/duel_card_record_lifecycle": [("gDuel_bTerrainCodegenAlias", 0x8009B364,
+                                         'extern u8 gDuel_bTerrainCodegenAlias[] asm("%s");')],
 }
 
 # Carving a block splits the fallback data blob, and splat emits an asm data
