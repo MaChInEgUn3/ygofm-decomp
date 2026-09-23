@@ -418,6 +418,16 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # wrapper's #define renames those.
     fnames_out = list(fnames)
     for k, (n, j) in enumerate(zip(fnames, jps)):
+        # The address a function lands at can ALREADY carry a name in the JP
+        # symbols.txt, put there by an earlier promotion that called it while it was
+        # still asm: "Match Japanese game over mode runner" added
+        # `func_8003BFA4 = 0x8003BFA4;` and `#define GameOver_Init func_8003BFA4`.
+        # Writing GameOver_Init for the same address is refused by splat ("Duplicate
+        # symbol detected! GameOver_Init clashes with func_8003BFA4"), so the unit's
+        # function takes the name already there, and the caller binds to it.
+        if j in JPVRAM and JPVRAM[j] != n:
+            aliases[n] = fnames_out[k] = JPVRAM[j]
+            continue
         m0 = re.match(r"func_([0-9A-Fa-f]{8})$", n)
         if m0 and int(m0.group(1), 16) != j and n in JP_AUTO:
             aliases[n] = fnames_out[k] = "func_%08X" % j
