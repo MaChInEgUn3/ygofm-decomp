@@ -121,6 +121,7 @@ def main():
     # (`D_8009B0F4_abs`), a base the source names but no instruction carries
     # (`gFade_State`), a name splat already gives the JP address, an asm label.
     # A first version of this tool re-derived those rules and got each wrong once.
+    has_table = False
     for ua, ja in fns:
         if ua not in us or us[ua]["source"] != src: sys.exit(f"{ua:#x} is not a function of {src}")
         sz = int(us[ua]["size"], 16); uw = words(usb, ua, sz)
@@ -128,15 +129,29 @@ def main():
         # which this tool does not carve (library_runtime's func_8002BAB4 linked
         # with the table still pointing at labels the asm no longer had)
         if any(w >> 26 == 0 and (w & 0x3F) == 0x08 and (w >> 21) & 31 != 31 for w in uw):
-            sys.exit(f"{names.get(ua)} has a jump table; promote its unit with jp_batch or by hand")
+            has_table = True
         # a call into an overlay: the Japanese link has no overlay symbols
         # (main_mode_runners' Main_RunTrade -> MainMenu_InitTradeScreen)
         if any(w >> 26 == 3 and (0x80000000 | ((w & 0x3FFFFFF) << 2)) >= 0x80100000 for w in uw):
             sys.exit(f"{names.get(ua)} calls into an overlay, which the Japanese link cannot resolve")
+    # a switch's table moves with the function only when the unit's WHOLE .rodata
+    # block points into these functions (func_80014294's 7 words are all
+    # File_StepActiveTransfer's); a block shared with functions left behind
+    # (library_runtime, ai_script_control_flow) needs the whole unit
+    if has_table:
+        blk = M.US_RODATA.get(f"game/{a.unit}")
+        if not blk: sys.exit(f"{src} has a jump table but no US .rodata block")
+        lo = fns[0][0]; hi = fns[-1][0] + int(us[fns[-1][0]]["size"], 16)
+        tw = words(usb, blk[0] - M.HDR + M.LOAD, blk[1])
+        outside = [w for w in tw if 0x80010000 <= w < 0x80090000 and not lo <= w < hi]
+        if outside or not tw:
+            sys.exit(f"{src}'s .rodata block points outside these functions ({len(outside)} words); "
+                     "promote the whole unit")
     if patches:
         M.REGIONAL[a.unit] = (fns[0][1], [(wa, ui, ji) for wa, (ui, ji) in patches.items()], [])
     r = M.analyze(us, jp, pairs, names, jpsyms, fns[0][0],
-                  only=[u for u, _ in fns], jps_given=[j for _, j in fns])
+                  only=[u for u, _ in fns], jps_given=[j for _, j in fns], rodata_ok=has_table)
+    if has_table and not r.get("rodata"): sys.exit(f"{src}: the jump table's JP copy was not derived")
     if not r.get("ok"): sys.exit(f"{src}: {r.get('why')}")
     aliases, lines, asm_lines = dict(r["aliases"]), dict(r["lines"]), list(r.get("asm_aliases") or [])
     renames = {names[u]: n for (u, _), n in zip(fns, r["names"]) if n != names[u]}
@@ -228,12 +243,33 @@ def main():
         sys.exit(f"{src}: {len(inside)} directive(s) inside comments, {len(orphan)} comment-only block(s)")
     p.write_text(s)
 
+    # ---- prototypes: a function of the same file that the promoted ones use (a
+    # callback address, a call) but that stays outside this guard is declared only
+    # by its own definition, which the wrapper no longer compiles
+    # (File_StepActiveTransfer takes func_80014294, func_80014308 and
+    # func_80014390 as callbacks: "`func_80014390' undeclared")
+    code_all = re.sub(r"/\*.*?\*/", " ", s, flags=re.S)
+    heads = {m.group(2): m.group(1).strip() for m in
+             re.finditer(r"^((?:static\s+)?[A-Za-z_][\w\s\*]*?\b(\w+)\s*\([^;{}]*\))\s*\{", code_all, re.M)}
+    own_names = {names[u] for u, _ in fns}
+    bodies = ""
+    for u, _ in fns:
+        mdef = re.search(r"\b%s\s*\([^;{]*\)\s*\{" % re.escape(names[u]), code_all)
+        if mdef: bodies += code_all[mdef.end():code_all.index("\n}\n", mdef.end())]
+    protos = [heads[n] + ";" for n in sorted(heads) if n not in own_names
+              and re.search(r"\b%s\b" % re.escape(n), bodies) and not heads[n].startswith("static")]
+
     # ---- wrapper
     body = ['#include "../../types.h"', "", "#define VERSION_JAPAN", f"#define {a.guard}"]
     body += [f"#define {d.split('=', 1)[0]} {d.split('=', 1)[1]}" for d in a.define]
     body += [f"#define {n} {v}" for n, v in sorted(aliases.items())]
     body += asm_lines
     body += [f'#include "../{a.unit}.c"', ""]
+    if protos:
+        # after the include would be too late; they go in front of it, after the
+        # types, so the #defines above rename them too
+        k = body.index(f'#include "../{a.unit}.c"')
+        body[k:k] = ["", "/* Same-file functions this one uses but that stay outside its guard. */"] + protos + [""]
     w = KG / f"src/game/japanese/{a.wrapper}.c"
     if w.exists(): sys.exit(f"{w} exists")
     w.write_text("\n".join(body))
@@ -266,6 +302,18 @@ def main():
         st = "\n".join(st).split("\n")
         rows = [(i, int(m.group(1), 16), m) for i, l in enumerate(st)
                 for m in [re.match(r"\s+- \[(0x[0-9a-f]+), (asm|c|rodata|\.rodata|bin|pad|data)", l)] if m]
+    if r.get("rodata"):
+        roff, rsize = r["rodata"]
+        rrows = [(i, int(m.group(1), 16), m.group(2)) for i, l in enumerate(st)
+                 for m in [re.match(r"\s+- \[(0x[0-9a-f]+), (asm|c|rodata|\.rodata|bin|pad|data|sdata)", l)] if m]
+        i0, o0, t0 = max((x for x in rrows if x[1] <= roff), key=lambda x: x[1])
+        if t0 != "rodata": sys.exit(f".rodata block at {roff:#x} does not sit in an initial-data blob row")
+        nxt = min(o for _, o, _ in rrows if o > o0)
+        new = [] if o0 == roff else [st[i0]]
+        new.append(f"      - [{roff:#x}, .rodata, game/japanese/{a.wrapper}]")
+        if roff + rsize < nxt: new.append(f"      - [{roff + rsize:#x}, rodata, initial_data_{roff + rsize:x}]")
+        st[i0] = "\n".join(new)
+        st = "\n".join(st).split("\n")
     sp.write_text("\n".join(st))
 
     # ---- manifest

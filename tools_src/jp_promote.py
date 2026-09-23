@@ -509,7 +509,7 @@ def regional_words(src, us_base, uw, jw, jp_base):
     return jw
 
 
-def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None):
+def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodata_ok=False):
     """`only` + `jps_given`: analyse just those functions of the unit, at those JP
     addresses (guard_promote.py). The unit's .rodata and .sdata carves are skipped
     then; guard_promote refuses a function with a jump table."""
@@ -789,7 +789,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None):
     # IS the block's read ASCII as a broken table, sixteen bytes off.
     rodata = None
     unit_name = src[len("src/"):-2]
-    if unit_name in US_RODATA and not only:
+    if unit_name in US_RODATA and (not only or rodata_ok):
         off, size = US_RODATA[unit_name]
         usvram = off - HDR + LOAD
         want = "D_%08X" % usvram
