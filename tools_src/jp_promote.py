@@ -475,6 +475,13 @@ REGIONAL = {
                                               (0x8001E3A4, 0x00C0, 0x00A0)],
                                  [("DUEL_FIELD_ACTIONS_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)"),
                                   ("DUEL_FIELD_ACTIONS_CANCEL_BUTTON", "PAD_BUTTON_CROSS")]),
+    # debug screen: confirm mask 0xC0 -> 0xA0 and cancel 0x20 -> 0x40, literals in
+    # the source. The address came from shape search and neither neighbour
+    # confirms it (-0x258/-0x2AC against -0x270); func_80030C10, already paired,
+    # calls it there, and both images have five jal sites to it.
+    "func_80030294": (0x80030024, [(0x80030480, 0x00C0, 0x00A0), (0x800304AC, 0x0020, 0x0040)],
+                      [("DEBUG_SCREEN_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)"),
+                       ("DEBUG_SCREEN_CANCEL_BUTTON", "PAD_BUTTON_CROSS")]),
     "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
@@ -783,12 +790,19 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         usvram = off - HDR + LOAD
         want = "D_%08X" % usvram
         jpvram = syms.get(want)
+        # a DATA table that did not move: its symbol never enters `syms` (the
+        # address is the same in both), and its bytes are identical at that
+        # address -- func_80030294's {1, 10, 100, 1000, 10000} at 0x80010250.
+        # Only an unmoved block with equal bytes qualifies; a switch table of
+        # .text addresses would have to shift with the unit and cannot be equal.
+        unmoved = jpvram is None and words(JP_EXE, usvram, size) == words(US_EXE, usvram, size)
+        if unmoved: jpvram = usvram
         if jpvram is None:
             return dict(ok=False, src=src, why=f".rodata block at {usvram:#x} has no derived JP address ({want} never paired)")
         tdelta = fns[0] - jps[0]
         uw2, jw2 = words(US_EXE, usvram, size), words(JP_EXE, jpvram, size)
         deltas = {(a - b) & 0xFFFFFFFF for a, b in zip(uw2, jw2)}
-        if deltas != {tdelta}:
+        if deltas != {tdelta} and not unmoved:
             return dict(ok=False, src=src, why=f".rodata at {usvram:#x} is not the US block shifted by the unit's {tdelta:#x} "
                                                f"(deltas {sorted(hex(d) for d in deltas)[:3]})")
         rodata = (jpvram - LOAD + HDR, size)
