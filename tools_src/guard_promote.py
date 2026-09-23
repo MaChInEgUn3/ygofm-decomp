@@ -131,6 +131,7 @@ def main():
         s2 = join.sub(lambda m: opener + m.group(1) + "\n", s)
         if s2 == s: break
         s = s2
+    s = s.rstrip("\n") + "\n"   # a split of the file's last block left a blank line at EOF
     p.write_text(s)
 
     # ---- wrapper
