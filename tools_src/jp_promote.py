@@ -411,6 +411,21 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
     # aliases: US name -> the name the JP build must use (a wrapper's #define
     # lines, upstream's "regional alias"); lines: symbols.txt lines to add
     aliases, lines = {}, {}
+    # A unit's OWN function whose US-address name is also splat's auto name for a
+    # DIFFERENT Japanese address. display_object_fade_callbacks defines
+    # func_80039BE0 (US 0x80039BE0), which lands at JP 0x80039254; splat names JP
+    # 0x80039BE0 -- inside func_8003986C's asm, outside this unit -- func_80039BE0
+    # too, so two objects export it: "multiple definition of func_80039BE0". The
+    # function is renamed to splat's name for the address it actually lands at:
+    # promoting the unit turns that range into C, which frees the name, and the
+    # asm callers that already jal func_80039254 then bind to it. `fnames` keeps
+    # the US names so the unit's calls to itself are still skipped below -- the
+    # wrapper's #define renames those.
+    fnames_out = list(fnames)
+    for k, (n, j) in enumerate(zip(fnames, jps)):
+        m0 = re.match(r"func_([0-9A-Fa-f]{8})$", n)
+        if m0 and int(m0.group(1), 16) != j and n in JP_AUTO:
+            aliases[n] = fnames_out[k] = "func_%08X" % j
     # the unit's own source text, with comments stripped: a provenance header or a
     # goto label reads as a reference and is not one
     _text = (KG / src).read_text(errors="replace") if (KG / src).exists() else ""
@@ -626,7 +641,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
         carve_pads = CARVE_PADS.get(unit_name, [])
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, sdata=sdata, carve_pads=carve_pads, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames)
+                rodata=rodata, sdata=sdata, carve_pads=carve_pads, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
