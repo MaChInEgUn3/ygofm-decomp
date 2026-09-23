@@ -388,7 +388,7 @@ REGIONAL = {
                               [("SCRIPT_DUEL_RESULT_MENU_ASSETS_START_SECTOR", "0x1FB2")]),
     # `44 * FILE_SECTOR_SIZE` (0x16000), JP 48 sectors (0x18000): lui 0x0001 + ori
     "duel_load_package_stage": ([(0x800173A8, 0x6000, 0x8000)],
-                                [("DUEL_PACKAGE_STAGE_SECTORS", "48")]),
+                                [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
 
 
@@ -742,7 +742,7 @@ def apply(addr):
                 f"/* SLPM-86398 build of {r['src']}: the symbols below sit at other addresses in the",
                 " * Japanese executable and their US names are taken there, so they are aliased",
                 f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
-                " * unchanged. */"]
+                " * as is. */" if r.get("defines") else " * unchanged. */"]
         body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
         if r.get("defines"):
             body += ["", "/* Values that differ in the Japanese release; the US source names each",
