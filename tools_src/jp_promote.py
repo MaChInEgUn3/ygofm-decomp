@@ -369,6 +369,44 @@ def unit_of(us, addr):
     fns = sorted(a for a, f in us.items() if f["source"] == src)
     return src, fns
 
+# Regional CONSTANTS, the same pattern upstream uses for literals (#5730's
+# g_SDValue, #5750's MAIN_FREE_DUEL_START_SECTOR): the US source names the value
+# with `#ifndef MACRO / #define MACRO <US spelling> / #endif`, and the JP wrapper
+# defines MACRO first. The source edit is made by hand; this table is what lets
+# the word comparison accept exactly that difference and nothing else. Each entry
+# is checked against BOTH executables before it is applied -- the US word must
+# carry the US immediate and the JP word the JP one, with every other bit equal --
+# so a table that drifts from the binaries fails the unit instead of hiding a
+# real difference. Unit -> ([(US word address, US imm16, JP imm16)], [(MACRO, JP spelling)]).
+REGIONAL = {
+    # FILE_WA_EGYPT_OVERWORLD_START_SECTOR: JP 0x1FE4, the Japanese WA.MRG layout
+    "campaign_map_load_package_stage": ([(0x8003C0F0, 0x1FD9, 0x1FE4)],
+                                        [("CAMPAIGN_MAP_PACKAGE_START_SECTOR", "0x1FE4")]),
+    "password_load_package_stage": ([(0x8003BECC, 0x1F2F, 0x1F3A)],
+                                    [("PASSWORD_PACKAGE_START_SECTOR", "0x1F3A")]),
+    "script_op_duel_result": ([(0x8002F660, 0x1FA7, 0x1FB2)],
+                              [("SCRIPT_DUEL_RESULT_MENU_ASSETS_START_SECTOR", "0x1FB2")]),
+    # `44 * FILE_SECTOR_SIZE` (0x16000), JP 48 sectors (0x18000): lui 0x0001 + ori
+    "duel_load_package_stage": ([(0x800173A8, 0x6000, 0x8000)],
+                                [("DUEL_PACKAGE_STAGE_SECTORS", "48")]),
+}
+
+
+def regional_words(src, us_base, uw, jw):
+    """jw with the unit's declared REGIONAL immediates set to the US ones, or None
+    when an entry does not hold (either word, or any other bit, differs)."""
+    patches = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], ([], []))[0]
+    if not patches: return jw
+    jw = list(jw)
+    for ua, ui, ji in patches:
+        k = (ua - us_base) // 4
+        if not (0 <= k < len(uw)) or uw[k] & 0xFFFF != ui or jw[k] & 0xFFFF != ji \
+                or (uw[k] ^ jw[k]) & 0xFFFF0000:
+            return None
+        jw[k] = uw[k]
+    return jw
+
+
 def analyze(us, jp, pairs, names, jpsyms, addr):
     src, fns = unit_of(us, addr)
     sizes = [int(us[a]["size"], 16) for a in fns]
@@ -387,6 +425,10 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         if j + s != k: return dict(ok=False, src=src, why=f"JP unit not contiguous at {j:#x}")
     if any(j in jp for j in jps): return dict(ok=False, src=src, why="already in JP matching_c")
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
+    defines = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], ([], []))[1]
+    jw = regional_words(src, fns[0], uw, jw)
+    if jw is None:
+        return dict(ok=False, src=src, why="a REGIONAL entry does not hold in the binaries")
     ok, syms, why = pair_words(uw, jw, names, pairs, (fns[0], jps[0]))
     if not ok: return dict(ok=False, src=src, why=why)
     # A derived symbol whose US address is outside the image cannot be a symbol:
@@ -663,7 +705,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         # row when there is one -- the padding gets a row of its own
         sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
-                rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out)
+                rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out, defines=defines)
 
 def scan():
     us, jp, pairs, names, jpsyms = load_all()
@@ -688,7 +730,7 @@ def apply(addr):
     wrapper = None
     # an asm label alone needs the wrapper too (func_80031784 has no #define, only
     # the label), or it never reaches the build
-    if r["aliases"] or r.get("asm_aliases"):
+    if r["aliases"] or r.get("asm_aliases") or r.get("defines"):
         # upstream's regional-alias wrapper (src/game/japanese/*.c): the US
         # names the JP build cannot use are #defined to JP names before the
         # headers are seen; the US source is included rather than copied
@@ -702,6 +744,10 @@ def apply(addr):
                 f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
                 " * unchanged. */"]
         body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
+        if r.get("defines"):
+            body += ["", "/* Values that differ in the Japanese release; the US source names each",
+                     " * with an #ifndef default (jp_promote.REGIONAL). */"]
+            body += [f"#define {m} {v}" for m, v in r["defines"]]
         if r.get("asm_aliases"):
             body += ["",
                      " /* The same object under a second US name, which a #define cannot carry:".replace(" /*", "/*"),

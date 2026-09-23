@@ -76,6 +76,8 @@ def main():
         uw = words(usb, addrs[0], tot)
         jw = words(jpb, addrs[0] + d, tot)
         if uw is None or jw is None: return None
+        jw = M.regional_words(us[addrs[0]]["source"], addrs[0], uw, jw)   # declared constants only
+        if jw is None: return None
         ok, syms, _why = M.pair_words(uw, jw, names, pairs, (addrs[0], addrs[0] + d))
         return syms if ok else None
 
