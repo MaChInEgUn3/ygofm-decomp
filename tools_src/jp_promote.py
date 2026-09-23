@@ -377,30 +377,45 @@ def unit_of(us, addr):
 # is checked against BOTH executables before it is applied -- the US word must
 # carry the US immediate and the JP word the JP one, with every other bit equal --
 # so a table that drifts from the binaries fails the unit instead of hiding a
-# real difference. Unit -> ([(US word address, US imm16, JP imm16)], [(MACRO, JP spelling)]).
+# real difference. Unit -> (JP unit address, [(US word address, US imm16, JP imm16)],
+# [(MACRO, JP spelling)]).
+#
+# The JP ADDRESS IS PART OF THE ENTRY because the immediates alone do not pin the
+# pair. Measured 2026-09-23: file_request_game_over_package declared as
+# 0x2157/0x32 -> 0x2184/0x4C, and jp_pairs' shape search then paired it with JP
+# 0x80032090 -- which is the counterpart of US func_80032328 (duel_reward_setup),
+# a sibling of the same shape with count 0x4C, already promoted under that name by
+# #5819. Both value checks held; only the address says which function it is. So an
+# entry is applied only at the JP address it names, found by reading the
+# neighbourhood's displacement, never by shape.
 REGIONAL = {
     # FILE_WA_EGYPT_OVERWORLD_START_SECTOR: JP 0x1FE4, the Japanese WA.MRG layout
-    "campaign_map_load_package_stage": ([(0x8003C0F0, 0x1FD9, 0x1FE4)],
+    "campaign_map_load_package_stage": (0x8003B4F8, [(0x8003C0F0, 0x1FD9, 0x1FE4)],
                                         [("CAMPAIGN_MAP_PACKAGE_START_SECTOR", "0x1FE4")]),
-    "password_load_package_stage": ([(0x8003BECC, 0x1F2F, 0x1F3A)],
+    "password_load_package_stage": (0x8003B30C, [(0x8003BECC, 0x1F2F, 0x1F3A)],
                                     [("PASSWORD_PACKAGE_START_SECTOR", "0x1F3A")]),
-    "script_op_duel_result": ([(0x8002F660, 0x1FA7, 0x1FB2)],
+    "script_op_duel_result": (0x8002F3D8, [(0x8002F660, 0x1FA7, 0x1FB2)],
                               [("SCRIPT_DUEL_RESULT_MENU_ASSETS_START_SECTOR", "0x1FB2")]),
     # `44 * FILE_SECTOR_SIZE` (0x16000), JP 48 sectors (0x18000): lui 0x0001 + ori
-    # both literals in the call: start sector and sector count
-    "file_request_game_over_package": ([(0x8003C4AC, 0x2157, 0x2184), (0x8003C4B0, 0x0032, 0x004C)],
-                                       [("GAME_OVER_PACKAGE_START_SECTOR", "0x2184"),
-                                        ("GAME_OVER_PACKAGE_SECTOR_COUNT", "0x4C")]),
-    "duel_load_package_stage": ([(0x800173A8, 0x6000, 0x8000)],
+    # only the start sector moves (the count stays 0x32). The address comes from
+    # the order of the request sites: US and JP list the same package calls in the
+    # same order, and this is the ninth on both sides. NOT JP 0x80032090, which
+    # shape search chose once -- see the note above.
+    "file_request_game_over_package": (0x8003BA64, [(0x8003C4AC, 0x2157, 0x2152)],
+                                       [("GAME_OVER_PACKAGE_START_SECTOR", "0x2152")]),
+    "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
 
 
-def regional_words(src, us_base, uw, jw):
+def regional_words(src, us_base, uw, jw, jp_base):
     """jw with the unit's declared REGIONAL immediates set to the US ones, or None
-    when an entry does not hold (either word, or any other bit, differs)."""
-    patches = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], ([], []))[0]
-    if not patches: return jw
+    when an entry does not hold: another JP address, or either word, or any other
+    bit, differs."""
+    entry = REGIONAL.get(src.rsplit("/", 1)[-1][:-2])
+    if not entry: return jw
+    jaddr, patches, _ = entry
+    if jp_base != jaddr: return None
     jw = list(jw)
     for ua, ui, ji in patches:
         k = (ua - us_base) // 4
@@ -429,8 +444,8 @@ def analyze(us, jp, pairs, names, jpsyms, addr):
         if j + s != k: return dict(ok=False, src=src, why=f"JP unit not contiguous at {j:#x}")
     if any(j in jp for j in jps): return dict(ok=False, src=src, why="already in JP matching_c")
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
-    defines = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], ([], []))[1]
-    jw = regional_words(src, fns[0], uw, jw)
+    defines = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], (0, [], []))[2]
+    jw = regional_words(src, fns[0], uw, jw, jps[0])
     if jw is None:
         return dict(ok=False, src=src, why="a REGIONAL entry does not hold in the binaries")
     ok, syms, why = pair_words(uw, jw, names, pairs, (fns[0], jps[0]))
