@@ -455,6 +455,18 @@ REGIONAL = {
     # chose once -- see the note above.
     "file_request_game_over_package": (0x8003BA64, [(0x8003C4AC, 0x2157, 0x2152)],
                                        [("GAME_OVER_PACKAGE_START_SECTOR", "0x2152")]),
+    # the lone Cancel test: US PAD_BUTTON_CANCEL (Circle, 0x20), JP Cross (0x40);
+    # the combined confirm|cancel mask is 0xE0 in both and stays as it is
+    "func_80020988": (0x800207D0, [(0x80020BA0, 0x0020, 0x0040)],
+                      [("FUNC_80020988_CANCEL_BUTTON", "PAD_BUTTON_CROSS")]),
+    # the confirm mask: US PAD_BUTTON_CONFIRM_MASK (Cross|Square, 0xC0), JP
+    # Circle|Square (0xA0), spelled by name as #5597 does; the previous
+    # neighbour moves by -0x844
+    "dialog_update_choice": (0x80036964, [(0x800372E0, 0x00C0, 0x00A0)],
+                             [("DIALOG_UPDATE_CHOICE_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)")]),
+    # Start|confirm, 0x8C0 against 0x8A0; the next neighbour moves by -0x914
+    "main_run_frontend_loop": (0x800432B8, [(0x80043C68, 0x08C0, 0x08A0)],
+                               [("MAIN_FRONTEND_LOOP_CONFIRM_MASK", "(PAD_BUTTON_CIRCLE | PAD_BUTTON_SQUARE)")]),
     "duel_load_package_stage": (0x80017044, [(0x800173A8, 0x6000, 0x8000)],
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
