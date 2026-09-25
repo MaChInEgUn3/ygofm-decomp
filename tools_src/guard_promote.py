@@ -136,7 +136,7 @@ def main():
     # (`gFade_State`), a name splat already gives the JP address, an asm label.
     # A first version of this tool re-derived those rules and got each wrong once.
     has_table = False
-    overlay_targets = set()
+    overlay_targets = {}
     for ua, ja in fns:
         if ua not in us or us[ua]["source"] != src: sys.exit(f"{ua:#x} is not a function of {src}")
         sz = int(us[ua]["size"], 16); uw = words(usb, ua, sz)
@@ -147,11 +147,20 @@ def main():
             has_table = True
         # a call into an overlay: the Japanese link has no overlay symbols
         # (main_mode_runners' Main_RunTrade -> MainMenu_InitTradeScreen)
-        ov = {0x80000000 | ((w & 0x3FFFFFF) << 2) for w in uw if w >> 26 == 3}
-        ov = {t for t in ov if t >= 0x80100000}
+        # the overlay's layout can differ between the builds (model_intro_
+        # controller calls 0x80180820 in the Japanese one where the US one calls
+        # 0x80180A24), so each US target is paired with the Japanese word's
+        jw_ = words(jpb, ja, sz)
+        ov = {}
+        for w, v in zip(uw, jw_):
+            if w >> 26 == 3 and (0x80000000 | ((w & 0x3FFFFFF) << 2)) >= 0x80100000:
+                ut, jt = 0x80000000 | ((w & 0x3FFFFFF) << 2), 0x80000000 | ((v & 0x3FFFFFF) << 2)
+                if overlay_targets.get(ut, jt) != jt or ov.get(ut, jt) != jt:
+                    sys.exit(f"overlay target {ut:#x} maps to two Japanese addresses")
+                ov[ut] = jt
         if ov and not a.overlay_ok:
             sys.exit(f"{names.get(ua)} calls into an overlay; pass --overlay-ok to name the targets by address")
-        overlay_targets |= ov
+        overlay_targets.update(ov)
     # a switch's table moves with the function only when the unit's WHOLE .rodata
     # block points into these functions (func_80014294's 7 words are all
     # File_StepActiveTransfer's); a block shared with functions left behind
@@ -168,7 +177,9 @@ def main():
         # and func_800577B0's follow); then only that suffix is carved
         first = mine[0]
         outside = [w for w in tw[first:] if 0x80010000 <= w < 0x80090000 and not lo <= w < hi]
-        if outside or mine != list(range(first, len(tw))):
+        # zero words inside the run are alignment padding between two of these
+        # functions' own tables (model_intro_controller's func_800507D0)
+        if outside or any(w and not lo <= w < hi for w in tw[first:]):
             sys.exit(f"{src}'s .rodata block points outside these functions ({len(outside)} words) "
                      "and the rest is not a suffix of it; promote the whole unit")
         if first:
@@ -181,12 +192,13 @@ def main():
         sys.exit(f"{src}: the jump table's JP copy was not derived ({r.get('why')})")
     if not r.get("ok"): sys.exit(f"{src}: {r.get('why')}")
     aliases, lines, asm_lines = dict(r["aliases"]), dict(r["lines"]), list(r.get("asm_aliases") or [])
-    for t in sorted(overlay_targets):
-        n = names.get(t) or overlay_name(t)
-        if not n: sys.exit(f"overlay target {t:#x} has no US name")
-        lines = {k: v for k, v in lines.items() if v != t}
-        if n != f"func_{t:08X}": aliases[n] = f"func_{t:08X}"
-        lines[f"func_{t:08X}"] = t
+    for t, jt in sorted(overlay_targets.items()):
+        # no US name at all: the C already calls it func_<ADDR> (model_intro_
+        # controller's func_801807B0), so only the symbols line is needed
+        n = names.get(t) or overlay_name(t) or f"func_{t:08X}"
+        lines = {k: v for k, v in lines.items() if v not in (t, jt)}
+        if n != f"func_{jt:08X}": aliases[n] = f"func_{jt:08X}"
+        lines[f"func_{jt:08X}"] = jt
     renames = {names[u]: n for (u, _), n in zip(fns, r["names"]) if n != names[u]}
     # existing Japanese wrappers may call a function of this call by its
     # JP-address name, from when it was asm (func_80014294's wrappers call
@@ -235,6 +247,10 @@ def main():
                 break
         j = s.index("\n}\n", mdef.end()) + 3
         before = s[:i]
+        # already under its own guard, as #6046 left func_800507D0: nothing to split
+        own = before.rfind(f"#if !defined(VERSION_JAPAN) || defined({a.guard})\n")
+        if own >= 0 and before.rfind("#endif") < own:
+            continue
         opened = before.rfind("#ifndef VERSION_JAPAN\n"); closed = before.rfind("#endif")
         if opened < 0 or closed > opened:
             sys.exit(f"{fn} is not inside `#ifndef VERSION_JAPAN` in {src}; guard this file by hand")

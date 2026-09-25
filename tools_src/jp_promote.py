@@ -822,7 +822,8 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
             return dict(ok=False, src=src, why=f".rodata block at {usvram:#x} has no derived JP address ({want} never paired)")
         tdelta = (fns[0] - jps[0]) & 0xFFFFFFFF   # a unit can move UP in the JP build
         uw2, jw2 = words(US_EXE, usvram, size), words(JP_EXE, jpvram, size)
-        deltas = {(a - b) & 0xFFFFFFFF for a, b in zip(uw2, jw2)}
+        # a word that is zero in both is alignment padding between two tables
+        deltas = {(a - b) & 0xFFFFFFFF for a, b in zip(uw2, jw2) if a or b}
         if deltas != {tdelta} and not unmoved:
             return dict(ok=False, src=src, why=f".rodata at {usvram:#x} is not the US block shifted by the unit's {tdelta:#x} "
                                                f"(deltas {sorted(hex(d) for d in deltas)[:3]})")
