@@ -97,12 +97,26 @@ def _guard_whole_file(s, src):
     return s.replace("#endif\n\n#ifndef VERSION_JAPAN\n", "\n").replace("#endif\n#ifndef VERSION_JAPAN\n", "")
 
 
+def overlay_name(addr):
+    """The US name of an overlay function: the overlays keep their own symbol
+    files under config/slus_01411/overlays, which the main-executable name map
+    does not read."""
+    for f in sorted((KG / "config/slus_01411/overlays").rglob("*.txt")):
+        for l in f.read_text().splitlines():
+            m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;", l)
+            if m and int(m.group(2), 16) == addr: return m.group(1)
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("unit"); ap.add_argument("wrapper"); ap.add_argument("guard")
     ap.add_argument("pairs_", nargs="+", metavar="US:JP")
     ap.add_argument("--patch", action="append", default=[])
     ap.add_argument("--define", action="append", default=[])
+    # overlay calls resolve the way #5881 resolved Main_RunMenu's: the US name
+    # is #defined to func_<ADDR> and symbols.txt gets `func_<ADDR> = 0x<ADDR>;`
+    ap.add_argument("--overlay-ok", action="store_true")
     a = ap.parse_args()
     clash0 = _clashes()
     us, jp, pairs, names, jpsyms = M.load_all()
@@ -122,6 +136,7 @@ def main():
     # (`gFade_State`), a name splat already gives the JP address, an asm label.
     # A first version of this tool re-derived those rules and got each wrong once.
     has_table = False
+    overlay_targets = set()
     for ua, ja in fns:
         if ua not in us or us[ua]["source"] != src: sys.exit(f"{ua:#x} is not a function of {src}")
         sz = int(us[ua]["size"], 16); uw = words(usb, ua, sz)
@@ -132,8 +147,11 @@ def main():
             has_table = True
         # a call into an overlay: the Japanese link has no overlay symbols
         # (main_mode_runners' Main_RunTrade -> MainMenu_InitTradeScreen)
-        if any(w >> 26 == 3 and (0x80000000 | ((w & 0x3FFFFFF) << 2)) >= 0x80100000 for w in uw):
-            sys.exit(f"{names.get(ua)} calls into an overlay, which the Japanese link cannot resolve")
+        ov = {0x80000000 | ((w & 0x3FFFFFF) << 2) for w in uw if w >> 26 == 3}
+        ov = {t for t in ov if t >= 0x80100000}
+        if ov and not a.overlay_ok:
+            sys.exit(f"{names.get(ua)} calls into an overlay; pass --overlay-ok to name the targets by address")
+        overlay_targets |= ov
     # a switch's table moves with the function only when the unit's WHOLE .rodata
     # block points into these functions (func_80014294's 7 words are all
     # File_StepActiveTransfer's); a block shared with functions left behind
@@ -163,6 +181,12 @@ def main():
         sys.exit(f"{src}: the jump table's JP copy was not derived ({r.get('why')})")
     if not r.get("ok"): sys.exit(f"{src}: {r.get('why')}")
     aliases, lines, asm_lines = dict(r["aliases"]), dict(r["lines"]), list(r.get("asm_aliases") or [])
+    for t in sorted(overlay_targets):
+        n = names.get(t) or overlay_name(t)
+        if not n: sys.exit(f"overlay target {t:#x} has no US name")
+        lines = {k: v for k, v in lines.items() if v != t}
+        if n != f"func_{t:08X}": aliases[n] = f"func_{t:08X}"
+        lines[f"func_{t:08X}"] = t
     renames = {names[u]: n for (u, _), n in zip(fns, r["names"]) if n != names[u]}
     # existing Japanese wrappers may call a function of this call by its
     # JP-address name, from when it was asm (func_80014294's wrappers call
