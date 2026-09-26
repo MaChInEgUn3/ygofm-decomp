@@ -149,7 +149,9 @@ def load_all():
     ALT_NAMES = collections.defaultdict(set)
     for a, n in names.items(): ALT_NAMES[a].add(n)
     for line in open(BASE_CFG / "c_symbols.ld"):
-        m = re.match(r"\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;", line)
+        # PROVIDE(Password_InitShopScreen = 0x8016A080); counts too: without it
+        # a unit calling the overlay by that name got func_8016A080 instead
+        m = re.match(r"\s*(?:PROVIDE\(\s*)?(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*\)?\s*;", line)
         if m: ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
     # DATA DEFINED IN C carries a name that no config file holds: the address comes
     # out of the US link and nothing else. `gDebugMenu_abMainModeByEntry` is one --
