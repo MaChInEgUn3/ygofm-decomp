@@ -647,7 +647,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
         # that very address (`D_8009AFAC = 0x8009AFAC;`) is the same situation as
         # splat's automatic name: the US object of that name lives elsewhere in
         # the Japanese build (func_800540B4: US D_8009AFAC is JP 0x8009AF14), so
-        # it takes a gJapanese_ name instead of being refused
+        # it needs a tent_ name like any other collision (refused below)
         self_named = m is not None and jpsyms.get(n) == int(m.group(2), 16)
         if n in jpsyms and not self_named:
             if jpsyms[n] != a: return dict(ok=False, src=src, why=f"{n} already {jpsyms[n]:#x} in JP symbols, unit wants {a:#x}")
@@ -662,8 +662,14 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
             aliases[n] = f"func_{a:08X}"
             continue
         if m and (n in JP_AUTO or self_named) and int(m.group(2), 16) != a:
-            jn = ("gJapanese_" if m.group(1) == "D" else "Japanese_") + n
-            aliases[n] = jn; lines[jn] = a
+            # This used to synthesise `gJapanese_D_<usaddr>` and alias the US
+            # name onto it with a #define. The maintainer asked for one
+            # tentative name shared by both builds instead (krystalgamer's
+            # `tent_NomeDeAcordoContexto`, kg #6248), and a name needs reading
+            # the code, which this tool cannot do: refuse and say where.
+            return dict(ok=False, src=src,
+                        why=f"{n} needs a tent_ name: the US {n} is JP {a:#x}, "
+                            f"and splat's own {n} there is another object")
         else:
             lines[n] = a
     # a second US name of the same address, used by this unit's source, needs
