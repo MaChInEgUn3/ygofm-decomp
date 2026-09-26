@@ -558,7 +558,17 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
     if any(j is None for j in jps): return dict(ok=False, src=src, why="no function of the unit has a JP pair")
     for j, s, k in zip(jps, sizes, jps[1:]):
         if j + s != k: return dict(ok=False, src=src, why=f"JP unit not contiguous at {j:#x}")
-    if any(j in jp for j in jps): return dict(ok=False, src=src, why="already in JP matching_c")
+    if any(j in jp for j in jps): return dict(ok=False, src=src, why=f"already in {R['config']} matching_c")
+    # A US source that casts a literal 0x80xxxxxx address compiles to that US
+    # address whatever symbols.txt says, but its lui/lo halves differ from the
+    # target like a relocation does, so the word check below passes it
+    # (measured: sd_arm_busy_callback, `#define g_SDValue (*(SDValue **)0x8009B45C)`,
+    # built 0x8009B45C where SLES-03947 has 0x8009C3C0). Refuse unless the
+    # target is the US build itself.
+    for f in (KG / src, (KG / src).with_suffix(".h")):
+        if f.exists() and re.search(r"\)\s*0x80[0-9A-Fa-f]{6}\b|\b0x80[0-9A-Fa-f]{6}\s*\)",
+                                    re.sub(r"/\*.*?\*/", " ", f.read_text(errors="replace"), flags=re.S)):
+            return dict(ok=False, src=src, why=f"{f.name} casts a literal 0x80xxxxxx address: needs a regional wrapper")
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
     defines = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], (0, [], []))[2]
     jw = regional_words(src, fns[0], uw, jw, jps[0])
