@@ -48,6 +48,7 @@ PAIRS = ROOT / "config" / R["pairs"]   # address = target, address2 = US; the pa
 US_LINK_SYMS = ROOT / "config" / "us_link_symbols.csv"   # names the US link gives C-defined data
 US_EXE, JP_EXE = KG / "game/SLUS_014.11", KG / R["exe"]
 LOAD, HDR = 0x80010000, 0x800
+OVERLAY_BASE = 0x80100000   # every overlay slot loads at or above this; the executable's text ends far below
 # BOTH gp values are read from their own split.yaml. GP_JP used to be the
 # literal 0x8009AE48, which is right for SLPM-86398 and would have silently
 # paired a European target against the Japanese gp.
@@ -152,7 +153,13 @@ def load_all():
         # PROVIDE(Password_InitShopScreen = 0x8016A080); counts too: without it
         # a unit calling the overlay by that name got func_8016A080 instead
         m = re.match(r"\s*(?:PROVIDE\(\s*)?(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*\)?\s*;", line)
-        if m: ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
+        if m:
+            ALT_NAMES[int(m.group(2), 16)].add(m.group(1))
+            # an address the US symbols.txt never names (the overlay entry
+            # points: MainMenu_InitFrontendMenu = 0x8018001C) is named here;
+            # without it an equal-address call became func_8018001C, which the
+            # emitter skips as splat's own
+            names.setdefault(int(m.group(2), 16), m.group(1))
     # DATA DEFINED IN C carries a name that no config file holds: the address comes
     # out of the US link and nothing else. `gDebugMenu_abMainModeByEntry` is one --
     # the promoter recorded 0x80090D68 -> 0x80090C18 and wrote it as `D_80090D68`,
@@ -390,6 +397,15 @@ def pair_words(uw, jw, names, func_map, uw_base=(0, 0)):
                 ja = ((lui[rs][1] << 16) + sx16(j & 0xFFFF)) & 0xFFFFFFFF
                 if not put(ua, ja): return False, {}, f"word {i}: symbol conflict"
                 unpaired.pop(rs, None)
+            elif op == 0x03:
+                # an equal `jal` into an overlay (outside the executable's text,
+                # so splat names nothing there) still needs its name placed:
+                # SLES-03947 calls MainMenu_InitFrontendMenu at 0x8018001C and
+                # CampaignMap_UpdateLocation at 0x80168FCC, the US addresses,
+                # and the link had no definition for either
+                ua = 0x80000000 | ((u & 0x3FFFFFF) << 2)
+                if ua >= OVERLAY_BASE and not put(ua, ua, func=True):
+                    return False, {}, f"word {i}: jal conflict"
             continue
         if op in (0x02, 0x03) and (j >> 26) == op:
             ua, ja = 0x80000000 | ((u & 0x3FFFFFF) << 2), 0x80000000 | ((j & 0x3FFFFFF) << 2)
