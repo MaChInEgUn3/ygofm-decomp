@@ -235,7 +235,11 @@ def load_all():
     # batch without rebuilding).
     ld = SPLAT / (R["config"] + ".ld")
     newest = max((TGT_CFG / f).stat().st_mtime for f in ("symbols.txt", "split.yaml"))
-    if ld.exists() and ld.stat().st_mtime < newest:
+    # Additions this tool makes during one batch are harmless (a name it adds
+    # is in jpsyms, so it is not read as splat's); only a REMOVAL since the
+    # split misleads. YGOFM_STALE_OK=1 is for exactly that case: a fresh build,
+    # then nothing but applies.
+    if ld.exists() and ld.stat().st_mtime < newest and not os.environ.get("YGOFM_STALE_OK"):
         sys.exit(f"{SPLAT.relative_to(KG)} is older than {TGT_CFG.relative_to(KG)}: "
                  f"run `make {R['make']}-match` (or -split) first")
     for p in list((SPLAT / "asm").rglob("*.s")) + [SPLAT / "undefined_syms_auto.txt",
