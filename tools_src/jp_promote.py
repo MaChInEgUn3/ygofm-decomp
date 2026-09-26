@@ -27,7 +27,16 @@ KG = pathlib.Path(os.environ.get("YGOFM_KG", ROOT.parent / "memories-decomp"))
 # region by dropping its config directory and executable in here.
 REGIONS = {
     "jp": dict(config="slpm_86398", exe="game/japanese/SLPM_863.98",
-               srcdir="japanese", make="japanese", pairs="jp_matches.csv"),
+               srcdir="japanese", make="japanese", pairs="jp_matches.csv",
+               row="%#x", tail="func_%08X"),
+    # SLES-03947 (kg #6258). Pairs: US game functions whose masked
+    # instruction sequence occurs exactly once in SLES_039.47 (976 of 1104
+    # occur at all; the 236 US addresses shared with the issue's best.csv
+    # agree 236/236).
+    "eu": dict(config="sles_03947", exe="game/europe/SLES_039.47",
+               srcdir="europe", make="european", pairs="eu_matches.csv",
+               # his split writes 0x0030CC and names asm rows generated/text_0030cc
+               row="0x%06X", tail="generated/text_%06x"),
 }
 REGION = os.environ.get("YGOFM_REGION", "jp")
 if REGION not in REGIONS: sys.exit(f"unknown region {REGION!r}; known: {', '.join(sorted(REGIONS))}")
@@ -219,6 +228,16 @@ def load_all():
     # with them, and the linker then takes splat's definition (measured:
     # sorted_entry_relink, built lo 0xB314 where JP has 0xB204)
     JP_AUTO = set()
+    # The split output has to describe the CURRENT config: after a config
+    # change without a rebuild, the asm still carries the names the old
+    # symbols.txt placed, and every one of them reads as a splat collision
+    # (measured 2026-09-26 on SLES-03947: 14 false refusals after reverting a
+    # batch without rebuilding).
+    ld = SPLAT / (R["config"] + ".ld")
+    newest = max((TGT_CFG / f).stat().st_mtime for f in ("symbols.txt", "split.yaml"))
+    if ld.exists() and ld.stat().st_mtime < newest:
+        sys.exit(f"{SPLAT.relative_to(KG)} is older than {TGT_CFG.relative_to(KG)}: "
+                 f"run `make {R['make']}-match` (or -split) first")
     for p in list((SPLAT / "asm").rglob("*.s")) + [SPLAT / "undefined_syms_auto.txt",
                                                    SPLAT / "undefined_funcs_auto.txt",
                                                    SPLAT / (R["config"] + ".ld")]:
@@ -668,7 +687,7 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
             # `tent_NomeDeAcordoContexto`, kg #6248), and a name needs reading
             # the code, which this tool cannot do: refuse and say where.
             return dict(ok=False, src=src,
-                        why=f"{n} needs a tent_ name: the US {n} is JP {a:#x}, "
+                        why=f"{n} needs a tent_ name: the US {n} is {REGION} {a:#x}, "
                             f"and splat's own {n} there is another object")
         else:
             lines[n] = a
@@ -921,12 +940,16 @@ def apply(addr):
     # split.yaml: the main segment's subsegment list
     sp = TGT_CFG / "split.yaml"; text = sp.read_text()
     lines = text.split("\n")
-    idx = [i for i, l in enumerate(lines) if re.match(r"\s+- \[0x[0-9a-f]+, (c|asm|rodata|pad)", l) and i < lines.index("  - name: initialized_data")]
-    ents = [(int(re.match(r"\s+- \[(0x[0-9a-f]+)", lines[i]).group(1), 16), i) for i in idx]
+    idx = [i for i, l in enumerate(lines) if re.match(r"\s+- \[0x[0-9a-fA-F]+, (c|asm|rodata|pad)", l) and i < lines.index("  - name: initialized_data")]
+    ents = [(int(re.match(r"\s+- \[(0x[0-9a-fA-F]+)", lines[i]).group(1), 16), i) for i in idx]
     offs = {o: i for o, i in ents}
     if start in offs and ", c," in lines[offs[start]]: sys.exit("start offset already a c segment")
-    pending = [(start, f"      - [{start:#x}, c, {unit}]")]
-    if end not in offs: pending.append((end, f"      - [{end:#x}, asm, func_{end - HDR + LOAD:08X}]"))
+    pending = [(start, f"      - [{R['row'] % start}, c, {unit}]")]
+    if end not in offs:
+        tail = R["tail"] % ((end - HDR + LOAD) if R["tail"].startswith("func_") else end)
+        pending.append((end, f"      - [{R['row'] % end}, asm, {tail}]"))
+    if REGION != "jp" and (r.get("rodata") or r.get("sdata")):
+        sys.exit(f"{r['src']}: .rodata/.sdata carving is only measured on the Japanese split")
     if r.get("rodata"):
         # The unit's switch table. The JP split covers the whole initial-data
         # region with ONE `[0x800, rodata, initial_data]` line where the US
@@ -942,14 +965,14 @@ def apply(addr):
     # REPLACED by it, not left in front at size zero (func_80030294's block at
     # 0xa50 left `[0xa50, rodata, initial_data_a50]` right before its own row)
     rstart = r["rodata"][0] if r.get("rodata") else None
-    def _o(l): return int(re.match(r"\s+- \[(0x[0-9a-f]+)", l).group(1), 16)
+    def _o(l): return int(re.match(r"\s+- \[(0x[0-9a-fA-F]+)", l).group(1), 16)
     keep = [l for i, l in enumerate(lines)
             if not (i in offs.values() and ((_o(l) == start and ", asm," in l)
                                             or (_o(l) == rstart and ", rodata," in l)))]
     # insert each line in offset order
     out, pend = [], sorted(pending)
     for l in keep:
-        m = re.match(r"\s+- \[(0x[0-9a-f]+), ", l)
+        m = re.match(r"\s+- \[(0x[0-9a-fA-F]+), ", l)
         if m and "- name: initialized_data" not in "".join(out[-3:]):
             o = int(m.group(1), 16)
             while pend and pend[0][0] < o:
