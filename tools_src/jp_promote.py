@@ -618,6 +618,18 @@ REGIONAL_EU = {
     # the count box's y (0x17 -> 0x19) and flags (0x100 -> 0x1)
     "build_deck_card_counts": (0x80032044, [(0x80031E7C, 0x0017, 0x0019), (0x80031E98, 0x0100, 0x0001)],
         [("BUILD_DECK_COUNT_BOX_Y", "0x19"), ("BUILD_DECK_COUNT_BOX_FLAGS", "0x1")]),
+    # the field_34 bit this sets (0x2 -> 0x4)
+    "duel_effect_mark_object_if_active": (0x8002E420, [(0x8002E398, 0x0002, 0x0004)],
+        [("DUEL_EFFECT_MARK_OBJECT_FLAG", "4")]),
+    # the flags_34 bit set and cleared on the channel (0x4 -> 0x8)
+    "func_8003DA40": (0x8003DA04, [(0x8003DB10, 0x0004, 0x0008), (0x8003DBD8, 0xFFFB, 0xFFF7)],
+        [("FUNC_8003DA40_CHANNEL_FLAG", "8")]),
+    # the choice.flags bit that opens and closes the choice (0x8 -> 0x10)
+    "func_80039794": (0x80039570, [(0x80039818, 0x0008, 0x0010), (0x80039874, 0x0008, 0x0010), (0x80039894, 0xFFF7, 0xFFEF)],
+        [("FUNC_80039794_CHOICE_FLAG", "0x10")]),
+    # the flags_34 bit under which the box rebuilds its gouraud quad (0x20 -> 0x40)
+    "text_box_layout_helpers": (0x80038FEC, [(0x8003922C, 0x00E8, 0x00C0), (0x800392F0, 0x0020, 0x0040)],
+        [("TEXT_BOX_LAYOUT_QUAD_FLAG", "0x40"), ("TEXT_BOX_LAYOUT_HEIGHT", "0xC0")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
