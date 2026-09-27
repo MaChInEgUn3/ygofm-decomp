@@ -682,6 +682,9 @@ REGIONAL_EU = {
     # the cursor's field_0C (0x74 -> 0x84)
     "duel_update_card_pick_cursor": (0x80024028, [(0x800240DC, 0x0074, 0x0084)],
         [("DUEL_PICK_CURSOR_FIELD_0C", "0x84"), ("DUEL_VIEWER_CARD_ID_ADDRESS", "0x8009C1B8"), ("DUEL_VIEWER_Y_OFFSET_ADDRESS", "0x8009C1BD")]),
+    # the geometry offset y (0x60 -> 0x68)
+    "func_80029934": (0x80029988, [(0x80029944, 0x0060, 0x0068)],
+        [("GLOBE_GEOM_OFFSET_Y", "0x68")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
