@@ -541,6 +541,33 @@ REGIONAL_EU = {
     "checkerboard_background": (0x8003D2F8, [(0x8003D384, 0x02C0, 0x0340), (0x8003D3B8, 0x02C0, 0x0340),
                                              (0x8003D408, 0x02D0, 0x0350), (0x8003D43C, 0x00F0, 0x0100)],
                                 [("CHECKERBOARD_CLUT_X", "0x340"), ("CHECKERBOARD_SCREEN_HEIGHT", "0x100")]),
+    # the geometry offset y, half the screen height (0x78 -> 0x80)
+    "main_run_animated_battle": (0x8002D210, [(0x8002D188, 0x0078, 0x0080)],
+        [("ANIMATED_BATTLE_GEOM_OFFSET_Y", "0x80")]),
+    # DIVPOLYGON4 piv (272 -> 288)
+    "display_object_helpers": (0x800422B8, [(0x80042720, 0x0110, 0x0120)],
+        [("DISPLAY_OBJECT_DIVP_PIV", "288")]),
+    # the lower bound past which the viewport follows the motion (0xB0 -> 0xC0)
+    "func_8002A660": (0x8002A6AC, [(0x8002A690, 0x00B0, 0x00C0), (0x8002A6A4, 0xFF50, 0xFF40)],
+        [("LIBRARY_VIEWPORT_FOLLOW_BOTTOM", "0xC0")]),
+    # the table's y position (0xD0 -> 0xE0)
+    "file_set_position_table": (0x800135FC, [(0x80013754, 0x00D0, 0x00E0)],
+        [("FILE_POSITION_TABLE_Y", "0xE0")]),
+    # field_4A beside field_48 = 0xA0: half the screen height (0x78 -> 0x80)
+    "display_object_transition": (0x80043878, [(0x80043738, 0x0078, 0x0080)],
+        [("DISPLAY_OBJECT_TRANSITION_HALF_HEIGHT", "0x80")]),
+    # the load descriptor's x (0x200 -> 0x280)
+    "func_8003A01C": (0x8003A1AC, [(0x8003A05C, 0x0200, 0x0280)],
+        [("DISPLAY_EFFECT_RESOURCE_LOAD_X", "0x280")]),
+    # the burst CLUT (0x3D20 -> 0x3D28: x 0x200 -> 0x280, y 0xF4)
+    "func_8006CD78": (0x8006D1A0, [(0x8006CE3C, 0x3D20, 0x3D28)],
+        [("MODEL_BURST_CLUT", "0x3D28")]),
+    # the burst CLUT (0x3D20 -> 0x3D28: x 0x200 -> 0x280, y 0xF4)
+    "func_8006F1B4": (0x8006F5DC, [(0x8006F26C, 0x3D20, 0x3D28)],
+        [("MODEL_BURST_CLUT", "0x3D28")]),
+    # the two CLUTs (0x3C11 -> 0x3829, 0x3C50 -> 0x3868)
+    "func_800164FC": (0x80016414, [(0x80016610, 0x3C11, 0x3829), (0x80016654, 0x3C50, 0x3868)],
+        [("DUEL_FIELD_CARDS_CLUT_1", "0x3829"), ("DUEL_FIELD_CARDS_CLUT_3", "0x3868")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
