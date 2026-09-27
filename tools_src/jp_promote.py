@@ -779,6 +779,12 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
         for m0 in re.finditer(pat, hdr.read_text(errors="replace")):
             decl, label = m0.group(1), m0.group(2)
             if decl != label and decl in lines and label not in lines: rename.setdefault(decl, label)
+            # both derived (the label from the words, the C name from c_symbols.ld)
+            # at one address: the object only emits the label, and splat refuses a
+            # second name there ("Duplicate symbol detected! D_8009B468 clashes
+            # with gModel_ImageCopyRect", SLES-03947)
+            elif decl != label and decl in lines and lines.get(label) == lines[decl]:
+                del lines[decl]
     for old, newn in rename.items():
         if old in lines: lines[newn] = lines.pop(old)
         if old in aliases: aliases[newn] = aliases.pop(old)
