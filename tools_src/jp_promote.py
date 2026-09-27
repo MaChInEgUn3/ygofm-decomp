@@ -872,6 +872,19 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
                 and int(m.group(2), 16) != a:
             aliases[n] = f"func_{a:08X}"
             continue
+        if m and (n in JP_AUTO or self_named) and int(m.group(2), 16) != a \
+                and REGION == "eu" and os.environ.get("YGOFM_EU_ALIAS"):
+            # The European lane's own practice (kg #6328's
+            # `#define func_80014220 func_80014138`, and model_effect_state's
+            # `#define D_8009B074 gEuropean_D_8009B074`): a function takes the
+            # splat name of its European address, data a gEuropean_ name with
+            # its own symbols line.
+            if m.group(1) == "func":
+                aliases[n] = "func_%08X" % a
+            else:
+                aliases[n] = "gEuropean_" + n
+                lines["gEuropean_" + n] = a
+            continue
         if m and (n in JP_AUTO or self_named) and int(m.group(2), 16) != a:
             # This used to synthesise `gJapanese_D_<usaddr>` and alias the US
             # name onto it with a #define. The maintainer asked for one
