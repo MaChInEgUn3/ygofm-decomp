@@ -34,7 +34,7 @@ REGIONS = {
     # occur at all; the 236 US addresses shared with the issue's best.csv
     # agree 236/236).
     "eu": dict(config="sles_03947", exe="game/europe/SLES_039.47",
-               srcdir="europe", make="european", pairs="eu_matches.csv",
+               srcdir="european", make="european", pairs="eu_matches.csv",
                # his split writes 0x0030CC and names asm rows generated/text_0030cc
                row="0x%06X", tail="generated/text_%06x"),
 }
