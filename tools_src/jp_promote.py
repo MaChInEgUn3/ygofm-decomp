@@ -612,6 +612,12 @@ REGIONAL_EU = {
     # the inner object's y (194 -> 210), and the count sprite's field_5D (0xB8 -> 0xB0) and field_40, its CLUT x (0x250 -> 0x2D0)
     "func_8001B7AC": (0x8001B6F0, [(0x8001B7A0, 0x00C2, 0x00D2), (0x8001B830, 0x00B8, 0x00B0), (0x8001B840, 0x0250, 0x02D0)],
         [("DUEL_HAND_STACK_INNER_Y", "210"), ("DUEL_HAND_STACK_COUNT_FIELD_5D", "0xB0"), ("DUEL_HAND_STACK_COUNT_CX", "0x2D0")]),
+    # the two func_80031574 calls' x, y and last argument (deck pane 0x234, 0x16, 0xA -> 0x235, 0x14, 0xC; chest pane y 0x18 -> 0x14 and last argument 0xC -> 0xD)
+    "build_deck_pane_input": (0x80033850, [(0x800336B0, 0x0234, 0x0235), (0x800336B4, 0x000A, 0x000C), (0x800336B8, 0x0016, 0x0014), (0x800338A4, 0x000C, 0x000D), (0x800338B4, 0x0018, 0x0014)],
+        [("BUILD_DECK_DECK_PANE_X", "0x235"), ("BUILD_DECK_DECK_PANE_Y", "0x14"), ("BUILD_DECK_DECK_PANE_ARG4", "0xC"), ("BUILD_DECK_CHEST_PANE_Y", "0x14"), ("BUILD_DECK_CHEST_PANE_ARG4", "0xD")]),
+    # the count box's y (0x17 -> 0x19) and flags (0x100 -> 0x1)
+    "build_deck_card_counts": (0x80032044, [(0x80031E7C, 0x0017, 0x0019), (0x80031E98, 0x0100, 0x0001)],
+        [("BUILD_DECK_COUNT_BOX_Y", "0x19"), ("BUILD_DECK_COUNT_BOX_FLAGS", "0x1")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
