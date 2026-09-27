@@ -642,6 +642,21 @@ REGIONAL_EU = {
     # the free duel package's sector count (0x57 -> 0x67)
     "main_init_free_duel_menu": (0x8003BAB4, [(0x8003B9D0, 0x1E88, 0x23F6), (0x8003B9D4, 0x0057, 0x0067)],
         [("FREE_DUEL_PACKAGE_SECTOR_COUNT", "0x67"), ("FREE_DUEL_PACKAGE_START_SECTOR", "0x23F6")]),
+    # the screen height a card leaves at (240 -> 256)
+    "duel_scene_card_placement": (0x80019CA4, [(0x8001B004, 0x00F0, 0x0100)],
+        [("DUEL_CARD_PLACEMENT_SCREEN_HEIGHT", "256")]),
+    # the cursor's field_0C (0xAE -> 0xBE), the base of field_40 (0x2E0 -> 0x360) and the y func_80018004 places a hand card at (0x292 -> 0x2A2)
+    "duel_phase_entry": (0x800181E8, [(0x80018758, 0x00AE, 0x00BE), (0x800189D0, 0x02E0, 0x0360), (0x80018B94, 0x0292, 0x02A2), (0x80018BE8, 0x00AE, 0x00BE)],
+        [("DUEL_PHASE_CURSOR_FIELD_0C", "0xBE"), ("DUEL_PHASE_FIELD_40_BASE", "0x360"), ("DUEL_PHASE_HAND_CARD_Y", "0x2A2")]),
+    # the object's y (0x16 -> 0xE)
+    "func_80019608": (0x80019594, [(0x80019758, 0x0016, 0x000E)],
+        [("DUEL_CARD_USE_OBJECT_Y", "0xE")]),
+    # the CLUT rectangles' x (512 -> 640)
+    "display_effect_resource_setup": (0x8003A37C, [(0x8003A648, 0x0200, 0x0280), (0x8003A718, 0x3B4E, 0x4361), (0x8003A874, 0x0200, 0x0280)],
+        [("DISPLAY_EFFECT_CLUT_X", "640"), ("DISPLAY_EFFECT_SLOT_ID(i)", "(D_8015C410[i])"), ("DISPLAY_EFFECT_RESOURCE_FIRST_SECTOR", "17249")]),
+    # the two files' start sectors, now #ifndef in model.h (0x3B4 -> 0x5D4, 0x88 -> 0x2A8)
+    "model_load_monster_merge": (0x8005AA38, [(0x80056618, 0x03B4, 0x05D4), (0x800567BC, 0x0088, 0x02A8)],
+        [("MODEL_SPECIAL_BATTLE_FILE_START_SECTOR", "0x5D4"), ("MODEL_AUX_FILE_START_SECTOR", "0x2A8")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
