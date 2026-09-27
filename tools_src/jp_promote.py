@@ -594,6 +594,15 @@ REGIONAL_EU = {
     # the sprite's cxcy, CLUT (0x100, 0xF1) -> (0x280, 0xE1)
     "duel_draw_status_numbers": (0x80016C44, [(0x80016EB4, 0x0100, 0x0280), (0x80016EB0, 0x3C0300F1, 0x3C0300E1)],
         [("DUEL_STATUS_NUMBERS_CXCY", "0xE10280")]),
+    # the digit sprites' texture v (0x70 -> 0x40)
+    "duel_card_stat_display": (0x8003175C, [(0x8003170C, 0x0070, 0x0040)],
+        [("DUEL_CARD_STAT_DIGIT_V", "0x40")]),
+    # the 0xF0 passed to func_80018150 and stored in position field_2A, the screen height (0xF0 -> 0x100)
+    "duel_field_display_objects": (0x80023008, [(0x80023780, 0x00F0, 0x0100), (0x80023880, 0x00F0, 0x0100)],
+        [("DUEL_FIELD_SCREEN_HEIGHT", "0x100")]),
+    # the sprite's width argument and the half of it stored beside (0xC4 -> 0xD4)
+    "duel_create_card_effect_overlay": (0x800194F0, [(0x80019598, 0x00C4, 0x00D4), (0x800195D0, 0x0062, 0x006A)],
+        [("DUEL_CARD_EFFECT_OVERLAY_WIDTH", "0xD4")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
