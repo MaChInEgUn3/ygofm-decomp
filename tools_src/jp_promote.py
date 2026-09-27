@@ -657,6 +657,18 @@ REGIONAL_EU = {
     # the two files' start sectors, now #ifndef in model.h (0x3B4 -> 0x5D4, 0x88 -> 0x2A8)
     "model_load_monster_merge": (0x8005AA38, [(0x80056618, 0x03B4, 0x05D4), (0x800567BC, 0x0088, 0x02A8)],
         [("MODEL_SPECIAL_BATTLE_FILE_START_SECTOR", "0x5D4"), ("MODEL_AUX_FILE_START_SECTOR", "0x2A8")]),
+    # the card readback height, now #ifndef in duel_display.h (0xC4 -> 0xD4); the word count follows it
+    # The corner stores are whole words: their displacements are off
+    # buffer + 0x8000 in a register, which pair_words would otherwise read as
+    # %lo halves and derive symbols from; rows 195/194 are 211/210 here.
+    "func_8001944C": (0x800193D8, [(0x800194B4, 0x00C4, 0x00D4), (0x800194C8, 0x6B30, 0x73F0), (0x80019540, 0x00C4, 0x00D4),
+                                   (0x800194FC, 0xA440565C, 0xA44067DC), (0x80019500, 0xA440565E, 0xA44067DE),
+                                   (0x80019504, 0xA440554A, 0xA44066CA), (0x80019508, 0xA4405548, 0xA44066C8),
+                                   (0x8001950C, 0xA4405546, 0xA44066C6), (0x80019510, 0xA4405430, 0xA44065B0)],
+        [("DUEL_CARD_READBACK_HEIGHT", "0xD4")]),
+    # the confirmation boxes' y and flags (wide 0x78, 0x1028 -> 0x84, 0x1050; narrow 0x60, 0x20 -> 0x6C, 0x40), the fade level (0xA0 -> 0xC0) and the completion mask (0x2008 -> 0x2010)
+    "func_800339D0": (0x80033CE4, [(0x80033A2C, 0x0078, 0x0084), (0x80033A40, 0x1028, 0x1050), (0x80033A64, 0x0060, 0x006C), (0x80033A78, 0x0020, 0x0040), (0x80033AA8, 0x00A0, 0x00C0), (0x80033AF8, 0x2008, 0x2010)],
+        [("BUILD_DECK_WIDE_BOX_Y", "0x84"), ("BUILD_DECK_WIDE_BOX_FLAGS", "0x1050"), ("BUILD_DECK_NARROW_BOX_Y", "0x6C"), ("BUILD_DECK_NARROW_BOX_FLAGS", "0x40"), ("BUILD_DECK_CONFIRM_FADE_LEVEL", "0xC0"), ("BUILD_DECK_CONFIRM_COMPLETION_MASK", "0x2010")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
