@@ -568,6 +568,22 @@ REGIONAL_EU = {
     # the two CLUTs (0x3C11 -> 0x3829, 0x3C50 -> 0x3868)
     "func_800164FC": (0x80016414, [(0x80016610, 0x3C11, 0x3829), (0x80016654, 0x3C50, 0x3868)],
         [("DUEL_FIELD_CARDS_CLUT_1", "0x3829"), ("DUEL_FIELD_CARDS_CLUT_3", "0x3868")]),
+    # the y func_80018004 places the drawn card at (0x92 -> 0xA2)
+    "duel_draw_resolution": (0x80018C84, [(0x80018EF0, 0x0092, 0x00A2)],
+        [("DUEL_DRAW_RESOLUTION_CARD_Y", "0xA2")]),
+    # the text box's y (0xCA -> 0xD5)
+    "func_8002A3CC": (0x8002A340, [(0x8002A36C, 0x00CA, 0x00D5)],
+        [("FUNC_8002A3CC_TEXT_BOX_Y", "0xD5")]),
+    # the CLUT's y base and its x in 16-pixel units (0xF1 -> 0xE1, 0x10 -> 0x28)
+    "func_80015EF4": (0x80015E0C, [(0x80016358, 0x00F1, 0x00E1), (0x80016360, 0x0010, 0x0028)],
+        [("DUEL_FIELD_CARD_CLUT_Y", "0xE1"), ("DUEL_FIELD_CARD_CLUT_X16", "0x28")]),
+    # the cursor's field_0C (0x74 -> 0x84)
+    "func_8001B938": (0x8001B8A8, [(0x8001B970, 0x0074, 0x0084)],
+        [("DUEL_SELECTION_CURSOR_FIELD_0C", "0x84")]),
+    # the quit box's height (0x24 -> 0x30, through the existing
+    # DUEL_QUIT_BOX_X block, which defines all three) and flags (0x20 -> 0x40)
+    "func_80024200": (0x80024178, [(0x8002429C, 0x0024, 0x0030), (0x800242A4, 0x0020, 0x0040)],
+        [("DUEL_QUIT_BOX_FLAGS", "0x40"), ("DUEL_QUIT_BOX_X", "0x78"), ("DUEL_QUIT_BOX_WIDTH", "0x50"), ("DUEL_QUIT_BOX_HEIGHT", "0x30")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
