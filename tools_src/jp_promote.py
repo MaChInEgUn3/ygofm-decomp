@@ -630,6 +630,18 @@ REGIONAL_EU = {
     # the flags_34 bit under which the box rebuilds its gouraud quad (0x20 -> 0x40)
     "text_box_layout_helpers": (0x80038FEC, [(0x8003922C, 0x00E8, 0x00C0), (0x800392F0, 0x0020, 0x0040)],
         [("TEXT_BOX_LAYOUT_QUAD_FLAG", "0x40"), ("TEXT_BOX_LAYOUT_HEIGHT", "0xC0")]),
+    # the model scene buffer size, through the existing #ifndef (0x63000 -> 0x65800)
+    "duel_init_model_scene": (0x800174FC, [(0x80017578, 0x3000, 0x5800)],
+        [("DUEL_MODEL_SCENE_BUFFER_SIZE", "0x65800")]),
+    # the input repeat delay and interval, now #ifndef in input.h (0x18 -> 0x14, 0x14 -> 0x11)
+    "main_reset_frontend_runtime": (0x8002CE1C, [(0x8002CDC0, 0x0018, 0x0014), (0x8002CDCC, 0x0014, 0x0011)],
+        [("INPUT_REPEAT_THRESHOLD", "0x14"), ("INPUT_REPEAT_RELOAD_VALUE", "0x11")]),
+    # the completion mask it tests (0x2008 -> 0x2010)
+    "script_run_tick": (0x8002FAB8, [(0x8002FA8C, 0x2008, 0x2010)],
+        [("SCRIPT_RUN_TICK_COMPLETION_MASK", "0x2010")]),
+    # the free duel package's sector count (0x57 -> 0x67)
+    "main_init_free_duel_menu": (0x8003BAB4, [(0x8003B9D0, 0x1E88, 0x23F6), (0x8003B9D4, 0x0057, 0x0067)],
+        [("FREE_DUEL_PACKAGE_SECTOR_COUNT", "0x67"), ("FREE_DUEL_PACKAGE_START_SECTOR", "0x23F6")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
