@@ -584,6 +584,16 @@ REGIONAL_EU = {
     # DUEL_QUIT_BOX_X block, which defines all three) and flags (0x20 -> 0x40)
     "func_80024200": (0x80024178, [(0x8002429C, 0x0024, 0x0030), (0x800242A4, 0x0020, 0x0040)],
         [("DUEL_QUIT_BOX_FLAGS", "0x40"), ("DUEL_QUIT_BOX_X", "0x78"), ("DUEL_QUIT_BOX_WIDTH", "0x50"), ("DUEL_QUIT_BOX_HEIGHT", "0x30")]),
+    # the screen height the frame is drawn above (0xF0 -> 0x100) and the
+    # sprite's cxcy, CLUT (0x100, 0xF1) -> (0x280, 0xE1): its lui half is a
+    # whole-word entry, since one copy sits alone in a branch delay slot
+    "duel_card_frame_draw": (0x8001669C, [(0x800167CC, 0x00F0, 0x0100), (0x800168D4, 0x0100, 0x0280),
+                                          (0x800168AC, 0x3C0200F1, 0x3C0200E1), (0x800168C4, 0x3C0200F1, 0x3C0200E1),
+                                          (0x80016CAC, 0x0100, 0x0280), (0x80016CA8, 0x3C0300F1, 0x3C0300E1)],
+        [("DUEL_CARD_FRAME_SCREEN_HEIGHT", "0x100"), ("DUEL_CARD_FRAME_CXCY", "0xE10280")]),
+    # the sprite's cxcy, CLUT (0x100, 0xF1) -> (0x280, 0xE1)
+    "duel_draw_status_numbers": (0x80016C44, [(0x80016EB4, 0x0100, 0x0280), (0x80016EB0, 0x3C0300F1, 0x3C0300E1)],
+        [("DUEL_STATUS_NUMBERS_CXCY", "0xE10280")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
