@@ -584,8 +584,11 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
     # built 0x8009B45C where SLES-03947 has 0x8009C3C0). Refuse unless the
     # target is the US build itself.
     for f in (KG / src, (KG / src).with_suffix(".h")):
-        if f.exists() and re.search(r"\)\s*0x80[0-9A-Fa-f]{6}\b|\b0x80[0-9A-Fa-f]{6}\s*\)",
-                                    re.sub(r"/\*.*?\*/", " ", f.read_text(errors="replace"), flags=re.S)):
+        # also `#define SAVE_DATA_CAMPAIGN_SCENE_INDEX_ADDRESS 0x8009B27A`: the
+        # address behind a name, cast where it is used (save_data_payload
+        # against SLES-03947 stored to 0x8009B27A where Europe has 0x8009C218)
+        if f.exists() and re.search(r"\)\s*0x80[0-9A-Fa-f]{6}\b|\b0x80[0-9A-Fa-f]{6}\s*\)|^\s*#\s*define\s+\w+\s+0x80[0-9A-Fa-f]{6}\b",
+                                    re.sub(r"/\*.*?\*/", " ", f.read_text(errors="replace"), flags=re.S), re.M):
             return dict(ok=False, src=src, why=f"{f.name} casts a literal 0x80xxxxxx address: needs a regional wrapper")
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
     defines = REGIONAL.get(src.rsplit("/", 1)[-1][:-2], (0, [], []))[2]
