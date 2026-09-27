@@ -1109,7 +1109,15 @@ def apply(addr):
         if wrapper.exists(): sys.exit(f"{wrapper} exists")
         # `make basic-types` wants types.h included first in every source file
         body = ['#include "../../types.h"', ""]
-        if r["aliases"] or r.get("asm_aliases"):
+        abs_only = r["aliases"] and not r.get("asm_aliases") and all(
+            n == jn + "_abs" for n, jn in r["aliases"].items())
+        if abs_only:
+            # the US build's second .data views of these objects; the target
+            # names only the objects (kg's european/duel_effect_display_states.c)
+            body += [f"/* {R['disc']} build of {r['src']}. The US build reaches these objects",
+                     " * through second .data views named *_abs; this build names the",
+                     " * objects only. The US source is included as is. */"]
+        elif r["aliases"] or r.get("asm_aliases"):
             body += [f"/* {R['disc']} build of {r['src']}: the symbols below sit at other addresses in the",
                      f" * {R['people']} executable and their US names are taken there, so they are aliased",
                      f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
