@@ -669,6 +669,12 @@ REGIONAL_EU = {
     # the confirmation boxes' y and flags (wide 0x78, 0x1028 -> 0x84, 0x1050; narrow 0x60, 0x20 -> 0x6C, 0x40), the fade level (0xA0 -> 0xC0) and the completion mask (0x2008 -> 0x2010)
     "func_800339D0": (0x80033CE4, [(0x80033A2C, 0x0078, 0x0084), (0x80033A40, 0x1028, 0x1050), (0x80033A64, 0x0060, 0x006C), (0x80033A78, 0x0020, 0x0040), (0x80033AA8, 0x00A0, 0x00C0), (0x80033AF8, 0x2008, 0x2010)],
         [("BUILD_DECK_WIDE_BOX_Y", "0x84"), ("BUILD_DECK_WIDE_BOX_FLAGS", "0x1050"), ("BUILD_DECK_NARROW_BOX_Y", "0x6C"), ("BUILD_DECK_NARROW_BOX_FLAGS", "0x40"), ("BUILD_DECK_CONFIRM_FADE_LEVEL", "0xC0"), ("BUILD_DECK_CONFIRM_COMPLETION_MASK", "0x2010")]),
+    # addresses the US sources already name with #ifndef (the Japanese
+    # wrappers set them too); read off the European words
+    "sd_arm_busy_callback": (0x80045714, [],
+        [("g_SDValue", "(*(SDValue **)0x8009C3C0)"), ("D_8009B128", "(*(void (**)(void))0x8009C050)")]),
+    "save_data_payload": (0x8003CE40, [],
+        [("SAVE_DATA_CAMPAIGN_SCENE_INDEX_ADDRESS", "0x8009C218")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
