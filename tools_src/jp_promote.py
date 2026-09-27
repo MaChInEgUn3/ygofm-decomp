@@ -673,8 +673,6 @@ REGIONAL_EU = {
     # wrappers set them too); read off the European words
     "sd_arm_busy_callback": (0x80045714, [],
         [("g_SDValue", "(*(SDValue **)0x8009C3C0)"), ("D_8009B128", "(*(void (**)(void))0x8009C050)")]),
-    "save_data_payload": (0x8003CE40, [],
-        [("SAVE_DATA_CAMPAIGN_SCENE_INDEX_ADDRESS", "0x8009C218")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
