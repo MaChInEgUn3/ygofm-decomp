@@ -1002,8 +1002,11 @@ def apply(addr):
     if end not in offs:
         tail = R["tail"] % ((end - HDR + LOAD) if R["tail"].startswith("func_") else end)
         pending.append((end, f"      - [{R['row'] % end}, asm, {tail}]"))
-    if REGION != "jp" and (r.get("rodata") or r.get("sdata")):
-        sys.exit(f"{r['src']}: .rodata/.sdata carving is only measured on the Japanese split")
+    # .rodata measured on SLES-03947 2026-09-27: func_80046294's jump table
+    # carved as [0xe4c, .rodata] + [0xf10, rodata, initial_data_f10] and
+    # european-match is MATCH. .sdata is still unmeasured there.
+    if REGION != "jp" and r.get("sdata"):
+        sys.exit(f"{r['src']}: .sdata carving is only measured on the Japanese split")
     if r.get("rodata"):
         # The unit's switch table. The JP split covers the whole initial-data
         # region with ONE `[0x800, rodata, initial_data]` line where the US
