@@ -726,7 +726,9 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
         # also `#define SAVE_DATA_CAMPAIGN_SCENE_INDEX_ADDRESS 0x8009B27A`: the
         # address behind a name, cast where it is used (save_data_payload
         # against SLES-03947 stored to 0x8009B27A where Europe has 0x8009C218)
-        if f.exists() and re.search(r"\)\s*0x80[0-9A-Fa-f]{6}\b|\b0x80[0-9A-Fa-f]{6}\s*\)|^\s*#\s*define\s+\w+\s+0x80[0-9A-Fa-f]{6}\b",
+        # 0x80000000 is a value (a sign-bit mask or compare), never an address;
+        # YGOFM_LITERAL_PROBE=1 skips this refusal so the target build can decide
+        if not os.environ.get("YGOFM_LITERAL_PROBE") and f.exists() and re.search(r"\)\s*0x80(?!000000\b)[0-9A-Fa-f]{6}\b|\b0x80(?!000000\b)[0-9A-Fa-f]{6}\s*\)|^\s*#\s*define\s+\w+\s+0x80[0-9A-Fa-f]{6}\b",
                                     re.sub(r"/\*.*?\*/", " ", f.read_text(errors="replace"), flags=re.S), re.M):
             return dict(ok=False, src=src, why=f"{f.name} casts a literal 0x80xxxxxx address: needs a regional wrapper")
     uw = words(US_EXE, fns[0], sum(sizes)); jw = words(JP_EXE, jps[0], sum(sizes))
