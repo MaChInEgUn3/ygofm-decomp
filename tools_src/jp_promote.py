@@ -673,6 +673,15 @@ REGIONAL_EU = {
     # wrappers set them too); read off the European words
     "sd_arm_busy_callback": (0x80045714, [],
         [("g_SDValue", "(*(SDValue **)0x8009C3C0)"), ("D_8009B128", "(*(void (**)(void))0x8009C050)")]),
+    # the load box's flags (0x1008 -> 0x1010) and the channel flag bit it waits on (0x8 -> 0x10)
+    "save_data_transfer_runtime": (0x8003F8F8, [(0x8003FB78, 0x1008, 0x1010), (0x8003FC24, 0x0008, 0x0010)],
+        [("SAVE_DATA_LOAD_BOX_FLAGS", "0x1010"), ("SAVE_DATA_LOAD_CHANNEL_FLAG", "0x10"), ("SAVE_DATA_LOAD_STATUS_ADDRESS", "0x8009C015")]),
+    # the channel flags it sets (0x1008 -> 0x1010)
+    "duel_effect_create_channel": (0x8003D438, [(0x8003D4DC, 0x1008, 0x1010)],
+        [("DUEL_EFFECT_CHANNEL_CREATE_FLAGS", "0x1010"), ("DIALOG_CHOICE_ADDRESS", "0x8009C2B0")]),
+    # the cursor's field_0C (0x74 -> 0x84)
+    "duel_update_card_pick_cursor": (0x80024028, [(0x800240DC, 0x0074, 0x0084)],
+        [("DUEL_PICK_CURSOR_FIELD_0C", "0x84"), ("DUEL_VIEWER_CARD_ID_ADDRESS", "0x8009C1B8"), ("DUEL_VIEWER_Y_OFFSET_ADDRESS", "0x8009C1BD")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
@@ -1150,7 +1159,11 @@ def apply(addr):
     # split.yaml: the main segment's subsegment list
     sp = TGT_CFG / "split.yaml"; text = sp.read_text()
     lines = text.split("\n")
-    idx = [i for i, l in enumerate(lines) if re.match(r"\s+- \[0x[0-9a-fA-F]+, (c|asm|rodata|pad)", l) and i < lines.index("  - name: initialized_data")]
+    # `.rodata` rows count too: a carve ending where another unit's `.rodata`
+    # row starts needs no resume row (save_data_transfer_runtime's block ends
+    # at 0xc8c, where display_object_helpers' starts; a second
+    # `[0xc8c, rodata, initial_data_c8c]` re-emitted that table with .L labels)
+    idx = [i for i, l in enumerate(lines) if re.match(r"\s+- \[0x[0-9a-fA-F]+, (c|asm|\.?rodata|pad)", l) and i < lines.index("  - name: initialized_data")]
     ents = [(int(re.match(r"\s+- \[(0x[0-9a-fA-F]+)", lines[i]).group(1), 16), i) for i in idx]
     offs = {o: i for o, i in ents}
     if start in offs and ", c," in lines[offs[start]]: sys.exit("start offset already a c segment")
