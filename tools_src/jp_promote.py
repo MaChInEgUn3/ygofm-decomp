@@ -1088,8 +1088,24 @@ def apply(addr):
     # too (named, equal-address): it is already on the function line above,
     # and splat rejects the duplicate ("Duplicate symbol detected")
     add += [f"{n} = 0x{a:08X};" for n, a in sorted(r["lines"].items(), key=lambda kv: kv[1])]
-    body = old if old.endswith("\n") else old + "\n"
-    st.write_text(body + "\n".join(add) + ("\n" if old.endswith("\n") else ""))
+    if REGION == "jp":
+        body = old if old.endswith("\n") else old + "\n"
+        st.write_text(body + "\n".join(add) + ("\n" if old.endswith("\n") else ""))
+    else:
+        # Not at the end: every PR in the European lane appended there, so any
+        # two open batches conflicted on the last line (#6262/#6267, #6269/#6271).
+        # Each line goes right after the line with the nearest lower address,
+        # which is almost never a line another batch touches.
+        lines = old.split("\n")
+        def addr(l):
+            m = re.match(r"\s*\w+\s*=\s*0x([0-9A-Fa-f]+)\s*;", l)
+            return int(m.group(1), 16) if m else None
+        for new in sorted(add, key=addr):
+            a = addr(new)
+            best = max(((addr(l), i) for i, l in enumerate(lines) if addr(l) is not None and addr(l) < a),
+                       default=None)
+            lines.insert(best[1] + 1 if best else len(lines) - (1 if lines and lines[-1] == "" else 0), new)
+        st.write_text("\n".join(lines))
     print(f"applied {unit}: {len(r['fns'])} fn at {r['jps'][0]:#x}..{r['jps'][0] + sum(r['sizes']):#x}, "
           f"{len(r['lines'])} symbol lines, {len(r['aliases'])} aliases {r['aliases']}"
           + (f", wrapper {wrapper.relative_to(KG)}" if wrapper else ""))
