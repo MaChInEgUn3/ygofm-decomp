@@ -28,7 +28,7 @@ KG = pathlib.Path(os.environ.get("YGOFM_KG", ROOT.parent / "memories-decomp"))
 REGIONS = {
     "jp": dict(config="slpm_86398", exe="game/japanese/SLPM_863.98",
                srcdir="japanese", make="japanese", pairs="jp_matches.csv",
-               row="%#x", tail="func_%08X"),
+               row="%#x", tail="func_%08X", disc="SLPM-86398", people="Japanese"),
     # SLES-03947 (kg #6258). Pairs: US game functions whose masked
     # instruction sequence occurs exactly once in SLES_039.47 (976 of 1104
     # occur at all; the 236 US addresses shared with the issue's best.csv
@@ -36,7 +36,7 @@ REGIONS = {
     "eu": dict(config="sles_03947", exe="game/europe/SLES_039.47",
                srcdir="european", make="european", pairs="eu_matches.csv",
                # his split writes 0x0030CC and names asm rows generated/text_0030cc
-               row="0x%06X", tail="generated/text_%06x"),
+               row="0x%06X", tail="generated/text_%06x", disc="SLES-03947", people="European"),
 }
 REGION = os.environ.get("YGOFM_REGION", "jp")
 if REGION not in REGIONS: sys.exit(f"unknown region {REGION!r}; known: {', '.join(sorted(REGIONS))}")
@@ -533,6 +533,17 @@ REGIONAL = {
                                 [("DUEL_PACKAGE_STAGE7_SECTORS", "48")]),
 }
 
+# The same table for SLES-03947, same contract: each entry names the European
+# address of the unit's first function and is checked against both executables.
+REGIONAL_EU = {
+    # the two GsSPRITE cx values (CLUT x, 0x2C0 and 0x2D0 -> 0x340 and 0x350)
+    # and the screen height the rows stop at (240 -> 256)
+    "checkerboard_background": (0x8003D2F8, [(0x8003D384, 0x02C0, 0x0340), (0x8003D3B8, 0x02C0, 0x0340),
+                                             (0x8003D408, 0x02D0, 0x0350), (0x8003D43C, 0x00F0, 0x0100)],
+                                [("CHECKERBOARD_CLUT_X", "0x340"), ("CHECKERBOARD_SCREEN_HEIGHT", "0x100")]),
+}
+REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
+
 
 def regional_words(src, us_base, uw, jw, jp_base):
     """jw with the unit's declared REGIONAL immediates set to the US ones, or None
@@ -969,14 +980,17 @@ def apply(addr):
         wrapper = KG / "src/game" / R["srcdir"] / (base + ".c")
         if wrapper.exists(): sys.exit(f"{wrapper} exists")
         # `make basic-types` wants types.h included first in every source file
-        body = ['#include "../../types.h"', "",
-                f"/* SLPM-86398 build of {r['src']}: the symbols below sit at other addresses in the",
-                " * Japanese executable and their US names are taken there, so they are aliased",
-                f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
-                " * as is. */" if r.get("defines") else " * unchanged. */"]
+        body = ['#include "../../types.h"', ""]
+        if r["aliases"] or r.get("asm_aliases"):
+            body += [f"/* {R['disc']} build of {r['src']}: the symbols below sit at other addresses in the",
+                     f" * {R['people']} executable and their US names are taken there, so they are aliased",
+                     f" * (config/{R['config']}/symbols.txt has the addresses). The US source is included",
+                     " * as is. */" if r.get("defines") else " * unchanged. */"]
+        else:
+            body += [f"/* {R['disc']} build of {r['src']}. The US source is included as is. */"]
         body += [f"#define {n} {jn}" for n, jn in sorted(r["aliases"].items())]
         if r.get("defines"):
-            body += ["", "/* Values that differ in the Japanese release; the US source names each",
+            body += ["", f"/* Values that differ in the {R['people']} release; the US source names each",
                      " * with an #ifndef default (jp_promote.REGIONAL). */"]
             body += [f"#define {m} {v}" for m, v in r["defines"]]
         if r.get("asm_aliases"):
