@@ -603,6 +603,15 @@ REGIONAL_EU = {
     # the sprite's width argument and the half of it stored beside (0xC4 -> 0xD4)
     "duel_create_card_effect_overlay": (0x800194F0, [(0x80019598, 0x00C4, 0x00D4), (0x800195D0, 0x0062, 0x006A)],
         [("DUEL_CARD_EFFECT_OVERLAY_WIDTH", "0xD4")]),
+    # the screen sprite's field_40, its CLUT x (0x200 -> 0x280)
+    "display_effect_update_callbacks": (0x8003AAB0, [(0x8003B208, 0x0200, 0x0280)],
+        [("DISPLAY_EFFECT_SPRITE_CX", "0x280")]),
+    # the icon sprite's field_5D (0xC8 -> 0xC0) and field_40, its CLUT x (0x260 -> 0x2E0)
+    "duel_card_type_icon": (0x800315E0, [(0x800315C4, 0x00C8, 0x00C0), (0x800315D4, 0x0260, 0x02E0)],
+        [("DUEL_CARD_TYPE_ICON_FIELD_5D", "0xC0"), ("DUEL_CARD_TYPE_ICON_CX", "0x2E0")]),
+    # the inner object's y (194 -> 210), and the count sprite's field_5D (0xB8 -> 0xB0) and field_40, its CLUT x (0x250 -> 0x2D0)
+    "func_8001B7AC": (0x8001B6F0, [(0x8001B7A0, 0x00C2, 0x00D2), (0x8001B830, 0x00B8, 0x00B0), (0x8001B840, 0x0250, 0x02D0)],
+        [("DUEL_HAND_STACK_INNER_Y", "210"), ("DUEL_HAND_STACK_COUNT_FIELD_5D", "0xB0"), ("DUEL_HAND_STACK_COUNT_CX", "0x2D0")]),
 }
 REGIONAL = {"jp": REGIONAL, "eu": REGIONAL_EU}[REGION]
 
