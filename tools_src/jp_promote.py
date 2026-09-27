@@ -919,6 +919,15 @@ def analyze(us, jp, pairs, names, jpsyms, addr, only=None, jps_given=None, rodat
         # the blob resumes where the US split resumes, which is past the `pad`
         # row when there is one -- the padding gets a row of its own
         sdata = (jpvram - LOAD + HDR, size, jpvram - LOAD + HDR + (resume - off))
+    # final pass: a header asm label and its C name must not both be written at
+    # one address (later steps can re-add either after the check above ran;
+    # measured on func_8004E9A0 against SLES-03947)
+    if hdr.exists():
+        for m0 in re.finditer(r'\bextern\b[^;{}]*?\b(\w+)\s*(?:\[[^\]]*\])?\s*asm\s*\(\s*"(\w+)"\s*\)',
+                              hdr.read_text(errors="replace")):
+            d0, l0 = m0.group(1), m0.group(2)
+            if d0 != l0 and d0 in lines and lines.get(l0) == lines[d0]:
+                del lines[d0]
     return dict(ok=True, src=src, fns=fns, jps=jps, sizes=sizes, syms=syms, aliases=aliases, lines=lines,
                 rodata=rodata, sdata=sdata, asm_aliases=asm_lines, profile=us[fns[0]]["profile"], names=fnames_out, defines=defines)
 
