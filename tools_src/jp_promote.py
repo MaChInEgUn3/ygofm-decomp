@@ -954,6 +954,10 @@ def apply(addr):
     wrapper = None
     # an asm label alone needs the wrapper too (func_80031784 has no #define, only
     # the label), or it never reaches the build
+    # `#define X X` is not an alias: it came out of file_stream against
+    # SLES-03947 (D_8009B0F4, D_8009B134) and made a wrapper that only restated
+    # the US names, plus a Japanese header comment in a European file
+    r["aliases"] = {n: jn for n, jn in r["aliases"].items() if n != jn}
     if r["aliases"] or r.get("asm_aliases") or r.get("defines"):
         # upstream's regional-alias wrapper (src/game/japanese/*.c): the US
         # names the JP build cannot use are #defined to JP names before the
