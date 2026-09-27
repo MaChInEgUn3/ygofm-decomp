@@ -1005,7 +1005,12 @@ def apply(addr):
     # .rodata measured on SLES-03947 2026-09-27: func_80046294's jump table
     # carved as [0xe4c, .rodata] + [0xf10, rodata, initial_data_f10] and
     # european-match is MATCH. .sdata is still unmeasured there.
-    if REGION != "jp" and r.get("sdata"):
+    # .sdata MEASURED on SLES-03947 2026-09-27 and it does not carry over:
+    # main_frame's carve went in, and ld discarded it ("D_8009AF0C ... defined
+    # in discarded section `.sdata' of main_frame.o") -- the European
+    # initialized_data segment is `type: bin`, so the link script places no
+    # C data inside it. Changing that is a split-structure change.
+    if REGION != "jp" and r.get("sdata") and not os.environ.get("YGOFM_SDATA_PROBE"):
         sys.exit(f"{r['src']}: .sdata carving is only measured on the Japanese split")
     if r.get("rodata"):
         # The unit's switch table. The JP split covers the whole initial-data
